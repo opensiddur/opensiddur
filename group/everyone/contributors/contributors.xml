@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title xml:lang="en">Global contributors list</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:availability status="free">
+                    <tei:p xmlns="http://www.tei-c.org/ns/1.0" xml:lang="en">
+                To the extent possible under law, the contributors who associated
+                <tei:ref type="license" target="http://www.creativecommons.org/publicdomain/zero/1.0">Creative Commons Zero
+                </tei:ref>
+                with this work have waived all copyright and related or neighboring rights to this work.
+              </tei:p>
+                    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+                        <cc:License xmlns:cc="http://web.resource.org/cc/" rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+                            <cc:legalcode rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/legalcode"/>
+                            <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+                            <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+                        </cc:License>
+                    </rdf:RDF>
+                </tei:availability>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:bibl>
+                    <tei:p>Born digital</tei:p>
+                </tei:bibl>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <tei:body>
+            <tei:div type="contributors">
+                <tei:list>
+                    <tei:item xml:id="WLC">
+                        <tei:orgName>Westminster Leningrad Codex</tei:orgName>
+                        <tei:email>transcriber@tanach.us</tei:email>
+                    </tei:item>
+                    <tei:item xml:id="Christopher.Kimball">
+                        <tei:email>transcriber@tanach.us</tei:email>
+                        <tei:ptr target="http://tanach.us" type="url"/>
+                        <tei:name>
+                            <tei:forename xmlns:xrx="http://jewishliturgy.org/ns/xrx">Christopher</tei:forename>
+                            <tei:surname xmlns:xrx="http://jewishliturgy.org/ns/xrx">Kimball</tei:surname>
+                        </tei:name>
+                        <tei:affiliation>
+                            <tei:ptr target="#WLC"/>
+                        </tei:affiliation>
+                    </tei:item>
+                    <tei:item xml:id="OpenSiddur">
+                        <tei:orgName>Open Siddur Project</tei:orgName>
+                        <tei:email>contribute@opensiddur.org</tei:email>
+                        <tei:ptr target="http://opensiddur.org" type="url"/>
+                    </tei:item>
+                </tei:list>
+            </tei:div>
+        </tei:body>
+    </tei:text>
+</tei:TEI>

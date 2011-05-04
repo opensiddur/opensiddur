@@ -1,0 +1,30 @@
+/* builder CSS
+ * 
+ * Copyright 2011 Efraim Feinstein <efraim.feinstein@gmail.com>
+ * Licensed under the GNU Lesser General Public License, version 3 or later
+ */
+
+/* button actions */
+.table-row .xforms-control {
+	display:inline;
+}
+
+.actions-row {
+	display:inline-block;
+}
+
+.actions-row .xforms-control {
+	display:inline;
+	padding-right:1em;
+}
+
+.actions-row .xforms-trigger a, 
+.actions-row .xforms-trigger a:visited
+{
+	text-decoration:underline;
+}
+
+.actions-row .xforms-trigger a:hover
+{
+	text-decoration:none;
+}

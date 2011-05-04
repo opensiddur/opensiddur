@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <!--
+    raw.xml 
+    
+    Copyright 2009 Efraim Feinstein <efraim.feinstein@gmail.com> 
+    
+    Licensed under the GNU General Public License. 
+    
+    See the file GPL-3 for details.
+    
+    $Date: 2009-08-16 22:29:05 -0400 (Sun, 16 Aug 2009) $ 
+    $Id: raw.xml 236 2009-08-17 02:29:05Z efraim.feinstein $
+  -->
+<elementSpec xmlns="http://www.tei-c.org/ns/1.0"
+  xmlns:jx="http://www.jewishliturgy.org/ns/examples" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xi="http://www.w3.org/2001/XInclude"
+  module="liturgy" ident="raw" ns="http://jewishliturgy.org/ns/jlptei/1.0">
+  <equiv name="j:raw" filter="canonical-tei.xsl2#transform.raw"
+    mimeType="application/xsl" />
+  <gloss xml:lang="en">Holds raw (unencoded) text.</gloss>
+  <classes>
+    <memberOf key="att.global" />
+    <memberOf key="model.divLike" />
+  </classes>
+  <attList>
+    <attDef ident="status">
+      <desc xml:lang="en">Identifies the status of the raw section in a workflow.
+      Contents are application defined.</desc>
+      <datatype>
+        <rng:ref name="data.word"/>
+      </datatype>
+    </attDef>
+  </attList>
+  <content>
+    <rng:zeroOrMore>
+      <rng:choice>
+        <rng:text/>
+        <rng:ref name="seg"/>
+      </rng:choice>
+    </rng:zeroOrMore>
+  </content>
+  <exemplum>
+  </exemplum>
+  <remarks>
+    <p>
+      Each view within the concurrent hierarchy puts structure around segments in the selection.
+    </p>
+  </remarks>
+  <listRef>
+    <ptr target="#div.concurrent" />
+  </listRef>
+</elementSpec>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+Table of strings for automatically generated text, see intl-strings.xsl2 for 
+information about the file format.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/
+
+$Id: strings.xml 454 2010-02-22 05:03:27Z efraim.feinstein $ 
+-->
+<str:string-table xmlns:str="http://jewishliturgy.org/ns/strings">
+      <str:strings xml:id="licensing-header"> 
+        <str:string xml:lang="en">License</str:string>
+      </str:strings>
+      <str:strings xml:id="licensing-statement">
+        <str:string xml:lang="en">The material contained in this document is 
+        released under the following licenses:</str:string>
+      </str:strings>
+      <str:strings xml:id="licensing-additional">
+        <str:string xml:lang="en">Some material was requires the
+        following additional statements:</str:string>
+      </str:strings>
+      <str:strings xml:id="licensing-attribution">
+        <str:string xml:lang="en">Some material requires the following additional 
+        attributions:</str:string>
+      </str:strings>
+      <!-- bibliography strings -->
+      <str:strings xml:id="bibl-header-sources">
+        <str:string xml:lang="en">Sources</str:string>
+      </str:strings>
+      <str:strings xml:id="bibl-header-references">
+        <str:string xml:lang="en">References</str:string>
+      </str:strings>
+      <!-- misc -->
+      <str:strings xml:id="and">
+        <str:string xml:lang="en">and</str:string>
+      </str:strings>
+</str:string-table>

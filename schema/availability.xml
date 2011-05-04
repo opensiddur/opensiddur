@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+availability.xml
+
+Copyright 2009 Efraim Feinstein <efraim.feinstein@gmail.com>
+
+Modified from rdg.xml
+Copyright TEI Consortium. 
+
+Licensed under the GNU General Public License. 
+See the file GPL-3 for details
+$Date: 2008-12-25 18:07:33 -0500 (Thu, 25 Dec 2008) $
+$Id: availability.xml 236 2009-08-17 02:29:05Z efraim.feinstein $
+
+ChangeLog:
+12/20/2007 - change from rdg to txt
+12/27/2007 - change from txt to var
+1/26/2009 - copy from var to availability
+7/24/2009 - modify for new encoding
+-->
+<elementSpec 
+	xmlns="http://www.tei-c.org/ns/1.0"
+	xmlns:jx="http://jewishliturgy.org/ns/examples"
+	xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+	xmlns:rng="http://relaxng.org/ns/structure/1.0"
+	module="header" 
+	xml:id="AVAILABILITY2" ident="availability"
+	mode="change"
+	>
+	<remarks>Specifies the license under which the text is made available, in human and computer parsable form.</remarks>
+    <content mode="change">
+      <rng:oneOrMore>
+        <rng:ref name="model.pLike"/>
+      </rng:oneOrMore>
+      <rng:ref name="RDF"/>
+    </content>
+</elementSpec>

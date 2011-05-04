@@ -1,0 +1,31 @@
+<tei:TEI xmlns:jx="http://jewishliturgy.org/ns/jlp-processor" xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:lang="en" jx:document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-notes.xml" xml:base="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-notes.xml">
+    <tei:teiHeader>
+        <tei:fileSpec>
+            <tei:titleStmt>
+                <tei:title>Standoff relationship test:notes</tei:title>
+                <tei:resp>
+                    <tei:name jx:id="transcriber">Transcriber One</tei:name>
+                    <tei:name jx:id="transcriber2">Transcriber Two</tei:name>
+                </tei:resp>
+                <j:respList>
+                    <tei:respons j:role="transcriber" target="#repository" resp="#transcriber2"/>
+                </j:respList>
+            </tei:titleStmt>
+        </tei:fileSpec>
+    </tei:teiHeader>
+    <j:links>
+        <tei:ptr jx:id="n1p1" target="#se1"/>
+    </j:links>
+    <tei:text>
+        <jx:joined-concurrent>
+            <note xmlns="http://www.tei-c.org/ns/1.0" jx:id="note1">
+                <relationship xmlns="http://jewishliturgy.org/ns/jlp-processor" type="responsibility" subtype="transcriber" target="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-notes.xml#transcriber2" jx:source-document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-notes.xml">
+                    <ptr xmlns="http://www.tei-c.org/ns/1.0" target="#r_note_1" jx:id="se1"/>
+                </relationship>
+            </note>
+        </jx:joined-concurrent>
+        <j:repository jx:id="repository">
+            <tei:seg jx:id="r_note_1">First note.</tei:seg>
+        </j:repository>
+    </tei:text>
+</tei:TEI>

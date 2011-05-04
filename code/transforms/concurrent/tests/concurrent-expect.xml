@@ -1,0 +1,20 @@
+<tei:TEI xml:lang="en" 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor">
+  <j:links>
+    <tei:ptr jx:id="p1-1" target="#se1" />
+    <tei:ptr jx:id="p1-2" target="#se2" />
+    <tei:ptr jx:id="p2-1" target="#se3" />
+  </j:links>
+  <jx:joined-concurrent>
+    <tei:p jx:id="p1">
+      <tei:ptr jx:id="se1" target="#r1"/>
+      <tei:ptr jx:id="se2" target="#r2"/>
+    </tei:p>
+    <tei:p jx:id="p2">
+      <tei:ptr jx:id="se3" target="#r3"/>
+    </tei:p>
+  </jx:joined-concurrent>
+</tei:TEI>
+

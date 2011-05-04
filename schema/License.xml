@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <!--
+    License.xml 
+    
+    Copyright 2009 Efraim Feinstein <efraim.feinstein@gmail.com> 
+    
+    Licensed under the GNU General Public License. 
+    
+    See the file GPL-3 for details.
+    
+    $Date: 2009-08-16 22:29:05 -0400 (Sun, 16 Aug 2009) $ 
+    $Id: License.xml 236 2009-08-17 02:29:05Z efraim.feinstein $
+  -->
+<elementSpec xmlns="http://www.tei-c.org/ns/1.0"
+  xmlns:jx="http://www.jewishliturgy.org/ns/examples" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:cc="http://web.resource.org/cc/"
+  xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xi="http://www.w3.org/2001/XInclude"
+  module="liturgy" ident="License" ns="http://web.resource.org/cc/">
+  <equiv />
+  <gloss>Holds the details of the Creative Commons license.</gloss>
+  <classes>
+    <memberOf key="att.global" />
+  </classes>
+  <attList>
+    <attDef ident="about" ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" usage="req">
+      <desc xml:lang="en">Holds a pointer to the human-readable license summary, if available.  
+      Otherwise, points to the license text.</desc>
+      <datatype>
+        <rng:ref name="data.pointer" />
+      </datatype>
+    </attDef>
+  </attList>
+  <content>
+    <rng:ref name="legalcode" />
+    <rng:oneOrMore>
+      <rng:ref name="permits"/>
+    </rng:oneOrMore>
+    <rng:zeroOrMore>
+      <rng:ref name="requires"/>
+    </rng:zeroOrMore>
+  </content>
+  <exemplum>
+  </exemplum>
+  <remarks>
+  </remarks>
+  <listRef>
+    <ptr target="#div.header" />
+  </listRef>
+</elementSpec>

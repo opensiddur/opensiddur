@@ -1,0 +1,29 @@
+<tei:TEI xmlns:jx="http://jewishliturgy.org/ns/jlp-processor" xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:lang="en" jx:document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-external-context.xml" xml:base="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-external-context.xml">
+    <tei:teiHeader/>
+    <j:links>
+        <tei:link type="note" targets="standoff-relationship-context.xml#has_a_note_in_another_file #note_ext"/><!-- for ancestor relationships -->
+        <tei:respons j:role="encoder" resp="standoff-relationship-notes.xml#transcriber" target="#view1"/>
+        <tei:respons j:role="proofreader" resp="standoff-relationship-notes.xml#transcriber2" target="#div1"/>
+        <tei:ptr jx:id="has_relationships_in_ancestors" target="#se2"/>
+    </j:links>
+    <tei:text>
+        <jx:joined-concurrent>
+            <note xmlns="http://www.tei-c.org/ns/1.0" jx:id="note_ext">
+                <ptr target="#r_note_ext" jx:id="se1"/>
+            </note>
+            <relationship xmlns="http://jewishliturgy.org/ns/jlp-processor" type="responsibility" subtype="proofreader" target="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-notes.xml#transcriber2" jx:source-document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-external-context.xml">
+                <relationship type="responsibility" subtype="encoder" target="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-notes.xml#transcriber" jx:source-document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-external-context.xml">
+                    <div xmlns="http://www.tei-c.org/ns/1.0" jx:id="div1">
+                        <p jx:id="p1">
+                            <tei:ptr target="#r_external_content" jx:id="se2"/>
+                        </p>
+                    </div>
+                </relationship>
+            </relationship>
+        </jx:joined-concurrent>
+        <j:repository>
+            <tei:seg jx:id="r_note_ext">External note.</tei:seg>
+            <tei:seg jx:id="r_external_content">External content</tei:seg>
+        </j:repository>
+    </tei:text>
+</tei:TEI>

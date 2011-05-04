@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+model.viewPart.members.xml
+
+Copyright 2009 Efraim Feinstein <efraim.feinstein@gmail.com>. 
+Licensed under the GNU General Public License. 
+See the file GPL-3 for details.
+$Date: 2010-06-06 01:36:59 -0400 (Sun, 06 Jun 2010) $
+$Id: model.viewPart.members.xml 513 2010-06-06 05:36:59Z efraim.feinstein $
+-->
+<specGrp xmlns="http://www.tei-c.org/ns/1.0" xml:id="spec.model.viewPart.members">
+  <elementSpec ident="ab" mode="change">
+    <classes mode="change">
+      <memberOf key="model.viewPart" />
+    </classes>
+  </elementSpec>
+  
+	<elementSpec ident="choice" mode="change">
+    <classes mode="change">
+      <memberOf key="model.viewPart" />
+    </classes>
+  </elementSpec>
+  
+  <elementSpec ident="div" mode="change">
+    <classes mode="change">
+      <memberOf key="model.viewPart" />
+    </classes>
+  </elementSpec>
+  
+  <elementSpec ident="l" mode="change">
+    <classes mode="change">
+      <memberOf key="model.viewPart" />
+    </classes>
+  </elementSpec>
+  
+  <elementSpec ident="lg" mode="change">
+    <classes mode="change">
+      <memberOf key="model.viewPart" />
+    </classes>
+  </elementSpec>
+  
+  <elementSpec ident="list" mode="change">
+    <classes mode="change">
+      <memberOf key="model.viewPart" />
+    </classes>
+  </elementSpec>
+  
+  <elementSpec ident="p" mode="change">
+    <classes mode="change">
+      <memberOf key="model.viewPart" />
+    </classes>
+  </elementSpec>
+  
+  <elementSpec ident="s" mode="change">
+    <classes mode="change">
+      <memberOf key="model.viewPart" />
+    </classes>
+  </elementSpec>
+  
+</specGrp>

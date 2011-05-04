@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="2.0" 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  exclude-result-prefixes="#all"
+  >
+  
+  <xsl:import href="../common/common.xsl2"/>
+  <xsl:import href="follow-uri.xsl2"/>
+  <xd:doc type="stylesheet">
+    <xd:short>Provide templates for 
+    detaching a sequence from its original location (making a copy of it),
+    reattaching a sequence to a new location and
+    copying attributes, all while maintaining language and base URI context.
+    </xd:short>
+    <xd:copyright>Copyright 2009-2011 Efraim Feinstein (LGPL 3+)</xd:copyright>
+    <xd:detail>
+        <p>This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+        <p>This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU Lesser General Public License for more details.</p>
+
+        <p>You should have received a copy of the GNU Lesser General Public License
+        along with this program.  If not, see 
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
+        </p>
+      </xd:detail>
+      <xd:svnId>$Id: copy-context.xsl2 745 2011-04-17 17:43:50Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+  <!-- 
+  <xd:doc>
+    <xd:short>Return a copy of a sequence where the root element(s)
+    have @xml:lang, @lang, and @xml:base preserved as the same as their 
+    original.  Also keep each copied element with a @jx:uid to
+    preserve its identity.</xd:short>
+    <xd:param name="sequence">The original sequence, with the context of its 
+    constituents preserved.</xd:param>
+  </xd:doc>
+	<xsl:function name="func:detach-copy" as="node()*">
+    <xsl:param name="sequence" as="node()*"/>
+		
+    <xsl:for-each select="$sequence">
+      <xsl:variable name="original-base" as="xs:anyURI" select="base-uri(.)"/>
+      <xsl:variable name="original-lang" as="xs:string" 
+        select="func:language(.)"/>      
+      <xsl:copy>
+        <xsl:copy-of select="@* except (@xml:base,@lang,@xml:lang,@jx:uid)"/>
+        <xsl:attribute name="jx:uid" select="(@jx:uid,generate-id())[1]"/>
+        <xsl:attribute name="xml:base" select="$original-base"/>
+        <xsl:attribute name="xml:lang" select="$original-lang"/>
+        <xsl:attribute name="lang" select="$original-lang"/>
+        <xsl:apply-templates mode="detach-copy"/>
+      </xsl:copy>
+    </xsl:for-each>
+	</xsl:function>
+  
+  <xd:doc>
+    <xd:short>Copy and add an attribute that identifies the
+    element by its unique id</xd:short>
+  </xd:doc>
+  <xsl:template match="element()" mode="detach-copy">
+    <xsl:copy>
+      <xsl:copy-of select="@* except @jx:uid"/>
+      <xsl:attribute name="jx:uid" select="(@jx:uid, generate-id())[1]"/>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Attach the given node(s) in place.
+    Remove @xml:lang/@lang and/or @xml:base if they are unnecessary in
+    context.</xd:short>
+    <xd:param name="sequence">The sequence to attach in-place.</xd:param>
+    <xd:param name="additional-attributes">Any attributes to be added 
+    to the copy other than @xml:lang, @lang, @xml:base</xd:param>
+  </xd:doc>
+  <xsl:template name="attach-copy">
+    <xsl:param name="sequence" as="node()*" required="yes"/>
+    <xsl:param name="additional-attributes" as="attribute()*" select="()"/>
+    
+    <xsl:variable name="context-base" as="xs:anyURI" select="base-uri(.)"/>
+    <xsl:variable name="context-lang" as="xs:string" select="func:language(.)"/>    
+    
+    <xsl:for-each select="$sequence">
+      <xsl:copy>
+        <xsl:variable name="seq-base" as="xs:anyURI" select="base-uri(.)"/>
+        <xsl:variable name="seq-lang" as="xs:string" select="func:language(.)"/>
+        <xsl:sequence select="func:debug((name(.), 'lang:', $seq-lang, ' context-lang: ', $context-lang, ' base:', $seq-base, ' context-base:', $context-base), 'attach-copy',$debug-info)"/>      
+        <xsl:copy-of select="@* except (@lang,@xml:lang,@xml:base),
+          $additional-attributes"/>
+        <xsl:if test="not($seq-base eq $context-base)">
+          <xsl:attribute name="xml:base" select="$seq-base"/>
+        </xsl:if>
+        <xsl:if test="not($seq-lang eq $context-lang)">
+          <xsl:attribute name="xml:lang" select="$seq-lang"/>
+          <xsl:attribute name="lang" select="$seq-lang"/>
+        </xsl:if>
+        <xsl:sequence select="child::node()"/>
+      </xsl:copy>
+    </xsl:for-each>
+  </xsl:template>
+  -->
+  <xd:doc type="attribute()*">
+    <xd:short>Copy the current context's attributes and lang/base
+    context, if necessary.  Passing an empty sequence indicates
+    that the base or lang should not be added unless an explicit
+    attribute is present.</xd:short>
+  </xd:doc>
+  <xsl:template name="copy-attributes-and-context" as="attribute()*">
+    <xsl:param name="attributes" as="attribute()*" select="@*"/>
+    <xsl:param name="current-base-uri" as="xs:anyURI?" select="base-uri(.)"/>
+    <xsl:param name="current-document-uri" as="xs:anyURI?" select="func:original-document-uri(.)"/>
+    <xsl:param name="current-lang" as="xs:string?" select="func:language(.)"/>
+    
+    <!-- run uri-base-resource on all the parameters, shadowing them -->
+    <xsl:variable name="current-document-uri" as="xs:anyURI?" select="func:uri-base-resource($current-document-uri)"/>
+    <xsl:variable name="current-base-uri" as="xs:anyURI?" select="func:uri-base-resource($current-base-uri)"/>
+      
+    <xsl:copy-of select="$attributes except (@lang,@xml:lang,@xml:base)"/>
+    <xsl:if test="$current-base-uri">
+      <xsl:attribute name="xml:base" select="func:uri-base-resource($current-base-uri)"/>
+    </xsl:if>
+    <xsl:if test="$current-document-uri">
+      <xsl:attribute name="jx:document-uri" select="func:uri-base-resource($current-document-uri)"/>
+    </xsl:if>
+    <xsl:if test="$current-lang">
+      <xsl:attribute name="xml:lang" select="$current-lang"/>
+    </xsl:if>
+    
+    <xsl:sequence select="func:debug(('lang:', $current-lang, ' base:', $current-base-uri, ' document-uri:', $current-document-uri), ('copy-attributes-and-context for ', func:get-xpath(.)),$debug-detail+1)"/> 
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Copy attributes and context (xml:base, jx:document-uri, xml:lang) if
+    the context is changed, either by coming from a different document or by manual changes.  
+    Do not copy @xml:id to prevent invalid XML from repetition.</xd:short>
+    <xd:param name="attributes">List of attributes to potentially copy</xd:param>
+    <xd:param name="current-document-uri">Document URI tunneled</xd:param>
+    <xd:param name="current-lang">Language tunneled</xd:param>
+    <xd:param name="current-base-uri">Base URI tunneled</xd:param>
+    <xd:param name="new-document-uri">Document URI of the context (defaulted)</xd:param>
+    <xd:param name="new-lang">Language of the context (defaulted)</xd:param>
+    <xd:param name="new-base-uri">Base URI of context (defaulted)</xd:param>
+  </xd:doc>
+  <xsl:template name="copy-attributes-and-context-if-changed" as="attribute()*">
+    <xsl:param name="attributes" as="attribute()*" select="@*"/>
+    <xsl:param name="current-document-uri" as="xs:anyURI" tunnel="yes" 
+      select="func:original-document-uri((..,.)[1])" />
+    <xsl:param name="current-lang" as="xs:string" tunnel="yes" select="func:language((..,.)[1])"/>
+    <xsl:param name="current-base-uri" as="xs:anyURI?" tunnel="yes" 
+      select="base-uri((..,.)[1])"/>
+    <xsl:param name="new-document-uri" as="xs:anyURI?" select="func:original-document-uri(.)"/>
+    <xsl:param name="new-lang" as="xs:string" select="func:language(.)"/>
+    <xsl:param name="new-base-uri" as="xs:anyURI?" select="base-uri(.)"/>
+    
+    <!-- run uri-base-resource on all the parameters, shadowing them -->
+    <xsl:variable name="current-document-uri" as="xs:anyURI" select="func:uri-base-resource($current-document-uri)"/>
+    <xsl:variable name="current-base-uri" as="xs:anyURI" select="func:uri-base-resource($current-base-uri)"/>
+    <xsl:variable name="new-document-uri" as="xs:anyURI?" select="func:uri-base-resource($new-document-uri)"/>
+    <xsl:variable name="new-base-uri" as="xs:anyURI?" select="func:uri-base-resource($new-base-uri)"/>
+
+    <xsl:sequence select="$attributes except (@xml:base,@xml:lang,@jx:document-uri)"/>
+
+    <xsl:sequence select="func:debug(('copying = ' , $new-document-uri and not($current-document-uri eq $new-document-uri), '$current-document-uri = ', $current-document-uri, ' $new-document-uri = ', $new-document-uri, ' context:', .), ('copy-attributes-and-context-if-changed for ', func:get-xpath(.)),$debug-detail)"/>
+    
+    <xsl:if test="$new-base-uri and not($current-base-uri eq $new-base-uri)">
+      <xsl:attribute name="xml:base" select="func:uri-base-resource($new-base-uri)"/>
+    </xsl:if>
+    <xsl:if test="$new-document-uri and not($current-document-uri eq $new-document-uri)">
+      <xsl:attribute name="jx:document-uri" select="func:uri-base-resource($new-document-uri)"/>
+    </xsl:if>
+    <xsl:if test="$new-lang and not($current-lang eq $new-lang)">
+      <xsl:attribute name="xml:lang" select="$new-lang"/>
+    </xsl:if>
+  </xsl:template>
+ 
+  
+</xsl:stylesheet>

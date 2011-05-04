@@ -1,0 +1,1362 @@
+<?xml version = "1.0" encoding="UTF-8"?>
+<!-- Copyright C.V.Kimball 2010 -->
+<Tanach xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation ="../XSL/Tanach.xsd">
+<teiHeader>
+  <fileDesc>
+    <titleStmt>
+      <title level="s"  type="uniform">Tanach</title>
+      <title level="s"  type="uniformhebrew">תנ״ך</title>
+      <title level="s"  type="main">The Westminster Leningrad Codex</title>
+      <title level="a"  type="filename">Tanach</title>
+      <editor>Shemu'el ben Ya'akov</editor>
+      <editor>Aharon ben-Mosheh ben-Asher</editor>
+      <respStmt>
+        <resp>Active maintenance of machine-readable version:</resp>
+        <name>Stephen K. Salisbury</name>
+        <name type="position">Editor</name>
+        <name type="email">steve@grovescenter.org</name>
+        <name>Kirk E. Lowery</name>
+        <name type="position">Senior editor</name>
+        <name type="email">kirk@grovescenter.org</name>
+        <name type="org">J. Alan Groves Center for Advanced Biblical Research</name>
+      </respStmt>
+      <respStmt>
+        <resp>Transcription to Unicode/XML:</resp>
+        <name>Christopher V. Kimball</name>
+        <name type="email">transcriber@tanach.us</name>
+      </respStmt>
+    </titleStmt>
+    <editionStmt>
+      <edition>Unicode/XML Westminster Leningrad Codex
+        <version>4.14</version>
+        <date>1 Jul 2010</date>
+      </edition>
+      <respStmt>
+        <resp>Transcribed by WLC2XML of 6 Jun 2010 at 08 Jul 2010 @ 13:46.02. Build number: 21.1.</resp>
+      </respStmt>
+    </editionStmt>
+    <extent>    37,366 bytes</extent>
+    <publicationStmt>
+      <authority>Transcription permitted:
+        <name>Kirk Lowery</name>
+        <name type="email">kirk@grovescenter.org</name>
+        <name type="org">J. Alan Groves Center for Advanced Biblical Research</name>
+        <date>15 June 2010 11:49 AM</date>
+      </authority>
+      <distributor>Via web site:
+        <name>Christopher V. Kimball</name>
+        <name type="url">http://www.tanach.us/Tanach.xml</name>
+        <name type="email">transcriber@tanach.us</name>
+      </distributor>
+      <availability status="free">Freely available</availability>
+    </publicationStmt>
+    <notesStmt>
+      <note>from the electronic version of the Leningrad Codex maintained by the J. Alan Groves Center for Advanced Biblical Research.</note>
+      <note>This text began as an electronic transcription by Richard Whitaker (Princeton Seminary, New Jersey) and H. van Parunak (then at the University of Michigan, Ann Arbor) of the 1983 printed edition of Biblia Hebraica Stuttgartensia (BHS). It was continued with the cooperation of Robert Kraft (University of Pennsylvania) and Emmanuel Tov (Hebrew University, Jerusalem), and completed by Alan Groves (Westminster Theological Seminary).  The transcription was called the Michigan-Claremont-Westminster electronic Hebrew Bible and was archived at the Oxford Text Archive (OTA) in 1987. It has been variously known as the "CCAT" or "eBHS" text. Since that time, the text has been modified in many hundreds of places to conform to the photo-facsimile of the Leningrad Codex, Firkovich B19A, residing at the Russian National Library, St. Petersberg; hence the change of name.</note>
+      <note>The J. Alan Groves Center for Advanced Biblical Research has continued to scrutinize and correct this electronic text as a part of its continuing work of building morphology and syntax databases of the Hebrew Bible, since correct linguistic analysis requires an accurate text.</note>
+      <note>Vocalized ketib variants are no longer included as they are not part of the original manuscript.</note>
+      <note>The only changes to the J. Alan Groves Center for Advanced Biblical Research text by the transcriber are: The book names in English and Hebrew of the Jewish Publication Society Tanach and book abbreviations from the New Revised Standard Version have been added. Six transcription notes (5,7,10) have been moved to the noted character (Lev 11:42.4, Judg 18:30.11, Isa 9.6.1, Ps 80:14.3, Job 38:13.5, Job 38:15.2) </note>
+    </notesStmt>
+    <sourceDesc>
+      <biblItem>
+        <title>Hebrew Bible</title>
+        <title>Leningrad Codex</title>
+        <editor>Shemu'el ben Ya'akov</editor>
+        <editor>Aharon ben-Mosheh ben-Asher</editor>
+        <edition>Original document</edition>
+        <imprint>
+          <publisher>Russian National Library (Saltykov-Shchedrin)</publisher>
+          <pubPlace>St. Petersburg (Leningrad)</pubPlace>
+          <date>ca 1008</date>
+        </imprint>
+        <idno>Firkovich B 19 A</idno>
+      </biblItem>
+      <biblItem>
+        <title>Biblia Hebraica Stuttgartensia</title>
+        <editor>Kittel, Rudolf, 1853-1929</editor>
+        <editor>Alt, Albrecht, 1883-1956</editor>
+        <editor>Eissfeldt, Otto, 1887-</editor>
+        <editor>Kahle, Paul, 1875-1964</editor>
+        <editor>Elliger, Karl, 1901-1977</editor>
+        <editor>Rudolph, Wilhelm, 1891-</editor>
+        <edition>Fourth</edition>
+        <imprint>
+          <publisher>Deutsche Bibelstiftung</publisher>
+          <pubPlace>Stuttgart</pubPlace>
+          <date>1983</date>
+        </imprint>
+        <idno type="IBSN">3-43805218-0</idno>
+      </biblItem>
+      <biblItem>
+        <title type="uniform">Bible. O.T. Hebrew</title>
+        <title type="main">Biblia Hebraica Stuttgartensia [Electronic resource] : (Michigan-Claremont text)</title>
+        <editor>Kittel, Rudolf, 1853-1929</editor>
+        <editor>Alt, Albrecht, 1883-1956</editor>
+        <editor>Eissfeldt, Otto, 1887-</editor>
+        <editor>Kahle, Paul, 1875-1964</editor>
+        <editor>Elliger, Karl, 1901-1977</editor>
+        <editor>Rudolph, Wilhelm, 1891-</editor>
+        <respStmt>
+          <resp>Creation of machine-readable version:</resp>
+          <name>Whitaker, Richard E.</name>
+          <name>Parunak, H. Van Dyke</name>
+          <name>Kraft, Robert A</name>
+        </respStmt>
+        <edition>Rev. ed. / Computer Assisted Tools for Septuagint Studies (Project)</edition>
+        <imprint>
+          <publisher>Oxford Text Archive</publisher>
+          <pubPlace>Oxford</pubPlace>
+          <date>1987-02-07</date>
+        </imprint>
+        <idno type="ota">bibl0525</idno>
+      </biblItem>
+      <biblItem>
+        <title>The Leningrad Codex - A Facsimile Edition</title>
+        <editor>Freedman, David Noel</editor>
+        <editor>Beck, Astrid B.</editor>
+        <edition>First</edition>
+        <imprint>
+          <publisher>Wm. B. Eerdmans Publishing Co.</publisher>
+          <pubPlace>Grand Rapids, MI</pubPlace>
+          <date>1998</date>
+        </imprint>
+        <idno type="IBSN">0-8028-3786-7</idno>
+      </biblItem>
+    </sourceDesc>
+  </fileDesc>
+  <encodingDesc>
+  </encodingDesc>
+  <profileDesc>
+    <creation>Input text file wlc414_ps.txt provided by the J. Alan Groves Center for Advanced 
+Biblical Research. The file has the MD5 hash: 4326 BC1C 5057 776F 5C6F 88DA BB98 6DF0 
+and was received on 1 Jul 2010. The WLC text file has been modified by the 
+transcriber to move transcription notes closer to the relevant character in 
+exactly six (6) places. The modified file, wlc414_ps_td.txt, has the following 
+SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 . 
+      <date>08 Jul 2010</date>
+    </creation>
+    <langUsage>
+      <language ident="HE">Hebrew</language>
+    </langUsage>
+  </profileDesc>
+</teiHeader>
+<index>
+  <n>39</n>
+  <books>
+    <names>
+      <name>Genesis</name>
+      <abbrev>Gen</abbrev>
+      <number>1</number>
+      <filename>Genesis</filename>
+      <hebrewname>בראשית</hebrewname>
+    </names>
+    <names>
+      <name>Exodus</name>
+      <abbrev>Ex</abbrev>
+      <number>2</number>
+      <filename>Exodus</filename>
+      <hebrewname>שמות</hebrewname>
+    </names>
+    <names>
+      <name>Leviticus</name>
+      <abbrev>Lev</abbrev>
+      <number>3</number>
+      <filename>Leviticus</filename>
+      <hebrewname>ויקרא</hebrewname>
+    </names>
+    <names>
+      <name>Numbers</name>
+      <abbrev>Num</abbrev>
+      <number>4</number>
+      <filename>Numbers</filename>
+      <hebrewname>במדבר</hebrewname>
+    </names>
+    <names>
+      <name>Deuteronomy</name>
+      <abbrev>Deut</abbrev>
+      <number>5</number>
+      <filename>Deuteronomy</filename>
+      <hebrewname>דברים</hebrewname>
+    </names>
+    <names>
+      <name>Joshua</name>
+      <abbrev>Josh</abbrev>
+      <number>6</number>
+      <filename>Joshua</filename>
+      <hebrewname>יהושע</hebrewname>
+    </names>
+    <names>
+      <name>Judges</name>
+      <abbrev>Judg</abbrev>
+      <number>7</number>
+      <filename>Judges</filename>
+      <hebrewname>שופטים</hebrewname>
+    </names>
+    <names>
+      <name>1 Samuel</name>
+      <abbrev>1 Sam</abbrev>
+      <number>8</number>
+      <filename>Samuel_1</filename>
+      <hebrewname>שמואל א</hebrewname>
+    </names>
+    <names>
+      <name>2 Samuel</name>
+      <abbrev>2 Sam</abbrev>
+      <number>9</number>
+      <filename>Samuel_2</filename>
+      <hebrewname>שמואל ב</hebrewname>
+    </names>
+    <names>
+      <name>1 Kings</name>
+      <abbrev>1 Kings</abbrev>
+      <number>10</number>
+      <filename>Kings_1</filename>
+      <hebrewname>מלכים א</hebrewname>
+    </names>
+    <names>
+      <name>2 Kings</name>
+      <abbrev>2 Kings</abbrev>
+      <number>11</number>
+      <filename>Kings_2</filename>
+      <hebrewname>מלכים ב</hebrewname>
+    </names>
+    <names>
+      <name>Isaiah</name>
+      <abbrev>Isa</abbrev>
+      <number>12</number>
+      <filename>Isaiah</filename>
+      <hebrewname>ישעיה</hebrewname>
+    </names>
+    <names>
+      <name>Jeremiah</name>
+      <abbrev>Jer</abbrev>
+      <number>13</number>
+      <filename>Jeremiah</filename>
+      <hebrewname>ירמיה</hebrewname>
+    </names>
+    <names>
+      <name>Ezekiel</name>
+      <abbrev>Ezek</abbrev>
+      <number>14</number>
+      <filename>Ezekiel</filename>
+      <hebrewname>יחזקאל</hebrewname>
+    </names>
+    <names>
+      <name>Hosea</name>
+      <abbrev>Hos</abbrev>
+      <number>15</number>
+      <filename>Hosea</filename>
+      <hebrewname>הושע</hebrewname>
+    </names>
+    <names>
+      <name>Joel</name>
+      <abbrev>Joel</abbrev>
+      <number>16</number>
+      <filename>Joel</filename>
+      <hebrewname>יואל</hebrewname>
+    </names>
+    <names>
+      <name>Amos</name>
+      <abbrev>Am</abbrev>
+      <number>17</number>
+      <filename>Amos</filename>
+      <hebrewname>עמוס</hebrewname>
+    </names>
+    <names>
+      <name>Obadiah</name>
+      <abbrev>Ob</abbrev>
+      <number>18</number>
+      <filename>Obadiah</filename>
+      <hebrewname>עבדיה</hebrewname>
+    </names>
+    <names>
+      <name>Jonah</name>
+      <abbrev>Jon</abbrev>
+      <number>19</number>
+      <filename>Jonah</filename>
+      <hebrewname>יונה</hebrewname>
+    </names>
+    <names>
+      <name>Micah</name>
+      <abbrev>Mic</abbrev>
+      <number>20</number>
+      <filename>Micah</filename>
+      <hebrewname>מיכה</hebrewname>
+    </names>
+    <names>
+      <name>Nahum</name>
+      <abbrev>Nah</abbrev>
+      <number>21</number>
+      <filename>Nahum</filename>
+      <hebrewname>נחום</hebrewname>
+    </names>
+    <names>
+      <name>Habakkuk</name>
+      <abbrev>Hab</abbrev>
+      <number>22</number>
+      <filename>Habakkuk</filename>
+      <hebrewname>חבקוק</hebrewname>
+    </names>
+    <names>
+      <name>Zephaniah</name>
+      <abbrev>Zeph</abbrev>
+      <number>23</number>
+      <filename>Zephaniah</filename>
+      <hebrewname>צפניה</hebrewname>
+    </names>
+    <names>
+      <name>Haggai</name>
+      <abbrev>Hag</abbrev>
+      <number>24</number>
+      <filename>Haggai</filename>
+      <hebrewname>חגי</hebrewname>
+    </names>
+    <names>
+      <name>Zechariah</name>
+      <abbrev>Zech</abbrev>
+      <number>25</number>
+      <filename>Zechariah</filename>
+      <hebrewname>זכריה</hebrewname>
+    </names>
+    <names>
+      <name>Malachi</name>
+      <abbrev>Mal</abbrev>
+      <number>26</number>
+      <filename>Malachi</filename>
+      <hebrewname>מלאכי</hebrewname>
+    </names>
+    <names>
+      <name>Psalms</name>
+      <abbrev>Ps</abbrev>
+      <number>27</number>
+      <filename>Psalms</filename>
+      <hebrewname>תהלים</hebrewname>
+    </names>
+    <names>
+      <name>Proverbs</name>
+      <abbrev>Prov</abbrev>
+      <number>28</number>
+      <filename>Proverbs</filename>
+      <hebrewname>משלי</hebrewname>
+    </names>
+    <names>
+      <name>Job</name>
+      <abbrev>Job</abbrev>
+      <number>29</number>
+      <filename>Job</filename>
+      <hebrewname>איוב</hebrewname>
+    </names>
+    <names>
+      <name>Song of Songs</name>
+      <abbrev>Song</abbrev>
+      <number>30</number>
+      <filename>Song_of_Songs</filename>
+      <hebrewname>שיר השירים</hebrewname>
+    </names>
+    <names>
+      <name>Ruth</name>
+      <abbrev>Ruth</abbrev>
+      <number>31</number>
+      <filename>Ruth</filename>
+      <hebrewname>רות</hebrewname>
+    </names>
+    <names>
+      <name>Lamentations</name>
+      <abbrev>Lam</abbrev>
+      <number>32</number>
+      <filename>Lamentations</filename>
+      <hebrewname>איכה</hebrewname>
+    </names>
+    <names>
+      <name>Ecclesiastes</name>
+      <abbrev>Eccl</abbrev>
+      <number>33</number>
+      <filename>Ecclesiastes</filename>
+      <hebrewname>קהלת</hebrewname>
+    </names>
+    <names>
+      <name>Esther</name>
+      <abbrev>Esth</abbrev>
+      <number>34</number>
+      <filename>Esther</filename>
+      <hebrewname>אסתר</hebrewname>
+    </names>
+    <names>
+      <name>Daniel</name>
+      <abbrev>Dan</abbrev>
+      <number>35</number>
+      <filename>Daniel</filename>
+      <hebrewname>דניאל</hebrewname>
+    </names>
+    <names>
+      <name>Ezra</name>
+      <abbrev>Ezra</abbrev>
+      <number>36</number>
+      <filename>Ezra</filename>
+      <hebrewname>עזרא</hebrewname>
+    </names>
+    <names>
+      <name>Nehemiah</name>
+      <abbrev>Neh</abbrev>
+      <number>37</number>
+      <filename>Nehemiah</filename>
+      <hebrewname>נחמיה</hebrewname>
+    </names>
+    <names>
+      <name>1 Chronicles</name>
+      <abbrev>1 Chr</abbrev>
+      <number>38</number>
+      <filename>Chronicles_1</filename>
+      <hebrewname>דברי הימים א</hebrewname>
+    </names>
+    <names>
+      <name>2 Chronicles</name>
+      <abbrev>2 Chr</abbrev>
+      <number>39</number>
+      <filename>Chronicles_2</filename>
+      <hebrewname>דברי הימים ב</hebrewname>
+    </names>
+  </books>
+  <vs>23213</vs>
+  <cs>929</cs>
+</index>
+<coding>
+  <char>
+    <value>֑</value>
+    <hexvalue>0591</hexvalue>
+    <name>Etnachta</name>
+    <mccode>92</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>֒</value>
+    <hexvalue>0592</hexvalue>
+    <name>Segol</name>
+    <mccode>1</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֓</value>
+    <hexvalue>0593</hexvalue>
+    <name>Shalshelet</name>
+    <mccode>65</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֔</value>
+    <hexvalue>0594</hexvalue>
+    <name>Zaqef Qatan</name>
+    <mccode>80</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֕</value>
+    <hexvalue>0595</hexvalue>
+    <name>Zaqef Gadol</name>
+    <mccode>85</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֖</value>
+    <hexvalue>0596</hexvalue>
+    <name>Tipeha</name>
+    <mccode>73</mccode>
+    <type>Accent</type>
+    <equivalents>Tarha</equivalents>
+    <notes>&#160;</notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>֗</value>
+    <hexvalue>0597</hexvalue>
+    <name>Revia</name>
+    <mccode>81</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֘</value>
+    <hexvalue>0598</hexvalue>
+    <name>Zarqa</name>
+    <mccode>82</mccode>
+    <type>Accent</type>
+    <equivalents>Tsinorit, Zinorit, Tsinor, Zinor</equivalents>
+    <notes>This character is to be used when Zarqa or Tsinor are placed above, and also for Tsinorit.</notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֙</value>
+    <hexvalue>0599</hexvalue>
+    <name>Pashta</name>
+    <mccode>3, 33</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>13</group>
+  </char>
+  <char>
+    <value>֚</value>
+    <hexvalue>059a</hexvalue>
+    <name>Yetiv</name>
+    <mccode>10</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>10</group>
+  </char>
+  <char>
+    <value>֛</value>
+    <hexvalue>059b</hexvalue>
+    <name>Tevir</name>
+    <mccode>91</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>֜</value>
+    <hexvalue>059c</hexvalue>
+    <name>Geresh</name>
+    <mccode>61</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֝</value>
+    <hexvalue>059d</hexvalue>
+    <name>Geresh Muqdam</name>
+    <mccode>11</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֞</value>
+    <hexvalue>059e</hexvalue>
+    <name>Gereshayim</name>
+    <mccode>62</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֟</value>
+    <hexvalue>059f</hexvalue>
+    <name>Qarney Para</name>
+    <mccode>84</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֠</value>
+    <hexvalue>05a0</hexvalue>
+    <name>Telisha Gedola</name>
+    <mccode>14, 44</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֡</value>
+    <hexvalue>05a1</hexvalue>
+    <name>Pazer</name>
+    <mccode>83</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֣</value>
+    <hexvalue>05a3</hexvalue>
+    <name>Munah</name>
+    <mccode>74</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>֤</value>
+    <hexvalue>05a4</hexvalue>
+    <name>Mahapakh</name>
+    <mccode>70</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>֥</value>
+    <hexvalue>05a5</hexvalue>
+    <name>Merkha</name>
+    <mccode>71</mccode>
+    <type>Accent</type>
+    <equivalents>Yored</equivalents>
+    <notes>&#160;</notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>֦</value>
+    <hexvalue>05a6</hexvalue>
+    <name>Merkha Kefula</name>
+    <mccode>72</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>֧</value>
+    <hexvalue>05a7</hexvalue>
+    <name>Darga</name>
+    <mccode>94</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>֨</value>
+    <hexvalue>05a8</hexvalue>
+    <name>Qadma</name>
+    <mccode>63</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֩</value>
+    <hexvalue>05a9</hexvalue>
+    <name>Telisha Qetana</name>
+    <mccode>4, 24</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>13</group>
+  </char>
+  <char>
+    <value>֪</value>
+    <hexvalue>05aa</hexvalue>
+    <name>Yerah Ben Yomo</name>
+    <mccode>93</mccode>
+    <type>Accent</type>
+    <equivalents>Galgal</equivalents>
+    <notes>&#160;</notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>֫</value>
+    <hexvalue>05ab</hexvalue>
+    <name>Ole</name>
+    <mccode>60</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֬</value>
+    <hexvalue>05ac</hexvalue>
+    <name>Iluy</name>
+    <mccode>64</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>11</group>
+  </char>
+  <char>
+    <value>֭</value>
+    <hexvalue>05ad</hexvalue>
+    <name>Dehi</name>
+    <mccode>13</mccode>
+    <type>Accent</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>10</group>
+  </char>
+  <char>
+    <value>֮</value>
+    <hexvalue>05ae</hexvalue>
+    <name>Zinor</name>
+    <mccode>2</mccode>
+    <type>Accent</type>
+    <equivalents>Tsinor, Zarqa</equivalents>
+    <notes>This character is to be used when Zarqa or Tsinor are placed above left.</notes>
+    <group>13</group>
+  </char>
+  <char>
+    <value>ְ</value>
+    <hexvalue>05b0</hexvalue>
+    <name>Sheva</name>
+    <mccode>:</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ֱ</value>
+    <hexvalue>05b1</hexvalue>
+    <name>Hataf Segol</name>
+    <mccode>:E</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ֲ</value>
+    <hexvalue>05b2</hexvalue>
+    <name>Hataf Patah</name>
+    <mccode>:A</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ֳ</value>
+    <hexvalue>05b3</hexvalue>
+    <name>Hataf Qamats</name>
+    <mccode>:F</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ִ</value>
+    <hexvalue>05b4</hexvalue>
+    <name>Hiriq</name>
+    <mccode>I</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ֵ</value>
+    <hexvalue>05b5</hexvalue>
+    <name>Tsere</name>
+    <mccode>"</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ֶ</value>
+    <hexvalue>05b6</hexvalue>
+    <name>Segol</name>
+    <mccode>E</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ַ</value>
+    <hexvalue>05b7</hexvalue>
+    <name>Patah</name>
+    <mccode>A</mccode>
+    <type>Point</type>
+    <equivalents>&#160;</equivalents>
+    <notes>Furtive patah is not a distinct character.</notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ָ</value>
+    <hexvalue>05b8</hexvalue>
+    <name>Qamats</name>
+    <mccode>F</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ֹ</value>
+    <hexvalue>05b9</hexvalue>
+    <name>Holam</name>
+    <mccode>O</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes>OW is usually a holam vav with exceptions set by the Donnelly/Kirk algorithm.</notes>
+    <group>5</group>
+  </char>
+  <char>
+    <value>ֺ</value>
+    <hexvalue>05ba</hexvalue>
+    <name>Holam haser after vav</name>
+    <mccode>O</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes>WO is usually a vav holam-haser with exceptions set by the Donnelly/Kirk algorithm.</notes>
+    <group>5</group>
+  </char>
+  <char>
+    <value>ֻ</value>
+    <hexvalue>05bb</hexvalue>
+    <name>Qubuts</name>
+    <mccode>U</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>7</group>
+  </char>
+  <char>
+    <value>ּ</value>
+    <hexvalue>05bc</hexvalue>
+    <name>Dagesh</name>
+    <mccode>.</mccode>
+    <type>Point</type>
+    <equivalents>Mapiq, Shuriq</equivalents>
+    <notes>Falls within base letter.</notes>
+    <group>3</group>
+  </char>
+  <char>
+    <value>ֽ</value>
+    <hexvalue>05bd</hexvalue>
+    <name>Meteg</name>
+    <mccode>35, 75, 95</mccode>
+    <type>Point</type>
+    <equivalents>Siluq</equivalents>
+    <notes>Maybe used as a Hebrew accent sof pasuq.Left (75), center (35), and right (95) metegs are separately grouped to produce correct positioning. The center meteg is preceded by a ZWJ, u200D, for positioning.</notes>
+    <group>8, 8, 6</group>
+  </char>
+  <char>
+    <value>־</value>
+    <hexvalue>05be</hexvalue>
+    <name>Maqaf</name>
+    <mccode>-</mccode>
+    <type>Point</type>
+    <equivalents>&#x00a0;</equivalents>
+    <notes>An accent displayed in the Vowels content mode.</notes>
+    <group>16</group>
+  </char>
+  <char>
+    <value>ֿ</value>
+    <hexvalue>05bf</hexvalue>
+    <name>Rafe</name>
+    <mccode>,</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>4</group>
+  </char>
+  <char>
+    <value>׀</value>
+    <hexvalue>05c0</hexvalue>
+    <name>Paseq</name>
+    <mccode>5</mccode>
+    <type>Punctuation</type>
+    <equivalents>Legarmeh</equivalents>
+    <notes>May be treated as spacing punctuation, not as a point. Each Paseq is preceded by a Space, \u0020, for positioning.</notes>
+    <group>16</group>
+  </char>
+  <char>
+    <value>ׁ</value>
+    <hexvalue>05c1</hexvalue>
+    <name>Shin Dot</name>
+    <mccode>Not used</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>1</group>
+  </char>
+  <char>
+    <value>ׂ</value>
+    <hexvalue>05c2</hexvalue>
+    <name>Sin Dot</name>
+    <mccode>Not used</mccode>
+    <type>Point</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>2</group>
+  </char>
+  <char>
+    <value>׃</value>
+    <hexvalue>05c3</hexvalue>
+    <name>Sof Pasuq</name>
+    <mccode>0</mccode>
+    <type>Point</type>
+    <equivalents>&#x00a0;</equivalents>
+    <notes>An accent displayed in the Vowels content mode.</notes>
+    <group>16</group>
+  </char>
+  <char>
+    <value>ׄ</value>
+    <hexvalue>05c4</hexvalue>
+    <name>Upper Dot</name>
+    <mccode>52</mccode>
+    <type>Mark</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>9</group>
+  </char>
+  <char>
+    <value>ׅ</value>
+    <hexvalue>05c5</hexvalue>
+    <name>Lower Dot</name>
+    <mccode>53</mccode>
+    <type>Mark</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>12</group>
+  </char>
+  <char>
+    <value>א</value>
+    <hexvalue>05d0</hexvalue>
+    <name>Alef</name>
+    <mccode>)</mccode>
+    <type>Letter</type>
+    <equivalents>Aleph</equivalents>
+    <notes>&#160;</notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ב</value>
+    <hexvalue>05d1</hexvalue>
+    <name>Bet</name>
+    <mccode>B</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ג</value>
+    <hexvalue>05d2</hexvalue>
+    <name>Gimel</name>
+    <mccode>G</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ד</value>
+    <hexvalue>05d3</hexvalue>
+    <name>Dalet</name>
+    <mccode>D</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ה</value>
+    <hexvalue>05d4</hexvalue>
+    <name>He</name>
+    <mccode>H</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ו</value>
+    <hexvalue>05d5</hexvalue>
+    <name>Vav</name>
+    <mccode>W</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ז</value>
+    <hexvalue>05d6</hexvalue>
+    <name>Zayin</name>
+    <mccode>Z</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ח</value>
+    <hexvalue>05d7</hexvalue>
+    <name>Het</name>
+    <mccode>X</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ט</value>
+    <hexvalue>05d8</hexvalue>
+    <name>Tet</name>
+    <mccode>+</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>י</value>
+    <hexvalue>05d9</hexvalue>
+    <name>Yod</name>
+    <mccode>Y</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ך</value>
+    <hexvalue>05da</hexvalue>
+    <name>Final Kaf</name>
+    <mccode>K</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>כ</value>
+    <hexvalue>05db</hexvalue>
+    <name>Kaf</name>
+    <mccode>K</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ל</value>
+    <hexvalue>05dc</hexvalue>
+    <name>Lamed</name>
+    <mccode>L</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ם</value>
+    <hexvalue>05dd</hexvalue>
+    <name>Final Mem</name>
+    <mccode>M</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>מ</value>
+    <hexvalue>05de</hexvalue>
+    <name>Mem</name>
+    <mccode>M</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ן</value>
+    <hexvalue>05df</hexvalue>
+    <name>Final Nun</name>
+    <mccode>N</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>נ</value>
+    <hexvalue>05e0</hexvalue>
+    <name>Nun</name>
+    <mccode>N</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ס</value>
+    <hexvalue>05e1</hexvalue>
+    <name>Samekh</name>
+    <mccode>S</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ע</value>
+    <hexvalue>05e2</hexvalue>
+    <name>Ayin</name>
+    <mccode>(</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ף</value>
+    <hexvalue>05e3</hexvalue>
+    <name>Final Pe</name>
+    <mccode>P</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>פ</value>
+    <hexvalue>05e4</hexvalue>
+    <name>Pe</name>
+    <mccode>P</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ץ</value>
+    <hexvalue>05e5</hexvalue>
+    <name>Final Tsadi</name>
+    <mccode>C</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>צ</value>
+    <hexvalue>05e6</hexvalue>
+    <name>Tsadi</name>
+    <mccode>C</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ק</value>
+    <hexvalue>05e7</hexvalue>
+    <name>Qof</name>
+    <mccode>Q</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ר</value>
+    <hexvalue>05e8</hexvalue>
+    <name>Resh</name>
+    <mccode>R</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ש</value>
+    <hexvalue>05e9</hexvalue>
+    <name>Shin</name>
+    <mccode>&amp;, $</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <char>
+    <value>ת</value>
+    <hexvalue>05ea</hexvalue>
+    <name>Tav</name>
+    <mccode>T</mccode>
+    <type>Letter</type>
+    <equivalents></equivalents>
+    <notes></notes>
+    <group>0</group>
+  </char>
+  <specialchar>
+    <value> </value>
+    <hexvalue>0020</hexvalue>
+    <name>Space</name>
+    <mccode>&#160;</mccode>
+    <type>Special</type>
+    <equivalents>&#160;</equivalents>
+    <notes>Paseq is a Space + Paseq.</notes>
+    <group>&#160;</group>
+  </specialchar>
+  <specialchar>
+    <value>/</value>
+    <hexvalue>002f</hexvalue>
+    <name>Slash</name>
+    <mccode>/</mccode>
+    <type>Special</type>
+    <equivalents>&#160;</equivalents>
+    <notes>Morphological divider.</notes>
+    <group>&#160;</group>
+  </specialchar>
+  <specialchar>
+    <value>‍</value>
+    <hexvalue>200d</hexvalue>
+    <name>Zero width joiner (ZWJ)</name>
+    <mccode>&#160;</mccode>
+    <type>Special</type>
+    <equivalents>&#160;</equivalents>
+    <notes>Center meteg is a ZWJ + meteg.</notes>
+    <group>&#160;</group>
+  </specialchar>
+</coding>
+<notes>
+  <note>
+    <code>1</code>
+    <gccode>1</gccode>
+    <note>BHS has been faithful to the Leningrad Codex where there might be a question of the validity of the form and we keep the same form as BHS. </note>
+  </note>
+  <note>
+    <code>2</code>
+    <gccode>2</gccode>
+    <note>We have added a sop pasuq where L and BHS omit it. (The added sof pasuq often is missing from the text.)</note>
+  </note>
+  <note>
+    <code>3</code>
+    <gccode>3</gccode>
+    <note>We read or understand L differently than BHS. Often this notation indicates a typographical error in BHS. </note>
+  </note>
+  <note>
+    <code>4</code>
+    <gccode>4</gccode>
+    <note>Puncta extraordinaria -- a \u05c4 is used to mark such marks in the text when they are above the line and a \u05c5 when they are below the line. </note>
+  </note>
+  <note>
+    <code>5</code>
+    <gccode>5</gccode>
+    <note>Large letter(s). Shown as large letters without a superscript note number. </note>
+  </note>
+  <note>
+    <code>6</code>
+    <gccode>6</gccode>
+    <note>Small letter(s). Shown as small letters without a superscript note number. </note>
+  </note>
+  <note>
+    <code>7</code>
+    <gccode>7</gccode>
+    <note>Suspended letter(s). Shown as suspended letters without a superscript note number. </note>
+  </note>
+  <note>
+    <code>8</code>
+    <gccode>8</gccode>
+    <note>Inverted nun in the text. </note>
+  </note>
+  <note>
+    <code>9</code>
+    <gccode>9</gccode>
+    <note>BHS has abandoned L and we concur. All of these occurrences are ketib/qere problems. </note>
+  </note>
+  <note>
+    <code>10</code>
+    <gccode>a</gccode>
+    <note>Adaptations to a Qere which L and BHS, by their design, do not indicate. </note>
+  </note>
+  <note>
+    <code>11</code>
+    <gccode>c</gccode>
+    <note>We read one or more accents in L differently than BHS. Often this notation indicates a typographical error in BHS. </note>
+  </note>
+  <note>
+    <code>12</code>
+    <gccode>k</gccode>
+    <note>We read one or more consonants in L differently from BHS. </note>
+  </note>
+  <note>
+    <code>13</code>
+    <gccode>m</gccode>
+    <note>Miscellaneous notes to the text and occasions where more than one bracket category applies. </note>
+  </note>
+  <note>
+    <code>14</code>
+    <gccode>n</gccode>
+    <note>Marks an anomalous form. </note>
+  </note>
+  <note>
+    <code>15</code>
+    <gccode>p</gccode>
+    <note>We read punctuation (maqaf, dagesh or mapiq) in L differently from BHS. </note>
+  </note>
+  <note>
+    <code>16</code>
+    <gccode>q</gccode>
+    <note>We have abandoned or added a ketib/qere relative to BHS. In doing this we agree with L against BHS. </note>
+  </note>
+  <note>
+    <code>17</code>
+    <gccode>v</gccode>
+    <note>We read one or more vowels in L differently from BHS. </note>
+  </note>
+  <note>
+    <code>18</code>
+    <gccode>y</gccode>
+    <note>Yathir readings in L which we have designated as Qeres when both Dothan and BHS list a Qere. </note>
+  </note>
+  <note>
+    <code>19</code>
+    <gccode>C</gccode>
+    <note>We read one or more accents in L differently from BHQ. </note>
+  </note>
+  <note>
+    <code>20</code>
+    <gccode>F</gccode>
+    <note>Marks a consonant with an anomalous final form that is word-medial.</note>
+  </note>
+  <note>
+    <code>21</code>
+    <gccode>K</gccode>
+    <note>We read one or more consonants in L differently from BHQ. (Currently unused.) </note>
+  </note>
+  <note>
+    <code>22</code>
+    <gccode>M</gccode>
+    <note>Marks a word with a final consonant that is a medial (not a final) form. </note>
+  </note>
+  <note>
+    <code>23</code>
+    <gccode>P</gccode>
+    <note>We read the punctuation (maqaf, dagesh or mapiq) in L differently from BHQ. </note>
+  </note>
+  <note>
+    <code>24</code>
+    <gccode>Q</gccode>
+    <note>Marks a place where we agree with BHQ against BHS in reading L. </note>
+  </note>
+  <note>
+    <code>25</code>
+    <gccode>V</gccode>
+    <note>We read one or more vowels in L differently from BHQ. </note>
+  </note>
+</notes>
+</Tanach>

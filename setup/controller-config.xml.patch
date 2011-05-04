@@ -1,0 +1,19 @@
+*** controller-config.xml	2011-02-23 09:37:51.000000000 -0500
+--- controller-config.ef2.xml	2011-02-27 16:04:25.000000000 -0500
+***************
+*** 40,45 ****
+--- 40,53 ----
+      ++ webapp directory. 
+    -->
+    <root pattern="/library" path="xmldb:exist:///db/org/library"/>
++     
++   <!-- EDF: change so that all requests default to the db, unless preceded by fs,
++ 	allow legacy (demo) to access through /exist -->
++ 	<!-- -->
++ 	<root pattern="/exist/rest" path="xmldb:exist:///"/>
++   <root pattern="/fs/.*" path="/"/>
++   <root pattern="/db" path="xmldb:exist:///db"/>
++ 	<root pattern="/.*" path="xmldb:exist:///db"/>
+  
+    <root pattern="/apps" path="xmldb:exist:///db"/>
+    

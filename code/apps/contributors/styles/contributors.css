@@ -1,0 +1,37 @@
+/* CSS for contributor list editor
+ * Open Siddur Project
+ * Copyright 2010 Efraim Feinstein
+ * Licensed under the GNU Lesser General Public License, version 3 or later
+ * $Id: contributors.css 687 2011-01-23 23:36:48Z efraim.feinstein $
+ */
+
+/* this is for the main table */
+.control-contributorlist-table {
+  height:300px;
+  width:99%;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+
+/* this is for the editor
+ * it would be better to do with xf:dialog, but that doesn't seem to be supported yet in betterFORM
+ */
+#editor-ui, #editor-delete-ui {
+  background:white;
+  position:fixed;
+  z-index:3;
+  left:25%;
+  top:25%;
+  height:50%;
+  width:50%;
+  padding:1em;
+  overflow:auto;
+  border-width:2px;
+  border-style:solid;
+}
+
+.error-report {
+  display:block;
+  border:1px red;
+  background-color:#FF6666;
+};

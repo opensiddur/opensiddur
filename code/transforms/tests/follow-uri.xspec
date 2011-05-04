@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tests for func:follow-uri(), func:follow-cached-uri() and follow-tei-link
+
+  Open Siddur Project
+  Copyright 2010-2011 Efraim Feinstein
+  Licensed under the GNU Lesser General Public License, version 3 or later  
+
+  $Id: follow-uri.xspec 687 2011-01-23 23:36:48Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  stylesheet="../follow-uri.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="Always pending, force prefixes">
+      <x:call function="func:nonexistent">
+        <x:param><func:test/><tei:TEI/><jx:test/></x:param>
+      </x:call>
+    </x:scenario>
+  </x:pending>
+  <x:scenario label="func:uri-base-path">
+    <x:call function="func:uri-base-path"/>
+    <x:scenario label="path without fragment">
+      <x:call>
+        <x:param select="'abc.xml'"/>
+      </x:call>
+      <x:expect label="file name" select="xs:anyURI('abc.xml')"/>
+    </x:scenario>
+    <x:scenario label="path with fragment">
+      <x:call>
+        <x:param select="'abc.xml#def'"/>
+      </x:call>
+      <x:expect label="file name with fragment removed" select="xs:anyURI('abc.xml')"/>
+    </x:scenario>
+  </x:scenario>
+  
+  <x:scenario label="func:uri-fragment">
+    <x:call function="func:uri-fragment"/>
+    <x:scenario label="path without fragment">
+      <x:call>
+        <x:param select="'abc.xml'"/>
+      </x:call>
+      <x:expect label="empty URI" select="xs:anyURI('')"/>
+    </x:scenario>
+    <x:scenario label="path with fragment">
+      <x:call>
+        <x:param select="'abc.xml#def'"/>
+      </x:call>
+      <x:expect label="fragment only" select="xs:anyURI('def')"/>
+    </x:scenario>
+  </x:scenario>
+
+  <x:scenario label="follow-uri mode when the pointer">
+    <x:context href="follow-uri-context-1.xml" mode="follow-uri"/>
+    <x:scenario label="is not a pointer">
+      <x:context select="id('destination')"/>
+      <x:expect label="result is self" test="exists($x:result/self::tei:seg[@xml:id='destination']) and count($x:result) = 1"/>
+    </x:scenario>
+    <x:scenario label="points one ahead">
+      <x:context select="id('one')"/>
+      <x:expect label="result is destination" test="exists($x:result/self::tei:seg[@xml:id='destination']) and count($x:result) = 1"/>
+    </x:scenario>
+    <x:scenario label="points two ahead">
+      <x:context select="id('two')"/>
+      <x:expect label="result is destination" test="exists($x:result/self::tei:seg[@xml:id='destination']) and count($x:result) = 1"/>
+    </x:scenario>
+    <x:scenario label="points three ahead">
+      <x:context select="id('three')"/>
+      <x:expect label="result is destination" test="exists($x:result/self::tei:seg[@xml:id='destination']) and count($x:result) = 1"/>
+    </x:scenario>
+    <x:scenario label="has evaluate=none">
+      <x:context select="id('noeval')"/>
+      <x:expect label="result is next pointer" test="exists($x:result/self::tei:ptr[@xml:id='three']) and count($x:result) = 1"/>
+    </x:scenario>
+    <x:scenario label="has evaluate=one">
+      <x:context select="id('evalone')"/>
+      <x:expect label="result is two pointers ahead" test="exists($x:result/self::tei:ptr[@xml:id='two']) and count($x:result) = 1"/>
+    </x:scenario>
+    <x:scenario label="is a join">
+      <x:context select="id('eval_join')"/>
+      <x:expect label="result is two segments" test="count($x:result) = 2"/>
+      <x:expect label="segment 1 is present" test="exists($x:result/self::tei:seg[@xml:id='destination'])"/>
+      <x:expect label="segment 2 is present" test="exists($x:result/self::tei:seg[@xml:id='destination2'])"/>
+    </x:scenario>
+    <x:scenario label="is a join into a paragraph">
+      <x:context select="id('eval_join_as_p')"/>
+      <x:expect label="result is one paragraph" test="count($x:result) = 1 and exists($x:result/self::tei:p)"/>
+      <x:expect label="segment 1 is present" test="exists($x:result/tei:seg[@xml:id='destination'])"/>
+      <x:expect label="segment 2 is present" test="exists($x:result/tei:seg[@xml:id='destination2'])"/>
+    </x:scenario>
+    <x:scenario label="points into a different file">
+      <x:context select="id('in_file_2')"/>
+      <x:expect label="result is segment from other file" test="exists($x:result/self::tei:seg[@xml:id='f2_destination']) and count($x:result) = 1"/>
+    </x:scenario>
+    <x:scenario label="points into a different file and has additional indirection">
+      <x:context select="id('in_file_2_indirect')"/>
+      <x:expect label="result is segment from other file" test="exists($x:result/self::tei:seg[@xml:id='f2_destination']) and count($x:result) = 1"/>
+    </x:scenario>
+    <x:scenario label="points to a range">
+      <x:context select="id('range')"/>
+      <x:expect label="result is a sequence of all of the segments in the range">
+        <tei:seg jx:id="part1">1</tei:seg>
+        <tei:seg jx:id="part2">2</tei:seg>
+        <tei:seg jx:id="part3">3</tei:seg>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="that is of type url">
+      <x:context select="id('url_ptr')"/>
+      <x:expect label="result is the pointer itself" 
+        test="$x:result[count(.) = 1]/tei:ptr[@xml:id='url_ptr']"/>
+    </x:scenario>
+    <x:scenario label="that points to a ptr of type url">
+      <x:context select="id('to_url_ptr')"/>
+      <x:expect label="result is the URL pointer" 
+        test="$x:result[count(.) = 1]/tei:ptr[@xml:id='url_ptr']"/>
+    </x:scenario>
+  </x:scenario>
+
+  <x:scenario label="follow-uri mode with cache-type parameter">
+    <x:scenario label="not using the cache...">
+      <x:context href="follow-uri-cached-context.xml" mode="follow-uri">
+        <x:param name="cache-type" as="xs:string?" tunnel="yes" select="()"/>
+      </x:context>
+      <x:scenario label="... and pointing at a document ...">
+        <x:context select="id('doc')"/>
+        <x:expect label="returns the uncached document" test="exists(//jx:uncached-resource)"/>
+      </x:scenario>
+      <x:scenario label="... and pointing at a jx:id ...">
+        <x:context select="id('by-jx-id')"/>
+        <x:expect label="returns the identified resource" test="exists(//jx:identified[@jx:id='id1'])"/>
+      </x:scenario>
+      <x:scenario label="... and pointing at an xml:id ...">
+        <x:context select="id('by-xml-id')"/>
+        <x:expect label="returns the identified resource" test="exists(//jx:identified[@xml:id='id2'])"/>
+      </x:scenario>
+    </x:scenario>
+    <x:scenario label="using the cache...">
+      <x:context href="follow-uri-cached-context.xml" mode="follow-uri">
+        <x:param name="cache-type" as="xs:string?" tunnel="yes" select="'format=fragmentation'"/>
+      </x:context>
+      <x:scenario label="... and pointing at a document ...">
+        <x:context select="id('doc')"/>
+        <x:expect label="returns the cached document" test="exists(//jx:cached-resource)"/>
+      </x:scenario>
+      <x:scenario label="... and pointing at a jx:id ...">
+        <x:context select="id('by-jx-id')"/>
+        <x:expect label="returns the identified resource" test="exists(//jx:identified[@jx:id='id1'])"/>
+      </x:scenario>
+      <x:scenario label="... and pointing at an xml:id ...">
+        <x:context select="id('by-xml-id')"/>
+        <x:expect label="returns the identified resource" test="exists(//jx:identified[@xml:id='id2'])"/>
+      </x:scenario>
+    </x:scenario>
+  </x:scenario>
+</x:description>
+
+

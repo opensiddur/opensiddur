@@ -1,0 +1,872 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE xsl:stylesheet [
+<!ENTITY % hebrewent SYSTEM "../../../group/everyone/transliteration/hebrew.dtd">
+%hebrewent;
+]>
+<!-- 
+TODO: 
+  change prose-poetic division to only break on ethnah, zaqef, revia
+- insert poetic divisions when necessary
+- make proper bibliography entry including edition # from teiHeader
+-->
+<xsl:stylesheet version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+  xmlns:jx="http://jewishliturgy.org/ns/jlptei-processor"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:tmp="http://jewishliturgy.org/ns/tmp" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc" xmlns:cat="urn:oasis:names:tc:entity:xmlns:xml:catalog"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cc="http://web.resource.org/cc/"
+  exclude-result-prefixes="#all">
+  <xsl:import href="../../common/params.xsl2" />
+  <xsl:import href="../../common/cRef.xsl2" />
+  <xsl:import href="../rawtext/split-word.xsl2" />
+  <xsl:import href="../rawtext/normalize-nonunicode.xsl2" />
+  <xsl:import href="../fill-template.xsl2" />
+  <xsl:output indent="yes" encoding="utf-8" method="xml" />
+  <xd:doc type="stylesheet">
+    <xd:short>Convert the Joined WLC to JLPTEI.</xd:short>
+    <xd:copyright>Copyright 2009-2010 Efraim Feinstein
+    </xd:copyright>
+    <xd:detail>
+      <p>The output is XML catalog entries. The tanach is output
+        directly to Tanach files.</p>
+      <p>This program is free software: you can redistribute it
+        and/or modify
+        it under the terms of the GNU Lesser General Public License as
+        published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+      <p>This program is distributed in the hope that it will be
+        useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+        GNU Lesser General Public License for more details.</p>
+
+      <p>
+        You should have received a copy of the GNU Lesser General Public
+        License
+        along with this program. If not, see
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/
+        </a>
+        .
+      </p>
+    </xd:detail>
+    <xd:svnId>$Id: wlc2jlptei.xsl2 764 2011-04-27 15:19:16Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+
+  <xd:doc>
+    Location of input file containing the tanach as utf8 text
+	</xd:doc>
+  <xsl:param name="input-file" as="xs:string"
+    select="'../../../sources/tanach/WLC/joined-wlc.xml'" />
+
+  <xd:doc>
+    Location of files for output (relative to the location where the script is run)
+	</xd:doc>
+  <xsl:param name="result-directory" as="xs:string" select="'tanach'" />
+
+  <xd:doc>
+    Location of result directory relative to the XML catalog
+	</xd:doc>
+  <xsl:param name="result-directory-from-catalog" as="xs:string"
+    select="'../text'" />
+  
+  <xd:doc>
+    Subdirectory of $result-directory to place tanach original files in
+  </xd:doc>
+  <xsl:param name="result-subdirectory" as="xs:string"
+    select="'original'"/>
+
+  <xd:doc>
+    Notes file name (base of name without extension)
+  </xd:doc>
+  <xsl:param name="notes-file-name" as="xs:string"
+    select="'notes/wlc'"/>
+
+  <xd:doc>
+    Contributor list entry file name (base w/o extension)
+  </xd:doc>
+  <xsl:param name="contributors-file-name" as="xs:string" 
+    select="'contributors/wlc'"/>
+
+  <xd:doc>
+    Bibliography entry file name (base w/o extension)
+  </xd:doc>
+  <xsl:param name="bibliography-file-name" as="xs:string" 
+    select="'sources/wlc'"/>
+
+  <xd:doc>
+    extension of output files
+	</xd:doc>
+  <xsl:param name="extension" as="xs:string" select="'.xml'" />
+
+  <xd:doc>
+    Lists books and chapters that should have a poetic hierarchy in addition to
+    the prose hierarchy
+    books: tmp:book[@name]
+    chapters: tmp:book[@name]/tmp:chapter[@begin,@end]+
+    verses: "/tmp:verse[@begin,@beginSegment,@end,@endSegment]
+      @beginSegment and @endSegment are segment numbers (starting from 1)
+      for beginnings and endings at partial verses 
+	</xd:doc>
+  <xsl:param name="poetic-parts" as="element(tmp:poeticList)">
+    <tmp:poeticList>
+			<tmp:book name="Exodus">
+				<tmp:chapter begin="15" end="15"><!-- shirat hayyam-->
+					<tmp:verse begin="1" beginSegment="3" end="18"/>
+				</tmp:chapter>
+			</tmp:book>
+			<tmp:book name="Numbers">
+				<tmp:chapter begin="10" end="10"><!-- vayhi binsoa haaron-->
+					<tmp:verse begin="35" beginSegment="2" end="35"/>
+          <tmp:verse begin="36" beginSegment="2" end="36"/>
+				</tmp:chapter>
+			</tmp:book>
+			<tmp:book name="Judges">
+				<tmp:chapter begin="5" end="5"><!-- Deborah's song -->
+					<tmp:verse begin="2" end="31" endSegment="3"/>
+				</tmp:chapter>
+			</tmp:book>
+      <tmp:book name="Psalms" />
+      <tmp:book name="Proverbs" />
+      <tmp:book name="Job" />
+    </tmp:poeticList>
+  </xsl:param>
+
+  <xd:doc>
+    <xd:short>Return the generated xml:id of a word</xd:short>
+  </xd:doc>
+  <xsl:function name="func:make-word-xmlid" as="xs:string">
+    <xsl:param name="context" as="element()"/>
+    <!-- Really, this should only count words, but if samekh/pe=pc, there can be 2x pc after 
+    one word, and that will cause invalidity by repeated xml:id -->
+    <xsl:sequence select="string-join(
+          ('v',substring-after($context/ancestor::tei:ab/@xml:id,'v'),
+          $context/local-name(),
+          xs:string(count(
+            ($context/preceding::tei:w | $context/preceding::tei:pc)
+            intersect $context/ancestor::tei:ab//element()) + 1)),'')"/>
+  </xsl:function>
+  
+  <xd:doc>
+    <xd:short>Determine if a verse should have a poetic equivalent
+    hierarchy. Return a boolean.</xd:short>
+    <xd:param name="book">Book name</xd:param>
+    <xd:param name="chap">Chapter number</xd:param>
+    <xd:param name="verse">Verse number</xd:param>
+  </xd:doc>
+  <xsl:function name="func:is-poetic-verse" as="xs:boolean">
+    <xsl:param name="book" as="xs:string"/>
+    <xsl:param name="chap" as="xs:integer"/>
+    <xsl:param name="verse" as="xs:integer"/>
+    <xsl:variable name="book-ref" as="element()?" 
+      select="$poetic-parts/tmp:book[@name=$book]"/>
+    <xsl:variable name="chapter-ref" as="element()?"
+      select="$book-ref/tmp:chapter
+        [$chap &gt;= @begin and $chap &lt;= @end]"/>
+    <xsl:variable name="verse-ref" as="element()?"
+      select="$chapter-ref/tmp:verse
+        [$verse &gt;= @begin and $verse &lt;= @end]"/>
+    <xsl:variable name="return" as="xs:boolean" select="
+      ($book-ref and empty($book-ref/tmp:chapter)) or
+      ($chapter-ref and empty($chapter-ref/tmp:verse)) or
+      ($verse-ref)"/> 
+    <!-- xsl:sequence select="func:debug($return,string-join(('is-poetic-verse(',$book,',',string($chap),',',string($verse),')'),''), $debug-info)"/-->
+    <xsl:value-of select="$return"/>
+  </xsl:function> 
+  
+  <xd:doc>
+    <xd:short>Convert a book/chap reference to a uri fragment
+    </xd:short>
+  </xd:doc>
+  <xsl:function name="func:bookref-to-uri" as="xs:string">
+    <xsl:param name="book" as="xs:string" />
+    <xsl:param name="chap" as="xs:string?" />
+    <xsl:value-of
+      select="string-join((translate($book,' ','_'),
+			if (empty($chap)) then '' 
+				else format-number(number($chap), '000')
+				),'')" />
+  </xsl:function>	
+ 
+	<xd:doc>
+		<xd:short>assign an id to a word by adding a base to a number</xd:short>
+	</xd:doc>
+	<xsl:template match="tei:w|tei:c|tei:pc" mode="process-text">
+    <!-- xsl:message>
+      <xsl:if test="self::tei:w">
+    tei:w: parent= <xsl:sequence select="parent::*"/>
+    </xsl:if></xsl:message-->
+		<xsl:copy copy-namespaces="no">
+      <!-- always label w, c, pc by the word number of the preceding
+      word -->
+			<xsl:attribute name="xml:id" 
+        select="func:make-word-xmlid(.)"/>
+        
+			<xsl:copy-of select="@*" copy-namespaces="no"/>
+			<xsl:apply-templates select="node() except (x)" mode="#current"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Split a given verse into segments based on trope</xd:short>
+		<xd:param name="emet-verse">set to true() if the verse should be considered to use eme"t trope. otherwise, false</xd:param>
+	</xd:doc>
+	<xsl:template name="segment-verse">
+		<xsl:param name="verse" as="element(tei:ab)"/>
+		<xsl:param name="emet-verse" as="xs:boolean" select="false()"/>
+		<!-- $emet-verse is true when eme"t book-only trope are used -->
+		
+		<xsl:sequence select="func:debug($verse, 'segment-verse got', $debug-detail)"/>
+		
+		<xsl:apply-templates select="$verse" mode="segment-verse">
+			<xsl:with-param name="emet-verse" select="$emet-verse" as="xs:boolean" tunnel="yes"/>
+		</xsl:apply-templates>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Use the verse divisions produced  by tei:w to break up the verse into multiple segments.  Split them into text-library and hierarchy.  Use</xd:short>
+	</xd:doc>
+	<xsl:template match="tei:ab" mode="segment-verse">
+    <xsl:variable name="processed-text" as="document-node()">
+      <xsl:document>
+        <xsl:apply-templates mode="process-text"/>
+      </xsl:document>
+    </xsl:variable>
+		<xsl:variable name="segmented-verse" as="node()+">
+			<xsl:apply-templates select="$processed-text" mode="#current"/>
+		</xsl:variable>
+		<xsl:variable name="verse-id" select="@xml:id"/>
+	
+		<xsl:for-each-group select="$segmented-verse/self::*" group-ending-with="tei:lb">
+				<tei:seg>
+					<xsl:attribute name="xml:id" select="string-join(($verse-id,'_seg',string(position())),'')"/>
+					<xsl:sequence 
+            select="current-group()/self::* except current-group()/self::tei:lb"
+            />
+				</tei:seg>
+		</xsl:for-each-group>
+	
+		<!--xsl:sequence select="j:debug($segments,'segments=',$debug-info)"/-->
+		
+	</xsl:template>
+	
+  <xd:doc>
+    <xd:short>notes element is removed</xd:short>
+  </xd:doc>
+  <xsl:template match="notes" mode="#all">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Copy note content as a segment</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:note" mode="notes-repository">
+    <tei:seg>
+      <xsl:attribute name="xml:id" select="concat('r_',@xml:id)"/>
+      <xsl:apply-templates /> <!-- back to default mode -->
+    </tei:seg>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Generate a selection pointer to the note.</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:note" mode="notes-selection">
+    <tei:ptr target="{concat('#r_', @xml:id)}">
+      <xsl:attribute name="xml:id" select="concat('s_', @xml:id)"/>
+    </tei:ptr>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Copy notes element and a reference to the selection</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:note" mode="notes-view">
+    <xsl:copy copy-namespaces="no">
+      <xsl:copy-of select="@*" copy-namespaces="no"/>
+      <tei:ptr target="{concat('#s_', @xml:id)}">
+        <xsl:attribute name="xml:id" select="concat('v_',@xml:id)"/>
+      </tei:ptr>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xd:doc>
+	<xd:short>Leave an empty "tei:lb" element at the end of a segment (before this word), if necessary</xd:short>
+    <xd:detail>This code operates under the assumption that a segment will never break up
+    in the middle of a kri-ktiv. </xd:detail>
+	<xd:param name="emet-verse">true if emet trope are used.</xd:param>
+  </xd:doc>
+  <xsl:template match="tei:w|tei:choice" mode="segment-verse">
+	 <xsl:param tunnel="yes" name="emet-verse" as="xs:boolean" select="false()"/>
+	
+    <!-- poetic verse, break into segments at ole-merkha(=ole vyored), ethahtah and sof pasuq -->
+    <!-- regular verse, break into segments at revia,ethnahta, zaqef katan, sof pasuq -->
+    <xsl:if test="if ($emet-verse) 
+      then (
+        matches(preceding::tei:w[1],
+          '([&etnahta;&sofpasuq;]|(&ole;.*&merkha;))') 
+        or 
+        (matches(preceding::tei:w[1],'^[^&ole;]*&merkha;') and 
+          matches(preceding::tei:w[2],'&ole;[^&merkha;]*$'))
+      )
+      else 
+        matches(preceding::tei:w[1], 
+          '[&sofpasuq;&etnahta;&zaqefqatan;&zaqefgadol;&accentsegol;&shalshelet;&revia;&tevir;&merkhakefula;]')">
+      <tei:lb/>
+    </xsl:if>
+  
+	 <xsl:copy copy-namespaces="no">
+	   <xsl:copy-of select="@*" copy-namespaces="no"/>
+	   <xsl:sequence select="node()"/>
+	 </xsl:copy>
+  </xsl:template>
+	
+	<xd:doc>
+		<xd:short>Normalize text to SBL Hebrew conventions, 
+    mark the tetragrammaton with j:divineName. 
+    Return either text() or text(),j:divineName</xd:short>
+	</xd:doc>
+	<xsl:template match="text()" mode="process-text">
+		<xsl:variable name="normalized-text" as="xs:string" 
+      select="func:normalize-nonunicode(normalize-space(.))"/>
+		<xsl:analyze-string select="$normalized-text" regex="&yod;[&sheva;&trope;]*&he;[&trope;]*&vav;[&patah;&qamats;&trope;]*&he;[&trope;]?">
+			<xsl:matching-substring>
+				<j:divineName>
+					<xsl:value-of select="."/>
+				</j:divineName>
+			</xsl:matching-substring>
+			<xsl:non-matching-substring>
+                <!-- correct the holam-vav convention to vav-holam
+                and vowel-vav-holam to vowel-vav-holam haser for vav -->
+                <xsl:value-of 
+                  select="replace(replace(.,
+                    '([&aleph;-&tav;][&dageshormapiq;]?)([&trope;]?)&holam;([&meteg;]?)([&trope;]?)&vav;([&trope;]?)([&aleph;-&tav;]|$)', 
+                    '$1$2$3$4$5&vav;&holam;$6'),
+                    '([&vowel;][&trope;]?)&vav;([&dageshormapiq;]?)&holam;',
+                    '$1&vav;$2&holamhaserforvav;')"/>
+			</xsl:non-matching-substring>
+		</xsl:analyze-string>
+	</xsl:template>
+
+  <xd:doc>
+    <xd:short>Turn WLC x into a link for a tei:note</xd:short>
+  </xd:doc>
+  <xsl:template match="x" mode="link-notes">
+    <xsl:variable name="file" as="xs:string"
+      select="concat('../', $result-subdirectory, '/',
+        func:bookref-to-uri(
+        ancestor::book/names/name,
+        ancestor::c/@n))"/>
+    <xsl:variable name="link-to-id" as="xs:string?"
+      select="if (parent::tei:w) 
+        then func:make-word-xmlid(parent::tei:w)
+        else if (following-sibling::*[1]) 
+        then func:make-word-xmlid(following-sibling::*[1])
+        else func:debug(('note I do not know what to link it to', parent::*), 'x', $debug-error)"/>
+    <tei:link type="note" targets="{string-join(
+      ($file,$extension,'#',$link-to-id, ' #note_',.),'')}"/>
+  </xsl:template>
+	
+  <xsl:template match="text()" mode="link-notes"/>
+  
+	<xd:doc>
+		<xd:short>copy xml markup</xd:short>
+	</xd:doc>
+	<xsl:template match="*" mode="format-line process-text segment-verse">
+		<xsl:copy copy-namespaces="no">
+			<xsl:copy-of select="@*" copy-namespaces="no" />
+			<xsl:apply-templates mode="#current"/>
+		</xsl:copy>
+	</xsl:template>
+
+	<xd:doc>
+		<xd:short>Fake template to start main in case command line parameters can't be passed</xd:short>
+	</xd:doc>
+	<xsl:template match="/">
+		<xsl:call-template name="main"/>
+	</xsl:template>
+	
+  <xd:doc>
+    <xd:short>Entry point for standalone program</xd:short>
+  </xd:doc>
+  <xsl:template name="main">
+    <xsl:variable name="tanach-as-xml" as="document-node()"
+      select="document($input-file)"/>
+    <xsl:variable name="bibl-content" as="element(tei:bibl)">
+			<tei:bibl xml:id="biblKimball2010">
+	      <tei:ptr target="../{$bibliography-file-name}{$extension}#Kimball2010" />
+			</tei:bibl>
+    </xsl:variable>
+    <xsl:variable name="license-content" as="element()+">
+      <tei:p xml:lang="en" xmlns="http://www.tei-c.org/ns/1.0">
+        To the extent possible under law,
+        the contributors who associated
+        <tei:ref type="license" target="http://www.creativecommons.org/publicdomain/zero/1.0">Creative Commons Zero
+        </tei:ref>
+        with this work have waived all copyright and related or
+        neighboring rights to this work.
+        <!-- 
+        A list of contributors is available at
+        <ref type="attribution" target="http://jewishliturgy.org/base/text/contributors">
+          http://jewishliturgy.org/base/text/contributors</ref>
+        .
+         -->
+      </tei:p>
+      <rdf:RDF>
+        <cc:License rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+          <cc:legalcode
+            rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/legalcode" />
+          <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction" />
+          <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution" />
+        </cc:License>
+      </rdf:RDF>
+    </xsl:variable>
+    <xsl:variable name="respList-content" as="element(j:respList)">
+      <j:respList>
+        <tei:respons j:role="transcriber" locus="value" target="#repository" resp="../{$contributors-file-name}{$extension}#Christopher.Kimball"/>
+      </j:respList>
+    </xsl:variable>
+		<xsl:variable name="links-content" as="element(j:links)">
+			<j:links>
+				<tei:linkGrp type="source">
+					<tei:link targets="#repository #biblKimball2010"/>
+				</tei:linkGrp>
+			</j:links>
+		</xsl:variable>
+    <!--
+      xsl:sequence
+      select="j:debug($tanach-as-xml,'tanach-as-xml=',$debug-info)"/
+    -->
+
+    <!-- produce the whole-tanach file -->
+    <!--
+      note: a dumb limitation of XSLT 2.0 (no result-document in
+      xsl:with-param) makes this algorithm far from efficient
+    -->
+    
+    <cat:group>
+      <xsl:attribute name="xml:base" select="$result-directory-from-catalog"/>
+      <xsl:sequence
+        select="func:debug('writing Tanach.xml', 'tanach2jlptei', $debug-detail)" />
+      <cat:uri name="{$common-base-uri}Tanach" uri="Tanach{$extension}" />
+      <xsl:result-document href="{$result-directory}/{$result-subdirectory}/Tanach{$extension}">
+        <xsl:apply-templates select="$template"
+          mode="fill-template">
+          <xsl:with-param tunnel="yes" name="xmlbase" as="xs:anyURI?" select="()"/>
+<!--            select="xs:anyURI(string-join(($common-base-uri, 'Tanach', $extension), ''))" /-->
+          <xsl:with-param tunnel="yes" name="title"
+            as="element(tei:title)+">
+            <tei:title type="main" xml:lang="he">תנ״ך</tei:title>
+          </xsl:with-param>
+          <xsl:with-param tunnel="yes" name="body"
+            as="element(tei:body)">
+            <tei:body xml:lang="he">
+              <!-- each chapter and book is its own file too -->
+
+              <!-- books get referenced in the whole-tanach file -->
+              <j:concurrent>
+                <xsl:variable name="selection" as="element(jx:tmp)">
+                  <jx:tmp>
+                    <xsl:for-each select="$tanach-as-xml//book">
+                      <xsl:variable name="book"
+                        select="names/name" as="xs:string" />
+                      <xsl:variable name="book-uri"
+                        select="func:bookref-to-uri($book, ())" />
+                      <tei:ptr target="{$book-uri}{$extension}#main">
+												<xsl:attribute name="xml:id" select="concat('se_',$book-uri)"/> 
+                      </tei:ptr>
+                    </xsl:for-each>
+                  </jx:tmp>
+                </xsl:variable>
+                <j:selection>
+                  <xsl:sequence select="$selection/*" />
+                </j:selection>
+                <j:view type="div">
+                  <tei:div>
+										<xsl:attribute name="xml:id" select="'main'"/>
+                    <tei:head xml:lang="he">תנ״ך</tei:head>
+                    <tei:ab>
+                      <tei:ptr xml:id="tanach"
+                        target="#range({$selection/tei:ptr[1]/@xml:id},{$selection/tei:ptr[last()]/@xml:id})" 
+                        xsl:exclude-result-prefixes="jx"
+                        />
+                    </tei:ab>
+                  </tei:div>
+                </j:view>
+              </j:concurrent>
+            </tei:body>
+          </xsl:with-param>
+          <xsl:with-param name="license" tunnel="yes"
+            as="element()+" select="$license-content" />
+          <xsl:with-param name="bibl" tunnel="yes"
+            as="element(tei:bibl)" select="$bibl-content" />
+        </xsl:apply-templates>
+      </xsl:result-document>
+      <!-- books -->
+      <xsl:for-each select="$tanach-as-xml//book">
+        <xsl:variable name="book" select="names/name"
+          as="xs:string" />
+        <xsl:sequence
+          select="func:debug(concat('writing ', $book) , 'tanach2jlptei', $debug-detail)" />
+        <xsl:variable name="book-he"
+          select="func:resolve-cRef('Biblical', $book, 'he')" />
+        <xsl:variable name="book-uri" select="func:bookref-to-uri($book, ())" />
+        <xsl:variable name="book-filename" select="concat($book-uri,$extension)" />
+        <cat:uri name="{$common-base-uri}{$book-filename}" uri="{$book-filename}" />
+        <xsl:result-document href="{$result-directory}/{$result-subdirectory}/{$book-filename}">
+          <xsl:apply-templates select="$template"
+            mode="fill-template">
+            <xsl:with-param tunnel="yes" name="xmlbase" select="()"
+              as="xs:anyURI?"/><!-- select="xs:anyURI(concat($common-base-uri, $book-filename))" /-->
+            <xsl:with-param tunnel="yes" name="title"
+              as="element(tei:title)+">
+              <tei:title type="main" xml:lang="he">
+                <xsl:value-of select="$book-he" />
+              </tei:title>
+            </xsl:with-param>
+            <xsl:with-param tunnel="yes" name="body"
+              as="element(tei:body)">
+              <tei:body xml:lang="he">
+                <j:concurrent>
+                  <xsl:variable name="selection" as="element(jx:tmp)">
+                    <jx:tmp>
+                      <xsl:for-each select="c">
+                        <xsl:variable name="chap"
+                          select="@n" />
+                        <xsl:variable name="chap-uri"
+                          select="func:bookref-to-uri($book, $chap)" />
+                        <tei:ptr target="{$chap-uri}{$extension}#main"> 
+													<xsl:attribute name="xml:id" select="concat('se_ch',$chap)"/>
+												</tei:ptr>
+                      </xsl:for-each>
+                    </jx:tmp>
+                  </xsl:variable>
+                  <j:selection>
+                    <xsl:sequence select="$selection/*" />
+                  </j:selection>
+                  <j:view type="div">
+                    <tei:div xml:id="main">
+                      <tei:head xml:lang="he">
+                        <xsl:value-of select="$book-he" />
+                      </tei:head>
+                      <tei:ab>
+                        <tei:ptr
+                          target="#range({$selection/tei:ptr[1]/@xml:id},{$selection/tei:ptr[last()]/@xml:id})" />
+                      </tei:ab>
+                    </tei:div>
+                  </j:view>
+                </j:concurrent>
+              </tei:body>
+            </xsl:with-param>
+            <xsl:with-param name="license" tunnel="yes"
+              as="element()+" select="$license-content" />
+            <xsl:with-param name="bibl" tunnel="yes"
+              as="element(tei:bibl)" select="$bibl-content" />
+          </xsl:apply-templates>
+        </xsl:result-document>
+      </xsl:for-each>
+      <!-- book chapters (including tanach text) -->
+      <xsl:for-each select="$tanach-as-xml//book">
+        <xsl:variable name="book" select="names/name" as="xs:string" />
+        <xsl:variable name="book-he"
+          select="func:resolve-cRef('Biblical', $book,'he')" as="xs:string" />
+        <xsl:variable name="book-uri" select="func:bookref-to-uri($book, ())" />
+        <xsl:variable name="book-filename" select="concat($book-uri, $extension)" />
+        <xsl:for-each select="c">
+          <xsl:variable name="chap" select="@n" />
+          <!-- type of trope the chapter uses -->
+          <xsl:variable name="emet-chapter"
+            select="matches(string(.),'[&ole;-&dehi;]')"
+            as="xs:boolean" />
+          <xsl:sequence
+            select="func:debug(string-join(('writing',$book,$chap, 'emet-verse=', xs:string($emet-chapter)),' '), 'tanach2jlptei', $debug-detail)" />
+          <xsl:variable name="chap-uri"
+            select="func:bookref-to-uri($book, $chap)" />
+          <xsl:variable name="chap-filename" select="concat($chap-uri,$extension)" />
+          <xsl:variable name="book-chap-en"
+            select="string-join(($book,$chap),' ')" />
+          <xsl:variable name="book-chap-he"
+            select="func:resolve-cRef('Biblical',$book-chap-en,'he')" />
+
+          <cat:uri name="{$common-base-uri}{$chap-uri}" uri="{$chap-uri}{$extension}" />
+
+          <xsl:result-document href="{$result-directory}/{$result-subdirectory}/{$chap-filename}">
+            <xsl:apply-templates select="$template"
+              mode="fill-template">
+              <xsl:with-param tunnel="yes" name="xmlbase" select="()"
+                as="xs:anyURI?"/> <!--select="xs:anyURI(string-join(($common-base-uri, $chap-filename), ''))" /-->
+              <xsl:with-param name="title" tunnel="yes"
+                as="element(tei:title)+">
+                <tei:title type="main" xml:lang="he">
+                  <xsl:value-of select="$book-chap-he" />
+                </tei:title>
+              </xsl:with-param>
+              <xsl:with-param tunnel="yes" name="body"
+                as="element(tei:body)">
+                <tei:body xml:lang="he">
+                  <xsl:variable name="bodies" as="element()+">
+                    <xsl:for-each select="tei:ab">
+                      <xsl:variable name="verse-id" as="xs:string"
+                        select="@xml:id" />
+                      <xsl:variable name="verse-s" as="element(tei:ab)">
+                        <tei:ab>
+                          <xsl:attribute name="xml:id" select="$verse-id"/>
+                          <xsl:sequence select="*" />
+                        </tei:ab>
+                      </xsl:variable>
+                      <xsl:variable name="segments"
+                        as="element(tei:seg)+">
+                        <xsl:call-template name="segment-verse">
+                          <xsl:with-param name="verse"
+                            select="$verse-s" />
+                          <xsl:with-param name="emet-verse"
+                            as="xs:boolean" select="$emet-chapter" />
+                        </xsl:call-template>
+                      </xsl:variable>
+
+                      <!-- segments for text repository -->
+                      <xsl:sequence select="$segments" />
+
+                      <!-- ptrs for selection and l for l-view -->
+                      <xsl:variable name="selection-ptr"
+                        as="element()+">
+                        <xsl:for-each select="$segments">
+                          <tei:ptr target="#{@xml:id}">
+														<xsl:attribute name="xml:id" select="concat('se_',@xml:id)"/>
+													</tei:ptr>
+                          <tei:l>
+														<xsl:attribute name="xml:id" select="concat('l_',@xml:id)"/>
+                            <tei:ptr target="#se_{@xml:id}" />
+                          </tei:l>
+                        </xsl:for-each>
+                      </xsl:variable>
+                      <xsl:sequence select="$selection-ptr/self::tei:ptr" />
+                      
+                      <xsl:variable name="verse-num" as="xs:integer" 
+                        select="xs:integer(substring-after(@xml:id,'v'))"/>
+                      <!--  lg for lg view -->
+                      <xsl:if test="func:is-poetic-verse($book, $chap, 
+                        $verse-num)">
+                        <xsl:variable name="verse-lines" as="document-node()">
+													<xsl:document>
+	                          <xsl:sequence select="$selection-ptr/self::tei:l"/>
+													</xsl:document>
+												</xsl:variable>
+                        <xsl:variable name="chap-spec" 
+                          as="element(tmp:chapter)?"
+                          select="$poetic-parts/tmp:book[@name=$book]/
+                            tmp:chapter[@begin=$chap or @end=$chap]"/>
+                        <xsl:variable name="verse-spec" 
+                          as="element(tmp:verse)?"
+                          select="$chap-spec/
+                            tmp:verse[@begin=$verse-num or @end=$verse-num]
+                            "/>
+                        <xsl:variable name="segments" as="xs:integer+"
+                          select="
+                          if ($chap-spec/@begin=$chap and
+                            $verse-spec/@begin=$verse-num and 
+                            $verse-spec/@beginSegment) 
+                            then ($verse-spec/@beginSegment to 
+                              count($verse-lines/*))
+                            else if ($chap-spec/@end=$chap and
+                              $verse-spec/@end=$verse-num and 
+                              $verse-spec/@endSegment)
+                            then 1 to $verse-spec/@endSegment
+                            else 1 to count($verse-lines/*)"/>
+                        <tei:lg>
+													<xsl:attribute name="xml:id" select="concat('lg_',$verse-id)"/>
+                          <xsl:sequence select="$verse-lines/tei:l
+                            [position()=$segments]" />
+                        </tei:lg>
+                      </xsl:if>
+
+                      <!--  ab for verse-view -->
+                      <tei:ab type="verse">
+                        <xsl:attribute name="xml:id" select="$verse-id"/>
+                        <tei:label n="chapter"><xsl:value-of select="$chap"/></tei:label>
+                        <tei:label n="verse"><xsl:value-of select="substring-after($verse-id, 'v')"/></tei:label>
+                          
+                        <xsl:for-each-group select="$segments"
+                          group-by="position()">
+                          <xsl:variable name="alphabetic-segment-number"
+                            as="xs:string"><xsl:number 
+                              format="a" value="current-grouping-key()"/></xsl:variable>
+                          <tei:ptr target="#se_{@xml:id}"> 
+                            <xsl:attribute name="xml:id" select="concat($verse-id, $alphabetic-segment-number)"/>
+													</tei:ptr>
+                        </xsl:for-each-group>
+                      </tei:ab>
+                      
+                    </xsl:for-each>
+                  </xsl:variable>
+                  <xsl:variable name="repository-content"
+                      as="element(tei:seg)+"
+                      select="$bodies/self::tei:seg"/>
+                    
+                  <j:concurrent>
+                    <xsl:variable name="selection-content"
+                      as="element(tei:ptr)+"
+                      select="$bodies/self::tei:ptr" />
+                    <xsl:variable name="sentence-content"
+                      as="element(tei:ab)+"
+                      select="$bodies/self::tei:ab" />
+                    <xsl:variable name="lg-content"
+                      as="element(tei:lg)*"
+                      select="$bodies/self::tei:lg" />
+                    
+                    <j:selection>
+                      <xsl:sequence select="$selection-content"/>
+                    </j:selection>
+                    <j:view type="div">
+                      <tei:div xml:id="main">
+                        <tei:head><xsl:value-of select="$book-chap-he"/></tei:head>
+                        <tei:ab>
+                          <tei:ptr target="#range({$selection-content[1]/@xml:id},{$selection-content[last()]/@xml:id})"/>
+                        </tei:ab>
+                      </tei:div>
+                    </j:view>
+                    <j:view type="p">
+                      <xsl:for-each-group select="$repository-content"
+                        group-ending-with="*[tei:pc=('&samekh;','&pe;')]">
+                        <tei:p>
+													<xsl:attribute name="xml:id" select="concat('p_',string(position()))"/>
+                          <xsl:choose>
+                            <xsl:when test="count(current-group()) &gt; 1">
+                              <tei:ptr target="#range(se_{current-group()[1]/@xml:id},se_{current-group()[last()]/@xml:id})"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                              <tei:ptr target="#se_{current-group()[1]/@xml:id}"/>
+                            </xsl:otherwise>
+                          </xsl:choose>
+                        </tei:p>
+                      </xsl:for-each-group>
+                    </j:view>
+                    <j:view type="verse">
+                      <xsl:sequence select="$sentence-content"/>
+                    </j:view>
+                    <xsl:if test="$lg-content">
+                      <j:view type="lg">
+                        <xsl:sequence select="$lg-content"/>
+                      </j:view>
+                    </xsl:if>
+                  </j:concurrent>
+                  <j:repository xml:id="repository">
+                    <!-- TOFIX: func and tmp namespace nodes -->
+                    <xsl:sequence select="$repository-content" />
+                  </j:repository>
+                </tei:body>
+              </xsl:with-param>
+              <xsl:with-param name="license" tunnel="yes"
+                as="element()+" select="$license-content" />
+              <xsl:with-param name="bibl" tunnel="yes"
+                as="element(tei:bibl)" select="$bibl-content" />
+              <xsl:with-param name="respList" tunnel="yes"
+                as="element(j:respList)" select="$respList-content"/>
+							<xsl:with-param name="links" tunnel="yes" 
+								as="element(j:links)" select="$links-content"/>
+            </xsl:apply-templates>
+          </xsl:result-document>
+        </xsl:for-each>
+      </xsl:for-each>
+    </cat:group>
+    <xsl:result-document 
+      href="{$result-directory}/{$notes-file-name}{$extension}">
+      <xsl:apply-templates mode="fill-template" select="$template">
+        <xsl:with-param tunnel="yes" name="xmlbase" select="()"
+          as="xs:anyURI?"/>
+        <xsl:with-param name="title" tunnel="yes"
+          as="element(tei:title)+">
+          <tei:title type="main" xml:lang="en">
+            Notes from the Westminster Leningrad Codex
+          </tei:title>
+        </xsl:with-param>
+        <xsl:with-param tunnel="yes" name="body"
+          as="element(tei:body)">
+          <tei:body xml:lang="en">
+            <j:concurrent>
+              <j:selection>
+                <xsl:apply-templates select="$tanach-as-xml//notes" mode="notes-selection"/>
+              </j:selection>
+              <j:view type="note">
+                <xsl:apply-templates select="$tanach-as-xml//notes" mode="notes-view"/>
+              </j:view>
+            </j:concurrent>
+            <j:repository>
+              <xsl:apply-templates select="$tanach-as-xml//notes" mode="notes-repository"/>
+            </j:repository>
+          </tei:body>
+        </xsl:with-param>
+        <xsl:with-param name="license" tunnel="yes" as="element()+"
+          select="$license-content"/>
+        <xsl:with-param name="bibl" tunnel="yes" as="element(tei:bibl)"
+          select="$bibl-content"/>
+        <xsl:with-param name="links" tunnel="yes" as="element(j:links)">
+          <j:links>
+            <xsl:apply-templates select="$tanach-as-xml//tanach" 
+              mode="link-notes"/>
+          </j:links>
+        </xsl:with-param>
+      </xsl:apply-templates>
+    </xsl:result-document>
+    <xsl:result-document href="{$result-directory}/{$contributors-file-name}{$extension}">
+      <tei:div type="contributors" xml:lang="en">
+        <tei:list>
+          <tei:item xml:id="Christopher.Kimball">
+            <tei:name>
+              <tei:forename>Christopher</tei:forename>
+              <tei:surname>Kimball</tei:surname>
+            </tei:name>
+            <tei:email>transcriber@tanach.us</tei:email>
+            <tei:affiliation>
+              <tei:ptr target="#WLC"/>
+            </tei:affiliation>
+          </tei:item>
+          <tei:item xml:id="WLC">
+            <tei:orgName>Westminster Leningrad Codex</tei:orgName>
+            <tei:ptr type="url" target="http://tanach.us"/>
+          </tei:item>
+        </tei:list>
+      </tei:div>
+    </xsl:result-document>
+    <xsl:result-document href="{$result-directory}/{$bibliography-file-name}{$extension}">
+      <tei:div type="bibliography" xml:lang="en">
+        <tei:biblStruct xml:id="Kimball2010">
+          <tei:monogr>
+            <tei:title>
+              <xsl:value-of select="$tanach-as-xml//fileDesc//title[@level='s' and @type='main']"/>
+            </tei:title>
+            <tei:edition>
+              <xsl:text>v.</xsl:text>
+              <xsl:value-of select="$tanach-as-xml//version/node()"/>
+            </tei:edition>
+            <xsl:for-each select="$tanach-as-xml//titleStmt//editor|
+              $tanach-as-xml//titleStmt//respStmt/name[not(@type)]">
+              <tei:editor>
+                <tei:name>
+                  <xsl:value-of select="."/>
+                </tei:name>
+              </tei:editor>
+            </xsl:for-each>
+            <tei:imprint>
+              <tei:publisher>J. Alan Groves Center for Advanced Biblical Research</tei:publisher>
+              <tei:pubPlace>Glenside, PA</tei:pubPlace>
+              <tei:date>
+                <xsl:value-of select="$tanach-as-xml//edition/date/node()"/>
+              </tei:date>
+              <tei:distributor>
+                <xsl:value-of select="$tanach-as-xml//distributor/name[not(@type)]"/>
+                <tei:ref type="url" target="{$tanach-as-xml//distributor/name[@type='url']}">via web site</tei:ref>
+                <tei:date type="access">07-2010</tei:date>
+              </tei:distributor>
+            </tei:imprint>
+          </tei:monogr>
+          <tei:note type="copyright">
+            The transcriber has released the text "without restriction."  A copy of the license is in
+            our <tei:ref type="url" target="http://jewishliturgy.googlecode.com/svn/sources/tanach/WLC/License.html">subversion repository</tei:ref>. 
+          </tei:note>
+        </tei:biblStruct>
+      </tei:div>
+    </xsl:result-document>
+  </xsl:template>
+</xsl:stylesheet>

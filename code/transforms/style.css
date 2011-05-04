@@ -1,0 +1,55 @@
+/* style.css 
+ * CSS for the Open Siddur Project muXHTML
+ * $Id: style.css 299 2009-11-12 18:20:16Z efraim.feinstein $
+ */
+
+
+:lang(he) {
+	direction:rtl;
+	font-family:Ezra SIL, Ezra SIL SR, SBL Hebrew;
+}
+
+.divineName {
+	display:inline;
+}
+
+.head {
+	font-size:200%;
+	font-weight:bold;
+	display:block;
+}
+
+.l {
+	display:block;
+	padding-top:0.25ex;
+	padding-bottom:0.25ex;
+}
+
+.lg {
+	display:block;
+	padding-top:0.5ex;
+	padding-bottom:0.5ex;
+}
+
+.read {
+	display:inline;
+}
+
+.p {
+	display:block;
+	padding-top:0.25ex;
+	padding-bottom:0.25ex;
+}
+
+.written {
+	color:red;
+	display:inline;
+}
+
+.s {
+	display:inline;
+}
+
+.seg {
+	display:inline;
+}

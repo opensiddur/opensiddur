@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- test main list compiler 
+  Open Siddur Project
+  Copyright 2011 Efraim Feinstein
+  Licensed under the GNU Lesser General Public License, version 3 or later
+
+  $Id: list-compiler.xspec 687 2011-01-23 23:36:48Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
+  stylesheet="../list-compiler.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="force xmlns declarations">
+      <x:context><j:test/><jx:test/><tei:test/></x:context>
+      <x:expect label="nothing" test="()"/>
+    </x:scenario>
+  </x:pending>
+  <x:param name="string-table" as="xs:string" 
+    select="'http://localhost:8080/db/code/transforms/list-compiler/strings.xml'"/>
+  <x:param name="resource-to-process" as="xs:string" 
+    select="'http://localhost:8080/db/code/transforms/list-compiler/tests/licensing-context.xml'"/>
+  <x:scenario label="licensing generator">
+    <x:context href="licensing-context.xml"/>
+    <x:expect label="tei:back section is created" test="exists(//tei:text/tei:back)"/>
+    <x:expect label="license-list section is created" test="exists(//tei:back/tei:div[@type='license-list'])"/>
+    <x:expect label="cc0 is referenced" 
+      test="exists(//tei:div[@type='license-list']/tei:ab[@type='license']//tei:ref[@type='license'][@target='http://creativecommons.org/licenses/publicdomain/zero/1.0'])"/>
+    <x:expect label="cc-by is referenced" test="exists(//tei:div[@type='license-list']/tei:ab[@type='license']//tei:ref[@type='license'][@target='http://creativecommons.org/licenses/by/3.0'])"/>
+    <x:expect label="cc-by is referenced only once" test="count(//tei:div[@type='license-list']/tei:ab[@type='license']//tei:ref[@type='license'][@target='http://creativecommons.org/licenses/by/3.0']) = 1"/>
+    <x:expect label="cc-by-sa is referenced" test="exists(//tei:div[@type='license-list']/tei:ab[@type='license']//tei:ref[@type='license'][@target='http://creativecommons.org/licenses/by-sa/3.0'])"/>
+    <x:expect label="additional attribution notice is included" test="exists(//tei:div[@type='license-list']/tei:div[@type='additional-license-attributions']/tei:p[@n='attribution'])"/>
+  </x:scenario>
+  <x:scenario label="credits generator">
+    <x:context href="credits-context.xml"/>
+    <x:expect label="tei:back section is created" test="exists(//tei:text/tei:back)"/>
+    <x:expect label="credits-list section is created" test="exists(//tei:back/tei:div[@type='credits-list'])"/>
+    <x:expect label="transcribers list is present" test="exists(//tei:div[@type='credits-list']/tei:list[@type='credits']/tei:head[.='Transcribers'])"/>
+    <x:expect label="Transcriber One is listed once" test="count(//tei:div[@type='credits-list']//tei:name/@jx:id='one') = 1"/>
+    <x:expect label="Transcriber Two is listed once" test="count(//tei:div[@type='credits-list']//tei:name/@jx:id='two') = 1"/>
+    <x:expect label="Transcribers are listed in alphabetical order"
+      test="
+        (//tei:div[@type='credits-list']//tei:name[@jx:id='four'][1] &lt;&lt; //tei:div[@type='credits-list']//tei:name[@jx:id='one'][1]) and
+        (//tei:div[@type='credits-list']//tei:name[@jx:id='one'][1] &lt;&lt; //tei:div[@type='credits-list']//tei:name[@jx:id='two'][1]) and 
+        (//tei:div[@type='credits-list']//tei:name[@jx:id='two'][1] &lt;&lt; //tei:div[@type='credits-list']//tei:name[@jx:id='three'][1])"/>
+    <x:expect label="encoders list is present" test="exists(//tei:div[@type='credits-list']/tei:list[@type='credits']/tei:head[.='Encoders'])"/>
+    <x:expect label="encoders list has one item" test="count(//tei:div[@type='credits-list']/tei:list[tei:head='Encoders']/tei:item) = 1"/>
+  </x:scenario>
+  <x:scenario label="bibliography generator">
+    <x:context href="bibliography-context.xml"/>
+    <x:expect label="tei:back section is created" test="exists(//tei:text/tei:back)"/>
+    <x:expect label="two bibliography sections are created" test="count(//tei:back/tei:div[@type='bibliography'])=2"/>
+    <x:expect label="book1 is present" test="exists(//tei:back//tei:biblStruct/@jx:id='book1')"/>
+    <x:expect label="book1 is present exactly once" test="count(//tei:back//tei:div[@type='bibliography'][tei:head='Sources']/tei:biblStruct/@jx:id='book1') = 1"/>
+    <x:expect label="book2 is present exactly once" test="count(//tei:back//tei:biblStruct/@jx:id='book2') = 1"/>
+    <x:expect label="book3 is present exactly once" test="count(//tei:back//tei:biblStruct/@jx:id='book3') = 1"/>
+    <x:expect label="book4 is present exactly once" test="count(//tei:back//tei:biblStruct/@jx:id='book4') = 1"/>
+    <x:expect label="book1 is listed before book 2" 
+      test="//tei:div[@type='bibliography']//tei:biblStruct[@jx:id='book1'] &lt;&lt; //tei:div[@type='bibliography']//tei:biblStruct[@jx:id='book2']"/>
+    <x:expect label="book3 is listed after book 2" 
+      test="//tei:div[@type='bibliography']//tei:biblStruct[@jx:id='book2'] &lt;&lt; //tei:div[@type='bibliography']//tei:biblStruct[@jx:id='book3']"/>
+    <x:expect label="book4 is listed before book 1" 
+      test="//tei:div[@type='bibliography']//tei:biblStruct[@jx:id='book4'] &lt;&lt; //tei:div[@type='bibliography']//tei:biblStruct[@jx:id='book1']"/>
+    <x:expect label="book5 is in the references section" 
+      test="exists(//tei:div[@type='bibliography'][tei:head='References']//tei:biblStruct[@jx:id='book5'])"/>
+  </x:scenario>
+</x:description>

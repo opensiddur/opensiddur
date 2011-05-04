@@ -1,0 +1,18 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xmlns:cc="http://web.resource.org/cc/" xml:base="http://jewishliturgy.org/base/text/contributors">
+  <!-- missing header parts -->
+    <tei:teiHeader>
+      <tei:publicationStmt>
+        <tei:availability status="free">
+          <!-- this is here to set off the header Schematron -->
+        </tei:availability>
+      </tei:publicationStmt>
+    </tei:teiHeader>
+    <tei:text>
+        <tei:body>
+            <tei:div xml:lang="en">
+              <tei:head>Shortest document ever</tei:head>
+              <tei:p>Yay!</tei:p>
+            </tei:div>
+        </tei:body>
+    </tei:text>
+</tei:TEI>

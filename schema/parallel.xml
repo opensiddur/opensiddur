@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <!--
+    parallel.xml 
+    
+    Copyright 2009 Efraim Feinstein <efraim.feinstein@gmail.com> 
+    
+    Licensed under the GNU General Public License. 
+    
+    See the file GPL-3 for details.
+    
+    $Date: 2009-12-06 00:46:24 -0500 (Sun, 06 Dec 2009) $ 
+    $Id: parallel.xml 337 2009-12-06 05:46:24Z efraim.feinstein $
+  -->
+<elementSpec xmlns="http://www.tei-c.org/ns/1.0"
+  xmlns:jx="http://www.jewishliturgy.org/ns/examples" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xi="http://www.w3.org/2001/XInclude"
+  module="liturgy" ident="parallel" ns="http://jewishliturgy.org/ns/jlptei/1.0">
+  <equiv name="j:parallel" filter="canonical-tei.xsl2#transform.parallel"
+    mimeType="application/xsl" />
+  <gloss>Content of parallel the text in a parallel group</gloss>
+  <classes>
+    <memberOf key="att.global" />
+  </classes>
+  <content>
+    <rng:oneOrMore>
+      <rng:ref name="model.divPart"/>
+    </rng:oneOrMore>
+  </content>
+  <exemplum>
+  </exemplum>
+  <remarks>
+  </remarks>
+  <listRef>
+    <ptr target="#div.parallel" />
+  </listRef>
+</elementSpec>

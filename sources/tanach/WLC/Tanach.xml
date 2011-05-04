@@ -1,0 +1,47 @@
+<?xml version = "1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="XSL/Tanach.xsl.xml"?>
+<!-- Copyright C.V.Kimball 2010 -->
+<Tanach>
+<!-- The following is a simplified version of the About page. 
+     and is intended to be read only by search engines.
+     Actual operation is through the XSLT transformation file,
+     XSL/Tanach.xsl.xml, specified above. 
+-->
+<h1>Unicode/XML Leningrad Codex</h1>
+The Hebrew bible, the Tanach, has been transcribed from the electronic 
+text of the Leningrad Codex maintained by the J. Alan Groves Center for 
+Advanced Biblical Research to a modern Unicode and XML-based format. The Coding
+page describes the transcription process. The license of use is very generous.
+<p/>
+Text can be rapidly accessed by providing a citation, i.e. Deut 26:5-9, in a 
+text field or by clicking on a succession of links. Text can be displayed in 
+a variety of formats and font sizes. Hebrew text may be highlighted, copied, 
+and pasted into Unicode compatible applications. Books of the Torah have an 
+option to display source markings of the Documentary Hypothesis (DH). 
+Files include a standard Text Encoding Initiative header describing the provenance 
+of the text..
+<p/>
+<ul>
+<li>The Hebrew text is freely available  with <b>XML</b> markup or without any markup
+as text files. The text files are an official repository
+of the Groves Center for the Westminster Leningrad Codex in Unicode.</li>
+<p/>
+<li>An <b>HTML Server</b> is available separately to provide 
+<i>standalone</i> Hebrew text in a flexible, user-selected format.</li>
+<p/>
+<li>An RSS feed of random verses
+  provides a learning challenge.</li>
+<p/>
+<li>Text-dependent links to external sites, such as translations,
+ may be created. </li>
+<p/>
+<li>The software that generated the site is freely
+   available as Java source and class files. </li>
+</ul>
+Notices about the site are published on the <b>b-hebrew</b> mailing list at 
+<b><tt>http://lists.ibiblio.org/mailman/listinfo/b-hebrew</tt></b>.  The subject line
+of the notices contains the phrase "Unicode/XML Westminster Leningrad Codex".
+<p/>
+Transcriber: Christopher V. Kimball, West Redding, CT, USA
+<p/>
+</Tanach>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title xml:lang="en">Global contributors list</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:availability status="free">
+                    <tei:p xmlns="http://www.tei-c.org/ns/1.0" xml:lang="en">
+                To the extent possible under law, the contributors who associated
+                <tei:ref type="license" target="http://www.creativecommons.org/publicdomain/zero/1.0">Creative Commons Zero
+                </tei:ref>
+                with this work have waived all copyright and related or neighboring rights to this work.
+              </tei:p>
+                    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+                        <cc:License xmlns:cc="http://web.resource.org/cc/" rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+                            <cc:legalcode rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/legalcode"/>
+                            <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+                            <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+                        </cc:License>
+                    </rdf:RDF>
+                </tei:availability>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:bibl>
+                    <tei:p>Born digital</tei:p>
+                </tei:bibl>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+    </tei:teiHeader>
+    <tei:text>
+      <tei:body>
+        <tei:div xmlns:tei="http://www.tei-c.org/ns/1.0" type="bibliography" xml:lang="en">
+            <tei:biblStruct xml:id="Kimball2010">
+                <tei:monogr>
+                    <tei:title>The Westminster Leningrad Codex</tei:title>
+                    <tei:edition>v.4.14</tei:edition>
+                    <tei:editor>
+                        <tei:name>Shemu'el ben Ya'akov</tei:name>
+                    </tei:editor>
+                    <tei:editor>
+                        <tei:name>Aharon ben-Mosheh ben-Asher</tei:name>
+                    </tei:editor>
+                    <tei:editor>
+                        <tei:name>Stephen K. Salisbury</tei:name>
+                    </tei:editor>
+                    <tei:editor>
+                        <tei:name>Kirk E. Lowery</tei:name>
+                    </tei:editor>
+                    <tei:editor>
+                        <tei:name>Christopher V. Kimball</tei:name>
+                    </tei:editor>
+                    <tei:imprint>
+                        <tei:publisher>J. Alan Groves Center for Advanced Biblical Research</tei:publisher>
+                        <tei:pubPlace>Glenside, PA</tei:pubPlace>
+                        <tei:date>1 Jul 2010</tei:date>
+                        <tei:distributor>Christopher V. Kimball<tei:ref type="url" target="http://www.tanach.us/Tanach.xml">via web site</tei:ref>
+                            <tei:date type="access">07-2010</tei:date>
+                        </tei:distributor>
+                    </tei:imprint>
+                </tei:monogr>
+                <tei:note type="copyright">
+                    The transcriber has released the text "without restriction."  A copy of the license is in
+                    our <tei:ref type="url" target="http://jewishliturgy.googlecode.com/svn/sources/tanach/WLC/License.html">subversion repository</tei:ref>. 
+                  </tei:note>
+            </tei:biblStruct>
+          </tei:div>
+        </tei:body>
+    </tei:text>
+</tei:TEI>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  all concurrent modes together
+
+  Open Siddur Project
+  Copyright 2010 Efraim Feinstein
+  Licensed under the GNU Lesser General Public License, version 3 or later
+
+  $Id: all-modes.xspec 739 2011-04-15 04:17:09Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
+  stylesheet="../concurrent.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="garbage">
+      <x:context><tei:junk/><j:junk/><jx:junk/></x:context>
+    </x:scenario>
+  </x:pending>
+
+  <x:scenario label="All modes">
+    <x:scenario label="j:concurrent, one hierarchy">
+      <x:context href="concurrent-context.xml">
+      </x:context>
+      <x:expect label="joined hierarchy/selection" href="concurrent-expect.xml">
+      </x:expect>
+    </x:scenario>
+
+    <x:scenario label="All modes together">
+      <x:scenario label="Simple document">
+        <x:context>
+          <tei:TEI xml:lang="en" xml:base="one-view-context.xml" jx:document-uri="one-view-context.xml">
+            <tei:teiHeader/>
+            <tei:text/>
+          </tei:TEI>
+        </x:context>
+        <x:expect label="document URI and identity template">
+          <tei:TEI xml:lang="en" xml:base="one-view-context.xml" jx:document-uri="one-view-context.xml">
+            <tei:teiHeader/>
+            <tei:text/>
+          </tei:TEI>
+        </x:expect>
+      </x:scenario>
+      <!--x:pending-->
+      <x:scenario label="selection with one concurrent view" >
+        <x:context href="one-view-context.xml"/>
+        <x:expect href="one-view-expect.xml"/>
+      </x:scenario>
+      <x:scenario label="selection with only external pointers">
+        <x:context href="../tests-with-document-uri/external-only-context.xml"/>
+        <x:expect test="//tei:text" href="../tests-with-document-uri/external-only-expect.xml"/>
+      </x:scenario>
+      <x:scenario label="selection with one concurrent view and one external pointer">
+        <x:context href="../tests-with-document-uri/view-and-external-context.xml"/>
+        <x:expect test="//tei:text" href="../tests-with-document-uri/view-and-external-expect.xml"/>
+      </x:scenario>
+    <!--/x:pending-->
+    </x:scenario>
+  </x:scenario>
+</x:description>

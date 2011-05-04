@@ -1,0 +1,74 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xml:lang="en">
+  <tei:teiHeader>
+    <tei:fileSpec>
+      <tei:titleStmt>
+        <tei:title>Standoff relationship test</tei:title>
+        <j:respList>
+          <tei:respons xml:id="respons" j:role="transcriber" target="#repository" resp="standoff-relationship-notes.xml#transcriber"/>
+        </j:respList>
+      </tei:titleStmt>
+    </tei:fileSpec>
+  </tei:teiHeader>
+  <tei:fsdDecl>
+    <tei:fsDecl type="note">
+      <tei:fDecl name="note1">
+        <tei:desc>Turn a note on/off</tei:desc>
+        <tei:vRange>
+          <tei:vAlt>
+            <tei:symbol value="YES"/>
+            <tei:symbol value="NO"/>
+          </tei:vAlt>
+        </tei:vRange>
+      </tei:fDecl>
+    </tei:fsDecl>
+  </tei:fsdDecl>
+  <j:links>
+    <tei:ptr type="standoff" target="standoff-relationship-external-context.xml"/>
+    <tei:link xml:id="has_a_note_link" type="note" targets="#has_a_note standoff-relationship-notes.xml#note1"/>
+    <tei:link xml:id="has_a_note_in_a_child_link" type="note" targets="#child_w standoff-relationship-notes.xml#note1"/>
+    
+    <tei:fvLib>
+      <tei:symbol xml:id="Y" value="YES"/>
+      <tei:symbol xml:id="N" value="NO"/>
+      <tei:fs xml:id="note_Y" type="note">
+        <tei:f name="note1" fVal="#Y"/>
+      </tei:fs>
+      <tei:fs xml:id="note_N" type="note">
+        <tei:f name="note1" fVal="#N"/>
+      </tei:fs>
+    </tei:fvLib>
+    
+    <tei:link type="set" targets="#p1 #note_N"/>
+    <tei:link type="association" targets="#has_a_note_that_is_conditionally_nixed_link #note_Y"/>
+    <tei:link xml:id="has_a_note_that_is_conditionally_nixed_link" type="note" targets="#has_a_note_that_is_conditionally_nixed standoff-relationship-notes.xml#note1"/>
+  </j:links>
+  <tei:text>
+    <j:concurrent>
+      <j:selection xml:id="selection">
+        <tei:ptr xml:id="se1" target="#has_a_note"/>
+        <tei:ptr xml:id="se2" target="#has_a_note_in_another_file"/>
+        <tei:ptr xml:id="se3" target="#has_a_note_in_a_child"/>
+        <tei:ptr xml:id="se4" target="#has_a_note_that_is_conditionally_nixed"/>
+        <tei:ptr xml:id="se5" target="standoff-relationship-external-context.xml#has_relationships_in_ancestors"/>
+      </j:selection>
+      <j:view type="p">
+        <tei:p xml:id="p1">
+          <tei:ptr target="#range(se1,se4)"/>
+        </tei:p>
+      </j:view>
+    </j:concurrent>
+    <j:repository xml:id="repository">
+      <tei:seg xml:id="has_a_note">A</tei:seg>
+      <tei:seg xml:id="has_a_note_in_another_file">B</tei:seg>
+      <tei:seg xml:id="has_a_note_in_a_child">
+        <tei:w xml:id="other_child_1">O1</tei:w>
+        <tei:w xml:id="child_w">C</tei:w>
+        <tei:w xml:id="other_child_2">O2</tei:w>
+      </tei:seg>
+      <tei:seg xml:id="has_a_note_that_is_conditionally_nixed">D</tei:seg>
+    </j:repository>
+  </tei:text>
+</tei:TEI>
+

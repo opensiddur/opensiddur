@@ -1,0 +1,10 @@
+<collection user="admin" group="everyone" mode="774">
+	<resource name="Academy_of_the_Hebrew_Language-2007.tr.xml" group="everyone" mode="774"/>
+	<resource name="ALA-Library_of_Congress-1997.tr.xml" group="everyone" mode="774"/>
+	<resource name="International_Phonetic_Alphabet-2005.tr.xml" group="everyone" mode="774"/>
+	<resource name="James_Strong-1890.tr.xml" group="everyone" mode="774"/>
+	<resource name="Michigan-Claremont-1984.tr.xml" group="everyone" mode="774"/>
+	<resource name="Modern_Ashkenazi_Dialect-2010.tr.xml" group="everyone" mode="774"/>
+	<resource name="Modern_Israeli_Hebrew-2010.tr.xml" group="everyone" mode="774"/>
+	<resource name="Society_of_Biblical_Literature-1999.tr.xml" group="everyone" mode="774"/>
+</collection>

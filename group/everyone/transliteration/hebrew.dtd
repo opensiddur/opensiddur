@@ -1,0 +1,115 @@
+<!-- 
+hebrew.ent
+Entities for Hebrew characters
+
+Contributors: Efraim Feinstein
+
+To the extent possible under law,  the contributors who associated  
+Creative Commons Zero with this work have waived all copyright 
+and related or neighboring rights to this work.
+
+A copy of the Creative Commons Zero public domain declaration
+can be found at http://www.creativecommons.org/publicdomain/zero/1.0
+
+$Id: hebrew.dtd 710 2011-02-24 15:29:07Z efraim.feinstein $
+-->
+<!ENTITY aleph "&#x05d0;">
+<!ENTITY bet "&#x05d1;">
+<!ENTITY gimel "&#x05d2;">
+<!ENTITY dalet "&#x05d3;">
+<!ENTITY he "&#x05d4;">
+<!ENTITY vav "&#x05d5;">
+<!ENTITY zayin "&#x05d6;">
+<!ENTITY het "&#x05d7;">
+<!ENTITY tet "&#x05d8;">
+<!ENTITY yod "&#x05d9;">
+<!ENTITY finalkaf "&#x05da;">
+<!ENTITY kaf "&#x05db;">
+<!ENTITY lamed "&#x05dc;">
+<!ENTITY finalmem "&#x05dd;">
+<!ENTITY mem "&#x05de;">
+<!ENTITY finalnun "&#x05df;">
+<!ENTITY nun "&#x05e0;">
+<!ENTITY samekh "&#x05e1;">
+<!ENTITY ayin "&#x05e2;">
+<!ENTITY finalpe "&#x5e3;">
+<!ENTITY pe "&#x05e4;">
+<!ENTITY finaltsadi "&#x05e5;">
+<!ENTITY tsadi "&#x05e6;">
+<!ENTITY qof "&#x05e7;">
+<!ENTITY resh "&#x05e8;">
+<!ENTITY shin "&#x05e9;">
+<!ENTITY tav "&#x05ea;">
+<!ENTITY etnahta "&#x0591;">
+<!ENTITY accentsegol "&#x0592;">
+<!ENTITY shalshelet "&#x0593;">
+<!ENTITY zaqefqatan "&#x0594;">
+<!ENTITY zaqefgadol "&#x0595;">
+<!ENTITY tipeha "&#x0596;">
+<!ENTITY revia "&#x0597;">
+<!ENTITY zarqa "&#x0598;">
+<!ENTITY pashta "&#x0599;">
+<!ENTITY yetiv "&#x059a;">
+<!ENTITY tevir "&#x059b;">
+<!ENTITY geresh "&#x059c;">
+<!ENTITY gereshmuqdam "&#x059d;">
+<!ENTITY gershayim "&#x059e;">
+<!ENTITY qarneypara "&#x059f;">
+<!ENTITY telishagedola "&#x05a0;">
+<!ENTITY pazer "&#x05a1;">
+<!ENTITY atnahhafukh "&#x05a2;">
+<!ENTITY munah "&#x05a3;">
+<!ENTITY mahapakh "&#x05a4;">
+<!ENTITY merkha "&#x05a5;">
+<!ENTITY merkhakefula "&#x05a6;">
+<!ENTITY darga "&#x05a7;">
+<!ENTITY qadma "&#x05a8;">
+<!ENTITY telishaqetana "&#x05a9;">
+<!ENTITY yerahbenyomo "&#x05aa;">
+<!ENTITY ole "&#x05ab;">
+<!ENTITY iluy "&#x05ac;">
+<!ENTITY dehi "&#x05ad;">
+<!ENTITY zinor "&#x05ae;">
+<!ENTITY masoracircle "&#x05af;">
+<!ENTITY sheva "&#x05b0;">
+<!ENTITY hatafsegol "&#x05b1;">
+<!ENTITY hatafpatah "&#x05b2;">
+<!ENTITY hatafqamats "&#x05b3;">
+<!ENTITY hiriq "&#x05b4;">
+<!ENTITY tsere "&#x05b5;">
+<!ENTITY segol "&#x05b6;">
+<!ENTITY patah "&#x05b7;">
+<!ENTITY qamats "&#x05b8;">
+<!ENTITY holam "&#x05b9;">
+<!ENTITY holamhaserforvav "&#x05ba;">
+<!ENTITY qubuts "&#x05bb;">
+<!ENTITY dageshormapiq "&#x05bc;">
+<!ENTITY meteg "&#x05bd;">
+<!ENTITY maqaf "&#x05be;">
+<!ENTITY rafe "&#x05bf;">
+<!ENTITY paseq "&#x05c0;">
+<!ENTITY shindot "&#x05c1;">
+<!ENTITY sindot "&#x05c2;">
+<!ENTITY sofpasuq "&#x05c3;">
+<!ENTITY upperdot "&#x05c4;">
+<!ENTITY lowerdot "&#x05c5;">
+<!ENTITY nunhafukha "&#x05c6;">
+<!ENTITY qamatsqatan "&#x05c7;">
+<!ENTITY punctuationgeresh "&#x05f3;">
+<!ENTITY punctuationgershayim "&#x05f4;">
+<!ENTITY schwa "&#x259;">
+<!ENTITY lefthalfring "&#x2bf;">
+<!ENTITY righthalfring "&#x2be;">
+<!ENTITY underline "&#x332;">
+<!ENTITY dotbelow "&#x323;">
+<!ENTITY acute "&#x301;">
+<!ENTITY circumflex "&#x302;">
+<!ENTITY macron "&#x304;">
+<!ENTITY breve "&#x306;">
+<!ENTITY caron "&#x30c;">
+<!ENTITY shevana "&#xff00;">
+<!ENTITY shevanach "&#xff01;">
+<!ENTITY cgj "&#x34f;">
+<!ENTITY consonant "&aleph;-&tav;">
+<!ENTITY vowel "&sheva;-&qubuts;&qamatsqatan;">
+<!ENTITY trope "&etnahta;-&masoracircle;">

@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet
+  version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  xmlns:p="http://jewishliturgy.org/ns/parser"
+  xmlns:r="http://jewishliturgy.org/ns/parser-result"  
+  exclude-result-prefixes="xs xd func"
+  >  
+  <xsl:import href="../common/common.xsl2"/>    
+  <xd:doc type="stylesheet">
+    <xd:short>Second (refactored) implementation of a grammar parser in XSLT 2.0.</xd:short>
+    <xd:copyright>Copyright 2010 Efraim Feinstein (LGPL 3+)</xd:copyright>
+    <xd:detail>
+        <p>A "DTD" for grammars is as follows:</p>
+        <p><![CDATA[
+        <!DOCTYPE p:grammar [
+        <!ELEMENT p:grammar (p:term+|p:grammar+)>
+        <!ELEMENT p:term (p:termRef|p:zeroOrOne|p:zeroOrMore|p:oneOrMore|p:termRefAnon|p:exp|p:expAnon|p:choice|p:end)+>
+        <!ATTLIST p:term name ID #REQUIRED>
+        <!ELEMENT p:termRef EMPTY>
+        <!ATTLIST p:termRef name IDREF #REQUIRED>
+        <!ATTLIST p:termRef alias #CDATA #IMPLIED>
+        <!ELEMENT p:termRefAnon EMPTY>
+        <!ATTLIST p:termRefAnon name IDREF #REQUIRED>
+        <!ELEMENT p:exp #PCDATA>
+        <!ATTLIST p:exp name ID #IMPLIED>
+        <!ELEMENT p:expAnon #PCDATA>
+        <!ELEMENT p:choice (p:termRef|p:zeroOrOne|p:zeroOrMore|p:oneOrMore|p:termRefAnon|p:exp|p:expAnon|p:choice|p:end|p:empty|p:group)+>
+        <!ELEMENT p:group (p:termRef|p:zeroOrOne|p:zeroOrMore|p:oneOrMore|p:termRefAnon|p:exp|p:expAnon|p:choice|p:end)+>
+        <!ELEMENT p:end EMPTY>
+        <!ELEMENT p:empty EMPTY>
+        ]>
+        ]]></p>
+        <p>How it works:
+        Apply-templates to the grammar in mode="grammar" or call the function 
+        func:parse-by-grammar($string as xs:string, $grammar as node*) 
+        
+        All functions return either:
+        (r:{term-name}, r:remainder) if a match is found to the term.
+        (r:no-match, r:remainder) if no match is found.
+        r:{term name} contains 
+        Terms may be referenced in grammars by name or anonymously.
+        Anonymous references (p:termRefAnon, p:expAnon) create r:anonymous 
+        instead of r:{term-name}, which can be cleaned from the result 
+        by r:clean().
+        
+        </p>
+        <p>This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+        <p>This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU Lesser General Public License for more details.</p>
+
+        <p>You should have received a copy of the GNU Lesser General Public License
+        along with this program.  If not, see 
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
+        </p>
+      </xd:detail>
+      <xd:svnId>$Id: grammar2.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+  
+  <xd:doc>
+    <xd:short>Debugging function to turn a long string into a short one</xd:short>
+  </xd:doc>
+  <xsl:function name="func:abbr-string" as="xs:string">
+    <xsl:param name="string" as="xs:string?"/>
+    
+    <xsl:variable name="strlen" as="xs:integer" select="string-length($string)"/>
+    <xsl:variable name="quote" as="xs:string">`</xsl:variable>
+    <xsl:sequence select="string-join(
+      ($quote,
+      if ($strlen &lt; 25)
+      then $string
+      else ( substring($string, 1, 10), '...', 
+        substring($string, $strlen - 10, 10)),
+      $quote),
+      '')
+    "/>
+    
+  </xsl:function>
+  
+  <xd:doc>
+    <xd:short>Front end to grammar parsing</xd:short>
+  </xd:doc>
+  <xsl:function name="func:grammar-parse" as="element()+">
+    <xsl:param name="string" as="xs:string?"/>
+    <xsl:param name="start-term" as="xs:string"/>
+    <xsl:param name="grammar" as="node()"/>
+    
+    <xsl:variable name="unexpanded" as="element()+">
+      <xsl:apply-templates select="$grammar//p:term[@name=$start-term]" mode="grammar">
+        <xsl:with-param name="string" as="xs:string?" tunnel="yes" select="$string"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    <xsl:apply-templates select="$unexpanded" mode="grammar-expand">
+      <xsl:with-param name="string" as="xs:string?" tunnel="yes" select="$string"/>
+    </xsl:apply-templates>
+  </xsl:function>
+  
+  <xd:doc>
+    <xd:short>Front-end to clean r:anonymous terms from a parsed string</xd:short>
+  </xd:doc>
+  <xsl:function name="func:grammar-clean" as="element()+">
+    <xsl:param name="to-clean" as="element()+"/>
+        
+    <xsl:apply-templates select="$to-clean" mode="grammar-clean"/>
+  </xsl:function>
+  
+  <xsl:template match="r:empty|r:end" mode="grammar-clean"/>
+      
+  <xsl:template match="r:anonymous" mode="grammar-clean">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+      
+  <xsl:template match="text()|comment()|element()|/r:anonymous" 
+    mode="grammar-clean">
+    <xsl:copy copy-namespaces="no"> 
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Expand grammar parser index pointers over the whole string</xd:short>
+  </xd:doc>
+  <xsl:function name="func:grammar-expand" as="element()+">
+    <xsl:param name="string" as="xs:string?"/>
+    <xsl:param name="to-expand" as="element()+"/>
+    
+    <xsl:apply-templates select="$to-expand" mode="grammar-expand">
+      <xsl:with-param name="string" as="xs:string" tunnel="yes" select="$string"/>
+    </xsl:apply-templates>
+  </xsl:function>
+  
+  <xsl:template match="r:*[not(@expand)]" mode="grammar-expand">
+    <xsl:copy>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="r:*[@expand]" mode="grammar-expand">
+    <xsl:param name="string" tunnel="yes" as="xs:string?"/>
+    
+    <xsl:copy>
+      <xsl:value-of select="substring($string, @begin, @end - @begin + 1)"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Using a previous result, chain to the next handler if necessary</xd:short>
+    <xd:param name="previous-result">The last result</xd:param>
+  </xd:doc>
+  <xsl:template name="chain-next">
+    <xsl:param name="string" as="xs:string?" tunnel="yes" required="yes"/>
+    <xsl:param name="previous-result" as="element()+"/>
+    
+    <xsl:variable name="match" as="element()*" 
+      select="$previous-result/self::r:* except 
+        $previous-result/self::r:remainder"/>
+    <xsl:variable name="remainder" as="element(r:remainder)?" 
+      select="if (number($previous-result/self::r:remainder/@end) &gt;= number($previous-result/self::r:remainder/@begin)) then $previous-result/self::r:remainder else ()"/>
+    <xsl:variable name="context" as="node()" select="."/>      
+
+    <xsl:variable name="matched-str" select="string-join($match,'')"/>
+    <!-- xsl:sequence select="
+        func:debug((
+        '[', func:get-xpath(.), ' ', string((@alias, @name, string-join((name(), '=', normalize-space(string(.))),''))[1]) , ' ',
+        ' $previous-result ()=',(string($previous-result/self::r:remainder/@end),' ',string($previous-result/self::r:remainder/@begin)),' match=', $match, ' remainder=', $remainder),
+        'chain-next',
+        $debug-detail)"/-->
+    
+    <xsl:choose>
+      <!-- empty($match)? -->
+      <xsl:when test="(empty($match) or $match/self::r:no-match) and 
+        not(self::p:zeroOrOne or self::p:zeroOrMore)">
+        <!-- no match to this.  no need to chain. -->
+        <xsl:sequence select="func:debug('CHAIN COMPLETE', 'chain-next', $debug-detail)"/>
+        <r:no-match/>
+        <xsl:sequence select="$remainder"/>
+      </xsl:when>
+      <xsl:when test="parent::p:choice">
+        <xsl:sequence select="func:debug('NOT CHAINING CHOICE', 'chain-next', $debug-detail)"/>
+        <!-- the parent is a choice element, we don't need to chain continue -->
+        <xsl:sequence select="($match, $remainder)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <!-- we have a match and are not in a choice construct,
+        so we need to chain to the next sibling  -->
+        <xsl:sequence select="func:debug(('CHAINING TO ', (following-sibling::*[1]/name(), 'NOTHING')[1], ' remainder=', $remainder), 'chain-next', $debug-detail)"/>
+        <xsl:variable name="chain-result" as="element()*">
+          <xsl:apply-templates select="following-sibling::element()[1]" mode="grammar">
+            <xsl:with-param name="string-position" as="xs:integer" select="($remainder/@begin, string-length($string) + 1)[1]"/>
+          </xsl:apply-templates>
+        </xsl:variable>
+        <xsl:choose>
+          <xsl:when test="not(following-sibling::*[1])">
+            <xsl:sequence select="($match, $remainder)"/>
+          </xsl:when>
+          <xsl:when test="$chain-result/self::r:no-match">
+            <r:no-match/>
+            <r:remainder expand="1" 
+              begin="{min(($match/@begin, $remainder/@begin))}" 
+              end="{string-length($string)}">
+              <!-- xsl:sequence select="string-join(($match, $remainder),'')"/-->
+            </r:remainder>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:sequence select="($match, $chain-result)"/> 
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <!-- EXPAND-OK -->
+  <xd:doc>
+    <xd:short>empty matches everything</xd:short>
+  </xd:doc>
+  <xsl:template match="p:empty" mode="grammar">
+    <xsl:param name="string" tunnel="yes" as="xs:string?"/>
+    <xsl:param name="string-position" as="xs:integer" select="1"/>
+    <!-- xsl:message>DEBUG: empty</xsl:message-->
+    <r:empty/>
+    <xsl:if test="string-length($string) &gt; 0">
+      <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+    </xsl:if>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Number</xd:short>
+  </xd:doc>
+  <xsl:template match="p:zeroOrOne|p:zeroOrMore|p:oneOrMore" mode="grammar">
+    <xsl:param name="string" tunnel="yes" as="xs:string?"/>
+    <xsl:param name="string-position" as="xs:integer" select="1"/>
+    <xsl:param name="found-already" as="xs:integer" select="0"/>
+  
+    <!-- xsl:message>DEBUG: <xsl:value-of select="name()"/></xsl:message-->
+	<!-- xsl:sequence select="func:debug((., ' for string ', 
+       func:abbr-string(substring($string,$string-position))), 
+      'zeroOrMore|zeroOrOne|oneOrMore', $debug-detail)"/-->
+
+    <xsl:variable name="result" as="element()+">
+      <xsl:apply-templates select="*[1]" mode="grammar">
+        <xsl:with-param name="string-position" as="xs:integer" select="$string-position"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    <!-- xsl:message>ZOO|ZOM|OOM: $result={<xsl:sequence select="$result"/>}
+    </xsl:message-->
+    <xsl:variable name="match" as="element()*" 
+      select="$result/self::r:* except 
+        ($result/self::r:remainder,$result/self::r:no-match)"/>
+    <xsl:variable name="remainder" as="element(r:remainder)?" 
+      select="$result/self::r:remainder"/>
+    <xsl:choose>
+      <xsl:when test="empty($match) and $found-already eq 0">
+        <xsl:sequence select="func:debug(('NO MATCH for ', ., ' for string ', 
+          func:abbr-string(substring($string,$string-position))), 'zeroOrOne|zeroOrMore|oneOrMore', $debug-detail)"/>
+        <xsl:call-template name="chain-next">
+          <xsl:with-param name="previous-result" as="element()+">
+            <xsl:element name="{if (self::p:zeroOrOne or self::p:zeroOrMore)
+                then 'r:empty' 
+                else 'r:no-match'}"/>
+            <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+          </xsl:with-param>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="empty($match) and $found-already &gt; 0">
+        <!-- return remainder back through the recursion -->
+      
+ 	    <xsl:sequence select="func:debug(('NO MATCH and FOUND ALREADY for ', ., ' for string ', 
+          func:abbr-string(substring($string,$string-position))), 'zeroOrOne|zeroOrMore|oneOrMore', $debug-detail)"/>
+        <xsl:sequence select="$remainder"/>
+      </xsl:when>
+      <xsl:when test="$match and self::p:zeroOrOne">
+        <xsl:sequence select="func:debug(('MATCH for ', ., ' for string ', func:abbr-string($string)), 'zeroOrOne', $debug-detail)"/>
+        <xsl:sequence select="$match"/>
+        <xsl:call-template name="chain-next">
+          <xsl:with-param name="previous-result" as="element()+" select="$result"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="func:debug(('MATCH and *orMore for ', ., ' for string ', 
+          func:abbr-string(substring($string,$string-position))), 'zeroOrOne|zeroOrMore|oneOrMore', $debug-detail)"/>
+        <xsl:variable name="or-more-match" as="element()*">
+          <xsl:apply-templates select="." mode="grammar">
+            <xsl:with-param name="string-position" as="xs:integer" select="($remainder/@begin, string-length($string) + 1)[1]"/>
+            <xsl:with-param name="found-already" as="xs:integer" select="$found-already + 1"/>
+          </xsl:apply-templates>
+        </xsl:variable>
+        <!-- $match and zeroOrMore or OneOrMore -->
+        <xsl:choose>
+          <xsl:when test="$found-already eq 0">
+            <xsl:sequence select="func:debug((),'*OrMore COMPLETED.  Chaining next', $debug-info)"/>
+            <xsl:call-template name="chain-next">
+              <xsl:with-param name="previous-result" as="element()+" select="($match,$or-more-match)"/>
+            </xsl:call-template>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:sequence select="func:debug((),'*OrMore returning chained results', $debug-info)"/>
+            <xsl:sequence select="($match, $or-more-match)"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Handle a named term</xd:short>
+  </xd:doc>
+  <xsl:template match="p:term|p:group" mode="grammar">
+    <xsl:param name="string" as="xs:string?" tunnel="yes"/>
+    <xsl:param name="string-position" as="xs:integer" select="1"/>
+    
+    <!-- xsl:message>DEBUG: <xsl:value-of select="name()"/>: <xsl:value-of select="@name"/></xsl:message-->
+    <xsl:variable name="result" as="element()+">
+      <xsl:apply-templates select="*[1]" mode="grammar">
+        <xsl:with-param name="string-position" as="xs:integer" select="$string-position"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    
+    <xsl:variable name="this-result" as="element()+">
+      <xsl:choose>
+        <xsl:when test="$result/self::r:no-match">
+          <!-- xsl:message>DEBUG: NO MATCH for term <xsl:value-of select="@name"/></xsl:message-->
+          <r:no-match/>
+          <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <!-- term matched -->
+          <!-- xsl:message>DEBUG: YES MATCH for term <xsl:value-of select="@name"/></xsl:message-->
+          <xsl:element name="r:{if (@name) then string(@name) else 'anonymous'}">
+            <xsl:sequence select="$result/self::r:* except 
+              ($result/self::r:remainder,$result/self::r:no-match)"/>
+          </xsl:element>
+          <xsl:sequence select="$result/self::r:remainder"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:choose>
+      <xsl:when test="self::p:group">
+        <xsl:call-template name="chain-next">
+          <xsl:with-param name="previous-result" as="element()+" select="$this-result"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>        
+        <xsl:sequence select="$this-result"/>
+      </xsl:otherwise>
+    </xsl:choose>
+<!--     
+    <xsl:sequence select="func:debug(('applied to ', *[1]), ('TERM OR GROUP (', name(), ') ', string(@name)), $debug-detail)"/>
+ -->    
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Handle multiple choices.  The one that matches to the longest
+    string wins</xd:short>
+  </xd:doc>
+  <xsl:template match="p:choice" mode="grammar">
+    <xsl:param name="string" tunnel="yes" as="xs:string?"/>
+    <xsl:param name="string-position" as="xs:integer" select="1"/>
+    
+    <!-- xsl:message>DEBUG: choice</xsl:message-->
+<!--    
+    <xsl:sequence select="func:debug(('context = ', .), 'choice', $debug-detail)"/>
+ -->    
+ 
+    <xsl:variable name="result" as="element(r:choice-match)*">
+      <xsl:for-each select="*">
+        <r:choice-match>
+          <xsl:apply-templates select="." mode="grammar">
+            <xsl:with-param name="string-position" as="xs:integer" select="$string-position"/>
+          </xsl:apply-templates>
+        </r:choice-match>
+      </xsl:for-each>
+    </xsl:variable>
+<!--     
+    <xsl:sequence select="func:debug(for $r in $result return count($r/r:remainder), 'CHOICE RESULTS', $debug-detail)"/>
+ -->    
+    <xsl:variable name="successful-matches" as="element(r:choice-match)*" 
+      select="$result/self::r:choice-match[not(r:no-match)]"/>
+    <!--xsl:message>DEBUG: choice: successful-matches = <xsl:sequence select="$successful-matches"/></xsl:message-->
+    <xsl:variable name="match-length" 
+      as="xs:integer*">
+      <xsl:for-each select="$successful-matches">
+        <xsl:variable name="match-element" as="element()*"
+          select="r:*[not(name()=('r:remainder'))]"/>
+        <xsl:variable name="max-difference" as="xs:integer?"
+          select="xs:integer(max($match-element//@end) - min($match-element//@begin))"/>
+        <xsl:sequence select="($max-difference, 0)[1]"/>
+        <!-- xsl:message>DEBUG: choice: match-element = <xsl:sequence select="$match-element"/>(<xsl:value-of select="max($match-element//@begin)"/>,<xsl:value-of select="max($match-element//@end)"/>, <xsl:value-of select="$max-difference"/>)</xsl:message-->
+      </xsl:for-each>
+    </xsl:variable>
+    <xsl:variable name="no-result" as="element()+">
+      <r:no-match/>
+      <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+    </xsl:variable>
+    <!-- xsl:sequence select="func:debug(
+      $successful-matches
+    , ('choice ', func:get-xpath(.)), $debug-info)"/-->
+    <!-- 
+    <xsl:sequence select="func:debug(
+      if (not(empty($successful-matches))) 
+        then (func:abbr-string(
+          $successful-matches[
+            index-of($match-length,
+              max($match-length))][last() - 1]/element()[1]), ' PASS')
+        else (func:abbr-string(string-join($no-result,'')), ' FAIL')
+    , ('choice ', func:get-xpath(.)), $debug-info)"/>
+     -->
+    <xsl:call-template name="chain-next">
+      <xsl:with-param name="previous-result" as="element()+" 
+        select="if (not(empty($successful-matches))) 
+        then $successful-matches[index-of($match-length,max($match-length))[1]]/element()
+        else $no-result" />
+    </xsl:call-template>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Reference to a term or a group</xd:short>
+  </xd:doc>
+  <xsl:template match="p:termRef|p:termRefAnon" mode="grammar">
+    <xsl:param name="string" tunnel="yes" as="xs:string?" />
+    <xsl:param name="string-position" as="xs:integer" select="1"/>
+    
+    <!-- xsl:message><xsl:value-of select="name()"/>: <xsl:value-of select="@name"/></xsl:message-->
+    <xsl:variable name="context" select="." as="node()"/>
+    
+    <xsl:variable name="result" as="element()+">
+      <xsl:apply-templates select="//p:term[@name = current()/@name]" mode="grammar">
+        <xsl:with-param name="string-position" as="xs:integer" select="$string-position"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    <xsl:variable name="matched-part" as="xs:string" select="string-join(
+    $result/self::* except $result/self::r:remainder
+    ,'')"/>
+    <!-- xsl:sequence select="func:debug((
+     '[', if ($matched-part) then func:abbr-string($matched-part) 
+      else ('FAIL:', func:abbr-string($result/self::r:remainder)) ,']'
+    ), ((@alias,@name)[1], ' ', func:get-xpath(.)), $debug-info)"/-->
+    <xsl:call-template name="chain-next">
+      <xsl:with-param name="previous-result" as="element()+">
+        <!-- anonymize or alias if necessary -->
+        <xsl:choose>
+          <xsl:when test="self::p:termRefAnon or @alias">
+            <xsl:for-each select="$result">
+              <xsl:choose>
+                <xsl:when test="name()=concat('r:',string($context/@name))">
+                  <xsl:element name="{concat('r:',if ($context/@alias) then string($context/@alias) else 'anonymous')}">
+                    <xsl:sequence select="node()"/>
+                  </xsl:element>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:sequence select="."/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:for-each>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:sequence select="$result"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:with-param>
+    </xsl:call-template>
+  </xsl:template>    
+  
+  <xd:doc>
+    <xd:short>Match an expression.  Return r:{@name} or r:anonymous</xd:short>
+  </xd:doc>
+  <xsl:template match="p:exp|p:expAnon" mode="grammar">
+	<xsl:param name="string" as="xs:string?" tunnel="yes" required="yes"/>
+    <xsl:param name="string-position" as="xs:integer" select="1"/>
+    
+    <xsl:variable name="regex" as="xs:string" select="."/>
+    <xsl:variable name="context" as="node()" select="."/>
+    <!-- xsl:message>p:exp -
+    <xsl:value-of select="$context"/>
+     regexp = <xsl:value-of select="$regex"/></xsl:message-->
+    <xsl:variable name="result" as="element()+">
+      <xsl:choose>
+        <xsl:when test="$string-position &gt; string-length($string)">
+          <xsl:choose>
+            <xsl:when test="not($regex)">
+              <r:empty/>
+            </xsl:when>
+            <xsl:otherwise>
+              <r:no-match/>
+            </xsl:otherwise>
+          </xsl:choose>
+          <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:variable name="string-match" as="element()?">
+            <xsl:analyze-string regex="^({$regex})" select="substring($string, $string-position)">
+              <xsl:matching-substring>
+                <xsl:element name="{concat('r:', if ($context/@name) then string($context/@name) else 'anonymous')}">
+                  <xsl:attribute name="expand" select="1"/>
+                  <xsl:attribute name="begin" select="$string-position"/>
+                  <xsl:attribute name="end" select="$string-position + string-length(.) - 1"/>
+                </xsl:element>
+                <!-- xsl:message>MATCHING SUBSTRING(<xsl:value-of select="$regex"/>): <xsl:value-of select="."/></xsl:message-->
+              </xsl:matching-substring>
+              <xsl:non-matching-substring>
+                <!-- xsl:message>NON-MATCHING SUBSTRING(<xsl:value-of select="$regex"/>): <xsl:value-of select="func:abbr-string(.)"/></xsl:message-->
+              </xsl:non-matching-substring>
+            </xsl:analyze-string>
+          </xsl:variable>
+          <xsl:sequence select="$string-match"/>
+          <!-- xsl:message>string-match(<xsl:value-of select="$string-match/@begin"/>,<xsl:value-of select="$string-match/@end"/>, <xsl:sequence select="(string-length($string), substring($string,$string-position))"/>) = <xsl:sequence select="$string-match"/></xsl:message-->
+          <xsl:if test="(max(($string-match/@end + 1,$string-position)) &lt;= string-length($string))">
+            <!-- xsl:message>added remainder</xsl:message-->
+            <r:remainder expand="1" 
+              begin="{if ($string-match) then ($string-match/@end + 1) else $string-position}" end="{string-length($string)}"/>
+          </xsl:if>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <!-- xsl:message>DEBUG: <xsl:value-of select="name()"/>: <xsl:value-of select="if (@name) then @name else string(.)"/>: <xsl:sequence select="$result"/></xsl:message-->
+<!--     
+    <xsl:sequence select="func:debug((count($string), count($result/self::r:remainder)), ('EXP or EXPANON ', string($context)),$debug-detail)"/>
+ -->    
+    <!-- xsl:message>$result from exp: {<xsl:sequence select="$result"/>}</xsl:message-->    
+    <xsl:call-template name="chain-next">
+      <xsl:with-param name="previous-result" as="element()+" select="$result"/>
+    </xsl:call-template>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>End of string</xd:short>
+  </xd:doc>
+  <xsl:template match="p:end" mode="grammar">
+    <xsl:param name="string" tunnel="yes" as="xs:string?"/>
+    <xsl:param name="string-position" as="xs:integer" select="1"/>
+    
+    <!-- xsl:message>DEBUG: end</xsl:message-->
+    <xsl:choose>
+      <xsl:when test="$string-position &gt; string-length($string)">
+        <xsl:sequence select="func:debug('FOUND', 'p:end', $debug-info)"/>
+        <r:end/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="func:debug('FAIL', 'p:end', $debug-info)"/>
+        <r:no-match/>
+        <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>          
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+</xsl:stylesheet>

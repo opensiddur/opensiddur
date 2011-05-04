@@ -1,0 +1,37 @@
+<tei:TEI xmlns:jx="http://jewishliturgy.org/ns/jlp-processor" xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:lang="en" jx:document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference-parallel.xml" xml:base="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference-parallel.xml">
+    <jx:cache-depend path="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference.xml"/>
+    <jx:cache-depend path="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference-translation.xml"/>
+    <j:links>
+        <tei:ptr jx:id="orig-se1" target="#se1"/>
+        <tei:ptr jx:id="orig-se2" target="#se2"/>
+        <tei:ptr jx:id="orig-se3" target="#se3"/>
+        <tei:ptr jx:id="par-se1" target="#se1"/>
+        <tei:ptr jx:id="par-se2" target="#se2"/>
+        <tei:ptr jx:id="par-se3" target="#se3"/>
+    </j:links>
+    <tei:teiHeader/>
+    <tei:text>
+        <jx:joined-concurrent>
+            <j:parallelGrp>
+                <original xmlns="http://jewishliturgy.org/ns/jlptei/1.0" n="1" xml:base="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference.xml">
+                    <p xmlns="http://www.tei-c.org/ns/1.0" jx:id="o-p1" jx:document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference.xml" xml:lang="he">
+                        <ptr target="#r1" jx:id="se1"/>
+                        <ptr target="#r2" jx:id="se2"/>
+                    </p>
+                    <p xmlns="http://www.tei-c.org/ns/1.0" jx:document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference.xml" xml:lang="he" jx:id="o-p2">
+                        <ptr target="#r3" jx:id="se3"/>
+                    </p>
+                </original>
+                <parallel xmlns="http://jewishliturgy.org/ns/jlptei/1.0" n="2" xml:base="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference-translation.xml">
+                    <p xmlns="http://www.tei-c.org/ns/1.0" jx:id="t-p1" jx:document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference-translation.xml">
+                        <ptr target="#r1" jx:id="se1"/>
+                        <ptr target="#r2" jx:id="se2"/>
+                    </p>
+                    <p xmlns="http://www.tei-c.org/ns/1.0" jx:id="t-p2" jx:document-uri="http://localhost:8080/db/code/transforms/data-compiler/tests-with-document-uri/parallel-self-reference-translation.xml">
+                        <ptr target="#r3" jx:id="se3"/>
+                    </p>
+                </parallel>
+            </j:parallelGrp>
+        </jx:joined-concurrent>
+    </tei:text>
+</tei:TEI>

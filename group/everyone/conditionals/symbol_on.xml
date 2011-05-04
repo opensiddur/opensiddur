@@ -1,0 +1,5 @@
+<!-- 
+  Feature conditional value of ON 
+  $Id: symbol_on.xml 687 2011-01-23 23:36:48Z efraim.feinstein $
+-->
+<tei:symbol value="ON" xmlns:tei="http://www.tei-c.org/ns/1.0"/>

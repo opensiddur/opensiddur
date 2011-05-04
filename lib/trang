@@ -1,0 +1,4 @@
+#!/bin/sh
+# $Id: trang 379 2009-12-22 19:18:29Z efraim.feinstein $
+SCRIPTPATH=$(dirname $(absolutize $0))
+java -jar $SCRIPTPATH/trang.jar $@

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- test main data compiler 
+  Open Siddur Project
+  Copyright 2010 Efraim Feinstein
+  Licensed under the GNU Lesser General Public License, version 3 or later
+
+  $Id: data-compiler.xspec 747 2011-04-17 22:02:12Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
+  stylesheet="../data-compiler.xsl2"
+  >
+  <x:import href="all-modes.xspec"/>
+  <x:import href="conditional-setting.xspec"/>
+  <x:import href="conditionals.xspec"/>
+  <x:import href="incorporate-new-selections.xspec"/>
+  <x:import href="standardize-features.xspec"/>
+  <x:import href="evaluate-conditionals.xspec"/>
+  <x:import href="standoff.xspec"/>
+</x:description>

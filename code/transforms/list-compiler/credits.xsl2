@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet
+  version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:cc="http://web.resource.org/cc/"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  exclude-result-prefixes="#all"
+  >
+  
+  <xsl:import href="../../common/common.xsl2"/>
+  <xsl:import href="../follow-uri.xsl2"/>
+  <xsl:import href="../intl-strings.xsl2"/>
+  <xsl:import href="lc-common.xsl2"/>
+  <xd:doc type="stylesheet">
+    <xd:short>Given a completed document, and all its credit attributions 
+    (jx:credits), find all unique contributors and apply templates to them.
+    </xd:short>
+    <xd:copyright>Copyright 2010-2011 Efraim Feinstein (LGPL 3+)</xd:copyright>
+    <xd:detail>
+        <p>This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+        <p>This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU Lesser General Public License for more details.</p>
+
+        <p>You should have received a copy of the GNU Lesser General Public License
+        along with this program.  If not, see 
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
+        </p>
+      </xd:detail>
+      <xd:svnId>$Id: credits.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+
+  
+  <xd:doc>
+    <xd:short>Generate a credits list, under tei:div[@type='credits-list']</xd:short>
+  </xd:doc>
+  <xsl:template name="generate-credits-list" as="element(tei:div)?">
+    <xsl:variable name="all-credits"
+      select="key('relationships-by-type', 'responsibility')"
+      as="element(jx:relationship)*"/>
+    
+    <xsl:variable name="contributors" as="element(tei:list)*">
+      <xsl:for-each-group select="$all-credits" group-by="@subtype">
+<!--xsl:message>
++++++outer loop
++++++<xsl:sequence select="(position(), current-grouping-key())"/>
++++++<xsl:sequence select="current-group()"/>
++++++END
+</xsl:message-->
+        <tei:list type="credits">
+          <tei:head>
+            <xsl:sequence select="func:get-string($string-table-doc, current-grouping-key(), $primary-language)"/>
+          </tei:head>
+          
+          <xsl:for-each-group select="current-group()/self::jx:relationship" 
+            group-by="subsequence(jx:linked-relationship//(tei:name,tei:orgName),1,1)">
+            <xsl:sort select="func:name-sort-key(subsequence(jx:linked-relationship//(tei:name,tei:orgName),1,1))"/>
+            <tei:item>
+              <xsl:apply-templates mode="credits" select="current-group()[1]/jx:linked-relationship/*"/>
+            </tei:item>
+          </xsl:for-each-group>
+          
+        </tei:list>
+      </xsl:for-each-group>
+    </xsl:variable>
+    <xsl:if test="$contributors">
+      <tei:div type="credits-list">
+        <xsl:attribute name="xml:lang" select="$primary-language"/>
+        <tei:head>
+          <xsl:sequence select="func:get-string($string-table-doc, 'contributors-header', $primary-language)"/>
+        </tei:head>
+        <xsl:sequence select="$contributors"/>
+      </tei:div>
+    </xsl:if>
+    
+  </xsl:template>  
+  
+  <xd:doc>
+    Credits mode does basic formatting for credits, for now, just identity template them
+  </xd:doc>
+  <xsl:template match="*" mode="credits">
+    <xsl:call-template name="identity-in-mode"/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Skip tei:item in credits entries</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:item" mode="credits">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+  
+</xsl:stylesheet>

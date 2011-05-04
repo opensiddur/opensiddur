@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<collection group="everyone" mode="775" name="/db/group/everyone/contributors" owner="admin">
+  <resource name="contributors.xml" owner="admin" group="everyone" mode="775" />
+</collection>

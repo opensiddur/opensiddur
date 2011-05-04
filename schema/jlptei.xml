@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <!--
+    jlptei.xml Main entry point to the ODD description of the Jewish
+    Liturgy TEI Extension Copyright 2007-2009 Efraim Feinstein
+    <efraim.feinstein@gmail.com> License: GPLv3+ (see tei:availability
+    element below) $Date$ $Id: jlptei.xml 513 2010-06-06 05:36:59Z efraim.feinstein $
+  -->
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:jx="http://jewishliturgy.org/ns/examples"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title xml:lang="en">Jewish Liturgy Project Extension
+        </title>
+        <!-- Enter other language titles here too -->
+        <respStmt>
+          <!-- holds credits for contributions to the file -->
+          <resp>Originally written by</resp>
+          <name>Efraim Feinstein</name>
+        </respStmt>
+        <respStmt>
+          <resp>Some editing of the text by</resp>
+          <name>Eve Feinstein</name>
+        </respStmt>
+        <respStmt>
+          <resp>Added Dictionary module</resp>
+          <name>Ze'ev Clementson</name>
+        </respStmt>
+        <!-- add additional respStmt tags for additional contributors -->
+      </titleStmt>
+      <publicationStmt>
+        <idno type="revision">$Id: jlptei.xml 513 2010-06-06 05:36:59Z efraim.feinstein $</idno>
+        <authority>Jewish Liturgy Project/Open Siddur</authority>
+        <availability status="restricted">
+          <p type="copyright notice">
+            Copyright
+            <date value="2007">2007</date>
+            -
+            <date value="2009">2009</date>
+            Efraim Feinstein
+          </p>
+          <p type="license notice">
+            This work is dual licensed under the
+            <ref type="url"
+              target="http://www.creativecommons.org/licenses/by-sa/3.0">Creative Commons Attribution-ShareAlike 3.0
+              Unported</ref>
+            license and
+            the
+            <ref type="url" target="http://www.gnu.org/licenses/gpl">GNU General Public License,
+              version 3</ref>
+            , or at your option, any later version.
+          </p>
+          <p type="warranty notice">This work is distributed in the hope that it
+            will be useful,
+            but WITHOUT ANY WARRANTY; without even the implied warranty of
+            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</p>
+        </availability>
+      </publicationStmt>
+      <sourceDesc>
+        <p>Born digital.</p>
+      </sourceDesc>
+    </fileDesc>
+    <revisionDesc>
+      <p>Revisions on tracked on the version control system.
+      </p>
+    </revisionDesc>
+  </teiHeader>
+  <text>
+    <body xml:lang="en">
+      <div xml:id="div.header">
+        <head>The header</head>
+        <specGrp xml:id="spec.header">
+          <xi:include href="respList.xml" />
+          <xi:include href="RDF.xml" />
+          <xi:include href="License.xml" />
+          <xi:include href="permits.xml" />
+          <xi:include href="requires.xml" />
+          <xi:include href="legalcode.xml" />
+          <xi:include href="availability.xml" />
+        </specGrp>
+      </div>
+      <div xml:id="div.raw">
+        <head>Unencoded text</head>
+        <specGrp xml:id="spec.raw">
+          <xi:include href="raw.xml" />
+        </specGrp>
+      </div>
+      <div xml:id="div.basicText">
+        <head>Basic text</head>
+        <specGrp xml:id="spec.basicText">
+          <xi:include href="segGen.xml" />
+        </specGrp>
+      </div>
+      <div xml:id="div.repository">
+        <head>The text repository</head>
+        <specGrp xml:id="spec.repository">
+          <xi:include href="repository.xml" />
+        </specGrp>
+      </div>
+      <div xml:id="div.divineName">
+        <head>The tetragrammaton</head>
+        <specGrp xml:id="spec.divineName">
+          <xi:include href="w.xml" />
+          <xi:include href="divineName.xml" />
+        </specGrp>
+      </div>
+      <div xml:id="div.choice">
+        <head>Choices and options</head>
+        <specGrp xml:id="spec.choice">
+          <xi:include href="option.xml" />
+          <xi:include href="read.xml" />
+          <xi:include href="written.xml" />
+        </specGrp>
+      </div>
+      <div xml:id="div.conditions">
+        <head>Conditionals</head>
+        <specGrp xml:id="spec.conditionals">
+          <xi:include href="conditionGrp.xml"/>
+        </specGrp>
+      </div>
+      <div xml:id="div.concurrent">
+        <head>Concurrent hierarchies</head>
+        <specGrp xml:id="spec.concurrent">
+          <xi:include href="model.viewPart.xml" />
+          <xi:include href="concurrent.xml" />
+          <xi:include href="selection.xml" />
+          <xi:include href="view.xml" />
+        </specGrp>
+        <xi:include href="model.viewPart.members.xml"/>
+      </div>
+      <div xml:id="div.parallel">
+        <head>Parallel texts</head>
+        <specGrp xml:id="spec.parallel">
+          <xi:include href="original.xml"/>
+          <xi:include href="parallel.xml"/>
+          <xi:include href="parallelGrp.xml"/>
+          <xi:include href="links.xml"/>
+        </specGrp>
+      </div>
+      <schemaSpec ident="jlptei" start="TEI" xml:lang="en">
+        <moduleRef key="header" />
+        <elementSpec mode="delete" module="header" ident="handNote" />
+        <elementSpec mode="delete" module="header" ident="typeNote" />
+
+        <moduleRef key="core" />
+        <!-- removals from core -->
+        <elementSpec mode="delete" module="core" ident="add" />
+        <elementSpec mode="delete" module="core" ident="binaryObject" />
+        <elementSpec mode="delete" module="core" ident="cb" />
+        <elementSpec mode="delete" module="core" ident="del" />
+        <elementSpec mode="delete" module="core" ident="div1" />
+        <elementSpec mode="delete" module="core" ident="div2" />
+        <elementSpec mode="delete" module="core" ident="div3" />
+        <elementSpec mode="delete" module="core" ident="div4" />
+        <elementSpec mode="delete" module="core" ident="div5" />
+        <elementSpec mode="delete" module="core" ident="div6" />
+        <elementSpec mode="delete" module="core" ident="div7" />
+        <elementSpec mode="delete" module="core" ident="gap" />
+        <elementSpec mode="delete" module="core" ident="index" />
+        <elementSpec mode="delete" module="core" ident="lb" />
+        <elementSpec mode="delete" module="core" ident="measure" />
+        <elementSpec mode="delete" module="core" ident="measureGrp" />
+        <elementSpec mode="delete" module="core" ident="num" />
+        <elementSpec mode="delete" module="core" ident="pb" />
+        <elementSpec mode="delete" module="core" ident="sp" />
+        <elementSpec mode="delete" module="core" ident="speaker" />
+        <elementSpec mode="delete" module="core" ident="stage" />
+        <elementSpec mode="delete" module="core" ident="teiCorpus" />
+        <elementSpec mode="delete" module="core" ident="time" />
+        <elementSpec mode="delete" module="core" ident="unclear" />
+
+        <moduleRef key="tei" />
+        <moduleRef key="analysis" />
+        <moduleRef key="declarefs" />
+        <moduleRef key="iso-fs" />
+        <moduleRef key="dictionaries" />
+
+        <moduleRef key="linking" />
+        <elementSpec mode="delete" module="linking" ident="alt" />
+        <elementSpec mode="delete" module="linking" ident="altGrp" />
+        <elementSpec mode="delete" module="linking" ident="timeline" />
+        <elementSpec mode="delete" module="linking" ident="when" />
+
+        <moduleRef key="textstructure" />
+
+        <moduleRef key="textcrit" />
+        <elementSpec mode="delete" module="textcrit" ident="app" />
+        <elementSpec mode="delete" module="textcrit" ident="lem" />
+        <elementSpec mode="delete" module="textcrit" ident="rdg" />
+        <elementSpec mode="delete" module="textcrit" ident="rdgGrp" />
+        <elementSpec mode="delete" module="textcrit" ident="lacunaStart" />
+        <elementSpec mode="delete" module="textcrit" ident="lacunaEnd" />
+        <elementSpec mode="delete" module="textcrit" ident="witEnd" />
+        <elementSpec mode="delete" module="textcrit" ident="witStart" />
+
+        <moduleRef key="namesdates" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="age" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="bloc" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="climate" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="country" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="district" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="education" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="event" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="faith" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="floruit" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="geo" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="geoDecl" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="geogFeat" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="geogName" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="langKnowledge" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="langKnown" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="listEvent" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="listNym" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="location" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="nationality" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="nym" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="occupation" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="offset" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="place" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="placeName" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="population" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="region" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="relation" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="relationGrp" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="residence" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="settlement" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="sex" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="socecStatus" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="state" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="terrain" />
+        <elementSpec mode="delete" module="namesdates"
+          ident="trait" />
+
+        <!-- certainty is used for respons element -->
+        <moduleRef key="certainty" />
+				<xi:include href="respons.xml"/>
+        <elementSpec mode="delete" module="certainty" ident="certainty" />
+
+				<!-- facsimile is used from transcr module -->
+				<moduleRef key="transcr" />
+				<elementSpec mode="delete" module="transcr" ident="surface"/>				
+				<elementSpec mode="delete" module="transcr" ident="zone"/>				
+
+        <!-- changes to TEI elements (aka, badness that I shouldn't do) -->
+        <!-- 
+				<xi:include href="availability.odd"/>
+				 -->
+        <moduleRef key="liturgy" />
+        <!-- xi:include href="./att.global.odd"/-->
+
+        <!-- the liturgy module for elements -->
+        <moduleSpec ident="liturgy">
+          <desc>Contains all elements used for the encoding and
+            processing of Jewish liturgical texts.</desc>
+        </moduleSpec>
+
+        <!-- concurrent hierarchies -->
+        <specGrpRef target="#spec.concurrent" />
+        <specGrpRef target="#spec.model.viewPart.members" />        
+        
+        <!-- conditionals -->
+        <specGrpRef target="#spec.conditionals" />
+        
+        <!-- parallel texts -->
+        <specGrpRef target="#spec.parallel" />
+        
+        <!--  raw data -->
+        <specGrpRef target="#spec.raw" />
+        
+        <!-- text repository -->
+        <specGrpRef target="#spec.repository" />
+        <specGrpRef target="#spec.choice" />
+        <specGrpRef target="#spec.basicText"/>
+
+        <!-- divine name -->
+        <specGrpRef target="#spec.divineName" />
+        
+        <!-- cc license RDF, respList -->
+        <specGrpRef target="#spec.header" />
+      </schemaSpec>
+    </body>
+  </text>
+</TEI>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This file contains a grammar for the TEI XPointer schemes,
+described at http://www.tei-c.org/release/doc/tei-p5-doc/html/SA.html
+
+The following schemes are supported:
+range(pointer1, pointer2)
+left(pointer)
+right(pointer)
+
+It relies on the presence of the XPointer framwork grammar.  To use
+it, include the compiled framework grammar and this one in your 
+XSLT stylesheet.
+
+Copyright 2009 Efraim Feinstein <efraim.feinstein@gmail.com>
+
+Part of the Jewish Liturgy/Open Siddur Project
+
+This file is released under the GNU Lesser General Public License, version 3, or later. 
+ 
+$Id: xptr-tei.xml 284 2009-09-18 16:28:38Z efraim.feinstein $
+ -->
+<grammar xmlns="http://jewishliturgy.org/ns/parser">
+  <!-- 
+  SchemeData for range():
+  RangeData    ::=     Pointer, Pointer -->
+  <term name="RangeData">
+    <termRefAnon name="S"/>
+    <termRef name="Pointer"/>
+    <expAnon>\s*,\s*</expAnon>
+    <termRef name="Pointer"/>
+    <termRefAnon name="S"/>
+  </term>
+  
+  <!--  left() and right() pointers' SchemeData -->
+  <term name="LeftData">
+    <termRef name="Pointer"/>
+  </term>
+
+  <term name="RightData">
+    <termRef name="Pointer"/>
+  </term>
+</grammar>

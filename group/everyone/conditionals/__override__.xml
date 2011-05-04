@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<collection group="dba" mode="744" name="/db/group/everyone/conditionals" owner="admin">
+  <resource group="dba" mode="744" name="symbol_off.xml" owner="admin" />
+  <resource group="dba" mode="744" name="symbol_maybe.xml" owner="admin" />
+  <resource group="dba" mode="744" name="symbol_on.xml" owner="admin" />
+  <resource group="dba" mode="744" name="symbol_yes.xml" owner="admin" />
+  <resource group="dba" mode="744" name="symbol_no.xml" owner="admin" />
+  <resource group="dba" mode="744" name="symbol_yn.xml" owner="admin" />
+  <resource group="dba" mode="744" name="symbol_ym.xml" owner="admin" />
+  <resource group="dba" mode="744" name="symbol_nm.xml" owner="admin" />
+  <resource group="dba" mode="744" name="range_onoff.xml" owner="admin" />
+  <resource group="dba" mode="744" name="range_ynm.xml" owner="admin" />
+  <resource group="dba" mode="744" name="range_yn.xml" owner="admin" />
+  <resource group="dba" mode="744" name="operators.xml" owner="admin" />
+</collection>

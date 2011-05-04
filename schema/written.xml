@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+written.xml
+
+Copyright TEI Consortium. 
+Modifications Copyright 2008-2009 Efraim Feinstein <efraim.feinstein@gmail.com>
+
+Licensed under the GNU General Public License. 
+See the file GPL-3 for details
+
+$Date: 2008-12-25 18:07:33 -0500 (Thu, 25 Dec 2008) $
+$Id: written.xml 216 2009-07-24 04:49:05Z efraim.feinstein $
+
+ChangeLog:
+1/6/2008 - change tei:reg to j:written, then to j:read
+7/23/2009 - change for new-encoding
+-->
+<elementSpec xmlns="http://www.tei-c.org/ns/1.0" xmlns:jx="http://jewishliturgy.org/ns/examples"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude" module="liturgy" xml:id="WRITTEN"
+  usage="opt" ident="written" ns="http://jewishliturgy.org/ns/jlptei/1.0">
+  <equiv name="j:written" filter="canonical-tei.xsl2#transform.written"
+    mimeType="application/xsl" />
+  <gloss>written form</gloss>
+  <desc>contains a variant of text as traditionally written in
+    the original text.</desc>
+  <classes>
+    <memberOf key="model.pPart.transcriptional" />
+    <memberOf key="model.choicePart" />
+    <memberOf key="att.editLike" />
+    <!-- memberOf key="att.liturgy.conditional.odd"/-->
+  </classes>
+  <content>
+    <rng:ref name="macro.paraContent" />
+  </content>
+  <exemplum>
+    <jx:egXML>
+      <choice xml:lang="he">
+        <j:written>יְרוּשָׁלַ͏ִם</j:written>
+        <j:read>יְרוּשָׁלַיִם</j:read>
+      </choice>
+    </jx:egXML>
+  </exemplum>
+  <remarks>
+    <p>
+      May be used in a
+      <gi>choice</gi>
+      construct along with
+      <gi>read</gi>
+      .
+    </p>
+  </remarks>
+  <listRef>
+  </listRef>
+</elementSpec>

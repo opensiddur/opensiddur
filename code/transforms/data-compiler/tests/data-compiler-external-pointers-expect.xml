@@ -1,0 +1,21 @@
+<tei:TEI
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xml:lang="en">
+  <tei:text>
+    <tei:p jx:id="p1">
+      <tei:s>
+        <tei:seg jx:id="B">segment B</tei:seg>
+      </tei:s>
+    </tei:p>
+    <tei:p jx:id="p1" jx:document-uri="..." xml:base="...">
+      <tei:s>
+        <tei:seg jx:id="A">segment A</tei:seg>
+      </tei:s>
+      <tei:s>
+        <tei:seg jx:id="C">segment C</tei:seg>
+      </tei:s>
+    </tei:p>
+  </tei:text>
+</tei:TEI>

@@ -1,0 +1,39 @@
+The Open Siddur Project License file:
+
+All source code is stored on subversion, and may be obtained by following
+the instructions at http://jewishliturgy.googlecode.com/source/checkout
+
+The source code may be browsed directly at 
+http://jewishliturgy.googlecode.com/svn/trunk
+All file and directory names in this file are relative to that path.
+
+The project is distributed under the following licenses:
+
+Parts of the project source code are distributed under the GNU Lesser 
+General Public License, version 3 or later.  For the full license, see
+the files GPL-3 and LGPL-3.
+
+The schemas are distributed under the GNU General Public License version 3 
+or later.  For the full license, see the file GPL-3.
+
+Items in the lib/ directory are third party files and libraries required
+by the software.  Their own license terms apply, and they may differ from
+the rest of the project's.
+
+See the *-LICENSE.txt and *-NOTICE.txt files and *-notices directories
+ in the lib/ directory for more information.  It is accessible on the 
+Internet at 
+http://jewishliturgy.googlecode.com/svn/trunk/lib/
+
+The BHebrew and BHebrewSR fonts are modified versions of the Ezra SIL
+fonts from SIL International, and are released under the SIL Open Font License.
+The only modification is the format conversion to Embedded Open Type or SVG.
+
+Siddur texts may be under any of the following license statements (see the 
+text file for specifics):
+
+Creative Commons Zero 1.0 Universal -- see the file CC0
+Creative Commons Attribution 3.0 Unported -- see the file CC-BY
+Creative Commons Attribution-ShareAlike 3.0 Unported -- see the file CC-BY-SA.
+
+

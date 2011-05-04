@@ -1,0 +1,141 @@
+/* style.css 
+ * CSS for the Open Siddur Project muXHTML
+ * $Id: style.css 706 2011-02-21 01:18:10Z efraim.feinstein $
+ */
+
+@font-face {
+	font-family: 'BHebrewSR';
+	src: url('/code/apps/compiler/resources/BHebrewSR.eot#') format('☺'), 
+	     url('/code/apps/compiler/resources/EzraSILSR.ttf')  format('truetype'),
+	     url('/code/apps/compiler/resources/BHebrewSR.woff') format('woff'); 
+	}
+
+:lang(he) {
+	direction:rtl;
+	font-family:'BHebrewSR','Ezra SIL', 'Ezra SIL SR', 'SBL Hebrew', 'Cardo', 'Arial Unicode MS', 'Lucida Grande', serif;
+}
+
+:lang(en) {
+	direction:ltr;	
+}
+
+.ab-verse {
+	display:inline;
+}
+
+.bibl-entry {
+	display:block;
+}
+
+.bibl-entry * {
+	display:inline;	
+}
+
+.bibl-titles {
+	font-style:italic;	
+}
+
+.credit * {
+	display:inline;
+}
+
+.divineName {
+	display:inline;
+}
+
+.head {
+	font-size:200%;
+	font-weight:bold;
+	display:block;
+}
+
+.l {
+	display:block;
+	padding-top:0.25ex;
+	padding-bottom:0.25ex;
+}
+
+.label-chapter {
+	display:none;
+}
+
+.label-verse {
+	display:inline;
+	vertical-align:super;
+	font-size:xx-small;	
+}
+
+.lg {
+	display:block;
+	padding-top:0.5ex;
+	padding-bottom:0.5ex;
+}
+
+.name, .orgname {
+	display:inline;
+}
+
+.read {
+	display:inline;
+}
+
+.p {
+	display:block;
+	padding-top:0.25ex;
+	padding-bottom:0.25ex;
+}
+
+.written {
+	color:red;
+	display:inline;
+}
+
+.s {
+	display:inline;
+}
+
+.seg {
+	display:inline;
+}
+
+.pc {
+	margin:0;
+	padding:0;
+}
+
+.pe, .samekh {
+	font-weight:bold;
+}
+
+.w {
+  display:inline;
+}
+
+/* title */
+.title-page {
+  border:1px solid black;
+  font-size:500%;
+  text-align:center;
+}
+
+.title-part-main {
+  font-weight:bold;
+}
+
+.title-part-sub {
+  font-weight:bold;
+  font-size:70%;
+}
+
+.doc-author {
+  font-size:50%;
+}
+
+.doc-date {
+  font-size:25%;
+}
+
+.doc-imprint {
+  font-size:25%;
+  font-style:italic;
+}

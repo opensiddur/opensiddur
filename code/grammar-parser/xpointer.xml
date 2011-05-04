@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This is an XPointer framework grammar written in the language parsed by 
+grammar.xsl2, attempting to follow the W3C recommendation from 25 March 2003
+at http://www.w3.org/TR/xptr-framework/
+
+Copyright 2009 Efraim Feinstein <efraim.feinstein@gmail.com>
+
+Part of the Jewish Liturgy/Open Siddur Project
+
+This file is released under the GNU Lesser General Public License, version 3, or later. 
+ 
+$Id: xpointer.xml 470 2010-03-17 18:02:06Z efraim.feinstein $
+ -->
+<grammar xmlns="http://jewishliturgy.org/ns/parser">
+  <!-- Pointer    ::=     Shorthand | SchemeBased -->
+  <term name="Pointer">
+    <choice>
+      <termRef name="Shorthand"/>
+      <termRef name="SchemeBased"/>
+    </choice>
+  </term>
+  <!-- [2]     Shorthand    ::=    NCName -->
+  <term name="Shorthand">
+    <termRefAnon name="NCName"/>
+  </term>
+  <!-- [3]     SchemeBased    ::=    PointerPart (S? PointerPart)* -->
+  <term name="SchemeBased">
+    <termRef name="PointerPart"/>
+    <zeroOrMore>
+      <choice>
+        <expAnon>\s+</expAnon>
+        <empty/>
+      </choice>
+      <termRef name="PointerPart"/>
+    </zeroOrMore>
+  </term>
+  <!-- [4]     PointerPart    ::=    SchemeName '(' SchemeData ')' -->
+  <term name="PointerPart">
+    <termRef name="SchemeName"/>
+    <expAnon>\(</expAnon>
+    <termRef name="SchemeData"/>
+    <expAnon>\)</expAnon>
+  </term>
+<!-- [5]     SchemeName     ::=    QName -->
+  <term name="SchemeName">
+    <termRefAnon name="QName"/>
+  </term>
+    <!--  [6]     SchemeData     ::=    EscapedData* -->
+  <term name="SchemeData">
+    <zeroOrMore>
+      <termRefAnon name="EscapedData"/>
+    </zeroOrMore>
+  </term>
+  <!--  [7]     EscapedData    ::=    
+    NormalChar | '^(' | '^)' | '^^' | '(' SchemeData ')' -->
+  <term name="EscapedData">
+    <choice>
+      <termRefAnon name="NormalChars"/>
+      <expAnon>(\^\(|\^\)|\^\^)+</expAnon>
+      <group>
+        <expAnon>\(</expAnon>
+        <termRefAnon name="SchemeData"/>
+        <expAnon>\)</expAnon>
+      </group>
+    </choice>
+  </term>
+  <!-- [7]     QName    ::=    PrefixedName
+      | UnprefixedName -->
+  <term name="QName">
+    <choice>
+      <termRef name="PrefixedName"/>
+      <termRef name="UnprefixedName"/>
+    </choice>
+  </term>
+  <!-- [8]     PrefixedName     ::=    Prefix ':' LocalPart -->
+  <term name="PrefixedName">
+    <termRef name="NCName" alias="Prefix"/>
+    <expAnon>:</expAnon>
+    <termRef name="NCName" alias="LocalName"/>
+  </term>
+  <!--  [9]     UnprefixedName     ::=    LocalPart -->
+  <term name="UnprefixedName">
+    <termRefAnon name="NCName"/>
+  </term>
+<!-- [8]     NormalChar     ::=    UnicodeChar - [()^] -->
+  <term name="NormalChars">
+    <expAnon>[^()\^]+</expAnon>
+  </term>
+  <!-- [4]     NCName     ::=    NCNameStartChar NCNameChar* /* An XML Name, minus the ":" */ -->
+  <term name="NCName">
+    <!--expAnon>([A-Z_a-z&#xC0;-&#xD6;&#xD8;-&#xF6;&#xF8;-&#x2FF;&#x370;-&#x37D;&#x37F;-&#x1FFF;&#x200C;-&#x200D;&#x2070;-&#x218F;&#x2C00;-&#x2FEF;&#x3001;-&#xD7FF;&#xF900;-&#xFDCF;&#xFDF0;-&#xFFFD;&#x10000;-&#xEFFFF;][-A-Z_a-z&#xC0;-&#xD6;&#xD8;-&#xF6;&#xF8;-&#x2FF;&#x370;-&#x37D;&#x37F;-&#x1FFF;&#x200C;-&#x200D;&#x2070;-&#x218F;&#x2C00;-&#x2FEF;&#x3001;-&#xD7FF;&#xF900;-&#xFDCF;&#xFDF0;-&#xFFFD;&#x10000;-&#xEFFFF;.0-9&#xB7;&#x0300;-&#x036F;&#x203F;-&#x2040;]*)</expAnon-->
+    <expAnon>([\i-[:]][\c-[:]]*)</expAnon>
+  </term>  
+  
+  <!--  S ::= \s* -->
+  <term name="S">
+    <choice>
+      <empty/>
+      <expAnon>\s+</expAnon>
+    </choice>
+  </term>
+</grammar>

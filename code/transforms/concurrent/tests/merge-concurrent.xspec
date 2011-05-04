@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tests for merge-concurrent mode
+
+  Open Siddur Project
+  Copyright 2010 Efraim Feinstein
+  Licensed under the GNU Lesser General Public License, version 3 or later  
+
+  $Id: merge-concurrent.xspec 739 2011-04-15 04:17:09Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  stylesheet="../concurrent.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="garbage">
+      <x:context><tei:junk/><j:junk/><jx:junk/></x:context>
+    </x:scenario>
+  </x:pending>
+  <x:scenario label="merge-concurrent mode">
+    <x:scenario label="empty j:selection">
+      <x:context mode="merge-concurrent">
+        <root xml:base="merge-concurrent.xspec" 
+          jx:document-uri="merge-concurrent.xspec" 
+          xml:lang="en"
+          xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+          xmlns:jx="http://jewishliturgy.org/ns/jlp-processor">
+          <j:selection jx:uid="111">
+          </j:selection>
+        </root>
+      </x:context>
+      <x:expect label="converts to jx:merged-selection">
+        <jx:merged-selection 
+          jx:uid="111"
+          xml:base="..." 
+          xml:lang="en"
+          jx:document-uri="...">
+        </jx:merged-selection>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="j:selection with 2 pointers and 2 views">
+      <x:context mode="merge-concurrent">
+        <x:param name="flattened-views" as="element(jx:merged-view)+" tunnel="yes">
+          <jx:merged-view>
+            <tei:div jx:start="v1div1"/>
+            <tei:ab jx:start="v1ab1"/>
+            <tei:ptr jx:selection="111" jx:id="s1" target="#r1"/>
+            <tei:ab jx:end="v1ab1"/>
+            <tei:ab jx:start="v1ab2"/>
+            <tei:ptr jx:selection="111" jx:id="s2" target="#r2"/>
+            <tei:ab jx:end="v1ab2"/>
+            <tei:div jx:end="v1div1"/>
+          </jx:merged-view>
+          <jx:merged-view>
+            <tei:div jx:start="v2div1"/>
+            <tei:label>Test label</tei:label>
+            <tei:ab jx:start="v2ab1"/>
+            <tei:ptr jx:selection="111" jx:id="s1" target="#r1"/>
+            <tei:ab jx:end="v2ab1"/>
+            <tei:ab jx:start="v2ab2"/>
+            <tei:ptr jx:selection="111" jx:id="s2" target="#r2"/>
+            <tei:ab jx:end="v2ab2"/>
+            <tei:div jx:end="v2div1"/>
+          </jx:merged-view>
+        </x:param>
+        <root xml:base="merge-concurrent.xspec" jx:document-uri="merge-concurrent.xspec" xml:lang="en">
+          <j:selection jx:uid="111">
+            <tei:ptr jx:id="s1" target="#r1"/>
+            <tei:ptr jx:id="s2" target="#r2"/>
+          </j:selection>
+        </root>
+      </x:context>
+      <x:expect label="merges items in the selection unsorted">
+        <jx:merged-selection 
+          jx:uid="111"
+          xml:base="..." 
+          xml:lang="en"
+          jx:document-uri="...">
+            <tei:div jx:start="v1div1"/>
+            <tei:ab jx:start="v1ab1"/>
+            <tei:div jx:start="v2div1"/>
+            <tei:label>Test label</tei:label>
+            <tei:ab jx:start="v2ab1"/>
+            <tei:ptr jx:selection="111" jx:id="s1" target="#r1"/>
+            <tei:ab jx:end="v1ab1"/>
+            <tei:ab jx:start="v1ab2"/>
+            <tei:ab jx:end="v2ab1"/>
+            <tei:ab jx:start="v2ab2"/>
+            <tei:ptr jx:selection="111" jx:id="s2" target="#r2"/>
+            <tei:ab jx:end="v1ab2"/>
+            <tei:div jx:end="v1div1"/>
+            <tei:ab jx:end="v2ab2"/>
+            <tei:div jx:end="v2div1"/>
+        </jx:merged-selection>
+      </x:expect>
+    </x:scenario>
+  </x:scenario>
+</x:description>
+
+

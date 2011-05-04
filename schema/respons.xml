@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright TEI Consortium. 
+
+Modified by Efraim Feinstein, 2010
+
+Licensed under the GNU General Public License. 
+See the file COPYING.txt for details
+$Date: 2010-02-11 15:55:55 +0000 (Thu, 11 Feb 2010) $
+$Id: respons.xml 687 2011-01-23 23:36:48Z efraim.feinstein $
+-->
+<elementSpec 
+  xmlns="http://www.tei-c.org/ns/1.0" 
+  xmlns:rng="http://relaxng.org/ns/structure/1.0" 
+  module="certainty" ident="respons" mode="change">
+    <attDef ident="role" usage="rwa" mode="add" 
+      ns="http://jewishliturgy.org/ns/jlptei/1.0">
+      <desc>Responsibility is being assigned by this element for the activity given
+      by <att>j:for</att>
+      that was done by the person referenced by <att>resp</att> to <att>locus</att>
+      in <att>target</att>.</desc>
+      <valList type="closed" mode="add">
+        <valItem ident="scanner">
+          <desc>responsibility is being assigned concerning the scanning of the source 
+          of the element concerned.</desc>
+        </valItem>
+        <valItem ident="transcriber">
+          <desc>responsibility is being assigned concerning the original transcription of the 
+					value of the element concerned.</desc>
+        </valItem>
+        <valItem ident="editor">
+          <desc>responsibility is being assigned concerning the value of the element concerned.</desc>
+        </valItem>
+        <valItem ident="proofreader">
+          <desc>responsibility is being assigned concerning the proofreading of the value of the element
+	  concerned.</desc>
+        </valItem>
+        <valItem ident="encoder">
+          <desc>responsibility is being assigned concerning the encoding of the element concerned (location).</desc>
+	    </valItem>
+        <valItem ident="author">
+	  <desc>responsibility is being assigned concerning the original authorship of the value of the element.</desc>
+        </valItem>
+      </valList>
+    </attDef>
+
+</elementSpec>

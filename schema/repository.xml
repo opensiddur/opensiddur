@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <!--
+    repository.xml 
+    
+    Copyright 2009 Efraim Feinstein <efraim.feinstein@gmail.com> 
+    
+    Licensed under the GNU General Public License. 
+    
+    See the file GPL-3 for details.
+    
+    $Date: 2009-07-23 23:27:19 -0400 (Thu, 23 Jul 2009) $ 
+    $Id: repository.xml 215 2009-07-24 03:27:19Z efraim.feinstein $
+  -->
+<elementSpec xmlns="http://www.tei-c.org/ns/1.0"
+  xmlns:jx="http://www.jewishliturgy.org/ns/examples" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xi="http://www.w3.org/2001/XInclude"
+  module="liturgy" ident="repository" ns="http://jewishliturgy.org/ns/jlptei/1.0">
+  <equiv name="j:repository" filter="canonical-tei.xsl2#transform.repository"
+    mimeType="application/xsl" />
+  <gloss>Holds a text repository.</gloss>
+  <classes>
+    <memberOf key="att.global" />
+    <memberOf key="att.typed" />
+    <memberOf key="model.divLike" />
+  </classes>
+  <content>
+    <rng:oneOrMore>
+      <rng:ref name="seg" />
+    </rng:oneOrMore>
+  </content>
+  <exemplum>
+  </exemplum>
+  <remarks>
+    <p>
+      All
+      <gi>seg</gi>
+      elements in the repository must be identified by an
+      <att>@xml:id</att>
+      attribute
+    </p>
+  </remarks>
+  <listRef>
+    <ptr target="#div.repository" />
+  </listRef>
+</elementSpec>

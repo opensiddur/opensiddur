@@ -1,0 +1,930 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE xsl:stylesheet [
+<!ENTITY % hebrewent SYSTEM "xmldb:exist:///group/everyone/transliteration/hebrew.dtd">
+%hebrewent;
+]>
+<xsl:stylesheet
+  version="2.0" 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:tr="http://jewishliturgy.org/ns/tr/1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  extension-element-prefixes="xs xd"
+  >
+  <xsl:import href="../../common/common.xsl2" />
+  <xsl:import href="../data-compiler/conditionals.xsl2"/>
+	<xd:doc type="stylesheet">
+		<xd:short>
+			Automated transliterator for Hebrew to Roman (or any other alphabet)
+      text.
+		</xd:short>
+		<xd:detail>
+			<p>Implementation details: 
+			After substituting the Tetragrammaton for the appropriate pronunciation, a word is
+			split into independent characters, which are represented in XML as &lt;tr:cc/&gt; elements,
+			which are contained in tr:w elements.  Each tr:w element should contain a <strong>grammatical</strong> word.
+			cc stands for "complex character."
+			This transliterator is a 6 pass processor:
+			<ol>
+				<li>The "zeroth" pass assembles the shin and shin/sin dots and marks first, 
+        last letters of orthographic words and punctuation, and assembles the hiriq male-dagesh</li>
+				<li>The first pass assembles multicharacter vowels, such as shuruq, holam male, qamats-he</li>
+				<li>The second pass removes vowel letters that are ignored in transliteration</li>
+				<li>The third pass marks degeshim as hazak or kal; virtually doubles dagesh hazak</li>
+				<li>The fourth pass marks sheva as sheva na or sheva nach, using characters in the private use area</li>
+				<li>The fifth pass transliterates using a given table</li>
+			</ol>
+			</p>
+			<p>Partial words that are broken up between elements must be enclosed 
+      in tei:w elements, with a chain of @next attributes 
+      pointing from the first part to the last.  
+      (Partial words are not supported in standalone mode)</p>
+		</xd:detail>
+		<xd:copyright>Copyright 2008-2010 Efraim Feinstein</xd:copyright>
+
+		<xd:detail>
+			<p>This program is free software: you can redistribute it and/or modify
+			it under the terms of the GNU Lesser General Public License as published by
+			the Free Software Foundation, either version 3 of the License, or
+			(at your option) any later version.</p>
+
+			<p>This program is distributed in the hope that it will be useful,
+			but WITHOUT ANY WARRANTY; without even the implied warranty of
+			MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+			GNU Lesser General Public License for more details.</p>
+
+			<p>You should have received a copy of the GNU Lesser General Public License
+				along with this program.  If not, see 
+				<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
+			</p>
+		</xd:detail>
+		<xd:svnId>$Id: translit.xsl2 709 2011-02-24 06:37:44Z efraim.feinstein $</xd:svnId>
+	</xd:doc>
+	
+	<!--xsl:output method="text" encoding="utf8" indent="yes"/-->
+
+	<xd:doc>
+		Input filename when run in standalone mode
+	</xd:doc>
+	<xsl:param name="input-filename" select="''" as="xs:string"/>
+	
+	<xd:doc>
+		Output filename when run in standalone mode
+	</xd:doc>
+	<xsl:param name="output-filename" select="'translit.out.txt'" as="xs:string"/>
+
+	<xd:doc>
+		Transliteration table to use when in standalone mode (no extension)
+	</xd:doc>
+	<xsl:param name="table" select="'sbl'" as="xs:string"/>
+
+  <xd:doc>
+    <xd:short>Given the current selections, obtain a transliteration table</xd:short>
+    <xd:param name="current-settings">Current settings, which refer to the table's code</xd:param>
+  </xd:doc>
+  <xsl:function name="func:get-transliteration-table" as="element(tr:table)?">
+    <xsl:param name="current-settings" as="document-node()?"/>
+    
+    <xsl:variable name="tr-table" as="xs:string?"
+      select="func:get-selection-value($current-settings, 
+        'transliteration', 'table')"/>
+		<xsl:sequence select="func:debug($tr-table, 'func:get-transliteration-table()', $debug-detail)"/>
+    <xsl:if test="not(empty($tr-table) or $tr-table='off')">
+      <xsl:variable name="table-file-name" as="xs:string"
+        select="concat($tr-table, '.tr.xml')"/>
+      <xsl:sequence select="if (doc-available($table-file-name))
+        then document($table-file-name)/tr:table
+        else ()"/>
+    </xsl:if>  
+  </xsl:function>
+
+  <xd:doc>
+    <xd:short>Check if the given context item has a vowel or sheva (include shuruq and holam male)
+    </xd:short>
+  </xd:doc>
+  <xsl:function name="tr:has-vowel" as="xs:boolean">
+    <xsl:param name="context" as="element(tr:cc)"/>
+    
+    <xsl:for-each select="$context">
+      <xsl:sequence select="(tr:s|tr:vu|tr:vl|tr:vs) or
+        following::tr:cc[1][tr:cons='&vav;' and (tr:vl='&holam;' or 
+          (tr:d and not(tr:s|tr:vu|tr:vl|tr:vs)))]"/>
+    </xsl:for-each>
+  </xsl:function>
+
+  <xd:doc>
+    <xd:short>Catch j:parallel.  If transliteration is on,
+    insert a new j:parallel and process it.  Disabled by jx:disable-xlt</xd:short>
+    <xd:detail>Note: we can't always assume j:original is the Hebrew!
+    </xd:detail>
+  </xd:doc>
+  <xsl:template match="j:original[not(@jx:disable-xlit)]" priority="70">
+    <xsl:param name="current-settings" as="document-node()?" tunnel="yes"/>
+    
+    <xsl:variable name="tr-table" as="element(tr:table)?"
+      select="func:get-transliteration-table($current-settings)"/>
+      
+    <xsl:next-match/>    
+    <xsl:if test="not(empty($tr-table))">
+      <xsl:variable name="transliterated" as="element(j:parallel)">
+        <j:parallel type="transliteration" xml:lang="he-latn">
+          <xsl:apply-templates mode="transliterate">
+            <xsl:with-param name="transliteration-table" as="element(tr:table)"
+              tunnel="yes"
+              select="$tr-table" />
+          </xsl:apply-templates>
+        </j:parallel>
+      </xsl:variable>
+      <xsl:apply-templates select="$transliterated"/>
+    </xsl:if>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Replace transliteration-calls by @xml:lang with
+    the transliteration, if one is set</xd:short>
+  </xd:doc>
+  <xsl:template match="j:segGen[@type='transliteration']">
+    <xsl:param name="current-settings" as="document-node()?" tunnel="yes"/>
+    
+    <xsl:variable name="tr-table" as="element(tr:table)?"
+      select="func:get-transliteration-table($current-settings)"/>   
+    <xsl:variable name="result">
+      <tei:seg>
+        <xsl:choose>
+          <xsl:when test="empty($tr-table)">
+            <!-- no transliteration table, convert it into a tei:seg -->
+            <xsl:sequence select="@*|node()"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <!-- TODO - check if this is right! -->
+						<xsl:copy-of select="@* except (@xml:lang, @xml:id)"/>
+            <xsl:attribute name="xml:lang" select="'he-latn'"/>
+            <xsl:apply-templates mode="transliterate">
+              <xsl:with-param name="transliteration-table" 
+                as="element(tr:table)" select="$tr-table"
+                tunnel="yes"/>
+            </xsl:apply-templates>
+          </xsl:otherwise>
+        </xsl:choose>
+      </tei:seg>
+    </xsl:variable>
+    <xsl:apply-templates select="$result"/>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>If a transliteration is called for and we are not in a 
+      parallelGrp</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:seg[(lang('he') or lang('arc')) and not(lang('he-latn'))]" 
+		priority="70">
+    <xsl:param name="current-settings" as="document-node()?" tunnel="yes"/>
+    
+    <xsl:variable name="tr-table" as="element(tr:table)?"
+      select="func:get-transliteration-table($current-settings)"/>
+
+		<xsl:sequence select="func:debug(('current-settings=', $current-settings,' table=', $tr-table), ('tei:seg, priority=70 for ', func:get-xpath(.)), $debug-detail)"/>
+    <xsl:choose>
+      <xsl:when test="not(empty($tr-table)) and not(ancestor::j:parallelGrp)">
+        <xsl:variable name="result" as="element(j:parallelGrp)">
+					<j:parallelGrp>
+	          <j:original jx:disable-xlit="1">
+  	          <xsl:next-match/>
+    	      </j:original>
+      	    <j:parallel xml:lang="he-latn" jx:disable-xlit="1">
+							<xsl:copy>
+								<xsl:copy-of select="@* except (@xml:lang, @xml:id)"/>					
+	          	  <xsl:apply-templates mode="transliterate">
+  	          	  <xsl:with-param name="transliteration-table" 
+    	          	  as="element(tr:table)" select="$tr-table"
+      	          	tunnel="yes"/>
+	        	    </xsl:apply-templates>
+							</xsl:copy>
+    	      </j:parallel>
+					</j:parallelGrp>
+        </xsl:variable>
+        <xsl:apply-templates select="$result"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+	<xd:doc>
+		<xd:short>Find a whole word, reversing through the @next pointers.  
+    When the first part is found, go into assemble-word mode.</xd:short>
+	</xd:doc>
+	<xsl:template match="tei:w" mode="assemble-word-reverse">
+		<xsl:variable name="backlink" as="element(tei:w)?" 
+      select="tei:w[func:absolutize-uri(xs:anyURI(@next),current())=
+        func:absolutize-uri(xs:anyURI(concat('#',@xml:id)),current())]"/>
+		<xsl:choose>
+			<xsl:when test="$backlink">
+				<xsl:apply-templates select="$backlink" mode="#current"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:apply-templates select="." mode="assemble-word"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xd:doc>
+		<xd:short>Find a whole word, going forward through the @next 
+    pointers.</xd:short>
+	</xd:doc>
+	<xsl:template match="tei:w" mode="assemble-word">
+		<xsl:variable name="msg">tei:w(mode=assemble-word):<xsl:value-of select="."/></xsl:variable>
+		<xsl:sequence select="func:debug($msg,'translit.xsl2(tei:w, mode=assemble-word)',$debug-detail)"/>
+		<xsl:apply-templates mode="#current"/>
+		<xsl:if test="@next">
+			<xsl:apply-templates mode="#current" select="func:follow-uri(@next,.,-1)"/>
+		</xsl:if>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Finds the textual part of a whole word; If it's from the context we're looking for, don't wrap it.  If it isn't, wrap it in tr:ignore tags.</xd:short>
+	</xd:doc>
+	<xsl:template match="text()" mode="assemble-word">
+		<xsl:param tunnel="yes" name="this-context"/>
+		<xsl:choose>
+			<xsl:when test="current()=$this-context">
+				<xsl:copy/>
+			</xsl:when>
+			<xsl:otherwise>
+				<tr:ignore><xsl:copy/></tr:ignore>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xd:doc>
+		<xd:short>Replaces appearances of the Tetragrammaton with their pronounced versions. Returns an xs:string.  Will only work if the Tetragrammaton is a not broken up.</xd:short>
+	</xd:doc>
+	<xsl:template match="text()" mode="replace-tetragrammaton">
+		<xsl:param name="word" as="xs:string" select="."/>
+		
+		<xsl:variable name="msg">replace-tetragrammaton: word=<xsl:value-of select="$word"/></xsl:variable>
+		<xsl:sequence select="func:debug($msg,'translit.xsl2(text(),mode=replace-tetragrammaton)',$debug-detail)"/>
+		
+		<xsl:variable name="replaced" as="xs:string*">
+			<xsl:analyze-string select="$word" flags="x"
+			regex="&yod;([&sheva;]?)([\P{{L}}]*)&he;([\P{{L}}]*)&vav;([&qamats;&patah;&hiriq;])([\P{{L}}]*)&he;([\P{{L}}]*)$">
+				<xsl:matching-substring>
+					<xsl:variable name="msg">matching: <xsl:value-of select="regex-group(0)"/></xsl:variable>
+					<xsl:sequence select="func:debug($msg,'translit.xsl2(text(),mode=replace-tetragrammaton)',$debug-detail)"/>
+					<xsl:choose>
+						<xsl:when test="regex-group(4)='&hiriq;'">
+							<!-- elohim -->
+							<xsl:value-of select="string-join(
+								('&aleph;',
+								if (regex-group(1)='&sheva;') then '&hatafsegol;' else '',
+								regex-group(2),
+								'&lamed;&holam;',
+								regex-group(3),
+								'&he;&hiriq;',
+								regex-group(5),
+								'&finalmem;',
+								regex-group(6)),'')"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<!-- adonai -->
+							<xsl:value-of select="string-join(
+								('&aleph;',
+								if (regex-group(1)='&sheva;') then '&hatafpatah;' else '',
+								regex-group(2),
+								'&dalet;&holam;',
+								regex-group(3),
+								'&nun;',
+								regex-group(4),
+								regex-group(5),
+								'&yod;',
+								regex-group(6)),'')"/>
+						</xsl:otherwise>
+					</xsl:choose>
+				</xsl:matching-substring>
+				<xsl:non-matching-substring>
+					<xsl:variable name="msg">non-matching: <xsl:value-of select="."/></xsl:variable>
+					<xsl:sequence select="func:debug($msg,'translit.xsl2(text(), mode=replace-tetragrammaton)', $debug-detail)"/>
+					<xsl:value-of select="."/>
+				</xsl:non-matching-substring>
+			</xsl:analyze-string>
+		</xsl:variable>
+		<xsl:value-of select="string-join($replaced,'')"/>
+	</xsl:template>
+
+	<xd:doc>
+		<xd:short>Make a tr:w word filled with tr:cc "complex characters."  
+		The result must be processed further to make all of these correct.</xd:short>
+		<xd:detail>A set of complex characters consists of the following elements in the "urn:transliterator" namespace:
+		<ul>
+			<li>cons: consonant</li>
+			<li>s: sheva</li>
+			<li>vu: ultrashort vowel</li>
+			<li>vs: short vowel</li>
+			<li>vl: long vowel</li>
+			<li>d: dagesh or rafe</li>
+			<li>dot:shin/sin dot</li>
+			<li>m: meteg</li>
+			<li>al: lower accent</li>
+			<li>am: "mid accent" - Unicode character class between 220 and 230, exclusive</li>
+			<li>ah: high accent</li>
+		</ul>
+		</xd:detail>
+		<xd:param name="word">The content of the Hebrew word to be converted, which is a Unicode string inside tr:w</xd:param>
+	</xd:doc>
+	<xsl:template match="text()" mode="make-word">
+		<xsl:param name="word" as="xs:string" select="."/>
+		
+		<!-- regex order is defined by the idiotic -but at least standard- Unicode normalization chart
+		$1=consonant or equivalent 
+		$2=sheva
+		$3=ultrashort
+		$4=short
+		$5=long
+		$6=dagesh
+		$7=meteg
+		$8=rafe
+		$9=shin/sin dot
+		$10=lower accent
+		$11=mid accent
+		$12=upper accent
+		-->
+		<xsl:analyze-string select="normalize-unicode(normalize-space($word),'NFKD')" 
+		flags="x"
+		regex="([\p{{Lo}}\p{{Po}}&cgj;])
+		([&sheva;]?)
+				([&hatafsegol;-&hatafqamats;]?)
+				([&hiriq;&segol;&patah;&qamatsqatan;&qubuts;]?)
+				([&tsere;&qamats;&holam;&holamhaserforvav;]?)
+			([&dageshormapiq;]?)
+			([&meteg;]?)
+			([&rafe;]?)
+			([&shindot;&sindot;]?)
+			([&etnahta;&tevir;&atnahhafukh;&munah;&mahapakh;&merkha;&merkhakefula;&darga;&yerahbenyomo;&lowerdot;&tipeha;]?)
+			([&dehi;&yetiv;&zinor;]?)
+			([&geresh;&shalshelet;&accentsegol;&ole;&iluy;&pazer;&qadma;&zaqefqatan;&zaqefgadol;&telishaqetana;&telishagedola;&qarneypara;&gershayim;&gereshmuqdam;&revia;&zarqa;&pashta;&upperdot;]*)"
+			>
+			<xsl:matching-substring>
+				<xsl:variable name="complex-character-subelements" 
+				select="('cons','s','vu','vs','vl','d','m','d','dot','al','am','ah')"/>
+				<tr:cc>
+					<xsl:for-each select="1 to 12">
+						<xsl:variable name="index-num" select="." as="xs:integer"/>
+						<xsl:variable name="current-string" select="regex-group($index-num)" as="xs:string"/>
+						<xsl:if test="string-length($current-string)&gt;0">
+							<xsl:element name="{concat('tr:',$complex-character-subelements[$index-num])}">
+								<xsl:value-of select="$current-string"/>
+							</xsl:element>
+						</xsl:if>
+					</xsl:for-each>
+				</tr:cc>
+			</xsl:matching-substring>
+			<xsl:non-matching-substring>
+				<tr:nomatch><xsl:value-of select="."/></tr:nomatch>
+				<xsl:variable name="msg">Encountered a character ("<xsl:value-of select="."/>"=#<xsl:value-of select="string-to-codepoints(.)"/>) in your Hebrew text in the word <xsl:value-of select="$word"/> that doesn't match any known pattern in Hebrew.  This is either a typo or a bug in the transliterator.
+				</xsl:variable>
+				<xsl:sequence select="func:debug($msg,'translit.xsl2(text(), mode=make-word)',$debug-warn)"/>
+			</xsl:non-matching-substring>
+		</xsl:analyze-string>
+	</xsl:template>
+
+  <xd:doc>
+    <xd:short>continue...</xd:short>
+  </xd:doc>
+  <xsl:template match="tr:cc|tr:silent|tr:w" mode="transliterate-final" priority="3">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Check for suppressed virtual doubling</xd:short>
+  </xd:doc>
+  <xsl:template match="tr:cc[@virtual]/tr:*" 
+    mode="transliterate-final" priority="4">
+    <xsl:param name="transliteration-table" as="element(tr:table)"
+      tunnel="yes" required="yes"/>
+      
+    <xsl:variable name="text" as="xs:string" select="."/>
+    <xsl:if test="not($transliteration-table/tr:tr[@from=$text]/@double=('no','false','off'))"> 
+      <xsl:next-match/>
+    </xsl:if>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>If a dagesh letter requires a different transliteration
+    because it has a dagesh, transliterate it here</xd:short>
+  </xd:doc>
+  <xsl:template match="tr:cons[not(tr:suppress) and following-sibling::tr:d]" 
+    mode="transliterate-final" priority="2">
+    <xsl:param name="transliteration-table" required="yes" tunnel="yes" 
+      as="element(tr:table)"/>
+    <xsl:variable name="text" as="xs:string" select="."/>
+    <xsl:choose>
+      <xsl:when test="contains(., '&dageshormapiq;') or $text='&vav;'">
+        <!-- kluge: excludes vav from being able to have its own entry! -->
+        <xsl:next-match/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="(
+          $transliteration-table/tr:tr[@from=concat($text, '&dageshormapiq;')]
+          ,
+          $transliteration-table/tr:tr[@from=$text])[1]
+          /@to"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>silent letter: use @silent instead of @to</xd:short>
+  </xd:doc>
+  <xsl:template match="tr:silent/tr:cons" mode="transliterate-final">
+    <xsl:param name="transliteration-table" required="yes" tunnel="yes" 
+      as="element(tr:table)"/>
+    <xsl:variable name="text" as="xs:string" select="."/>
+    <xsl:value-of select="$transliteration-table/tr:tr[@from=$text]/@silent"/>
+  </xsl:template>
+  
+	<xd:doc>
+		<xd:short>Transliterate non-ignored text from the table</xd:short>
+		<xd:param name="transliteration-table"></xd:param>
+	</xd:doc>
+	<xsl:template match="tr:*[not(tr:suppress) and not(parent::tr:silent)]" 
+      mode="transliterate-final" priority="1">
+	 <xsl:param name="transliteration-table" required="yes" tunnel="yes" 
+      as="element(tr:table)"/>
+		
+	 <xsl:variable name="text" select="." as="xs:string"/>
+	 <xsl:sequence select="func:debug(
+        ('. =', $text, 
+         ' tr:tr =', string($transliteration-table/tr:tr[@from=$text]/@to)), 
+         'translit: tr:cc', $debug-detail)"/> 
+	 <xsl:value-of select="$transliteration-table/tr:tr[@from=$text]/@to"/>
+	</xsl:template>
+
+	<xd:doc>
+		<xd:short>Ignore text under tr:ignore/tr:suppress</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:ignore|tr:suppress|tr:*[tr:suppress]" mode="transliterate-final" priority="2"/>
+
+	<!--xsl:template name="transliterate-final">
+		<xsl:param name="transliteration-table" tunnel="yes" as="element(tr:tr)+"/>
+		<xsl:param name="word" as="element(tr:w)"/>
+	</xsl:template-->
+
+	<xd:doc>
+		<xd:short>transliterates raw text</xd:short>
+		<xd:param name="transliteration-table">A set of tr:tr elements that form a table for converting characters to their transliterated equivalents.</xd:param>
+	</xd:doc>
+	<xsl:template match="text()" mode="transliterate">
+        <xsl:param name="transliteration-table" required="yes" tunnel="yes" 
+          as="element(tr:table)"/>
+      
+		<xsl:variable name="context" select="current()"/>
+		
+		<xsl:for-each select="tokenize(.,'\s+')">
+			<xsl:variable name="original" select="." as="xs:string" />
+			<xsl:if test="string-length($original) &gt; 0">
+				<xsl:variable name="replaced-tetragrammaton" as="element(tr:w)">
+					<xsl:variable name="whole-word" as="element(tr:w)">
+						<xsl:choose>
+							<xsl:when test="$context/ancestor::tei:w">
+								<tr:w>
+									<xsl:apply-templates select="$context/ancestor::tei:w" mode="assemble-word-reverse">
+										<xsl:with-param name="this-context" tunnel="yes" select="$context"/>
+									</xsl:apply-templates>
+								</tr:w>
+							</xsl:when>
+							<xsl:otherwise>
+								<tr:w><xsl:sequence select="$original"/></tr:w>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:variable>
+				    <xsl:sequence select="func:debug($whole-word, 'whole-word',$debug-detail)"/>
+                    <xsl:choose>
+                      <xsl:when test="not($transliteration-table/tr:option
+                        [@name='replace-tetragrammaton' and @value=('off','false','no')])">
+					     <xsl:apply-templates select="$whole-word" mode="replace-tetragrammaton"/>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <xsl:sequence select="$whole-word"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+				</xsl:variable>
+				<xsl:sequence select="func:debug($replaced-tetragrammaton, 'translit: replaced-tetragrammaton', $debug-detail)"/>
+
+				<xsl:variable name="complex-character-word" as="element(tr:w)">
+					<xsl:apply-templates select="$replaced-tetragrammaton" mode="make-word"/>
+				</xsl:variable>
+				<xsl:sequence select="func:debug($complex-character-word, 
+          'translit: complex character sequence (after make-word)', $debug-detail)"/>
+
+				<xsl:variable name="output" as="xs:string*">
+					<xsl:if test="not(empty($complex-character-word))">
+						<xsl:variable name="zeroth-pass-result" as="element(tr:w)">
+							<xsl:apply-templates select="$complex-character-word" mode="transliterate-zeroth-pass"/>
+						</xsl:variable>
+						
+						<xsl:variable name="first-pass-result" as="element(tr:w)">
+							<xsl:apply-templates select="$zeroth-pass-result" mode="transliterate-first-pass"/>
+						</xsl:variable>            
+            <xsl:sequence select="func:debug($first-pass-result, 'complex character sequence (after first-pass)', $debug-detail)"/>
+
+						<xsl:variable name="second-pass-result" as="element(tr:w)">
+							<xsl:apply-templates select="$first-pass-result" mode="transliterate-second-pass"/>
+						</xsl:variable>
+            <xsl:sequence select="func:debug($second-pass-result, 'complex character sequence (after second pass)', $debug-detail)"/>
+
+						<xsl:variable name="third-pass-result" as="element(tr:w)">
+							<xsl:apply-templates select="$second-pass-result" mode="transliterate-third-pass"/>
+						</xsl:variable>
+            <xsl:sequence select="func:debug($third-pass-result, 'complex character sequence (after third-pass)', $debug-detail)"/>
+
+						<xsl:variable name="fourth-pass-result" as="element(tr:w)">
+							<xsl:apply-templates select="$third-pass-result" mode="transliterate-fourth-pass"/>
+						</xsl:variable>
+            <xsl:sequence select="func:debug($fourth-pass-result, 'complex character sequence (after fourth-pass)', $debug-detail)"/>
+
+						<xsl:apply-templates select="$fourth-pass-result" mode="transliterate-final"/>
+					</xsl:if>
+				</xsl:variable>
+				<xsl:sequence select="string-join($output,'')"/>
+        <xsl:sequence select="func:debug(string-join($output,''), 'output', $debug-detail)"/>
+			</xsl:if><!-- string-length($original) >0 -->
+		</xsl:for-each>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Mark first and last in word with @first or @last; punctuation is marked with @punct; combine shin/sin dot</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc" mode="transliterate-zeroth-pass">
+		<xsl:copy>
+			<xsl:copy-of select="@*"/>
+			<!-- mark position; can't use position() because there may be other elements in the hierarchy! -->
+			<xsl:if test="not(preceding::tr:cc) or preceding::tr:cc[1][matches(tr:cons/text(),'\p{P}','x')]">
+				<xsl:attribute name="first" select="'1'"/>
+			</xsl:if>
+			<xsl:if test="matches(tr:cons/text(),'\p{P}','x')">
+				<xsl:attribute name="punct" select="'1'"/>
+			</xsl:if>
+			<xsl:if test="not(following::tr:cc) or following::tr:cc[1][matches(tr:cons/text(),'\p{P}','x')]">
+				<xsl:attribute name="last" select="'1'"/>
+			</xsl:if>
+			<!-- shin/sin dot -->
+			<xsl:choose>
+				<xsl:when test="tr:dot">
+					<tr:cons><xsl:value-of select="tr:cons"/><xsl:value-of select="tr:dot"/></tr:cons>
+					<xsl:sequence select="* except (tr:cons,tr:dot)"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:sequence select="*"/>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:copy>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Furtive patah.  Reverses the vowel and consonant order.</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc[@last and tr:vs='&patah;']" mode="transliterate-first-pass">		
+		<xsl:copy>
+			<xsl:copy-of select="@*"/>
+			<xsl:choose>
+				<xsl:when test="tr:cons=('&aleph;','&he;','&het;', '&ayin;','&resh;')">
+					<xsl:sequence select="func:debug('found', 'test for furtive patah, mode=transliterate-first-pass',$debug-detail)"/>
+					<xsl:sequence select="(tr:vs,tr:cons,* except (tr:vs,tr:cons))"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:sequence select="*"/>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:copy>
+	</xsl:template>
+	
+	
+	<xd:doc>
+		<xd:short>Complex character preceding a holam male.  Adds the holam male.</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc[not(tr:vs|tr:s|tr:vl|tr:vu) and following::tr:cc[1][tr:cons='&vav;' and tr:vl='&holam;']]" mode="transliterate-first-pass">
+		<xsl:sequence select="func:debug((),'found holam male',$debug-detail)"/>
+		<xsl:variable name="holam-male" as="element()">
+			<tr:vl>&vav;&holam;</tr:vl>
+		</xsl:variable>
+		<xsl:copy>
+			<xsl:copy-of select="@*"/>
+			<xsl:copy-of select="following::tr:cc[1]/@last"/><!-- holam male can't be first or punct -->
+			<xsl:sequence select="(tr:cons,$holam-male,* except tr:cons)"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>vav with holam - remove (it's a typographic convention for holam male).  For vav haluma use HEBREW VOWEL HOLAM FOR VAV instead</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc[tr:cons='&vav;' and tr:vl='&holam;']" mode="transliterate-first-pass"/>
+	
+	<xd:doc>
+		<xd:short>Complex character preceding a shuruq; adds the shuruq; ignore two "possible" shuruqs in a row - first is not a shuruq</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc[not(tr:vs|tr:s|tr:vl|tr:vu) and 
+  following::tr:cc[1][tr:cons='&vav;' and tr:d='&dageshormapiq;'] and 
+  not(following::tr:cc[2][tr:cons='&vav;' and tr:d='&dageshormapiq;'])]" mode="transliterate-first-pass">
+		<xsl:sequence select="func:debug((),'found shuruq',$debug-detail)"/>
+		<xsl:variable name="shuruq" as="element()">
+			<tr:vl>&vav;&dageshormapiq;</tr:vl>
+		</xsl:variable>
+		<xsl:copy>
+			<xsl:copy-of select="following::tr:cc[1]/@last"/>
+			<xsl:copy-of select="@*"/>
+			<xsl:sequence select="(tr:cons,tr:d,$shuruq,* except (tr:cons,tr:d))"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>vav with dagesh. 
+		At beginning of word - replace the current cc with a shuruq vowel only; 
+		if the preceding consonant has no vowel, it's a shuruq and should be ignored; 
+		otherwise, it gets copied wholesale because it's a vav with dagesh; ignores first vav-dagesh</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc[tr:cons='&vav;' and 
+    tr:d='&dageshormapiq;' and 
+    not(tr:vl|tr:vs|tr:s) and
+    not(following::tr:cc[1][tr:cons='&vav;' and 
+      (tr:d='&dageshormapiq;' or tr:vl='&holam;')])]" 
+    mode="transliterate-first-pass">
+		<xsl:choose>
+			<xsl:when test="@first">
+				<xsl:sequence select="func:debug('at beginning of word', 'found possible shuruq', $debug-detail)"/>
+				<xsl:copy>
+					<xsl:copy-of select="@*"/>
+					<tr:vl>&vav;&dageshormapiq;</tr:vl>
+					<xsl:sequence select="* except (tr:cons, tr:d)"/>
+				</xsl:copy>
+			</xsl:when>
+			<xsl:when test="not(@first) and preceding::tr:cc[1][not(tr:s|tr:vs|tr:vl|tr:vu)]">
+				<xsl:sequence select="func:debug('middle of word', 'found possible shuruq', $debug-detail)"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:sequence select="func:debug('no I did not', 'found possible shuruq', $debug-detail)"/>
+				<xsl:sequence select="."/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+	
+  
+  <!-- OLD: tr:cc[(tr:vs=('&hiriq;','&segol;') or tr:vl='&tsere;') and 
+      following::tr:cc[1][
+        tr:cons='&yod;' 
+        and not(tr:s|tr:d|tr:vl|tr:vs|tr:vu)]] -->
+	<xd:doc>
+		<xd:short>Hiriq male or long versions of tsere and segol</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc[(tr:vs=('&hiriq;','&segol;') or tr:vl='&tsere;') and 
+      following::tr:cc[1][tr:cons='&yod;' and (tr:d or not(tr:has-vowel(.)))]]" 
+      mode="transliterate-first-pass">
+        <xsl:param name="transliteration-table" as="element(tr:table)" tunnel="yes"
+          required="yes"/>
+        <xsl:variable name="vowel-male" as="element()">
+		  <tr:vl>
+            <xsl:value-of select="tr:vs|tr:vl"/>
+            <xsl:text>&yod;</xsl:text>
+            <xsl:if test="tr:vs='&hiriq;' and 
+              following::tr:cc[1][tr:d] and
+              $transliteration-table/tr:tr[@from='&hiriq;&yod;&dageshormapiq;']">
+              <xsl:text>&dageshormapiq;</xsl:text>
+            </xsl:if>
+          </tr:vl>
+		</xsl:variable>
+		<xsl:copy>
+			<xsl:copy-of select="following::tr:cc[1]/@last"/>
+			<xsl:sequence select="(@*, tr:cons,$vowel-male,* except (tr:cons,tr:vs,tr:vl))"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Hiriq male and similar, remove the yod (but not when it has a dagesh)</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc[tr:cons='&yod;' and 
+    not(tr:s|tr:d|tr:vl|tr:vs|tr:vu) and 
+    preceding::tr:cc[1][tr:vs=('&hiriq;','&segol;') or tr:vl='&tsere;'] and
+    not(following::tr:cc[1][tr:cons='&vav;' and 
+      ((tr:d and not(tr:vl|tr:vs|tr:vu|tr:s)) or tr:vl='&holam;') ])]" 
+    mode="transliterate-first-pass"/>
+	<!-- 
+  <xd:doc>
+    <xd:short>Hiriq male with dagesh</xd:short>
+  </xd:doc>
+	<xsl:template match="tr:cc[tr:vs='&hiriq;' and 
+      following::tr:cc[1][tr:cons='&yod;' and tr:d]]" 
+      mode="transliterate-zeroth-pass">
+    <xsl:variable name="vowel-male" as="element()">
+      <tr:vl>&hiriq;&yod;</tr:vl>
+    </xsl:variable>
+    <xsl:copy>
+      <xsl:copy-of select="following::tr:cc[1]/@last"/>
+      <xsl:sequence select="(@*, tr:cons,$vowel-male,* except (tr:cons,tr:vs))"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>yod w/dagesh following hiriq male w/dagesh:
+    result depends on tr:option suppress-hiriq-male-dagesh.  
+    If true, suppress the consonant, otherwise, include the consonant w/o the dagesh and 
+    always include the vowel</xd:short>
+    <xd:detail>would conflict w/long qamats in 1st pass</xd:detail>
+  </xd:doc>
+  <xsl:template match="tr:cc[tr:cons='&yod;' and tr:d and 
+    preceding::tr:cc[1][tr:vs='&hiriq;']]" 
+    mode="transliterate-zeroth-pass">
+    <xsl:param name="transliteration-table" as="element(tr:table)" tunnel="yes"
+      required="yes"/>
+    <xsl:copy>
+      <xsl:variable name="new-tr-cons" as="element(tr:cons)">
+        <tr:cons>
+          <xsl:text>&yod;</xsl:text>
+          <xsl:if test="$transliteration-table/tr:option
+            [@name='suppress-hiriq-male-dagesh' and @value=('yes','on','true')]">
+            <tr:suppress/>
+          </xsl:if>
+        </tr:cons>
+      </xsl:variable>
+      <xsl:sequence select="@*, $new-tr-cons, * except (tr:cons, tr:d)"/>
+    </xsl:copy> 
+  </xsl:template>
+   -->
+	<xd:doc>
+		<xd:short>Check if a qamats is a vowel letter.</xd:short>
+    <xd:detail>Removed @last condition on following tr:cc.
+    Has to prevent next letter from having a vowel itself or shuruq/holam male
+    </xd:detail>
+	</xd:doc>
+	<xsl:template match="tr:cc[tr:vl='&qamats;' 
+    and (following::tr:cc[1][tr:cons='&he;' and 
+      not(tr:d) and not(tr:has-vowel(.))])]" 
+    mode="transliterate-first-pass">
+		<xsl:variable name="qamats-he" as="element()">
+			<tr:vl><xsl:value-of select="'&qamats;&he;'"/></tr:vl>
+		</xsl:variable>
+		<xsl:copy>
+			<xsl:copy-of select="following::tr:cc[1]/@last"/>
+			<xsl:sequence select="(@*, tr:cons,$qamats-he,* except (tr:cons,tr:vl))"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Remove the vowel letter he</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc[tr:cons='&he;' and 
+      not(tr:has-vowel(.)) and not(tr:d) and 
+      preceding::tr:cc[1][tr:vl='&qamats;']]" 
+      mode="transliterate-first-pass">
+      <tr:silent><xsl:sequence select="tr:cons"/></tr:silent>
+    </xsl:template>
+	
+	<xd:doc>
+		<xd:short>Put a vowel on the preceding letter when a silent letter is 
+    about to be removed.</xd:short>
+	</xd:doc>
+  <!-- added @last condition- may cause errors -->
+	<xsl:template match="tr:cc[not(@first|@punct) and 
+	not(tr:has-vowel(.)) and 
+	following::tr:cc[1][tr:cons=('&he;','&aleph;') and 
+    not(tr:d) and not(tr:has-vowel(.)) and not(@last) ]]" 
+	mode="transliterate-second-pass">
+		<xsl:sequence select="func:debug((), 'Letter precedes silent letter', $debug-detail)"/>
+		<xsl:copy>
+			<xsl:copy-of select="following::tr:cc[1]/@last"/>
+			<xsl:sequence select="(@*, tr:cons,* except tr:cons)"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Remove silent letters in the second pass.  
+    The silent letter may actually have a vowel after the first pass (HOW!?), 
+    which should be moved (by another template) to the preceding letter</xd:short>
+	</xd:doc>
+  <!-- remove he? -->
+	<xsl:template match="tr:cc[tr:cons=('&aleph;') and 
+      not(tr:d) and not(tr:has-vowel(.)) and 
+		(not(preceding::tr:cc[1][tr:s|tr:vs|tr:vu|tr:vl]) or 
+          (not(@last)))
+	and not(@first|@punct)]" mode="transliterate-second-pass">
+		<xsl:sequence select="func:debug(('Removing ', string(tr:cons), 'as silent letter.'), 'translit: second pass', $debug-detail)"/>
+      <tr:silent><xsl:sequence select="tr:cons"/></tr:silent>
+	</xsl:template>
+	
+	<xd:doc>
+      <xd:short>Try to find whether a dagesh is a kal or hazak.  
+      If hazak, double the letter by adding a "virtual" complex 
+      character before the current one, otherwise join the dagesh 
+      to the consonant.</xd:short>
+	</xd:doc>
+	<xsl:template match="tr:cc[tr:d='&dageshormapiq;' 
+      and not(tr:cons='&he;' and @last)]" 
+      mode="transliterate-third-pass">
+		<!-- dagesh kal if begedkeft letter at beginning of word or after sheva(nach) -->
+		<xsl:variable name="is-bgdkft" as="xs:boolean" 
+		select="tr:cons=('&bet;','&gimel;','&dalet;','&finalkaf;','&kaf;','&finalpe;','&pe;','&tav;')"/>
+		<xsl:variable name="is-dagesh-kal" as="xs:boolean" 
+		select="($is-bgdkft) 	and (@first or preceding::tr:cc[1][tr:s])" />
+		<xsl:variable name="new-consonant" as="element()">
+			<tr:cons>	
+				<xsl:value-of select="tr:cons"/>
+				<xsl:if test="$is-bgdkft">
+					<xsl:value-of select="tr:d"/>
+				</xsl:if>
+			</tr:cons>
+		</xsl:variable>
+		<xsl:choose>
+			<xsl:when test="$is-dagesh-kal=true()">
+				<xsl:copy>
+					<xsl:sequence select="(@*, $new-consonant, * except (tr:cons,tr:d))"/>
+				</xsl:copy>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:attribute name="virtual" select="'1'"/>
+					<xsl:sequence select="(if (@first) then @first else (), $new-consonant)"/>
+					<tr:d><xsl:value-of select="tr:d"/></tr:d>
+					<tr:s><xsl:text>&shevanach;</xsl:text></tr:s>
+				</xsl:copy>
+				<xsl:copy>
+					<xsl:sequence select="(@* except (@first,@last), if (@last) then @last else (), $new-consonant, * except tr:cons)"/>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Determine if an indeterminate sheva is na or nach.</xd:short>
+		<xd:detail>
+		Rules:
+		<ul>
+			<li>First letter in word</li>
+			<li>Preceding letter had a long vowel or sheva and not last letter in word</li>
+			<li>Next letter is not last and with sheva (not the first in a doubly closed syllable)</li>
+			<li>First consonant in a sequence of two identical consonants</li>
+		</ul>
+		</xd:detail>
+	</xd:doc>
+	<xsl:template match="tr:cc[tr:s='&sheva;']" mode="transliterate-fourth-pass">
+		<xsl:copy>
+			<xsl:copy-of select="@*"/>
+			<xsl:variable name="sheva" as="element()">
+		      <!-- removed and @last from following::tr:cc[1][tr:s] -->
+              <tr:s><xsl:value-of select="if 
+				(
+				(@first
+				or preceding::tr:cc[1][tr:vl|tr:s] 
+				and not(@last))
+				and not(following::tr:cc[1][tr:s])
+				or (tr:cons=following::tr:cc[1]/tr:cons)
+				) then '&shevana;' else '&shevanach;'"/></tr:s>
+			</xsl:variable>
+			<xsl:sequence select="(tr:cons,$sheva,* except (tr:cons,tr:s))"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>By default, pass on what already exists in all modes.</xd:short>
+	</xd:doc>
+	<xsl:template match="*" mode="make-word assemble-word replace-tetragrammaton transliterate transliterate-zeroth-pass transliterate-first-pass transliterate-second-pass transliterate-third-pass transliterate-fourth-pass  transliterate-final">
+		<xsl:sequence select="func:debug((), ('translit: catch-all - ', name(.)), $debug-detail)"/>
+		
+		<xsl:copy>
+			<xsl:copy-of select="@*"/>
+			<xsl:apply-templates mode="#current"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	<xsl:template match="/" mode="standalone">
+		<xsl:param name="transliteration-table" tunnel="yes" as="element(tr:table)" select="document('sbl.tr.xml')/tr:table"/>
+		
+		<xsl:sequence select="func:debug($transliteration-table, 'transliterator in standalone mode', $debug-detail)"/>
+		<xsl:apply-templates mode="transliterate">
+			<xsl:with-param name="transliteration-table" tunnel="yes" select="$transliteration-table" as="element(tr:table)"/>
+		</xsl:apply-templates>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Main entry point for use as a standalone transliterator.  Otherwise, ignored.</xd:short>
+	</xd:doc>
+	<xsl:template name="main">
+		<xsl:variable name="temp-input" as="element()">
+			<tr:temp>
+				<xsl:value-of select="unparsed-text($input-filename)"/>
+			</tr:temp>
+		</xsl:variable>
+		<xsl:result-document encoding="utf8" method="text" href="{$output-filename}">
+			<xsl:variable name="temp-output" as="element()">
+				<xsl:apply-templates mode="transliterate" select="$temp-input">
+					<xsl:with-param name="transliteration-table" 
+            tunnel="yes" 
+            select="document(concat($table,'.tr.xml'))/tr:table" 
+            as="element(tr:table)"/>
+				</xsl:apply-templates>
+			</xsl:variable>
+			<xsl:value-of select="string($temp-output)"/>
+		</xsl:result-document>
+	</xsl:template>
+</xsl:stylesheet>

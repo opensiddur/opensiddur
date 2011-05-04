@@ -1,0 +1,36 @@
+#!/bin/sh 
+# 
+# $Id: saxon 742 2011-04-17 06:38:52Z efraim.feinstein $
+
+# exit 0 on --help so the xspec script will work right 
+#while [ $# -gt 0 ]
+#do
+#    case "$1" in
+#       --help)   echo "Usage: saxon [saxonoptions] xsltfile"; exit 0;;
+#    esac
+#done
+if [ "$1" = "--help" ];
+then 
+  echo "Usage: saxon [saxonoptions] xsltfile"; exit 0;
+fi 
+
+# Detect Cygwin. If Cygwin is found, use Cygwin paths and path separators for
+# Java. Otherwise, use regular *nix ones
+CYGWIN=false;
+
+case "`uname`" in
+  CYGWIN*) CYGWIN=true;
+esac
+
+SCRIPTPATH=$(dirname $(absolutize $0))
+RESOLVEROPTIONS="-x:org.apache.xml.resolver.tools.ResolvingXMLReader -y:org.apache.xml.resolver.tools.ResolvingXMLReader -r:org.apache.xml.resolver.tools.CatalogResolver"
+SAXONJAR=$SCRIPTPATH/saxonhe-9.2.1.5.jar
+COMMONDIR=$SCRIPTPATH/../common
+RESOLVERPATH=$SCRIPTPATH/resolver-1.2.jar
+CLASSPATH="$SAXONJAR:$COMMONDIR:$RESOLVERPATH"
+
+if $CYGWIN; then
+  CLASSPATH=`cygpath --path -m "$CLASSPATH"`
+fi
+
+nice -n 10 java $JAVAOPTIONS -cp "$CLASSPATH" net.sf.saxon.Transform $RESOLVEROPTIONS -ext:on $@

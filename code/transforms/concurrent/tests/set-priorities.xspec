@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Test set-priorities mode
+
+Open Siddur Project
+Copyright 2010 Efraim Feinstein
+Licensed under the GNU Lesser General Public License, version 3 or later
+
+$Id: set-priorities.xspec 739 2011-04-15 04:17:09Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  stylesheet="../set-priorities.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="garbage">
+      <x:context><tei:junk/><j:junk/><jx:junk/></x:context>
+    </x:scenario>
+  </x:pending>
+  <x:scenario label="set-priorities mode">
+    <x:scenario label="with element inside selection">
+      <x:context mode="set-priorities">
+        <tei:ptr jx:selection="1" target="#x"/>
+      </x:context>
+      <!-- *[@jx:selection] can't really be the root element, so it doesn't have xml:base, etc added -->
+      <x:expect label="No added priority" test="empty(/tei:ptr/@jx:priority)"/>
+    </x:scenario>
+
+    <x:scenario label="with 1 selection element">
+      <x:context mode="set-priorities">
+        <tei:p>
+          <tei:ptr jx:selection="1" target="#x"/>
+        </tei:p>
+      </x:context>
+      <x:expect label="has assigned priority 1" test="/tei:p/@jx:priority = 1"/>
+    </x:scenario>
+
+    <x:scenario label="with 2 selection elements">
+      <x:context mode="set-priorities">
+        <tei:p>
+          <tei:ptr jx:selection="1" target="#x"/>
+          <tei:ptr jx:selection="1" target="#y"/>
+        </tei:p>
+      </x:context>
+      <x:expect label="has assigned priority 2" test="/tei:p/@jx:priority=2"/>
+    </x:scenario>
+
+    <x:scenario label="with mixed element hierarchy">
+      <x:context mode="set-priorities">
+        <tei:p>
+          <tei:s>
+            <tei:ptr jx:selection="1" target="#x"/>
+          </tei:s>
+          <tei:ptr jx:selection="1" target="#y"/>
+        </tei:p>
+      </x:context>
+      <x:expect label="Priority depends on number of descendant selection elements: p priority is 2"
+        test="/tei:p/@jx:priority=2"/>
+      <x:expect label="Priority depends on number of descendant selection elements: s priority is 1"
+        test="/tei:p/tei:s/@jx:priority=1"/>
+    </x:scenario>
+    
+    <x:scenario label="with element outside selection">
+      <x:context mode="set-priorities">
+        <tei:div>
+          <tei:label>Label</tei:label>
+          <tei:ab>
+            <tei:ptr jx:selection="1" target="#x"/>
+          </tei:ab>
+          <tei:ab>
+            <tei:ptr jx:selection="1" target="#y"/>
+          </tei:ab>
+        </tei:div>
+      </x:context>
+      <x:expect label="Has same priority as parent" 
+        test="/tei:div/@jx:priority = /tei:div/tei:label/@jx:priority"/>
+    </x:scenario>
+    
+    <x:scenario label="with hierarchical elements that have no children in the selection">
+      <x:context mode="set-priorities">
+        <tei:div>
+          <tei:ab>
+            <tei:p>
+              <tei:ptr jx:selection="1" target="#x"/>
+            </tei:p>
+          </tei:ab>
+        </tei:div>
+      </x:context>
+      <x:expect label="Priority boost is not applied to the innermost element"
+        test="/tei:div/tei:ab/tei:p/@jx:priority = 1"/>
+      <x:expect label="Priority boost is applied to the middle element"
+        test="/tei:div/tei:ab/@jx:priority = 1.01"/>
+      <x:expect label="Priority boost is applied to the outermost element"
+        test="/tei:div/@jx:priority = 1.02"/>
+    </x:scenario>
+    
+    <x:scenario label="with hierarchical elements that have no children in the selection and multiple paths to the selection">
+      <x:context mode="set-priorities">
+        <tei:div>
+          <tei:ab>
+            <tei:p>
+              <tei:ptr jx:selection="1" target="#x"/>
+            </tei:p>
+            <tei:ptr jx:selection="1" target="#y"/>
+          </tei:ab>
+        </tei:div>
+      </x:context>
+      <x:expect label="Priority boost is not applied to the innermost element"
+        test="/tei:div/tei:ab/tei:p/@jx:priority = 1"/>
+      <x:expect label="Priority boost is not applied to the middle element"
+        test="/tei:div/tei:ab/@jx:priority = 2"/>
+      <x:expect label="Priority boost is applied to the outermost element"
+        test="/tei:div/@jx:priority = 2.01"/>
+    </x:scenario>
+    
+    <x:scenario label="with parallel elements">
+      <x:context mode="set-priorities">
+        <j:parallelGrp>
+          <j:original>
+            <tei:p>
+              <tei:ptr jx:selection="1" target="#a"/>
+              <tei:ptr jx:selection="1" target="#b"/>
+            </tei:p>
+          </j:original>
+          <j:parallel>
+            <tei:p>
+              <tei:ptr jx:selection="2" target="#c"/>
+              <tei:ptr jx:selection="2" target="#d"/>
+            </tei:p>
+          </j:parallel>
+        </j:parallelGrp>
+      </x:context>
+      <x:expect label="have maximum priority" 
+        test="every $priority in (/j:parallelGrp,//j:original,//j:parallel)/@jx:priority
+          satisfies $priority = 10000"/>
+    </x:scenario>
+  </x:scenario>
+</x:description>
+

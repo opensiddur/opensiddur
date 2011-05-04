@@ -1,0 +1,11 @@
+<jx:current-settings 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor">
+  <jx:feature-selections>
+    <tei:fs type="fs-1">
+      <tei:f name="f-1">
+        <tei:symbol value="MAYBE"/>
+      </tei:f>
+    </tei:fs>
+  </jx:feature-selections>
+</jx:current-settings>

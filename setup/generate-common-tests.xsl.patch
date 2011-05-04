@@ -1,0 +1,33 @@
+--- ../db/code/modules/resources/xspec/generate-common-tests.xsl	2010-09-19 19:47:08.000000000 -0400
++++ ../db/code/modules/resources/xspec/generate-common-tests.xsl	2010-10-16 20:05:07.000000000 -0400
+@@ -5,6 +5,7 @@
+ <!--  URI:        http://xspec.googlecode.com/                             -->
+ <!--  Tags:                                                                -->
+ <!--    Copyright (c) 2008, 2010 Jeni Tennsion (see end of file.)          -->
++<!--    Modifications 2010 Efraim Feinstein                                -->
+ <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+ 
+ 
+@@ -14,7 +15,7 @@
+                 xmlns:x="http://www.jenitennison.com/xslt/xspec"
+                 exclude-result-prefixes="xs test x"
+                 version="2.0">
+-
++   <xsl:strip-space elements="*"/>
+    <xsl:preserve-space elements="x:space"/>
+ 
+    <!--
+@@ -41,11 +42,12 @@
+       <xsl:apply-templates select="$unshared-scenarios/*" mode="x:generate-tests"/>
+    </xsl:template>
+ 
+-   <xsl:template match="x:description" mode="x:copy-namespaces">
++   <xsl:template match="element()" mode="x:copy-namespaces">
+       <xsl:variable name="e" as="element()" select="."/>
+       <xsl:for-each select="in-scope-prefixes($e)">
+          <xsl:namespace name="{ . }" select="namespace-uri-for-prefix(., $e)"/>
+       </xsl:for-each>
++      <xsl:apply-templates select="element()" mode="#current"/>
+    </xsl:template>
+ 
+    <xsl:function name="x:gather-specs" as="element(x:description)+">

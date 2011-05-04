@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  intermediate-links mode
+
+  Open Siddur Project
+  Copyright 2010 Efraim Feinstein
+  Licensed under the GNU Lesser General Public License, version 3 or later
+
+  $Id: intermediate-links.xspec 739 2011-04-15 04:17:09Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
+  stylesheet="../intermediate-links.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="garbage">
+      <x:context><tei:junk/><j:junk/><jx:junk/></x:context>
+    </x:scenario>
+  </x:pending>
+  <x:scenario label="intermediate-links mode">
+    <x:scenario label="Single hop">
+      <x:context mode="intermediate-links" href="concurrent-context.xml">
+      </x:context>
+      <x:expect label="Returns intermediate links" test="//j:links">
+        <j:links>
+          <tei:ptr jx:id="p1-1" target="#se1"/>
+          <tei:ptr jx:id="p1-2" target="#se2"/>
+          <tei:ptr jx:id="p2-1" target="#se3"/>
+        </j:links>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="Double hop">
+      <x:context mode="intermediate-links" href="intermediate-links-context.xml">
+      </x:context>
+      <x:expect label="Returns intermediate links" test="//j:links">
+        <j:links>
+          <tei:ptr jx:id="p1-s1" target="#s1"/>
+          <tei:ptr jx:id="p1-s2" target="#s2"/>
+          <tei:ptr jx:id="p2-s1" target="#s3"/>
+          <tei:ptr jx:id="s1-1" target="#se1"/>
+          <tei:ptr jx:id="s2-1" target="#se2"/>
+          <tei:ptr jx:id="s3-1" target="#se3"/>
+        </j:links>
+      </x:expect>
+    </x:scenario>
+    
+  </x:scenario>
+</x:description>

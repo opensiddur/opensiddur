@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+option.xml
+
+Copyright TEI Consortium. 
+Modifications Copyright 2008-2009 Efraim Feinstein <efraim.feinstein@gmail.com>
+
+Licensed under the GNU General Public License. 
+See the file GPL-3 for details
+
+$Date: 2009-07-24 00:49:05 -0400 (Fri, 24 Jul 2009) $
+$Id: option.xml 216 2009-07-24 04:49:05Z efraim.feinstein $
+
+ChangeLog:
+1/6/2008 - change tei:reg to j:written, the to tei:read
+2/16/2009 - change j:read to j:option
+7/23/2009 - update for new-encoding
+-->
+<elementSpec 
+	xmlns="http://www.tei-c.org/ns/1.0"
+	xmlns:jx="http://jewishliturgy.org/ns/examples"
+	xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+	xmlns:rng="http://relaxng.org/ns/structure/1.0"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	module="liturgy" usage="opt" ident="option" ns="http://jewishliturgy.org/ns/jlptei/1.0">
+  <equiv name="j:option" filter="canonical-tei.xsl2#transform.option"
+    mimeType="application/xsl" />
+  <gloss>One option or textual variant</gloss>
+  <desc>Contains a single option.</desc>
+  <classes>
+    <memberOf key="model.pPart.transcriptional"/>
+    <memberOf key="model.choicePart"/>
+    <memberOf key="att.declaring"/>
+    <memberOf key="att.typed"/>
+    <memberOf key="att.global"/>
+  </classes>
+  <content>
+    <rng:ref name="macro.paraContent"/>
+  </content>
+  <exemplum>
+    <jx:egXML>
+			<seg>
+				<choice xml:lang="he">
+					<j:option>
+						<seg>
+							ושבת
+						</seg>
+					</j:option>
+					<j:option>
+						<seg>
+							ומועדי
+						</seg>
+					</j:option>
+				</choice>
+				קדשך
+			</seg>
+		</jx:egXML>
+  </exemplum>
+  <remarks>
+		<p>Options should have some distinguishing characteristic defining when they should be processed.</p>
+		<p><gi>choice</gi>/<gi>option</gi> resembles a generic form of tei:app/tei:rdg used for time-, function-, and custom-based textual variants, in addition to multiple sources.</p>
+	</remarks>
+	<listRef>
+		<ptr target="#div.choice"/>
+  </listRef>
+</elementSpec>

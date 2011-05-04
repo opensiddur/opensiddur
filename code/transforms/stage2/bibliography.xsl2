@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet
+  version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:cc="http://web.resource.org/cc/"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  exclude-result-prefixes="#all"
+  >
+  <xsl:import href="../../common/common.xsl2"/>
+  <xsl:import href="../intl-strings.xsl2"/>
+  <xd:doc type="stylesheet">
+    <xd:short>Handle bibliography</xd:short>
+    <xd:copyright>Copyright 2010 Efraim Feinstein (LGPL 3+)</xd:copyright>
+    <xd:detail>
+        <p>This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+        <p>This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU Lesser General Public License for more details.</p>
+
+        <p>You should have received a copy of the GNU Lesser General Public License
+        along with this program.  If not, see 
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
+        </p>
+      </xd:detail>
+      <xd:svnId>$Id: bibliography.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+
+  <!-- xsl:variable name="string-table" as="document-node()"
+    select="doc(strings.xml)"/-->
+
+  <xd:doc>Language code for primary document language</xd:doc>
+  <xsl:param name="primary-language" select="'en'" as="xs:string"/>
+
+  <xd:doc>
+    <xd:short>Generate a bibliography</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:TEI" mode="bibliography">
+    <xsl:variable name="source-bibl"
+      select="//jx:source"
+      as="element(jx:source)*"/>
+    
+    <xsl:variable name="reference-bibl"
+      select="//jx:bibl"
+      as="element(jx:bibl)*"/>
+    <xsl:if test="$source-bibl">  
+      <tei:div type="bibliography">
+        <tei:head>
+          <xsl:sequence 
+            select="func:get-string($string-table,
+              'bibl-header-sources',$primary-language)"/>
+        </tei:head>
+        <xsl:call-template name="make-bibliography-list">
+          <xsl:with-param name="list-pointers" as="element()*"
+            select="$source-bibl"/>
+        </xsl:call-template>
+      </tei:div>
+    </xsl:if>
+    <xsl:if test="$reference-bibl">
+      <tei:div type="bibliography">
+        <tei:head>
+          <xsl:sequence 
+            select="func:get-string($string-table,
+              'bibl-header-references',$primary-language)"/>
+        </tei:head>
+        <xsl:call-template name="make-bibliography-list">
+          <xsl:with-param name="list-pointers" as="element()*"
+            select="$reference-bibl"/>
+        </xsl:call-template>
+      </tei:div>
+    </xsl:if>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Helper function to make a bibliography list, given
+    one of the jx:* elements that has pointers to bibliography URIs</xd:short>
+  </xd:doc>
+  <xsl:template name="make-bibliography-list" as="element(tei:listBibl)">
+    <xsl:param name="list-pointers" as="element()*"/>
+
+		<xsl:variable name="local-bib-entries" as="element(tei:bibl)*" 
+			select="for $pointer in $list-pointers return func:follow-uri(string($pointer),$pointer,-1)"/>
+		<xsl:variable name="bib-entries" as="element(tei:biblStruct)*">
+			<xsl:for-each-group select="$local-bib-entries" group-by="func:absolutize-uri(tei:ptr/@target,.)">
+				<xsl:variable name="ptr-target" select="current-group()[1]/tei:ptr/@target"/>
+				<xsl:sequence select="func:follow-uri($ptr-target,current-group()[1],-1)"/>
+			</xsl:for-each-group>
+		</xsl:variable>    
+
+		<tei:listBibl>
+          <xsl:for-each-group select="$bib-entries" group-by="@xml:id">
+				<!-- <xsl:message>bib-entry-id = <xsl:sequence select="."/>, <xsl:sequence select="$bib-entries[@xml:id]"/></xsl:message>-->
+            <xsl:apply-templates select="current-group()[1]"/>
+          </xsl:for-each-group>
+    </tei:listBibl>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>A bibliography containing a pointer should not be copied</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:bibl[count(*)=count(tei:ptr)]">
+    <xsl:apply-templates/>
+  </xsl:template>  
+  
+</xsl:stylesheet>

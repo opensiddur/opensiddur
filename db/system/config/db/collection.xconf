@@ -1,0 +1,15 @@
+<collection xmlns="http://exist-db.org/collection-config/1.0">
+    <index xmlns:jx="http://jewishliturgy.org/ns/jlp-processor">
+      <!-- range indexes -->
+      <create qname="@jx:id" type="xs:string"/>
+      <create qname="@xml:id" type="xs:string"/>
+    </index>
+    <triggers>
+        <trigger class="org.exist.collections.triggers.XQueryTrigger">
+            <parameter name="url" value="xmldb:exist:///db/code/triggers/document-uri.xql"/>
+        </trigger>
+        <!--trigger class="org.exist.collections.triggers.XQueryTrigger">
+            <parameter name="url" value="xmldb:exist:///db/code/triggers/uri-index.xql"/>
+        </trigger-->
+    </triggers>
+</collection>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet
+	version="2.0" 
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:tei="http://www.tei-c.org/ns/1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+	xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+	xmlns:tr="http://jewishliturgy.org/ns/tr/1.0"
+	xmlns:tmp="http://jewishliturgy.org/ns/tmp"
+	xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	exclude-result-prefixes="tmp xs xd html tr j"
+    extension-element-prefixes="func xd"
+	>
+	
+	<xsl:include href="../../common/common.xsl2"/>
+	<xsl:include href="../../common/params.xsl2"/>
+	
+	<xd:doc type="stylesheet">
+		<xd:author>$Author: efraim.feinstein $</xd:author>
+		<xd:short>Template to split a text stream into words</xd:short>
+		<xd:copyright>Copyright 2009 Efraim Feinstein</xd:copyright>
+		<xd:detail>
+			<p>
+				This program is free software: you can redistribute it and/or modify
+				it under the terms of the GNU Lesser General Public License as published by
+				the Free Software Foundation, either version 3 of the License, or
+				(at your option) any later version.
+			</p>
+			<p>
+				This program is distributed in the hope that it will be useful,
+				but WITHOUT ANY WARRANTY; without even the implied warranty of
+				MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+				GNU Lesser General Public License for more details.
+			</p>
+			<p>
+				You should have received a copy of the GNU Lesser General Public License
+				along with this program.  If not, see <a href="http://www.gnu.org/licenses">http://www.gnu.org/licenses</a>.
+			</p>
+		</xd:detail>
+		<xd:svnId>$Id: split-word.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
+	</xd:doc>
+	
+	<xd:doc>File to draw input from (as unparsed text)</xd:doc>
+	<xsl:param name="infile" as="xs:string" select="'test.txt'" />
+	
+	<xd:doc>Symbols that act as boundaries for ignored text.  Each symbol goes in an "ignore" tag, which has 2 elements: @symbol="symbol" and @pi="processing instruction title"</xd:doc>
+	<xsl:param name="ignore" as="element(ignore)*">
+		<ignore symbol="+" pi="biblical"/>
+		<ignore symbol="/" pi="instruct"/>
+	</xsl:param>
+	
+	<xd:doc>
+		<xd:short>Split all words and put them between &lt;tei:w&gt; tags.  Punctuation characters go between &lt;tei:pc&gt; tags.  Characters between $ignore/@symbol are put inside a processing instruction &lt;?$ignore/@pi CONTENT ?&gt;</xd:short>
+		<xd:param name="original-string">The original string to split word</xd:param>
+		<xd:param name="ignore">Ignore all characters between appearances of $ignore/@symbol. </xd:param>
+	</xd:doc>
+	<xsl:template name="split-words">
+		<xsl:param name="original-string" as="xs:string" required="yes"/>
+		<xsl:param name="ignore" as="element(ignore)*" select="()"/>
+		<xsl:choose>
+			<xsl:when test="not(empty($ignore))">
+				<!-- make the regex, which contains each of the ignore chars as a group, numbered in order of appearance in $ignore 
+				the number of the text = 1+2*(regex-1)
+				-->
+				<xsl:variable name="nIgnores" select="count($ignore/self::ignore)"/>
+				
+				<xsl:variable name="regex" as="xs:string+">
+					<xsl:for-each select="$ignore/self::ignore">
+						<xsl:value-of select="string-join(('([',@symbol,']([^',@symbol,']*)[',@symbol,'])'),'')"/>
+						<!-- insert an | if necessary -->
+						<xsl:value-of select="if (position() &lt; $nIgnores) then '|' else ''"/>
+					</xsl:for-each>
+				</xsl:variable>
+				<xsl:analyze-string select="$original-string" regex="{string-join($regex,'')}">
+					<xsl:matching-substring>
+						<!-- what to do for text inside $ignore-char... first, need to find out which ignore character it was -->
+						<xsl:variable name="this-symbol" select="string-join(('[', substring(.,1,1),']'),'')" as="xs:string"/>
+						<xsl:processing-instruction name="{$ignore/self::ignore[matches(@symbol,$this-symbol)]/@pi}">
+							<xsl:value-of select="substring(., 2, string-length(.) - 2)"/>
+						</xsl:processing-instruction>
+					</xsl:matching-substring>
+					<xsl:non-matching-substring>
+						<xsl:call-template name="split-words-no-ignore">
+							<xsl:with-param name="original-string" select="." as="xs:string"/>
+						</xsl:call-template>
+					</xsl:non-matching-substring>
+				</xsl:analyze-string>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:call-template name="split-words-no-ignore">
+					<xsl:with-param name="original-string" select="$original-string" as="xs:string"/>
+				</xsl:call-template>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Split words without an ignore character</xd:short>
+	</xd:doc>
+	<xsl:template name="split-words-no-ignore">
+		<xsl:param name="original-string" as="xs:string" required="yes"/>
+		<!-- warning: should not tokenize on \s+, should caputure whitespace! -->
+			<!-- need to split into characters & control characters, punctuation, spaces -->
+		<xsl:analyze-string select="$original-string" regex="(\s+)|([\p{{L}}\p{{M}}\p{{N}}\p{{S}}\p{{C}}]+)|(\p{{P}})">
+			<xsl:matching-substring>
+				<xsl:variable name="spaces" select="regex-group(1)" as="xs:string"/>
+				<xsl:variable name="word-chars" select="regex-group(2)" as="xs:string"/>
+				<xsl:variable name="punct-chars" select="regex-group(3)" as="xs:string"/>
+				<xsl:choose>
+					<xsl:when test="string-length($spaces) &gt; 0">
+						<!-- most spaces are ignored, single enter ends a sentence.  double enter ends sentence and paragraph -->
+						<xsl:if test="matches($spaces,'\n')">
+							<ends/>
+						</xsl:if>
+						<xsl:if test="matches($spaces,'\n\n')">
+							<endp/>
+						</xsl:if>
+					</xsl:when>
+					<xsl:when test="string-length($word-chars) &gt; 0">
+						<tei:w><xsl:value-of select="$word-chars"/></tei:w>
+					</xsl:when>
+					<xsl:when test="string-length($punct-chars) &gt; 0">
+						<tei:pc><xsl:value-of select="$punct-chars"/></tei:pc>
+					</xsl:when>
+				</xsl:choose>
+			</xsl:matching-substring>
+			<xsl:non-matching-substring>
+				<xsl:variable name="msg">found "<xsl:value-of select="."/>" which is a character I don't know what to do with.</xsl:variable>
+				<xsl:sequence select="func:debug($msg, 'split-words-no-ignore', $debug-warn)"/>
+			</xsl:non-matching-substring>				
+		</xsl:analyze-string>
+	</xsl:template>
+	
+	<xd:doc>
+		<xd:short>Standalone/testing entry point. Requires stylesheet parameters to be set.</xd:short>
+	</xd:doc>
+	<xsl:template name="split-words-main">
+		<split-words>
+			<xsl:call-template name="split-words">
+				<xsl:with-param name="original-string" as="xs:string" select="unparsed-text($infile)"/>
+				<xsl:with-param name="ignore" as="element(ignore)*" select="$ignore"/>
+			</xsl:call-template>
+		</split-words>
+	</xsl:template>
+</xsl:stylesheet>

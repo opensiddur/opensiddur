@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+segGen.xml
+
+Copyright TEI Consortium. 
+Modifications Copyright 2009 Efraim Feinstein <efraim.feinstein@gmail.com>
+
+Licensed under the GNU General Public License. 
+See the file GPL-3 for details
+
+$Date: 2010-02-08 12:21:17 -0500 (Mon, 08 Feb 2010) $
+$Id: segGen.xml 443 2010-02-08 17:21:17Z efraim.feinstein $
+
+ChangeLog:
+1/6/2008 - change tei:reg to j:written, the to tei:read
+2/16/2009 - change j:read to j:option
+7/23/2009 - update for new-encoding
+1/24/2010 - make new j:segGen
+-->
+<elementSpec 
+	xmlns="http://www.tei-c.org/ns/1.0"
+	xmlns:jx="http://jewishliturgy.org/ns/examples"
+	xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+	xmlns:rng="http://relaxng.org/ns/structure/1.0"
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	module="liturgy" usage="opt" ident="segGen" 
+  ns="http://jewishliturgy.org/ns/jlptei/1.0">
+  <equiv name="j:segGen" filter="canonical-tei.xsl2#transform.segGen"
+    mimeType="application/xsl" />
+  <gloss>Generated segment of text</gloss>
+  <desc>The type determines how the segment should be generated</desc>
+  <classes>
+    <memberOf key="model.segLike"/>
+    <memberOf key="att.global"/>
+    <memberOf key="att.typed"/>
+  </classes>
+  <content>
+    <rng:ref name="macro.paraContent"/>
+  </content>
+  <exemplum>
+    <jx:egXML>
+			<segGen type="transliteration">מָצָּה</segGen>
+		</jx:egXML>
+  </exemplum>
+  <remarks>
+	</remarks>
+	<listRef>
+		<ptr target="#div.choice"/>
+  </listRef>
+</elementSpec>

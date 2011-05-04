@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet
+  version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+	xmlns:p="http://jewishliturgy.org/ns/parser"
+  xmlns:r="http://jewishliturgy.org/ns/parser-result"  
+  exclude-result-prefixes="xs xd func r"
+  >
+	<xsl:import href="../grammar-parser/grammar2.xsl2"/>
+  <xsl:include href="../common/common.xsl2"/>
+  
+  <xd:doc type="stylesheet">
+    <xd:short>Implements following a URI to where it points</xd:short>
+    <xd:copyright>Copyright 2009-2011 Efraim Feinstein (LGPL 3+)</xd:copyright>
+    <xd:detail>
+        <p>This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU Lesser General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+        <p>This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU Lesser General Public License for more details.</p>
+
+        <p>You should have received a copy of the GNU Lesser General Public License
+        along with this program.  If not, see 
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
+        </p>
+      </xd:detail>
+      <xd:svnId>$Id: follow-uri.xsl2 757 2011-04-22 23:24:36Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+  
+	<xsl:param name="xpointer-grammar" as="document-node()">
+		<xsl:document>
+			<p:grammar>
+				<xsl:sequence select="doc('../grammar-parser/xpointer.xml')/p:grammar | 
+					doc('../grammar-parser/xptr-tei.xml')/p:grammar"/>
+			</p:grammar>
+		</xsl:document>
+	</xsl:param>
+  
+  <xd:doc>func:follow-cached-uri() $cache-type parameter for follow-uri mode for using the fragmentation cache</xd:doc>
+  <xsl:variable name="fragmentation-cache-type" as="xs:string" select="'format=fragmentation'"/>
+
+  <xd:doc>
+    <xd:short>Return the original document uri of a node, given the 
+    possibility that processing was done by concurrent.xsl2</xd:short>
+    <xd:detail>When this function is called, you want a URI.  
+    It fails if it can't give one.
+    The declaration is xs:anyURI? to prevent a stylesheet error.
+    The original document URI is determined by (in order):
+    @jx:source-document-uri, @jx:document-uri (cascading from ancestors) and
+    the document-uri() function</xd:detail>
+    <xd:param name="node">The node whose document-uri we're trying to get
+    </xd:param>
+  </xd:doc>
+  <xsl:function name="func:original-document-uri" as="xs:anyURI?">
+    <xsl:param name="node" as="node()"/>
+    <xsl:variable name="document-uri" as="xs:anyURI?" select="func:uri-base-path(document-uri(root($node)))"/>
+    <xsl:variable name="closest-jx-document-uri" as="xs:anyURI?"
+      select="xs:anyURI(
+        if ($node instance of document-node())
+        then $node/*/(@jx:source-document-uri, @jx:document-uri)[1]
+        else $node/
+          (@jx:source-document-uri,
+          ancestor-or-self::*[@jx:document-uri][1]/@jx:document-uri)[1]
+      )" />
+    <!-- original-document-uri should not return base-uri() -->    
+    <xsl:variable name="return" as="xs:anyURI?" select="($closest-jx-document-uri, $document-uri)[1]"/>
+    <xsl:sequence select="
+      ($return, 
+      func:debug(('Node has no document URI: ', func:get-xpath($node)), 'func:original-document-uri', $debug-warn),
+      func:debug(('node: ', $node, ' document-uri: ', $document-uri, 
+        if ($node instance of document-node()) 
+        then ('document-uri under node: ', ($node/*/@jx:source-document-uri, $node/*/@jx:document-uri)[1] ) 
+        else (
+        ' source-document-uri: ', $node/@jx:source-document-uri,
+        ' closest ancestor: ', $node/ancestor-or-self::*[@jx:document-uri][1]/@jx:document-uri)
+        ), 'func:original-document-uri details', $debug-detail)
+      )[1] "/>
+  </xsl:function>
+
+  <xd:doc>
+    <xd:short>Given a relative URI and a context,  
+    resolve the relative URI into an absolute URI</xd:short>
+    <xd:param name="uri">contains the URI to make absolute</xd:param>
+    <xd:param name="context">The URI is absolute relative to this context.
+    </xd:param>
+  </xd:doc>
+  <xsl:function name="func:absolutize-uri" as="xs:anyURI">
+    <xsl:param name="uri" as="xs:string"/>
+    <xsl:param name="context" as="node()?"/>
+    
+    <xsl:variable name="base-path" as="xs:string"
+      select="string(func:uri-base-path($uri))"/>
+    <xsl:variable name="base-uri" as="xs:string" 
+      select="string(func:uri-base-path(base-uri($context)))"/>
+    <!-- this concat() kluge introduced because resolve-uri() with xmldb:exist URIs is broken
+    in eXist 1.5 r14186 -->
+    <xsl:sequence select="xs:anyURI(
+    if ($base-path and doc-available($base-path))
+    then $uri
+    else if (starts-with($base-uri, 'xmldb:exist'))
+    then concat('xmldb:exist://', resolve-uri($uri, replace($base-uri, '^xmldb:exist://', '')))
+    else resolve-uri($uri,$base-uri)
+    )"/>
+    <!-- 
+    <xsl:sequence select="func:debug($return,('absolutize-uri(',$uri,')'),$debug-detail + 2)"/>
+    <xsl:value-of select="$return"/>
+     -->
+  </xsl:function>
+  
+  
+  <xd:doc>
+    <xd:short>Returns the base path part of an absolute URI
+    </xd:short>
+    <xd:param name="uri">An absolute URI</xd:param>
+  </xd:doc>
+  <xsl:function name="func:uri-base-path" as="xs:anyURI?">
+    <xsl:param name="uri" as="xs:string?"/>
+    <!-- remove protocol if it points to http://localhost:[\d]/ or xmldb:exist://user:password@ --> 
+    <xsl:sequence select="xs:anyURI(
+      replace (
+        if (contains($uri,'#')) 
+        then substring-before($uri,'#') 
+        else $uri,
+        '^((http://localhost:[\d]+)|(xmldb:exist://([^@]+@)?))',
+        ''
+      )
+      )"/>
+  </xsl:function>
+  
+  
+  <xd:doc>
+    <xd:short>Base resource of a URI (not including the fragment or query string)</xd:short>
+    <xd:param name="uri">A URI</xd:param>
+  </xd:doc>
+  <xsl:function name="func:uri-base-resource" as="xs:anyURI?">
+    <xsl:param name="uri" as="xs:string?"/>
+    
+    <xsl:variable name="base-path" as="xs:string"
+     select="string(func:uri-base-path($uri))"/>
+    <xsl:sequence select="xs:anyURI(
+      if (contains($base-path, '?'))
+      then substring-before($base-path, '?')
+      else $base-path
+      )"/>
+  </xsl:function>
+  
+  <xd:doc>
+    <xd:short>Returns the fragment portion of an absolute URI.  
+    The return value excludes the # </xd:short>
+    <xd:param name="uri">An absolute URI</xd:param>
+  </xd:doc>
+  <xsl:function name="func:uri-fragment" as="xs:anyURI">
+    <xsl:param name="uri" as="xs:string"/>
+    
+    <xsl:value-of select="xs:anyURI(
+      if (contains($uri, '#')) 
+      then substring-after($uri, '#') 
+      else '')"/>
+  </xsl:function>
+  
+  <!--  follow parsed XPointer -->
+  <xd:doc>
+    <xd:short>Get nodes, given $document and $fragment</xd:short>
+  </xd:doc>
+  <xsl:function name="func:node-from-pointer" as="node()*">
+    <xsl:param name="document" as="document-node()?"/>
+    <xsl:param name="fragment" as="xs:anyURI" />
+    
+    <xsl:sequence select="func:debug($document,
+      'func:node-from-pointer: document',
+      $debug-detail + 1)"/> 
+    <xsl:sequence select="func:debug(($fragment),
+      'func:node-from-pointer: fragment',
+      $debug-detail + 1)"/>
+    <xsl:apply-templates
+      select="func:grammar-clean(func:grammar-parse(string($fragment), 'Pointer', $xpointer-grammar))"
+      mode="follow-parsed-xpointer">
+      <xsl:with-param name="document" select="$document" 
+      as="document-node()?" tunnel="yes" />
+    </xsl:apply-templates>
+    
+  </xsl:function>
+
+  <xd:doc>
+    <xd:short>Follow a pointer one step</xd:short>
+  </xd:doc>
+  <xsl:template match="r:Pointer" mode="follow-parsed-xpointer">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Follow a shorthand pointer (aka, id)</xd:short>
+  </xd:doc>
+  <xsl:template match="r:Shorthand" mode="follow-parsed-xpointer">
+    <xsl:param name="document" as="document-node()?" 
+      tunnel="yes" required="yes"/>
+    <xsl:sequence select="key('xmlids',string(.), $document)"/>
+    <!--
+    <xsl:apply-templates mode="follow-uri" 
+      select="key('xmlids', string(.), $document)">
+      <xsl:with-param name="steps" as="xs:integer" 
+        select="$follow-steps" 
+        tunnel="yes"/>
+    
+    </xsl:apply-templates>
+    -->
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>For scheme based pointers, follow the pointer
+    parts.</xd:short>
+  </xd:doc>
+  <xsl:template match="r:SchemeBased" mode="follow-parsed-xpointer">
+    <xsl:apply-templates select="r:PointerPart" mode="#current"/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Follow a scheme-based pointer.
+    Send out a debug warning if the scheme is unsupported.
+    </xd:short>
+  </xd:doc>
+  <xsl:template match="r:PointerPart[r:SchemeName='range']" 
+    mode="follow-parsed-xpointer">
+    
+    <xsl:variable name="pointers" as="element(r:Pointer)+"
+      select="func:grammar-clean(func:grammar-parse(string(r:SchemeData), 'RangeData', $xpointer-grammar))/
+      r:Pointer"/>
+    <xsl:sequence select="func:debug(
+      ($pointers,.),
+      'r:PointerPart[range]:pointers', $debug-warn)"/>
+    <xsl:variable name="left-pointer" as="node()?">
+      <xsl:apply-templates select="$pointers[1]"
+        mode="follow-parsed-xpointer">
+      </xsl:apply-templates>
+    </xsl:variable>
+    <xsl:variable name="right-pointer" as="node()?">
+      <xsl:apply-templates select="$pointers[2]"
+        mode="follow-parsed-xpointer">
+      </xsl:apply-templates>
+    </xsl:variable>
+    
+      
+    <!--  pointers[1] contains the beginning, pointers[2]
+    contains the end.  It is an error for:
+    (1) pointers[2] to be before pointers[1] in document order
+    (2) pointers[1] or pointers[2] to be empty
+     -->    
+    <xsl:choose>
+      <xsl:when test="empty($left-pointer) or empty($right-pointer)">
+        <xsl:sequence select="func:debug(
+          ('In a pointer range expression, both pointers must resolve ',
+          'to a location'),
+          'r:PointerPart',
+          $debug-error)"/>
+      </xsl:when>
+      <xsl:when test="$left-pointer >> $right-pointer">
+        <xsl:sequence select="func:debug(
+          ('In a pointer range expression, the second pointer must follow ',
+          'the first in document order. ',
+          '[1] = ', $left-pointer, ' [2] = ', $right-pointer), 
+          'r:PointerPart', 
+          $debug-error)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$left-pointer|
+          ($left-pointer/following-sibling::node() intersect 
+            $right-pointer/preceding-sibling::node())|
+          $right-pointer"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  
+  <xsl:template match="r:PointerPart" mode="follow-parsed-xpointer">
+    <xsl:sequence select="func:debug(
+      ('Unsupported scheme: ', r:SchemeName, ' in ', .), 
+      'r:PointerPart', 
+      $debug-warn)"/>
+  </xsl:template>
+  
+  <!-- following TEI pointers -->
+  <xd:doc>
+    <xd:short>Follow a given pointer $uri, 
+    including any subsequent pointers or links (such as tei:join). 
+    The $steps parameter indicates the number of pointer steps to follow if 
+    another pointer is pointed to by $uri.  
+    If $steps is negative, the chain is followed infinitely (or
+    until another pointer limits it).</xd:short>
+    <xd:detail>Uses the follow-uri template mode.</xd:detail>
+  </xd:doc>
+  <xsl:function name="func:follow-uri" as="node()*">
+    <xsl:param name="uri" as="xs:string"/>
+    <xsl:param name="context" as="node()"/>
+    <xsl:param name="steps" as="xs:integer"/>
+    
+    <xsl:sequence select="func:follow-cached-uri($uri, $context, $steps, ())"/>
+  </xsl:function>
+
+  <xd:doc>
+    <xd:short>Given the full path to a document, return its cached version's path</xd:short>
+    <xd:detail>Replace this with jcache:cached-document-path() when
+    native XSLT comes around</xd:detail>
+  </xd:doc>
+  <xsl:function name="func:cached-document-path" as="xs:string">
+    <xsl:param name="path" as="xs:string"/>
+    
+
+    <xsl:variable name="split-path" as="element()">
+      <split-path>
+        <xsl:analyze-string select="$path" 
+          regex="^(((xmldb:exist)|http)://[^/]+)?(.+)$">
+          <xsl:matching-substring>
+            <protocol-and-server><xsl:value-of select="regex-group(1)"/></protocol-and-server>
+            <collection-and-resource><xsl:value-of select="regex-group(4)"/></collection-and-resource>
+          </xsl:matching-substring>
+          <xsl:non-matching-substring>
+          </xsl:non-matching-substring>
+        </xsl:analyze-string>
+      </split-path>
+    </xsl:variable>
+    <xsl:variable name="protocol-and-server" as="xs:string"
+      select="$split-path/protocol-and-server"/>
+    <xsl:variable name="path-parts" as="xs:string*"
+      select="tokenize($split-path/collection-and-resource, '/')"/>
+    <xsl:variable name="collection" as="xs:string" 
+      select="string-join(subsequence($path-parts, 1, count($path-parts) - 1), '/')"/>
+    <xsl:variable name="resource" as="xs:string"
+      select="$path-parts[last()]"/>
+    <xsl:sequence select="concat($protocol-and-server, $collection, if (ends-with($collection,'/cache')) then '/' else '/cache/', $resource)"/>
+  </xsl:function>
+
+  <xd:doc>
+    <xd:short>Extended func:follow-uri() to allow caching.</xd:short>
+    <xd:param name="cache-type">Additional query string (eg, format=fragmentation) to add to the base part of the URI. Empty for none.</xd:param>
+    <xd:detail>Uses the follow-uri template mode.</xd:detail>
+  </xd:doc>
+  <xsl:function name="func:follow-cached-uri" as="node()*">
+    <xsl:param name="uri" as="xs:string"/>
+    <xsl:param name="context" as="node()"/>
+    <xsl:param name="steps" as="xs:integer"/>
+    <xsl:param name="cache-type" as="xs:string?"/>
+
+    <xsl:variable name="full-uri" as="xs:anyURI"
+      select="func:absolutize-uri($uri, $context)"/>
+    <xsl:variable name="base-path" as="xs:anyURI" 
+      select="func:uri-base-path(
+        if ($cache-type=$fragmentation-cache-type)
+        then func:cached-document-path(string($full-uri))
+        else string($full-uri))"/>
+    <xsl:variable name="base-path-with-protocol" as="xs:anyURI"
+      select="xs:anyURI(
+      if (contains(substring-before(string($base-path),'/'), ':'))
+      then (: there's already a protocol :) $base-path
+      else (
+        (: add xmldb:exist protocol with user:password@ :) 
+        concat('xmldb:exist://', 
+          if ($user) 
+          then concat($user, ':', $password, '@')
+          else '',
+          string($base-path))
+      )
+      )"
+      />
+    <xsl:variable name="fragment" as="xs:anyURI" 
+      select="func:uri-fragment(string($full-uri))"/>      
+
+    <xsl:sequence 
+      select="func:debug(('uri =', $uri,
+        ' base-uri/document-uri($context) =', base-uri($context), ' ', document-uri(root($context)),
+        ' full-uri =', $full-uri, 
+        ' base-path =', $base-path,
+        ' base-path-with-protocol =', $base-path-with-protocol,
+        ' fragment =', $fragment,
+        ' cache-type = ', $cache-type), 'func:follow-uri', $debug-detail+1)"/>    
+    <!--xsl:message>func:follow-uri $uri = <xsl:value-of select="$uri"/> $parameters = <xsl:value-of select="$parameters"/></xsl:message-->
+    <xsl:variable name="document" as="document-node()?"
+      select="doc($base-path-with-protocol)"/>
+      
+    <xsl:variable name="pointer-destination" as="node()*">
+      <xsl:apply-templates 
+        select="if (string-length($fragment) &gt; 0) 
+        then func:node-from-pointer($document, $fragment) 
+        else $document" mode="follow-uri">
+        <!-- ^ changed to return $document from $document/. -->
+        <xsl:with-param tunnel="yes" name="steps" select="$steps"/>
+        <xsl:with-param tunnel="yes" name="cache-type" select="$cache-type"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+
+    <xsl:sequence select="func:debug(($fragment, $steps, $pointer-destination), 
+      string-join(('func:follow-pointer(): $fragment, $steps, $pointer-destination for ', 
+        $base-path,'#',$fragment), ''), $debug-detail)"/>
+    <xsl:sequence select="$pointer-destination"/>
+  </xsl:function>
+
+  <xd:doc>
+    <xd:short>Named template to handle the common processing 
+    involved in following TEI links</xd:short>
+    <xd:param name="steps">Specifies the maximum number of steps to evaluate.  Negative for infinity.</xd:param>
+    <xd:param name="cache-type">Specifies the cache type to use (eg, format=fragmentation).  Empty for none (default)</xd:param>
+  </xd:doc>
+  <xsl:template name="follow-tei-link" as="node()*">
+    <xsl:param name="steps" tunnel="yes" as="xs:integer" select="-1"/>
+    <xsl:param name="cache-type" tunnel="yes" as="xs:string?" select="()"/>
+    
+    <xsl:variable name="context" as="node()" select="current()"/>
+    <xsl:variable name="evaluate" as="xs:string?" 
+      select="(@evaluate,../(tei:linkGrp|../tei:joinGrp)/@evaluate)[1]"/>
+    <xsl:variable name="targets" as="xs:string+" 
+      select="tokenize(@target|@targets,'\s+')"/>
+        
+    <xsl:for-each select="$targets">
+      <xsl:choose>
+        <xsl:when test="$steps=0">
+          <xsl:sequence select="$context"/>
+        </xsl:when>
+        <xsl:otherwise><!-- evaluate='all' or nonexistent -->
+          <xsl:sequence select="func:follow-cached-uri(., $context, 
+            if ($evaluate='none') 
+            then 0 
+            else if ($evaluate='one') 
+            then 1
+            else $steps - 1, 
+            $cache-type)"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>tei:ptr being followed</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:ptr" mode="follow-uri">
+    <xsl:param name="steps" as="xs:integer" tunnel="yes" select="-1"/>
+    <xsl:param name="cache-type" as="xs:string?" tunnel="yes" select="()"/>
+    <xsl:call-template name="follow-tei-link"/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>tei:ptr that should not be followed</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:ptr[@type='url']" mode="follow-uri">
+    <xsl:sequence select="."/>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>tei:join or tei:ptr acting as a join being followed.  
+    If @result is present, produce an element with the namespace URI
+    the same as the context node's</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:join|tei:joinGrp/tei:ptr" mode="follow-uri">
+    <xsl:variable name="joined-elements" as="element()*">
+      <xsl:variable name="prejoined-elements" as="element()*">
+        <xsl:call-template name="follow-tei-link"/>
+      </xsl:variable>
+      <xsl:for-each select="$prejoined-elements">
+        <xsl:choose>
+          <xsl:when test="@scope='branches'">
+            <xsl:sequence select="./child::node()"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:sequence select="."/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each>
+    </xsl:variable>
+    
+    <xsl:variable name="result" as="xs:string?" 
+      select="(@result, parent::tei:joinGrp/@result)[1]"/> 
+    
+    <xsl:choose>
+      <xsl:when test="$result">
+        <xsl:element name="{$result}" namespace="{namespace-uri()}">
+          <xsl:sequence select="$joined-elements"/>
+        </xsl:element>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$joined-elements"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Non-pointer nodes.  Return the current sequence.</xd:short>
+  </xd:doc>
+  <xsl:template match="document-node()|node()" mode="follow-uri">
+    <xsl:sequence select="."/>
+  </xsl:template>
+  
+</xsl:stylesheet>

@@ -1,0 +1,20 @@
+--- mime-types.xml	2010-10-26 10:46:52.000000000 -0400
++++ mime-types.ef.xml	2010-10-31 01:47:53.000000000 -0400
+@@ -22,7 +22,7 @@
+     <!-- Mime types stored as XML -->
+     <mime-type name="application/xml" type="xml">
+         <description>XML document</description>
+-        <extensions>.xml,.xsd,.rng,.mods,.xmp,.xmi,.xconf,.xmap,.xsp,.wsdl,.x3d,.rdf,.owl,.dbx,.tei,.xces,.ead,.xqx,.xform,.gml,.fo,.nvdl,.sch,.imdi,.cmdi</extensions>
++        <extensions>.xml,.xsd,.rng,.mods,.xmp,.xmi,.xconf,.xmap,.xsp,.wsdl,.x3d,.rdf,.owl,.dbx,.tei,.xces,.ead,.xqx,.xform,.gml,.fo,.nvdl,.sch,.imdi,.cmdi,.xspec</extensions>
+     </mime-type>
+     <mime-type name="text/xml" type="xml">
+         <description>Deprecated XML document</description>
+@@ -30,7 +30,7 @@
+     </mime-type>
+     <mime-type name="application/xslt+xml" type="xml">
+         <description>XSL document</description>
+-        <extensions>.xsl,.xslt</extensions>
++        <extensions>.xsl,.xslt,.xsl2</extensions>
+     </mime-type>
+     <mime-type name="application/stx+xml" type="xml">
+         <description>STX document</description>

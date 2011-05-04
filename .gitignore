@@ -1,0 +1,41 @@
+# local mods to Makefile
+Makefile.local
+
+# fake svn external directories
+lib/xsltforms/
+lib/xspec/
+lib/XSLTDoc/
+lib/tei/
+lib/exist/
+
+# generated text directory
+text/wlc/
+
+# generated documentation
+/doc/
+
+# generated files:
+/code/common/params.xsl2
+/code/modules/admin.xqm
+/code/transforms/format/xhtml/muxhtml.xsl2
+
+# db directory except special
+db/
+!db/controller.xql
+!db/system/
+
+# contents list
+__contents__.xml
+
+# backup files
+*.bak
+*.bkp
+*.swp
+*.tmp
+*.temp
+temp/
+tmp/
+*~
+
+# patch rejects
+*.rej

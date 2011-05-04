@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- conditionals filter 
+  Open Siddur Project
+  Copyright 2010 Efraim Feinstein
+  Licensed under the GNU Lesser General Public License, version 3 or later
+
+  $Id: conditionals.xspec 687 2011-01-23 23:36:48Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
+  stylesheet="../data-compiler.xsl2"
+  >
+  <x:scenario label="Truth table...">
+    <x:context href="conditional-truth-table.xml"/>
+    <x:expect label="...with no control results in presence of structure and content" test="//*[@jx:id = 'NoControl']">
+      <tei:p jx:id="NoControl">...</tei:p>
+    </x:expect>
+    <x:scenario label="...with two-way set=YES...">
+      <x:expect label="and association=YES results in presence of structure and content" test="//*[@jx:id = 'p2_Y_Y']">
+        <tei:p jx:id="p2_Y_Y">...</tei:p>
+      </x:expect>
+      <x:expect label="and association=NO results in exclusion" 
+        test="empty(//*[@jx:id='p2_Y_N']) and exists(//*[@jx:id='Exclusion_2_Y_N']) and not(string(//*[@jx:id='Exclusion_2_Y_N']))"/>
+    </x:scenario>
+    <x:scenario label="...with two-way set=NO...">
+      <x:expect label="and association=NO results in presence of structure and content" test="//*[@jx:id = 'p2_N_N']">
+        <tei:p jx:id="p2_N_N">...</tei:p>
+      </x:expect>
+      <x:expect label="and association=YES results in exclusion" 
+        test="empty(//*[@jx:id='p2_N_Y']) and exists(//*[@jx:id='Exclusion_2_N_Y']) and not(string(//*[@jx:id='Exclusion_2_N_Y']))"/>
+    </x:scenario>
+    <x:scenario label="...with two-way structure set=ON...">
+      <x:expect label="and association=ON results in presence of structure and content" test="//*[@jx:id = 'ps_ON_ON']">
+        <tei:p jx:id="ps_ON_ON">...</tei:p>
+      </x:expect>
+      <x:expect label="and association=OFF results in presence of content and exclusion of structure" 
+        test="empty(//*[@jx:id='ps_ON_OFF']) and normalize-space(//*[@jx:id='Exclusion_2_ON_OFF'])='Excluded'"/>
+    </x:scenario>
+    <x:scenario label="...with two-way structure set=OFF...">
+      <x:expect label="and association=ON results in absence of structure and presence of content" test="empty(//*[@jx:id = 'p2_OFF_ON']) and normalize-space(//*[@jx:id='Exclusion_2_OFF_ON'])='Excluded'"/>
+      <x:expect label="and association=OFF results in presence of content and structure" 
+        test="//*[@jx:id='ps_OFF_OFF']">
+        <tei:p jx:id="ps_OFF_OFF">...</tei:p>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="...with three-way set=YES...">
+      <x:expect label="and association=YES results in presence of structure and content" test="//*[@jx:id='p3_Y_Y']">
+        <tei:p jx:id="p3_Y_Y">...</tei:p>
+      </x:expect>
+      <x:expect label="and association=NO results in exclusion of content and structure" 
+        test="empty(//*[@jx:id='p2_Y_N']) and exists(//*[@jx:id='Exclusion_3_Y_N']) and not(string(//*[@jx:id='Exclusion_3_Y_N']))"/>
+    </x:scenario>
+    <x:scenario label="...with three-way set=NO...">
+      <x:expect label="and association=NO results in presence of structure and content" test="//*[@jx:id='p3_N_N']">
+        <tei:p jx:id="p3_N_N">...</tei:p>
+      </x:expect>
+      <x:expect label="and association=YES results in exclusion of content and structure" 
+        test="empty(//*[@jx:id='p3_N_Y']) and exists(//*[@jx:id='Exclusion_3_N_Y']) and not(string(//*[@jx:id='Exclusion_3_N_Y']))"/>
+    </x:scenario>
+    <x:scenario label="...with three-way set=MAYBE...">
+      <x:expect label="and association=NO results in presence of structure and content with instruction" 
+        test="//*[@jx:id='p3_M_N']">
+        <tei:p jx:id="p3_M_N">
+          <tei:note jx:id="instruction">...</tei:note>
+          <tei:ab>...</tei:ab>
+        </tei:p>
+      </x:expect>
+      <x:expect label="and association=YES results in presence of structure and content with instruction" 
+        test="//*[@jx:id='p3_M_Y']">
+        <tei:p jx:id="p3_M_Y">
+          <tei:note jx:id="instruction">...</tei:note>
+          <tei:ab>...</tei:ab>
+        </tei:p>
+      </x:expect>
+    </x:scenario>
+  </x:scenario> 
+</x:description>

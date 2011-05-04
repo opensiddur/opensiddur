@@ -1,0 +1,11 @@
+<tei:list xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <tei:item xml:id="new">
+  	<tei:orgName/>
+  	<tei:email/>
+  	<tei:ptr type="url" target="" />
+  	<tei:name/>	
+  	<tei:affiliation>
+  		<tei:ptr target=""/>
+  	</tei:affiliation>
+  </tei:item>
+</tei:list>
