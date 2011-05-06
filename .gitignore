@@ -37,8 +37,9 @@ temp/
 tmp/
 *~
 
-# project
+# local files project
 .project
+private-scripts/
 
 # patch rejects
 *.rej

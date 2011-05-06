@@ -313,30 +313,7 @@
   </xd:doc>
   <xsl:function name="func:cached-document-path" as="xs:string">
     <xsl:param name="path" as="xs:string"/>
-    
-
-    <xsl:variable name="split-path" as="element()">
-      <split-path>
-        <xsl:analyze-string select="$path" 
-          regex="^(((xmldb:exist)|http)://[^/]+)?(.+)$">
-          <xsl:matching-substring>
-            <protocol-and-server><xsl:value-of select="regex-group(1)"/></protocol-and-server>
-            <collection-and-resource><xsl:value-of select="regex-group(4)"/></collection-and-resource>
-          </xsl:matching-substring>
-          <xsl:non-matching-substring>
-          </xsl:non-matching-substring>
-        </xsl:analyze-string>
-      </split-path>
-    </xsl:variable>
-    <xsl:variable name="protocol-and-server" as="xs:string"
-      select="$split-path/protocol-and-server"/>
-    <xsl:variable name="path-parts" as="xs:string*"
-      select="tokenize($split-path/collection-and-resource, '/')"/>
-    <xsl:variable name="collection" as="xs:string" 
-      select="string-join(subsequence($path-parts, 1, count($path-parts) - 1), '/')"/>
-    <xsl:variable name="resource" as="xs:string"
-      select="$path-parts[last()]"/>
-    <xsl:sequence select="concat($protocol-and-server, $collection, if (ends-with($collection,'/cache')) then '/' else '/cache/', $resource)"/>
+    <xsl:sequence select="replace($path, '^((((xmldb:exist)|http)://[^/]+)?)(/db)?(/cache?)/(.+)$', '$1$5/cache/$6')"/> 
   </xsl:function>
 
   <xd:doc>
