@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/
 db-tests:
-	rsync $(RSYNC_EXCLUDE) -a --delete $(TOPDIR)/cache $(DBDIR)
-	rsync $(RSYNC_EXCLUDE) -a --delete $(CODEDIR)/transforms/tests/cache $(DBDIR)/cache/code/transforms/tests
-	rsync $(RSYNC_EXCLUDE) -a --delete $(CODEDIR)/transforms/data-compiler/tests/cache $(DBDIR)/cache/code/transforms/data-compiler/tests
-	rsync $(RSYNC_EXCLUDE) -a --delete $(CODEDIR)/transforms/data-compiler/tests-with-document-uri/cache $(DBDIR)/cache/code/transforms/data-compiler/tests-with-document-uri
+	rsync $(RSYNC_EXCLUDE) -a --delete $(TOPDIR)/tests/cache $(DBDIR)
+	rsync $(RSYNC_EXCLUDE) -a --delete $(CODEDIR)/transforms/tests/cache/ $(DBDIR)/cache/code/transforms/tests
+	rsync $(RSYNC_EXCLUDE) -a --delete $(CODEDIR)/transforms/data-compiler/tests-with-document-uri/cache/ $(DBDIR)/cache/code/transforms/data-compiler/tests-with-document-uri

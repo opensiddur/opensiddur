@@ -272,6 +272,7 @@ db-sync:
 
 # patch error status ignored because it returns 1 if patches are already applied
 db: externals schema transforms queries $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tests
+	mkdir -p $(DBDIR)/xforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources
 	cp $(CODEDIR)/common/params.xsl2 $(DBDIR)/code/common	
