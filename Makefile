@@ -191,6 +191,9 @@ $(EXIST_INSTALL_JAR):
 		JAVA_HOME=$(JAVA_HOME) \
 		./build.sh installer -Dizpack.dir=$(IZPACK)
 
+.PHONY: build-exist clean-exist dist-clean-exist
+build-exist: $(EXIST_INSTALL_JAR)
+
 clean-exist:
 	rm -f $(EXIST_INSTALL_JAR)
 
