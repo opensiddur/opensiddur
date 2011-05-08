@@ -1,0 +1,3 @@
+The cache directory contains tests that are staged from other places 
+in the directory structure into the database as to be used as pre-cached
+resources, for example, for testing the cache.

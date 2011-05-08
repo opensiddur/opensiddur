@@ -139,7 +139,7 @@ include $(TEXTDIR)/Makefile
 include $(CODEDIR)/Makefile
 include $(ODDDIR)/Makefile
 include $(LIBDIR)/Makefile
-
+include tests/Makefile
 
 XSLTDOC_CFGFILE ?= XSLTDocConfig.xml
 
@@ -271,7 +271,7 @@ db-sync:
 	$(EXISTBACKUP) -u admin -p $(DBAPASS) -r `pwd`/$(COMMONDIR)/__contents__.xml -ouri=xmldb:exist://localhost:8080/xmlrpc
 
 # patch error status ignored because it returns 1 if patches are already applied
-db: externals schema transforms queries $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema
+db: externals schema transforms queries $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tests
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources
 	cp $(CODEDIR)/common/params.xsl2 $(DBDIR)/code/common	
@@ -282,7 +282,7 @@ db: externals schema transforms queries $(DBDIR)/code $(DBDIR)/common $(DBDIR)/s
 	cp $(TRANSFORMS-DIR)/format/xhtml/muxhtml.xsl2 $(DBDIR)/code/transforms/format/xhtml
 
 db-clean:
-	rm -fr $(DBDIR)/schema $(DBDIR)/code $(DBDIR)/common
+	rm -fr $(DBDIR)/schema $(DBDIR)/code $(DBDIR)/common $(DBDIR)/cache
 
 # equivalent of svn externals
 .PHONY: db-externals
