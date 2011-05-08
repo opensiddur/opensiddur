@@ -88,7 +88,7 @@ TEXMLOPTIONS ?= -e utf8
 #	--doc makes TEI documentation, 
 #	--docpdf makes PDF documentation (broken!)
 #	--dochtml makes HTML documentation
-ROMAOPTIONS ?= --xsl=$(LIBDIR)/tei/trunk/Stylesheets --doc --dochtml 
+ROMAOPTIONS ?= --xsl=$(LIBDIR)/tei/Stylesheets --doc --dochtml 
 
 # XML validator options
 RELAXNGOPTIONS ?= $(TEIDOCDIR)/jlptei.rng
@@ -111,7 +111,7 @@ JCLASSPATH ?= "$(SAXONJAR):$(RESOLVERPATH):$(COMMONDIR)"
 SAXONCLASS ?= net.sf.saxon.Transform
 XSLT ?= java $(JAVAOPTIONS) -cp "$(JCLASSPATH)" $(SAXONCLASS)  $(XSLTOPTIONS) 
 XSLTDOC ?= $(LIBDIR)/XSLTDoc/xsl/xsltdoc.xsl
-TEIROMA ?= $(LIBDIR)/tei/trunk/Roma/roma2.sh $(ROMAOPTIONS)
+TEIROMA ?= $(LIBDIR)/tei/Roma/roma2.sh $(ROMAOPTIONS)
 RELAXNG ?= $(LIBDIR)/jing $(RELAXNGOPTIONS)
 
 # changes for Cygwin path (experimental, not necessarily maintained!)
