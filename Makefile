@@ -155,7 +155,7 @@ depend-clean:
 schema: odddoc
 
 .PHONY: clean
-clean: xsltdoc-clean dist-clean depend-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean
+clean: xsltdoc-clean dist-clean depend-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist
 
 dist:
 	svnversion -n $(TOPDIR) | sed -e "s/:/-/g" > opensiddur-version
@@ -202,14 +202,29 @@ dist-clean-exist:
 		JAVA_HOME=$(JAVA_HOME) \
 		./build.sh clean
 
+.PHONY: build-hebmorph build-hebmorph-lucene clean-hebmorph clean-hebmorph-lucene
+build-hebmorph: $(LIBDIR)/hebmorph/java/hebmorph/build/distribution/hebmorph.jar
+	cd $(LIBDIR)/hebmorph/java/hebmorph/ && \
+    ant jar
+
+clean-hebmorph:
+	cd $(LIBDIR)/hebmorph/java/hebmorph/ && \
+    ant clean
+
+build-hebmorph-lucene: build-hebmorph $(LIBDIR)/hebmorph/lucene.hebrew/build/distribution/lucene.hebrew.jar
+	cd $(LIBDIR)/hebmorph/lucene.hebrew/ && ant jar
+
+clean-hebmorph-lucene:
+	cd $(LIBDIR)/hebmorph/lucene.hebrew/ && ant clean
+
 # Install a copy of the eXist database
 .PHONY: db-install db-install-wlc bf-install db-uninstall db-sync db-svnsync db-syncclean
-db-install: code $(EXIST_INSTALL_JAR)
+db-install: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 	java -jar $(EXIST_INSTALL_JAR) -p $(EXIST_INSTALL_DIR)
-	#cp $(SETUPDIR)/conf.xml $(EXIST_INSTALL_DIR) # no longer any changes to conf.xml
 	-patch -Nd $(EXIST_INSTALL_DIR) < $(SETUPDIR)/mime-types.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/webapp/WEB-INF < $(SETUPDIR)/controller-config.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/tools/jetty/etc < $(SETUPDIR)/jetty.xml.patch
+	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
 	# kluge:
 	#cp $(DBDIR)/data/global/transliteration/hebrew.dtd $(EXIST_INSTALL_DIR)
 	@read -p "Set the password for admin database user: " ADMPASS && \
