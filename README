@@ -1,4 +1,28 @@
 This is the Open Siddur Project's git repository.
 
-For history prior to version 0.4.1, see our old Subversion repository
-at http://jewishliturgy.googlecode.com
+The Open Siddur Project aims to produce a free software toolkit for making high-quality custom Jewish liturgical books such as haggadot, siddurim, and bentchers that can be displayed on screen or printed to paper. The project's goals include producing a reliable source text, enabling personalization and customization of the text for local rites and customs and selective inclusion of multilingual translations, transliterations, instructions, notes, and commentaries.
+
+To accomplish it, we are to creating a collaborative publishing platform built around a social network of individuals passionate about the siddur, some wanting to craft their own siddur, others wanting to use it as an educational tool, or for sharing prayers, translations, commentaries, art, and layout templates for new siddurim. The mission of the Open Siddur Project is further described in our Mission Statement (http://opensiddur.org/development/mission/) and encompasses the values of pluralism (acceptance for the diversity of Jewish cultural expression), historical awareness (the text of the siddur is an aggregate of thousands of years of creatively inspired works), and individual freedom.
+
+The project is divided into three major parts:
+* Schema: A defined XML format for storing liturgical materials, based on the Text Encoding Initiative (TEI) XML schema.
+* Back-end: A database and REST API for storing and accessing siddur data.
+* Front-end: The web-based editing application.
+
+This site serves as the project's repository and issue tracker. 
+
+Current development progress is being tracked on our wiki at http://wiki.jewishliturgy.org. All useful documentation is kept on the wiki.
+
+Many of the texts that have been contributed to date are distributed at http://opensiddur.org
+
+Comments and bug reports from anyone are welcome. 
+
+Please join our discussion lists:
+* Read-only announcements (low traffic): http://groups.google.com/group/opensiddur-announce
+* General discussion: http://groups.google.com/group/opensiddur-talk
+* Technical discussion: http://groups.google.com/group/opensiddur-tech
+* Commit logs: http://groups.google.com/group/opensiddur-dev
+
+You can also follow us on Twitter (@opensiddur) and Facebook (http://www.facebook.com/home.php#/group.php?gid=107922647745)
+
+For history prior to version 0.4.1, see our old Subversion repository at http://jewishliturgy.googlecode.com
