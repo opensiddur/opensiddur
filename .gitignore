@@ -18,6 +18,7 @@ text/wlc/
 /code/common/params.xsl2
 /code/modules/admin.xqm
 /code/transforms/format/xhtml/muxhtml.xsl2
+/setup/setup.xql
 
 # db directory except special
 db/
