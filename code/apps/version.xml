@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- application interface version 
-$Id: version.xml 696 2011-02-07 02:53:44Z efraim.feinstein $
 -->
-<version xmlns="">0.4.1</version>
+<version xmlns="">0.4.2</version>
