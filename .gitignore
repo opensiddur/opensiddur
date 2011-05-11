@@ -21,7 +21,7 @@ text/wlc/
 /setup/setup.xql
 
 # db directory except special
-db/
+db/*
 !db/controller.xql
 !db/system/
 

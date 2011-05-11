@@ -1,0 +1,12 @@
+<collection xmlns="http://exist-db.org/collection-config/1.0">
+    <index xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+        <fulltext default="none" attributes="no"/>
+        <lucene>
+            <analyzer class="org.apache.lucene.analysis.hebrew.MorphAnalyzer"/>
+            <inline qname="tei:c"/>
+            <text qname="tei:title"/>
+            <text qname="j:repository"/>
+            <text qname="tei:seg"/>
+        </lucene>
+    </index>
+</collection>
