@@ -183,7 +183,7 @@ $(DBDIR)/schema:
 IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 
 # build eXist (what dependencies should this have?)
-$(EXIST_INSTALL_JAR):
+$(EXIST_INSTALL_JAR): svn-exist
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
 	rm -f $(LIBDIR)/exist/extensions/indexes/lucene/lib/*2.9.2.jar
 	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/lib/lucene*2.9.3.jar $(LIBDIR)/exist/extensions/indexes/lucene/lib
@@ -207,6 +207,8 @@ dist-clean-exist:
 
 .PHONY: build-hebmorph build-hebmorph-lucene clean-hebmorph clean-hebmorph-lucene
 build-hebmorph: $(LIBDIR)/hebmorph/java/hebmorph/build/distribution/hebmorph.jar
+
+$(LIBDIR)/hebmorph/java/hebmorph/build/distribution/hebmorph.jar:
 	cd $(LIBDIR)/hebmorph/java/hebmorph/ && \
     ant jar
 
@@ -214,11 +216,13 @@ clean-hebmorph:
 	cd $(LIBDIR)/hebmorph/java/hebmorph/ && \
     ant clean
 
-build-hebmorph-lucene: build-hebmorph $(LIBDIR)/hebmorph/lucene.hebrew/build/distribution/lucene.hebrew.jar
-	cd $(LIBDIR)/hebmorph/lucene.hebrew/ && ant jar
+build-hebmorph-lucene: build-hebmorph $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar 
+
+$(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar:
+	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant jar
 
 clean-hebmorph-lucene:
-	cd $(LIBDIR)/hebmorph/lucene.hebrew/ && ant clean
+	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant clean
 
 # Install a copy of the eXist database
 .PHONY: db-install db-install-wlc bf-install db-uninstall db-sync db-svnsync db-syncclean
