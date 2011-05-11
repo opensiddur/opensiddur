@@ -184,6 +184,9 @@ IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 
 # build eXist (what dependencies should this have?)
 $(EXIST_INSTALL_JAR):
+	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions
+	rm -f $(LIBDIR)/exist/extensions/indexes/lucene/lib/*2.9.2.jar
+	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/lib/lucene*2.9.3.jar $(LIBDIR)/exist/extensions/indexes/lucene/lib
 	cd $(LIBDIR)/exist && \
 		JAVA_HOME=$(JAVA_HOME) \
 		./build.sh svn-download
