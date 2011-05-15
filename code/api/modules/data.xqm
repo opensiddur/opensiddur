@@ -107,40 +107,75 @@ declare function data:db-path-to-api(
 	)
 };
 
+(:~ convert an API path to component parts, returned inside an XML element
+ :)
+declare function data:path-to-parts(
+  $path as xs:string
+  ) as element(data:path) {
+  <data:path>{
+    (: split the path at the wildcard. Anything before is part of the full path, after is 
+     :  part of the subresource :)
+    let $wildcard := tokenize($path, '/\.\.\./')
+    let $before-wildcard := $wildcard[1]
+    let $after-wildcard := $wildcard[2]
+    let $after-wildcard-tokens := tokenize($after-wildcard, '/')[.]
+	  let $path-tokens := tokenize(replace($before-wildcard, '^(/code/api/data)?/', ''), '/')[.]
+    let $n-tokens := count($path-tokens)
+    let $purpose := $path-tokens[1]
+    let $share-type := $path-tokens[2]
+    let $owner := $path-tokens[3]
+    let $resource := 
+      if ($n-tokens = 4 and contains($path-tokens[4], '.'))
+      then substring-before($path-tokens[4], '.')
+      else $path-tokens[4]
+    let $subresource := 
+      if ($after-wildcard)
+      then
+        replace($after-wildcard[1], '\.(.*)$', '')
+      else
+        if ($n-tokens = 5 and contains($path-tokens[5], '.'))
+        then substring-before($path-tokens[5], '.')
+        else $path-tokens[5]
+    let $subsubresource := 
+      if ($after-wildcard)
+      then
+        replace($after-wildcard[2], '\.(.*)$', '')
+      else
+        if ($n-tokens = 6 and contains($path-tokens[6], '.'))
+        then substring-before($path-tokens[6], '.')
+        else $path-tokens[6]	
+    let $format := 
+      let $last-token := ($after-wildcard[last()], $path-tokens[last()])[1]
+      return
+        if (contains($last-token, '.'))
+        then substring-after($last-token, '.')
+        else ()
+    return (
+      <data:purpose>{$purpose}</data:purpose>,
+      <data:share-type>{$share-type}</data:share-type>,
+      <data:owner>{$owner}</data:owner>,
+      <data:resource>{$resource}</data:resource>,
+      <data:subresource>{$subresource}</data:subresource>,
+      <data:subsubresource>{$subsubresource}</data:subsubresource>,
+      <data:format>{$format}</data:format>
+    )
+  }</data:path>
+};
+
 (:~ convert an API path into exist:add-parameter elements 
  :)
 declare function data:path-to-parameters(
 	$path as xs:string
 	) as element(exist:add-parameter)+ {
-	let $path-tokens := tokenize(replace($path, '^(/code/api/data)?/', ''), '/')[.]
-	let $n-tokens := count($path-tokens)
-	let $purpose := $path-tokens[1]
-	let $share-type := $path-tokens[2]
-	let $owner := $path-tokens[3]
-	let $resource := 
-		if ($n-tokens = 4 and contains($path-tokens[4], '.'))
-		then substring-before($path-tokens[4], '.')
-		else $path-tokens[4]
-	let $subresource := 
-		if ($n-tokens = 5 and contains($path-tokens[5], '.'))
-		then substring-before($path-tokens[5], '.')
-		else $path-tokens[5]
-	let $subsubresource := 
-		if ($n-tokens = 6 and contains($path-tokens[6], '.'))
-		then substring-before($path-tokens[6], '.')
-		else $path-tokens[6]	
-	let $format := 
-		if (contains($path-tokens[last()], '.'))
-		then substring-after($path-tokens[last()], '.')
-		else ()
-	return (
-		<exist:add-parameter name="purpose" value="{$purpose}"/>,
-		<exist:add-parameter name="share-type" value="{$share-type}"/>,
-		<exist:add-parameter name="owner" value="{$owner}"/>,
-		<exist:add-parameter name="resource" value="{$resource}"/>,
-		<exist:add-parameter name="subresource" value="{$subresource}"/>,
-		<exist:add-parameter name="subsubresource" value="{$subsubresource}"/>,
-		<exist:add-parameter name="format" value="{$format}"/>
+  let $tokenized-path := data:path-to-parts($path)
+	return $tokenized-path/(
+		<exist:add-parameter name="purpose" value="{data:purpose}"/>,
+		<exist:add-parameter name="share-type" value="{data:share-type}"/>,
+		<exist:add-parameter name="owner" value="{data:owner}"/>,
+		<exist:add-parameter name="resource" value="{data:resource}"/>,
+		<exist:add-parameter name="subresource" value="{data:subresource}"/>,
+		<exist:add-parameter name="subsubresource" value="{data:subsubresource}"/>,
+		<exist:add-parameter name="format" value="{data:format}"/>
 	)
 }; 
 

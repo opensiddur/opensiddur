@@ -41,6 +41,8 @@ import module namespace app="http://jewishliturgy.org/modules/app"
 	at "/code/modules/app.xqm";
 import module namespace collab="http://jewishliturgy.org/modules/collab"
 	at "/code/modules/collab.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+	at "/code/modules/paths.xqm";
 import module namespace scache="http://jewishliturgy.org/modules/scache"
 	at "/code/api/modules/scache.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"

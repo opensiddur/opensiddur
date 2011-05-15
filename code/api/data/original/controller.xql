@@ -1,7 +1,10 @@
 xquery version "1.0";
 (: original text data api controller.
  :
- : $Id: controller.xql 769 2011-04-29 00:02:54Z efraim.feinstein $
+ : Open Siddur Project
+ : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Licensed under the GNU Lesser General Public License, version 3 or later
+ :
  :)
 import module namespace api="http://jewishliturgy.org/modules/api"
 	at "/code/api/modules/api.xqm";
@@ -48,6 +51,7 @@ then
 	)
 else (),
 let $has-compile-query := request:get-parameter('compile', ())
+let $has-search-query := request:get-parameter('q', ())
 let $path-tokens := tokenize($exist:path, '/')[.]
 let $n-tokens := count($path-tokens)
 let $purpose := 'original'
@@ -66,8 +70,26 @@ let $subsubresource :=
 	then substring-before($path-tokens[5], '.')
 	else $path-tokens[5]	
 let $format := substring-after($path-tokens[$n-tokens], '.')
+let $sr := 
+	if ($subresource = 'id')
+	then data:forward-by-id($purpose, $share-type, $owner, $resource, $subsubresource)
+	else $subresource
 return
-	if ($n-tokens <= 2)
+	if ($has-search-query)
+	then
+		<exist:dispatch>
+			{app:pass-credentials-xq()}
+			<exist:forward url="{$local:query-base}/search.xql">
+				<exist:add-parameter name="purpose" value="{$purpose}"/>
+				<exist:add-parameter name="share-type" value="{$share-type}"/>
+				<exist:add-parameter name="owner" value="{$owner}"/>
+				<exist:add-parameter name="resource" value="{$resource}"/>
+				<exist:add-parameter name="subresource" value="{$sr}"/>
+				<exist:add-parameter name="subsubresource" value="{$subsubresource}"/>
+				<exist:add-parameter name="format" value="{$format}"/>
+			</exist:forward>
+		</exist:dispatch>
+	else if ($n-tokens <= 2)
 	then
 		<exist:dispatch>
 			{app:pass-credentials-xq()}
@@ -77,55 +99,53 @@ return
 			</exist:forward>
 		</exist:dispatch>
 	else if ($n-tokens = (3, 4, 5))
-	then
-		let $sr := 
-			if ($subresource = 'id')
-			then data:forward-by-id($purpose, $share-type, $owner, $resource, $subsubresource)
-			else $subresource
-		return (
-			util:log-system-out(('controller: subresource for ', $exist:path,'= ', $sr)),
-			if ($has-compile-query)
-			then
-				<exist:dispatch>
-					{app:pass-credentials-xq()}
-					<exist:forward url="{$local:query-base}/compile.xql">
-						<exist:add-parameter name="purpose" value="{$purpose}"/>
-						<exist:add-parameter name="share-type" value="{$share-type}"/>
-						<exist:add-parameter name="owner" value="{$owner}"/>
-						<exist:add-parameter name="resource" value="{$resource}"/>
-						<exist:add-parameter name="subresource" value="{$sr}"/>
-						<exist:add-parameter name="subsubresource" value="{$subsubresource}"/>
-						<exist:add-parameter name="format" value="{$format}"/>
-					</exist:forward>
-				</exist:dispatch>
-			else if ($sr = $local:subresource/s)
-			then 
-				(: subresource handled in its own query :)
-				<exist:dispatch>
-					{app:pass-credentials-xq()}
-					<exist:forward url="{$local:subresource/s[.=$sr]/@xquery}">
-						<exist:add-parameter name="purpose" value="{$purpose}"/>
-						<exist:add-parameter name="share-type" value="{$share-type}"/>
-						<exist:add-parameter name="owner" value="{$owner}"/>
-						<exist:add-parameter name="resource" value="{$resource}"/>
-						<exist:add-parameter name="subresource" value="{$sr}"/>
-						<exist:add-parameter name="subsubresource" value="{$subsubresource}"/>
-						<exist:add-parameter name="format" value="{$format}"/>
-					</exist:forward>
-				</exist:dispatch>
-			else
-				(: resource with or w/no subresource :)
-				<exist:dispatch>
-					{app:pass-credentials-xq()}
-					<exist:forward url="{$exist:controller}/resource.xql">
-						<exist:add-parameter name="share-type" value="{$share-type}"/>
-						<exist:add-parameter name="owner" value="{$owner}"/>
-						<exist:add-parameter name="resource" value="{$resource}"/>
-						<exist:add-parameter name="subresource" value="{$sr}"/>
-						<exist:add-parameter name="subsubresource" value="{$subsubresource}"/>
-						<exist:add-parameter name="format" value="{$format}"/>
-					</exist:forward>
-				</exist:dispatch>
+	then (
+		if ($paths:debug)
+		then
+			util:log-system-out(('controller: subresource for ', $exist:path,'= ', $sr))
+		else (),
+		if ($has-compile-query)
+		then
+			<exist:dispatch>
+				{app:pass-credentials-xq()}
+				<exist:forward url="{$local:query-base}/compile.xql">
+					<exist:add-parameter name="purpose" value="{$purpose}"/>
+					<exist:add-parameter name="share-type" value="{$share-type}"/>
+					<exist:add-parameter name="owner" value="{$owner}"/>
+					<exist:add-parameter name="resource" value="{$resource}"/>
+					<exist:add-parameter name="subresource" value="{$sr}"/>
+					<exist:add-parameter name="subsubresource" value="{$subsubresource}"/>
+					<exist:add-parameter name="format" value="{$format}"/>
+				</exist:forward>
+			</exist:dispatch>
+		else if ($sr = $local:subresource/s)
+		then 
+			(: subresource handled in its own query :)
+			<exist:dispatch>
+				{app:pass-credentials-xq()}
+				<exist:forward url="{$local:subresource/s[.=$sr]/@xquery}">
+					<exist:add-parameter name="purpose" value="{$purpose}"/>
+					<exist:add-parameter name="share-type" value="{$share-type}"/>
+					<exist:add-parameter name="owner" value="{$owner}"/>
+					<exist:add-parameter name="resource" value="{$resource}"/>
+					<exist:add-parameter name="subresource" value="{$sr}"/>
+					<exist:add-parameter name="subsubresource" value="{$subsubresource}"/>
+					<exist:add-parameter name="format" value="{$format}"/>
+				</exist:forward>
+			</exist:dispatch>
+		else
+			(: resource with or w/no subresource :)
+			<exist:dispatch>
+				{app:pass-credentials-xq()}
+				<exist:forward url="{$exist:controller}/resource.xql">
+					<exist:add-parameter name="share-type" value="{$share-type}"/>
+					<exist:add-parameter name="owner" value="{$owner}"/>
+					<exist:add-parameter name="resource" value="{$resource}"/>
+					<exist:add-parameter name="subresource" value="{$sr}"/>
+					<exist:add-parameter name="subsubresource" value="{$subsubresource}"/>
+					<exist:add-parameter name="format" value="{$format}"/>
+				</exist:forward>
+			</exist:dispatch>
 		)
 	else
 		(: path is too long :)
