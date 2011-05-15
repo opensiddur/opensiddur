@@ -52,11 +52,11 @@ declare function data:api-path-to-db(
 					concat($tok[4], '/')
 				else '',
 				$resource-noext, 
-				'.',
-				if ($ext) 
-				then $ext
-				else 'xml'
-			)
+        (: add an extension if the resource is not blank :)
+        if ($resource-noext)
+        then concat('.', if ($ext) then $ext else 'xml')
+        else ''
+			)[.]
 	let $xmlid := 
 		if ($tok[5] = 'id')
 		then $tok[6]

@@ -44,6 +44,10 @@ declare function local:get(
       then doc($db-path)
       else api:error(404, "Document not found or inaccessible", $db-path)
     else collection(data:api-path-to-db($path))
+  let $collection :=
+    if ($top-level instance of document-node())
+    then util:collection-name($top-level)
+    else data:api-path-to-db($path)
   return
     if ($top-level instance of element(error))
     then (
@@ -62,8 +66,7 @@ declare function local:get(
         xs:integer(request:get-parameter('max-results', $api:default-max-results))
       let $subresource := $path-parts/data:subresource/string()
       let $uri := request:get-uri()
-      let $collection := 
-        data:db-path-to-api(string-join(('', $path-parts/(data:share-type, data:owner, data:purpose)), '/'))
+      let $null := util:log-system-out(('$path-parts=', $path-parts, ' db-path=', $db-path, ' collection=', $collection))
       let $results :=
         if (scache:is-up-to-date($collection, $uri, $query))
         then 
@@ -84,14 +87,14 @@ declare function local:get(
                   $top-level//(j:repository|tei:title)[ft:query(., $query)]
               )
               let $doc-uri := document-uri(root($result))
-              let $desc := kwic:summarize($result, <config/>)
+              let $desc := kwic:summarize($result, element {QName('', 'config')}{attribute width {40}})
               let $api-doc := data:db-path-to-api($doc-uri)
               let $link := 
                 if ($subresource)
                 then concat($api-doc, '/', if ($subresource='seg') then concat('id/', $result/@xml:id) else $subresource)
                 else $api-doc
-              let $alt-desc := '(doc)'
-              order by ft:score(.) descending
+              let $alt-desc := 'doc'
+              order by ft:score($result) descending
               return
                 api:list-item($desc, $link, (), $api-doc, $alt-desc)  
             }</ul>)
