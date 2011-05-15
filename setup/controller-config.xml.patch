@@ -1,19 +1,19 @@
-*** controller-config.xml	2011-02-23 09:37:51.000000000 -0500
---- controller-config.ef2.xml	2011-02-27 16:04:25.000000000 -0500
+*** controller-config.xml	2011-05-09 14:03:38.000000000 -0400
+--- controller-config.xml.ef	2011-05-15 15:22:00.000000000 -0400
 ***************
-*** 40,45 ****
---- 40,53 ----
-      ++ webapp directory. 
-    -->
-    <root pattern="/library" path="xmldb:exist:///db/org/library"/>
-+     
+*** 42,47 ****
+--- 42,55 ----
+    <root pattern="/apps/tamboti" path="xmldb:exist:///db/library"/>
+  
+    <root pattern="/apps" path="xmldb:exist:///db"/>
++      
 +   <!-- EDF: change so that all requests default to the db, unless preceded by fs,
 + 	allow legacy (demo) to access through /exist -->
-+ 	<!-- -->
-+ 	<root pattern="/exist/rest" path="xmldb:exist:///"/>
++  	<!-- -->
++  	<root pattern="/exist/rest" path="xmldb:exist:///"/>
 +   <root pattern="/fs/.*" path="/"/>
 +   <root pattern="/db" path="xmldb:exist:///db"/>
 + 	<root pattern="/.*" path="xmldb:exist:///db"/>
-  
-    <root pattern="/apps" path="xmldb:exist:///db"/>
     
+    <!-- 
+      ++ To redirect requests based on the server name (i.e. www.example.com)

@@ -226,7 +226,7 @@ clean-hebmorph-lucene:
 
 # Install a copy of the eXist database
 .PHONY: db-install db-install-wlc bf-install db-uninstall db-sync db-svnsync db-syncclean
-db-install: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
+db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 	java -jar $(EXIST_INSTALL_JAR) -p $(EXIST_INSTALL_DIR)
 	-patch -Nd $(EXIST_INSTALL_DIR) < $(SETUPDIR)/mime-types.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/webapp/WEB-INF < $(SETUPDIR)/controller-config.xml.patch
@@ -313,8 +313,12 @@ db-clean:
 # equivalent of svn externals
 .PHONY: db-externals
 
-.PHONY: externals
+.PHONY: externals submodules
 externals: svn-xspec svn-xsltforms svn-xsltdoc svn-tei svn-exist
+
+submodules:
+	git submodule init
+	git submodule update
 
 .PHONY: svn-xspec svn-xsltforms svn-xsltdoc svn-tei svn-exist
 svn-xspec: $(XSPECDIR)
