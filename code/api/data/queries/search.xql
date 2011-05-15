@@ -50,10 +50,10 @@ declare function local:get(
       api:serialize-as('xml'), 
       $top-level
     )
-    else if (string($data:subresource) and not($path-parts/data:subresource = $local:valid-subresources))
+    else if (string($path-parts/data:subresource) and not($path-parts/data:subresource = $local:valid-subresources))
     then (
       api:serialize-as('xml'),
-      api:error(404, "Invalid subresource", string($data:subresource))
+      api:error(404, "Invalid subresource", string($path-parts/data:subresource))
     )
     else 
       let $query := request:get-parameter('q', ())
@@ -62,8 +62,8 @@ declare function local:get(
         xs:integer(request:get-parameter('max-results', $api:default-max-results))
       let $subresource := $path-parts/data:subresource/string()
       let $uri := request:get-uri()
-      let $collection := concat('/', 
-        data:db-path-to-api(string-join($path-parts/(* except (data:resource, data:subresource, data:subsubresource, data:format)), '/')))
+      let $collection := 
+        data:db-path-to-api(string-join(('', $path-parts/(data:share-type, data:owner, data:purpose)), '/'))
       let $results :=
         if (scache:is-up-to-date($collection, $uri, $query))
         then 
@@ -86,6 +86,10 @@ declare function local:get(
               let $doc-uri := document-uri(root($result))
               let $desc := kwic:summarize($result, <config/>)
               let $api-doc := data:db-path-to-api($doc-uri)
+              let $link := 
+                if ($subresource)
+                then concat($api-doc, '/', if ($subresource='seg') then concat('id/', $result/@xml:id) else $subresource)
+                else $api-doc
               let $alt-desc := '(doc)'
               order by ft:score(.) descending
               return
@@ -101,7 +105,7 @@ declare function local:get(
 
 if (api:allowed-method(('GET')))
 then
-  local:get($path)
+  local:get(request:get-uri())
 else 
 	(:disallowed method:)
 	api:error-message("Method not allowed")
