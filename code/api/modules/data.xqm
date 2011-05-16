@@ -32,7 +32,7 @@ declare function data:api-path-to-db(
 	) as xs:string {
 	let $tok := tokenize(replace($api-path, '^/(code/api/)?data/', ''), '/')
 	let $share-type :=
-		if ($tok[2] = 'group')
+		if ($tok[2] = 'group' or count($tok)=1)
 		then 'group'
 		else error(xs:QName('err:INPUT'), concat('api-path-to-db: Input has an invalid share-type. input=', $api-path))
 	let $owner := $tok[3]

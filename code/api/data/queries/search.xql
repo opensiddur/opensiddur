@@ -43,11 +43,17 @@ declare function local:get(
       if (doc-available($db-path)) 
       then doc($db-path)
       else api:error(404, "Document not found or inaccessible", $db-path)
-    else collection(data:api-path-to-db($path))
+    else if (string($path-parts/data:owner))
+    then collection($db-path)
+    else
+      (: no owner, top identifiable level is share-type :)
+      collection(concat('/',$path-parts/data:share-type))
   let $collection :=
     if ($top-level instance of document-node())
     then util:collection-name($top-level)
-    else data:api-path-to-db($path)
+    else if (string($path-parts/data:owner))
+    then $db-path
+    else concat('/',$path-parts/data:share-type)
   return
     if ($top-level instance of element(error))
     then (
@@ -66,7 +72,6 @@ declare function local:get(
         xs:integer(request:get-parameter('max-results', $api:default-max-results))
       let $subresource := $path-parts/data:subresource/string()
       let $uri := request:get-uri()
-      let $null := util:log-system-out(('$path-parts=', $path-parts, ' db-path=', $db-path, ' collection=', $collection))
       let $results :=
         if (scache:is-up-to-date($collection, $uri, $query))
         then 
@@ -94,6 +99,11 @@ declare function local:get(
                 then concat($api-doc, '/', if ($subresource='seg') then concat('id/', $result/@xml:id) else $subresource)
                 else $api-doc
               let $alt-desc := 'doc'
+              where 
+                (: if there's no owner, then we've searched through everything. Need to filter for purpose:)
+                if (string($path-parts/data:owner))
+                then true()
+                else data:path-to-parts($api-doc)/data:purpose/string() eq $path-parts/data:purpose/string()
               order by ft:score($result) descending
               return
                 api:list-item($desc, $link, (), $api-doc, $alt-desc)  
@@ -102,7 +112,7 @@ declare function local:get(
     api:list(
       <title>Search results for {$uri}?q={$query}</title>,
       $results,
-      count($results/li)
+      count(scache:get($uri, $query)/li)
     )        
 };
 
