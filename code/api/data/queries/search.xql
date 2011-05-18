@@ -91,8 +91,23 @@ declare function local:get(
                 else
                   $top-level//(j:repository|tei:title)[ft:query(., $query)]
               )
-              let $doc-uri := document-uri(root($result))
-              let $desc := kwic:summarize($result, element {QName('', 'config')}{attribute width {40}})
+              let $root := root($result)
+              let $doc-uri := document-uri($root)
+              let $title := $root//tei:title[@type='main' or not(@type)]
+              let $title-lang := string($title/ancestor-or-self::*[@xml:lang][1]/@xml:lang)
+              let $desc := (
+                (: desc contains the document title and the context of the search result :)
+                <span>{
+                  if ($title-lang)
+                  then (
+                    attribute lang {$title-lang},
+                    attribute xml:lang {$title-lang}
+                  ) 
+                  else (),
+                  normalize-space($title)
+                }</span>,
+                kwic:summarize($result, element {QName('', 'config')}{attribute width {40}})
+              )
               let $api-doc := data:db-path-to-api($doc-uri)
               let $link := 
                 if ($subresource)
@@ -108,12 +123,14 @@ declare function local:get(
               return
                 api:list-item($desc, $link, (), $api-doc, $alt-desc)  
             }</ul>)
-  return
+  return (
+    api:serialize-as('xhtml'),
     api:list(
       <title>Search results for {$uri}?q={$query}</title>,
       $results,
       count(scache:get($uri, $query)/li)
     )        
+  )
 };
 
 if (api:allowed-method(('GET')))
