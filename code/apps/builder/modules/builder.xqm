@@ -4,7 +4,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License version 3 or later
- : $Id: builder.xqm 775 2011-05-01 06:46:55Z efraim.feinstein $
  :)
 module namespace builder="http://jewishliturgy.org/apps/builder/controls";
 
@@ -41,6 +40,7 @@ declare function builder:sidebar(
 			<xf:case id="builder-sidebar-login">
 				<ul>
 					<li><a href="{$builder:app-location}/edit-metadata.xql?new=true">Start new siddur</a></li>
+          <li><a href="{$builder:app-location}/search.xql">Full text search</a></li>
 				</ul>
 			</xf:case>
 			<xf:case id="builder-sidebar-logout"/>
@@ -369,17 +369,32 @@ declare function builder:document-chooser-ui(
 	builder:document-chooser-ui($instance-id, $control-id, $actions, false())
 };
 
-(:~ 
- : in the style section, you need to add a faketable control style for this control.
- : the table's control id is {$control-id}-table, and it has 4 columns
- : @param $actions actions that can be done with each document
- : @param $allow-change-sharing Allow the sharing parameters to be changed by the user (default false)
- :)
 declare function builder:document-chooser-ui(
 	$instance-id as xs:string,
 	$control-id as xs:string,
 	$actions as element()+,
 	$allow-change-sharing as xs:boolean
+	) as element()+ {
+	builder:document-chooser-ui($instance-id, $control-id, $actions, false(), false(), 'Status', 'N/A')
+};
+
+(:~ 
+ : in the style section, you need to add a faketable control style for this control.
+ : the table's control id is {$control-id}-table, and it has 4 columns
+ : @param $actions actions that can be done with each document
+ : @param $allow-change-sharing Allow the sharing parameters to be changed by the user (default false)
+ : @param $allow-search Whether to have a search box
+ : @param $results-column-title title of middle column
+ : @param $results-column-content content of middle column
+ :)
+declare function builder:document-chooser-ui(
+	$instance-id as xs:string,
+	$control-id as xs:string,
+	$actions as element()+,
+	$allow-change-sharing as xs:boolean,
+  $allow-search as xs:boolean,
+  $results-column-title as item()+, 
+  $results-column-content as item()+
 	) as element()+ {
 	<xf:group id="{$control-id}" ref="instance('{$instance-id}')">
 		<xf:group>
@@ -428,6 +443,18 @@ declare function builder:document-chooser-ui(
 						<xf:send submission="{$instance-id}-submit"/>
 					</xf:action>
 				</xf:trigger> 
+        {
+        if ($allow-search)
+        then (
+          <xf:input ref="instance('{$instance-id}-search')/q"/>,
+          <xf:submit submission="{$instance-id}-submit">
+            <xf:label>Search</xf:label>
+						<xf:setvalue ev:event="DOMActivate" ref="instance('{$instance-id}-search')/start" 
+							value="substring-before(substring-after(context()/@href, 'start='), '&amp;')"/>
+          </xf:submit>
+        )
+        else ()
+        }
 				<xf:select1 ref="instance('{$instance-id}-search')/max-results">
 					<xf:label>Display up to:</xf:label>
 					<xf:itemset nodeset="instance('{$instance-id}-max-results-chooser')/max-result">
@@ -462,7 +489,7 @@ declare function builder:document-chooser-ui(
 		<div class="{$control-id}-table table">
 			<div class="{$control-id}-header {$control-id}-row table-header table-row">
   			<div class="{$control-id}-column table-column">Document</div>
-  			<div class="{$control-id}-column table-column">Status</div>
+  			<div class="{$control-id}-column table-column">{$results-column-title}</div>
   			<div class="{$control-id}-column table-column">Actions</div>
   		</div>
   		<xf:repeat id="{builder:document-chooser-ui-repeat($control-id)}" 
@@ -472,7 +499,7 @@ declare function builder:document-chooser-ui(
 	      		<xf:output ref="./html:a/html:span"/>
 	    		</div>
 	        <div class="{$control-id}-column table-column">
-	        	N/A
+	        	{$results-column-content}
 	        </div>
 	        <div class="{$control-id}-column table-column">
 	        	<div class="actions-row">
