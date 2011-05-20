@@ -255,10 +255,20 @@ declare function builder:document-chooser-instance(
 				<data-type>original</data-type>
 				<share-type>group</share-type>
 				<owner></owner>
+        <scope/>
 			</action>
 		</xf:instance>,
 		<xf:bind nodeset="instance('{$instance-id}-action')/owner" 
 			calculate="instance('{$share-options-id}')/owner"/>,
+    (: set the search scope using a checkbox :)
+    <xf:instance id="{$instance-id}-search-options">
+      <search-options xmlns="">
+        <titles-only>false</titles-only>
+      </search-options>
+    </xf:instance>,
+    <xf:bind nodeset="instance('{$instance-id}-search-options')/titles-only" type="xf:boolean"/>,
+    <xf:bind nodeset="instance('{$instance-id}-action')/scope"
+      calculate="choose(boolean-from-string(instance('{$instance-id}-search-options')/titles-only),'title','')"/>,
 		<xf:instance id="{$instance-id}-max-results-chooser">
 			<max-results xmlns="">
 				<max-result>25</max-result>
@@ -342,7 +352,8 @@ declare function builder:document-chooser-instance(
 			concat('/code/api/data/', 
 				instance('{$instance-id}-action')/data-type,
 				choose(instance('{$instance-id}-action')/share-type != '', concat('/', instance('{$instance-id}-action')/share-type), ''),
-				choose(instance('{$instance-id}-action')/owner != '', concat('/', instance('{$instance-id}-action')/owner), '')
+				choose(instance('{$instance-id}-action')/owner != '', concat('/', instance('{$instance-id}-action')/owner), ''),
+        choose(instance('{$instance-id}-action')/scope != '', concat('/.../', instance('{$instance-id}-action')/scope), '')
 				)"/>
 			{
 			controls:submission-response(
@@ -444,9 +455,13 @@ declare function builder:document-chooser-ui(
 					</xf:action>
 				</xf:trigger> 
         {
+        (: search box :)
         if ($allow-search)
         then (
           <xf:input ref="instance('{$instance-id}-search')/q"/>,
+          <xf:input ref="instance('{$instance-id}-search-options')/titles-only">
+            <xf:label>Titles only</xf:label>
+          </xf:input>,
           <xf:submit submission="{$instance-id}-submit">
             <xf:label>Search</xf:label>
 						<xf:setvalue ev:event="DOMActivate" ref="instance('{$instance-id}-search')/start" 
