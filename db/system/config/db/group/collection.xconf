@@ -4,6 +4,9 @@
         <lucene>
             <analyzer class="org.apache.lucene.analysis.hebrew.MorphAnalyzer"/>
             <inline qname="tei:c"/>
+            <inline qname="tei:pc"/>
+            <inline qname="j:divineName"/>
+
             <text qname="tei:title"/>
             <text qname="j:repository"/>
             <text qname="tei:seg"/>
