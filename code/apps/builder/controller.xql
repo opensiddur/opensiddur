@@ -62,9 +62,9 @@ then
 				return
 					not(util:is-binary-doc($doc)) and doc-available($doc)
 			else 
-				let $no-item-ok := ('my-siddurim.xql', 'edit-metadata.xql', 'notfound.xql', 'builder.css', 'welcome.xql', 'search.xql')
+				let $no-item-ok := ('my-siddurim.xql', 'edit-metadata.xql', 'notfound.xql', 'welcome.xql', 'search.xql')
 				return 
-					$exist:resource = $no-item-ok
+					not(ends-with($exist:resource, '.xql')) or $exist:resource = $no-item-ok
 		return
 			if ($doc-exists-ok)
 			then

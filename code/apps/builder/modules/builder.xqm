@@ -174,9 +174,17 @@ declare function builder:app-header(
 };
 
 declare function builder:css(
-	) as element(link) {
-	<link rel="stylesheet" type="text/css" href="{$builder:app-location}/styles/builder.css"/>
+	) as element(link)+ {
+	<link rel="stylesheet" type="text/css" href="{$builder:app-location}/styles/builder.css"/>,
+  builder:keyboard-css()
 }; 
+
+(:~ output CSS and js links for virtual keyboard :)
+declare function builder:keyboard-css(
+  ) as element()+ {
+  <script type="text/javascript" src="{$builder:app-location}/scripts/keyboard.js" charset="UTF-8"></script>,
+  <link rel="stylesheet" type="text/css" href="{$builder:app-location}/styles/keyboard.css"/>
+};
 
 (:~ output login actions id from builder:login-actions
  : WARNING: do not use!
@@ -458,7 +466,9 @@ declare function builder:document-chooser-ui(
         (: search box :)
         if ($allow-search)
         then (
-          <xf:input ref="instance('{$instance-id}-search')/q"/>,
+          <span class="keyboardInput">
+            <xf:input ref="instance('{$instance-id}-search')/q"/>
+          </span>,
           <xf:input ref="instance('{$instance-id}-search-options')/titles-only">
             <xf:label>Titles only</xf:label>
           </xf:input>,
