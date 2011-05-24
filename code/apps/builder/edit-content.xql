@@ -333,7 +333,13 @@ return
 										<xf:delete nodeset="instance('selection')//html:span[@class='placeholder']"/>
 									</xf:action>
 								</xf:trigger>,
-							true())
+							true(), true(), 'Search result',
+              <xf:repeat id="search-result" nodeset="./html:a/html:p">
+                <xf:output ref="html:span[@class='previous']"/>
+                <xf:output id="search-match" ref="html:span[@class='hi']"/>
+                <xf:output ref="html:span[@class='following']"/>
+              </xf:repeat>
+            )
 					}</div>
 					
 				</xf:group>
