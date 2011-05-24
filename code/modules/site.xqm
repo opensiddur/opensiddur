@@ -93,6 +93,8 @@ declare function site:form(
 			{
 			$css,
 			$head-content,
+      (: favicon :)
+      <link rel="shortcut icon" href="/code/modules/{$site:resource-path}/favicon.ico"/>,
 			if ($paths:xforms-processor = 'xsltforms')
 			then $model
 			else ()
