@@ -37,15 +37,25 @@ then
 	</debug>
 	)
 else (),
+let $has-search-query := request:get-parameter('q', ())
 let $uri := request:get-uri()
 return
-<exist:dispatch>
-	{app:pass-credentials-xq()}
-	<exist:forward url="{$exist:controller}/output.xql">
-		{
-		(: send all the normal parameters + the whole path :)
-		data:path-to-parameters($uri)
-		}
-		<exist:add-parameter name="path" value="{$uri}"/>
-	</exist:forward>
-</exist:dispatch>
+  if ($has-search-query)
+  then
+    <exist:dispatch>
+      {app:pass-credentials-xq()}
+      <exist:forward url="{$exist:controller}/../queries/search.xql">
+        {data:path-to-parameters($uri)}
+      </exist:forward>
+    </exist:dispatch>
+  else
+    <exist:dispatch>
+      {app:pass-credentials-xq()}
+      <exist:forward url="{$exist:controller}/output.xql">
+        {
+        (: send all the normal parameters + the whole path :)
+        data:path-to-parameters($uri)
+        }
+        <exist:add-parameter name="path" value="{$uri}"/>
+      </exist:forward>
+    </exist:dispatch>

@@ -26,6 +26,7 @@ import module namespace scache="http://jewishliturgy.org/modules/scache"
 	at "/code/api/modules/scache.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml";
+declare namespace html="http://www.w3.org/1999/xhtml";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 
@@ -84,16 +85,24 @@ declare function local:get(
                 then
                   (: subresources :)
                   if ($subresource = 'title')
-                  then $top-level//tei:title[ft:query(.,$query)]
+                  then 
+                    if ($path-parts/data:purpose = 'output')
+                    then $top-level//html:title[ft:query(.,$query)]
+                    else $top-level//tei:title[ft:query(.,$query)]
                   else if ($subresource = 'repository')
                   then $top-level//j:repository[ft:query(.,$query)]
                   else $top-level//tei:seg[ft:query(.,$query)]
+                else if ($path-parts/data:purpose = 'output')
+                then
+                  (: HTML based -- TODO: what happens when we have non-HTML output? :)
+                  $top-level//html:body[ft:query(., $query)]
                 else
+                  (: TEI-based :)
                   $top-level//(j:repository|tei:title)[ft:query(., $query)]
               )
               let $root := root($result)
               let $doc-uri := document-uri($root)
-              let $title := $root//tei:title[@type='main' or not(@type)]
+              let $title := $root//(tei:title[@type='main' or not(@type)]|html:title)
               let $title-lang := string($title/ancestor-or-self::*[@xml:lang][1]/@xml:lang)
               let $desc := (
                 (: desc contains the document title and the context of the search result :)
