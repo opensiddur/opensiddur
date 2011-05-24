@@ -417,7 +417,7 @@ declare function builder:document-chooser-ui(
 	) as element()+ {
 	<xf:group id="{$control-id}" ref="instance('{$instance-id}')">
 		<xf:group>
-			<div class="inline-control">
+			<div class="inline-control document-chooser-header">
 				<xf:trigger id="{$control-id}-first" ref="//html:link[@rel='first']" appearance="minimal">
 					<xf:label>|&lt;&lt; <xf:output value="min(instance('{$instance-id}-range')/first/start/*)"/>-<xf:output value="min(instance('{$instance-id}-range')/first/end/*)"/></xf:label>
 					<xf:action ev:event="DOMActivate">
@@ -465,19 +465,20 @@ declare function builder:document-chooser-ui(
         {
         (: search box :)
         if ($allow-search)
-        then (
-          <span class="keyboardInput">
-            <xf:input ref="instance('{$instance-id}-search')/q"/>
-          </span>,
-          <xf:input ref="instance('{$instance-id}-search-options')/titles-only">
-            <xf:label>Titles only</xf:label>
-          </xf:input>,
-          <xf:submit submission="{$instance-id}-submit">
-            <xf:label>Search</xf:label>
-						<xf:setvalue ev:event="DOMActivate" ref="instance('{$instance-id}-search')/start" 
-							value="substring-before(substring-after(context()/@href, 'start='), '&amp;')"/>
-          </xf:submit>
-        )
+        then 
+          <div class="search-box">
+            <span class="keyboardInput">
+              <xf:input ref="instance('{$instance-id}-search')/q"/>
+            </span>
+            <xf:input ref="instance('{$instance-id}-search-options')/titles-only">
+              <xf:label>Titles only</xf:label>
+            </xf:input>
+            <xf:submit submission="{$instance-id}-submit">
+              <xf:label>Search</xf:label>
+              <xf:setvalue ev:event="DOMActivate" ref="instance('{$instance-id}-search')/start" 
+                value="substring-before(substring-after(context()/@href, 'start='), '&amp;')"/>
+            </xf:submit>
+          </div>
         else ()
         }
 				<xf:select1 ref="instance('{$instance-id}-search')/max-results">
