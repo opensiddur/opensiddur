@@ -46,3 +46,12 @@
   width:auto;
   margin-right:0.5em;
 }
+
+/* search results */
+*[oldid=search-match] {
+  font-weight:bold;
+}
+
+:lang(he), *[lang|=he] {
+  direction:rtl;
+}

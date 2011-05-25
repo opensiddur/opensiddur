@@ -33,6 +33,7 @@ declare option exist:serialize "method=xhtml media-type=text/xml indent=yes omit
 	doctype-system=http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"; 
 
 
+
 let $login-instance-id := 'login'
 let $error-instance-id := 'error'
 let $result-instance-id := 'result'
@@ -64,9 +65,7 @@ site:form(
         </xf:load>
       </xf:trigger>, true(), true(), 'Result',
       <xf:repeat id="search-result" nodeset="./html:a/html:p">
-        <xf:output ref="html:span[@class='previous']"/>
-        <xf:output id="search-match" ref="html:span[@class='hi']"/>
-        <xf:output ref="html:span[@class='following']"/>
+        {builder:search-results-block()}
       </xf:repeat>),
     controls:debug-show-instance($result-instance-id)
   ),

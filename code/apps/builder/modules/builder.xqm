@@ -543,7 +543,42 @@ declare function builder:share-options-instance(
 	) {
 	builder:share-options-instance($instance-id, true(), ())
 };
-	
+
+declare function local:direction-by-lang(
+  $lang as xs:string?
+  ) as xs:string {
+  if ($lang = ('he','arc' (: TODO: add other rtl languages here :) ))
+  then 'rtl'
+  else 'ltr'
+};
+
+(: search results block by language 
+ : there should be a better way to do this. :)
+declare function local:search-result-lang(
+  $lang as xs:string
+  ) {
+  <xf:group ref="self::p[@lang='{$lang}']">
+    <span xml:lang="{$lang}" lang="{$lang}">
+      {
+      let $dir := local:direction-by-lang($lang)
+      where $dir = 'rtl'
+      return attribute dir {$dir}
+      }
+      <xf:output ref="html:span[@class='previous']"/>
+      <xf:output id="search-match" ref="html:span[@class='hi']"/>
+      <xf:output ref="html:span[@class='following']"/>
+    </span>
+  </xf:group>
+};
+
+(:~ block of search results to appear in the context of a repeat on 
+ : html:a/html:p :)
+declare function builder:search-results-block(
+  ) {
+  for $lang in ('en','he')
+  return
+    local:search-result-lang($lang)
+};
 
 declare function builder:share-options-instance(
 	$instance-id as xs:string,
