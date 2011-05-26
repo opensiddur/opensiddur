@@ -557,7 +557,7 @@ declare function local:direction-by-lang(
 declare function local:search-result-lang(
   $lang as xs:string
   ) {
-  <xf:group ref="self::p[@lang='{$lang}']">
+  <xf:group ref="self::html:p[@lang='{$lang}']">
     <span xml:lang="{$lang}" lang="{$lang}">
       {
       let $dir := local:direction-by-lang($lang)
@@ -565,7 +565,9 @@ declare function local:search-result-lang(
       return attribute dir {$dir}
       }
       <xf:output ref="html:span[@class='previous']"/>
-      <xf:output id="search-match" ref="html:span[@class='hi']"/>
+      <span class="search-match">
+        <xf:output ref="html:span[@class='hi']"/>
+      </span>
       <xf:output ref="html:span[@class='following']"/>
     </span>
   </xf:group>

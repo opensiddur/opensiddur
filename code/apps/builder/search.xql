@@ -56,7 +56,6 @@ site:form(
 	</xf:model>,
 	<title>Full text search</title>,
 	(
-    controls:error-report($error-instance-id),
     builder:document-chooser-ui($result-instance-id, $result-control-id, 
       <xf:trigger appearance="minimal">
         <xf:label>Edit</xf:label>
@@ -65,9 +64,13 @@ site:form(
         </xf:load>
       </xf:trigger>, true(), true(), 'Result',
       <xf:repeat id="search-result" nodeset="./html:a/html:p">
+        {(:
+        <xf:output ref="html:span[@class='previous']"/>
+        <xf:output ref="html:span[@class='hi']"/>
+        <xf:output ref="html:span[@class='following']"/>
+        :)()}
         {builder:search-results-block()}
-      </xf:repeat>),
-    controls:debug-show-instance($result-instance-id)
+      </xf:repeat>)
   ),
  	(site:css(), builder:css(), controls:faketable-style($result-control-id, 90, 3)),
  	site:header(),
