@@ -478,6 +478,13 @@ declare function builder:document-chooser-ui(
               <xf:setvalue ev:event="DOMActivate" ref="instance('{$instance-id}-search')/start" 
                 value="substring-before(substring-after(context()/@href, 'start='), '&amp;')"/>
             </xf:submit>
+            <xf:submit submission="{$instance-id}-submit">
+              <xf:label>Reset</xf:label>
+              <xf:action ev:event="DOMActivate">
+                <xf:setvalue ref="instance('{$instance-id}-search')/start" value="1"/>
+                <xf:setvalue ref="instance('{$instance-id}-search')/q" value=""/>
+              </xf:action>
+            </xf:submit>
           </div>
         else ()
         }
