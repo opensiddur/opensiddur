@@ -334,11 +334,9 @@ return
 									</xf:action>
 								</xf:trigger>,
 							true(), true(), 'Search result',
-              <xf:repeat id="search-result" nodeset="./html:a/html:p">
-                <xf:output ref="html:span[@class='previous']"/>
-                <xf:output id="search-match" ref="html:span[@class='hi']"/>
-                <xf:output ref="html:span[@class='following']"/>
-              </xf:repeat>
+              <xf:repeat id="search-result" nodeset="./html:a/html:p">{
+                builder:search-results-block()
+              }</xf:repeat>
             )
 					}</div>
 					
@@ -353,7 +351,7 @@ return
 		controls:faketable-style(
 			concat('control-', $document-chooser-id), 
 			100, 
-			4)
+			3)
 		),
 		site:header(),
 		(site:sidebar-with-login($login-instance-id),

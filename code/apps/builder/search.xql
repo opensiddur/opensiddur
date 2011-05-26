@@ -64,11 +64,6 @@ site:form(
         </xf:load>
       </xf:trigger>, true(), true(), 'Result',
       <xf:repeat id="search-result" nodeset="./html:a/html:p">
-        {(:
-        <xf:output ref="html:span[@class='previous']"/>
-        <xf:output ref="html:span[@class='hi']"/>
-        <xf:output ref="html:span[@class='following']"/>
-        :)()}
         {builder:search-results-block()}
       </xf:repeat>)
   ),
