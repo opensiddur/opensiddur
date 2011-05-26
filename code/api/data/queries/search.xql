@@ -155,7 +155,7 @@ declare function local:get(
                 if ($subresource)
                 then concat($api-doc, '/', if ($subresource='seg') then concat('id/', $result/@xml:id) else $subresource)
                 else $api-doc
-              let $alt-desc := 'doc'
+              let $alt-desc := 'db'
               where 
                 $formatted-result and (
                 (: if there's no owner, then we've searched through everything. Need to filter for purpose:)
@@ -165,7 +165,7 @@ declare function local:get(
                 )
               order by ft:score($result) descending
               return
-                api:list-item($desc, $link, (), $api-doc, $alt-desc)  
+                api:list-item($desc, $link, (), $doc-uri, $alt-desc)  
             }</ul>)
   return (
     api:serialize-as('xhtml'),
