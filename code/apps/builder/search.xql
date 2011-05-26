@@ -69,7 +69,7 @@ site:form(
       </xf:repeat>),
     controls:debug-show-instance($result-instance-id)
   ),
- 	(site:css(), builder:css(), controls:faketable-style($result-control-id, 90, 4)),
+ 	(site:css(), builder:css(), controls:faketable-style($result-control-id, 90, 3)),
  	site:header(),
  	(site:sidebar-with-login($login-instance-id),
  	builder:sidebar()),
