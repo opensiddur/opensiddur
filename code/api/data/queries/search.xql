@@ -40,15 +40,28 @@ declare variable $local:valid-subresources := ('title', 'seg', 'repository');
  :)
 declare function local:result-with-lang(
   $hit as node()
-  ) as element(p)+ {
+  ) as element(p)* {
+  let $expanded := kwic:expand($hit)
   let $summary := kwic:summarize($hit, element {QName('', 'config')}{attribute width {40}})
   let $lang := string($hit/ancestor::*[@xml:lang][1]/@xml:lang)
-  for $p in $summary
+  for $p at $i in $summary
+  let $match := ($expanded//exist:match)[$i]
+  let $pre := $match/preceding-sibling::node()
+  let $post := $match/following-sibling::node()
+  (: results are sometimes returned with blank matches. Do not return them! :)
+  where $p/span[@class='hi']/string()
   return
     <p>{
       attribute lang {$lang},
       attribute xml:lang {$lang},
-      $p/span
+      $p/span[@class='previous'],
+      (: add something that collapses to a space if the match is not in the middle of a word :)
+      <span class="hi">{
+        concat(if ($pre) then '' else ' ',
+          $p/span[@class='hi'],
+          if ($post) then '' else ' ')
+      }</span>,
+      $p/span[@class='following']
     }</p>
 };
 
@@ -93,7 +106,7 @@ declare function local:get(
       let $subresource := $path-parts/data:subresource/string()
       let $uri := request:get-uri()
       let $results :=
-        if (scache:is-up-to-date($collection, $uri, $query))
+        if (false() (:scache:is-up-to-date($collection, $uri, $query):))
         then 
           scache:get-request($uri, $query)
         else
@@ -118,11 +131,12 @@ declare function local:get(
                 else
                   (: TEI-based :)
                   $top-level//(j:repository|tei:title)[ft:query(., $query)]
-              )[exists(kwic:expand(.)//exist:match[.])]
+              )
               let $root := root($result)
               let $doc-uri := document-uri($root)
               let $title := $root//(tei:title[@type='main' or not(@type)]|html:title)
               let $title-lang := string($title/ancestor-or-self::*[@xml:lang][1]/@xml:lang)
+              let $formatted-result := local:result-with-lang($result)
               let $desc := (
                 (: desc contains the document title and the context of the search result :)
                 <span>{
@@ -134,7 +148,7 @@ declare function local:get(
                   else (),
                   normalize-space($title)
                 }</span>,
-                local:result-with-lang($result)
+                $formatted-result
               )
               let $api-doc := data:db-path-to-api($doc-uri)
               let $link := 
@@ -143,10 +157,12 @@ declare function local:get(
                 else $api-doc
               let $alt-desc := 'doc'
               where 
+                $formatted-result and (
                 (: if there's no owner, then we've searched through everything. Need to filter for purpose:)
                 if (string($path-parts/data:owner))
                 then true()
                 else data:path-to-parts($api-doc)/data:purpose/string() eq $path-parts/data:purpose/string()
+                )
               order by ft:score($result) descending
               return
                 api:list-item($desc, $link, (), $api-doc, $alt-desc)  
