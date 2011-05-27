@@ -957,18 +957,30 @@ declare function controls:license-chooser-ui(
 	)
 };
 
-(:~ license chooser UI 
- : @param $label Label text
- : @param $appearance 'droplist' (drop down list, default),
- :		 'list' (list that shows all), 'radio' (radio buttons), '' 
- : @param $event-target target for xforms-value-changed events, to work around a bug in XSLTForms r501
- :)
 declare function controls:license-chooser-ui(
 	$control-id as xs:string,
 	$chooser-instance-id as xs:string,
 	$label as xs:string,
 	$appearance as xs:string?,
 	$event-target as xs:string?
+	) as element()+ {
+  controls:license-chooser-ui($control-id, $chooser-instance-id, $label, $appearance, $event-target, false())
+};
+
+(:~ license chooser UI 
+ : @param $label Label text
+ : @param $appearance 'droplist' (drop down list, default),
+ :		 'list' (list that shows all), 'radio' (radio buttons), '' 
+ : @param $event-target target for xforms-value-changed events, to work around a bug in XSLTForms r501
+ : @param $changed-value-save value changed event is the equivalent of focus out (both save)
+ :)
+declare function controls:license-chooser-ui(
+	$control-id as xs:string,
+	$chooser-instance-id as xs:string,
+	$label as xs:string,
+	$appearance as xs:string?,
+	$event-target as xs:string?,
+  $changed-value-save as xs:boolean?
 	) as element()+ {
 	<div class="license-chooser">
 		<xf:select1 id="{$control-id}" incremental="true">
@@ -991,7 +1003,7 @@ declare function controls:license-chooser-ui(
 			{
 			for $et in $event-target
 			return (
-				<xf:dispatch ev:event="xforms-value-changed" name="xforms-value-changed" targetid="{$et}" 
+				<xf:dispatch ev:event="xforms-value-changed" name="{if ($changed-value-save) then 'DOMFocusOut' else 'xforms-value-changed'}" targetid="{$et}" 
 					bubbles="true"/>,
 				<xf:dispatch ev:event="DOMFocusOut" name="DOMFocusOut" targetid="{$et}" 
 					bubbles="true"/>
@@ -1185,14 +1197,14 @@ declare function controls:rt-submission(
 };
  
 declare function controls:rt-control(
-	$control-id as xs:string,
+	$control-id as xs:string?,
 	$submission-id as xs:string
 	) as element()+ {
 	controls:rt-control($control-id, $submission-id, (), (), ())
 };
 
 declare function controls:rt-control(
-	$control-id as xs:string,
+	$control-id as xs:string?,
 	$submission-id as xs:string,
 	$set-actions as element()*,
 	$other-actions as element()*
