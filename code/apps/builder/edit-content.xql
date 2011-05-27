@@ -333,7 +333,11 @@ return
 										<xf:delete nodeset="instance('selection')//html:span[@class='placeholder']"/>
 									</xf:action>
 								</xf:trigger>,
-							true())
+							true(), true(), 'Search result',
+              <xf:repeat id="search-result" nodeset="./html:a/html:p">{
+                builder:search-results-block()
+              }</xf:repeat>
+            )
 					}</div>
 					
 				</xf:group>
@@ -347,7 +351,7 @@ return
 		controls:faketable-style(
 			concat('control-', $document-chooser-id), 
 			100, 
-			4)
+			3)
 		),
 		site:header(),
 		(site:sidebar-with-login($login-instance-id),

@@ -7,7 +7,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License version 3 or later
- : $Id: controller.xql 775 2011-05-01 06:46:55Z efraim.feinstein $
  :)
 import module namespace app="http://jewishliturgy.org/modules/app"
 	at "/code/modules/app.xqm";
@@ -63,9 +62,9 @@ then
 				return
 					not(util:is-binary-doc($doc)) and doc-available($doc)
 			else 
-				let $no-item-ok := ('my-siddurim.xql', 'edit-metadata.xql', 'notfound.xql', 'builder.css', 'welcome.xql')
+				let $no-item-ok := ('my-siddurim.xql', 'edit-metadata.xql', 'notfound.xql', 'welcome.xql', 'search.xql')
 				return 
-					$exist:resource = $no-item-ok
+					not(ends-with($exist:resource, '.xql')) or $exist:resource = $no-item-ok
 		return
 			if ($doc-exists-ok)
 			then

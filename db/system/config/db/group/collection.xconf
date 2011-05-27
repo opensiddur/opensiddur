@@ -1,12 +1,19 @@
 <collection xmlns="http://exist-db.org/collection-config/1.0">
-    <index xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+    <index xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xmlns:html="http://www.w3.org/1999/xhtml">
         <fulltext default="none" attributes="no"/>
         <lucene>
             <analyzer class="org.apache.lucene.analysis.hebrew.MorphAnalyzer"/>
             <inline qname="tei:c"/>
+            <inline qname="tei:pc"/>
+            <inline qname="j:divineName"/>
+
             <text qname="tei:title"/>
             <text qname="j:repository"/>
             <text qname="tei:seg"/>
+            
+            <!-- for finding which html file contains a phrase -->
+            <text qname="html:title"/>
+            <text qname="html:body"/>
         </lucene>
     </index>
 </collection>

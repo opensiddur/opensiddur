@@ -204,8 +204,8 @@ declare function api:list(
 				)
 				else (),
 				(: add data about where this page is in the search :)
-				<meta name="start" content="{$start}"/>,
-				<meta name="end" content="{$start + $max-results - 1}"/>,
+				<meta name="start" content="{if ($n-results eq 0) then 0 else $start}"/>,
+				<meta name="end" content="{min(($start + $max-results - 1, $n-results))}"/>,
 				<meta name="results" content="{$n-results}"/>,
 				if ($tei-capable)
 				then

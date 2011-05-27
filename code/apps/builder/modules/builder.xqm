@@ -4,7 +4,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License version 3 or later
- : $Id: builder.xqm 775 2011-05-01 06:46:55Z efraim.feinstein $
  :)
 module namespace builder="http://jewishliturgy.org/apps/builder/controls";
 
@@ -41,6 +40,7 @@ declare function builder:sidebar(
 			<xf:case id="builder-sidebar-login">
 				<ul>
 					<li><a href="{$builder:app-location}/edit-metadata.xql?new=true">Start new siddur</a></li>
+          <li><a href="{$builder:app-location}/search.xql">Full text search</a></li>
 				</ul>
 			</xf:case>
 			<xf:case id="builder-sidebar-logout"/>
@@ -174,9 +174,17 @@ declare function builder:app-header(
 };
 
 declare function builder:css(
-	) as element(link) {
-	<link rel="stylesheet" type="text/css" href="{$builder:app-location}/styles/builder.css"/>
+	) as element(link)+ {
+	<link rel="stylesheet" type="text/css" href="{$builder:app-location}/styles/builder.css"/>,
+  builder:keyboard-css()
 }; 
+
+(:~ output CSS and js links for virtual keyboard :)
+declare function builder:keyboard-css(
+  ) as element()+ {
+  <script type="text/javascript" src="{$builder:app-location}/scripts/keyboard.js" charset="UTF-8"></script>,
+  <link rel="stylesheet" type="text/css" href="{$builder:app-location}/styles/keyboard.css"/>
+};
 
 (:~ output login actions id from builder:login-actions
  : WARNING: do not use!
@@ -255,10 +263,20 @@ declare function builder:document-chooser-instance(
 				<data-type>original</data-type>
 				<share-type>group</share-type>
 				<owner></owner>
+        <scope/>
 			</action>
 		</xf:instance>,
 		<xf:bind nodeset="instance('{$instance-id}-action')/owner" 
 			calculate="instance('{$share-options-id}')/owner"/>,
+    (: set the search scope using a checkbox :)
+    <xf:instance id="{$instance-id}-search-options">
+      <search-options xmlns="">
+        <titles-only>false</titles-only>
+      </search-options>
+    </xf:instance>,
+    <xf:bind nodeset="instance('{$instance-id}-search-options')/titles-only" type="xf:boolean"/>,
+    <xf:bind nodeset="instance('{$instance-id}-action')/scope"
+      calculate="choose(boolean-from-string(instance('{$instance-id}-search-options')/titles-only),'title','')"/>,
 		<xf:instance id="{$instance-id}-max-results-chooser">
 			<max-results xmlns="">
 				<max-result>25</max-result>
@@ -342,7 +360,8 @@ declare function builder:document-chooser-instance(
 			concat('/code/api/data/', 
 				instance('{$instance-id}-action')/data-type,
 				choose(instance('{$instance-id}-action')/share-type != '', concat('/', instance('{$instance-id}-action')/share-type), ''),
-				choose(instance('{$instance-id}-action')/owner != '', concat('/', instance('{$instance-id}-action')/owner), '')
+				choose(instance('{$instance-id}-action')/owner != '', concat('/', instance('{$instance-id}-action')/owner), ''),
+        choose(instance('{$instance-id}-action')/scope != '', concat('/.../', instance('{$instance-id}-action')/scope), '')
 				)"/>
 			{
 			controls:submission-response(
@@ -369,21 +388,36 @@ declare function builder:document-chooser-ui(
 	builder:document-chooser-ui($instance-id, $control-id, $actions, false())
 };
 
-(:~ 
- : in the style section, you need to add a faketable control style for this control.
- : the table's control id is {$control-id}-table, and it has 4 columns
- : @param $actions actions that can be done with each document
- : @param $allow-change-sharing Allow the sharing parameters to be changed by the user (default false)
- :)
 declare function builder:document-chooser-ui(
 	$instance-id as xs:string,
 	$control-id as xs:string,
 	$actions as element()+,
 	$allow-change-sharing as xs:boolean
 	) as element()+ {
+	builder:document-chooser-ui($instance-id, $control-id, $actions, false(), false(), 'Status', 'N/A')
+};
+
+(:~ 
+ : in the style section, you need to add a faketable control style for this control.
+ : the table's control id is {$control-id}-table, and it has 4 columns
+ : @param $actions actions that can be done with each document
+ : @param $allow-change-sharing Allow the sharing parameters to be changed by the user (default false)
+ : @param $allow-search Whether to have a search box
+ : @param $results-column-title title of middle column
+ : @param $results-column-content content of middle column
+ :)
+declare function builder:document-chooser-ui(
+	$instance-id as xs:string,
+	$control-id as xs:string,
+	$actions as element()+,
+	$allow-change-sharing as xs:boolean,
+  $allow-search as xs:boolean,
+  $results-column-title as item()+, 
+  $results-column-content as item()+
+	) as element()+ {
 	<xf:group id="{$control-id}" ref="instance('{$instance-id}')">
 		<xf:group>
-			<div class="inline-control">
+			<div class="inline-control document-chooser-header">
 				<xf:trigger id="{$control-id}-first" ref="//html:link[@rel='first']" appearance="minimal">
 					<xf:label>|&lt;&lt; <xf:output value="min(instance('{$instance-id}-range')/first/start/*)"/>-<xf:output value="min(instance('{$instance-id}-range')/first/end/*)"/></xf:label>
 					<xf:action ev:event="DOMActivate">
@@ -428,6 +462,32 @@ declare function builder:document-chooser-ui(
 						<xf:send submission="{$instance-id}-submit"/>
 					</xf:action>
 				</xf:trigger> 
+        {
+        (: search box :)
+        if ($allow-search)
+        then 
+          <div class="search-box">
+            <span class="keyboardInput">
+              <xf:input ref="instance('{$instance-id}-search')/q"/>
+            </span>
+            <xf:input ref="instance('{$instance-id}-search-options')/titles-only">
+              <xf:label>Titles only</xf:label>
+            </xf:input>
+            <xf:submit submission="{$instance-id}-submit">
+              <xf:label>Search</xf:label>
+              <xf:setvalue ev:event="DOMActivate" ref="instance('{$instance-id}-search')/start" 
+                value="substring-before(substring-after(context()/@href, 'start='), '&amp;')"/>
+            </xf:submit>
+            <xf:submit submission="{$instance-id}-submit">
+              <xf:label>Reset</xf:label>
+              <xf:action ev:event="DOMActivate">
+                <xf:setvalue ref="instance('{$instance-id}-search')/start" value="1"/>
+                <xf:setvalue ref="instance('{$instance-id}-search')/q" value=""/>
+              </xf:action>
+            </xf:submit>
+          </div>
+        else ()
+        }
 				<xf:select1 ref="instance('{$instance-id}-search')/max-results">
 					<xf:label>Display up to:</xf:label>
 					<xf:itemset nodeset="instance('{$instance-id}-max-results-chooser')/max-result">
@@ -462,7 +522,7 @@ declare function builder:document-chooser-ui(
 		<div class="{$control-id}-table table">
 			<div class="{$control-id}-header {$control-id}-row table-header table-row">
   			<div class="{$control-id}-column table-column">Document</div>
-  			<div class="{$control-id}-column table-column">Status</div>
+  			<div class="{$control-id}-column table-column">{$results-column-title}</div>
   			<div class="{$control-id}-column table-column">Actions</div>
   		</div>
   		<xf:repeat id="{builder:document-chooser-ui-repeat($control-id)}" 
@@ -472,7 +532,7 @@ declare function builder:document-chooser-ui(
 	      		<xf:output ref="./html:a/html:span"/>
 	    		</div>
 	        <div class="{$control-id}-column table-column">
-	        	N/A
+	        	{$results-column-content}
 	        </div>
 	        <div class="{$control-id}-column table-column">
 	        	<div class="actions-row">
@@ -490,7 +550,44 @@ declare function builder:share-options-instance(
 	) {
 	builder:share-options-instance($instance-id, true(), ())
 };
-	
+
+declare function local:direction-by-lang(
+  $lang as xs:string?
+  ) as xs:string {
+  if ($lang = ('he','arc' (: TODO: add other rtl languages here :) ))
+  then 'rtl'
+  else 'ltr'
+};
+
+(: search results block by language 
+ : there should be a better way to do this. :)
+declare function local:search-result-lang(
+  $lang as xs:string
+  ) {
+  <xf:group ref="self::html:p[@lang='{$lang}']">
+    <span xml:lang="{$lang}" lang="{$lang}">
+      {
+      let $dir := local:direction-by-lang($lang)
+      where $dir = 'rtl'
+      return attribute dir {$dir}
+      }
+      <xf:output ref="html:span[@class='previous']"/>
+      <span class="search-match">
+        <xf:output ref="html:span[@class='hi']"/>
+      </span>
+      <xf:output ref="html:span[@class='following']"/>
+    </span>
+  </xf:group>
+};
+
+(:~ block of search results to appear in the context of a repeat on 
+ : html:a/html:p :)
+declare function builder:search-results-block(
+  ) {
+  for $lang in ('en','he')
+  return
+    local:search-result-lang($lang)
+};
 
 declare function builder:share-options-instance(
 	$instance-id as xs:string,

@@ -28,3 +28,30 @@
 {
 	text-decoration:none;
 }
+
+/* document chooser */
+.document-chooser-header .xforms-label {
+  width:auto;
+  margin-right:0.5em;
+}
+
+/* search box */
+.search-box {
+  display:inline;
+  margin-right:1em;
+}
+
+.search-box .xforms-input .xforms-label {
+  display:inline;
+  width:auto;
+  margin-right:0.5em;
+}
+
+/* search results */
+.search-match {
+  font-weight:bold;
+}
+
+:lang(he), *[lang|=he] {
+  direction:rtl;
+}
