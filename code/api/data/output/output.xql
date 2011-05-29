@@ -141,12 +141,13 @@ declare function local:get(
 	$path as xs:string,
 	$format as xs:string
 	) as item() {
+  let $original-format := $format
 	let $format := 
 		if (not($format) or $format = 'html')
 		then 'xhtml'
 		else $format
-	let $db-path := data:api-path-to-db(concat($path, if ($format) then '' else '.xhtml'))
-	return
+	let $db-path := data:api-path-to-db(concat($path, if ($original-format) then '' else '.xhtml'))
+	return (
 		if ($format = 'xhtml')
 		then 
 			if (doc-available($db-path))
@@ -171,6 +172,7 @@ declare function local:get(
 						api:error(404, "Not found", $path)
 			else
 				api:error(404, "Not found", $path)
+  )
 };
 
 if (api:allowed-method('GET'))
