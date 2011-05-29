@@ -205,7 +205,7 @@ return
           <xf:trigger appearance="minimal">
             <xf:label>View</xf:label>
             <xf:load ev:event="DOMActivate" show="new">
-              <xf:resource value="concat(./html:a/@href,'.xhtml')"/>
+              <xf:resource value="./html:a/@href"/>
             </xf:load>
           </xf:trigger>,
           true(), true(), "Result",
