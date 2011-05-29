@@ -222,6 +222,17 @@ declare function builder:document-chooser-instance(
 	builder:document-chooser-instance($instance-id, $allow-change-share-group, $default-share-group, ())
 };
 
+declare function builder:document-chooser-instance(
+	$instance-id as xs:string,
+	$allow-change-share-group as xs:boolean, 
+	$default-share-group as xs:string?,
+	$resource-instance-id as xs:string?
+	) as element()+ {
+  builder:document-chooser-instance(
+    $instance-id, $allow-change-share-group, 
+    $default-share-group, $resource-instance-id, ())
+};
+
 (:~ document chooser instance.
  : offers a number of options, including making the share group changable or unchangable
  : if a $resource-instance-id is given, the current document listed in it is not shown in the UI.
@@ -230,7 +241,8 @@ declare function builder:document-chooser-instance(
 	$instance-id as xs:string,
 	$allow-change-share-group as xs:boolean, 
 	$default-share-group as xs:string?,
-	$resource-instance-id as xs:string?
+	$resource-instance-id as xs:string?,
+  $default-purpose as xs:string?
 	) as element()+ {
 	let $error-instance-id := concat($instance-id, '-error')
 	let $share-options-id := concat($instance-id, '-share')
@@ -260,7 +272,7 @@ declare function builder:document-chooser-instance(
 		else (),
 		<xf:instance id="{$instance-id}-action">
 			<action xmlns="">
-				<data-type>original</data-type>
+				<data-type>{($default-purpose, 'original')[1]}</data-type>
 				<share-type>group</share-type>
 				<owner></owner>
         <scope/>
