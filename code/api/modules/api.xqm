@@ -5,7 +5,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: api.xqm 766 2011-04-28 02:42:20Z efraim.feinstein $
  :) 
 module namespace api="http://jewishliturgy.org/modules/api";
 
@@ -78,7 +77,7 @@ declare function api:require-authentication(
 	else (
 		false(),
 		response:set-status-code(401), 
-    response:set-header('WWW-Authenticate', 'Basic') 
+    response:set-header('WWW-Authenticate', 'Basic realm="opensiddur"')
 	)
 };
 
