@@ -122,7 +122,7 @@ declare function local:put-property(
         else (),
         if ($format = 'txt' and not($property = 'name'))
         then 
-          update insert $new-value into $reference
+          update value $reference with $new-value
         else 
           update replace $reference with $new-value
       )
