@@ -38,6 +38,9 @@ temp/
 tmp/
 *~
 
+# compiled Python
+*.pyc
+
 # local files project
 .project
 private-scripts/
