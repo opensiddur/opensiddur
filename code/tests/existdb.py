@@ -1,77 +1,105 @@
 ''' 
   Library to run basic operations on eXist database through its REST interface
 
-  Copyright 2009-2010 Efraim Feinstein
+  Copyright 2009-2011 Efraim Feinstein
   Open Siddur Project
   Licensed under the GNU Lesser General Public License, version 3 or later
-
-  $Id: existdb.py 687 2011-01-23 23:36:48Z efraim.feinstein $
+  
+  TODO: cookie authentication
 '''
 import sys
 import lxml.etree
-import httplib
+import urllib2
+import cookielib
 import base64
+import BaseHTTPServer
+
+# This short bit of code from Benjamin Smedberg <http://benjamin.smedbergs.us/blog/2008-10-21/putting-and-deleteing-in-python-urllib2/>:
+class RequestWithMethod(urllib2.Request):
+  def __init__(self, method, *args, **kwargs):
+    self._method = method
+    urllib2.Request.__init__(self, *args, **kwargs)
+
+  def get_method(self):
+    return self._method
 
 class Existdb:
-    def __init__(self, server='localhost', port=8080, restPrefix = '', user = '', password = '', debuglevel = 0, useHTTPBasic = True):
+    def __init__(self, server='localhost', port=8080, restPrefix = '', user = '', password = '', debuglevel = 0, useHTTPBasic = True, forceHTTPBasic = True, useSession = False):
         ''' Initialize an eXist REST client.  restPrefix is what comes after the port in the URL, eg, /exist/rest ...
+        Use forceHTTPBasic to force send the HTTP Basic header even if the server didn't request it.
         '''
-        self.server = '%s:%d' % (server, port)
+        if user == '' and password == '':
+          # change the default for HTTP Basic if no passwords are given
+          useHTTPBasic = False
+          forceHTTPBasic = False
+
+        self.server = 'http://%s:%d' % (server, port)
         self.restPrefix = restPrefix
         self.user = user
         self.password = password
         self.debuglevel = debuglevel
         self.useHTTPBasic = useHTTPBasic
-    
-    def authenticationHeader(self):
-      ''' Internal function: used to return an HTTP Basic header to authenticate by the given user and password 
-      Alternately, use Username and Password headers. '''
-      if len(self.user) > 0:
-        if self.useHTTPBasic:
-          return {'Authorization':'Basic %s' % (base64.b64encode('%s:%s' % (self.user, self.password)) )}
+        self.forceHTTPBasic = forceHTTPBasic
+        self.useSession = useSession
+        
+        handlers = tuple() 
+        if useHTTPBasic and not forceHTTPBasic:
+          passwd = urllib2.HTTPPasswordMgrWithDefaultRealm()
+          passwd.add_password(None, self.server, self.user, self.password)
+          handlers = handlers + (urllib2.HTTPBasicAuthHandler(passwd),)
+
+        if useSession:
+          self.cookieJar = cookielib.LWPCookieJar()
+          handlers = handlers + (urllib2.HTTPCookieProcessor(self.cookieJar),)
         else:
-          return {'Username':self.user, 'Password':self.password}
+          self.cookieJar = None            
+        
+        handlers = handlers + (urllib2.HTTPHandler(debuglevel=debuglevel),)
+        
+        self.urlOpener = urllib2.build_opener(*handlers)
+
+    # return (code, reason, data as string)    
+    def openUrl(self, request):
+      if self.forceHTTPBasic:
+        enc = base64.encodestring('%s:%s' % (self.user, self.password))
+        request.add_header("Authorization", "Basic %s" % enc) 
+      try:
+        response = self.urlOpener.open(request)
+      except urllib2.HTTPError, err:
+        rsp = err
       else:
-        return {}
+        rsp = response
+      finally:
+        code = rsp.getcode()
+        data = rsp.read()
+        rsp.close()
+        reason = BaseHTTPServer.BaseHTTPRequestHandler.responses[code][0]
+      return (code, reason, data)
 
     def get(self, location):
         ''' send a get request for a location 
         Return (status, reason, data).
         '''
-        conn = httplib.HTTPConnection(self.server)
-        conn.set_debuglevel(self.debuglevel)
-        conn.request("GET", self.restPrefix + location, headers = self.authenticationHeader())
-        response = conn.getresponse()
-        data = response.read()
-        conn.close()
-        return (response.status, response.reason, data)
+        url = self.server + self.restPrefix + location
+        req = RequestWithMethod('GET', url)
+        return self.openUrl(req)
 
     def put(self, location, document, contentType='text/xml'):
         ''' put a document to a given database location. 
         Return status, reason, headers
         '''
-        conn = httplib.HTTPConnection(self.server)
-        conn.set_debuglevel(self.debuglevel)
-        headers = {'Content-Type':contentType}
-        headers.update(self.authenticationHeader())
-        conn.request('PUT', self.restPrefix + location, document, headers)
-        #print 'PUT: ' + location + ' ' + self.user + ':'+ self.password + ' ' + document
-        response = conn.getresponse()
-        data = response.read()
-        conn.close()
-        return (response.status, response.reason, data)
+        url = self.server + self.restPrefix + location
+        req = RequestWithMethod('PUT', url, data=document, 
+          headers={'Content-Type':contentType})
+        return self.openUrl(req)
 
     def delete(self, location):
         ''' delete a location
         Return (status, reason, data)
         '''
-        conn = httplib.HTTPConnection(self.server)
-        conn.set_debuglevel(self.debuglevel)
-        conn.request("DELETE", self.restPrefix + location, headers = self.authenticationHeader())
-        response = conn.getresponse()
-        data=response.read()
-        conn.close()
-        return (response.status, response.reason, data)
+        url = self.server + self.restPrefix + location
+        req = RequestWithMethod('DELETE', url)
+        return self.openUrl(req)
     
     def createCollection(self, collection, base = '/db'):
       ''' make a collection (requires appropriate priveleges) '''
@@ -88,26 +116,17 @@ class Existdb:
       location holds the database location (eg, starting with /db)
       Return (status, reason, data)
       '''
-      headers = {"Content-type": contentType}
-      headers.update(self.authenticationHeader())
-      conn = httplib.HTTPConnection(self.server)
-      conn.set_debuglevel(self.debuglevel)
-      conn.request("POST", self.restPrefix + location, document, headers)
-      response = conn.getresponse()
-      
-      data = response.read()
-      conn.close()
-      return (response.status, response.reason, data)
+      url = self.server + self.restPrefix + location
+      req = RequestWithMethod('POST', url, data=document, headers={'Content-type':contentType})
+      return self.openUrl(req)
  
     def postQuery(self, queryString, postLocation='/db', 
-        contentType='text/xml'):
+        contentType='application/xml'):
         ''' Post a query to the database.
         postLocation holds the database location (eg, starting with /db)
         queryString holds the full query
         Return (status, reason, data)
         '''
-        headers = {"Content-type": contentType}
-        headers.update(self.authenticationHeader())
         body = ('<?xml version="1.0" encoding="UTF-8"?>\n' +
             '<query xmlns="http://exist.sourceforge.net/NS/exist">\n'
             '<text>\n' + 
@@ -117,17 +136,10 @@ class Existdb:
             '</text>\n' + 
             '</query>'
             )
-        conn = httplib.HTTPConnection(self.server)
-        conn.set_debuglevel(self.debuglevel)
-        conn.request("POST", self.restPrefix + postLocation, body, headers)
-        response = conn.getresponse()
-        
-        data = response.read()
-        conn.close()
-        return (response.status, response.reason, data)
+        return self.post(postLocation, body, contentType)
     
     def postQueryFile(self, queryFile, postLocation='/db', 
-        contentType='text/xml'):
+        contentType='application/xml'):
         ''' Post a query from a file instead of a string '''
         f=file(queryFile, 'r')
         queryString=f.read()
