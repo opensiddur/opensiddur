@@ -5,7 +5,6 @@
   Open Siddur Project
   Licensed under the GNU Lesser General Public License, version 3 or later
   
-  TODO: cookie authentication
 '''
 import sys
 import lxml.etree
