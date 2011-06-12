@@ -7,7 +7,6 @@ xquery version "1.0";
  : Open Siddur Project
  : Copyright 2010-2011 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
- : $Id: app.xqm 775 2011-05-01 06:46:55Z efraim.feinstein $ 
  :)
 module namespace app="http://jewishliturgy.org/modules/app";
 
