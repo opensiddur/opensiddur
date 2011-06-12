@@ -132,6 +132,8 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
+# lock eXist to a given revision
+EXIST_REVISION ?= -r 14669
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -228,6 +230,7 @@ clean-hebmorph-lucene:
 .PHONY: db-install db-install-wlc bf-install db-uninstall db-sync db-svnsync db-syncclean
 db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 	java -jar $(EXIST_INSTALL_JAR) -p $(EXIST_INSTALL_DIR)
+	$(XSLT) -s $(EXIST_INSTALL_DIR)/conf.xml -o $(EXIST_INSTALL_DIR)/conf.xml $(SETUPDIR)/setup-conf-xml.xsl2
 	-patch -Nd $(EXIST_INSTALL_DIR) < $(SETUPDIR)/mime-types.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/webapp/WEB-INF < $(SETUPDIR)/controller-config.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/tools/jetty/etc < $(SETUPDIR)/jetty.xml.patch
@@ -346,8 +349,8 @@ $(TEIDIR):
 	svn co $(TEIREPO) $(TEIDIR)
 
 svn-exist: $(EXISTSRCDIR)
-	svn update $(EXISTSRCDIR)
+	svn update $(EXIST_REVISION) $(EXISTSRCDIR)
 
 $(EXISTSRCDIR):
-	svn co $(EXISTSRCREPO) $(EXISTSRCDIR)
+	svn co $(EXIST_REVISION) $(EXISTSRCREPO) $(EXISTSRCDIR)
 

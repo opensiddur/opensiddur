@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Make changes to conf.xml required for setup. Input is the existing conf.xml -->
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+  <xsl:output method="xml" indent="yes"/>
+  
+  <!-- default operation is identity -->
+  <xsl:template match="element()|comment()">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <!-- add optional modules that we use -->
+  <xsl:template match="builtin-modules">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+      <xsl:if test="empty(module[@uri='http://exist-db.org/xquery/scheduler'])">
+        <module class="org.exist.xquery.modules.scheduler.SchedulerModule"
+          uri="http://exist-db.org/xquery/scheduler" />
+      </xsl:if>
+    </xsl:copy>
+  </xsl:template>
+  
+  <!-- add the scheduled tasks -->
+  <xsl:template match="scheduler">
+    <!-- cron-trigger:
+      S M H D M W [Y]
+      S = seconds, M = minute, H = hour, D = day, M = month, W = day of week (1-7) Y = year
+     -->
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+      <!-- background scheduler task, runs 1x/minute -->
+      <job type="user" name="bg" cron-trigger="* 0/1 * * * ?"
+        xquery="/db/code/queries/bg-run-task.xql">
+      </job>
+      
+      <!-- background task to find uncached resources, runs 1x/hour -->
+      <job type="user" name="bg-schedule-cache" cron-trigger="* 0 * * * ?"
+        xquery="/db/code/queries/bg-schedule-cache.xql">
+      </job>
+       
+      <!-- backup to file system task to run at 3am every day -->
+      <job type="system" name="check1" 
+        class="org.exist.storage.ConsistencyCheckTask"
+        cron-trigger="0 0 3 * * ?">
+          <parameter name="output" value="export"/>
+          <parameter name="backup" value="yes"/>
+          <parameter name="incremental" value="no"/>
+          <parameter name="incremental-check" value="no"/>
+          <parameter name="max" value="2"/>
+      </job>
+    </xsl:copy>
+  </xsl:template>
+</xsl:stylesheet>  
