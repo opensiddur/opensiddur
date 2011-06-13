@@ -57,7 +57,9 @@ declare variable $paths:xslt-pi :=
 	else ();
 (:~ when to debug: when not on the primary server :)
 declare variable $paths:debug as xs:boolean :=
-	request:exists() and request:get-server-name()='localhost';
+	if (request:exists())
+  then request:get-server-name()='localhost')
+  else true();
 declare variable $paths:debug-pi := 
 	if ($paths:xforms-processor = 'xsltforms')
 	then
