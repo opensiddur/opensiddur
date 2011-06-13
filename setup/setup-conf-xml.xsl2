@@ -34,14 +34,14 @@
       <xsl:apply-templates/>
       <!-- background scheduler task, runs 1x/minute -->
       <xsl:if test="empty(job[@name='bg-runner'])">
-        <job type="user" name="bg-runner" cron-trigger="* 0/1 * * * ?"
+        <job type="user" name="bg-runner" cron-trigger="0 0/1 * * * ?"
           xquery="/db/code/queries/bg-run-task.xql">
         </job>
       </xsl:if>
       
       <!-- background task to find uncached resources, runs 1x/hour -->
       <xsl:if test="empty(job[@name='bg-schedule-cache'])">
-        <job type="user" name="bg-schedule-cache" cron-trigger="* 0 * * * ?"
+        <job type="user" name="bg-schedule-cache" cron-trigger="0 0 * * * ?"
           xquery="/db/code/queries/bg-schedule-cache.xql">
         </job>
       </xsl:if>
