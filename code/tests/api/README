@@ -17,13 +17,17 @@ following functions, which call the REST API using the given method:
   equivalent to GET http://localhost:8080/code/api/location
 
  self.database.post('/code/api/location', content)
+ self.database.post('/code/api/location', content, contentType)
   equivalent to POST content to http://localhost:8080/code/api/location
+  with the (optional) given content type
 
 Note the following unexpected consequences of a bug/feature in eXist:
 
  self.database.put('/code/api/location', content)
+ self.database.put('/code/api/location', content, contentType)
   equivalent to POST content to 
   http://localhost:8080/code/api/location?_method=PUT
+  with the (optional) given content type
 
  self.database.delete('/code/api/location')
   equivalent to POST empty content to 
