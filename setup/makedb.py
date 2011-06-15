@@ -119,7 +119,7 @@ def incorporateOverrides(overrideXml, overrideIndex, default, filename=''):
       elif fType == 'BinaryResource':
         fType = 'binary'
     
-      props.fileType = ftype
+      props.fileType = fType
     except KeyError:
       pass
   except KeyError:
