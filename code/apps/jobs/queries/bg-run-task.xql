@@ -8,9 +8,11 @@ xquery version "1.0";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "/code/modules/paths.xqm";
 
-if ($paths:debug)
-then 
-  util:log-system-out(
-    concat('In background task executive at ', string(current-dateTime()))
-  )
-else ()
+let $task-id := request:get-parameter('task-id', ())
+return
+  if ($paths:debug)
+  then 
+    util:log-system-out(
+      concat('In background task executive id ', $task-id, ' at ', string(current-dateTime()))
+    )
+  else ()
