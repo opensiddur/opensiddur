@@ -2,13 +2,11 @@ xquery version "1.0";
 (: Administrative functions that require the admin password
  : This file should be stored securely and the source containing
  : the correct password should not be released.
- : NOTE: you must change every let $admin-password to be correct!
  :
  : Copyright 2010-2011 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: admin.tmpl.xqm 726 2011-04-04 19:33:16Z efraim.feinstein $
  :)
 
 module namespace admin="http://jewishliturgy.org/modules/admin";
@@ -17,28 +15,26 @@ import module namespace util="http://exist-db.org/xquery/util";
 import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 
 (: This is fscked up insecure! :)
-declare variable $admin:admin-user as xs:string := 'userman';
+declare variable $admin:admin-user as xs:string := 'admin';
 
 (:~ Create a new user in the database :)
 declare function admin:new-user(
   $new-user as xs:string, 
   $new-password as xs:string)
   as xs:boolean {
-  let $admin-password as xs:string := '*PASSWORD*'
-  return
-    if (xmldb:exists-user($new-user) or 
-      string-length($new-user) eq 0)
-    then false()
-    else
-    	let $home-collection := concat('/db/group/', $new-user)
-    	return
-      (system:as-user($admin:admin-user, $admin-password, (
-      	xmldb:create-group($new-user),
-        xmldb:create-user($new-user, $new-password,
-          ($new-user, 'everyone'), $home-collection),
-        xmldb:set-collection-permissions($home-collection, $new-user, $new-user, 
-        	util:base-to-integer(0770, 8))
-      )) and true())
+  if (xmldb:exists-user($new-user) or 
+    string-length($new-user) eq 0)
+  then false()
+  else
+    let $home-collection := concat('/db/group/', $new-user)
+    return
+    (system:as-user($admin:admin-user, $magicpassword, (
+      xmldb:create-group($new-user),
+      xmldb:create-user($new-user, $new-password,
+        ($new-user, 'everyone'), $home-collection),
+      xmldb:set-collection-permissions($home-collection, $new-user, $new-user, 
+        util:base-to-integer(0770, 8))
+    )) and true())
 };
 
 (:~ change a user's password :)
@@ -47,12 +43,10 @@ declare function admin:change-password(
   $old-password as xs:string, 
   $new-password as xs:string)
   as xs:boolean {
-  let $admin-password as xs:string := '*PASSWORD*'
-  return
-    if (xmldb:authenticate('/db', $user-name, $old-password))
-    then (system:as-user($admin:admin-user, $admin-password,
-      xmldb:change-user($user-name, $new-password, (), ())), true())
-    else false()
+  if (xmldb:authenticate('/db', $user-name, $old-password))
+  then (system:as-user($admin:admin-user, $magicpassword,
+    xmldb:change-user($user-name, $new-password, (), ())), true())
+  else false()
 };
 
 (:~ change a user's group memberships.  For this function to work: 
@@ -77,10 +71,9 @@ declare function admin:change-groups(
     not(($add-groups, $remove-groups)!=$logged-in-groups)
     and not($add-groups=$remove-groups)
     and not($remove-groups=$user-name)
-  let $admin-password as xs:string := '*PASSWORD*'
   return 
     if ($allow-add) 
-    then system:as-user($admin:admin-user, $admin-password,
+    then system:as-user($admin:admin-user, $magicpassword,
       xmldb:change-user($user-name, (), 
         for $group in ($user-groups,$add-groups[not(.=$user-groups)])
         return if ($group=$remove-groups) then () else $group, ())
@@ -96,8 +89,6 @@ declare function admin:change-groups(
 declare function admin:reindex(
   $collection as xs:string
   ) as xs:boolean {
-  let $admin-password as xs:string := '*PASSWORD*'
-  return
-    system:as-user($admin:admin-user, $admin-password,
-      xmldb:reindex($collection))
+  system:as-user($admin:admin-user, $magicpassword,
+    xmldb:reindex($collection))
 };

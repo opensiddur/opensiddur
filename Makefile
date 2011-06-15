@@ -238,10 +238,8 @@ db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 	# kluge:
 	#cp $(DBDIR)/data/global/transliteration/hebrew.dtd $(EXIST_INSTALL_DIR)
 	@read -p "Set the password for admin database user: " ADMPASS && \
-	read -p "Set the password for userman database user (enter for none): " APASS && \
-	  echo "Setting userman password..." && \
-		cat $(CODEDIR)/$(QUERYDIR)/admin.tmpl.xqm | sed "s/\*PASSWORD\*/$$APASS/g" > $(CODEDIR)/$(QUERYDIR)/admin.xqm && \
-		cat $(SETUPDIR)/setup.xql.tmpl | sed "s/ADMINPASSWORD/$$ADMPASS/g" | sed "s/USERMANPASSWORD/$$APASS/g" > $(SETUPDIR)/setup.xql && \
+	  echo "Setting admin password..." && \
+		cat $(SETUPDIR)/setup.tmpl.xql | sed "s/ADMINPASSWORD/$$ADMPASS/g" > $(SETUPDIR)/setup.xql && \
 		echo "done."  && \
 		make db
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 $(DBDIR)
