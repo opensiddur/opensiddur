@@ -103,7 +103,10 @@ declare function local:put-property(
     if ($reference instance of element(error))
     then $reference
     else
-      let $value := request:get-data()
+      let $value := 
+        typeswitch (api:get-data())
+        case $data as xs:string return text { $data }
+        default $data return $data
       let $new-value := 
         if ($property = 'name' and empty($value/element()))
         then

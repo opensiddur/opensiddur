@@ -367,3 +367,15 @@ declare function api:serialize-as(
 	return
 		util:declare-option('exist:serialize', $options) 
 };
+
+(:~ get the request data. if it's text data, convert it to a string
+ : instead of xs:base64Binary 
+ :)
+declare function api:get-data(
+  ) as item()? {
+  let $data := request:get-data()
+  return
+    if ($data instance of xs:base64Binary)
+    then util:binary-to-string($data)
+    else $data
+};
