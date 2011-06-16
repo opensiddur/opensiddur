@@ -7,6 +7,7 @@
   
 '''
 import sys
+sys.path.append('/opt/opensiddur/code/tests')
 import getopt
 import unittest 
 import lxml.etree as etree
@@ -172,19 +173,93 @@ class Test_Change_Password_For_User_That_Is_Logged_In(Test_Create_User, unittest
 
 ######## User profile editing ##########
 
-class User_Profile_Operations(apidb.BaseAPITest):
+class User_Profile_Operations(Test_Create_User):
+  def setUp(self):
+    super(Test_Create_User, self).setUp()
+    self.create_user(self.newUserName, self.newPassword)
+    self.assertStatusError(self.code, 201)
+
   # each user's profile is represented by a number of individual API calls
+  # they all accept both txt and xml formats
+
+  def contentType(self, format):
+    if format == 'txt':
+      return 'text/plain'
+    else:
+      return 'application/xml'
+
   def get_user_profile_menu(self, name):
-    self.database.get('/code/api/user/' + name)
+    (self.code, self.reason, self.data) = self.database.get('/code/api/user/' + name)
 
   def get_user_profile_content(self, name, profile, format):
-    self.database.get('/code/api/user/' + name + '/' + profile + '.' + format) 
+    (self.code, self.reason, self.data) = self.database.get('/code/api/user/' + name + '/' + profile + '.' + format) 
 
-  def edit_user_profile_content(self, name, profile, format):
-    self.database.put('/code/api/user/' + name + '/' + profile + '.' + format) 
+  def set_user_profile_content(self, name, profile, format, content):
+    (self.code, self.reason, self.data) = self.database.put('/code/api/user/' + name + '/' + profile + '.' + format, content, self.contentType(format)) 
   
   def clear_user_profile_content(self, name, profile, format):
-    self.database.delete('/code/api/user/' + name + '/' + profile + '.' + format) 
+    (self.code, self.reason, self.data) = self.database.delete('/code/api/user/' + name + '/' + profile) 
+
+class Test_Set_Name_Txt_Format(User_Profile_Operations, unittest.TestCase):
+  newName = 'Rabbi Test von User III'
+
+  def set_name(self, content):
+    self.set_user_profile_content(self.newUserName, 'name', 'txt', content)
+
+  def test_Set_returns_HTTP_status_204(self):
+    self.set_name(self.newName)
+    self.assertResponse(self.code, 204, self.reason, self.data)
+
+class Test_Get_Name_Txt_Format(Test_Set_Name_Txt_Format):
+  def setUp(self):
+    super(Test_Get_Name_Txt_Format, self).setUp()
+    self.set_name(self.newName)
+    self.assertStatusError(self.code, 204, self.data)
+
+  def get_name(self):
+    self.get_user_profile_content(self.newUserName, 'name', 'txt')
+  
+  def test_Get_returns_HTTP_status_200(self):
+    self.get_name()
+    self.assertResponse(self.code, 200, self.reason, self.data)
+
+  def test_Get_returns_the_same_name_that_was_set(self):
+    self.get_name()
+    print >>sys.stderr, self.data
+    self.assertTrue(
+      self.toTree(self.data).xpath("//exist:value='%s'" % self.newName, namespaces=self.prefixes)
+    )
+
+class Test_Set_Name_Xml_Format(Test_Set_Name_Txt_Format, unittest.TestCase):
+  # note: set name in XML format breaks the usual convention that put->get return the same
+  # thing. it will have the same string value, but the db will process the name into
+  # component parts.
+  def set_name(self, content):
+    self.set_user_profile_content(
+      self.newUserName, 'name', 'xml',
+        '<tei:name xmlns:tei="http://www.tei-c.org/ns/1.0">' + content + '</tei:name>')
+
+
+class Test_Get_Name_Xml_Format(Test_Get_Name_Txt_Format, unittest.TestCase):
+  def get_name(self):
+    self.get_user_profile_content(self.newUserName, 'name', 'xml')
+
+  def test_Get_returns_the_same_name_that_was_set(self):
+    self.get_name()
+    self.assertTrue(
+      self.toTree(self.data).xpath("normalize-space(/tei:name)='%s'" % self.newName, namespaces=self.prefixes)
+    )
+
+  def test_Get_returns_the_name_broken_up_into_XML_components(self):
+    self.get_name()
+    self.assertTrue(
+      self.toTree(self.data).xpath(
+        "count(/tei:name[tei:roleName='Rabbi' and" +
+        "tei:forename='Test' and" +
+        "tei:nameLink='von' and" +
+        "tei:surname='User' and" +
+        "tei:genName='III'])=1", namespaces=self.prefixes)
+    )
 
 ######## End tests ###########
 def usage():
