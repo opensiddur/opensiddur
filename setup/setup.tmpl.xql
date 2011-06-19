@@ -19,9 +19,12 @@ xquery version "1.0";
   for $xquery in collection('/code')//document-uri(.)
   where matches($xquery,'xq[ml]$')
   return
-    let $collection := util:collection-name($xquery)
-    let $resource := util:document-name($xquery)
+    let $collection := util:collection-name(string($xquery))
+    let $resource := util:document-name(string($xquery))
     let $code := util:binary-to-string(util:binary-doc($xquery))
-    let $new-code := replace($code, "\$magicpassword", "'ADMINPASSWORD'")
-    return xmldb:store($collection, $resource, $new-code, 'application/xquery')
+    where contains($code, "$magicpassword")
+    return 
+      xmldb:store($collection, $resource, 
+        replace($code, "\$magicpassword", "'ADMINPASSWORD'"), 
+        'application/xquery')
 )
