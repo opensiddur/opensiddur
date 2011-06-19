@@ -225,10 +225,7 @@ class Test_Get_Name_Txt_Format(Test_Set_Name_Txt_Format):
 
   def test_Get_returns_the_same_name_that_was_set(self):
     self.get_name()
-    print >>sys.stderr, self.data
-    self.assertTrue(
-      self.toTree(self.data).xpath("//exist:value='%s'" % self.newName, namespaces=self.prefixes)
-    )
+    self.assertTrue(self.data == self.newName)
 
 class Test_Set_Name_Xml_Format(Test_Set_Name_Txt_Format, unittest.TestCase):
   # note: set name in XML format breaks the usual convention that put->get return the same
