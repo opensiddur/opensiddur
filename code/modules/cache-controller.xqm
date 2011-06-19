@@ -158,6 +158,12 @@ declare function local:commit-cache(
   )
 };
 
+declare function jcache:is-up-to-date(
+  $document-path as xs:string
+  ) as xs:boolean {
+  jcache:is-up-to-date($document-path, $jcache:cache-collection)
+};
+
 (:~ determine if a given document is up to date in the given cache, including dependencies
  : @param $document-path Path to document in the database (assumed to be a document!)
  : @param $cache Subdirectory name of the cache to use 
