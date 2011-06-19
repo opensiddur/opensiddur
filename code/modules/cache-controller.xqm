@@ -31,7 +31,7 @@ declare namespace err="http://jewishliturgy.org/errors";
 declare variable $jcache:cache-collection := 'cache';
 
 (:~ return the path to a flag for a given collection and resource as (cache-collection, resource) :)
-declare function jcache:_get-flag-path(
+declare function local:get-flag-path(
   $collection as xs:string,
   $resource as xs:string) 
   as xs:string+ {
@@ -43,25 +43,25 @@ declare function jcache:_get-flag-path(
 };
 
 (:~ set in-progress flag for the given collection and resource :)
-declare function jcache:_set-flag(
+declare function local:set-flag(
   $collection as xs:string, 
   $resource as xs:string) 
   as empty() {
-  let $in-progress-path := jcache:_get-flag-path($collection, $resource)
+  let $in-progress-path := local:get-flag-path($collection, $resource)
   let $in-progress-collection := $in-progress-path[1]
   let $in-progress-resource := $in-progress-path[2]
   return
     if (xmldb:store($in-progress-collection, $in-progress-resource, <in-progress/>))
-    then jcache:_set-cache-permissions($in-progress-collection, $in-progress-resource)
+    then local:set-cache-permissions($collection, $in-progress-resource)
     else error(xs:QName('err:STORE'), concat('Cannot store progress indicator ', $in-progress-path))
 };
 
 (:~ remove in-progress flag for the given collection and resource :)
-declare function jcache:_remove-flag(
+declare function local:remove-flag(
   $collection as xs:string, 
   $resource as xs:string) 
   as empty() {
-  let $in-progress-path := jcache:_get-flag-path($collection, $resource)
+  let $in-progress-path := local:get-flag-path($collection, $resource)
   let $in-progress-collection := $in-progress-path[1]
   let $in-progress-resource := $in-progress-path[2]
   return
@@ -72,11 +72,11 @@ declare function jcache:_remove-flag(
  : if an inactive flag exists, remove it and return false.
  : if no flag exists, return false.
  :)
-declare function jcache:_flag-is-active(
+declare function local:flag-is-active(
   $collection as xs:string,
   $resource as xs:string
   ) as xs:boolean {
-  let $in-progress-path := jcache:_get-flag-path($collection, $resource)
+  let $in-progress-path := local:get-flag-path($collection, $resource)
   let $cache-collection := $in-progress-path[1]
   let $in-progress-resource := $in-progress-path[2]
   let $cache-exists := xmldb:collection-available($cache-collection)
@@ -85,41 +85,33 @@ declare function jcache:_flag-is-active(
     xmldb:last-modified($cache-collection, $in-progress-resource) gt (xs:dayTimeDuration("P0DT0H5M0S") + current-dateTime())
   return
     if ($caching-too-long)
-    then (jcache:_remove-flag($collection, $resource), false())
+    then (local:remove-flag($collection, $resource), false())
     else $caching-in-progress
 };
 
 (:~ set appropriate resource permissions for a resource in the cache.
- : user = creating user, group = (everyone, authenticated-user, or group, as appropriate)
- : mode = 0774 (rwurwur--)
- : @param $cache The cache 
+ : which are the same as the original file.
+ : @param $collection The original resource collection 
  : @param $resource The resource
  :)
-declare function jcache:_set-cache-permissions(
-	$cache as xs:string,
+declare function local:set-cache-permissions(
+	$collection as xs:string,
 	$resource as xs:string
 	) as empty() {
-	xmldb:set-resource-permissions($cache, $resource,
-  	app:auth-user(), (
-  	(: group :)
-  	let $collection-levels := 
-  		tokenize(
-  			replace($cache, '^(/db)?/', ''),
-  			'/')
-    let $top-level-collection := $collection-levels[1]
-    return (
-    	if ($top-level-collection = 'group')
-    	then xmldb:get-group(concat('/', $top-level-collection, '/', $collection-levels[2]))
-    	else 'everyone'
-    	)
-    ), util:base-to-integer(0774,8))	
+  let $cache := jcache:cached-document-path($cache)
+  let $owner := xmldb:get-owner($collection, $resource)
+  let $group := xmldb:get-group($collection, $resource)
+  let $permissions := xmldb:get-permissions($collection, $resource)
+  return
+  	xmldb:set-resource-permissions($cache, $resource,
+      $owner, $group, $permissions)
 };
 
 (:~ commit a given resource to the cache 
  : @param $collection collection, must end with /
  : @param $resource resource name
  :)
-declare function jcache:_commit-cache(
+declare function local:commit-cache(
   $collection as xs:string,
   $resource as xs:string)
   as empty() {
@@ -139,7 +131,7 @@ declare function jcache:_commit-cache(
 				xmldb:get-permissions($collection)
       )
     ),
-    jcache:_set-flag($collection, $resource),
+    local:set-flag($collection, $resource),
     let $transform-result :=
     	util:catch('*', 
       	app:transform-xslt(
@@ -148,21 +140,21 @@ declare function jcache:_commit-cache(
       		(<param name="exist:stop-on-warn" value="yes"/>), ()),
       	(
       		(: make sure the flag is removed if app:transform-xslt fails :)
-      		jcache:_remove-flag($collection, $resource),
+      		local:remove-flag($collection, $resource),
       		error($util:exception cast as xs:QName, $util:exception-message)
       	)
       ) 
     return (
       if (xmldb:store($cache, $resource, $transform-result))
       then (
-      	jcache:_set-cache-permissions($cache, $resource)
+      	local:set-cache-permissions($collection, $resource)
       )
       else (
-        jcache:_remove-flag($collection, $resource),
+        local:remove-flag($collection, $resource),
         error(xs:QName('err:STORE'), concat('Cannot store resource ', $collection, $resource, ' in cache ', $cache)) 
       )
     ),
-    jcache:_remove-flag($collection, $resource)
+    local:remove-flag($collection, $resource)
   )
 };
 
@@ -170,7 +162,7 @@ declare function jcache:_commit-cache(
  : @param $document-path Path to document in the database (assumed to be a document!)
  : @param $cache Subdirectory name of the cache to use 
  :)
-declare function jcache:_is-up-to-date(
+declare function jcache:is-up-to-date(
 	$document-path as xs:string,
 	$cache as xs:string) 
 	as xs:boolean {
@@ -186,7 +178,7 @@ declare function jcache:_is-up-to-date(
 			(: these paths can be absolute with http:// etc. Need to make them in-db paths
 			The correct way to do it is probably with resolve-uri() :)
 			every $path in doc($cached-document-path)//jx:cache-depend/@path 
-			satisfies jcache:_is-up-to-date(string($path), $cache)
+			satisfies jcache:is-up-to-date(string($path), $cache)
 			)
 };
 
@@ -229,7 +221,7 @@ declare function jcache:clear-cache-resource(
     if (starts-with(replace($collection, '^(/db)?/',''), $jcache:cache-collection))
     then $collection
     else jcache:cached-document-path($collection)
-  where (app:require-authentication() and exists(jcache:_flag-is-active($collection, $resource)))
+  where (app:require-authentication() and exists(local:flag-is-active($collection, $resource)))
   return xmldb:remove($ccollection, $resource)
 };
 
@@ -248,10 +240,10 @@ declare function jcache:cache-all(
     if (starts-with($collection, '/db')) 
     then $collection 
     else app:concat-path('/db', $collection)
-  where not(jcache:_is-up-to-date($resource, $jcache:cache-collection)) 
-        and not(jcache:_flag-is-active($dbcollection, $document))
+  where not(jcache:is-up-to-date($resource, $jcache:cache-collection)) 
+        and not(local:flag-is-active($dbcollection, $document))
   return 
-    jcache:_commit-cache($dbcollection, $document)
+    local:commit-cache($dbcollection, $document)
 };
 
 (:~ find resources dependent on a given path :)
