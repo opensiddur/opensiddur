@@ -3,7 +3,6 @@
  : Open Siddur Project
  : Copyright 2010-2011 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Released under the GNU Lesser General Public License, ver 3 or later
- : $Id: controls.xqm 772 2011-04-29 05:34:57Z efraim.feinstein $
  :)
 xquery version "1.0";
 module namespace controls="http://jewishliturgy.org/modules/controls";
@@ -1091,28 +1090,25 @@ declare function controls:rt-submission-set(
 	concat(controls:rt-submission-id($binding), '-set')
 };
 
+(: XSLTForms supports @targetref as of r507:
 declare function local:simulate-targetref(
 	$result-instance-id as xs:string,
 	$replace as xs:string,
 	$targetref as xs:string
 	) as node()+ {
-	<xf:action ev:event="xforms-submit-done">{
-		if ($replace = 'text')
-		then (
-			<xf:setvalue ref="{$targetref}" value="instance('{$result-instance-id}')"/>
-		)
-		else if ($replace = 'instance')
-		then (
+  if ($replace = 'instance')
+  then
+  	<xf:action ev:event="xforms-submit-done">{
 			<xf:insert origin="instance('{$result-instance-id}')"
 				nodeset="{$targetref}" at="1" position="before" if="count({$targetref}) &gt; 0"/>,
 			<xf:insert origin="instance('{$result-instance-id}')"
 				context="{$targetref}" if="count({$targetref})=0"/>,
 			<xf:delete nodeset="{$targetref}" at="2" if="count({$targetref}) &gt; 1"/>
 		)
-		else ()
-	}</xf:action>
+	  }</xf:action>
+  else ()
 };
-
+:)
 
 declare function controls:rt-submission(
 	$binding as attribute(),	
@@ -1158,20 +1154,16 @@ declare function controls:rt-submission(
 	let $result-instance-id := concat($submission-id, '-result')
 	return (
 		controls:error-instance($error-instance-id), 
-		<xf:instance id="{$submission-id}-blank">
-			<blank xmlns=""/>
-		</xf:instance>,
 		<xf:instance id="{$result-instance-id}">
 			<result xmlns=""/>
 		</xf:instance>,
 		<xf:submission id="{$submission-id}-get"
 			method="get"
-			ref="instance('{$submission-id}-blank')"
-			replace="instance"
-			instance="{$result-instance-id}"
+      serialization="none"
 			>{
-			$get-action,
-			local:simulate-targetref($result-instance-id, string($replace), string($targetref))
+      ($replace, attribute replace { 'instance'} )[1],
+      ($targetref, attribute instance { $result-instance-id })[1],
+			$get-action
 		}</xf:submission>,
 		<xf:send ev:event="xforms-ready" submission="{$submission-id}-get">{
 			if ($rt-condition)
@@ -1182,8 +1174,8 @@ declare function controls:rt-submission(
 		<xf:submission 
 			id="{$submission-id}-set"
 			method="post"
-			replace="instance"
-			instance="{$result-instance-id}">
+			replace="none"
+			>
 			{
 			$binding,
 			($put-action, $get-action)[1],

@@ -67,7 +67,7 @@ return (
  		controls:rt-submission(
  			attribute bind {concat($instance-id,'-name')},
  			attribute action {concat('/code/api/user/', $user-name, '/name.txt')},
- 			attribute action {concat('/code/api/user/', $user-name, '/name.txt?_method=PUT')},
+ 			attribute action {concat('/code/api/user/', $user-name, '/name?_method=PUT')},
  			attribute replace {'text'},
  			attribute targetref { controls:instance-to-ref($instance-id, '/tei:name') },
  			$error-instance-id
@@ -84,7 +84,7 @@ return (
  			attribute bind {concat($instance-id,'-orgname')},
  			attribute action {concat('/code/api/user/', $user-name, '/orgname')},
  			attribute action {concat('/code/api/user/', $user-name, '/orgname?_method=PUT')},
- 			attribute replace {'text'},
+ 			attribute replace {'instance'},
  			attribute targetref { controls:instance-to-ref($instance-id, '/tei:orgName') },
  			$error-instance-id
  		)

@@ -24,7 +24,7 @@ xquery version "1.0";
  : Return: property result
  : Status codes: 204 OK, 401, 403, 404
  :
- : on error: <result><error/></result>
+ : on error: returns an error element with a description
  :
  : Open Siddur Project
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
