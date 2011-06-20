@@ -112,6 +112,8 @@ return
 			<xf:bind id="date"
 				nodeset="instance('metadata')//tei:docDate"
 				type="xf:date"/>,
+      <xf:bind id="license"
+        nodeset="instance('{$license-chooser-id}')"/>,
 			<xf:bind  
 				nodeset="instance('metadata')//tei:titlePart[@type='main']"
 				calculate="instance('metadata')/tei:title[@type='main']"/>,
@@ -136,7 +138,7 @@ return
 					}</item>
 				</instance>
 			</xf:instance>,
-			<xf:submission id="new-submit" method="post" ref="instance('blank')"
+			<xf:submission id="new-submit" method="post" ref="instance('blank')" serialization="none"
 				replace="none">
 				<xf:resource value="concat('/code/api/data/original/group/', instance('{$share-options-instance-id}')/owner)"/>
 				{
@@ -195,7 +197,7 @@ return
 			),
 			controls:rt-submission(
 				attribute bind { "lang" },	
-				<xf:resource value="concat(instance('resource')/item, '/lang.xml')"/>,
+				<xf:resource value="concat(instance('resource')/item, '/lang.txt')"/>,
 				<xf:resource value="concat(instance('resource')/item, '/lang.xml?_method=PUT')"/>,
 				attribute replace { 'text' },
 				attribute targetref { "instance('metadata')/lang" }, 
@@ -203,7 +205,8 @@ return
 				attribute if { "instance('resource')/item != ''" }
 			),
 			controls:rt-submission(
-				attribute ref { controls:instance-to-ref($license-chooser-id) },	
+				(:attribute ref { controls:instance-to-ref($license-chooser-id) }:)
+        attribute bind { "license" },	
 				<xf:resource value="concat(instance('resource'), '/license.xml')"/>,
 				<xf:resource value="concat(instance('resource'), '/license.xml?_method=PUT')"/>,
 				attribute replace { 'instance' },
@@ -321,7 +324,9 @@ return
 				</xf:group>
 				{controls:debug-show-instance('metadata'),
 				controls:debug-show-instance($save-flag-instance-id),
-				controls:debug-show-instance($license-chooser-id)}
+				controls:debug-show-instance($license-chooser-id),
+				controls:debug-show-instance('resource')
+        }
 			</div>
 		</fieldset>,
 		(site:css(), builder:css()),
