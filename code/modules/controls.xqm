@@ -981,35 +981,33 @@ declare function controls:license-chooser-ui(
 	$event-target as xs:string?,
   $changed-value-save as xs:boolean?
 	) as element()+ {
-	<div class="license-chooser">
-		<xf:select1 id="{$control-id}" incremental="true">
-			{
-			attribute {'ref'}{controls:instance-to-ref($chooser-instance-id,'@target')},
-			(:attribute {if ($bind) then 'bind' else 'ref'}{$ref}:)
-			attribute {'appearance'}{
-				if ($appearance = 'list')
-				then 'compact'
-				else if ($appearance = 'radio')
-				then 'full'
-				else 'minimal'
-				}
-			}
-			<xf:label>{$label}</xf:label>
-			<xf:itemset nodeset="instance('{$chooser-instance-id}-licenses')/license">
-				<xf:label ref="desc"/>
-				<xf:value ref="id"/>
-			</xf:itemset>
-			{
-			for $et in $event-target
-			return (
-				<xf:dispatch ev:event="xforms-value-changed" name="{if ($changed-value-save) then 'DOMFocusOut' else 'xforms-value-changed'}" targetid="{$et}" 
-					bubbles="true"/>,
-				<xf:dispatch ev:event="DOMFocusOut" name="DOMFocusOut" targetid="{$et}" 
-					bubbles="true"/>
-			)
-			}
-		</xf:select1>
-	</div>
+  <xf:select1 class="license-chooser" id="{$control-id}" incremental="true">
+    {
+    attribute {'ref'}{controls:instance-to-ref($chooser-instance-id,'self::tei:ptr/@target')},
+    (:attribute {if ($bind) then 'bind' else 'ref'}{$ref}:)
+    attribute {'appearance'}{
+      if ($appearance = 'list')
+      then 'compact'
+      else if ($appearance = 'radio')
+      then 'full'
+      else 'minimal'
+      }
+    }
+    <xf:label>{$label}</xf:label>
+    <xf:itemset nodeset="instance('{$chooser-instance-id}-licenses')/license">
+      <xf:label ref="desc"/>
+      <xf:value ref="id"/>
+    </xf:itemset>
+    {
+    for $et in $event-target
+    return (
+      <xf:dispatch ev:event="xforms-value-changed" name="{if ($changed-value-save) then 'DOMFocusOut' else 'xforms-value-changed'}" targetid="{$et}" 
+        bubbles="true"/>,
+      <xf:dispatch ev:event="DOMFocusOut" name="DOMFocusOut" targetid="{$et}" 
+        bubbles="true"/>
+    )
+    }
+  </xf:select1>
 };
 
 (:~ set a value on the license chooser from an existing value
@@ -1153,7 +1151,7 @@ declare function controls:rt-submission(
 	let $submission-id := controls:rt-submission-id(string($binding))
 	let $result-instance-id := concat($submission-id, '-result')
 	return (
-		controls:error-instance($error-instance-id), 
+		(:controls:error-instance($error-instance-id), :)
 		<xf:instance id="{$result-instance-id}">
 			<result xmlns=""/>
 		</xf:instance>,

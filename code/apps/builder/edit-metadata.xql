@@ -113,7 +113,7 @@ return
 				nodeset="instance('metadata')//tei:docDate"
 				type="xf:date"/>,
       <xf:bind id="license"
-        nodeset="instance('{$license-chooser-id}')"/>,
+        nodeset="instance('{$license-chooser-id}')/self::tei:ptr"/>,
 			<xf:bind  
 				nodeset="instance('metadata')//tei:titlePart[@type='main']"
 				calculate="instance('metadata')/tei:title[@type='main']"/>,
@@ -210,7 +210,7 @@ return
 				<xf:resource value="concat(instance('resource'), '/license.xml')"/>,
 				<xf:resource value="concat(instance('resource'), '/license.xml?_method=PUT')"/>,
 				attribute replace { 'instance' },
-				attribute targetref { controls:instance-to-ref($license-chooser-id) }, 
+				attribute instance { $license-chooser-id }, 
 				$error-instance-id,
 				attribute if { "instance('resource')/item != ''" }
 			)
@@ -290,8 +290,8 @@ return
               true()
 						),
 						controls:rt-control(
-							(:concat($control-id, '-license-chooser'):)(),
-							controls:rt-submission-id(controls:instance-to-ref($license-chooser-id)), controls:set-save-flag($save-flag-instance-id, true()),
+							(: concat($control-id, '-license-chooser') :) (),
+							controls:rt-submission-id("license"), controls:set-save-flag($save-flag-instance-id, true()),
 							(),
 							"instance('resource')/item != ''"
 						),
@@ -319,7 +319,7 @@ return
 								<xf:message>Not all required fields are filled in</xf:message>
 							</xf:action>
 						</xf:trigger>
-					else ()
+					else () 
 					}
 				</xf:group>
 				{controls:debug-show-instance('metadata'),
