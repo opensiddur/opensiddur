@@ -297,12 +297,11 @@ db-sync:
 	$(EXISTBACKUP) -u admin -p $(DBAPASS) -r `pwd`/$(COMMONDIR)/__contents__.xml -ouri=xmldb:exist://localhost:8080/xmlrpc
 
 # patch error status ignored because it returns 1 if patches are already applied
-db: externals schema transforms queries $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tests
+db: externals schema transforms $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tests
 	mkdir -p $(DBDIR)/xforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources
 	cp $(CODEDIR)/common/params.xsl2 $(DBDIR)/code/common	
-	cp $(CODEDIR)/$(QUERYDIR)/admin.xqm $(DBDIR)/$(CODEDIR)/$(QUERYDIR)
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-common-tests.xsl.patch
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-tests-utils.xsl.patch
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-xspec-tests.xsl.patch
