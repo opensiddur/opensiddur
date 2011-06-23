@@ -43,13 +43,7 @@ then
 		else if ($method = 'PUT')
 		then
 			(: this is a request to log in :)
-			let $password := string(
-        let $data := request:get-data()
-        return
-          if ($data instance of xs:base64Binary)
-          then util:binary-to-string($data)
-          else $data
-      )
+			let $password := string(api:get-data())
 			return
 				if (xmldb:authenticate('/db', $user-name, $password))
 				then (

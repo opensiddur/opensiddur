@@ -22,11 +22,11 @@
   </x:pending>
   <x:scenario label="all modes">
     <x:scenario label="on a file that has no pointers">
-      <x:context href="cache/data-compiler-no-pointers.xml"/>
+      <x:context href="/cache/code/transforms/data-compiler/tests/data-compiler-no-pointers.xml"/>
       <x:expect label="removes some top-level elements, retains tei:text" href="data-compiler-no-pointers-expect.xml"/>
     </x:scenario>
     <x:scenario label="on file that has internal pointers">
-      <x:context href="cache/data-compiler-internal-pointers.xml"/>
+      <x:context href="/cache/code/transforms/data-compiler/tests/data-compiler-internal-pointers.xml"/>
       <x:expect label="pointers in j:links section are not resolved" test="//j:links/(count(tei:ptr) = count(*))"/>
       <x:expect label="text repository is removed" test="empty(//j:repository)"/>
       <x:expect label="joined-concurrent section is resolved" test="//tei:text">
@@ -43,7 +43,7 @@
       </x:expect>
     </x:scenario>
     <x:scenario label="on file that has an external pointer">
-      <x:context href="cache/data-compiler-external-pointers.xml"/>
+      <x:context href="/cache/code/transforms/data-compiler/tests/data-compiler-external-pointers.xml"/>
       <x:expect label="internal and external pointers are resolved" href="data-compiler-external-pointers-expect.xml"/>
     </x:scenario>
   </x:scenario>

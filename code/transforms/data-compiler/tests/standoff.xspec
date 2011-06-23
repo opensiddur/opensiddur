@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- standoff markup in data-compiler
   Open Siddur Project
-  Copyright 2010 Efraim Feinstein
+  Copyright 2010-2011 Efraim Feinstein
   Licensed under the GNU Lesser General Public License, version 3 or later
-
-  $Id: standoff.xspec 746 2011-04-17 20:54:20Z efraim.feinstein $
  -->
 <x:description 
   xmlns:x="http://www.jenitennison.com/xslt/xspec"
@@ -21,7 +19,7 @@
     </x:scenario>
   </x:pending>
   <x:scenario label="Standoff markup">
-    <x:context href="../tests-with-document-uri/cache/standoff-relationship-context.xml" />
+    <x:context href="/cache/code/transforms/data-compiler/tests-with-document-uri/standoff-relationship-context.xml" />
     <!-- x:expect label="make it show the entire thing"><a/></x:expect-->
     <x:expect label="transcriber responsibility link returns transcriber information" 
       test="exists(//jx:relationship[@jx:id='respons']/

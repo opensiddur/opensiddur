@@ -24,7 +24,7 @@ xquery version "1.0";
  : Return: property result
  : Status codes: 204 OK, 401, 403, 404
  :
- : on error: <result><error/></result>
+ : on error: returns an error element with a description
  :
  : Open Siddur Project
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
@@ -103,7 +103,10 @@ declare function local:put-property(
     if ($reference instance of element(error))
     then $reference
     else
-      let $value := request:get-data()
+      let $value := 
+        typeswitch (api:get-data())
+        case $data as xs:string return text { $data }
+        default $data return $data
       let $new-value := 
         if ($property = 'name' and empty($value/element()))
         then
@@ -136,30 +139,32 @@ declare function local:get-property(
 	$property as xs:string,
 	$format as xs:string, 
 	$value as item()?
-	) as node()? {
+	) as item()? {
 	let $reference := ($value, local:get-reference($user-name, $property))[1]
 	return 
 		(: return the property :)
     if ($reference instance of element(error))
     then $reference
 	  else if ($format = 'txt')
-	  then
-	  	<result xmlns="">{
-				if ($property = 'name')
-	      then
-	      	name:name-to-string($reference) 
-	      else
-	       	string($reference) 
-	    }</result>
-	  else
+	  then (
+      api:serialize-as('txt'),
+			if ($property = 'name')
+      then
+      	name:name-to-string($reference) 
+      else
+       	string($reference) 
+    )
+	  else (
+      api:serialize-as('xml'),
 	  	$reference
+    )
 };
 
 declare function local:get-property(
 	$user-name as xs:string,
 	$property as xs:string,
 	$format as xs:string 
-	) as node()? {
+	) as item()? {
 	local:get-property($user-name, $property, $format, ())
 };
 

@@ -65,13 +65,11 @@ class Existdb:
       try:
         response = self.urlOpener.open(request)
       except urllib2.HTTPError, err:
-        rsp = err
-      else:
-        rsp = response
+        response = err
       finally:
-        code = rsp.getcode()
-        data = rsp.read()
-        rsp.close()
+        code = response.getcode()
+        data = response.read()
+        response.close()
         reason = BaseHTTPServer.BaseHTTPRequestHandler.responses[code][0]
       return (code, reason, data)
 
