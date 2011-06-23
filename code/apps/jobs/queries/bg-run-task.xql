@@ -13,9 +13,9 @@ declare variable $local:task-id external;
 
 declare function local:run-next-task(
   ) as empty() {
-  if (not(jobs:is-task-running($task-id)))
+  if (not(jobs:is-task-running($local:task-id)))
   then 
-    if (jobs:run($task-id))
+    if (jobs:run($local:task-id))
     then local:run-next-task()
     else ()
   else ()
@@ -24,7 +24,7 @@ declare function local:run-next-task(
 if ($paths:debug)
 then 
   util:log-system-out(
-    concat('In background task executive id ', $task-id, ' at ', string(current-dateTime()))
+    concat('In background task executive id ', $local:task-id, ' at ', string(current-dateTime()))
     )
 else (),
 local:run-next-task()

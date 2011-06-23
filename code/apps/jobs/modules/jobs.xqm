@@ -27,7 +27,7 @@ declare variable $jobs:queue-collection := '/code/apps/jobs/data';
 declare variable $jobs:queue-resource := 'queue.xml';
 declare variable $jobs:users-resource := 'users.xml';
 declare variable $jobs:queue-path := 
-  concat($job:queue-collection, '/', $jobs:queue-resource);
+  concat($jobs:queue-collection, '/', $jobs:queue-resource);
 declare variable $jobs:users-path :=
   concat($jobs:queue-collection, '/', $jobs:users-resource);
 
@@ -72,7 +72,7 @@ declare function local:delete-jobs-user(
   system:as-user('admin', $magicpassword, 
     let $jobs := doc($jobs:queue-path)
     let $users := doc($jobs:users-path)
-    where empty($jobs//(jobs:job[jobs:runas=$user][not(jobs:id=$exclude-job-id)])
+    where empty($jobs//(jobs:job[jobs:runas=$user][not(jobs:id=$exclude-job-id)]))
     return update delete $users//jobs:user[jobs:name=$user]
   )
 };
@@ -101,7 +101,7 @@ declare function local:add-jobs-user(
           }))
         then
           xmldb:set-resource-permissions(
-            $jobs:queue-collection, $jobs:queue-resource, 
+            $jobs:queue-collection, $jobs:users-resource, 
             'admin', 'dba',
             util:base-to-integer(0770, 8)
             )
@@ -121,7 +121,7 @@ declare function jobs:enqueue(
   $password as xs:string?
   ) as element(jobs:id)+ {
   system:as-user('admin', $magicpassword,
-    let $defaulted := local:set-job-defaults($job, $user)
+    let $defaulted := local:set-job-defaults($jobs, $user)
     let $queue := doc($jobs:queue-path)/jobs:jobs
     return (
       local:add-jobs-user($user, $password),
@@ -143,7 +143,8 @@ declare function jobs:enqueue(
         else
           error(xs:QName('err:INTERNAL'), 
             "Internal error. Cannot store the job queue")
-    )
+    ),
+    $defaulted//jobs:id
   )
 };
 
@@ -154,7 +155,7 @@ declare function jobs:enqueue-unique(
   $jobs as element(jobs:job)+,
   $user as xs:string,
   $password as xs:string
-  ) as empty() {
+  ) as element(jobs:id)* {
   let $queue := 
     system:as-user('admin', $magicpassword, doc($jobs:queue-path))
   for $job in $jobs
@@ -194,7 +195,7 @@ declare function jobs:pop(
   ) as element(jobs:job)? {
   let $queue := 
     system:as-user('admin', $magicpassword,
-      doc($queue:queue-path))/jobs:jobs)
+      doc($jobs:queue-path))/jobs:jobs
   let $max-priority := max($queue//jobs:priority)
   let $job-ids := $queue/jobs:id
   return

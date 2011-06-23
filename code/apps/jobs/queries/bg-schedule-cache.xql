@@ -12,6 +12,8 @@ import module namespace jcache="http://jewishliturgy.org/modules/cache"
 import module namespace jobs="http://jewishliturgy.org/apps/jobs"
   at "/code/apps/jobs/modules/jobs.xqm";
 
+declare namespace tei="http://www.tei-c.org/ns/1.0";
+
 declare variable $local:task-id external;
 
 if ($paths:debug)
@@ -30,7 +32,7 @@ return
   jobs:enqueue-unique(
     element jobs:job {
       element jobs:run {
-        element jobs:query { '/code/apps/jobs/queries/bg-cache.xql' }
+        element jobs:query { '/code/apps/jobs/queries/bg-cache.xql' },
         element jobs:param {
           element jobs:name { 'resource' },
           element jobs:value { $document }

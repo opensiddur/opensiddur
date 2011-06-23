@@ -194,7 +194,7 @@ $(EXIST_INSTALL_JAR): svn-exist
 		./build.sh svn-download
 	cd $(LIBDIR)/exist && \
 		JAVA_HOME=$(JAVA_HOME) \
-		./build.sh installer -Dizpack.dir=$(IZPACK)
+		./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true
 
 .PHONY: build-exist clean-exist dist-clean-exist
 build-exist: $(EXIST_INSTALL_JAR)
