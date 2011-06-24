@@ -28,7 +28,7 @@ class ApiDB(existdb.Existdb):
     return existdb.Existdb.post(self, self.__addMethod(location, 'PUT'), document, contentType)
 
   def delete(self, location):
-    return existdb.Existdb.post(self, self.__addMethod(location, 'DELETE'))
+    return existdb.Existdb.post(self, self.__addMethod(location, 'DELETE'),'')
 
 class BaseAPITest(object):
   ''' All API tests derive from here. based on BaseDBTest, which is being deprecated '''
