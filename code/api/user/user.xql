@@ -21,7 +21,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: user.xql 718 2011-03-29 05:23:51Z efraim.feinstein $
  :)
 import module namespace response="http://exist-db.org/xquery/response";
 import module namespace request="http://exist-db.org/xquery/request";
@@ -91,7 +90,7 @@ declare function local:get(
 declare function local:put(
 	$user-name as xs:string
 	) {
-	let $password := string(request:get-data())
+	let $password := string(api:get-data())
 	return
 		if (xmldb:exists-user($user-name))
 		then
