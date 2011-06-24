@@ -66,6 +66,11 @@ class Existdb:
         response = self.urlOpener.open(request)
       except urllib2.HTTPError, err:
         response = err
+      except urllib2.URLError, err:
+        response = err
+        response.getcode = lambda : 0
+        response.close = lambda : ()
+        response.read = lambda : str(err)
       finally:
         code = response.getcode()
         data = response.read()
