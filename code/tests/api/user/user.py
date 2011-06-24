@@ -208,7 +208,7 @@ class User_Profile_Operations(Test_Create_User):
     (self.code, self.reason, self.data) = self.database.put('/code/api/user/' + self.userName + '/' + self.profileOperation + self.extension(), 
       self.profileContent, self.contentType()) 
   
-  def clear_content(self, name, profile, format):
+  def clear_content(self):
     (self.code, self.reason, self.data) = self.database.delete('/code/api/user/' + self.userName + '/' + self.profileOperation) 
 
 class Test_Set_Name_Txt_Format(User_Profile_Operations, unittest.TestCase):
@@ -266,6 +266,26 @@ class Test_Get_Name_Xml_Format(Test_Get_Name_Txt_Format, unittest.TestCase):
         "tei:genName='III'])=1", namespaces=self.prefixes)
     )
 
+class Test_Delete_Name(User_Profile_Operations, unittest.TestCase):
+  profileContent = '<tei:name xmlns:tei="http://www.tei-c.org/ns/1.0">Rabbi Test von User III</tei:name>'   # this is the name we will use for testing
+  profileOperation = 'name'
+  profileFormat = 'xml'
+  profileReturn = profileContent
+
+  def setUp(self):
+    super(Test_Delete_Name, self).setUp()
+    self.set_content()
+    self.assertStatusError(self.code, 204, self.data)
+
+  def test_Delete_returns_HTTP_status_204(self):
+    self.clear_content()
+    self.assertResponse(self.code, 204, self.reason, self.data)
+
+  def test_Deleted_content_is_removed(self):
+    self.clear_content()
+    self.get_content()
+    self.assertTrue(self.toTree(self.data).xpath("normalize-space(/*)=''")) 
+
 #### User profile properties: email ####
 
 class Test_Set_Email_Txt_Format(Test_Set_Name_Txt_Format, unittest.TestCase):
@@ -299,6 +319,11 @@ class Test_Get_Email_Xml_Format(Test_Get_Email_Txt_Format, unittest.TestCase):
       )
     )
 
+class Test_Delete_Email(Test_Delete_Name, unittest.TestCase):
+  profileContent = '<tei:email xmlns:tei="http://www.tei-c.org/ns/1.0">test@example.com</tei:email>'   # this is the name we will use for testing
+  profileOperation = 'email'
+  profileFormat = 'xml'                 # format for checking existence
+
 #### User profile properties: organization name ####
 class Test_Set_Organization_Name_Txt_Format(Test_Set_Name_Txt_Format, unittest.TestCase):
   # setting an orgname and setting a name have the same tests...
@@ -323,6 +348,11 @@ class Test_Get_Organization_Name_Xml_Format(Test_Get_Email_Xml_Format, unittest.
   profileOperation = 'orgname'
   profileContent = '<tei:orgName xmlns:tei="http://www.tei-c.org/ns/1.0">' + Test_Set_Organization_Name_Txt_Format.profileContent + '</tei:orgName>'
   profileReturn = profileContent
+  profileFormat = 'xml'
+
+class Test_Delete_Organization_Name(Test_Delete_Name, unittest.TestCase):
+  profileContent = '<tei:orgName xmlns:tei="http://www.tei-c.org/ns/1.0">orgname</tei:orgName>'
+  profileOperation = 'orgname'
   profileFormat = 'xml'
 
 #### User profile properties: foobar (a property that does not exist) ####
@@ -350,6 +380,18 @@ class Test_Set_Nonexistent_Xml_Format(Test_Set_Nonexistent_Txt_Format, unittest.
 class Test_Get_Nonexistent_Xml_Format(Test_Get_Nonexistent_Txt_Format, unittest.TestCase):
   # tests for get nonexistent in xml are the same as for txt
   profileFormat = 'xml'
+
+class Test_Delete_Nonexistent(User_Profile_Operations, unittest.TestCase):
+  profileContent = ''   # this is the name we will use for testing
+  profileOperation = 'foobar'
+  profileFormat = 'xml'
+  profileReturn = profileContent
+
+  def test_Delete_returns_HTTP_status_404(self):
+    self.clear_content()
+    self.assertResponse(self.code, 404, self.reason, self.data)
+
+  
 
 ######## End tests ###########
 def usage():

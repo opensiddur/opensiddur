@@ -127,7 +127,8 @@ declare function local:put-property(
         then 
           update value $reference with $new-value
         else 
-          update replace $reference with $new-value
+          update replace $reference with $new-value,
+				response:set-status-code(204)
       )
 };
 
@@ -168,6 +169,19 @@ declare function local:get-property(
 	local:get-property($user-name, $property, $format, ())
 };
 
+declare function local:delete-property(
+  $user-name as xs:string,
+  $property as xs:string
+  ) as item()? {
+  let $reference := local:get-reference($user-name, $property)
+  return
+    if ($reference instance of element(error))
+    then $reference
+    else (
+      update delete $reference/node(),
+      response:set-status-code(204)
+    )
+};
 
 (: check if the property exists, if not, set error code 404 
  : the caller has to provide an error message
@@ -187,7 +201,7 @@ declare function local:has-property(
 		)
 };
 
-if (api:allowed-method(('GET', 'PUT')))
+if (api:allowed-method(('GET', 'PUT', 'DELETE')))
 then
 	let $user-name := request:get-parameter('user-name', ())
 	let $property-req := request:get-parameter('property', ())
@@ -209,10 +223,9 @@ then
 			then 
 				if ($method = 'GET')
 				then local:get-property($user-name, $property, $format)
-				else (
-					local:put-property($user-name, $property, $format), 
-					response:set-status-code(204)
-				)
+				else if ($method = 'PUT') 
+        then local:put-property($user-name, $property, $format)
+        else local:delete-property($user-name, $property)
 			else 
 				api:error(404, concat('The property ', $property, ' is not found.'))
 		else 
