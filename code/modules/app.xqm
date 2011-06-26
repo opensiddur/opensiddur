@@ -37,47 +37,50 @@ declare function app:get-version(
  : 'user' and 'password' request parameters 
  : 'Username' and 'password' headers    
  :)
-declare function app:_get_auth_string() as xs:string* {
-  let $authorization := (substring-after(request:get-header('Authorization'),'Basic '))[.]
-    cast as xs:base64Binary?
-  let $user-name-attribute := session:get-attribute('app.user')[.]
-  let $password-attribute := session:get-attribute('app.password')[.]
-  let $auth-cookie := request:get-cookie-value('Authorization')[.]
-  let $user-name-basic := substring-before(
-      util:binary-to-string(($authorization, $auth-cookie)[1]),
-      ':')[.]
-  let $password-basic := substring-after(
-      util:binary-to-string(($authorization, $auth-cookie)[1]),
-      ':')[.]
-  (: user name and password from the header.  BUG workaround: to get around a bug in betterform 3.1, need to take the last 
-   : comma separated value :)
-  let $user-name-hdr := tokenize(request:get-header('Username'),',')[last()][.]
-  let $password-hdr := tokenize(request:get-header('Password'),',')[last()][.]
-  (: last resort: user name and password from parameters user= and password= :)
-  let $user-name-param := request:get-parameter('user',())
-  let $password-param := request:get-parameter('password',())
-  (: return values :)
-  let $username := ($user-name-basic, $user-name-hdr, $user-name-attribute, $user-name-param)[1]
-  let $password := ($password-basic, $password-hdr, $password-attribute, $password-param)[1]
-  return (
-  	if ($paths:debug)
-  	then
-	  	util:log-system-out(
-	  		<authenticate>
-	  			<uri>{request:get-uri()}</uri>
-	  			<header>{$authorization, exists($authorization)}</header>
-	  			<attribute>{$user-name-attribute, exists($user-name-attribute)}</attribute>
-	  			<cookie>{$auth-cookie, exists($auth-cookie)}</cookie>
-	  			<hdr>{$user-name-hdr, $password-hdr, exists($user-name-hdr)}</hdr>
-	  			<user-param>{$user-name-param, $password-param, exists($user-name-param)}</user-param>
-	  			<return>
-	  				<user>{$username}</user>
-	  				<password>{$password}</password>
-	  			</return>
-	  		</authenticate>
-	  	)
-	  else (),
-  	$username, $password)
+declare function local:get-auth-string() as xs:string* {
+  if (request:exists())
+  then 
+    let $authorization := (substring-after(request:get-header('Authorization'),'Basic '))[.]
+      cast as xs:base64Binary?
+    let $user-name-attribute := session:get-attribute('app.user')[.]
+    let $password-attribute := session:get-attribute('app.password')[.]
+    let $auth-cookie := request:get-cookie-value('Authorization')[.]
+    let $user-name-basic := substring-before(
+        util:binary-to-string(($authorization, $auth-cookie)[1]),
+        ':')[.]
+    let $password-basic := substring-after(
+        util:binary-to-string(($authorization, $auth-cookie)[1]),
+        ':')[.]
+    (: user name and password from the header.  BUG workaround: to get around a bug in betterform 3.1, need to take the last 
+     : comma separated value :)
+    let $user-name-hdr := tokenize(request:get-header('Username'),',')[last()][.]
+    let $password-hdr := tokenize(request:get-header('Password'),',')[last()][.]
+    (: last resort: user name and password from parameters user= and password= :)
+    let $user-name-param := request:get-parameter('user',())
+    let $password-param := request:get-parameter('password',())
+    (: return values :)
+    let $username := ($user-name-basic, $user-name-hdr, $user-name-attribute, $user-name-param)[1]
+    let $password := ($password-basic, $password-hdr, $password-attribute, $password-param)[1]
+    return (
+      if ($paths:debug)
+      then
+        util:log-system-out(
+          <authenticate>
+            <uri>{request:get-uri()}</uri>
+            <header>{$authorization, exists($authorization)}</header>
+            <attribute>{$user-name-attribute, exists($user-name-attribute)}</attribute>
+            <cookie>{$auth-cookie, exists($auth-cookie)}</cookie>
+            <hdr>{$user-name-hdr, $password-hdr, exists($user-name-hdr)}</hdr>
+            <user-param>{$user-name-param, $password-param, exists($user-name-param)}</user-param>
+            <return>
+              <user>{$username}</user>
+              <password>{$password}</password>
+            </return>
+          </authenticate>
+        )
+      else (),
+      $username, $password)
+  else ()
 };
 
 (:~ generate a uuid that is guaranteed not to collide with any of the 
@@ -104,13 +107,13 @@ declare function app:unique-xmlid(
  : over the logged in user. :)
 declare function app:auth-user()
   as xs:string? {
-  (session:get-attribute('app.user'), xmldb:get-current-user()[not(. = 'guest')], app:_get_auth_string()[1])[1]
+  (session:get-attribute('app.user'), xmldb:get-current-user()[not(. = 'guest')], local:get-auth-string()[1])[1]
 };
 
 (:~ Return authenticated user's password; only works for HTTP Basic authentication :)
 declare function app:auth-password()
   as xs:string? {
-  (session:get-attribute('app.password'), app:_get_auth_string()[2])[1]
+  (session:get-attribute('app.password'), local:get-auth-string()[2])[1]
 };
 
 (:~ Read HTTP headers to determine if the user can be logged in or is already logged in.  
@@ -119,7 +122,7 @@ declare function app:auth-password()
  :)
 declare function app:authenticate()
   as xs:boolean {
-  let $authorization as xs:string* := app:_get_auth_string()
+  let $authorization as xs:string* := local:get-auth-string()
   let $user-name as xs:string? := $authorization[1]
   let $password as xs:string? := $authorization[2]
   let $logged-in as xs:boolean := boolean(xmldb:get-current-user()[not(. = 'guest')])
