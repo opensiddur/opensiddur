@@ -52,7 +52,12 @@ declare function local:set-flag(
   let $in-progress-resource := $in-progress-path[2]
   return
     if (xmldb:store($in-progress-collection, $in-progress-resource, <in-progress/>))
-    then local:set-cache-permissions($collection, $in-progress-resource)
+    then 
+      let $owner := xmldb:get-owner($collection, $resource)
+      let $group := xmldb:get-group($collection, $resource)
+      let $mode := xmldb:get-permissions($collection, $resource)
+      return
+        xmldb:set-resource-permissions($in-progress-collection, $in-progress-resource, $owner, $group, $mode)
     else error(xs:QName('err:STORE'), concat('Cannot store progress indicator ', $in-progress-path))
 };
 
@@ -98,13 +103,43 @@ declare function local:set-cache-permissions(
 	$collection as xs:string,
 	$resource as xs:string
 	) as empty() {
-  let $cache := jcache:cached-document-path($cache)
+  let $cache := jcache:cached-document-path($collection)
   let $owner := xmldb:get-owner($collection, $resource)
   let $group := xmldb:get-group($collection, $resource)
   let $permissions := xmldb:get-permissions($collection, $resource)
   return
   	xmldb:set-resource-permissions($cache, $resource,
       $owner, $group, $permissions)
+};
+
+
+(:~ make a cache collection path that mirrors the same path in 
+ : the normal /db hierarchy 
+ : @param $path the path
+ :)
+declare function local:make-cache-collection-path(
+  $path as xs:string
+  ) as empty() {
+  let $steps := tokenize(replace($path, '^(/db)', ''), '/')[.]
+  for $step in 1 to count($steps)
+  let $this-step := concat('/', string-join(subsequence($steps, 1, $step), '/'))
+  let $cache-this-step := jcache:cached-document-path($this-step)
+  where not(xmldb:collection-available($cache-this-step))
+  return
+    let $cache-previous-step := jcache:cached-document-path(concat('/', string-join(subsequence($steps, 1, $step - 1), '/')))
+    let $new-collection := $steps[$step]
+    let $owner := xmldb:get-owner($this-step)
+    let $group := xmldb:get-group($this-step)
+    let $mode := xmldb:get-permissions($this-step)
+    return (
+      if ($paths:debug)
+      then 
+    		util:log-system-out(('creating new cache collection: ', $cache-this-step))
+      else (),
+      if (xmldb:create-collection($cache-previous-step, $new-collection))
+			then xmldb:set-collection-permissions($cache-this-step, $owner, $group, $mode)
+  		else error(xs:QName('err:CREATE'), concat('Cannot create cache collection ', $this-step))
+    )
 };
 
 (:~ commit a given resource to the cache 
@@ -121,16 +156,7 @@ declare function local:commit-cache(
     (: make the cache collection if it does not already exist :)
     if (xmldb:collection-available($cache))
     then ()
-    else (
-      (: make the cache collection with the same priveleges as its parent :)
-      app:make-collection-path(
-				$cache, 
-				'/',
-				xmldb:get-owner($collection),
-				xmldb:get-group($collection),
-				xmldb:get-permissions($collection)
-      )
-    ),
+    else local:make-cache-collection-path($collection),
     local:set-flag($collection, $resource),
     let $transform-result :=
     	util:catch('*', 
@@ -178,7 +204,7 @@ declare function jcache:is-up-to-date(
 	let $cache-collection := jcache:cached-document-path($collection)
 	let $cached-document-path := jcache:cached-document-path($sanitized-document-path)
 	return
-    util:collection-available($cache-collection) and
+    xmldb:collection-available($cache-collection) and
 		doc-available($cached-document-path) and
 		(xmldb:last-modified($cache-collection, $resource) gt xmldb:last-modified($collection, $resource))
 		and (
