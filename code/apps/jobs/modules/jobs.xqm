@@ -120,29 +120,31 @@ declare function jobs:enqueue(
   $user as xs:string,
   $password as xs:string?
   ) as element(jobs:id)+ {
-  system:as-user('admin', $magicpassword,
-    let $defaulted := local:set-job-defaults($jobs, $user)
-    let $queue := doc($jobs:queue-path)/jobs:jobs
-    return (
-      local:add-jobs-user($user, $password),
-      if ($queue)
-      then
-        update insert $defaulted into $queue
-      else
-        if (xmldb:store($jobs:queue-collection, $jobs:queue-resource,
-          element jobs:jobs {
-            $defaulted
-          }))
-        then (
-          xmldb:set-resource-permissions(
-            $jobs:queue-collection, $jobs:queue-resource, 
-            'admin', 'dba',
-            util:base-to-integer(0770, 8)
-            )
-        )
+  let $defaulted := local:set-job-defaults($jobs, $user)
+  return (
+    system:as-user('admin', $magicpassword,
+      let $queue := doc($jobs:queue-path)/jobs:jobs
+      return (
+        local:add-jobs-user($user, $password),
+        if ($queue)
+        then
+          update insert $defaulted into $queue
         else
-          error(xs:QName('err:INTERNAL'), 
-            "Internal error. Cannot store the job queue")
+          if (xmldb:store($jobs:queue-collection, $jobs:queue-resource,
+            element jobs:jobs {
+              $defaulted
+            }))
+          then (
+            xmldb:set-resource-permissions(
+              $jobs:queue-collection, $jobs:queue-resource, 
+              'admin', 'dba',
+              util:base-to-integer(0770, 8)
+              )
+          )
+          else
+            error(xs:QName('err:INTERNAL'), 
+              "Internal error. Cannot store the job queue")
+      )
     ),
     $defaulted//jobs:id
   )
@@ -168,7 +170,7 @@ declare function jobs:complete(
   $job-id as xs:integer
   ) as empty() {
   system:as-user('admin', $magicpassword,
-    let $queue := doc($queue:queue-path)/jobs:jobs
+    let $queue := doc($jobs:queue-path)/jobs:jobs
     let $this-job := $queue/jobs:job[jobs:id=$job-id]  
     return (
       local:delete-jobs-user($this-job/jobs:runas, $this-job/jobs:id),
@@ -183,7 +185,7 @@ declare function jobs:running(
   $task-id as xs:integer?
   ) as empty() {
   system:as-user('admin', $magicpassword,
-    let $queue := doc($queue:queue-path)/jobs:jobs
+    let $queue := doc($jobs:queue-path)/jobs:jobs
     return
       update insert element jobs:running { $task-id } into 
         $queue/jobs:job[jobs:id=$job-id]
@@ -196,10 +198,11 @@ declare function jobs:pop(
   let $queue := 
     system:as-user('admin', $magicpassword,
       doc($jobs:queue-path))/jobs:jobs
-  let $max-priority := max($queue//jobs:priority)
+  let $max-priority := max($queue//jobs:priority[not(../jobs:running)])
   let $job-ids := $queue/jobs:id
   return
-    $queue/jobs:job[jobs:priority=$max-priority]
+    $queue/jobs:job[not(jobs:running)]
+      [jobs:priority=$max-priority]
       [not(jobs:depends=$job-ids)][1]
   
 };
@@ -214,20 +217,26 @@ declare function jobs:run(
   let $runas := string($next-job/jobs:runas)
   let $job-id := number($next-job/jobs:id)
   let $run := $next-job/jobs:run
+  let $null := util:log-system-out(("Next job: ", $next-job, " runas=", $runas, " $id=", $job-id, " run=", $run, " exist=", exists($next-job)))
   where exists($next-job)
   return (
     jobs:running($job-id, $task-id),
     system:as-user($runas,
       (: load the user password so the scheduled script can't access it. :) 
-      string(
-        system:as-user('admin', $magicpassword, 
-          doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
-        )),
+      if ($runas='admin')
+      then $magicpassword
+      else 
+        string(
+          system:as-user('admin', $magicpassword, 
+            doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
+          )), (
+      util:log-system-out(("Attempting to run: ", $run)),
       util:eval(xs:anyURI($run/jobs:query), true(), 
         for $param in $run/jobs:param
-        let $qname := xs:QName(concat('local:', $param/@name))
-        let $value := string($param/@value)
+        let $qname := xs:QName(concat('local:', $param/jobs:name))
+        let $value := string($param/jobs:value)
         return ($qname, $value)
+      )
       )
     ),
     jobs:complete($job-id),
