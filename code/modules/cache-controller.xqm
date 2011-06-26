@@ -134,7 +134,7 @@ declare function local:make-cache-collection-path(
     return (
       if ($paths:debug)
       then 
-    		util:log-system-out(('creating new cache collection: ', $cache-this-step))
+    		util:log-system-out(('creating new cache collection: ', $cache-this-step, ' owner/group/permissions=', $owner, '/',$group, '/',util:integer-to-base($mode,8)))
       else (),
       if (xmldb:create-collection($cache-previous-step, $new-collection))
 			then xmldb:set-collection-permissions($cache-this-step, $owner, $group, $mode)
