@@ -178,6 +178,7 @@ declare function jcache:is-up-to-date(
 	let $cache-collection := jcache:cached-document-path($collection)
 	let $cached-document-path := jcache:cached-document-path($sanitized-document-path)
 	return
+    util:collection-available($cache-collection) and
 		doc-available($cached-document-path) and
 		(xmldb:last-modified($cache-collection, $resource) gt xmldb:last-modified($collection, $resource))
 		and (
