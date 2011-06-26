@@ -15,7 +15,7 @@ import module namespace util="http://exist-db.org/xquery/util";
 import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 
 (: This is fscked up insecure! :)
-declare variable $admin:admin-user as xs:string := 'admin';
+declare variable $admin:admin-user as xs:string := 'userman';
 
 (:~ Create a new user in the database :)
 declare function admin:new-user(

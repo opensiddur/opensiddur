@@ -8,6 +8,9 @@ xquery version "1.0";
 (
 	(: set the admin password :)
 	xmldb:change-user('admin', 'ADMINPASSWORD', (), ()),
+  (: create userman user as equivalent of admin. userman is only required because
+   : of a bug in eXist that prevents admin from deleting groups :)
+  xmldb:create-user('userman', 'ADMINPASSWORD', 'dba', ()),
 	(: add a demo user :)
   xmldb:create-group('demouser'),
 	xmldb:create-user('demouser', 'resuomed', ('demouser','everyone'), '/group/demouser'),
