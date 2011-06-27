@@ -37,8 +37,16 @@ declare function user:profile-uri(
 declare function user:new-profile(
   $user-name as xs:string
   ) as xs:string {
-  xmldb:store(xmldb:get-user-home($user-name), $user:profile-resource,
+  let $home := xmldb:get-user-home($user-name)
+  let $path := xmldb:store($home, $user:profile-resource,
     $user:profile-prototype)
+  where $path
+  return ( 
+    (: profile is readable, but not writable by group, everything by user :)
+    xmldb:set-resource-permissions($home, $user:profile-resource, $user-name, $user-name, 
+      util:base-to-integer(0740,8)),
+    $path
+  )
 };
 
 (:~ create a new user with the given user name and password
