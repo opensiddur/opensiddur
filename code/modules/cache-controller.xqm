@@ -166,8 +166,15 @@ declare function local:commit-cache(
     let $transform-result :=
     	util:catch('*', 
       	app:transform-xslt(
-      		app:concat-path($collection, $resource), 
-      		'/db/code/transforms/concurrent/concurrent.xsl2',
+      		app:concat-path($collection, $resource),
+          app:concat-path(
+            if (request:exists())
+            then 
+              (: if we're coming from HTTP, no need to insert anything :)
+              ''
+            else $paths:internal-rest-prefix,
+            '/db/code/transforms/concurrent/concurrent.xsl2'
+          ),
       		(<param name="exist:stop-on-warn" value="yes"/>,
           if ($user)
           then (

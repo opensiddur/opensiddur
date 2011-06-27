@@ -402,7 +402,9 @@ declare function app:transform-xslt(
   $mode as xs:string?
   ) as item()* {
   let $xslt-uri-abs := 
-    app:concat-path($paths:rest-prefix, $xslt-uri)
+    if (contains($xslt-uri,':'))
+    then (: already an absolute path with protocol :) $xslt-uri 
+    else app:concat-path($paths:rest-prefix, $xslt-uri)
   let $user := (app:auth-user(), $parameters[@name='user']/@value/string())[1]
   let $password := (app:auth-password(), $parameters[@name='password']/@value)[1]
   let $absolute-uri := 
