@@ -252,7 +252,7 @@ declare function jobs:run(
       util:log-system-out(('An exception occurred: ', $code, ' ', $description, ' ', $value))
     },
     jobs:complete($job-id),
-    $job-id
+    xs:integer($job-id)
   )
 };
 
