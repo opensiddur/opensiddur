@@ -145,10 +145,15 @@ declare function local:make-cache-collection-path(
 (:~ commit a given resource to the cache 
  : @param $collection collection, must end with /
  : @param $resource resource name
+ : @param $user If provided, the user to run the XSLT as (who you're logged in as!). 
+ :      Else, use the session to figure it out
+ : @param $password Password for user, if provided
  :)
 declare function local:commit-cache(
   $collection as xs:string,
-  $resource as xs:string)
+  $resource as xs:string,
+  $user as xs:string?,
+  $password as xs:string?)
   as empty() {
   let $cache := jcache:cached-document-path($collection)
   where (app:require-authentication())
@@ -163,7 +168,14 @@ declare function local:commit-cache(
       	app:transform-xslt(
       		app:concat-path($collection, $resource), 
       		'/db/code/transforms/concurrent/concurrent.xsl2',
-      		(<param name="exist:stop-on-warn" value="yes"/>), ()),
+      		(<param name="exist:stop-on-warn" value="yes"/>,
+          if ($user)
+          then (
+            <param name="user" value="{$user}"/>,
+            <param name="password" value="{$password}"/>
+          )
+          else ()
+          ), ()),
       	(
       		(: make sure the flag is removed if app:transform-xslt fails :)
       		local:remove-flag($collection, $resource),
@@ -258,13 +270,23 @@ declare function jcache:clear-cache-resource(
   return xmldb:remove($ccollection, $resource)
 };
 
+(:~ cache all while logged in as the current user (generally from the session) :)
+declare function jcache:cache-all(
+  $path as xs:string
+  ) as empty() {
+  jcache:cache:all($path, (), ())
+};
+
 (:~ bring all of the resources referenced from a given resource
  : up to date in the cache
  : @param $path Resource to be tested
- :  to prevent infinite recursion
+ : @param $user If not provided, use the session
+ : @param $password If not provided, use the session
  :)
 declare function jcache:cache-all(
-  $path as xs:string
+  $path as xs:string,
+  $user as xs:string?,
+  $password as xs:string?
   ) as empty() {
   for $resource in jcache:find-dependent-resources($path, ())
   let $collection := util:collection-name($resource)
@@ -276,7 +298,7 @@ declare function jcache:cache-all(
   where not(jcache:is-up-to-date($resource, $jcache:cache-collection)) 
         and not(local:flag-is-active($dbcollection, $document))
   return 
-    local:commit-cache($dbcollection, $document)
+    local:commit-cache($dbcollection, $document, $user, $password)
 };
 
 (:~ find resources dependent on a given path :)

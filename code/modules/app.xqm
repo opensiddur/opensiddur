@@ -392,7 +392,7 @@ declare function app:concat-path(
  : @param $document-uri Pointer to the document in the database, *must* be absolute relative to db
  : 	Alternatively, if $document-uri contains a node(), the node() is transformed
  : @param $xslt-uri Pointer to the XSLT in the database, *must* be absolute relative to db
- : @param $parameters Parameters to pass to the XSLT 
+ : @param $parameters Parameters to pass to the XSLT (user and password parameters can be passed here)
  : @param $mode mode to execute; use empty sequence or blank string for #default
  :)
 declare function app:transform-xslt(
@@ -402,27 +402,15 @@ declare function app:transform-xslt(
   $mode as xs:string?
   ) as item()* {
   let $xslt-uri-abs := 
-    (:concat('xmldb:exist://', $xslt-uri):)
     app:concat-path($paths:rest-prefix, $xslt-uri)
-  let $user := app:auth-user()
-  let $password := app:auth-password()
+  let $user := (app:auth-user(), $parameters[@name='user']/@value/string())[1]
+  let $password := (app:auth-password(), $parameters[@name='password']/@value)[1]
   let $absolute-uri := 
     concat('xmldb:exist://', 
       if ($user)
       then concat($user,':',$password,'@')
       else '', 
       $document-uri)
-(:  	app:concat-path($paths:rest-prefix, $document-uri)
-    	string-join((
-      	$document-uri,
-      	if ($user)
-      	then ( 
-      		if (contains($document-uri, '?')) then '&amp;' else '?',
-          'auth=', app:encode-auth-string($user, $password)
-      		'user=', $user, '&amp;password=', $password
-      	)
-      	else ()
-      	), '') ):)
   let $xslt :=
     <xsl:stylesheet 
       xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
