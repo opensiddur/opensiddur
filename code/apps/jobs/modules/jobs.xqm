@@ -1,3 +1,4 @@
+xquery version "3.0";
 (:~ Job queue control functions
  : 
  : The job control structure looks like:
@@ -221,24 +222,31 @@ declare function jobs:run(
   where exists($next-job)
   return (
     jobs:running($job-id, $task-id),
-    system:as-user($runas,
-      (: load the user password so the scheduled script can't access it. :) 
-      if ($runas='admin')
-      then $magicpassword
-      else 
-        string(
-          system:as-user('admin', $magicpassword, 
-            doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
-          )), (
-      util:log-system-out(("Attempting to run: ", $run)),
-      util:eval(xs:anyURI($run/jobs:query), true(), 
-        for $param in $run/jobs:param
-        let $qname := xs:QName(concat('local:', $param/jobs:name))
-        let $value := string($param/jobs:value)
-        return ($qname, $value)
+    try {
+      system:as-user($runas,
+        (: load the user password so the scheduled script can't access it. :) 
+        if ($runas='admin')
+        then $magicpassword
+        else 
+          string(
+            system:as-user('admin', $magicpassword, 
+              doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
+            )), 
+        (
+          util:log-system-out(("Attempting to run: ", $run)),
+          util:eval(xs:anyURI($run/jobs:query), true(), 
+            for $param in $run/jobs:param
+            let $qname := xs:QName(concat('local:', $param/jobs:name))
+            let $value := string($param/jobs:value)
+            return ($qname, $value)
+          )
+        
+        )
       )
-      )
-    ),
+    }
+    catch * ($code, $description, $value) {
+      util:log-system-out(('An exception occurred: ', $code, ' ', $description, ' ', $value))
+    },
     jobs:complete($job-id),
     $job-id
   )
