@@ -23,12 +23,13 @@ declare variable $paths:prefix := concat('/', $paths:exist-prefix,
 	if ($paths:exist-prefix and $paths:requires-rest) then '/' else '', 
   if ($paths:requires-rest) then 'rest' else '');
 (:~ constant beginning part of REST URL :)
-declare variable $paths:rest-prefix :=
-	if (request:exists())
-	then
+declare variable $paths:internal-rest-prefix :=
 		concat(
 			'http://localhost:8080', 
-			$paths:prefix) 
+			$paths:prefix); 
+declare variable $paths:rest-prefix :=
+	if (request:exists())
+	then $paths:internal-rest-prefix
 	else '';
 (:~ absolute REST URL prefix as seen from the outside the server:)
 declare variable $paths:external-rest-prefix :=
