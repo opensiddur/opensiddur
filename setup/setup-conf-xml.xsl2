@@ -11,6 +11,15 @@
     </xsl:copy>
   </xsl:template>
   
+  <!-- change default permissions -->
+  <xsl:template match="db-connection">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates select="* except default-permissions"/>
+      <default-permissions collection="0775" resource="0775"/>
+    </xsl:copy>
+  </xsl:template>
+
   <!-- add optional modules that we use -->
   <xsl:template match="builtin-modules">
     <xsl:copy>
