@@ -10,6 +10,8 @@ import module namespace jcache="http://jewishliturgy.org/modules/cache"
   at "/code/modules/cache-controller.xqm";
 
 declare variable $local:resource external;
+declare variable $local:user external;
+declare variable $local:password external;
 
 if ($paths:debug)
 then 
@@ -17,4 +19,4 @@ then
     concat('Background caching ', $local:resource)
   )
 else (),
-jcache:cache-all($local:resource)
+jcache:cache-all($local:resource, $local:user, $local:password)

@@ -219,26 +219,30 @@ declare function jobs:run(
   let $job-id := number($next-job/jobs:id)
   let $run := $next-job/jobs:run
   let $null := util:log-system-out(("Next job: ", $next-job, " runas=", $runas, " $id=", $job-id, " run=", $run, " exist=", exists($next-job)))
+  let $password :=
+    if ($runas='admin')
+    then $magicpassword
+    else 
+      string(
+        system:as-user('admin', $magicpassword, 
+        doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
+      ))
   where exists($next-job)
   return (
     jobs:running($job-id, $task-id),
     try {
-      system:as-user($runas,
-        (: load the user password so the scheduled script can't access it. :) 
-        if ($runas='admin')
-        then $magicpassword
-        else 
-          string(
-            system:as-user('admin', $magicpassword, 
-              doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
-            )), 
+      system:as-user($runas, $password,
         (
           util:log-system-out(("Attempting to run: ", $run)),
-          util:eval(xs:anyURI($run/jobs:query), true(), 
+          util:eval(xs:anyURI($run/jobs:query), true(),
+            (
+            xs:QName('local:user'), $runas,
+            xs:QName('local:password'), $password,
             for $param in $run/jobs:param
             let $qname := xs:QName(concat('local:', $param/jobs:name))
             let $value := string($param/jobs:value)
             return ($qname, $value)
+            )
           )
         
         )
