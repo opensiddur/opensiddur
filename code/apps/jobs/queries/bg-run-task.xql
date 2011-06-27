@@ -5,9 +5,9 @@ xquery version "1.0";
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "/code/modules/paths.xqm";
+  at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace jobs="http://jewishliturgy.org/apps/jobs"
-  at "/code/apps/jobs/modules/jobs.xqm";
+  at "xmldb:exist:///code/apps/jobs/modules/jobs.xqm";
 
 declare variable $local:task-id external;
 

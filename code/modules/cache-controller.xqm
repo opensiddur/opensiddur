@@ -19,9 +19,9 @@ import module namespace request="http://exist-db.org/xquery/request";
 import module namespace transform="http://exist-db.org/xquery/transform";
 import module namespace util="http://exist-db.org/xquery/util";
 import module namespace app="http://jewishliturgy.org/modules/app" 
-	at "/code/modules/app.xqm";
+	at "xmldb:exist:///code/modules/app.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
-	at "/code/modules/paths.xqm";
+	at "xmldb:exist:///code/modules/paths.xqm";
 
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
@@ -274,7 +274,7 @@ declare function jcache:clear-cache-resource(
 declare function jcache:cache-all(
   $path as xs:string
   ) as empty() {
-  jcache:cache:all($path, (), ())
+  jcache:cache-all($path, (), ())
 };
 
 (:~ bring all of the resources referenced from a given resource

@@ -9,7 +9,7 @@ xquery version "1.0";
  : $Id: reindex.xql 687 2011-01-23 23:36:48Z efraim.feinstein $
  :)
 import module namespace admin="http://jewishliturgy.org/modules/admin"
-  at "modules/admin.xqm";
+  at "xmldb:exist:///code/modules/admin.xqm";
 
 let $collection := request:get-parameter('collection','')
 return

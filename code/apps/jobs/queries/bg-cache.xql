@@ -5,9 +5,9 @@ xquery version "1.0";
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "/code/modules/paths.xqm";
+  at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
-  at "/code/modules/cache-controller.xqm";
+  at "xmldb:exist:///code/modules/cache-controller.xqm";
 
 declare variable $local:resource external;
 declare variable $local:user external;

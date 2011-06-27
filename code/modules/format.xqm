@@ -14,9 +14,12 @@ declare namespace err="http://jewishliturgy.org/errors";
 import module namespace util="http://exist-db.org/xquery/util";
 import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 
-import module namespace app="http://jewishliturgy.org/modules/app" at "app.xqm";
-import module namespace jcache="http://jewishliturgy.org/modules/cache" at "cache-controller.xqm";
-import module namespace paths="http://jewishliturgy.org/modules/paths" at "paths.xqm";
+import module namespace app="http://jewishliturgy.org/modules/app" 
+  at "xmldb:exist:///code/modules/app.xqm";
+import module namespace jcache="http://jewishliturgy.org/modules/cache" 
+  at "xmldb:exist:///code/modules/cache-controller.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths" 
+  at "xmldb:exist:///code/modules/paths.xqm";
 
 
 declare variable $format:temp-dir := '.format';

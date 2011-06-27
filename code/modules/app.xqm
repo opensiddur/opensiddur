@@ -17,7 +17,7 @@ import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 import module namespace util="http://exist-db.org/xquery/util";
 
 import module namespace paths="http://jewishliturgy.org/modules/paths"
-	at "paths.xqm";
+	at "xmldb:exist:///code/modules/paths.xqm";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform";
