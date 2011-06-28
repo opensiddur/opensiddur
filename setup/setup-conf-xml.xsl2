@@ -51,7 +51,7 @@
       
       <!-- background task to find uncached resources, runs 1x/hour -->
       <xsl:if test="empty(job[@name='bg-schedule-cache'])">
-        <job type="user" name="bg-schedule-cache" cron-trigger="0 0 0/1 * * ?"
+        <job type="user" name="bg-schedule-cache" cron-trigger="0 0 * * * ?"
           xquery="/db/code/apps/jobs/queries/bg-schedule-cache.xql">
           <parameter name="task-id" value="-2"/>
         </job>
