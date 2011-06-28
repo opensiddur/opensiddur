@@ -22,6 +22,9 @@ xquery version "3.0";
  :)
 module namespace jobs="http://jewishliturgy.org/apps/jobs";
 
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "xmldb:exist:///code/modules/paths.xqm";
+
 declare namespace err="http://jewishliturgy.org/errors";
 
 declare variable $jobs:queue-collection := '/code/apps/jobs/data';

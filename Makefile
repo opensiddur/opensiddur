@@ -29,7 +29,6 @@
 # bf-install - install betterFORM extension over the database in $(EXIST_INSTALL_DIR)
 # db-uninstall - remove $(EXIST_INSTALL_DIR)
 # db-sync DBAPASS=<database password> - synchronize code, data, and common from the development working copy to a running database; 
-# db-svnsync DBAPASS=<database password> - synchronize server-based svn copy to a running database
 # db-syncclean - clean the __contents__.xml files left by syncing the database 
 # 
 # $Id: Makefile 776 2011-05-01 07:34:30Z efraim.feinstein $
@@ -227,7 +226,7 @@ clean-hebmorph-lucene:
 	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant clean
 
 # Install a copy of the eXist database
-.PHONY: db-install db-install-wlc bf-install db-uninstall db-sync db-svnsync db-syncclean
+.PHONY: db-install db-install-wlc bf-install db-uninstall db-sync db-syncclean
 db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 	java -jar $(EXIST_INSTALL_JAR) -p $(EXIST_INSTALL_DIR)
 	$(XSLT) -s $(EXIST_INSTALL_DIR)/conf.xml -o $(EXIST_INSTALL_DIR)/conf.xml $(SETUPDIR)/setup-conf-xml.xsl2
@@ -242,7 +241,7 @@ db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 		cat $(SETUPDIR)/setup.tmpl.xql | sed "s/ADMINPASSWORD/$$ADMPASS/g" > $(SETUPDIR)/setup.xql && \
 		echo "done."  && \
 		make db
-	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 $(DBDIR)
+	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
 	@echo "Copying files to database..."
 	@#copy the triggers first so eXist will know where they are during restore
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/triggers/__contents__.xml -ouri=xmldb:exist:// 
@@ -263,10 +262,6 @@ db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 db-install-wlc: tanach
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 774 -c /db/group/everyone -u admin -g everyone $(TEXTDIR)/wlc
 	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -ouri=xmldb:exist://
-
-db-svnsync: db
-	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 $(DBDIR)
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -u admin -P $(DBAPASS) -ouri=xmldb:exist://localhost:8080/xmlrpc
 
 # Install a new copy of the database with betterFORM trunk
 bf-install: db-install
@@ -290,7 +285,7 @@ db-uninstall:
 # (a bit of a misnomer, since it will not delete files from the db!)
 db-sync:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 -c /db/code $(CODEDIR) 
-	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 -g everyone -c /db/data $(DATADIR) 
+	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 -g everyone -c /db/data $(DATADIR) 
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 -c /db/common $(COMMONDIR) 
 	$(EXISTBACKUP) -u admin -p $(DBAPASS) -r `pwd`/$(CODEDIR)/__contents__.xml -ouri=xmldb:exist://localhost:8080/xmlrpc
 	$(EXISTBACKUP) -u admin -p $(DBAPASS) -r `pwd`/$(DATADIR)/__contents__.xml -ouri=xmldb:exist://localhost:8080/xmlrpc
