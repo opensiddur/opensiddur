@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.0";
 (:
  : Caching controller module
  : All the functions of the caching controller.
@@ -164,7 +164,7 @@ declare function local:commit-cache(
     else local:make-cache-collection-path($collection),
     local:set-flag($collection, $resource),
     let $transform-result :=
-    	util:catch('*', 
+    	try { 
       	app:transform-xslt(
       		app:concat-path($collection, $resource),
           app:concat-path(
@@ -182,13 +182,14 @@ declare function local:commit-cache(
             <param name="password" value="{$password}"/>
           )
           else ()
-          ), ()),
-      	(
+          ), ())
+        }
+      	catch * ($code, $desc, $value) {
       		(: make sure the flag is removed if app:transform-xslt fails :)
       		local:remove-flag($collection, $resource),
-      		error($util:exception cast as xs:QName, $util:exception-message)
-      	)
-      ) 
+          util:log-system-out(("Error during transform-xslt in cache-controller: ", $code, " ", $desc, " ", $value)),
+      		error($code cast as xs:QName, concat ($desc, ' ', $value))
+      	}
     return (
       if (xmldb:store($cache, $resource, $transform-result))
       then (

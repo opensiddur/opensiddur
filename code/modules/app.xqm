@@ -152,9 +152,13 @@ declare function app:authenticate()
 declare function app:require-authentication(
 	) as xs:boolean {
 	app:authenticate() or (
-    false(), 
-    response:set-status-code(401), 
-    response:set-header('WWW-Authenticate', 'Basic')
+    false(),
+    if (request:exists())
+    then ( 
+      response:set-status-code(401), 
+      response:set-header('WWW-Authenticate', 'Basic')
+    )
+    else ()
   )
 };
 

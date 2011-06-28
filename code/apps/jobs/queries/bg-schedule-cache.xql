@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.0";
 (:~ task to find uncached resources and schedule the background
  : task to execute them
  :  
@@ -16,28 +16,33 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 declare variable $local:task-id external;
 
-if ($paths:debug)
-then 
-  util:log-system-out(
-    concat('In uncached resource scheduler at ', string(current-dateTime()))
-  )
-else (),
-let $documents :=
-  system:as-user('admin', $magicpassword,
-    collection('/group')//tei:TEI/document-uri(root(.))
-  )
-for $document in $documents
-where not(jcache:is-up-to-date($document))
-return
-  jobs:enqueue-unique(
-    element jobs:job {
-      element jobs:run {
-        element jobs:query { '/code/apps/jobs/queries/bg-cache.xql' },
-        element jobs:param {
-          element jobs:name { 'resource' },
-          element jobs:value { $document }
+try {
+  if ($paths:debug)
+  then 
+    util:log-system-out(
+      concat('In uncached resource scheduler at ', string(current-dateTime()))
+    )
+  else (),
+  let $documents :=
+    system:as-user('admin', $magicpassword,
+      collection('/group')//tei:TEI/document-uri(root(.))
+    )
+  for $document in $documents
+  where not(jcache:is-up-to-date($document))
+  return
+    jobs:enqueue-unique(
+      element jobs:job {
+        element jobs:run {
+          element jobs:query { 'xmldb:exist:///code/apps/jobs/queries/bg-cache.xql' },
+          element jobs:param {
+            element jobs:name { 'resource' },
+            element jobs:value { $document }
+          }
         }
-      }
-    },
-    'admin', $magicpassword
-  )
+      },
+      'admin', $magicpassword
+    )
+}
+catch * ($c, $d, $v) {
+  util:log-system-out(('Error in cache scheduler: ', $c, ' ', $d, ' ', $v))
+}

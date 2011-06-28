@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.0";
 (:~ background task executive
  :  
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
@@ -12,7 +12,7 @@ import module namespace jobs="http://jewishliturgy.org/apps/jobs"
 declare variable $local:task-id external;
 
 declare function local:run-next-task(
-  ) as empty() {
+  ) {
   if (not(jobs:is-task-running($local:task-id)))
   then 
     if (jobs:run($local:task-id))
@@ -21,10 +21,15 @@ declare function local:run-next-task(
   else ()
 };
 
-if ($paths:debug)
-then 
-  util:log-system-out(
-    concat('In background task executive id ', $local:task-id, ' at ', string(current-dateTime()))
-    )
-else (),
-local:run-next-task()
+try {
+  if ($paths:debug)
+  then 
+    util:log-system-out(
+      concat('In background task executive id ', $local:task-id, ' at ', string(current-dateTime()))
+      )
+  else (),
+  local:run-next-task()
+}
+catch * ($code, $d, $v) {
+  util:log-system-out(('EXCEPTION IN BG-RUN-TASK: ', $code, ' ', $d, ' ', $v))
+}

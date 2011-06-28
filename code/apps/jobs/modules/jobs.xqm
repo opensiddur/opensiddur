@@ -121,33 +121,35 @@ declare function jobs:enqueue(
   $user as xs:string,
   $password as xs:string?
   ) as element(jobs:id)+ {
-  let $defaulted := local:set-job-defaults($jobs, $user)
-  return (
-    system:as-user('admin', $magicpassword,
-      let $queue := doc($jobs:queue-path)/jobs:jobs
-      return (
-        local:add-jobs-user($user, $password),
-        if ($queue)
-        then
-          update insert $defaulted into $queue
+  for $job in $jobs[not(matches(normalize-space(.//jobs:query), '^(xmldb:exist://)?(/db)?/code'))]
+  return 
+    error(xs:QName('err:SECURITY'), concat("For security reasons, all scheduled tasks must be in the /db/code collection in the database, offender: ", $job//jobs:query))
+  ,
+  system:as-user('admin', $magicpassword,
+    let $defaulted := local:set-job-defaults($jobs, $user)
+    let $queue := doc($jobs:queue-path)/jobs:jobs
+    return (
+      local:add-jobs-user($user, $password),
+      if ($queue)
+      then
+        update insert $defaulted into $queue
+      else
+        if (xmldb:store($jobs:queue-collection, $jobs:queue-resource,
+          element jobs:jobs {
+            $defaulted
+          }))
+        then (
+          xmldb:set-resource-permissions(
+            $jobs:queue-collection, $jobs:queue-resource, 
+            'admin', 'dba',
+            util:base-to-integer(0770, 8)
+            )
+        )
         else
-          if (xmldb:store($jobs:queue-collection, $jobs:queue-resource,
-            element jobs:jobs {
-              $defaulted
-            }))
-          then (
-            xmldb:set-resource-permissions(
-              $jobs:queue-collection, $jobs:queue-resource, 
-              'admin', 'dba',
-              util:base-to-integer(0770, 8)
-              )
-          )
-          else
-            error(xs:QName('err:INTERNAL'), 
-              "Internal error. Cannot store the job queue")
-      )
-    ),
-    $defaulted//jobs:id
+          error(xs:QName('err:INTERNAL'), 
+            "Internal error. Cannot store the job queue"),
+      $defaulted//jobs:id   
+    )
   )
 };
 
@@ -176,6 +178,19 @@ declare function jobs:complete(
     return (
       local:delete-jobs-user($this-job/jobs:runas, $this-job/jobs:id),
       update delete $this-job
+    )
+  )
+};
+
+(:~ mark a job incomplete-- run, but an error encountered, so it must be run again :)
+declare function jobs:incomplete(
+  $job-id as xs:integer
+  ) as empty() {
+  system:as-user('admin', $magicpassword,
+    let $queue := doc($jobs:queue-path)/jobs:jobs
+    let $this-job := $queue/jobs:job[jobs:id=$job-id]  
+    return (
+      update delete $this-job//jobs:running
     )
   )
 };
@@ -215,45 +230,52 @@ declare function jobs:run(
   $task-id as xs:integer
   ) as xs:integer? {
   let $next-job := jobs:pop()
-  let $runas := string($next-job/jobs:runas)
-  let $job-id := number($next-job/jobs:id)
-  let $run := $next-job/jobs:run
-  let $null := util:log-system-out(("Next job: ", $next-job, " runas=", $runas, " $id=", $job-id, " run=", $run, " exist=", exists($next-job)))
-  let $password :=
-    if ($runas='admin')
-    then $magicpassword
-    else 
-      string(
-        system:as-user('admin', $magicpassword, 
-        doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
-      ))
   where exists($next-job)
-  return (
-    jobs:running($job-id, $task-id),
-    try {
-      system:as-user($runas, $password,
-        (
-          util:log-system-out(("Attempting to run: ", $run)),
-          util:eval(xs:anyURI($run/jobs:query), true(),
-            (
-            xs:QName('local:user'), $runas,
-            xs:QName('local:password'), $password,
-            for $param in $run/jobs:param
-            let $qname := xs:QName(concat('local:', $param/jobs:name))
-            let $value := string($param/jobs:value)
-            return ($qname, $value)
+  return
+    let $runas := $next-job/jobs:runas/string()
+    let $job-id := $next-job/jobs:id/number()
+    let $run := $next-job/jobs:run
+    let $null := 
+      if ($paths:debug)
+      then util:log-system-out(("Jobs module: Next job: ", $next-job, " runas=", $runas, " $id=", $job-id, " run=", $run, " exist=", exists($next-job)))
+      else ()
+    let $password :=
+      if ($runas='admin')
+      then $magicpassword
+      else 
+        string(
+          system:as-user('admin', $magicpassword, 
+          doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
+        ))
+    return (
+      jobs:running($job-id, $task-id),
+      try {
+        system:as-user($runas, $password,
+          (
+            if ($paths:debug)
+            then util:log-system-out(("Jobs module attempting to run: ", $run))
+            else (),
+            util:eval(xs:anyURI($run/jobs:query), false(),
+              (
+              xs:QName('local:user'), $runas,
+              xs:QName('local:password'), $password,
+              for $param in $run/jobs:param
+              let $qname := xs:QName(concat('local:', $param/jobs:name))
+              let $value := string($param/jobs:value)
+              return ($qname, $value)
+              )
             )
+          
           )
-        
-        )
-      )
-    }
-    catch * ($code, $description, $value) {
-      util:log-system-out(('An exception occurred: ', $code, ' ', $description, ' ', $value))
-    },
-    jobs:complete($job-id),
-    xs:integer($job-id)
-  )
+        ),
+        jobs:complete($job-id),
+        xs:integer($job-id)
+      }
+      catch * ($code, $description, $value) {
+        jobs:incomplete($job-id), 
+        util:log-system-out(('Jobs module: An exception occurred while running job ',$job-id,': ', $code, ' ', $description, ' ', $value))
+      }
+    )
 };
 
 (:~ determine if any task is running that has the given task id :)
