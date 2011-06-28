@@ -237,7 +237,7 @@
       r:Pointer"/>
     <xsl:sequence select="func:debug(
       ($pointers,.),
-      'r:PointerPart[range]:pointers', $debug-warn)"/>
+      'r:PointerPart[range]:pointers', $debug-detail)"/>
     <xsl:variable name="left-pointer" as="node()?">
       <xsl:apply-templates select="$pointers[1]"
         mode="follow-parsed-xpointer">
