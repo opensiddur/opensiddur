@@ -232,7 +232,7 @@ declare function site:footer()
 		<p>This site powered by <a href="http://www.exist-db.org">eXist</a> native XML database and {
 			if ($paths:xforms-processor eq 'betterform') 
 			then <a href="http://www.betterform.de">BetterFORM</a>
-			else <a href="http://www.agencexml.com/xsltforms">XSLTForms</a>} XForms processor. The software is free and open source. See the <a href="http://jewishliturgy.googlecode.com">source code</a> for details.</p>
+			else <a href="http://www.agencexml.com/xsltforms">XSLTForms</a>} XForms processor. The software is free and open source. See the <a href="https://github.com/opensiddur/opensiddur">source code</a> for details.</p>
 	)
 };
 
