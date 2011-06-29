@@ -28,7 +28,7 @@ try {
       collection('/group')//tei:TEI/document-uri(root(.))
     )
   for $document in $documents
-  where not(jcache:is-up-to-date($document))
+  where not(system:as-user('admin', $magicpassword, jcache:is-up-to-date($document)))
   return
     jobs:enqueue-unique(
       element jobs:job {
