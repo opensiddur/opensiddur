@@ -178,7 +178,7 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
           # TODO: namedoctype, publicid, systemid
           etree.SubElement(contentsXml, 'resource', {'filename':fname, 'name':fname, 
             'owner':props.user, 'group':props.group, 'mode':props.permissions, 
-            'mimetype':fMime, 'type':fType})
+            'mimetype':fMime, 'type':fType, 'created':fCtime, 'modified':fMtime})
 
     # write the contentsXml file
     unindented = etree.tostring(contentsXml, encoding='utf-8')
