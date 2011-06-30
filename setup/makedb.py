@@ -13,10 +13,9 @@
 # An override file can also be used to exclude files by regular expression
 #
 # Open Siddur Project
-# Copyright 2010 Efraim Feinstein
+# Copyright 2010-2011 Efraim Feinstein
 # Licensed under the GNU Lesser General Public License, version 3 or later
 #
-# $Id: makedb.py 687 2011-01-23 23:36:48Z efraim.feinstein $
 import sys
 import copy
 import re
@@ -25,6 +24,8 @@ import getopt
 import time
 from xml.etree import ElementTree as etree
 from xml.dom import minidom
+
+exNS = 'http://exist.sourceforge.net/NS/exist'
 
 # structure
 class Struct:
@@ -129,7 +130,6 @@ def incorporateOverrides(overrideXml, overrideIndex, default, filename=''):
 
 # recursively build __content__.xml for each directory
 def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
-  exNS = '{http://exist.sourceforge.net/NS/exist}'
   contentOverrideFile = os.path.join(srcDirectory,'__override__.xml')
   hasOverrides = os.path.exists(contentOverrideFile)
   if hasOverrides:
@@ -141,8 +141,9 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
 
   if props.include:
     (directoryCtime, directoryMtime) = fileTimes(srcDirectory)
-    contentsXml = etree.Element(exNS + 'collection', {'name':destCollection, 'version':'1',   
-      'mode':props.permissions, 'owner':props.user, 'group':props.group, 'created':directoryCtime})
+    # using xmlns attribute to avoid auto-prefixing
+    contentsXml = etree.Element('collection', {'name':destCollection, 'version':'1',   
+      'mode':props.permissions, 'owner':props.user, 'group':props.group, 'created':directoryCtime, 'xmlns':exNS})
     contentsXmlTree = etree.ElementTree(contentsXml)
 
     for fname in os.listdir(srcDirectory):
@@ -154,7 +155,7 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
       if (not excludeRE or not excludeRE.search(fileWithPath)) and props.include:    # exclude anything listed in the exclude file
         if os.path.isdir(fileWithPath):
           # add subcollection to contentsXml
-          etree.SubElement(contentsXml, exNS + 'subcollection', {'filename':fname, 'name':fname})
+          etree.SubElement(contentsXml, 'subcollection', {'filename':fname, 'name':fname})
           # recurse to next directory
           buildCollection(fileWithPath, os.path.join(destCollection, fname), default, mimeDict, excludeRE)
         else:
@@ -175,7 +176,7 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
 
           # add resource to contentsXml
           # TODO: namedoctype, publicid, systemid
-          etree.SubElement(contentsXml, exNS + 'resource', {'filename':fname, 'name':fname, 
+          etree.SubElement(contentsXml, 'resource', {'filename':fname, 'name':fname, 
             'owner':props.user, 'group':props.group, 'mode':props.permissions, 
             'mimetype':fMime, 'type':fType})
 
