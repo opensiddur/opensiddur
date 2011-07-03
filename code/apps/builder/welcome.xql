@@ -5,7 +5,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: welcome.xql 775 2011-05-01 06:46:55Z efraim.feinstein $
  :) 
 import module namespace request="http://exist-db.org/xquery/request";
  
@@ -47,6 +46,8 @@ declare function local:welcome-message(
 			<a href="http://wiki.jewishliturgy.org/Release_Notes/{app:get-version()}">Follow this link 
 			for the full release notes</a>, including information on what is new in this version,
 			how to obtain the source code, and how to report bugs.</p>
+      <p><strong>Do not</strong> assume that the data you store in this application is secure! It may be read or deleted
+      at any time!</p>
 		</div>
 	</div>
 };
