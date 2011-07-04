@@ -35,17 +35,17 @@ declare option exist:serialize "method=xhtml media-type=text/xml indent=yes omit
 declare function local:welcome-message(
 	) {
 	<div class="welcome" xml:lang="en" lang="en">
-		<h1>Welcome to the Open Siddur Project v.{app:get-version()}</h1>
+		<h1>Welcome to the Open Siddur Project Builder v.{app:get-version()}</h1>
 		<div>
 			<p>To get started immediately, create an account or log in and press My Siddurim.</p>
 			<p><strong>Security notice</strong>: This version sends usernames, passwords, and all other
 			information in clear text over the Internet. Do not enter any information you would not want
 			to be public!</p>
-			<p>This version is a pre-alpha technology demonstration, a thin user interface wrapper
+			<p>This version is a <strong>pre-alpha technology demonstration</strong>, a thin user interface wrapper
 			around the <a href="/code/api">REST API</a>.
 			<a href="http://wiki.jewishliturgy.org/Release_Notes/{app:get-version()}">Follow this link 
 			for the full release notes</a>, including information on what is new in this version,
-			how to obtain the source code, and how to report bugs.</p>
+			how to obtain the <a href="https://github.com/opensiddur/opensiddur">source code</a>, and how to <a href="https://github.com/opensiddur/opensiddur/issues">report bugs</a>. To find out where we are in development and what comes next, <a href="http://wiki.jewishliturgy.org/Milestones">click here for our development roadmap</a>.</p>
       <p><strong>Do not</strong> assume that the data you store in this application is secure! It may be read or deleted
       at any time!</p>
 		</div>
