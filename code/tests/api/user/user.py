@@ -14,8 +14,6 @@ import lxml.etree as etree
 
 import apidb
   
-adminPassword = None
-
 #### LOGIN ####
 
 class Test_Login(apidb.BaseAPITestWithSession, apidb.DefaultUser):
@@ -119,7 +117,7 @@ class Test_Create_User(apidb.BaseAPITestWithSession):
         sm:delete-group($user-name)
         )
       )
-    """ % (self.newUserName, adminPassword))
+    """ % (self.newUserName, apidb.adminPassword))
 
 class Test_Create_User_With_Non_Existing_User(Test_Create_User, unittest.TestCase):
   def test_Returns_HTTP_status_201(self):
@@ -394,30 +392,6 @@ class Test_Delete_Nonexistent(User_Profile_Operations, unittest.TestCase):
   
 
 ######## End tests ###########
-def usage():
-  print "Unit testing framework. %s [-p admin-password] [-v]" % sys.argv[0]
-
 if __name__ == '__main__':
-  try:
-    opts, args = getopt.getopt(sys.argv[1:], "hp:v", ["help", "password=","verbose"])
-  except getopt.GetoptError, err:
-    # print help information and exit:
-    print str(err) # will print something like "option -a not recognized"
-    usage()
-    sys.exit(2)
-  
-  for o, a in opts:
-    if o in ("-h", "--help"):
-      usage()
-      sys.exit()
-    elif o in ("-p", "--password"):
-      adminPassword = a
-    elif o in ("-v", "--verbose"):
-      pass
-    else:
-      usage()
-      sys.exit()        
-  if adminPassword is None:
-    adminPassword = raw_input('Enter the database admin password (for user tests): ')
- 
-  unittest.main()
+  apidb.testMain()
+

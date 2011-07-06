@@ -8,8 +8,14 @@
 '''
 import StringIO
 import lxml.etree as etree
+import unittest
+import getopt
+import sys
 
 import existdb
+
+# store the admin password for when run as a test suite
+adminPassword = None 
 
 class ApiDB(existdb.Existdb):
   ''' abstraction of the database for API testing '''
@@ -168,3 +174,34 @@ class BaseAPITestWithHTTPBasic(BaseAPITest):
 class BaseAPITestWithSession(BaseAPITest):
   def setUp(self, **kwargs):
     super(BaseAPITestWithSession, self).setUp(useSession=True, **kwargs)
+
+def usage():
+  print "Unit testing framework. %s [-p admin-password] [-v]" % sys.argv[0]
+
+def testMain():
+  global adminPassword
+
+  try:
+    opts, args = getopt.getopt(sys.argv[1:], "hp:v", ["help", "password=","verbose"])
+  except getopt.GetoptError, err:
+    # print help information and exit:
+    print str(err) # will print something like "option -a not recognized"
+    usage()
+    sys.exit(2)
+  
+  for o, a in opts:
+    if o in ("-h", "--help"):
+      usage()
+      sys.exit()
+    elif o in ("-p", "--password"):
+      adminPassword = a
+    elif o in ("-v", "--verbose"):
+      pass
+    else:
+      usage()
+      sys.exit()        
+  if adminPassword is None:
+    adminPassword = raw_input('Enter the database admin password (for user tests): ')
+ 
+  unittest.main()
+
