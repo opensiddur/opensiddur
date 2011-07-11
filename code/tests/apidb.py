@@ -159,6 +159,12 @@ class BaseAPITest(object):
     """ Assert a given network response for inside tests """
     self.assertTrue(status == expectedStatus, '%s Reason = %s data = %s' % (message, reason, data))
 
+  def assertXPath(self, data, xpath):
+    """ Assert the truth of a given xpath expression """
+    self.assertTrue(
+      self.toTree(self.data).xpath(xpath, namespaces=self.prefixes)
+    )
+
 class DefaultUser:
   user = 'testuser'
   password = 'testuser'
