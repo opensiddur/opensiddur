@@ -9,7 +9,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: data.xql 769 2011-04-29 00:02:54Z efraim.feinstein $
  :)
 import module namespace response="http://exist-db.org/xquery/response";
 import module namespace request="http://exist-db.org/xquery/request";
@@ -31,7 +30,7 @@ declare function local:get(
 	) as element() {
 	let $base := '/code/api/data'
 	let $list := 
-		<ul>
+		<ul class="common">
 			<li><a href="{$base}/contributors">Contributor lists</a></li>
 			<li><a href="{$base}/original">Original texts</a></li>
 			<li><a href="{$base}/parallel">Parallel text tables</a></li>
@@ -44,7 +43,7 @@ declare function local:get(
 		api:list(
 			<title>Open Siddur Data API</title>,
 			$list,
-			count($list/li)
+			0 (: the list here is a common menu, not results, so the number of results = 0 :)
 		)
 }; 
 
