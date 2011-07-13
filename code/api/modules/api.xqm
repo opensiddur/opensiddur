@@ -33,8 +33,8 @@ declare function api:get-method(
 	)
 };
 
-(:~ check if the calling method is allowed. If not, set the response error to 405
- : and an Allow header to the allowed methods
+(:~ check if the calling method is allowed. If not, set the response error to 405.
+ : Add an Allow header to the allowed methods
  : @param $methods A sequence of allowed methods
  :
  : This function is intended to be called early in the controller and no other consequential
@@ -51,9 +51,9 @@ declare function api:allowed-method(
 		then true()
 		else (
 			false(),
-			response:set-status-code(405),
-			response:set-header('Allow', string-join($umethods, ', '))
-		)
+			response:set-status-code(405)
+		),
+	response:set-header('Allow', string-join($umethods, ', '))
 };
 
 
