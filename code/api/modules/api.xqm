@@ -20,11 +20,16 @@ declare variable $api:default-max-results := 50;
 
 (:~ the API allows POST to be used instead of PUT and DELETE 
  : if PUT and DELETE are not supported by the client. If so,
- : they are in the _method request parameter :)
+ : they are in the _method request parameter *or* in the X-HTTP-Method-Override header :)
 declare function api:get-method(
 	) {
 	let $real-method := upper-case(request:get-method())
-	let $alt-method := upper-case(request:get-parameter('_method', ()))
+	let $alt-method := upper-case(
+    (
+      request:get-header('X-HTTP-Method-Override'),
+      request:get-parameter('_method', ())
+    )[1]
+  )
 	return
 	( 
 		if ($real-method = 'POST' and $alt-method)
