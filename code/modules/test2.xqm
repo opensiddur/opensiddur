@@ -5,7 +5,6 @@ xquery version "1.0";
  : Modified by Efraim Feinstein, 2011
  : 
  : Licensed under the GNU Lesser General Public License, version 2.1 or later
- : $Id: test2.xqm 739 2011-04-15 04:17:09Z efraim.feinstein $
  :)
 (:
  : 
@@ -16,6 +15,7 @@ xquery version "1.0";
  : 
  : * add a top-level TestSuite element to contain multiple TestSet elements
  :  and a function t:run-testSuite()
+ : ** add setup and teardown for the entire suite
  : 
  : * allow each test to include any of:
  : ** at most 1 error element
@@ -321,9 +321,13 @@ declare function t:run-testSuite($suite as element(TestSuite)) as element() {
 			{$copy/suiteName}
 			{$copy/description}
 			{
-				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
-				return
-					t:run-testSet($set)
+        let $null := t:setup($copy/setup)
+        let $result :=
+  				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
+	  			return
+		  			t:run-testSet($set)
+        let $null := t:tearDown($copy/tearDown)
+        return $result
 			}
 		</TestSuite>
 };
@@ -463,7 +467,7 @@ declare function t:format-testResult($result as element()) {
 };
 
 (:~ determine if two nodes are deep-equal, allowing for the string ... to be a wildcard
- : an the namespace http://www.w3.org/1998/xml/namespace/alias to be equivalent to the
+ : and the namespace http://www.w3.org/1998/xml/namespace/alias to be equivalent to the
  : xml namespace
  : @param $node1 The original node
  : @param $node2 The expectation node, which may include aliased namespaces and wildcards
