@@ -65,14 +65,42 @@ declare function local:get-menu(
 	) as element() {
 	let $base := concat('/code/api/data/original/', string-join(($share-type, $owner, $resource), '/'))
 	let $list :=
-		<ul xmlns="http://www.w3.org/1999/xhtml">{
-			api:list-item('Primary language', concat($base, '/lang'), ('txt','xml')),
-			api:list-item('Title', concat($base, '/title'), ('txt','xml')),
-			api:list-item('Subtitle', concat($base, '/subtitle'), ('txt','xml')),
-			api:list-item('License URI', concat($base, '/license'), ('txt','xml')),
-			api:list-item('Front matter', concat($base, '/front'), ('xml')),
-			api:list-item('Selection', concat($base, '/selection'), ('xml')),
-			api:list-item('Text repository', concat($base, '/repository'), ('xml'))
+		<ul class="common" xmlns="http://www.w3.org/1999/xhtml">{
+			api:list-item('Primary language', concat($base, '/lang'), 
+        ("GET", "PUT", "DELETE"), 
+        ("application/xml","text/plain"),
+        ("application/xml","text/plain")
+      ),
+			api:list-item('Title', concat($base, '/title'),
+        ("GET", "PUT", "DELETE"), 
+        (api:tei-content-type("tei:title"), "text/plain"),
+        (api:tei-content-type("tei:title"), "text/plain")
+      ),
+			api:list-item('Subtitle', concat($base, '/subtitle'),
+        ("GET", "PUT", "DELETE"), 
+        (api:tei-content-type("tei:title"), "text/plain"),
+        (api:tei-content-type("tei:title"), "text/plain")
+      ),
+			api:list-item('License URI', concat($base, '/license'),
+        ("GET", "PUT", "DELETE"), 
+        (api:tei-content-type("tei:ptr"), "text/plain"),
+        (api:tei-content-type("tei:ptr"), "text/plain")
+      ),
+			api:list-item('Front matter', concat($base, '/front'),
+        ("GET", "PUT"), 
+        (api:tei-content-type("tei:front")),
+        api:tei-content-type("tei:front")
+      ),
+			api:list-item('Selection', concat($base, '/selection'), 
+        ("GET", "POST"), 
+        (api:tei-content-type("j:selection")),
+        api:tei-content-type("tei:ptr")
+      ),
+			api:list-item('Text repository', concat($base, '/repository'),
+        ("GET", "POST"), 
+        (api:html-content-type(), api:tei-content-type("j:repository")),
+        api:tei-content-type("tei:seg")
+      )
 		}</ul>
 	return (
 		api:serialize-as('xhtml'),
@@ -87,7 +115,10 @@ declare function local:get-menu(
 					string($title)
 				}</span></title>,
 			$list,
-			count($list/html:li)
+      0,
+      true(),
+      "GET", 
+      (api:html-content-type(), api:tei-content-type()), ()
 		)
 	)
 }; 

@@ -2,7 +2,6 @@ xquery version "1.0";
 (: api controller.
  : forward the request to the given action with a .xql extension
  :
- : $Id: controller.xql 769 2011-04-29 00:02:54Z efraim.feinstein $
  :)
 import module namespace paths="http://jewishliturgy.org/modules/paths"
 	at "/code/modules/paths.xqm";
@@ -28,7 +27,12 @@ then
 	</debug>
 	)
 else (),
-  if (ends-with($exist:resource, '.xql'))
+  if ($exist:resource = "OpenSearchDescription")
+  then
+    <exist:dispatch>
+      <exist:forward url="{$exist:controller}/OpenSearchDescription.xql"/>
+    </exist:dispatch>
+  else if (ends-with($exist:resource, '.xql'))
   then
     <exist:ignore/>
   else if (not($exist:resource))

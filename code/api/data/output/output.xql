@@ -70,7 +70,7 @@ declare function local:get-menu(
 		<ul class="common">{
 			if (not($share-type))
 			then (
-				api:list-item('Group output', '/code/api/data/output/group', ())
+				api:list-item('Group output', '/code/api/data/output/group', "GET", api:html-content-type(), ())
 			)
 			else if (not($owner))
 			then (
@@ -80,7 +80,7 @@ declare function local:get-menu(
 					then (
 						for $group in xmldb:get-user-groups($user)
 						return
-							api:list-item($group, concat('/code/api/data/output/group/', $group), ())
+							api:list-item($group, concat('/code/api/data/output/group/', $group), "GET", api:html-content-type(), ())
 					)
 					else ( (:do not display data about not logged in users :) )
 			)
@@ -115,9 +115,11 @@ declare function local:get-menu(
 									then $title-string
 									else $doc-name-no-ext
 								}</span>,
-								$link, ('xhtml', 'css'),
-								replace($doc-uri, '^/db', ''),
-								'db'
+								$link, "GET", api:html-content-type(),
+                ("xhtml", concat($link, ".xhtml"),
+                "css", concat($link, ".css"),
+								"db", replace($doc-uri, "^/db", "")
+                )
 							)
 			}</ul>
 		)
@@ -131,7 +133,11 @@ declare function local:get-menu(
 		api:list(
 			<title>Open Siddur Output Data API</title>,
 			$list,
-			$n-results
+			$n-results,
+      true(),
+      "GET",
+      (api:html-content-type()),
+      ()
 		)
 	)
 };

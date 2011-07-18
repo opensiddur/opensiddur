@@ -423,6 +423,11 @@ declare function api:html-content-type(
 };
 
 declare function api:tei-content-type(
+  ) as xs:string {
+  api:tei-content-type(())
+};
+
+declare function api:tei-content-type(
   $element as xs:string?
   ) as xs:string {
   concat("application/tei+xml", 

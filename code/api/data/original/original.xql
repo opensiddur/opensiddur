@@ -107,7 +107,7 @@ declare function local:get(
 		<ul class="common">{
 			if (not($share-type))
 			then (
-				api:list-item('Group', '/code/api/data/original/group', ())
+				api:list-item('Group', '/code/api/data/original/group', "GET", api:html-content-type(), ())
 			)
 			else if (not($owner))
 			then (
@@ -117,7 +117,7 @@ declare function local:get(
 					then (
 						for $group in xmldb:get-user-groups($user)
 						return
-							api:list-item($group, concat('/code/api/data/original/group/', $group), ())
+							api:list-item($group, concat('/code/api/data/original/group/', $group), "GET", api:html-content-type(), ())
 					)
 					else ( (:do not display data about not logged in users :) )
 			)
@@ -152,9 +152,10 @@ declare function local:get(
 									then $title-string
 									else $doc-name-no-ext
 								}</span>,
-								$link, ('xml'),
-								replace($doc-uri, '^/db', ''),
-								'db'
+								$link, "GET",
+                (api:tei-content-type()),
+                (),
+								("db", replace($doc-uri, '^/db', ''))
 							)
 			}</ul>
 		)
@@ -168,7 +169,11 @@ declare function local:get(
 		api:list(
 			<title>Open Siddur Original Data API</title>,
 			$list,
-			$n-results
+			$n-results,
+      true(),
+      ("GET", "POST"),
+      api:html-content-type(),
+      api:tei-content-type()
 		)
 	)
 };

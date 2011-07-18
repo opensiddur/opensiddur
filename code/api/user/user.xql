@@ -45,18 +45,31 @@ declare function local:show-user-menu(
 	) {
 	let $base := concat('/code/api/user/', $user-name)
 	let $list-body := 
-		<ul>
+		<ul class="common">
 			{
-			api:list-item('Name', concat($base, '/name'), ('xml', 'txt')),
-			api:list-item('Organizational affiliation', concat($base, '/orgname'), ('xml', 'txt')),
-			api:list-item('Email address', concat($base, '/email'), ('xml', 'txt'))
+			api:list-item('Name', concat($base, '/name'), 
+        ("GET", "PUT", "DELETE"), 
+        (api:tei-content-type("tei:name"), "text/plain"),
+        (api:tei-content-type("tei:name"), "text/plain")),
+			api:list-item('Organizational affiliation', concat($base, '/orgname'),
+        ("GET", "PUT", "DELETE"), 
+        (api:tei-content-type("tei:orgName"), "text/plain"),
+        (api:tei-content-type("tei:orgName"), "text/plain")),
+			api:list-item('Email address', concat($base, '/email'),
+        ("GET", "PUT", "DELETE"), 
+        (api:tei-content-type("tei:email"), "text/plain"),
+        (api:tei-content-type("tei:email"), "text/plain"))
 			}
 		</ul>
 	return
 		api:list(
 			<title>User API for {$user-name}</title>,
 			$list-body,
-			count($list-body/li)
+			0, 
+      false(),
+      ("GET", "PUT"),
+      api:html-content-type(), 
+      ("application/xml", "text/plain")
 		)
 };
 

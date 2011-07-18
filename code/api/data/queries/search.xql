@@ -156,6 +156,24 @@ declare function local:get(
                 then concat($api-doc, '/', if ($subresource='seg') then concat('id/', $result/@xml:id) else $subresource)
                 else $api-doc
               let $alt-desc := 'db'
+              let $supported-methods := (
+                "GET",
+                ("POST")[$subresource = ("repository")],
+                ("PUT")[$subresource = ("seg", "title")],
+                ("DELETE")[$subresource = ("seg", "title")]
+              )
+              let $request-content-types := (
+                (api:html-content-type())[not($subresource)],
+                (api:tei-content-type("tei:seg"))[$subresource = ("repository", "seg")],
+                (api:tei-content-type("tei:title"))[$subresource = "title"],
+                ("text/plain")[$subresource = ("title", "seg")]
+              )
+              let $accept-content-types := (
+                (api:html-content-type())[not($subresource)],
+                (api:tei-content-type())[$subresource = ("repository", "seg")],
+                (api:tei-content-type())[$subresource = "title"],
+                ("text/plain")[$subresource = ("title", "seg")]
+              )
               where 
                 $formatted-result and (
                 (: if there's no owner, then we've searched through everything. Need to filter for purpose:)
@@ -165,14 +183,18 @@ declare function local:get(
                 )
               order by ft:score($result) descending
               return
-                api:list-item($desc, $link, (), $doc-uri, $alt-desc)  
+                api:list-item($desc, $link, $supported-methods, $accept-content-types, $request-content-types, ($alt-desc, $doc))  
             }</ul>)
   return (
     api:serialize-as('xhtml'),
     api:list(
       <title>Search results for {$uri}?q={$query}</title>,
       $results,
-      count(scache:get($uri, $query)/li)
+      count(scache:get($uri, $query)/li),
+      true(),
+      "GET",
+      api:html-content-type(), 
+      ()
     )        
   )
 };

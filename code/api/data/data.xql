@@ -30,20 +30,59 @@ declare function local:get(
 	) as element() {
 	let $base := '/code/api/data'
 	let $list := 
-		<ul class="common">
-			<li><a href="{$base}/contributors">Contributor lists</a></li>
-			<li><a href="{$base}/original">Original texts</a></li>
-			<li><a href="{$base}/parallel">Parallel text tables</a></li>
-			<li><a href="{$base}/sources">Bibliographic data</a></li>
-			<li><a href="{$base}/translation">Translation texts</a></li>
-			<li><a href="{$base}/transliteration">Transliteration tables</a></li>
-			<li><a href="{$base}/output">Generated output</a></li>
-		</ul>
+		<ul class="common">{
+      api:list-item("Contributor lists",
+        concat($base, "/contributors"), 
+        ("GET", "POST"),
+        api:html-content-type(),
+        api:tei-content-type("tei:div")
+      ),
+      api:list-item("Original texts",
+        concat($base, "/original"),
+        "GET",
+        api:html-content-type(),
+        ()
+      ),
+      api:list-item("Parallel text tables",
+        concat($base, "/parallel"),
+        "GET",
+        api:html-content-type(),
+        ()
+      ),
+      api:list-item("Bibliographic data",
+        concat($base, "/sources"),
+        ("GET", "POST"),
+        api:html-content-type(),
+        api:tei-content-type("tei:biblStruct")
+      ),
+      api:list-item("Translation texts",
+        concat($base, "/translation"),
+        ("GET"),
+        api:html-content-type(),
+        ()
+      ),
+      api:list-item("Transliteration tables",
+        concat($base, "/transliteration"),
+        ("GET"),
+        api:html-content-type(),
+        ()
+      ),
+      api:list-item("Generated output",
+        concat($base, "/output"),
+        ("GET"),
+        api:html-content-type(),
+        ()
+      )
+		}</ul>
 	return
 		api:list(
 			<title>Open Siddur Data API</title>,
 			$list,
-			0 (: the list here is a common menu, not results, so the number of results = 0 :)
+			0 (: the list here is a common menu, not results, so the number of results = 0 :),
+      false(),
+      "GET",
+      api:html-content-type(),
+      ()
 		)
 }; 
 
