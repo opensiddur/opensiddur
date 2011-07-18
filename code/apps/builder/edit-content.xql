@@ -124,7 +124,7 @@ return
 			<xf:action ev:event="load-one">
 				{ ( (: load the title of title-index/index :) )}
 				<xf:setvalue ref="instance('current-title')/item" 
-					value="substring-before(instance('selection')//html:ul[@class='results']/html:li[number(instance('title-index')/index)]/html:a[not(@class)]/@href, '/id')"/>
+					value="substring-before(instance('selection')//html:ul[@class='results']/html:li[number(instance('title-index')/index)]/html:a[@class='service']/@href, '/id')"/>
 				<xf:send submission="selection-title-get"/>
 			</xf:action>,
 			<xf:action ev:event="load-title-event" 
@@ -262,25 +262,25 @@ return
 							{controls:unsave-save-flag($save-flag-instance-id)}
 							<xf:delete nodeset="instance('selection')//html:span[@class='placeholder']"/>
 							<xf:setvalue ref="instance('selection-post-position')/position"
-								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/preceding-sibling::html:li[2]/html:a[not(@class)]"/>
+								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/preceding-sibling::html:li[2]/html:a[@class='service']"/>
 							<xf:setvalue ref="instance('selection-post-content')/self::tei:ptr/@xml:id"
-								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/html:a[not(@class)]"/>
+								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/html:a[@class='service']"/>
 							<xf:setvalue ref="instance('selection-post-content')/self::tei:ptr/@target"
 								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/html:a[@class='alt']/@href"/>
 							<xf:send submission="selection-item-post"/>
-				      <xf:delete nodeset="instance('selection')//html:ul[@class='results']/html:li[html:a[not(@class)] = instance('selection-post-content')/self::tei:ptr/@xml:id][2]"/>
+				      <xf:delete nodeset="instance('selection')//html:ul[@class='results']/html:li[html:a[@class='service'] = instance('selection-post-content')/self::tei:ptr/@xml:id][2]"/>
 						</xf:action>
 						<xf:action ev:event="down">
 							{controls:unsave-save-flag($save-flag-instance-id)}
 							<xf:delete nodeset="instance('selection')//html:span[@class='placeholder']"/>
 							<xf:setvalue ref="instance('selection-post-position')/position"
-								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/following-sibling::html:li[1]/html:a[not(@class)]"/>
+								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/following-sibling::html:li[1]/html:a[@class='service']"/>
 							<xf:setvalue ref="instance('selection-post-content')/self::tei:ptr/@xml:id"
-								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/html:a[not(@class)]"/>
+								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/html:a[@class='service']"/>
 							<xf:setvalue ref="instance('selection-post-content')/self::tei:ptr/@target"
 								value="instance('selection')//html:ul[@class='results']/html:li[index('{controls:ordered-list-repeat-id(concat($control-id, '-list'))}')]/html:a[@class='alt']/@href"/>
 							<xf:send submission="selection-item-post"/>
-				      <xf:delete nodeset="instance('selection')//html:ul[@class='results']/html:li[html:a[not(@class)] = instance('selection-post-content')/self::tei:ptr/@xml:id][1]"/>
+				      <xf:delete nodeset="instance('selection')//html:ul[@class='results']/html:li[html:a[@class='service'] = instance('selection-post-content')/self::tei:ptr/@xml:id][1]"/>
 						</xf:action>
 						<xf:action ev:event="plus">
 							{controls:unsave-save-flag($save-flag-instance-id)}
@@ -312,7 +312,7 @@ return
 									<xf:action ev:event="DOMActivate" 
 										if="count(instance('selection')//html:ul[@class='results']/html:li) &gt; 0">
 										<xf:setvalue ref="instance('selection-post-position')/position" 
-										value="choose(count(instance('selection')//html:span[@class='placeholder']) &gt; 0, instance('selection')//html:ul[@class='results']/html:li[html:span[@class='placeholder']]/html:a[not(@class)], instance('selection')//html:ul[@class='results']/html:li[last()]/html:a[not(@class)])"/>
+										value="choose(count(instance('selection')//html:span[@class='placeholder']) &gt; 0, instance('selection')//html:ul[@class='results']/html:li[html:span[@class='placeholder']]/html:a[@class='service'], instance('selection')//html:ul[@class='results']/html:li[last()]/html:a[@class='service'])"/>
 										<xf:dispatch name="continue-insert" targetid="{$trigger-id}"/>
 									</xf:action>
 									<xf:action ev:event="DOMActivate" 

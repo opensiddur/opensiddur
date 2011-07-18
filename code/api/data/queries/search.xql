@@ -183,7 +183,7 @@ declare function local:get(
                 )
               order by ft:score($result) descending
               return
-                api:list-item($desc, $link, $supported-methods, $accept-content-types, $request-content-types, ($alt-desc, $doc))  
+                api:list-item($desc, $link, $supported-methods, $accept-content-types, $request-content-types, ($alt-desc, $doc-uri))  
             }</ul>)
   return (
     api:serialize-as('xhtml'),
