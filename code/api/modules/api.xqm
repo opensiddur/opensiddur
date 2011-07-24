@@ -13,6 +13,8 @@ import module namespace request="http://exist-db.org/xquery/request";
 
 import module namespace app="http://jewishliturgy.org/modules/app"
 	at "/code/modules/app.xqm";
+import module namespace t="http://exist-db.org/xquery/testing/modified"
+  at "/code/modules/test2.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 
@@ -251,15 +253,6 @@ declare function api:list(
 	api:list($title, $list-body, $n-results, false(), (), (), ())
 };
 
-(:~ list-type API 
- : @param $title API page title
- : @param $list-body Body of the list 
- : @param $n-results Number of total results in the list
- : @param $supports-search true() if the URI is searchable (default false())
- : @param $supported-methods List of HTTP methods that this URI will support (default GET)
- : @param $accept-content-types List of content types for the Accept header in GET (default application/xhtml+xml, text/html)
- : @param $request-content-types List of Content-Type header in PUT or POST request (no default)
- :)
 declare function api:list(
 	$title as element(title),
 	$list-body as element(ul)+,
@@ -268,6 +261,31 @@ declare function api:list(
 	$supported-methods as xs:string*,
 	$accept-content-types as xs:string*,
 	$request-content-types as xs:string*
+	) as element(html) {
+	api:list($title, $list-body, $n-results, $supports-search, $supported-methods, 
+    $accept-content-types, $request-content-types, ())
+  
+};
+
+(:~ list-type API 
+ : @param $title API page title
+ : @param $list-body Body of the list 
+ : @param $n-results Number of total results in the list
+ : @param $supports-search true() if the URI is searchable (default false())
+ : @param $supported-methods List of HTTP methods that this URI will support (default GET)
+ : @param $accept-content-types List of content types for the Accept header in GET (default application/xhtml+xml, text/html)
+ : @param $request-content-types List of Content-Type header in PUT or POST request (no default)
+ : @param $test-source Pointer to the test source if this API supports the ?_test= parameter
+ :)
+declare function api:list(
+	$title as element(title),
+	$list-body as element(ul)+,
+	$n-results as xs:integer,
+	$supports-search as xs:boolean,
+	$supported-methods as xs:string*,
+	$accept-content-types as xs:string*,
+	$request-content-types as xs:string*,
+  $test-source as xs:string?
 	) as element(html) {
 	let $my-uri := request:get-uri()
 	let $params := (
@@ -286,6 +304,13 @@ declare function api:list(
 			<head>
 				<title>{string($title)}</title>
 				{
+        (: add a link to the tests, if available :)
+        if ($test-source)
+        then (
+          <link rel="test" href="{$my-uri}?_test=1"/>,
+          <link rel="test-source" href="{$test-source}"/>
+        )
+        else (),
 				(: add first, previous, next, and last links :)
 				if ($start > 1 and $n-results >= 1)
 				then (
@@ -529,4 +554,17 @@ declare function api:get-data(
     if ($data instance of xs:base64Binary)
     then util:binary-to-string($data)
     else $data
+};
+
+(:~ run the given tests and return their results if the _test= query parameter is 
+ : given and the method is GET. If this is not a testing call, return ()
+ :)
+declare function api:tests(
+  $test-source as xs:string
+  ) as element()? {
+  util:log-system-out(("$test-source", doc($test-source))),
+  if (api:get-method() = "GET" and request:get-parameter("_test", ()))
+  then
+    t:format-testResult(t:run-testSuite(doc($test-source)/*))
+  else ()
 };

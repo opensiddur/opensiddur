@@ -26,6 +26,8 @@ declare option exist:serialize "method=xhtml media-type=text/html omit-xml-decla
         doctype-public=-//W3C//DTD&#160;XHTML&#160;1.1//EN
         doctype-system=http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd";
 
+declare variable $local:test-uri := "/code/tests/api/data/data.t.xml";
+
 declare function local:get(
 	) as element() {
 	let $base := '/code/api/data'
@@ -82,14 +84,18 @@ declare function local:get(
       false(),
       "GET",
       api:html-content-type(),
-      ()
+      (),
+      $local:test-uri
 		)
 }; 
 
+(
+api:tests($local:test-uri),
 if (api:allowed-method('GET'))
 then
 	(: $user-name the user name in the request URI :)
-	local:get()
+  local:get()
 else
 	(: disallowed method :) 
 	()
+)[1]
