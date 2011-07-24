@@ -17,6 +17,9 @@ xquery version "1.0";
  :  and a function t:run-testSuite()
  : ** add setup and teardown for the entire suite
  : 
+ : * add a <TestClass xml:id="..."> element for tests with no code that can be 
+ :  included into other TestSets with <class href=""/>
+ : 
  : * allow each test to include any of:
  : ** at most 1 error element
  : ** 1 or _more_ xpath elements to perform tests on the  (the xpath
@@ -199,7 +202,7 @@ declare function t:run-test($test as element(test), $count as xs:integer) {
             data($test/expected)
         else $test/expected
     let $OK := 
-    	for $assert in $test/(error|xpath|expected)
+    	for $assert in $test/(error|xpath|expected|t:expand-class(class))
     	return (
         if ($assert instance of element(error)) then
         		let $pass := $expanded instance of element(error) and contains($expanded, $assert)
@@ -265,6 +268,22 @@ declare function t:run-test($test as element(test), $count as xs:integer) {
                 
         }
         </test>
+};
+
+(: expand abstract test class references :)
+declare function t:expand-class(
+  $classes as element(class)*
+  ) as element()* {
+  for $class in $classes
+  let $base := substring-before($class/@href, '#')
+  let $fragment := substring-after($class/@href, '#')
+  let $doc := 
+    if ($base)
+    then doc(resolve-uri($base, base-uri($class)))
+    else root($class)
+  let $testClass as element(TestClass) := $doc/id($fragment)
+  return
+    $testClass/(error|xpath|expected|t:expand-class(class))
 };
 
 declare function t:normalize($nodes as node()*) {
