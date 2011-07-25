@@ -6,6 +6,11 @@
   xmlns:httpclient="http://exist-db.org/xquery/httpclient">
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="httpclient">http://exist-db.org/xquery/httpclient</namespace>
+  <TestClass xml:id="Testing">
+    <xpath desc="one test link is present">count(.//html:link[@rel='test'])=1</xpath>
+    <xpath desc="one test source link is present">count(.//html:link[@rel='test-source'])=1</xpath>
+    <xpath desc="test source link exists and is readable">doc-available(.//html:link[@rel='test-source']/@href)</xpath>
+  </TestClass>
   <TestClass xml:id="SelfConsistentApiList">
     <!-- tests for all api:list() derived results -->
     <xpath desc="status code=200">./@statusCode = 200</xpath>

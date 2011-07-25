@@ -31,6 +31,7 @@
         apitest:get("/code/api/data", <header name="Accept" value="application/xhtml+xml"/>)
 			]]></code>
       <class href="search-results.t.xml#SelfConsistentMenu"/> 
+      <class href="search-results.t.xml#Testing"/> 
 		</test>
 		<test>
 			<task>PUT</task>

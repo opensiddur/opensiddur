@@ -562,7 +562,6 @@ declare function api:get-data(
 declare function api:tests(
   $test-source as xs:string
   ) as element()? {
-  util:log-system-out(("$test-source", doc($test-source))),
   if (api:get-method() = "GET" and request:get-parameter("_test", ()))
   then
     t:format-testResult(t:run-testSuite(doc($test-source)/*))
