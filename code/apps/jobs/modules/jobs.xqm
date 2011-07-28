@@ -218,7 +218,7 @@ declare function jobs:pop(
     system:as-user('admin', $magicpassword,
       doc($jobs:queue-path))/jobs:jobs
   let $max-priority := max($queue//jobs:priority[not(../jobs:running)])
-  let $job-ids := $queue/jobs:id
+  let $job-ids := $queue//jobs:id
   return
     $queue/jobs:job[not(jobs:running)]
       [jobs:priority=$max-priority]
