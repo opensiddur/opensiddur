@@ -130,6 +130,8 @@ declare function local:copy-metadata-to-builder(
 let $builder-instance-id := 'builder' (: really just a metadata instance :)
 let $login-instance-id := 'login'
 let $document-chooser-id := 'documents'
+let $search-chooser-id  := 'search'
+let $result-chooser-id := 'search-results'
 return
 	site:form(
 		<xf:model id="model">
@@ -143,6 +145,9 @@ return
 			builder:document-chooser-instance(
 				$document-chooser-id
 			),
+      builder:document-chooser-instance(
+        $search-chooser-id, true(), xmldb:get-current-user(), (), 'output'
+      ),
 			local:confirm-delete-instance('confirm-delete', 'control-confirm-delete')
 			}
 			<xf:instance id="garbage">
@@ -193,13 +198,34 @@ return
 				)
 				
 				}
+        <h3>Search My Siddurim</h3>
+        <p>Use the box below to search your <strong>compiled</strong> siddurim:</p>
+        {
+        builder:document-chooser-ui($search-chooser-id, $result-chooser-id, 
+          <xf:trigger appearance="minimal">
+            <xf:label>View</xf:label>
+            <xf:load ev:event="DOMActivate" show="new">
+              <xf:resource value="./html:a/@href"/>
+            </xf:load>
+          </xf:trigger>,
+          true(), true(), "Result",
+          <xf:repeat id="search-result" nodeset="./html:a/html:p">
+            {builder:search-results-block()}
+          </xf:repeat>
+        )
+        }
 			</fieldset>
 		</xf:group>
 		)
 		,
-		(site:css(), builder:css(),
-		controls:faketable-style(
-  		concat('control-', $document-chooser-id),	90,	4)
+		(
+      site:css(), builder:css(),
+  		controls:faketable-style(
+    		concat('control-', $document-chooser-id),	90,	3
+      ),
+  		controls:faketable-style(
+    		$result-chooser-id,	90,	3
+      )
 		),
 		site:header(),
 		(site:sidebar-with-login($login-instance-id),

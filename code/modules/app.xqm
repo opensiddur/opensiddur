@@ -7,7 +7,6 @@ xquery version "1.0";
  : Open Siddur Project
  : Copyright 2010-2011 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
- : $Id: app.xqm 775 2011-05-01 06:46:55Z efraim.feinstein $ 
  :)
 module namespace app="http://jewishliturgy.org/modules/app";
 
@@ -18,7 +17,7 @@ import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 import module namespace util="http://exist-db.org/xquery/util";
 
 import module namespace paths="http://jewishliturgy.org/modules/paths"
-	at "paths.xqm";
+	at "xmldb:exist:///code/modules/paths.xqm";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform";
@@ -38,47 +37,50 @@ declare function app:get-version(
  : 'user' and 'password' request parameters 
  : 'Username' and 'password' headers    
  :)
-declare function app:_get_auth_string() as xs:string* {
-  let $authorization := (substring-after(request:get-header('Authorization'),'Basic '))[.]
-    cast as xs:base64Binary?
-  let $user-name-attribute := session:get-attribute('app.user')[.]
-  let $password-attribute := session:get-attribute('app.password')[.]
-  let $auth-cookie := request:get-cookie-value('Authorization')[.]
-  let $user-name-basic := substring-before(
-      util:binary-to-string(($authorization, $auth-cookie)[1]),
-      ':')[.]
-  let $password-basic := substring-after(
-      util:binary-to-string(($authorization, $auth-cookie)[1]),
-      ':')[.]
-  (: user name and password from the header.  BUG workaround: to get around a bug in betterform 3.1, need to take the last 
-   : comma separated value :)
-  let $user-name-hdr := tokenize(request:get-header('Username'),',')[last()][.]
-  let $password-hdr := tokenize(request:get-header('Password'),',')[last()][.]
-  (: last resort: user name and password from parameters user= and password= :)
-  let $user-name-param := request:get-parameter('user',())
-  let $password-param := request:get-parameter('password',())
-  (: return values :)
-  let $username := ($user-name-basic, $user-name-hdr, $user-name-attribute, $user-name-param)[1]
-  let $password := ($password-basic, $password-hdr, $password-attribute, $password-param)[1]
-  return (
-  	if ($paths:debug)
-  	then
-	  	util:log-system-out(
-	  		<authenticate>
-	  			<uri>{request:get-uri()}</uri>
-	  			<header>{$authorization, exists($authorization)}</header>
-	  			<attribute>{$user-name-attribute, exists($user-name-attribute)}</attribute>
-	  			<cookie>{$auth-cookie, exists($auth-cookie)}</cookie>
-	  			<hdr>{$user-name-hdr, $password-hdr, exists($user-name-hdr)}</hdr>
-	  			<user-param>{$user-name-param, $password-param, exists($user-name-param)}</user-param>
-	  			<return>
-	  				<user>{$username}</user>
-	  				<password>{$password}</password>
-	  			</return>
-	  		</authenticate>
-	  	)
-	  else (),
-  	$username, $password)
+declare function local:get-auth-string() as xs:string* {
+  if (request:exists())
+  then 
+    let $authorization := (substring-after(request:get-header('Authorization'),'Basic '))[.]
+      cast as xs:base64Binary?
+    let $user-name-attribute := session:get-attribute('app.user')[.]
+    let $password-attribute := session:get-attribute('app.password')[.]
+    let $auth-cookie := request:get-cookie-value('Authorization')[.]
+    let $user-name-basic := substring-before(
+        util:binary-to-string(($authorization, $auth-cookie)[1]),
+        ':')[.]
+    let $password-basic := substring-after(
+        util:binary-to-string(($authorization, $auth-cookie)[1]),
+        ':')[.]
+    (: user name and password from the header.  BUG workaround: to get around a bug in betterform 3.1, need to take the last 
+     : comma separated value :)
+    let $user-name-hdr := tokenize(request:get-header('Username'),',')[last()][.]
+    let $password-hdr := tokenize(request:get-header('Password'),',')[last()][.]
+    (: last resort: user name and password from parameters user= and password= :)
+    let $user-name-param := request:get-parameter('user',())
+    let $password-param := request:get-parameter('password',())
+    (: return values :)
+    let $username := ($user-name-basic, $user-name-hdr, $user-name-attribute, $user-name-param)[1]
+    let $password := ($password-basic, $password-hdr, $password-attribute, $password-param)[1]
+    return (
+      if ($paths:debug)
+      then
+        util:log-system-out(
+          <authenticate>
+            <uri>{request:get-uri()}</uri>
+            <header>{$authorization, exists($authorization)}</header>
+            <attribute>{$user-name-attribute, exists($user-name-attribute)}</attribute>
+            <cookie>{$auth-cookie, exists($auth-cookie)}</cookie>
+            <hdr>{$user-name-hdr, $password-hdr, exists($user-name-hdr)}</hdr>
+            <user-param>{$user-name-param, $password-param, exists($user-name-param)}</user-param>
+            <return>
+              <user>{$username}</user>
+              <password>{$password}</password>
+            </return>
+          </authenticate>
+        )
+      else (),
+      $username, $password)
+  else ()
 };
 
 (:~ generate a uuid that is guaranteed not to collide with any of the 
@@ -105,13 +107,13 @@ declare function app:unique-xmlid(
  : over the logged in user. :)
 declare function app:auth-user()
   as xs:string? {
-  (session:get-attribute('app.user'), xmldb:get-current-user()[not(. = 'guest')], app:_get_auth_string()[1])[1]
+  (session:get-attribute('app.user'), xmldb:get-current-user()[not(. = 'guest')], local:get-auth-string()[1])[1]
 };
 
 (:~ Return authenticated user's password; only works for HTTP Basic authentication :)
 declare function app:auth-password()
   as xs:string? {
-  (session:get-attribute('app.password'), app:_get_auth_string()[2])[1]
+  (session:get-attribute('app.password'), local:get-auth-string()[2])[1]
 };
 
 (:~ Read HTTP headers to determine if the user can be logged in or is already logged in.  
@@ -120,7 +122,7 @@ declare function app:auth-password()
  :)
 declare function app:authenticate()
   as xs:boolean {
-  let $authorization as xs:string* := app:_get_auth_string()
+  let $authorization as xs:string* := local:get-auth-string()
   let $user-name as xs:string? := $authorization[1]
   let $password as xs:string? := $authorization[2]
   let $logged-in as xs:boolean := boolean(xmldb:get-current-user()[not(. = 'guest')])
@@ -150,9 +152,13 @@ declare function app:authenticate()
 declare function app:require-authentication(
 	) as xs:boolean {
 	app:authenticate() or (
-    false(), 
-    response:set-status-code(401), 
-    response:set-header('WWW-Authenticate', 'Basic')
+    false(),
+    if (request:exists())
+    then ( 
+      response:set-status-code(401), 
+      response:set-header('WWW-Authenticate', 'Basic')
+    )
+    else ()
   )
 };
 
@@ -390,7 +396,7 @@ declare function app:concat-path(
  : @param $document-uri Pointer to the document in the database, *must* be absolute relative to db
  : 	Alternatively, if $document-uri contains a node(), the node() is transformed
  : @param $xslt-uri Pointer to the XSLT in the database, *must* be absolute relative to db
- : @param $parameters Parameters to pass to the XSLT 
+ : @param $parameters Parameters to pass to the XSLT (user and password parameters can be passed here)
  : @param $mode mode to execute; use empty sequence or blank string for #default
  :)
 declare function app:transform-xslt(
@@ -400,27 +406,17 @@ declare function app:transform-xslt(
   $mode as xs:string?
   ) as item()* {
   let $xslt-uri-abs := 
-    (:concat('xmldb:exist://', $xslt-uri):)
-    app:concat-path($paths:rest-prefix, $xslt-uri)
-  let $user := app:auth-user()
-  let $password := app:auth-password()
+    if (contains($xslt-uri,':'))
+    then (: already an absolute path with protocol :) $xslt-uri 
+    else app:concat-path($paths:rest-prefix, $xslt-uri)
+  let $user := (app:auth-user(), $parameters[@name='user']/@value/string())[1]
+  let $password := (app:auth-password(), $parameters[@name='password']/@value)[1]
   let $absolute-uri := 
     concat('xmldb:exist://', 
       if ($user)
       then concat($user,':',$password,'@')
       else '', 
       $document-uri)
-(:  	app:concat-path($paths:rest-prefix, $document-uri)
-    	string-join((
-      	$document-uri,
-      	if ($user)
-      	then ( 
-      		if (contains($document-uri, '?')) then '&amp;' else '?',
-          'auth=', app:encode-auth-string($user, $password)
-      		'user=', $user, '&amp;password=', $password
-      	)
-      	else ()
-      	), '') ):)
   let $xslt :=
     <xsl:stylesheet 
       xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 

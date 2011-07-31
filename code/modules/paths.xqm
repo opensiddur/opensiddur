@@ -23,12 +23,13 @@ declare variable $paths:prefix := concat('/', $paths:exist-prefix,
 	if ($paths:exist-prefix and $paths:requires-rest) then '/' else '', 
   if ($paths:requires-rest) then 'rest' else '');
 (:~ constant beginning part of REST URL :)
-declare variable $paths:rest-prefix :=
-	if (request:exists())
-	then
+declare variable $paths:internal-rest-prefix :=
 		concat(
 			'http://localhost:8080', 
-			$paths:prefix) 
+			$paths:prefix); 
+declare variable $paths:rest-prefix :=
+	if (request:exists())
+	then $paths:internal-rest-prefix
 	else '';
 (:~ absolute REST URL prefix as seen from the outside the server:)
 declare variable $paths:external-rest-prefix :=
@@ -57,7 +58,9 @@ declare variable $paths:xslt-pi :=
 	else ();
 (:~ when to debug: when not on the primary server :)
 declare variable $paths:debug as xs:boolean :=
-	request:exists() and request:get-server-name()='localhost';
+	if (request:exists())
+  then request:get-server-name()='localhost'
+  else true();
 declare variable $paths:debug-pi := 
 	if ($paths:xforms-processor = 'xsltforms')
 	then

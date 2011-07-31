@@ -56,7 +56,10 @@
  *
  */
 var VKI_attach, VKI_close;
-(function() {
+
+/* EDF: turn this into a function so I can invoke it manually */
+
+var VKIEF_run = function() {
   var self = this;
 
   this.VKI_version = "1.47";
@@ -1793,8 +1796,13 @@ var VKI_attach, VKI_close;
   VKI_addListener(window, 'resize', this.VKI_position, false);
   VKI_addListener(window, 'scroll', this.VKI_position, false);
   this.VKI_kbsize();
-  VKI_addListener(window, 'load', VKI_buildKeyboardInputs, false);
-  // VKI_addListener(window, 'load', function() {
-  //   setTimeout(VKI_buildKeyboardInputs, 5);
-  // }, false);
-})();
+  /* EDF: adding keyboards has to be delayed until the xsltforms script finishes
+   */
+  //VKI_addListener(window, 'load', VKI_buildKeyboardInputs, false);
+   VKI_addListener(window, 'load', function() {
+     setTimeout(VKI_buildKeyboardInputs, 5);
+   }, false);
+}
+
+VKIEF_run();
+

@@ -16,4 +16,10 @@
             <text qname="html:body"/>
         </lucene>
     </index>
+    <triggers>
+        <!-- the global trigger is not working, need to repeat it -->
+        <trigger class="org.exist.collections.triggers.XQueryTrigger">
+            <parameter name="url" value="xmldb:exist:///db/code/triggers/document-uri.xql"/>
+        </trigger>
+    </triggers>
 </collection>

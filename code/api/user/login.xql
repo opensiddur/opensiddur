@@ -43,7 +43,7 @@ then
 		else if ($method = 'PUT')
 		then
 			(: this is a request to log in :)
-			let $password := string(request:get-data())
+			let $password := string(api:get-data())
 			return
 				if (xmldb:authenticate('/db', $user-name, $password))
 				then (

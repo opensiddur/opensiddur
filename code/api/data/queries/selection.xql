@@ -36,7 +36,6 @@ xquery version "1.0";
  : Open Siddur Project 
  : Copyright 2011 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
- : $Id: selection.xql 730 2011-04-06 03:24:17Z efraim.feinstein $
  :)
 import module namespace request="http://exist-db.org/xquery/request";
 import module namespace response="http://exist-db.org/xquery/response";
@@ -67,17 +66,21 @@ declare function local:get-menu(
 		if (exists($index))
 		then
 			(: index given :)
-			<ul class="results">{
-				if ($indexed-node)
-				then
+			if ($indexed-node)
+			then
+			  <ul class="results">{ 
 					let $id := string($indexed-node/@xml:id)
 					let $db-link := resolve-uri(string($indexed-node/@target), base-uri($indexed-node))
 					let $api-link := data:db-path-to-api($db-link)
-					return
-						api:list-item($id, $api-link, ('xml', 'txt'), $db-link, 'db')
-				else
-					api:error(404, "Index not found", $index)
-			}</ul>
+					return 
+						api:list-item($id, $api-link, 
+              ("GET", "POST", "PUT", "DELETE"), 
+              (api:tei-content-type("tei:ptr"), "text/plain"), 
+              (api:tei-content-type("tei:ptr"), "text/plain"), 
+              ("db", $db-link))
+			  }</ul>
+			else
+				api:error(404, "Index not found", $index)
 		else
 			(: no index. show a list of available indexes :)
 			if (scache:is-up-to-date($uri, '', util:document-name(root($selection))))
@@ -92,7 +95,11 @@ declare function local:get-menu(
 						return
 							api:list-item(
 								$id,
-								$api-link, ('xml', 'txt'), $db-link, 'db'
+								$api-link, 
+                ("GET", "PUT", "POST", "DELETE"), 
+                (api:tei-content-type("tei:ptr"), "text/plain"),
+                (api:tei-content-type("tei:ptr"), "text/plain"),
+                ("db", $db-link)
 							)
 					}</ul>
 				)
@@ -107,7 +114,11 @@ declare function local:get-menu(
 					replace($uri, '^/code/api', '')
 				}</title>,
 				$list,
-				count(scache:get($uri, '')/li)
+				count(scache:get($uri, '')/li),
+        false(),
+        ("GET", "PUT", "POST", "DELETE"),
+        api:html-content-type(),
+        (api:tei-content-type("tei:ptr"), "text/plain")
 			)
 		)
 };

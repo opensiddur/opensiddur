@@ -222,6 +222,17 @@ declare function builder:document-chooser-instance(
 	builder:document-chooser-instance($instance-id, $allow-change-share-group, $default-share-group, ())
 };
 
+declare function builder:document-chooser-instance(
+	$instance-id as xs:string,
+	$allow-change-share-group as xs:boolean, 
+	$default-share-group as xs:string?,
+	$resource-instance-id as xs:string?
+	) as element()+ {
+  builder:document-chooser-instance(
+    $instance-id, $allow-change-share-group, 
+    $default-share-group, $resource-instance-id, ())
+};
+
 (:~ document chooser instance.
  : offers a number of options, including making the share group changable or unchangable
  : if a $resource-instance-id is given, the current document listed in it is not shown in the UI.
@@ -230,7 +241,8 @@ declare function builder:document-chooser-instance(
 	$instance-id as xs:string,
 	$allow-change-share-group as xs:boolean, 
 	$default-share-group as xs:string?,
-	$resource-instance-id as xs:string?
+	$resource-instance-id as xs:string?,
+  $default-purpose as xs:string?
 	) as element()+ {
 	let $error-instance-id := concat($instance-id, '-error')
 	let $share-options-id := concat($instance-id, '-share')
@@ -260,7 +272,7 @@ declare function builder:document-chooser-instance(
 		else (),
 		<xf:instance id="{$instance-id}-action">
 			<action xmlns="">
-				<data-type>original</data-type>
+				<data-type>{($default-purpose, 'original')[1]}</data-type>
 				<share-type>group</share-type>
 				<owner></owner>
         <scope/>
@@ -333,19 +345,19 @@ declare function builder:document-chooser-instance(
 		<xf:bind nodeset="instance('{$instance-id}-range')//max-results" 
 			calculate="instance('{$instance-id}-search')/max-results"/>,
 		<xf:bind nodeset="instance('{$instance-id}-range')//n-results" 
-			calculate="instance('{$instance-id}')//html:meta[@name='results']/@content"/>,
+			calculate="instance('{$instance-id}')//html:meta[@name='totalResults']/@content"/>,
 		<xf:bind nodeset="instance('{$instance-id}-range')//n-start-minus-max-results" 
-			calculate="instance('{$instance-id}')//html:meta[@name='start']/@content - instance('{$instance-id}-search')/max-results"/>,
+			calculate="instance('{$instance-id}')//html:meta[@name='startIndex']/@content - instance('{$instance-id}-search')/max-results"/>,
 		<xf:bind nodeset="instance('{$instance-id}-range')//prev-start-plus-max-results" 
 			calculate="max(instance('{$instance-id}-range')/previous/start/*) + instance('{$instance-id}-search')/max-results - 1"/>,
 		<xf:bind nodeset="instance('{$instance-id}-range')//n-start-minus-one" 
-			calculate="instance('{$instance-id}')//html:meta[@name='start']/@content - 1"/>,
+			calculate="instance('{$instance-id}')//html:meta[@name='startIndex']/@content - 1"/>,
 		<xf:bind nodeset="instance('{$instance-id}-range')//n-end-plus-one" 
-			calculate="instance('{$instance-id}')//html:meta[@name='end']/@content + 1"/>,
+			calculate="instance('{$instance-id}')//html:meta[@name='endIndex']/@content + 1"/>,
 		<xf:bind nodeset="instance('{$instance-id}-range')//n-end-plus-max-results" 
-			calculate="instance('{$instance-id}')//html:meta[@name='end']/@content + instance('{$instance-id}-search')/max-results"/>,
+			calculate="instance('{$instance-id}')//html:meta[@name='endIndex']/@content + instance('{$instance-id}-search')/max-results"/>,
 		<xf:bind nodeset="instance('{$instance-id}-range')//n-results-minus-max-results" 
-			calculate="instance('{$instance-id}')//html:meta[@name='results']/@content - instance('{$instance-id}-search')/max-results"/>,
+			calculate="instance('{$instance-id}')//html:meta[@name='totalResults']/@content - instance('{$instance-id}-search')/max-results"/>,
 		controls:error-instance($error-instance-id),
 		<xf:action ev:event="xforms-ready">
 			<xf:send submission="{$instance-id}-submit"/>
@@ -438,7 +450,7 @@ declare function builder:document-chooser-ui(
 				</xf:trigger>
 				<xf:trigger id="{$control-id}-current" appearance="minimal">
 					<xf:label>
-						[<xf:output ref="//html:meta[@name='start']/@content"/>-<xf:output ref="//html:meta[@name='end']/@content"/>]
+						[<xf:output ref="//html:meta[@name='startIndex']/@content"/>-<xf:output ref="//html:meta[@name='endIndex']/@content"/>]
 					</xf:label>
 				</xf:trigger>
 				<xf:output ref="//html:link[@rel='previous']" value="'&#xa0;'"/>

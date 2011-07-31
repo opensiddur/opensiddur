@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<collection group="dba" mode="744" name="/db/code/api/user" owner="admin">
+  <resource filename="controller.xql" group="dba" mimetype="application/xquery" mode="755" name="controller.xql" owner="admin" type="BinaryResource"/>
+  <resource filename="profile.xql" group="dba" mimetype="application/xquery" mode="755" name="profile.xql" owner="admin" type="BinaryResource"/>
+  <resource filename="login.xql" group="dba" mimetype="application/xquery" mode="755" name="login.xql" owner="admin" type="BinaryResource"/>
+  <resource filename="logout.xql" group="dba" mimetype="application/xquery" mode="755" name="logout.xql" owner="admin" type="BinaryResource"/>
+  <resource filename="index.xql" group="dba" mimetype="application/xquery" mode="755" name="index.xql" owner="admin" type="BinaryResource"/>
+</collection>

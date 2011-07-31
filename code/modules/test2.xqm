@@ -5,7 +5,6 @@ xquery version "1.0";
  : Modified by Efraim Feinstein, 2011
  : 
  : Licensed under the GNU Lesser General Public License, version 2.1 or later
- : $Id: test2.xqm 739 2011-04-15 04:17:09Z efraim.feinstein $
  :)
 (:
  : 
@@ -16,6 +15,10 @@ xquery version "1.0";
  : 
  : * add a top-level TestSuite element to contain multiple TestSet elements
  :  and a function t:run-testSuite()
+ : ** add setup and teardown for the entire suite
+ : 
+ : * add a <TestClass xml:id="..."> element for tests with no code that can be 
+ :  included into other TestSets with <class href=""/>
  : 
  : * allow each test to include any of:
  : ** at most 1 error element
@@ -199,7 +202,7 @@ declare function t:run-test($test as element(test), $count as xs:integer) {
             data($test/expected)
         else $test/expected
     let $OK := 
-    	for $assert in $test/(error|xpath|expected)
+    	for $assert in $test/(error|xpath|expected|t:expand-class(class))
     	return (
         if ($assert instance of element(error)) then
         		let $pass := $expanded instance of element(error) and contains($expanded, $assert)
@@ -267,6 +270,22 @@ declare function t:run-test($test as element(test), $count as xs:integer) {
         </test>
 };
 
+(: expand abstract test class references :)
+declare function t:expand-class(
+  $classes as element(class)*
+  ) as element()* {
+  for $class in $classes
+  let $base := substring-before($class/@href, '#')
+  let $fragment := substring-after($class/@href, '#')
+  let $doc := 
+    if ($base)
+    then doc(resolve-uri($base, base-uri($class)))
+    else root($class)
+  let $testClass as element(TestClass) := $doc/id($fragment)
+  return
+    $testClass/(error|xpath|expected|t:expand-class(class))
+};
+
 declare function t:normalize($nodes as node()*) {
 	for $node in $nodes return t:normalize-node($node)
 };
@@ -321,9 +340,13 @@ declare function t:run-testSuite($suite as element(TestSuite)) as element() {
 			{$copy/suiteName}
 			{$copy/description}
 			{
-				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
-				return
-					t:run-testSet($set)
+        let $null := t:setup($copy/setup)
+        let $result :=
+  				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
+	  			return
+		  			t:run-testSet($set)
+        let $null := t:tearDown($copy/tearDown)
+        return $result
 			}
 		</TestSuite>
 };
@@ -463,7 +486,7 @@ declare function t:format-testResult($result as element()) {
 };
 
 (:~ determine if two nodes are deep-equal, allowing for the string ... to be a wildcard
- : an the namespace http://www.w3.org/1998/xml/namespace/alias to be equivalent to the
+ : and the namespace http://www.w3.org/1998/xml/namespace/alias to be equivalent to the
  : xml namespace
  : @param $node1 The original node
  : @param $node2 The expectation node, which may include aliased namespaces and wildcards

@@ -237,7 +237,7 @@
       r:Pointer"/>
     <xsl:sequence select="func:debug(
       ($pointers,.),
-      'r:PointerPart[range]:pointers', $debug-warn)"/>
+      'r:PointerPart[range]:pointers', $debug-detail)"/>
     <xsl:variable name="left-pointer" as="node()?">
       <xsl:apply-templates select="$pointers[1]"
         mode="follow-parsed-xpointer">
@@ -313,7 +313,7 @@
   </xd:doc>
   <xsl:function name="func:cached-document-path" as="xs:string">
     <xsl:param name="path" as="xs:string"/>
-    <xsl:sequence select="replace($path, '^((((xmldb:exist)|http)://[^/]+)?)(/db)?(/cache?)/(.+)$', '$1$5/cache/$6')"/> 
+    <xsl:sequence select="replace($path, '^((((xmldb:exist)|http)://[^/]+))?(/db)?(/cache)?/(.+)$', '$1$5/cache/$7')"/>
   </xsl:function>
 
   <xd:doc>

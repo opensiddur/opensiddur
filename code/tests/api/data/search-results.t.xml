@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestClassSet
+	xmlns:tei="http://www.tei-c.org/ns/1.0"
+	xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+	xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:httpclient="http://exist-db.org/xquery/httpclient">
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="httpclient">http://exist-db.org/xquery/httpclient</namespace>
+  <TestClass xml:id="Testing">
+    <xpath desc="one test link is present">count(.//html:link[@rel='test'])=1</xpath>
+    <xpath desc="one test source link is present">count(.//html:link[@rel='test-source'])=1</xpath>
+    <xpath desc="test source link exists and is readable">doc-available(.//html:link[@rel='test-source']/@href)</xpath>
+  </TestClass>
+  <TestClass xml:id="SelfConsistentApiList">
+    <!-- tests for all api:list() derived results -->
+    <xpath desc="status code=200">./@statusCode = 200</xpath>
+    <xpath desc="@startIndex is present">count(.//html:meta[@name='startIndex'])=1</xpath>
+    <xpath desc="@endIndex is present">count(.//html:meta[@name='endIndex'])=1</xpath>
+    <xpath desc="@totalResults is present">count(.//html:meta[@name='totalResults'])=1</xpath>
+    <xpath desc="@itemsPerPage is present">count(.//html:meta[@name='itemsPerPage'])=1</xpath>
+    <xpath desc="endIndex - startIndex = number of results">
+      let $start := number($output//html:meta[@name='startIndex']/@content)
+      let $end := number($output//html:meta[@name='endIndex']/@content)
+      return ((if ($start) then 1 else 0) + $end - $start eq count($output//html:ul[@class='results']/html:li),
+        util:log-system-out(($start, ' ', $end, ' ', $output))
+      )
+    </xpath>
+    <xpath desc="endIndex &lt;= number of results">
+      number(.//html:meta[@name='endIndex']/@content) &lt;= number(.//html:meta[@name='totalResults']/@content)
+    </xpath>
+  </TestClass>
+  <TestClass xml:id="InvalidMethod">
+    <xpath desc="returns HTTP status 405">./@statusCode = 405</xpath>
+    <xpath desc="returns an Allow header">count(.//httpclient:header[@name="Allow"]) = 1</xpath>
+  </TestClass>
+	<TestClass xml:id="SelfConsistentMenu">
+    <xpath desc="has exactly one common section">count(.//html:ul[@class="common"])=1</xpath>
+    <class href="#SelfConsistentApiList"/>
+	</TestClass>
+  <TestClass xml:id="SelfConsistentSearch">
+    <xpath desc="has exactly one results section">count(.//html:ul[@class="results"])=1</xpath>
+    <class href="#SelfConsistentApiList"/>
+  </TestClass>
+</TestClassSet>
+

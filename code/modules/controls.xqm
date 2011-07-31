@@ -3,7 +3,6 @@
  : Open Siddur Project
  : Copyright 2010-2011 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Released under the GNU Lesser General Public License, ver 3 or later
- : $Id: controls.xqm 772 2011-04-29 05:34:57Z efraim.feinstein $
  :)
 xquery version "1.0";
 module namespace controls="http://jewishliturgy.org/modules/controls";
@@ -957,12 +956,6 @@ declare function controls:license-chooser-ui(
 	)
 };
 
-(:~ license chooser UI 
- : @param $label Label text
- : @param $appearance 'droplist' (drop down list, default),
- :		 'list' (list that shows all), 'radio' (radio buttons), '' 
- : @param $event-target target for xforms-value-changed events, to work around a bug in XSLTForms r501
- :)
 declare function controls:license-chooser-ui(
 	$control-id as xs:string,
 	$chooser-instance-id as xs:string,
@@ -970,35 +963,51 @@ declare function controls:license-chooser-ui(
 	$appearance as xs:string?,
 	$event-target as xs:string?
 	) as element()+ {
-	<div class="license-chooser">
-		<xf:select1 id="{$control-id}" incremental="true">
-			{
-			attribute {'ref'}{controls:instance-to-ref($chooser-instance-id,'@target')},
-			(:attribute {if ($bind) then 'bind' else 'ref'}{$ref}:)
-			attribute {'appearance'}{
-				if ($appearance = 'list')
-				then 'compact'
-				else if ($appearance = 'radio')
-				then 'full'
-				else 'minimal'
-				}
-			}
-			<xf:label>{$label}</xf:label>
-			<xf:itemset nodeset="instance('{$chooser-instance-id}-licenses')/license">
-				<xf:label ref="desc"/>
-				<xf:value ref="id"/>
-			</xf:itemset>
-			{
-			for $et in $event-target
-			return (
-				<xf:dispatch ev:event="xforms-value-changed" name="xforms-value-changed" targetid="{$et}" 
-					bubbles="true"/>,
-				<xf:dispatch ev:event="DOMFocusOut" name="DOMFocusOut" targetid="{$et}" 
-					bubbles="true"/>
-			)
-			}
-		</xf:select1>
-	</div>
+  controls:license-chooser-ui($control-id, $chooser-instance-id, $label, $appearance, $event-target, false())
+};
+
+(:~ license chooser UI 
+ : @param $label Label text
+ : @param $appearance 'droplist' (drop down list, default),
+ :		 'list' (list that shows all), 'radio' (radio buttons), '' 
+ : @param $event-target target for xforms-value-changed events, to work around a bug in XSLTForms r501
+ : @param $changed-value-save value changed event is the equivalent of focus out (both save)
+ :)
+declare function controls:license-chooser-ui(
+	$control-id as xs:string,
+	$chooser-instance-id as xs:string,
+	$label as xs:string,
+	$appearance as xs:string?,
+	$event-target as xs:string?,
+  $changed-value-save as xs:boolean?
+	) as element()+ {
+  <xf:select1 class="license-chooser" id="{$control-id}" incremental="true">
+    {
+    attribute {'ref'}{controls:instance-to-ref($chooser-instance-id,'self::tei:ptr/@target')},
+    (:attribute {if ($bind) then 'bind' else 'ref'}{$ref}:)
+    attribute {'appearance'}{
+      if ($appearance = 'list')
+      then 'compact'
+      else if ($appearance = 'radio')
+      then 'full'
+      else 'minimal'
+      }
+    }
+    <xf:label>{$label}</xf:label>
+    <xf:itemset nodeset="instance('{$chooser-instance-id}-licenses')/license">
+      <xf:label ref="desc"/>
+      <xf:value ref="id"/>
+    </xf:itemset>
+    {
+    for $et in $event-target
+    return (
+      <xf:dispatch ev:event="xforms-value-changed" name="{if ($changed-value-save) then 'DOMFocusOut' else 'xforms-value-changed'}" targetid="{$et}" 
+        bubbles="true"/>,
+      <xf:dispatch ev:event="DOMFocusOut" name="DOMFocusOut" targetid="{$et}" 
+        bubbles="true"/>
+    )
+    }
+  </xf:select1>
 };
 
 (:~ set a value on the license chooser from an existing value
@@ -1079,28 +1088,25 @@ declare function controls:rt-submission-set(
 	concat(controls:rt-submission-id($binding), '-set')
 };
 
+(: XSLTForms supports @targetref as of r507:
 declare function local:simulate-targetref(
 	$result-instance-id as xs:string,
 	$replace as xs:string,
 	$targetref as xs:string
 	) as node()+ {
-	<xf:action ev:event="xforms-submit-done">{
-		if ($replace = 'text')
-		then (
-			<xf:setvalue ref="{$targetref}" value="instance('{$result-instance-id}')"/>
-		)
-		else if ($replace = 'instance')
-		then (
+  if ($replace = 'instance')
+  then
+  	<xf:action ev:event="xforms-submit-done">{
 			<xf:insert origin="instance('{$result-instance-id}')"
 				nodeset="{$targetref}" at="1" position="before" if="count({$targetref}) &gt; 0"/>,
 			<xf:insert origin="instance('{$result-instance-id}')"
 				context="{$targetref}" if="count({$targetref})=0"/>,
 			<xf:delete nodeset="{$targetref}" at="2" if="count({$targetref}) &gt; 1"/>
 		)
-		else ()
-	}</xf:action>
+	  }</xf:action>
+  else ()
 };
-
+:)
 
 declare function controls:rt-submission(
 	$binding as attribute(),	
@@ -1145,21 +1151,17 @@ declare function controls:rt-submission(
 	let $submission-id := controls:rt-submission-id(string($binding))
 	let $result-instance-id := concat($submission-id, '-result')
 	return (
-		controls:error-instance($error-instance-id), 
-		<xf:instance id="{$submission-id}-blank">
-			<blank xmlns=""/>
-		</xf:instance>,
+		(:controls:error-instance($error-instance-id), :)
 		<xf:instance id="{$result-instance-id}">
 			<result xmlns=""/>
 		</xf:instance>,
 		<xf:submission id="{$submission-id}-get"
 			method="get"
-			ref="instance('{$submission-id}-blank')"
-			replace="instance"
-			instance="{$result-instance-id}"
+      serialization="none"
 			>{
-			$get-action,
-			local:simulate-targetref($result-instance-id, string($replace), string($targetref))
+      ($replace, attribute replace { 'instance'} )[1],
+      ($targetref, attribute instance { $result-instance-id })[1],
+			$get-action
 		}</xf:submission>,
 		<xf:send ev:event="xforms-ready" submission="{$submission-id}-get">{
 			if ($rt-condition)
@@ -1170,8 +1172,8 @@ declare function controls:rt-submission(
 		<xf:submission 
 			id="{$submission-id}-set"
 			method="post"
-			replace="instance"
-			instance="{$result-instance-id}">
+			replace="none"
+			>
 			{
 			$binding,
 			($put-action, $get-action)[1],
@@ -1185,14 +1187,14 @@ declare function controls:rt-submission(
 };
  
 declare function controls:rt-control(
-	$control-id as xs:string,
+	$control-id as xs:string?,
 	$submission-id as xs:string
 	) as element()+ {
 	controls:rt-control($control-id, $submission-id, (), (), ())
 };
 
 declare function controls:rt-control(
-	$control-id as xs:string,
+	$control-id as xs:string?,
 	$submission-id as xs:string,
 	$set-actions as element()*,
 	$other-actions as element()*

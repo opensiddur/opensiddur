@@ -9,7 +9,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: data.xql 769 2011-04-29 00:02:54Z efraim.feinstein $
  :)
 import module namespace response="http://exist-db.org/xquery/response";
 import module namespace request="http://exist-db.org/xquery/request";
@@ -27,31 +26,76 @@ declare option exist:serialize "method=xhtml media-type=text/html omit-xml-decla
         doctype-public=-//W3C//DTD&#160;XHTML&#160;1.1//EN
         doctype-system=http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd";
 
+declare variable $local:test-uri := "/code/tests/api/data/data.t.xml";
+
 declare function local:get(
 	) as element() {
 	let $base := '/code/api/data'
 	let $list := 
-		<ul>
-			<li><a href="{$base}/contributors">Contributor lists</a></li>
-			<li><a href="{$base}/original">Original texts</a></li>
-			<li><a href="{$base}/parallel">Parallel text tables</a></li>
-			<li><a href="{$base}/sources">Bibliographic data</a></li>
-			<li><a href="{$base}/translation">Translation texts</a></li>
-			<li><a href="{$base}/transliteration">Transliteration tables</a></li>
-			<li><a href="{$base}/output">Generated output</a></li>
-		</ul>
+		<ul class="common">{
+      api:list-item("Contributor lists",
+        concat($base, "/contributors"), 
+        ("GET", "POST"),
+        api:html-content-type(),
+        api:tei-content-type("tei:div")
+      ),
+      api:list-item("Original texts",
+        concat($base, "/original"),
+        "GET",
+        api:html-content-type(),
+        ()
+      ),
+      api:list-item("Parallel text tables",
+        concat($base, "/parallel"),
+        "GET",
+        api:html-content-type(),
+        ()
+      ),
+      api:list-item("Bibliographic data",
+        concat($base, "/sources"),
+        ("GET", "POST"),
+        api:html-content-type(),
+        api:tei-content-type("tei:biblStruct")
+      ),
+      api:list-item("Translation texts",
+        concat($base, "/translation"),
+        ("GET"),
+        api:html-content-type(),
+        ()
+      ),
+      api:list-item("Transliteration tables",
+        concat($base, "/transliteration"),
+        ("GET"),
+        api:html-content-type(),
+        ()
+      ),
+      api:list-item("Generated output",
+        concat($base, "/output"),
+        ("GET"),
+        api:html-content-type(),
+        ()
+      )
+		}</ul>
 	return
 		api:list(
 			<title>Open Siddur Data API</title>,
 			$list,
-			count($list/li)
+			0 (: the list here is a common menu, not results, so the number of results = 0 :),
+      false(),
+      "GET",
+      api:html-content-type(),
+      (),
+      $local:test-uri
 		)
 }; 
 
+(
+api:tests($local:test-uri),
 if (api:allowed-method('GET'))
 then
 	(: $user-name the user name in the request URI :)
-	local:get()
+  local:get()
 else
 	(: disallowed method :) 
 	()
+)[1]

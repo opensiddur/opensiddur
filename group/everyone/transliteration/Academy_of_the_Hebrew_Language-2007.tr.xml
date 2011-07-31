@@ -46,7 +46,7 @@ can be found at http://www.creativecommons.org/publicdomain/zero/1.0
     <tr:tr from="צ" to="ts"/>
     <tr:tr from="ק" to="k"/>
     <tr:tr from="ר" to="r"/>
-    <tr:tr from="שׁ" to="sh"/>
+    <tr:tr from="שׁ" to="sh" double="no"/>
     <tr:tr from="שׂ" to="s"/>
     <tr:tr from="ת" to="t"/>
     <tr:tr from="תּ" to="t"/>

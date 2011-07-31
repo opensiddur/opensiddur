@@ -5,7 +5,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: index.xql 719 2011-03-30 17:48:06Z efraim.feinstein $
  :)
 
 import module namespace request="http://exist-db.org/xquery/request";
@@ -38,6 +37,6 @@ then
 		api:list(
 			<title>Open Siddur User API</title>,
 	  	$list-body,
-	  	count($list-body/li)
+	  	count($list-body/self::ul[@class="results"]/li) 
 		)
 else ()

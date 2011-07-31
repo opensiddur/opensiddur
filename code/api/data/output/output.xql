@@ -70,7 +70,7 @@ declare function local:get-menu(
 		<ul class="common">{
 			if (not($share-type))
 			then (
-				api:list-item('Group output', '/code/api/data/output/group', ())
+				api:list-item('Group output', '/code/api/data/output/group', "GET", api:html-content-type(), ())
 			)
 			else if (not($owner))
 			then (
@@ -80,7 +80,7 @@ declare function local:get-menu(
 					then (
 						for $group in xmldb:get-user-groups($user)
 						return
-							api:list-item($group, concat('/code/api/data/output/group/', $group), ())
+							api:list-item($group, concat('/code/api/data/output/group/', $group), "GET", api:html-content-type(), ())
 					)
 					else ( (:do not display data about not logged in users :) )
 			)
@@ -115,9 +115,11 @@ declare function local:get-menu(
 									then $title-string
 									else $doc-name-no-ext
 								}</span>,
-								$link, ('xhtml', 'css'),
-								replace($doc-uri, '^/db', ''),
-								'db'
+								$link, "GET", api:html-content-type(),
+                ("xhtml", concat($link, ".xhtml"),
+                "css", concat($link, ".css"),
+								"db", replace($doc-uri, "^/db", "")
+                )
 							)
 			}</ul>
 		)
@@ -131,7 +133,11 @@ declare function local:get-menu(
 		api:list(
 			<title>Open Siddur Output Data API</title>,
 			$list,
-			$n-results
+			$n-results,
+      true(),
+      "GET",
+      (api:html-content-type()),
+      ()
 		)
 	)
 };
@@ -141,12 +147,13 @@ declare function local:get(
 	$path as xs:string,
 	$format as xs:string
 	) as item() {
+  let $original-format := $format
 	let $format := 
 		if (not($format) or $format = 'html')
 		then 'xhtml'
 		else $format
-	let $db-path := data:api-path-to-db(concat($path, if ($format) then '' else '.xhtml'))
-	return
+	let $db-path := data:api-path-to-db(concat($path, if ($original-format) then '' else '.xhtml'))
+	return (
 		if ($format = 'xhtml')
 		then 
 			if (doc-available($db-path))
@@ -171,6 +178,7 @@ declare function local:get(
 						api:error(404, "Not found", $path)
 			else
 				api:error(404, "Not found", $path)
+  )
 };
 
 if (api:allowed-method('GET'))

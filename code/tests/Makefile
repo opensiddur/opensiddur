@@ -2,7 +2,7 @@
 #
 # Allows make tests to run all the available automated tests, independent of where they are located
 #
-# Copyright 2010 Efraim Feinstein
+# Copyright 2010-2011 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -33,6 +33,10 @@ export PYTHONPATH := $(PYTHONPATH)
 .PHONY: prepare-tests
 prepare-tests: test-db-running
 	curl -u testuser:testuser http://localhost:8080/code/tests/setup-test-cache.xql
+
+.PHONY: test-api
+test-api: test-db-running
+	python $(CODEDIR)/tests/api/user/user.py -v
 
 .PHONY: test-triggers
 test-triggers: test-db-running

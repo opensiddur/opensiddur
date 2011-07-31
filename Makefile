@@ -29,7 +29,6 @@
 # bf-install - install betterFORM extension over the database in $(EXIST_INSTALL_DIR)
 # db-uninstall - remove $(EXIST_INSTALL_DIR)
 # db-sync DBAPASS=<database password> - synchronize code, data, and common from the development working copy to a running database; 
-# db-svnsync DBAPASS=<database password> - synchronize server-based svn copy to a running database
 # db-syncclean - clean the __contents__.xml files left by syncing the database 
 # 
 # $Id: Makefile 776 2011-05-01 07:34:30Z efraim.feinstein $
@@ -132,6 +131,8 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
+# lock eXist to a given revision
+EXIST_REVISION ?= -r 14669
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -192,7 +193,7 @@ $(EXIST_INSTALL_JAR): svn-exist
 		./build.sh svn-download
 	cd $(LIBDIR)/exist && \
 		JAVA_HOME=$(JAVA_HOME) \
-		./build.sh installer -Dizpack.dir=$(IZPACK)
+		./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true
 
 .PHONY: build-exist clean-exist dist-clean-exist
 build-exist: $(EXIST_INSTALL_JAR)
@@ -225,9 +226,10 @@ clean-hebmorph-lucene:
 	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant clean
 
 # Install a copy of the eXist database
-.PHONY: db-install db-install-wlc bf-install db-uninstall db-sync db-svnsync db-syncclean
+.PHONY: db-install db-install-wlc bf-install db-uninstall db-sync db-syncclean
 db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 	java -jar $(EXIST_INSTALL_JAR) -p $(EXIST_INSTALL_DIR)
+	$(XSLT) -s $(EXIST_INSTALL_DIR)/conf.xml -o $(EXIST_INSTALL_DIR)/conf.xml $(SETUPDIR)/setup-conf-xml.xsl2
 	-patch -Nd $(EXIST_INSTALL_DIR) < $(SETUPDIR)/mime-types.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/webapp/WEB-INF < $(SETUPDIR)/controller-config.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/tools/jetty/etc < $(SETUPDIR)/jetty.xml.patch
@@ -235,13 +237,11 @@ db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 	# kluge:
 	#cp $(DBDIR)/data/global/transliteration/hebrew.dtd $(EXIST_INSTALL_DIR)
 	@read -p "Set the password for admin database user: " ADMPASS && \
-	read -p "Set the password for userman database user (enter for none): " APASS && \
-	  echo "Setting userman password..." && \
-		cat $(CODEDIR)/$(QUERYDIR)/admin.tmpl.xqm | sed "s/\*PASSWORD\*/$$APASS/g" > $(CODEDIR)/$(QUERYDIR)/admin.xqm && \
-		cat $(SETUPDIR)/setup.xql.tmpl | sed "s/ADMINPASSWORD/$$ADMPASS/g" | sed "s/USERMANPASSWORD/$$APASS/g" > $(SETUPDIR)/setup.xql && \
+	  echo "Setting admin password..." && \
+		cat $(SETUPDIR)/setup.tmpl.xql | sed "s/ADMINPASSWORD/$$ADMPASS/g" > $(SETUPDIR)/setup.xql && \
 		echo "done."  && \
 		make db
-	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 $(DBDIR)
+	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
 	@echo "Copying files to database..."
 	@#copy the triggers first so eXist will know where they are during restore
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/triggers/__contents__.xml -ouri=xmldb:exist:// 
@@ -262,10 +262,6 @@ db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 db-install-wlc: tanach
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 774 -c /db/group/everyone -u admin -g everyone $(TEXTDIR)/wlc
 	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -ouri=xmldb:exist://
-
-db-svnsync: db
-	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 $(DBDIR)
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -u admin -P $(DBAPASS) -ouri=xmldb:exist://localhost:8080/xmlrpc
 
 # Install a new copy of the database with betterFORM trunk
 bf-install: db-install
@@ -289,19 +285,18 @@ db-uninstall:
 # (a bit of a misnomer, since it will not delete files from the db!)
 db-sync:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 -c /db/code $(CODEDIR) 
-	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 -g everyone -c /db/data $(DATADIR) 
+	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 -g everyone -c /db/data $(DATADIR) 
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 755 -c /db/common $(COMMONDIR) 
 	$(EXISTBACKUP) -u admin -p $(DBAPASS) -r `pwd`/$(CODEDIR)/__contents__.xml -ouri=xmldb:exist://localhost:8080/xmlrpc
 	$(EXISTBACKUP) -u admin -p $(DBAPASS) -r `pwd`/$(DATADIR)/__contents__.xml -ouri=xmldb:exist://localhost:8080/xmlrpc
 	$(EXISTBACKUP) -u admin -p $(DBAPASS) -r `pwd`/$(COMMONDIR)/__contents__.xml -ouri=xmldb:exist://localhost:8080/xmlrpc
 
 # patch error status ignored because it returns 1 if patches are already applied
-db: externals schema transforms queries $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tests
+db: externals schema transforms $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tests
 	mkdir -p $(DBDIR)/xforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources
 	cp $(CODEDIR)/common/params.xsl2 $(DBDIR)/code/common	
-	cp $(CODEDIR)/$(QUERYDIR)/admin.xqm $(DBDIR)/$(CODEDIR)/$(QUERYDIR)
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-common-tests.xsl.patch
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-tests-utils.xsl.patch
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-xspec-tests.xsl.patch
@@ -346,8 +341,8 @@ $(TEIDIR):
 	svn co $(TEIREPO) $(TEIDIR)
 
 svn-exist: $(EXISTSRCDIR)
-	svn update $(EXISTSRCDIR)
+	svn update $(EXIST_REVISION) $(EXISTSRCDIR)
 
 $(EXISTSRCDIR):
-	svn co $(EXISTSRCREPO) $(EXISTSRCDIR)
+	svn co $(EXIST_REVISION) $(EXISTSRCREPO) $(EXISTSRCDIR)
 
