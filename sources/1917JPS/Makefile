@@ -1,6 +1,9 @@
 # 1917 JPS project Makefile
 # Copyright 2011 Marc Stober and licensed under the LGPL
 
+# given the PDF from JPS
+# given the XML conversion of the PDF checked in by Efraim
+
 toc.txt: Tanakh-JPS1917.xml ../../code/input-conversion/1917JPS/toc.py
 # extract just the lines that *could* be in Table of Contents
 # to get it down to a manageable size
