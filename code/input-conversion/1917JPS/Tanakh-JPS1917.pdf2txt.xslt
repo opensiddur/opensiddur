@@ -16,15 +16,21 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
 
   <!-- TODO
        Split columns (in progress)
-       Backup!!!
+       Backup!!
        "Spell check" against a dictionary.
        Identify verse numbers, etc.
+       Paragraphs. Maybe we stripped out too much (&#10;)
        Poetry?
+       Tidy
   -->
 
+  <!-- TODO something cleaner than carrying around param like this? -->
   <xsl:template match="@*|*">
+    <xsl:param name="columnBoundaryX" />
     <xsl:copy>
-      <xsl:apply-templates select="*|@*|node()"/>
+      <xsl:apply-templates select="*|@*|node()">
+	<xsl:with-param name="columnBoundaryX" select="$columnBoundaryX" />
+      </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
 
@@ -46,11 +52,13 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
       <xsl:attribute name="columnBoundaryX">
 	<xsl:value-of select="$columnBoundaryX" />
       </xsl:attribute>
-      <xsl:apply-templates select="@*"/>
+      <xsl:apply-templates select="@*" />
       <!-- rects divide columns and footnotes. Find them first. -->
       <!-- TODO: are there ever any other rects? -->
       <xsl:apply-templates select="rect" />
-      <xsl:apply-templates select="*[name()!='rect']"/>
+      <xsl:apply-templates select="*[name()!='rect']">
+	<xsl:with-param name="columnBoundaryX" select="$columnBoundaryX" />
+      </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
 
@@ -73,17 +81,17 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
   </xsl:template>
 
   <xsl:template match="textline">
+    <xsl:param name="columnBoundaryX" />
     <xsl:copy>
       <!-- copy attributes TODO might not always need this -->
       <xsl:apply-templates select="@*" />
       <xsl:attribute name="class">
-	<xsl:value-of select="substring-before(@bbox,',')" />
 	<xsl:choose>
-	  <xsl:when>
-	    col-left
+	  <xsl:when test="substring-before(@bbox,',') &lt; $columnBoundaryX">
+	    <xsl:text>col-left</xsl:text>
 	  </xsl:when>
 	  <xsl:otherwise>
-	    col-right
+	    <xsl:text>col-right</xsl:text>
 	  </xsl:otherwise>
 	</xsl:choose>
       </xsl:attribute>

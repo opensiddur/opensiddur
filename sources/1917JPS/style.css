@@ -8,3 +8,11 @@ body
     margin: 1em 0;
     padding: 1em;
 }
+.text
+{
+    border: solid 1px #00FFFF;
+}
+.misplaced
+{
+    border: solid 2px #FF0000;
+}
