@@ -85,6 +85,8 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
     <xsl:copy>
       <!-- copy attributes TODO might not always need this -->
       <xsl:apply-templates select="@*" />
+
+      <!-- columns -->
       <xsl:attribute name="class">
 	<xsl:choose>
 	  <xsl:when test="substring-before(@bbox,',') &lt; $columnBoundaryX">
@@ -95,14 +97,33 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
 	  </xsl:otherwise>
 	</xsl:choose>
       </xsl:attribute>
-      <xsl:variable name="linetext"><xsl:apply-templates select="text" /></xsl:variable>
-      <xsl:value-of select="normalize-space($linetext)" />
+
+      <!-- xsl:variable name="linetext" -->
+	<xsl:for-each select="text[1]">
+	  <xsl:call-template name="text" />
+	</xsl:for-each>
+      <!-- /xsl:variable -->
+      <!-- xsl:value-of select="normalize-space($linetext)" / -->
     </xsl:copy>
   </xsl:template>
 
-  <!-- DON'T xsl:copy the text element, just its contents -->
-  <xsl:template match="text">
-    <xsl:value-of select="." />
+  <xsl:template name="text">
+    <xsl:variable name="size">
+      <xsl:value-of select="@size" />
+    </xsl:variable>
+    <xsl:element name="span">
+      <xsl:attribute name="size">
+	<xsl:value-of select="@size" />
+      </xsl:attribute>
+      <xsl:value-of select="." />
+      <xsl:for-each select="following-sibling::text[@size=$size]">
+	<xsl:value-of select="." />
+      </xsl:for-each>
+    </xsl:element>
+    <xsl:for-each select="following-sibling::node()[@size!=$size][1]">
+      
+      <xsl:call-template name="text" />
+    </xsl:for-each>
   </xsl:template>
 
 </xsl:stylesheet>
