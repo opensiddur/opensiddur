@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Tanakh-JPS1917.pdf2txt.xslt for the OpenSiddur project.
+1917JPS.xslt for the OpenSiddur project.
 Copyright 2011 Marc Stober and licensed under the GNU LGPL.
 
 Given the XML file produced by running the PDFMiner tool pdf2txt.py 
@@ -15,6 +15,8 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
   <xsl:preserve-space elements="text" />
 
   <!-- TODO
+       BUG: text repeated in spans
+       Make sure Hebrew is output
        Split columns (in progress)
        Backup!!
        "Spell check" against a dictionary.

@@ -3,15 +3,15 @@
 
 # given the PDF from JPS
 
-all: 18.xml
+all: 1917JPS.xml
 
 # todo put PDFMiner out put in a folder or something?
-18.pdf2txt.xml: Makefile
-	pdf2txt.py -p 18 -o 18.pdf2txt.xml -t xml -W 1 Tanakh-JPS1917.pdf
+1917JPS.pdf2txt.xml: Makefile
+	pdf2txt.py -p 16,17,18 -o 1917JPS.pdf2txt.xml -t xml -W 1 Tanakh-JPS1917.pdf
 
-18.xml: ../../code/input-conversion/1917JPS/Tanakh-JPS1917.pdf2txt.xslt 18.pdf2txt.xml
-	xsltproc ../../code/input-conversion/1917JPS/Tanakh-JPS1917.pdf2txt.xslt \
-	18.pdf2txt.xml > 18.xml
+1917JPS.xml: ../../code/input-conversion/1917JPS/1917JPS.xslt 1917JPS.pdf2txt.xml
+	xsltproc ../../code/input-conversion/1917JPS/1917JPS.xslt \
+	1917JPS.pdf2txt.xml > 1917JPS.xml
 
 # page 16=genesis 1
 16.html: ../../code/input-conversion/1917JPS/jps2.xslt
