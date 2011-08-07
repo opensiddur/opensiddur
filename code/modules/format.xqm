@@ -156,11 +156,23 @@ declare function format:enqueue-compile(
       jobs:enqueue(
         <jobs:job>
           <jobs:run>
-            <jobs:query>/code/apps/jobs/queries/bg-compile-cache.xqm</jobs:query>
-            <jobs:param name="source-collection" value="{$source-collection}"/>
-            <jobs:param name="source-resource" value="{$source-resource}"/>
-            <jobs:param name="dest-collection" value="{$dest-collection}"/>
-            <jobs:param name="dest-resource" value="{$dest-resource[1]}"/>
+            <jobs:query>/code/apps/jobs/queries/bg-compile-cache.xql</jobs:query>
+            <jobs:param>
+              <jobs:name>source-collection</jobs:name>
+              <jobs:value>{$source-collection}</jobs:value>
+            </jobs:param>
+            <jobs:param>
+              <jobs:name>source-resource</jobs:name>
+              <jobs:value>{$source-resource}</jobs:value>
+            </jobs:param>
+            <jobs:param>
+              <jobs:name>dest-collection</jobs:name>
+              <jobs:value>{$dest-collection}</jobs:value>
+            </jobs:param>
+            <jobs:param>
+              <jobs:name>dest-resource</jobs:name>
+              <jobs:value>{$dest-resource[1]}</jobs:value>
+            </jobs:param>
           </jobs:run>
         </jobs:job>, $user, $password)
     let $data-job := 
@@ -169,11 +181,23 @@ declare function format:enqueue-compile(
         jobs:enqueue(
           <jobs:job>
             <jobs:run>
-              <jobs:query>/code/apps/jobs/queries/bg-data-compile.xqm</jobs:query>
-              <jobs:param name="source-collection" value="{jcache:cached-document-path($source-collection)}"/>
-              <jobs:param name="source-resource" value="{$source-resource}"/>
-              <jobs:param name="dest-collection" value="{$dest-collection}"/>
-              <jobs:param name="dest-resource" value="{$dest-resource[2]}"/>
+              <jobs:query>/code/apps/jobs/queries/bg-data-compile.xql</jobs:query>
+              <jobs:param>
+                <jobs:name>source-collection</jobs:name>
+                <jobs:value>{jcache:cached-document-path($source-collection)}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>source-resource</jobs:name>
+                <jobs:value>{$source-resource}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-resource</jobs:name>
+                <jobs:value>{$dest-resource[2]}</jobs:value>
+              </jobs:param>
             </jobs:run>
             <jobs:depends>{string($frag-job)}</jobs:depends>
           </jobs:job>, $user, $password)
@@ -184,11 +208,23 @@ declare function format:enqueue-compile(
         jobs:enqueue(
           <jobs:job>
             <jobs:run>
-              <jobs:query>/code/apps/jobs/queries/bg-list-compile.xqm</jobs:query>
-              <jobs:param name="source-collection" value="{$dest-collection}"/>
-              <jobs:param name="source-resource" value="{$dest-resource[2]}"/>
-              <jobs:param name="dest-collection" value="{$dest-collection}"/>
-              <jobs:param name="dest-resource" value="{$dest-resource[3]}"/>
+              <jobs:query>/code/apps/jobs/queries/bg-list-compile.xql</jobs:query>
+              <jobs:param>
+                <jobs:name>source-collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>source-resource</jobs:name>
+                <jobs:value>{$dest-resource[2]}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-resource</jobs:name>
+                <jobs:value>{$dest-resource[3]}</jobs:value>
+              </jobs:param>
             </jobs:run>
             <jobs:depends>{string($data-job)}</jobs:depends>
           </jobs:job>, $user, $password)
@@ -199,12 +235,27 @@ declare function format:enqueue-compile(
         jobs:enqueue(
           <jobs:job>
             <jobs:run>
-              <jobs:query>/code/apps/jobs/queries/bg-format-compile.xqm</jobs:query>
-              <jobs:param name="source-collection" value="{$dest-collection}"/>
-              <jobs:param name="source-resource" value="{$dest-resource[3]}"/>
-              <jobs:param name="dest-collection" value="{$dest-collection}"/>
-              <jobs:param name="dest-resource" value="{$dest-resource[4]}"/>
-              <jobs:param name="style" value="{$style-href}"/>
+              <jobs:query>/code/apps/jobs/queries/bg-format-compile.xql</jobs:query>
+              <jobs:param>
+                <jobs:name>source-collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>source-resource</jobs:name>
+                <jobs:value>{$dest-resource[3]}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-resource</jobs:name>
+                <jobs:value>{$dest-resource[4]}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>style</jobs:name>
+                <jobs:value>{$style-href}</jobs:value>
+              </jobs:param>
             </jobs:run>
             <jobs:depends>{string($list-job)}</jobs:depends>
           </jobs:job>, $user, $password)

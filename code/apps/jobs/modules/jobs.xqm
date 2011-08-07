@@ -6,7 +6,10 @@ xquery version "3.0";
  :  <job>
  :    <run>
  :      <query/>
- :      <param name="" value=""/>+
+ :      <param>
+ :        <name/>
+ :        <value/>
+ :      </param>+
  :    </run>
  :    <priority/> <!--default 0 -->
  :    <runas/> <!-- default guest -->
@@ -26,6 +29,8 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "xmldb:exist:///code/modules/paths.xqm";
 
 declare namespace err="http://jewishliturgy.org/errors";
+
+declare option exist:optimize "enable=no";
 
 declare variable $jobs:queue-collection := '/code/apps/jobs/data';
 declare variable $jobs:queue-resource := 'queue.xml';
@@ -258,14 +263,17 @@ declare function jobs:run(
             if ($paths:debug)
             then util:log-system-out(("Jobs module attempting to run: ", $run))
             else (),
-            util:eval(xs:anyURI($run/jobs:query), false(),
-              (
-              xs:QName('local:user'), $runas,
-              xs:QName('local:password'), $password,
-              for $param in $run/jobs:param
-              let $qname := xs:QName(concat('local:', $param/jobs:name))
-              let $value := string($param/jobs:value)
-              return ($qname, $value)
+            let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
+            return (
+              util:eval($query , false(),
+                (
+                xs:QName('local:user'), $runas,
+                xs:QName('local:password'), $password,
+                for $param in $run/jobs:param
+                let $qname := xs:QName(concat('local:', $param/jobs:name))
+                let $value := string($param/jobs:value)
+                return ($qname, $value)
+                )
               )
             )
           
