@@ -188,7 +188,10 @@ declare function local:commit-cache(
       		(: make sure the flag is removed if app:transform-xslt fails :)
       		local:remove-flag($collection, $resource),
           util:log-system-out(("Error during transform-xslt in cache-controller: ", $code, " ", $desc, " ", $value)),
-      		error($code cast as xs:QName, concat ($desc, ' ', $value))
+      		error(
+            if ($code castable as xs:QName) 
+            then $code cast as xs:QName
+            else xs:QName("err:TRANSFORM"), concat ($code, " ", $desc, " ", $value))
       	}
     return (
       if (xmldb:store($cache, $resource, $transform-result))
