@@ -181,7 +181,7 @@ declare function format:enqueue-compile(
         jobs:enqueue(
           <jobs:job>
             <jobs:run>
-              <jobs:query>/code/apps/jobs/queries/bg-data-compile.xql</jobs:query>
+              <jobs:query>/code/apps/jobs/queries/bg-compile-data.xql</jobs:query>
               <jobs:param>
                 <jobs:name>source-collection</jobs:name>
                 <jobs:value>{jcache:cached-document-path($source-collection)}</jobs:value>
@@ -208,7 +208,7 @@ declare function format:enqueue-compile(
         jobs:enqueue(
           <jobs:job>
             <jobs:run>
-              <jobs:query>/code/apps/jobs/queries/bg-list-compile.xql</jobs:query>
+              <jobs:query>/code/apps/jobs/queries/bg-compile-list.xql</jobs:query>
               <jobs:param>
                 <jobs:name>source-collection</jobs:name>
                 <jobs:value>{$dest-collection}</jobs:value>
@@ -235,7 +235,7 @@ declare function format:enqueue-compile(
         jobs:enqueue(
           <jobs:job>
             <jobs:run>
-              <jobs:query>/code/apps/jobs/queries/bg-format-compile.xql</jobs:query>
+              <jobs:query>/code/apps/jobs/queries/bg-compile-format.xql</jobs:query>
               <jobs:param>
                 <jobs:name>source-collection</jobs:name>
                 <jobs:value>{$dest-collection}</jobs:value>
