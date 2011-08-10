@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tei:div xmlns:tei="http://www.tei-c.org/ns/1.0" type="contributors" xml:lang="en">
+   <tei:list>
+      <tei:item xml:id="Zalman.Schachter-Shalomi">
+         <tei:forename>Zalman</tei:forename>
+         <tei:surname>Schachter-Shalomi</tei:surname>
+         <tei:email>davvener@gmail.com</tei:email>
+         <tei:affiliation>
+            <tei:ptr target="#STHYP"/>
+         </tei:affiliation>
+      </tei:item>
+      <tei:item xml:id="STHYP">
+         <tei:orgName>The Red Zalman Legacy Project</tei:orgName>
+         <tei:ptr type="url" target="http://rzlp.org"/>
+      </tei:item>
+   </tei:list>
+</tei:div>

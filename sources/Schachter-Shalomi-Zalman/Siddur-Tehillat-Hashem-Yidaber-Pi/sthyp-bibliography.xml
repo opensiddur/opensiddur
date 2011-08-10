@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tei:div xmlns:tei="http://www.tei-c.org/ns/1.0" type="bibliography" xml:lang="en">
+   <tei:biblStruct xml:id="Zalman2009">
+      <tei:monogr>
+         <tei:title>Siddur Tehillat Hashem Yedaber Pi</tei:title>
+         <tei:edition>v.1.0</tei:edition>
+         <tei:editor>
+            <tei:name>Zalman Schachter-Shalomi</tei:name>
+         </tei:editor>
+         <tei:imprint>
+            <tei:publisher>Zalman Schachter-Shalomi</tei:publisher>
+            <tei:date>1 Jun 2009</tei:date>
+            <tei:distributor>The Open Siddur Project<tei:ref type="url" target="http://opensiddur.org/">via web site</tei:ref>
+               <tei:date type="access">08-2009</tei:date>
+            </tei:distributor>
+         </tei:imprint>
+      </tei:monogr>
+      <tei:note type="copyright">
+            The editor has shared the text with a Creative Commons By Attribution-ShareAlike 3.0 Unported license details at <tei:ref type="url"
+                  target="http://creativecommons.org/licenses/by-sa/3.0/">creativecommons.org</tei:ref>. 
+          </tei:note>
+   </tei:biblStruct>
+</tei:div>

@@ -1,0 +1,4971 @@
+﻿{file "סדור תהילת השם ידבר פי" "Siddur-Tehillat-Hashem-Yedaber-Pi.xml"}
+{include block "Title.xml"}
+{include block "Intro.xml"}
+{include block "Haskhamat-Haboker.xml"}
+{include block "Shacharit.xml"}
+{include block "Mincha.xml"}
+{include block "Maariv.xml"}
+{include block "Hareni-Mocheil.xml"}
+{include block "Appendix.xml"}
+{include block "Likkuti-tefilla-l'shabbat.xml"}
+
+{file "Title Page" "Title.xml"}
+{he סדוּר תהילת השם ידבר פי}
+{translit he-Latn "Siddur Tehillat Hashem"} As I Can Say It
+(For Praying In The Vernacular)
+
+{he שמע! בכל לשון שאתה שומע}
+Sh’ma! Listen in any language you can hear it and understand
+
+Rabbi Zalman Schachter-Shalomi
+
+Reb Zalman Legacy Project
+rzlp.org
+
+YESOD, Foundation for a Jewish Future
+yesodfoundation.org
+
+Aleph: Alliance for Jewish Renewal
+aleph.org
+
+Ohalah: Association of Rabbis for Jewish Renewal
+ohalah.org
+
+June 2009
+
+{file "Introduction" "Intro.xml"}
+{he בס"ד}
+
+Dear Davvener,
+
+If you are not used to reading Hebrew with comprehension and with the ability to dilate the Hebrew from the literal meaning, or if you cannot read Hebrew and need a resource for daily davvenen, I offer you this set of texts, which I, too, use frequently for myself.
+
+I translated the Psalms and the liturgy in the way in which I experience them in my {emph feeling consciousness.} This does not offer the {translit he-Latn "'pshat,'"} the literal meaning of the words, but the devotional interpretation that can make it a prayer of the heart.
+
+I suggest that you davven it first all the way through, reading it out loud enough to hear it yourself with feeling. You will like some sections better than others.
+
+However, as you will note, there are 5 sections to this heart siddur.  They describe the raising your awareness from the realm of {emph sensation,} the prayer of {emph {translit he-Latn "Assiyah,"}} to the realm of {emph feelings,} the prayer of {emph {translit he-Latn "Yetzirah,"}} from there to the realm of {emph reason and the intellect,} the world of {emph {translit he-Latn "B’riyah"}} and to the summit, the world of the {emph intuition, {translit he-Latn "Atzilut."}}
+
+When you are done with this ascent, coming back to the grounded world of sensation and action, you will need to reflect on the stirrings you felt on the way up and ask yourself these questions:
+* How am I to apply this in my consensus reality and with my family and other contacts?
+* How am I to act in a manner that will lead to the healing of our planet and society?
+
+This part is called the {emph bringing down of the Divine influx, {translit he-Latn "yeridat hashefa’."}}
+
+You may need to pick some paragraphs from each plane of prayer if all of it is too much for you. Some days you may wish to vary some parts and say others. This 'siddur' is meant to help you stay in daily touch with {dn God,} to gain blessed assistance from {dn God,} to lighten your burdens, not to add to them. Then recite some of the sentences of blessings and proceed with your daily tasks.
+
+{poetry} 
+May you experience
+your praying
+as a blessed meeting
+with {dn your God.} 
+{prose}
+
+Reb Zalman Schachter-Shalomi
+
+{file "השכמת הבוקר" "Haskhamat-Haboker.xml"}
+{section מודה אני לפניך}
+
+{poetry} 
+{emph Thank You,} Living {dn God} 
+And Master,
+For giving me 
+Another day of awareness.
+I thank You 
+For this sacred trust.
+
+{file "שחרית" "Shacharit.xml"}
+{include block "Tefillat-HaAssiya.xml"}
+{include block "Tefillat-HaYetzirah.xml"}
+{include block "Tefillat-HaBriyah.xml"}
+{include block "Tefillat-HaAtzilut.xml"}
+
+{file "תפילת העשיה" "Tefillat-HaAssiya.xml"}
+{include block "Asher-Yatzar.xml"}
+{include block "Elohai-Neshama.xml"}
+{include block "Birkhot-HaTorah.xml"}
+{include block "Birkhot-HaShachar.xml"}
+{include block "VAhavta.xml.xml"}
+
+{section תפילת העשיה}
+
+{file "אשר יצר" "Asher-Yatzar.xml"}
+{section אשר יצר}
+
+{poetry} 
+I worship You,
+{dn Yah,} {dn our God,} 
+Cosmic Majesty.
+You formed me,
+A human being,
+So wisely.
+You created in me
+All kinds of
+Hollows and ducts, 
+Inner organs and intestines.
+
+As I am all transparent to You,
+It is apparent and clear,
+That if any of these
+That need to be open would clog,
+Or any of these
+Which need to be enclosed
+Would seep,
+I could not exist and live
+In Your sight,
+Not even for a moment.
+
+So I am grateful 
+And bless You,
+For healing me,
+In amazing ways.
+
+{file "נשמה שנתת בי" "Elohai-Neshama.xml"}
+{section נשמה שנתת בי}
+
+{poetry} 
+My {dn God,}
+The breath You have given me
+Is fresh.
+You create it.
+You form it.
+You breathe it into me.
+
+And you keep me breathing.
+
+At some time,
+You will take it away from me,
+And I will have breathed 
+my last breath in this body.
+
+And You will resuscitate me,
+To the life of the spirit.
+
+For each breath still in me,
+I thank You,
+My own {dn God,}
+Who is also my parents' {dn God,}
+{dn Lord} of all spirits,
+Master of all that happens.
+
+I offer You thanks,
+Cosmic Majesty,
+And worship You,
+For keeping me breathing.
+
+And in this way,
+With each breath,
+You give me Life anew.
+
+{file "ברכות התורה" "Birkhot-HaTorah.xml"}
+{include block "study-torah.xml"}
+{include block "reveal-torah.xml"}
+
+{section ברכות התורה}
+
+{file "ברכה תלמוד התורה" "study-torah.xml"}
+{poetry} 
+You commanded us
+To exercise our awareness
+In Your {translit he-Latn "Torah;"}
+For this instruction
+We offer You our appreciation,
+{dn Yah,} {dn our God.} 
+
+We ask that we may find
+Zest and delight
+In the words of Your teaching.
+May we and our children
+(and their children, too)
+Become intimate with You.
+And, with pure intent--
+Immerse ourselves in the {translit he-Latn "Torah."}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+You mentor Your people
+In {translit he-Latn "Torah."}
+
+{file "ברכה נותן התורה" "reveal-torah.xml"}
+{poetry}
+Barukh attah {dn Yah,}
+I offer You thanks,
+Cosmic Majesty,
+And worship You
+For selecting us
+Among all nations,
+To reveal to us,
+The Torah meant for us.
+{translit he-Latn "Barukh attah {dn Yah,}"}
+You keep gifting us
+With Your Torah.
+
+{instruct Now, 
+study Torah 
+where your heart prompts you}
+
+
+{file "ברכות השחר" "Birkhot-HaShachar.xml"}
+{include block "Birkhot-SheNatani.xml"}
+{include block "Birkhot-SheAsani.xml"}
+{include block "HaMa'avir-Sheina.xml"}
+
+
+{section ברכות השחר}
+
+{file "ברכות שנתני" "Birkhot-SheNatani.xml"}
+{include block "LeHavkhin.xml"}
+{include block "Pokeach-Ivrim.xml"}
+{include block "Matir-Asurim.xml"}
+{include block "Zokef-Kefufim.xml"}
+{include block "Malbish-Arumim.xml"}
+{include block "Roka-HaAretz.xml"}
+{include block "Mitzadei-Gaver.xml"}
+{include block "Ozer-Yisrael.xml"}
+{include block "Oter-Yisrael.xml"}
+{include block "HaNotein-LeYaef.xml"}
+
+{file "ברכה להבכין" "LeHavkhin.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For giving me the gift
+To discern the difference
+Between day and night.
+
+{file "ברכה פוקח עורים" "Pokeach-Ivrim.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For giving sight to my eyes.
+
+{file "ברכה מתיר אסורים" "Matir-Asurim.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For giving free movement
+to my limbs.
+
+{file "ברכה זוקף כפופים" "Zokef-Kefufim.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For helping me to stand upright.
+
+{file "ברכה מלביש ערומים" "Malbish-Arumim.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For giving me clothes to wear.
+
+{file "ברכה רוקע הארץ" "Roka-HaAretz.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For  the firm ground
+On which You place me.
+
+{file "ברכה מצעדי גבר" "Mitzadei-Gaver.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For leading my steps
+In the right direction.
+
+{file "ברכה שעשה לי" "SheAsa-Li.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For providing 
+for all my needs.
+
+{file "ברכה אוזר ישראל" "Ozer-Yisrael.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For imbuing me
+Among other Jews,
+With Strength.
+
+{file "ברכה עותר ישראל" "Oter-Yisrael.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For making my soul bright,
+When I wrestle 
+And dance with You.
+
+{file "ברכה הנותן ליעף" "HaNotein-LeYaef.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For taking my weariness
+And giving me energy.
+
+{file "ברכות שעשני" "Birkhot-SheAsani.xml"}
+{include block "SheAsani-BeTzalmo.xml"}
+{include block "SheAsani-Chorin.xml"}
+{include block "SheAsani-Bnei-Yisrael.xml"}
+
+{file "ברכה שעשני בצלמו" "SheAsani-BeTzalmo.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For shaping my life 
+in Your image.
+
+{file "ברכה שעשני חורין" "SheAsani-Chorin.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For giving me options.
+
+{file "ברכה שעשני בני ישראל" "SheAsani-Bnei-Yisrael.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For giving me the privilege
+To worship You, as a Jew.
+
+{file "ברכה המעביר שנה" "HaMa'avir-Sheina.xml"}
+{poetry}
+{translit he-Latn "Barukh attah {dn Yah,}"}
+I offer You thanks,
+Cosmic Majesty
+And worship You,
+For removing 
+The last trace of sleep 
+from my eyes.
+
+{section יהי רצון}
+
+{poetry}
+And we ask Your blessed help
+To find that our habits
+Follow Your {translit he-Latn "Torah,"}
+To make our desire 
+Seek Your {translit he-Latn "Mitzvot."}
+
+Keep us from sin and offense,
+From shame and temptation.
+Do not allow evil to attract us.
+Keep us far from malicious people,
+But draw us to seek goodness
+And right action.
+Induce our selfishness 
+To serve You.
+And help us this day, 
+Yes, every day,
+To be generous, 
+Friendly and cheerful.
+
+As we face You
+And all who we will meet,
+Keep us in Your grace 
+And bless us.
+{translit he-Latn "Barukh attah {dn Yah,}"}
+You are always generous to us,
+Your people Israel.
+{translit he-Latn "Amen"}
+
+
+{file "מצוות אהבת" "VAhavta.xml"}
+{section ואהבת לרעך כמוך}
+
+{poetry}
+{emph I accept upon myself 
+the command 
+to love my neighbor as myself.}
+
+
+{file "תפילת היצירה" "Tefillat-HaYetzirah.xml"}
+{include block "Psalms30xml"}
+{include block "Psalms67.xml"}
+{include block "Barukh-SheAmar.xml"}
+{include block "Psalms100.xml"}
+{include block "Yehi-Kavod.xml"}
+{include block "Ashrei.xml"}
+{include block "Psalms145.xml"}
+{include block "Psalms146.xml"}
+{include block "Psalms147.xml"}
+{include block "Psalms148.xml"}
+{include block "Psalms149.xml"}
+{include block "Psalms150.xml"}
+{include block "Barukh-hashem-l'olam.xml"}
+{include block "Vayevarekh-David.xml"}
+{include block "Nechemia.xml"}
+{include block "Az-Yashir.xml"}
+{include block "Yishtabach.xml"}
+
+{section תפילת היצירה}
+
+{file "תהילים ל" "Psalms30.xml"}
+{section Psalm 30}
+{poetry}
+/30:1 <I>A Psalm for A Housewarming, 
+Composed by David</I>
+
+/30:2 I acclaim You, {dn my God.} 
+You set me free 
+So that my foes 
+Could not gloat at my troubles.
+/30:3 {dn Yah,} {dn my God,} I pleaded with You. 
+You healed me.
+/30:4 {dn Yah,} you lifted me from the pit; 
+From the brink of the grave 
+You brought me back to Life.
+
+/30:5 Fellow devotees! 
+Join me in my song. 
+Remembering what is sacred, 
+Let’s give thanks.
+
+/30:6 For a moment, I felt You angry, 
+Then I felt Life and acceptance.
+Though weeping as I fell asleep, 
+I woke up singing.
+/30:8 You, {dn Yah,} made my mountain firm, 
+I thought I was safe; 
+That I won’t ever stumble.
+But when You hid 
+your Face from me, 
+I panicked.
+/30:9 I call to You, {dn Yah!} 
+I plead with You, {dn Adonai!}
+/30:10 What use is there in my death 
+To go down to ruin?
+Can dust appreciate You? 
+Can it discern Your Truth?
+/30:11 Listen, {dn Yah!} 
+Be kind to me! 
+{dn Yah,} Please help me.
+
+/30:12 You turned my grieving 
+Into a dance of reconciliation. 
+You took off my rags 
+And wrapped me in joy.
+/30:13 Now, Your Glory is my song. 
+I won’t hold back.
+{dn Yah,} {dn my God,} 
+I will ever be grateful!
+
+
+{file "תהילים מז" "Psalms67.xml"}
+{section Psalm 67}
+
+{poetry}
+/67:1 <I>A Psalm for all the peoples 
+of the planet</I>
+
+/67:2 {dn God,} bless us with grace! 
+Let Your loving Face shine on us!
+/67:3 We want to get to know Your way 
+Here on Earth, 
+Seeing how Your help is given 
+To every group of people.
+/67:4 Oh, how the various peoples 
+Will thank You, 
+All of them will sing 
+And be grateful.
+/67:5 Many people will be joyous 
+And sing 
+When You, Will set them right 
+With forthrightness. 
+And the peoples, 
+As You direct them, 
+Will cheer You.
+/67:6 Oh, how the various peoples 
+Will thank You. 
+All of them will sing, be grateful.
+/67:7 The Earth will give her harvest. 
+Such blessings come from {dn God.} 
+Yes, from {dn our God!}
+/67:8 Bless us {dn God,} 
+All the ends of the Earth 
+Will esteem You!
+
+
+{file "ברוך שאמר" "Barukh-SheAmar.xml"}
+{section {he ברוּך שׁאמר}
+Baruch Sh’amar}
+
+{poetry}
+{emph Blessed One,
+You talked the Worlds 
+Into being.
+What a Blessing, You!
+Blessed One, 
+Your Word
+Makes for becoming.
+What a blessing, Your Name.
+Blessed One,
+You decree and sustain.
+Blessed One,
+All beginnings are Yours!
+Blessed One,
+Your Compassion 
+Enwombs the Earth.
+Blessed One,
+Your Caring is kind 
+To all creatures.
+Blessed One,
+You are generous
+In rewarding those 
+Who respect Your Creation.
+Blessed One, 
+Ever Alive,
+Ever confirming existence.
+Blessed One,
+You make us free,
+You rescue us!
+When we hear Your Name
+We offer blessing. 
+{translit he-Latn "Amen"}
+
+{translit he-Latn "Baruch attah {dn Yah}
+Melech m’hullal batishbachot."}}
+
+
+{file "תהילים ק" "Psalms100.xml"}
+{section Psalm 100}
+
+{poetry}
+/100:1 This is how you sing to {dn God} 
+{emph A Thank You song.}
+You join the symphony 
+Of the whole Earth.
+/100:2 In your gratefulness, 
+You meet Him. 
+Voices echo joy in {dn God’s} halls.
+
+/100:3 In giving thanks, 
+We engage Her blessings. 
+We meet His goodness, 
+Here and now; 
+Her encouragement 
+From generation to generation. 
+
+You are filled with joy 
+Serving {dn God’s} purpose. 
+You sound your own song 
+As you do it. 
+Certain that {dn God} is Be-ing, 
+We know that we are 
+Brought forth from Her, 
+--Both {dn God’s} companions 
+And His flock.
+/100:4 Enter into {dn God’s} Presence 
+Singing your own song, 
+In grateful appreciation. 
+
+Thank You {dn God,} You are all Blessing.
+/100:5 In this world, You are goodness. 
+Yes, Grace, itself. 
+This is the trust we bequeath 
+The next generation.
+
+
+{file "יהי כבוד" "Yehi-Kavod.xml"}
+{section {he יהי כבוד}
+Yehi Kh’vod}
+
+{poetry}
+{dn Yah!} Fill our world 
+To reflect Your nobility,
+So You will find joy 
+In Your creation.
+In all circumstances,
+We adore Your name forever.
+Those who come from East,
+And those who come 
+From the West,
+Celebrate Your Name 
+In their ways.
+{dn Yah} transcends 
+All national bigotries.
+Her glory is in what 
+Concerns Heaven.
+
+{dn Yah} -- this is Your Name forever.
+{dn Yah} -- is the watch word,
+Each generation passes to the next.
+
+{dn Yah,} You have established 
+Your {translit he-Latn "Sh’chinnah"} in the Heavens.
+Your domain encompasses 
+All there is.
+
+So, Heaven is glad.
+Earth is happy.
+All nations agree 
+that You Are in charge.
+
+{dn Yah!} You are now.
+{dn Yah!} You were then.
+{dn Yah!} You will be
+Constant forever.
+
+{dn Yah!} Your reign is eternal.
+Earth is Yours alone.
+No nation can claim her.
+You, {dn Yah,} void 
+The designs of tyrants.
+You, {dn Yah,} block their schemes.
+
+People brood 
+Over so many desires.
+It is Your design, {dn Yah,} 
+That prevails.
+What You, {dn Yah,} design, 
+Lasts through all time.
+What You propose,
+Works for many generations.
+
+You speak, and it becomes real.
+You command, 
+And it comes to existence.
+
+You, {dn Yah,} chose Zion.
+You wish to make Your seat there.
+
+You, {dn Yah,} have singled out Jacob.
+Israel, is Your treasure.
+
+You, {dn Yah,} will not desert 
+Your people.
+You will not forsake 
+Your heritage.
+
+Because You are caring, 
+You will forgive sin.
+You will not destroy.
+But time and again,
+You will subdue Your wrath
+And not let Your fury rise.
+
+{dn Yah!} Please help,
+Prince!
+Answer us the same day,
+When we cry out.
+{prose}
+
+{file "אשרי" "Ashrei.xml"}
+{include block "Ashrei-Intro.xml"}
+{include block "Psalms145.xml"}
+
+{section {he אשרי}
+ Ashrey}
+
+{file "אשרי Intro" "Ashrei-Intro.xml"}
+{poetry}
+Sitting in Your home is happiness.
+And, offering appreciation of You,
+Is even more so.
+{translit he-Latn "Selah!"}
+
+There is contentment for a people
+So at home with {dn Yah.}
+There is serenity among the people
+Who have You, as their {dn God.}
+
+{file "תהילים קמה" "Psalms145.xml"}
+{section Psalm 145}
+
+{poetry}
+/145:1 <I>David’s Aleph Bet Praise</I>
+
+I hold You in the highest esteem, 
+My {dn God,} My King. 
+In all I do, 
+I will offer praise to You.
+
+/145:2 Every day, 
+I will offer You my appreciation 
+And I will cheer You, 
+In all that I do.
+
+/145:3 Magnificent are You, {dn Yah,} 
+And much appreciated. 
+But, Your true greatness 
+Is beyond knowing.
+
+/145:4 One generation 
+Transmits its excitement 
+To the next 
+Over Your amazing actions, 
+Telling them of Your might.
+/145:5 Splendid and glorious 
+Is Your fame. 
+
+In all that I do, 
+I delight to tell of Your marvels.
+
+/145:6 While others may speak 
+Of Your awesome power, 
+I stress Your great kindness.
+
+/145:7 Many will recall 
+Your great goodness, 
+And sing of Your fairness.
+
+/145:8 You, {dn Yah,} are gentle 
+And compassionate, 
+Most patient 
+And caring.
+
+/145:9 You, {dn Yah,} are good to all of us. 
+All that You have made, 
+You hold in Your tenderness.
+
+/145:10 We, who are fashioned by You, 
+Acclaim You. 
+In fervent devoutness, 
+We bless You.
+
+/145:11 We talk of the honor 
+Of Your realm, 
+And draw our energy 
+From Your power.
+
+/145:12 Thus, we announce to others 
+How powerful You are, 
+And how distinguished 
+Your Majesty is.
+
+/145:13 Your domain embraces universes. 
+Your authority is recognized 
+Throughout all generations.
+
+/145:14 You, {dn Yah,} 
+Keep us from faltering, 
+And help us up, when we stumble.
+
+/145:15 We all look up to You with hope. 
+And trust that You will provide us, 
+At the right moment, 
+With what we need.
+
+/145:16 You open Your hand, 
+And each one of us receives, 
+What we desire.
+
+/145:17 You are a {translit he-Latn "Tzaddik," }
+In all Your ways; 
+A {translit he-Latn "Chassid,"} 
+In all that You do.
+
+/145:18 You are close by 
+When we call on You; 
+Especially, when we fully mean it.
+
+/145:19 You shape the will of those 
+Who respect You; 
+You hear their pleading, 
+And, You help.
+
+/145:20 You, {dn Yah,} protect those 
+Who love You. 
+Those who do evil, 
+You eliminate.
+
+/145:21 I offer my mouth to {dn God’s} praise. 
+Let all who are 
+in bodies of flesh, 
+Bless Your holy Name at all times, 
+And we will bless You, {dn Yah,} 
+From now on, and for as long 
+As there is life, on this world.
+
+
+{file "תהילים קמו" "Psalms146.xml"}
+{section Psalm 146}
+
+{poetry}
+/146:1 {emph Halleluyah!}
+Spirit of mine, praise {dn Yah!}
+/146:2 I will indeed praise {dn Yah,} 
+With my life. 
+I will sing to {dn God,} 
+With all my being.
+/146:3 I will not put my reliance in big shots. 
+What can people do, 
+Who can’t even help themselves?
+/146:4 When their spirits leave them, 
+They return to their dust. 
+All their schemes have vanished.
+/146:5 Happy is one, 
+Who is helped by Jacob’s {dn God;} 
+Whose hope is entrusted in {dn Yah,} His {dn God}--The One, 
+/146:6 Who makes heaven and earth, 
+The ocean and all that lives there.
+He is also the One, who is forever. 
+The standard of truth and sincerity.
+/146:7 He seeks justice for the oppressed, 
+And gives food to the starved. 
+{dn Yah,} is the One, 
+Who frees the imprisoned.
+/146:8 {dn Yah,} gives sight to the blind. 
+{dn Yah,} upholds the stooping. 
+{dn Yah,} loves the Tzaddikim.
+/146:9 {dn Yah,} protects the converts, 
+consoles the orphaned 
+and the widowed, 
+Confounds the way 
+Of the malicious.
+
+/146:10 Please, {dn Yah!} Zion’s God! 
+Manifest Your rule in the world! 
+For us, and for our children.
+{emph Halleluyah}
+{prose}
+
+{file "תהילים קמז" "Psalms147.xml"}
+{section Psalm 147}
+
+{poetry}
+/147:1 {emph Halleluyah!}
+It is so good to sing to {dn our God} 
+Make good music 
+to accompany the words 
+/147:2 {dn Yah,} Builds Jerusalem 
+by gathering 
+Her scattered Godwrestlers.
+/147:3 He makes the broken hearted well, 
+And soothes the hurt 
+Of their bruises.
+/147:4 Counting the stars 
+And naming them, 
+He creates them each to be.
+/147:5 Great, is {dn our Master, }
+And powerful beyond measure. 
+No one can describe 
+His way of comprehension.
+
+/147:6 {dn Yah,} encourages the downtrodden, 
+But the insolent, He brings low.
+
+/147:7 Offer gratitude to {dn Yah!} 
+To the harp, 
+Sing songs of celebration 
+To {dn our God} 
+/147:8 He covers the sky 
+With billowing clouds: 
+Thus arranging rain for the ground, 
+Making the hills sprout forth grass.
+
+/147:9 Giving the beasts the food 
+They need; 
+Even to the young ravens, 
+Who cry to be fed.
+/147:10 He is not impressed 
+By a stallion’s feistiness; 
+Nor, by the muscles 
+Of a man’s thighs.
+/147:11 {dn Yah,} welcomes those 
+Who respect Him; 
+Who long for His grace.
+/147:12 Jerusalem! Zion! 
+Give praise to {dn Yah.} 
+Celebrate that He is {dn your God!}
+
+/147:13 Because He strengthened 
+The bars of your gates, 
+And blessed your children 
+/147:14 In your midst, 
+Your borders He set to hold peace 
+And satisfies you 
+With good nourishment.
+/147:15 When He decrees 
+Something for Earth, 
+His command is swiftly fulfilled.
+
+/147:16 Snow, like white wool, 
+He sends down. 
+Frost, He scatters like sand.
+/147:17 He sends hail, like crumbs. 
+No one can stand it when 
+He brings on the cold.
+/147:18 Sending His word, He melts them, 
+Blowing warm wind 
+And the waters flow.
+
+/147:19 He imparts His words to Jacob; 
+His statutes and judgments 
+To Israel. 
+
+Alas!
+/147:20 He did not do the same 
+For other nations. His judgments, 
+He did not share with them.
+{emph {translit he-Latn "Halleluyah!"}}
+{prose}
+
+{file "תהילים קמח" "Psalms148.xml"}
+{section Psalm 148}
+
+{poetry}
+/148:1 {emph {translit he-Latn "Halleluyah!"}}
+Applaud and cheer {dn Yah,} 
+From the heavens.
+
+/148:2 Praise Him, the most sublime! 
+Angel assembly, sing {translit he-Latn "Hallel!"} 
+Heaven hosts, sing {translit he-Latn "Hallel!"} !
+/148:3 {translit he-Latn "Hallel!"} , too, sun and moon. 
+{translit he-Latn "Hallel!"} , also, stars of light!
+/148:4 Jubilation 
+From the heavens of heavens. 
+From the streams of endless space, 
+He has decreed your existence.
+/148:5 Praise {dn God} and be grateful for life.
+/148:6 He fortified you to last long; 
+Set a directive, 
+That cannot be disobeyed.
+/148:7 {translit he-Latn "Hallel!"} , too, from earth, 
+From dragons and deep canyons.
+/148:8 Fire, hail, snow and fog, 
+Tempests and storms 
+Obeying His word.
+/148:9 Mountains, {translit he-Latn "Hallel!"} ! 
+And hills echo. 
+Fruit trees and cedars 
+Sway their praise.
+/148:10 Wild and tame creatures, 
+Creepers and winged birds.
+/148:11 {translit he-Latn "Hallel!"} , too, from you –- 
+Rulers of lands and nations, 
+Officials and judges of the land.
+
+/148:12 Lads and also lasses, {translit he-Latn "Hallel!"} ! 
+Elders together with youths.
+
+/148:13 All of you, praise {dn Yah}’s Name. 
+His very Name, is so transcendent.
+
+His glory is reflected 
+By Heaven and Earth.
+/148:14 Grand is the fate of His people. 
+His devout ones, 
+In constant adoration.
+{translit he-Latn "Halleluyah"} those intimate and close to Him, 
+You Children of Israel, {emph {translit he-Latn "Halleluyah!"}}
+{prose}
+
+{file "תהילים קמט" "Psalms149.xml"}
+{section Psalm 149}
+
+{poetry}
+/149:1 {emph {translit he-Latn "Halleluyah!"}}
+Sing a brand new song to {dn Yah.} 
+This, is how He is celebrated 
+Among the {translit he-Latn "Chassidim."}
+/149:2 Yisrael, is happy 
+Knowing his Maker. 
+Zion’s children, 
+Delight in their King.
+/149:3 Dancing, they chant His Name, 
+Making rhythm, 
+With drums and strings.
+/149:4 {dn Yah,} loves His people. 
+The self-effacing, 
+Can count on Him for help.
+/149:5 {translit he-Latn "Chassidim,"} savor 
+His awesome Presence. 
+Even on their bed, They hum His praises.
+/149:6 They exalt {dn God,} in inner speech. 
+Such praise is a potent weapon, 
+/149:7 Repelling antagonists, 
+Scolding bigots, 
+/149:8 To immobilize their commanders, 
+And arrest their agitators.
+
+/149:9 Rebuke them, as they deserve! 
+
+All this, because {dn God’s} {translit he-Latn "Chassidim"}
+Gives honor to Him in splendor.
+{emph {translit he-Latn "Halleluyah!"}}
+{prose}
+
+{file "תהילים קן" "Psalms150.xml"}
+{section Psalm 150}
+
+{poetry}
+/150:1 {translit he-Latn "Halleluyah."} Attune to {dn God} in holiness: 
+be in awe of {dn God} who is mighty 
+in the heavens.
+/150:2 mark {dn God} for His potent acts: 
+praise {dn God} for Her generosity.
+/150:3 Salute {dn God} with trumpet sound: 
+hail {dn God} with the strings and harp.
+/150:4 Worship {dn God} with drum and dance: 
+Intone to {dn God} with organ and flute.
+
+/150:5 Make rhythm to {dn God} with crashing cymbals: 
+praise {dn God} with cymbals that ring out.
+/150:6 Let all who breathe chant {dn Yah.}
+{translit he-Latn "Halleluyah."}
+{prose}
+
+{file "ברוך ה׳ לעולם" "Barukh-hashem-l'olam.xml"}
+{poetry}
+{translit he-Latn "Barukh {dn Yah}"} always, {translit he-Latn "Amen, Amen."}
+From Zion,
+From Your dwelling 
+in Jerusalem,
+
+We send our {translit he-Latn "Halleluyah."}
+{translit he-Latn "Barukh,"} too, to You, {dn Yah,} 
+Israel’s {dn God,} 
+Who alone, does amazing things.
+
+May the glorious Presence,
+Governing numberless worlds,
+Manifest in this world
+In all magnificence, {translit he-Latn "Amen, Amen."}
+{prose}
+
+{file "ויברך דוד" "Vayevarekh-David.xml"}
+{section ויברך דוד}
+
+{poetry}
+And  David worshipped {dn Yah}
+For all the crowd to see.
+And David said,
+I offer worship to You, {dn Yah.}
+Blessed are You, {dn Yah,} 
+{dn God} of Israel, Our Father,
+Ruling countless worlds.
+
+All virtue is Yours:
+{translit he-Latn "Gedulah, Hesed,"} Largesse,
+{translit he-Latn "Gevurah,"} power and Law,
+{translit he-Latn "Tif’eret,"} balance and splendor,
+{translit he-Latn "Netzach,"} effectiveness,
+And {translit he-Latn "Hod,"} elegance.
+For all that is in Heaven and Earth, 
+Is founded in {translit he-Latn "Yesod."}
+The urge to live.
+Yours, {dn Yah,} is majesty,
+{translit he-Latn "Malkhut,"}  most sublime.
+
+Abundance and honor 
+Are before You.
+And You reign over the all.
+In your hand, is force and might.
+You can empower and raise up.
+
+And, as of right now,
+O, {dn our God,} 
+We thank you,
+And sing to your glory,
+To our utmost.
+
+{file "נחמיה ט׃ה-יא" "Nechemiah.xml"}
+/9:6 You, {dn Yah,} 
+You, alone have made the heavens,
+The heavens beyond our heaven,
+All those that serve You there.
+
+Earth and all that is on her;
+The oceans, and all 
+That they contain.
+The host of heaven bow to You,
+And you infuse them all with Life.
+{instruct here give {translit he-Latn "Tzedakah"}}
+/9:7 You chose Abram.
+You brought him out of Ur, 
+Of the Chaldees.
+You named him {translit he-Latn "Av-raham,"}
+/9:8 And found his heart
+To be trustworthy enough,
+To make a covenant with him.
+
+/9:9 On the day, when You saved us, 
+Abrahams children, 
+from {translit he-Latn "Mitzrayim,"}
+/9:10 We saw how You dealt  
+With {translit he-Latn "Mitzrayim,"}
+With superior force.
+
+{file "אז ישיר" "Az-Yashir.xml"}
+
+We, the people, saw it,
+And we put our faith in You, {dn Yah,}
+And in Moshe, your servant.
+
+We sang then the great song.
+And placed our trust in You,
+To bring us, plant us,
+On the mountain sacred to You,
+The Place You established,
+To reside there, the sanctuary, 
+That Your hands had set up for us.
+
+{dn Yah,} will reign there always.
+{dn Yah,} will reign there always.
+
+On that day, {dn Yah} will be One.
+And, His Name, will be One.
+
+{file "שתבח שמך" "Yishtabach.xml"}
+{section {he ישתבח שמך}
+Yishtabach}
+
+{poetry}
+Your Name be praised, 
+Always, Majestic One.
+Powerful and gentle Source,
+Making Heaven and Earth, sacred.
+It is our pleasure 
+To dedicate to You,
+Our {dn God} and Our parents' {dn God,}
+Time and again:
+
+Music and Celebration,
+Jubilation and Symphony,
+Fortissimo, Anthem,
+Victory March, Largo, Forte,
+Paean and Hymn,
+Sanctus and maestoso,
+Laudo and Aria,
+Celebrating 
+Your Divine reputation
+In every realm.
+
+We worship You, {dn Yah,}
+Generous, Great, Regal One,
+Who is the One,
+to whom we offer all these.
+
+{dn our God,}  whom we appreciate,
+Source of all wonder,
+Fountain of all souls,
+Author of all that happens,
+Who delights in music and chant,
+Origin of Unity.
+You are the Life
+That flows 
+Through all the worlds.
+
+{translit he-Latn "Amen"}
+
+{file "תפילת הבריאה" "Tefillat-HaBriyah.xml"}
+{include block "Tefillat-Lev.xml"}
+{include block "Shacharit-Birkhot-Kriyat-Shema.xml"}
+{include block "Shema.xml"}
+{include block "gaal-yisrael.xml"}
+
+{file "תפילת לב" "Tefillat-Lev.xml"}
+Reb Ahrele Roth, a"h, wrote a list of 32 mitzvot whose fulfillment is completed in the brain, the heart and the mouth.
+{instruct A good preparation and a bridge for the next phase of prayer, as you enter into the world of {translit he-Latn "B’riyah,"} is Reb Ahrele Roth’s list of {translit he-Latn "Mitzvot"} one can do with consciousness alone.}
+The Hebrew alphabetical equivalent of 32 is {he ל"ב}, the letters of which spell the Hebrew word {emph {translit he-Latn "LEV"}} for Heart.
+
+{poetry}
+{emph O my Creator!}
+{emph May Your Name be praised}: With my mouth, brain and heart prepared, I am ready to fulfill Your {translit he-Latn "mitzvot."} You who shape me.
+
+1. Faith I place in You.
+2. Oneness I affirm in You.
+3. I am mindful of You.
+4. I focus on Your vast Greatness,
+5. and focus on my insignificance.
+6. Thus do I turn back to You 
+in {translit he-Latn "teshuvah," "תְּשׁוּבָה"}
+7. and am bashful 
+in Your Presence.   
+8. I am awed by You,
+9. and love You.
+10. I accept the authority 
+of your {translit he-Latn "mitzvot," "מִצְוֺת"}
+11. find my joy in You,
+12. and place my trust in You.
+13. I deny all false gods and those 
+in their service; 
+I reject unfit thoughts that rise 
+in my heart.
+14. I give You my thanks,
+15. and aim to hold You sacred.
+16. I remember Jerusalem, 
+Your House of Prayer 
+for all peoples,
+17. and look out to You,
+to redeem us and free our souls.
+18. Amalek, I will blot out, 
+19. by loving my neighbor as myself,
+20. and adhering to You, in {translit he-Latn "devekut," "דְּבֵקוּת"}
+21. walking in Your ways.
+22. Thus, will I make in me a Holy Space 
+for You to be at home in.
+23. I long for Your intimacy and love,
+24. and am energized to find You 
+empowering my heart.
+25. I affirm that Your actions are just,
+26. and am mindful that 
+You redeem us from {translit he-Latn "Mitzrayim" "מִצְרַיִם"}
+27. Therefore, 
+I will not welcome 
+in my awareness, 
+thought that opposes faith 
+in Your\/our service 
+and in Your {translit he-Latn "Torah."}
+28. I will not yield to pride.
+29. I will not hate any fellow 
+{dn God}wrestler in my heart,
+30. and I will give up 
+all vindictiveness,
+not consider my self flawless,
+31. but remember that I caused You 
+displeasure.
+
+32. With all these, 
+I intend not to forget 
+Your presence in my life. 
+
+{translit he-Latn "Amen!"}
+
+Thus, may You be pleased, 
+O Supernal Parent,
+That by the merit and the power
+Of my making mention 
+of these {translit he-Latn "Mitzvot," "מִצְוֺת"} 
+With my mouth, 
+There be stimulated
+The energy of these {translit he-Latn "Mitzvot," "מִצְוֺת"}
+In their supernal root,
+To draw down to me,
+That High Holy flow
+That will shield my thoughts,
+My voice and my words,
+From all damage, 
+All taint, all dross and dirt.
+And there be drawn to me a flow
+That will make pure
+My thoughts and heart, 
+My voice and words.
+May all of them be surrendered
+To You, Praised One,
+To the end that I may merit 
+To be connected to You,
+In {translit he-Latn "devekut," "דְּבֵקוּת"} and love.
+And to attain the fulfillment 
+Of Your {translit he-Latn "mitzvah" "מִצְוָה"}
+To cleave to You.
+Thus will I be privileged 
+To be an instrument of Your will, 
+A vehicle for the 
+Blessed {translit he-Latn "Shechinah"} of Your Glory.
+
+Thus will the light in my soul  
+Not darken,
+Nor will Your Divine spark 
+Be extinguished in me,
+From now on and forever.
+{translit he-Latn "Amen!"}
+May this be Your will.
+
+{section תפילת הבריאה}
+
+{file "שחרית ברכות קריאת שמע" "Shacharit-Birkhot-Kriyat-Shema.xml"}
+{include block "Brakha-yotzer-or.xml"}
+{include block "Ahavat-Olam.xml"}
+
+{section Barchu}
+
+{file "ברכה יוצר אור" "Brakha-yotzer-or.xml"}
+{poetry}
+I bow before You,
+{dn Yah,} {dn our God,} 
+Cosmic Majesty,
+For shaping light 
+And creating darkness,
+Promoting peace 
+And creating what is.
+
+You bring on light 
+With compassion to the world 
+And to all who live in it.
+In goodness, 
+You constantly renew each day
+What You made happen 
+At the beginning,
+You make numberless beings,
+All different.
+Each one, with its own wisdom.
+All there is, is Yours.
+
+{dn Yah,} {dn our Master!}
+How mighty is Your fame 
+All over Earth.
+Such glory, 
+You radiate from the Heavens.
+
+I am awed 
+When I see Your skies,
+Your handiwork and fingerprints,
+The moon and stars
+You have arranged.
+And the angels;
+{emph {translit he-Latn "Ophanim,"}}
+Turning orbits and the planets,
+{emph {translit he-Latn "Hayot,"}}
+The constellations of the zodiac,
+{emph {translit he-Latn "Seraphim,"}}
+Blazing ones, the galaxies.
+
+All in concert, 
+Adore and venerate You,
+And sanctify Your Name
+Chanting:
+{emph {translit he-Latn "Kadosh, Kadosh, Kadosh"}
+Holy, Holy, Holy are You
+{dn Yah of Diversity}}
+The cosmos is filled 
+With Your radiance.
+They plead also…
+{emph Bring this glory to radiate to us
+Also on the level where we live.}
+
+They all offer to You, blessed {dn God}
+All pleasure in worship.
+Aware that You alone,
+Are Sacred, beyond all limits.
+Condensing and focusing,
+Creating anew,
+Overcoming all barriers,
+Seeding virtue,
+Growing liberations,
+Making healing available,
+Awesome in admiration,
+Master of marvels.
+
+In Your benevolence
+You renew each day, 
+Each moment,
+The work of Creation.
+
+Please, focus, new light on Zion
+And let us all receive its benefit.
+{translit he-Latn "Barukh attah {dn Yah}"}
+You shape luminaries.
+
+{file "אהבת עולם" "Ahavat-Olam.xml"}
+{section {he אהבת עולם}
+Ahavat Olam}
+
+{poetry}
+From ever
+You have loved us into life.
+{dn Yah} — {dn our God,} 
+You nourished us with kindness
+And abundance.
+
+Holy One!
+For the sake of Your plan,
+For Your honor,
+And because we know
+That our parents trusted You,
+And You, in turn, taught them
+How to live life,
+So as to be serving Your purpose,
+We ask You to share with us 
+In the same way.
+{dn our God,} kind Parent,
+We live in the embrace
+Of Your caring.
+Make ours an understanding heart,
+To become aware 
+And be careful and effective
+In this way, to make real
+What You speak to us in {translit he-Latn "Torah,"}
+And with so much love.
+
+When we study {translit he-Latn "Torah,"}
+May we see clearly
+What is meant for us to know.
+When we do {translit he-Latn "Mitzvot,"}
+May all our feelings
+Sit harmonious in our heart.
+
+Focus all our hearts’ longing
+To that moment,
+When we stand in Your Presence,
+In both awe and adoration.
+
+May we never have to be Apologetic for our love for You.
+
+Trusting You,
+We are happy to see
+Your beneficent plan unfolding.
+
+May Your 
+Kindness and compassion,
+Be available to us.
+
+Please hurry.
+Bring blessing and peace to us.
+Gather us, so we not be scattered
+All over the world.
+Lift the hold of estrangement
+From us.
+Lead us to live in this world,
+So that we feel at home in it.
+
+You can do this for us.
+You have assigned us
+To do our special work in life
+
+You brought us close to You.
+We are grateful.
+We hold You special.
+And are filled with love for You
+
+{emph {translit he-Latn "Barukh attah {dn Yah}"}}
+
+Who relates to us in Love.
+
+{translit he-Latn "Amen"}
+
+{file "שמע" "Shema.xml"}
+{include block "shema-yisrael.xml"}
+{include block "vahavta.xml"}
+{include block "vhaya.xml"}
+{include block "tzizit"}
+
+{section Sh’ma Yisrael}
+
+{file "שמע ישראל" "shema-yisrael.xml"}
+{he שמע ישראל י—ה א-להינו י—ה אחד}
+
+{section Deuteronomy 6:4}
+
+{poetry}
+/6:4 {emph Listen,} you, Yisrael person,
+{instruct say your own name here}
+{dn Yah who Is,} is {dn our God,} 
+{dn Yah who Is,} Is One, Unique, 
+All there Is.
+
+{he ברוך שם כבוד מלכותו לעולם ועד}
+
+{poetry}
+Through time and space,
+Your glory shines, Majestic One.
+
+{file "ואהבתה" "vahavta.xml"}
+{section Deuteronomy 6:5-9}
+
+{poetry}
+/6:5 {emph Love {dn Yah,}} who is {dn your God,} 
+In what your heart is,
+In what you aspire to,
+In what you have made your own.
+/6:6 May these values
+Which I connect with your life,
+Be implanted in your feelings.
+/6:7 May they become the norm
+For your children:
+Keep talking with them 
+In the privacy of your home,
+And on the errands you run.
+May they help you relax.
+And activate you to be productive.
+/6:8 Display them visibly on your arm.
+Let them focus your attention.
+/6:9 See them at all transitions at home,
+And in your environment.
+
+{file "והיה" "vhaya.xml"}
+{section Deuteronomy 11:13-21}
+
+{poetry}
+/11:13 {emph How good it will be}
+When you really listen,
+And hear my directions,
+Which I give to you today,
+For loving {dn Yah, who is} {dn your God,} 
+And to act godly 
+With feeling and inspiration.
+/11:14 Your earthly needs will be met
+At the right time,
+Appropriate to the season.
+You will reap what you planted
+For your delight and health.
+/11:15 Also, your animals 
+Will have ample feed.
+All of you will eat and be content.
+/11:16 Be careful -- watch out!
+Don't let your cravings delude you;
+Don’t become alienated;
+Don’t let your cravings 
+Become your gods;
+Don’t debase yourself to them,
+/11:17 Because the God-sense within you
+Will become distorted.
+Heaven will be shut to you,
+Grace will not descend,
+Earth will not yield her produce.
+Your rushing will destroy you!
+And Earth will not be able 
+To recover her good balance
+In which {dn God's} gifts manifest.
+/11:18 May these values of Mine, 
+Reside in your 
+Feelings and aspirations:
+Marking what you produce,
+Guiding what you perceive.
+/11:19 Teach them to your children
+So that they are instructed
+How to make their homes sacred;
+And how they deal with traffic.
+Even when you are depressed,
+And when you are elated.
+/11:20 Mark your entrances and exits
+With them,
+So you will be more aware.
+/11:21 Then, you and your children, 
+And their children,
+Will live out on earth
+That divine promise 
+Given to your ancestors
+To live heavenly days
+Right here on this earth. 
+
+{file "ציצית" "tzizit.xml"}
+{section ציצית}
+
+{section Numbers 15:37-41}
+
+{poetry}
+/15:37 {emph {dn Yah} who Is, said to Moses,}
+/15:38 `Speak, telling the Israel folks
+To make {translit he-Latn "tzitzit"}
+On the corners of their garments,
+So they will have generations
+To follow them.
+On each {translit he-Latn "tzizit"} tassel,
+Let them set a blue thread.
+/15:39 These {translit he-Latn "tzitzit"} are for your benefit!
+Glance at them.
+And in your seeing, 
+Remember all the other directives 
+Of {dn Yah, who Is,}
+And act on them!
+This way, 
+You will not be led astray,
+Craving to see and want,
+And then prostitute yourself
+For your cravings.
+/15:40 This way
+You will be mindful
+To actualize my directions
+For becoming dedicated 
+to {dn your God};
+To be aware 
+/15:41 That I Am {dn Yah, Who is} {dn your God,} 
+Who is the one who freed you
+From oppression,
+in order to {dn God} you.
+I am {dn Yah, who is} {dn your God.} '
+
+That is the truth!  {he אמת}
+
+{file "גאל ישראל" "gaal-yisrael.xml"}
+{poetry}
+You, {dn Yah,} 
+Who saved our ancestors,
+May You 
+Soon bring redemption 
+To us also.
+{translit he-Latn "Barukh attah {dn Yah}
+Ga’al Yisrael."}
+
+{file "תפילת האצילות" "Tefillat-HaAtzilut.xml"}
+{include block "Amidot.xml"}
+{include block "Tachanun.xml"}
+{include block "Shir-shel-yom.xml"}
+{include block "Aleynu.xml"}
+{include block "Malei-Rachamim.xml"}
+{include block "Psalms27.xml"}
+{include block "Blessing-for-the-Kahal.xml"}
+
+{section תפילת האצילות}
+
+{file "עמידות" "Amidot.xml"}
+{include block "amidah-affirmations.xml"}
+{include block "Amidah-Havinenu.xml"}
+{include block "HaAmidah.xml"}
+
+{file "Amidah-Affirmations" "amidah-affirmations.xml"}
+{section Weekday Affirmations Based on the Amidah.}
+
+{instruct You can add personal affirmations to the following.}
+
+{section I affirm...}
+
+{poetry}
+The power of positive affirmations.
+I affirm that the Shechinah Surrounds me, 
+And blesses me.
+I affirm the light beings 
+Of God's service, 
+Who support and guide me.
+
+{section Avot}
+
+{poetry}
+I affirm the blessings 
+Of Abraham and Sarah, in my life.
+
+{section T'hiyah}
+
+{poetry}
+I affirm the sacrifice of Isaac, 
+And God's power over my life, 
+And death.
+
+{section K'dushah}
+
+{poetry}
+I affirm God's holiness, 
+And my growth toward it.
+
+{section הָ Shover oyvim}
+
+{poetry}
+I place myself 
+Under the protection of the {translit he-Latn "S’phirah"} of {translit he-Latn "Keter,"}
+Which will shield me 
+From all harm and neutralize it.
+{he הַ} {translit he-Latn "Atah honen"}  
+I invoke the inflow of {translit he-Latn "Chochmah,"}
+To align my intellect
+With clarity and purpose, 
+To inspiration and realization.
+
+{section הֵ Hashivenu}
+
+{poetry}
+I invoke the care of {translit he-Latn "Binah,"}
+To lead me to God's heart.
+
+{section  הֶ S'lihah}
+
+{poetry}
+I invoke the abundance of {translit he-Latn "Chesed,"}
+To bring me to atonement.
+
+{section  הְ Ge'ullah}
+
+{poetry}
+I invoke the power of {translit he-Latn "Gevurah,"}
+To see me through trouble 
+And lead me to redemption.
+
+{section הוֹ Refu’ah}
+
+{poetry}
+I place myself 
+In the compassionate heart 
+Of God's {translit he-Latn "Tiferet,"}
+And affirm the healing, 
+balancing, integrative, 
+Centering light within me.
+
+{section הִ Brachah, Mashiach, Shechinah}
+
+{poetry}
+I support myself 
+On the pillar of {translit he-Latn "Netzach,"}
+Channeling to me 
+All manner of
+Blessing and prosperity, 
+And place it at the disposal 
+Of the redeeming {translit he-Latn "Mashiach,"}
+Unfolding to witness 
+The {translit he-Latn "Shechinah's"} residing in Zion.
+
+{section הֻ Kibbutz Galuyot, Yerushalayim, Modim}
+
+{poetry}
+I support myself 
+On the pillar of {translit he-Latn "Hod,"}
+Making order in my life,
+Gathering all the forces
+From dispersion,
+And settling them
+In the blessed Jerusalem,
+Where I offer my thanks 
+To {dn God's} Glory.
+
+{section הוּ Tzedakah Umishpat, Tzaddikim, Shalom}
+
+{poetry}
+I base myself 
+On the foundation 
+Of {translit he-Latn "Yesod,"}
+To act righteously and justly.
+To assist 
+Every righteous effort 
+In the world, 
+And to become 
+Peaceful, 
+To work for peace.
+
+{section ה Shome'a T'fillah}
+
+{poetry}
+I affirm that {translit he-Latn "Malchut,"}
+The {translit he-Latn "Shechinah,"} is the one 
+Offering these affirmations in me,
+And is attracting 
+The flow of blessings, 
+To suffuse my life. 
+
+{translit he-Latn "Amen...Amen."}
+
+
+{file "הבינינו" "Amidah-Havinenu.xml"}
+{instruct If you are pressed for time, you can use this short version.}
+
+{section Havinenu}
+
+{poetry}
+Help us {dn Yah,}
+To understand Your ways,
+And sensitize our hearts,
+With reverence all our days.
+
+Forgive us, with compassion,  each sin,
+That redemption  we may hope to win.
+In Your caring, 
+take our pain and suffering away,
+And satisfy us, with Your abundance,
+we pray.
+
+With Your all-powerful and tremendous hand,
+Our scattered ones
+Bring together to our own land.
+
+May justice be effective,
+And righteousness prevail.
+May evil plots be razed and fail.
+But righteous efforts 
+Be well regarded.
+And those who serve goodness 
+Be rewarded
+When Your sacred city, 
+With joy we rebuild.
+And Your House of prayer
+With all peoples be flll’d.
+
+Then with a loud and exultant voice,
+Will the righteous, O {dn God} of Israel, rejoice.
+
+Let it be Thy divine will, to speedily found
+A messianic life for all abound.
+
+And, may the light of peace, 
+Brightly blaze,
+As in reverence,
+Your sacred Name we praise.
+
+For You do hear 
+The voice of Prayer,
+Are blessed!  
+
+This we declare. {translit he-Latn "Amen"}
+
+{note based on a translation by Joseph F. Stern}
+
+{file "העמידה" "HaAmidah.xml"}
+{include block "Avot-vImahot.xml"}
+{include block "Gevurot.xml"}
+{include block "Kedushat-hashem.xml"}
+{include block "Binah.xml"}
+{include block "Teshuvah.xml"}
+{include block "Slichah.xml"}
+{include block "Geulah.xml"}
+{include block "Refuah.xml"}
+{include block "Birkhat-Hashanim.xml"}
+{include block "Qibutz-Galyot.xml"}
+{include block "Din.xml"}
+{include block "Birkhat-Haminim.xml"}
+{include block "Tzadikim.xml"}
+{include block "Bnin-Yerushalayim.xml"}
+{include block "Malkhut.xml"}
+{include block "Kiblat-Tefillah.xml"}
+{include block "Avodah.xml"}
+{include block "Hoda'a.xml"}
+{include block "Shalom.xml"}
+
+{section Another version of the Amidah}
+
+{section העמידה}
+
+{file "אבות ואמהות" "Avot-vImahot.xml"}
+{poetry}
+{he בָּרוּךְ אַתָּה ה׳} 
+I bow before You, {dn Yah,} 
+Our indwelling {dn God,}
+Our parents' {dn God,}
+Abraham and Sarah’s {dn God,}
+Isaac and Rebeccah’s {dn God,}
+Jacob and Leah and Rachel’s {dn God,}
+Great, Powerful  and Awesome {dn God.}
+{dn God} transcendent.
+You nurture us gently 
+And are kind to us.
+You, who possesses it all.
+You remember 
+How our parents loved You.
+Yes, we trust that You 
+Will bring redemption
+To us, their children’s children,
+Who chant Your name
+And love You...
+Our Prince, Our Helper, 
+Our Protector.
+{he בָּרוּךְ אַתָּה ה׳}  Barukh attah {dn Yah}
+{translit he-Latn "Magen Avraham U’foked Sarah"}
+
+{file "גבורות" "Gevurot.xml"}
+You are powerful with worlds {dn Adonay.}
+What is dead, you can make live.
+You are really capable of helping.
+You give dew (and rain) 
+To parched earth and souls.
+You feed all life with gentleness.
+You invigorate bodies 
+With mercy’s flow.
+You support us in falling.
+You heal us in sickness.
+You free us from compulsion.
+You keep faith 
+With those now dead.
+In Your might, 
+No one can compare with You.
+You deal out life and death.
+Yet in all this,
+You make salvation grow.
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+M’chayeh Hametim."}
+
+{file "קדושת השם" "Kedushat-hashem.xml"}
+You are Holy, 
+Your name is Sacred.
+And those who daily aspire to be holy,
+Sing your {translit he-Latn "Halleluyah"} all day.
+
+Indeed, You are 
+the Great and Holy {dn God.}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Ha’el hakkadosh."}
+
+{file "בינה" "Binah.xml"}
+{emph We pray for the right awareness}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Chonen Hada’at."}
+
+{file "תשובה" "Teshuvah.xml"}
+{emph We pray  for becoming harmonized
+with God’s will}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Harotzheh Bit’shuvah."}
+
+{file "סליכה" "Slichah.xml"}
+{emph We pray for forgiveness}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Channun Hammarbeh Lis’lo’ach."}
+
+{file "גאולה" "Geulah.xml"}
+{emph We pray for support and redemption}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Go’el Yisrael."}
+
+{file "רפואה" "Refuah.xml"}
+{emph We pray for healing}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Rofe’ Chol Bassar U’mafli’ La’assot."}
+
+{file "ברכת השנים" "Birkhat-Hashanim.xml"}
+{emph We pray for 
+the ecology and economy}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+M’varech Hashanim."}
+
+{file "קיבוץ גליות" "Qibutz-Galyot.xml"}
+{emph We pray for 
+the the ending of exile}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+M’kabbetz Nid’chey Ammo Yisrael."}
+
+{file "דין" "Din.xml"}
+{emph We pray for a just society}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Melech Ohev Tzedakka U’mishpat."}
+
+{file "ברכת המינים" "Birkhat-Haminim.xml"}
+{emph We pray for release
+from the struggle with negativity}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Shover Oyvim U’machni’a’ Zeydim."}
+
+{file "צדיקים" "Tzadikim.xml"}
+{emph We pray for 
+all righteous effort to succeed}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Mish’an U’mivtach latzaddikim"}
+
+{file "בנין ירושלים" "Bnin-Yerushalayim.xml"}
+{emph We pray for Jerusalem, 
+{dn God}’s city, The House of Prayer}
+for all Peoples.
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Boneh Y’rushalayim."}
+
+{file "מלכות" "Malkhut.xml"}
+{emph We pray for 
+the rule of {translit he-Latn "Mashi’ach"}}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Matzmi’ach Keren Y’shu’ah."}
+
+{file "קבלת תפילה" "Kiblat-Tefillah.xml"}
+{emph You hear Our Prayer,}
+Compassionate parent.
+Accept our pleading, 
+With kindness and grace.
+Everyone praying to You, is heard.
+So, I add the concerns I still have
+Beyond what I have expressed before,
+And I trust, that You, will respond.
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Shome’a’ T’fillah."}
+
+{file "עבודה" "Avodah.xml"}
+Take pleasure {dn God,} 
+In our way of praying.
+Teach us,  
+To encounter Your Presence.
+May we merit 
+To pray in Your Temple in Zion.
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+Hammachazir Sh’chinnato L’tzion."}
+
+{file "הודאה" "Hoda'a.xml"}
+We are grateful {dn God} 
+and count our blessings
+{instruct here in your words detail your gratitude for events in your life}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+HaTov Shimcha U’l’cha Na’eh L’hodot."}
+
+{file "שלום" "Shalom.xml"}
+{emph We pray for Peace}
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah}
+HaM’varech Et ‘Amo Yisrael Bashalom.
+Amen."}
+
+{file "תקון" "Tikkun.xml"}
+{poetry}
+{instruct After the {translit he-Latn "Amidah,"}
+it is important to find a moment
+to search
+your heart and conscience.
+
+If you find something
+that needs repair,
+make your commitment
+to do so, 
+and ask for the grace
+to fulfill
+that {translit he-Latn "tikkun."}}
+
+
+{file "תחנון" "Tachanun.xml"}
+{include block "Psalms15.xml"}
+{include block "my-soul-is-yours.xml"}
+{include block "Psalms6.xml"}
+{include block "Psalms25.xml"}
+{include block "DearGod.xml"}
+
+{instruct On joyful and celebrative days when Tachanun is not recited. Recite Psalm 15 instead.}
+
+{file "תהילים טו" "Psalms15.xml"}
+{section Psalm 15}
+
+{poetry}
+/15:1 David’s song: 
+
+{dn Yah!} 
+Who may be at home in Your tent? 
+Who may find sanctuary 
+On Your Sacred mountain?
+
+/15:2 One who strides with wholeness, 
+Acts with fairness, 
+Whose heart and words 
+Speak with honesty, 
+/15:3 Not given to gossip, 
+Not hurting others, 
+Not shifting blame on others.
+/15:4 Wary of his own motives, 
+
+He honors those 
+Who are respectful of {dn God.} 
+She will not stoop to lie 
+When she swears, 
+Even if it causes her loss.
+/15:5 He lends his money, interest free, 
+Won’t accept a bribe, 
+To convict the innocent.
+One who acts in this way, 
+Will never waver.
+
+{file "My Soul is Yours" "my-soul-is-yours.xml"}
+{section Tahanun}
+{poetry}
+My God!
+my soul is Yours 
+my body is Your servant 
+take pity on what You have created; 
+my soul is Yours 
+and my body is Yours 
+{dn God} help us for Your sake. 
+We come to You 
+because we want to honor 
+Your reputation.
+Help us in our moral struggle 
+for the sake of Your reputation;
+because You are kind and compassionate.
+Forgive us, 
+for there is so much 
+we need to be forgiven for.
+
+Pardon us our Father,
+our errors are so great;
+forgive us our Royal Master
+many are our mistakes 
+
+Our {dn God} our parents' {dn God}
+pardon our sins
+Erase our rebellions 
+Let our failures not appear before You.
+Mold our drives to serve Your purposes;
+let our stubbornness be in Your service.
+Refresh our conscience 
+to guard Your instructions
+Sensitize our hearts to love You 
+and to respect Your reputation
+as Your {translit he-Latn "Torah"} prescribes:
+`and {dn Yah} {dn Your God} 
+will sensitize Your heart 
+and the hearts of Your children 
+so that Your love for {dn Your God} 
+will be wholehearted, inspired, 
+to make Your life meaningful'
+
+Dear {dn God.}
+I approach You 
+from the desire to serve You
+and yet there is no {translit he-Latn "Tzaddik"}
+who can do only good 
+and not fail in it
+
+Please help me with my moral Life
+so that in every way 
+my attitude will be balanced 
+and right.
+
+To begin with, 
+help me to forgive anyone
+who is frustrated and upset me
+if they have sinned against me, 
+my body my possessions 
+my reputation anything of mine
+but unintentionally are intentionally
+whether they scheme to do it 
+or were unaware
+whether it was in word or action
+whether is was and thought 
+and the imagination
+Whether it was in this incarnation 
+or in any other
+I completely forgive any God-wrestler;
+let no one be punished on my account.
+
+My {dn God} and my parents' {dn God} 
+may our prayer come before You
+do not turn Your attention 
+from our pleading
+we don't want to be impudent
+we don't want to be stubborn
+and claim that we are righteous 
+and have not sinned
+
+Indeed our parents have sinned 
+and we have sinned
+Help us with {dn God} not to fail You again
+and what I hereby confess to You
+{instruct .......}
+
+I beg You, 
+that in Your great mercy 
+You erase my sins
+but not by means 
+of suffering and illness.
+May the words of my mouth and the meditation of my heart
+be acceptable for You {dn Yah} my rock and my Redeemer
+I place my faith in You
+I place my trust in You
+I place my hope and You
+
+{instruct Continue with the Siddur Shomer Yisrael.}
+
+{instruct At this point, you may wish to recite Psalm 6 or Psalm 25.}
+
+{file "תהילים ו" "Psalms6.xml"}
+{section Psalm 6}
+
+{poetry}
+/6:1 A David Song 
+(Note to the Conductor -- <I>play this melody on the eight stringer</I>)
+/6:2 {dn Yah!} Please don't chide me 
+in Your anger. 
+Don't scold me in Your wrath.
+/6:3 I need You to show me kindness. 
+I am so miserable. 
+Heal me, {dn Yah!} My bones ache so.
+/6:4 My inner self is very troubled. 
+I ask You, {dn Yah!} 
+How long must I still endure?
+/6:5 Relent, {dn Yah,} 
+And for mercy's sake 
+Pull me out and spare me.
+/6:6 How can I remember You 
+If I am dead in the pits? 
+Who will thank You?
+/6:7 I groan and am all worn out. 
+I sob on my bed; 
+My tears drench my mattress.
+/6:8 My eyes are stinging 
+From frustration, 
+As if all my troubles 
+Wept them out.
+
+/6:9 Away with you, 
+All you traffickers of sin!
+/6:10 {dn Yah} has heard my wailing. 
+{dn Yah} has listened to my pleading. 
+{dn Yah} will fulfill my prayer.
+/6:11 Confusion and embarrassment 
+On you, you fiends! 
+This very moment, Let shame 
+Bring you to your senses.
+
+
+{file "תהילים כה" "Psalms25.xml"}
+{section Psalm 25}
+
+{poetry}
+{he א} /25:1 (An Aleph-Bet song) Of David. 
+{dn Yah!} To You I raise my soul.
+{he ב} /25:2 {dn My God,} I trust You. 
+Let me not be shamed. 
+Let not my detractors mock me.
+
+{he ג} /25:3 All who place their hope in You 
+Will not be disgraced, 
+But shame will cling to those 
+who riot without cause.
+
+{he ד} /25:4 Get me to know your ways. 
+Teach me your way.
+
+{he ה} /25:5 Guide me in Your Truth. 
+Teach me to know 
+That You are the {dn God} of my salvation.
+All day long I set my trust on You.
+{he ו} 
+{he ז} /25:6 Recall Your compassion, {dn Yah} 
+And Your kindness, 
+They precede all Creation.
+
+{he ח} /25:7 To the failings of my youth 
+And my rebellions, don't pay heed.
+Remember Your good will for me, {dn Yah!} 
+for Your goodness' sake.
+
+{he ט} /25:8 Because You are good and fair, 
+You can gently show the way 
+to the neglectful.
+
+{he י} /25:9 You guide the modest 
+in their judgments, 
+Teaching the unassuming Your way.
+
+{he כ} /25:10 Those who respect Your covenant 
+And witness You, 
+Find that Your ways, {dn Yah,} 
+Are kind and real.
+{he ל} /25:11 For Your sake, {dn Yah,} 
+Pardon my flaw –- though it is great.
+
+{he מ} /25:12 When a person so minds You, {dn Yah,} 
+You will teach him the path to choose.
+
+{he נ} /25:13 Such one can sleep easy at night, 
+Knowing that her children 
+will inherit the Earth.
+
+{he ס} /25:14 You, {dn Yah,} impart Your secrets 
+To Your awakened ones. 
+Your mysteries You share with them.
+
+{he ע} /25:15 My eyes are focused on You, {dn Yah.} 
+You untangle my feet from the trap.
+
+{he פ} /25:16 Turn to me with kindness, 
+For I am lonely and wretched.
+
+{he צ} /25:17 My troubles have opened my heart
+And made space in it for others. 
+Do extricate me from my despair.
+
+{he ק} /25:18 See my struggle, 
+my heavy burden. 
+Forgive then all my failings.
+
+{he ר} /25:19 See how much I suffer, 
+How I am hated for no reason.
+
+{he ש} /25:20 Keep my soul safe and free me. 
+Let me not be reviled 
+for my trust in You.
+
+{he ת} /25:21 Because I trust You-- 
+Let simple directness protect me.
+/25:22 {dn God!} Free all of Israel 
+from all their distress.
+
+
+{file "Dear God" "DearGod.xml"}
+{poetry}
+Dear {dn God,}
+We take delight in the privilege
+To be created for Your glory--
+* Not to walk about in confusion;
+* To feel in us, 
+Your implant of eternal life.
+
+Open our hearts to Your Torah.
+Secure in our hearts, 
+Love and Awe for You.
+May we not waste our lives
+Or cause discord.
+We plead with You, {dn Yah,} 
+Our {dn God,} 
+Support of our Parents, 
+That in this life
+We may be faithful to Your intent.
+And that we may live, 
+To experience 
+The days of Mashiach, 
+And the life of the world to come.
+
+To trust in You, {dn Yah,}
+Is our blessing.
+I will keep chanting in Your honor,
+And offer my gratefulness,  
+And not be silent.
+
+{dn Yah} will prove trustworthy.
+{dn Yah} shaped the worlds,
+We can stake our trust on this.
+Knowing how to call on You, 
+We can depend on You.
+
+You never abandoned those 
+Who sought You, {dn Yah.}
+
+{emph This is true because}—
+You, {dn Yah,}
+desire this.
+
+In order that Your justice prevail,
+You extend the Torah,
+To be ever more 
+Compelling and strong.
+
+{file "שיר של יום" "Shir-shel-yom.xml"}
+{include block "Psalms24.xml"}
+{include block "Psalms48.xml"}
+{include block "Psalms82.xml"}
+{include block "Psalms94.xml"}
+{include block "Psalms81.xml"}
+{include block "Psalms93.xml"}
+{include block "Psalms104.xml"}
+
+{section Here are Psalms for each day of the week.}
+
+{file "תהילים כד" "Psalms24.xml"}
+{section Psalm 24}
+
+{note This psalm was the {emph Sunday} song of the Levites in the Holy Temple.}
+
+/24:1 David’s song (for opening himself to Spirit).
+{poetry}
+Earth and her fullness 
+Are Yours, {dn Yah,} 
+The cosmos and its beings.
+/24:2 You founded Earth 
+On the endless seas of space.
+You set her by the streams 
+Of the great Flow.
+
+/24:3 Who can rise 
+To Your summit, {dn Yah}? 
+Who can stand 
+In Your place of holiness?
+/24:4 One who has hands 
+that are clean, 
+A heart that is pure, 
+Who has no false oath 
+On her conscience, 
+Who swore not to larceny.
+/24:5 Such a one 
+Will raise a blessing from You, {dn Yah,} 
+Kind generosity from You, 
+Her helpful {dn God.}
+
+/24:6 Such people are of a generation 
+That seeks You. 
+Like Jacob seeking to face You, 
+{translit he-Latn "Selah!"}
+
+/24:7 Open your minds’ imagination! 
+Let the Gates to eternity 
+Come into view!
+Then the King of Glory 
+Will appear.
+/24:8 Who is this, 
+the King of Glory?
+{dn Yah – Tzebaot,}
+She is the Queen of Glory. 
+{dn Yah!} Powerful and strong. 
+{dn Yah,} the ever victorious!
+
+/24:9 Open your minds’ imagination! 
+Let the Gates to eternity 
+Come into view, 
+And then the King of Glory 
+Will appear.
+/24:10 Who is this, the King of Glory?
+{dn Yah – Tzebaot,} 
+She is the Queen of Glory. 
+{translit he-Latn "Selah!"}
+
+{file "תהילים מח" "Psalms48.xml"}
+{section Psalm 48}
+
+{note This psalm was the {emph Monday} song of the Levites in the Holy Temple.}
+
+{poetry}
+/48:1 <I>Song and music from the Korachites</I>
+/48:2 Here in God’s city, 
+On this holy mountain, 
+{dn God} is vast and His fame is glorious.
+/48:3 This beautiful landscape, 
+The joy place of Earth, 
+Mount Zion 
+at Jerusalem’s North side, 
+The great royal capital.
+
+/48:4 In her palaces, 
+{dn God} is known in exaltation.
+/48:5 Here, kings gathered. 
+They came together.
+/48:6 (<I>If they came as enemies...</I>) 
+They saw and were overwhelmed 
+With awe. 
+They were shaken and took flight.
+/48:7 Trembling, they shook, 
+Shaking like a woman in labor.
+
+/48:8 A storm You raised from the East, 
+Shattering Tarshish cruisers.
+/48:9 All this we heard.
+We even saw it all, 
+In God’s city, 
+The Seat of {dn Yah – Tzebaot.}
+May {dn God} keep it flourishing forever. 
+{translit he-Latn "Selah!"}
+
+/48:10 In the midst of Your Temple, 
+We looked for Your Grace, O {dn God.}
+/48:11 Your reputation is well deserved. 
+So, we praise You 
+To the ends of the Earth.
+Fairness and kindness 
+Issue from Your right hand.
+/48:12 Zion’s mountain rejoices. 
+Judah daughters are gleeful. 
+All because of how You act justly.
+
+/48:13 Go round Zion, enfold her. 
+Take note of her towers.
+/48:14 Set your heart on her strengths. 
+Raise her mansions high. 
+Then, you will tell about it 
+To generations yet to come:
+
+/48:15 This is {dn God,} {dn our God!} 
+Forever and ever. 
+He will guide us past death.
+{prose}
+
+{file "תהילים פב" "Psalms82.xml"}
+{section Psalm 82}
+
+{note This psalm was the {emph Tuesday} song of the Levites in the Holy Temple.}
+
+/82:1 Assaph sings: 
+{dn God} is present 
+to the godly gathering. 
+He presides among those 
+Who administer judgment, 
+(and warns them), 
+/82:2 `How much longer will you twist 
+Your verdicts 
+and favor the wicked?' 
+{translit he-Latn "Selah!"}
+/82:3 In your judging, 
+Consider the modest, 
+the orphan. 
+Find justice for the destitute 
+And the oppressed.
+/82:4 Assist the poor, the down and out. 
+Save them from the bullies’ hands.
+
+/82:5 Not knowing, unawares you are, 
+You walk in the dark, 
+While the foundations of earth 
+Are toppling.
+
+/82:6 I set you to be judges, 
+To be like angels 
+of the {dn Most High.}
+/82:7 But you will die like anyone else, 
+Topple like demoted princes.
+/82:8 Arise, O {dn God! }
+Bring justice to the world! 
+
+You can bring order 
+to all the nations.
+
+
+{file "תהילים צד" "Psalms94.xml"}
+{section Psalm 94}
+
+{note This psalm was the {emph Wednesday} song of the Levites in the Holy Temple.}
+
+{poetry}
+/94:1 {dn God} who settles scores! 
+Appear in Divine vengeance!
+/94:2 Make Yourself known, 
+As The Judge of the World. 
+
+Let the arrogant suffer 
+Your retribution.
+
+/94:3 How long yet {dn YHVH }
+will the wicked -- 
+How long yet 
+will the evil ones prosper?
+/94:4 Boasting their malice, 
+They talk each other into greater evil.
+/94:5 {dn YHVH! }
+They oppress Your people. 
+They demean Your legacy.
+/94:6 They murder widows 
+and strangers. 
+They kill orphans!
+
+/94:7 Deluded are they, 
+Thinking that {dn Yah} cannot see, 
+The {dn God} of Jacob is not aware.
+/94:8 Boorish trash! 
+Try to make sense! 
+Fools, will you ever get wise?
+/94:9 The One who plants ears -- 
+Can He not hear? 
+Who shapes eyes -- 
+Can She not see?
+/94:10 He who reproaches nations -- 
+Does She not call them to task? 
+
+He, Who teaches people 
+to be aware, Is She not aware?
+
+/94:11 {dn YHVH, }
+Knows our human thoughts. 
+They are all worthless.
+/94:12 Blissful is the one 
+whom You, {dn Yah,} 
+Take to task and teach him 
+Of Your Torah, 
+/94:13 To keep him secure 
+during evil days, 
+Tiding him over until ruin 
+Overtakes the wicked.
+/94:14 Because {dn YHVH, }
+Will not forsake His people. 
+She will not abandon Her heritage.
+/94:15 Justice will return to the courts, 
+Vindicating those of upright heart.
+/94:16 Will anyone 
+Stand with me against the wicked? 
+Who will stand up for me 
+Against the bullies?
+
+/94:17 Had {dn YHVH} not helped me, 
+I would not have escaped 
+The silent tomb.
+/94:18 When my knees buckled, 
+Your Grace, {dn YHVH,}
+Held me up.
+/94:19 When overwhelmed 
+By disturbing thoughts—-like... 
+`How could You assist malice?' 
+I found comfort 
+As You delighted my soul.
+/94:20 Those who scoff 
+all laws and justice, 
+/94:21 Who band together 
+Against righteous souls, 
+And shed pure blood in meanness, 
+/94:23 You paid them back 
+for their crimes.
+{dn YHVH, God,} 
+You suppressed them for their evil.
+/94:22 {dn YHVH,} Is at all times 
+my tower of strength, 
+{dn My God,} The rock of my safe place.
+
+{file "תהילים פא" "Psalms81.xml"}
+{section Psalm 81}
+
+{note This psalm was the {emph Thursday} song of the Levites in the Holy Temple.}
+
+/81:1 {instruct Accompany this Assaph song with the guitar}
+/81:2 Make music to {dn God,} 
+The Source of our strength.
+/81:3 Trumpet a fanfare to Jacob’s {dn God:} 
+Louder, Drum rolls, 
+Sweet sounding violins 
+And pipes.
+/81:4 Greet the New Moon 
+With the {translit he-Latn "Shofar,"} The time 
+When the moon is hidden, 
+And still we celebrate.
+
+/81:5 This is the imperative for Israel. 
+To become prepared, 
+For being judged by Jacob’s {dn God.}
+/81:6 (Like that day when...) 
+Joseph was empowered 
+To go out and rule Egypt, 
+Able to understand a language 
+He never learned.
+/81:7 (<I>This caused that, in the end.</I>) 
+The heavy load 
+was taken from his back 
+No longer 
+having to knead the clay.
+/81:8 You called when oppressed, 
+And I (said God) freed you.
+
+In the thunder 
+You heard my secret message. 
+Later, I tested you 
+at Meribah’s springs. 
+{translit he-Latn "Selah!"}
+
+/81:9 Listen my people! 
+I witness this to you! 
+Israel, if only 
+you would listen to Me.
+
+/81:10 Don’t cling to a strange god. 
+Don’t worship an alien deity.
+
+/81:11 It is I, {dn Yah,} 
+Who took you up from Egypt.
+I fed you 
+and you were sated to fullness.
+/81:12 But My people did not obey me. 
+Israel did not desire Me close.
+/81:13 I let them have their hearts’ way, 
+To pursue their own devices.
+
+/81:14 Oy! 
+If only my people would obey Me, 
+Israel would walk in My ways.
+/81:15 In a moment, 
+I would subdue their foes. 
+I would, with My own hands, 
+repay them.
+/81:16 Those who loathe {dn Yah,} but deny it, 
+Will have their rebuke forever.
+/81:17 (<I>But you who obey...</I>) 
+I will feed with the fat of grain. 
+And satisfy 
+With honey from the rock.
+
+
+{file "תהילים צג" "Psalms93.xml"}
+{section Psalm 93}
+
+{note This psalm was the {emph Friday} song of the Levites in the Holy Temple.}
+
+{poetry}
+/93:1 {dn Yah,} You ruled, robed in dignity.
+Donning intensity, 
+Girded with strength, 
+Even the cosmos you arrayed 
+That it not falter.
+/93:2 Your Throne 
+Is prepared from the farthest past. 
+You have been before 
+There was a world.
+
+/93:3 The currents raise their roar, 
+The rivers raise the spumes, 
+The mighty torrents' thunder.
+/93:4 The thunder of the ocean’s breakers: All exclaim, 
+`Most powerful are You, {dn Yah!}' 
+Oh, {dn Yah!} /93:5  Your creation 
+witnesses You well. 
+Of sacred beauty is Your house-- 
+Through all of time.
+
+
+{instruct On Rosh Chodesh (New Moon Day) or any other day in which you appreciate God’s hand in nature insert Psalm 104}
+
+{file "תהילים קד" "Psalms104.xml"}
+{section {he ברכי נפּשׁי}
+Psalm 104}
+
+{poetry}
+/104:1 Bless {dn Yah,} breath of mine. 
+{dn YAH,} {dn my God,} You are so vast and great, 
+All veiled in pride and glory!
+
+/104:2 You are wrapped in Light. 
+The sky, You spread like a sheet.
+
+/104:3 Your upper chambers are water roofed, 
+As You bestride clouds. 
+You waft on the wings of wind.
+
+/104:4 The breezes, You send 
+are Your aides, 
+Your helpers, blazing flames.
+
+/104:5 You founded Earth, so sound, 
+To outlast time itself.
+
+/104:6 The abyss, You covered like a mantle 
+Water! On mountains rests.
+
+/104:7 You sound a roar and they flee. 
+Your thunder makes them shake.
+
+/104:8 Mountains high and valleys low... 
+Their places they assume.
+
+/104:9 You set them limits they cannot pass. 
+Never again to flood the land.
+
+/104:10 Springs flow into brooks 
+And snake between the mountains.
+
+/104:11 All the wild of field drink there. 
+The beasts slake there their thirst.
+
+/104:12 By their shores dwell birds that soar, 
+Sounding calls through leaves and reeds.
+
+/104:13 You drench the hills 
+From Your Upper Chambers. 
+
+From your hands' produce 
+The Earth is filled.
+
+/104:14 You grow fodder for the tamed beasts, 
+And herbs with human labor, 
+
+To bring forth bread from Earth.
+/104:15 And wine to delight the sad ones, 
+
+And oil... that softens skin, 
+And bread... that sustains the weak.
+
+/104:16 Even the trees you sate with sap. 
+The cedars You planted on the Lebanon.
+
+/104:17 There, birds find their nesting. 
+There, storks find homes to rest.
+
+/104:18 Antelopes bound on the heights. 
+Marmots hide behind rocks.
+
+/104:19 The Moon pulls tides and seasons. 
+The sun knows where to set.
+
+/104:20 You darken dusk to night. 
+The forest's night life stirs.
+
+/104:21 The big cats cry for prey, 
+Praying {dn God} for their food.
+
+/104:22 They return at the rising of the sun, 
+To crouch once more in lairs.
+
+/104:23 While humans go out to work, 
+To their toil, up to night.
+
+/104:24 How many things You do! 
+So wisely are they made. 
+All Earth, at Your command.
+
+/104:25 This vast sea beyond all grasp. 
+Countless are the creatures in her, 
+Tiny ones and giant whales.
+
+/104:26 There go stately ships. 
+This Leviathan You shaped 
+To play and romp therein.
+
+/104:27 They all rely on Your care, 
+To feed them well each time.
+
+/104:28 You give to them and they take it. 
+Your hand's gifts sate them well.
+
+/104:29 You hide your face, they panic. 
+You recall their breaths, they die. 
+They return to their dust.
+
+/104:30 You send your spirit, 
+And they are re-created. 
+So too, You renew life on Earth.
+
+/104:31 Let Your glory, {dn Yah,} fill time and space. 
+Take Joy, O {dn Yah,} in what You do!
+
+/104:32 You look at Earth and she trembles, 
+Hills You touch, and they smoke.
+
+/104:33 I live Your song, my {dn Yah,} 
+{dn My Yah,} I am Your tune.
+
+/104:34 Let my talking give You joy. 
+I am so happy, {dn my Yah!}
+
+/104:35 I wish no sin exist on Earth. 
+All wickedness were gone. 
+
+Bless that {dn Yah,} my soul, my breath.
+
+{translit he-Latn "HALLELU-YAH!"}
+
+
+{instruct Then close with the Aleynu}
+{file "עלינו" "Aleynu.xml"}
+{section עלינו לשבח – שלו עשנו עם}
+
+{poetry}
+We rise to praise You,
+Source of All,
+Your generous work, 
+As  Creator of All.
+You made us  One 
+With all of Life.
+You inspired us to share 
+with all mankind.
+You linked our fate 
+With all that lives.
+And made our portion 
+With all in the world.
+Some of us like to worship You,
+As emptiness and void.
+Some of us want to worship You,
+As King of Kings.
+We all consider You 
+sacred and blessed.
+We stand amazed
+At the vault of the sky,
+At the firmness of Earth.
+And deem You,
+Enthroned in the Highest realms,
+Dwelling also in and with us.
+You are {dn our God.} 
+There is nothing else.
+Your Truth is supreme.
+Existence is nothing but You.
+So Your Torah guides us;
+{dn Yah’s} kingdom 
+Extends throughout the Cosmos.
+Further it is stated:
+{dn Yah}  will indeed govern 
+Over all there is.
+On that Day, {dn Yah} will be One.
+And Her Name, Will be ONE.
+{prose}
+
+{instruct In a minyan you can recite the {translit he-Latn "Kaddish"} here. And if you are in mourning you can always say:}
+
+{file "מלא רחמים" "Malei-Rachamim.xml"}
+{section אל מלא רחמים}
+
+Compassionate, Highest God! 
+Grant, repose under Your {translit he-Latn "Sh’khinnah’s"} wings in the company of saints and pure ones who radiate light like the bright sky, and among them may  the soul of my --- who has gone to other realms find gentle rest.  I will offer as Mitzvah, alms to honor & (his\/her) memory. May & soul find itself in the garden of delight and may his remains be undisturbed and may & soul be bound up in the chain of life. To this I say {translit he-Latn "Amen"}
+
+
+{instruct From the beginning of Elul we include Psalm 27}
+{file "תהילים כז" "Psalms27.xml"}
+{section Psalm 27}
+
+{poetry}
+/27:1 {dn Yah,} you are my Light, my Savior, 
+Whom need I dread?
+{dn Yah,} With You as my strong Protector 
+Who can make me panic?
+/27:2 When hateful bullies gang up on me, 
+Wanting to harass me, 
+To oppress and terrorize me, 
+They are the ones who stumble and fall.
+/27:3 Even if a gang surrounds me 
+My heart is not weakened.
+If a battle is joined around me 
+My trust in You is firm.
+/27:4 Only one thing do I ask of You, {dn Yah,} 
+Just this alone do I seek: 
+I want to be at home with You, {dn Yah,} 
+All the days of my life.
+I want to delight in seeing You, 
+When I come to visit You in Your Temple.
+/27:5 You hide me in Your Succah on an foul day.
+You conceal me unseen in Your tent 
+And also raise me beyond anyone’s reach.
+/27:6 And now, as You have held my head high, 
+Despite the presence of my powerful foes, 
+I prepare to celebrate and thrill, 
+Singing and making music to You, {dn Yah!}
+/27:7 Listen, {dn Yah,} to the sound of my cry 
+And, being kind, answer me.
+/27:8 My heart has said: -I turn to seek You, 
+Your Presence is what I beg for.
+/27:9 Don’t hide Your Face from me. 
+Don’t just put me down, 
+You, who have been my helper 
+Don’t abandon me, don’t forsake me, 
+{dn our God,}  my support.
+/27:10 Though father and mother have left me 
+You, {dn Yah,} will hold me securely.
+/27:11 Please teach me Your way 
+And guide me on the straight path. 
+Discourage those who defame me.
+/27:12 False witnesses stood up against me, 
+Belching out violence. 
+Don’t let me become the victim of my foes.
+/27:13 (<I>I would not have survived</I>)
+If I had not hoped that I would yet see 
+{dn Yah’s} goodness fully alive on Earth.
+/27:14 So friend, you too, hope to {dn Yah.} 
+Be sturdy! 
+And make strong your heart! 
+And most of all ---keep hoping to {dn Yah.}
+
+{file "ברכה בשביל קהל" "Blessing-for-the-Kahal.xml"}
+{instruct Here you say some of these blessings to those you davvened with and to your own day.}
+
+{poetry}
+{dn El Shaddai} bless you,
+Make you fruitful, give you the increase,
+that will become a
+source of  harmony for people.
+
+From {dn El,} your parents' {dn God,} help for you!
+From {dn Shaddai,} all the blessings;
+Sky blessings from above,
+Blessings from the deepest strata below,
+Blessings of fertility and nurture.
+
+May {dn G-d} fulfill the blessing
+to Abraham in you, 
+and in your loved ones,
+along with you.
+Wherever, like Abraham,
+you once were a stranger there, 
+in that place, 
+may you be at home.
+
+Blessings of your parents (Jacob),
+to add  more force
+to those of their parents,
+(Isaac and Abraham),
+to cap the desires of the ancient hills,
+be they upon your head (Joseph),
+and surround the heads of your siblings.
+
+{dn God} loves You.
+{dn God} blesses and increases you.
+{dn God} blesses your family and your land,
+your income and your holdings,
+right here on Earth,
+as {dn God} promised your parents.
+All peoples will bless you.
+You and your possessions,
+will all prosper.
+
+May {dn God} remove all illness and pain,
+all tensions and pressures
+you have known...
+
+The angel who redeemed me,
+from all that was corrupt,
+may that one bless these children.
+
+May my name, 
+that of Abraham and Isaac,
+be associated with theirs.
+
+Be blessed in the city.
+Be blessed in the country.
+Blessed as you arrive,
+Blessed as you are leaving.
+
+{dn God} decree for you blessing
+in what you have stored up
+for yourself from before,
+through  your hands' work now,
+right here on Earth.
+This be your gift from {dn God.}
+May {dn God} open for you,
+treasures of heavenly goodness,
+of earthly timeliness,
+to succeed in what you do.
+May you have good credit,
+and not need it.
+
+{dn God} be with you  and help you 
+at all times.
+May you not ever
+have to feel shame or blame.
+
+Go in joy, arrive in peace.
+Mountains and hills sing you on your way.
+Trees in the meadows applaud your trip.
+
+Draw waters of Joy
+from the source of help.
+May you live to the day
+that {dn God} be so present,
+the way we hoped, {dn Yah,}
+to be present to us all along,
+a real help in our lives!
+How we will then celebrate
+{dn God's} helpfulness!
+So you say to each other, {translit he-Latn "L’chayim!"}
+To you, {translit he-Latn "Shalom,"} to your home, {translit he-Latn "Shalom."}
+
+All of yours, {translit he-Latn "Shalom!"}
+
+
+{file "מנחה" "Mincha.xml"}
+{section Minchah, Afternoon Prayer}
+{instruct For minchah, turn to the Ashrey and the Amidah and follow with Aleynu.}
+{include block "Ashrey.xml"}
+{include block "Amidot.xml"}
+{include block "Aleynu.xml"}
+
+{file "מעריב" "Maariv.xml"}
+{include block "Maariv-Birkhot-Kriyat-Shema.xml"}
+{include block "Shema.xml"}
+{include block "Emet-vEmunah.xml"}
+{include block "Mi-Kamokha.xml"}
+{include block "Hashkivenu.xml"}
+{section Ma’ariv, Evening Prayer}
+{include block "Amidot.xml"}
+{include block "Aleynu.xml"}
+
+{section Barkhu and Sh’ma’}
+
+{file "מעריב ברכות קריאת שמע" "Maariv-Birkhot-Kriyat-Shema.xml"}
+{include block "Maariv-Aravim.xml"}
+{include block "Ohev-Amo.xml"}
+
+{file "מעריב ערבים" "Maariv-Aravim.xml"}
+{poetry}
+{emph We praise You, {dn Yah.}}
+By Your command,
+Pleasant evenings appear.
+With good judgment,
+You open gates to new awareness.
+
+You vary the seasons…
+Setting the sky’s light,
+As You adjust the times,
+To conform 
+To their appointed tasks.
+
+You create day and night.
+You make for dawn and dusk.
+Now the day is over, 
+And you bring on the night.
+
+You give us discernment,
+To know the difference 
+Between day and night.
+
+{dn Yah Tzeva’ot} – 
+{dn Lord of Diversity,}
+Is Your Name.
+
+Oh! Living, Present {dn God,}
+May You always 
+Govern our lives.
+{translit he-Latn "Barukh Attah {dn Yah}
+Ha ma’ariv Aravim."}
+
+
+{file "אוהב עמו" "Ohev-Amo.xml"}
+{poetry}
+You keep loving us,
+As You have always loved us.
+{dn Yah,} Our {dn God.}
+You impart to us: 
+{translit he-Latn "Torah"} and {translit he-Latn "Mitzvot,"}
+To know reality and justice.
+
+Therefore, {dn Yah,} {dn our God,} 
+When we are to rest for the night,
+When we are to rise for the day,
+We will make Your principles
+Our conversation.
+That will give us steady joy
+As we talk {translit he-Latn "Torah,"}
+And plan to do {translit he-Latn "Mitzvot."}
+
+This is what we live for.
+
+This is what keeps us going.
+Day and night we will
+Ponder their meaning. 
+Just keep on all along loving us.
+{translit he-Latn "Barukh Attah {dn Yah}
+Ohev Ammo Yisrael."}
+
+
+{file "אמת ואמונה" "Emet-vEmunah.xml"}
+{section אמת ואמונה}
+
+{poetry}
+It is true, and we believe it…
+That You are our redeemer.
+I am awed when I recall the miracles,
+And the help you gave me.
+You kept my spirit alive.
+You kept me from stumbling.
+In the past, 
+You helped our people.
+We all accepted You,
+As our leader,
+And vowed to follow Your lead.
+
+With Moshe, Miriam, And all Israel,
+We sang to You…
+
+
+{file "מי כמוֹך" "Mi-Kamokha.xml"}
+{section מי כמוֹך באלים יה}
+
+{poetry}
+Mi Kamokha ba’elim {dn Yah}
+Mi Kamocha ne’dar bakodesh
+Nora’ t’hillot ‘Osseh fele’
+
+And we continue 
+To celebrate You,
+As Redeemer of Israel.
+
+
+{file "השכיבנו" "Hashkivenu.xml"}
+{section השכיבנו}
+
+Give us peaceful rest. 
+And in the morning,
+Awaken us to the good life,
+And to peace.
+We need you
+To guide us,
+And to assist us.
+
+Protect us in the night.
+Keep us in health,
+And safe from ensnarement.
+Guard our coming and leaving,
+As You have, up to now. 
+
+{translit he-Latn "Barukh attah {dn Yah}
+Shomer et Ammo Yisrael la’ad."}
+
+{instruct Now pray the {translit he-Latn "Amidah"} and {translit he-Latn "Aleynu."}}
+
+
+{file "ריבונו של עולם הריני מוחל" "Hareni-Mocheil.xml"}
+{instruct Before you go to sleep, make an examination of your conscience for the entire day. Check your relationships and make an act of forgiveness.}
+
+{instruct Recalling whatever frustration and hurt  was experienced during the day, at the hands of others, 
+visualize them written on slips of paper. Rip these up one by one,
+forgiving fully those who hurt you as you say:}
+
+{section ריבונו של עולם הריני מוחל}
+
+{poetry}
+{translit he-Latn "Ribono Shel Olam, "}
+I hereby forgive 
+whoever has hurt me, 
+And whoever has done me 
+any wrong; 
+Whether it was 
+Deliberately or by accident, 
+Whether it was 
+Done by word or by deed, 
+In this incarnation 
+Or in previous ones. 
+May no one, 
+Be punished on my account. 
+
+May it be Your will, 
+O {dn Lord} {dn my God,} 
+{dn God} of my parents, 
+That I sin no more, 
+That I do not revert 
+to my old ways, 
+That I do not anger You any more 
+by my actions, 
+May I do not do that 
+which is evil in Your sight. 
+
+Wipe away the sins 
+That I have committed, 
+With Your great compassion, 
+But not through 
+Sickness or suffering. 
+
+May these words 
+Of my mouth, 
+And the prayers 
+That are in my heart, 
+Be acceptable before You, 
+O {dn Lord,} My Rock and my Redeemer. 
+
+{file "Appendix" "Appendix.xml"}
+{include block "Kavvanot-for-study.xml"}
+{include block "Prayer-for-prayer.xml"}
+
+{section Appendix}
+
+{file "כוונות של בית מדרש" "Kavvanot-for-study.xml"}
+{section The Teaching of the Beit Ha Midrash at Elat Chayyim}
+
+Each one who aligns oneself every day with these principles of the faith and lives according to them can be assured that s\/he will have a role in the World to Come for us and for all the peoples on the entire world soon:
+1. May it be the Divine will that I believe with perfect faith in the {dn G‑d} who is infinite and the blessed light that issues from that Infinite Source, who is beyond time and space, yet who longs to have a dwelling place among those in the worlds here below; and who, out of loving beneficence to Her creatures, contracted Her light and Her radiant glory, in order to emanate, to create, to form, and to effectuate all that exists in the universe.
+2. May it be the Divine will that I believe with perfect faith in the Oneness of {dn G‑d} and of all creation, a oneness of the kind of One that has no second; and that all which exists in the universe exists solely according to the will of that {dn G‑d}, who constantly calls everything into being – who causes all existence at every moment.
+3. May it be the Divine will that I believe with perfect faith that the Creator has an intent and a purpose in creation, and that one of the aspects of that purpose is so that He shall become known to us by and through it; and that we, creatures have a task to broaden and enlarge that knowledge\/awareness until the world will be as filled with knowledge of {dn G‑d} as the waters cover the sea.
+4. May it be the Divine will that I believe with perfect faith that the hoped‑for goal is that all of us will come to constitute one united interconnected and organic whole and that every living being will know that You are the One who constantly causes its existence.
+5. May it be the Divine will that I believe with perfect faith that all the pathways through which the Holy Spirit is manifest and revealed are of one piece with the Torah that was given at Sinai.
+6. May it be the Divine will that I believe with perfect faith in the mission of Judaism, which is one of the vital organs of the collective being that comprises all existence, and that through {dn G‑d's} compassion on all creatures, it is revealed to them also how indispensable and integral they are to the health of all the species of the planet.
+7. May it be the Divine will that I believe with perfect faith that the universe is not ownerless and abandoned, and that every one who does good with his\/her life takes part in the fixing on the world and that every one who uses his\/her life for evil participates in the destruction of the world; and that every action has an impact on the rest of existence.
+8. May it be the Divine will that I believe with perfect faith that the amount of good in the world is greater than the amount of evil, and that the entire order of movement through the chain of evolution is designed to bring about the fulfillment of the Divine intention.
+9. May it be the Divine will that I believe with perfect faith that the deeds of the fathers and mothers accrue to the benefit of the children, and that the tradition that is passed on contains within it the seeds of the light of redemption.
+10. May it be the Divine will that I believe with perfect faith that our prayers are heard and answered.
+11. May it be the Divine will that I believe with perfect faith that the Holy {translit he-Latn "Shechinah"} dwells within our midst and that all who show kindness to living creatures show kindness too to the {translit he-Latn "Sh’khinnah,"} and vice versa.
+12. May it be the divine will that I believe with perfect faith that physical death does not terminate the existence of the soul; rather, that there are innumerable worlds, within which they return to live again.
+13. May it be the Divine will that I believe with perfect faith in {translit he-Latn "Tikkun HaOlam,"} that the world can be repaired and healed and that it is becoming alive; and that besides coming to life, the world will come to possess a consciousness and feeling, and as such will become a fitting vessel for a fuller revelation of the Divine will.
+
+
+{file "תפילה קודם התפילה מרבי רבי אלימלך מליזשענסק" "Prayer-for-prayer.xml"} 
+{section {he תפילה קודם התפילה מרבי רבי אלימלך מליזשענסק}
+Rabbi Elimelech’s prayer to be able to pray}
+
+{poetry}
+{dn Yah,} {dn our God,}  
+You are our parents {dn God,} 
+You are open to hear our pleading prayer 
+with compassion.  
+You give a caring ear 
+to what Your people Israel is crying for.  
+This is our prayer to You, 
+please grant it.
+
+Open our hearts, 
+focus our thoughts, 
+help that our prayers 
+may flow freely from our lips 
+and incline Your ear to hear
+how we, Your servants 
+are seeking Your favor, 
+crying in a pleading voice 
+and with a shattered spirit.
+
+You, kind compassionate One
+{dn God} of infinite mercy!  
+Please forgive us, pardon us 
+and atone 
+for us and for Your entire people, 
+the house of Israel, 
+so that what ever we have failed 
+to do right 
+or what we have done wrong 
+or when we acted in ways 
+that are wicked
+and rebelled against You. 
+be forgiven, pardoned and atoned 
+for us and for Your entire people, 
+the house of Israel, 
+
+How well You know, 
+and it is apparent to You 
+that it was not with malice or willfulness 
+that we transgressed what You teach us,
+what You command us  
+in Your {translit he-Latn "Torah"} and Commandments.  
+
+In our bellies 
+there burns a fire without ceasing, 
+a {translit he-Latn "Yetzer Hara,"} the drive of selfishness 
+which draws us 
+to the vices of this world 
+and its follies.  
+The {translit he-Latn "Yetzer"} confuses our awareness, 
+even when we stand before You 
+seeking to pray and plead for our lives.  
+The {translit he-Latn "Yetzer’s"} incitement 
+constantly confuses our thoughts 
+with all sorts of thoughts and schemes.  
+We cannot resist it; 
+for our awareness is uncertain
+our mind unsteady 
+the troubles and preoccupations 
+of making a living 
+under times of oppression 
+bear down heavily on us.  
+
+Therefore, You, 
+who are compassionate and kind 
+fulfill for us what You promised 
+to Moses, Your faithful servant; 
+When You said, 
+`I will favor whomever I will favor 
+and I will be compassionate 
+on whomever I will be compassionate.'
+And this You had our sages tell us
+This applies even to those 
+who are not worthy
+for this is Your way;
+to be kind both to those who are bad 
+and those who are good.
+
+It must be obvious to You
+how we are troubled
+how hard our life is
+and what we must bear –
+it is so difficult for us
+to come near to You
+and to serve You well,
+to have our feelings be sincerely
+in harmony with Your will.
+Dear Father in heaven!
+What pain we feel in our souls!
+Please arouse Your mercy and kindness
+freely and abundantly 
+and banish, erase
+our attraction to evil.
+Let not our evil {translit he-Latn "Yetzer"}
+be active in our innards.
+Let him not seduce us
+let him not deflect us from serving You
+
+May no evil schemes arise in our heart
+when we are asleep or awake
+especially at that time 
+when we stand in prayer before You
+or are at times 
+when we study Your holy {translit he-Latn "Torah"}
+or at times when we are busy 
+fulfilling Your Commandments.
+Then let our thoughts be pure and clear,
+our own awareness steady and strong,
+sincere and heartfelt
+as You would have us be.
+
+Awaken in our hearts 
+and in the hearts of all of Israel, 
+Your people,
+the aim to unify You
+in all truth, in all love,
+so to serve
+as to be pleasing to You.
+
+Fasten in us 
+such a steadfast faith in You, 
+To be so deeply anchored 
+in our hearts as
+not to vacillate from it.
+
+Remove from us all the barriers 
+that separate us from You,  
+Our father in heaven.
+Save us from stumbling in our path,
+Keep us from going astray.
+
+Don't forsake us,
+don't abandon us,
+keep us from disgracing 
+You before the world.
+
+Be present to us 
+in the words of our prayer
+May the work of our hands
+and the thoughts of our hearts 
+serve You
+as we think of You
+
+Please, our Father in heaven
+In Your abundant kindness 
+Grant us the boon 
+that our thoughts 
+and words and actions, 
+all our motives and our feelings
+those we are aware of 
+and those near not aware of 
+those that are manifest 
+and those that are hidden
+with all of them together 
+be unified in sincerity and truth
+without any self deception.
+
+Purify our hearts,
+sanctify us,
+sprinkle us with Thy cleansing water 
+to purify us,
+wash us clean 
+with Your kindness and love.
+Plant Your steadfast love, 
+and Your awe in our hearts
+at all times
+and in all places
+as we go about our lives whether
+we lie down or get up;
+that there always be Your Holy Spirit 
+ardently active in our innards 
+that we may rely on You always,
+on Your greatness, 
+Your love and Your awe.
+
+May we be securely anchored
+in Your written and Oral {translit he-Latn "Torah"}
+in the part of the Torah 
+that is open to all
+and the part of {translit he-Latn "Torah"} that is hidden.
+In doing the {translit he-Latn "mitzvoth"}
+may we unify Your awesome Name.
+Protect us from hypocrisy,
+from pride, anger, and vindictiveness
+from depression, from tale bearing
+and other vices.
+Protect us from everything
+that might damage 
+the holiness and purity
+of our service to You, whom we love.
+
+Pour out thy Holy Spirit over us
+that we may stay close to You,
+that our longing for You may
+grow and increase.
+Raise us up from rung to rung
+that we might come close to the rung of
+our holy forebears
+Abraham, Isaac and Jacob.
+
+We know
+You will always receive our prayer;
+You will always answer us
+when we pray for anyone, 
+be it a single person 
+or the whole people Israel.
+May You take joy in us
+May Your glory be reflected in us.
+
+May our prayers bear fruit
+and be fulfilled, above and below.
+Help us to attend to our flaws,
+especially the sins of our youth
+as King David, peace be upon him, said
+`my youthful sins and my rebellions
+do not keep in Your memory.'
+Please, enable us to turn from our sins 
+and rebellions.
+Let there flow to us 
+from the realm of repentance
+the challenging call 
+to return to You wholeheartedly
+and to repair all that we have damaged 
+of Your pure and holy Name.
+
+{dn Yah,} rescue us from envy.
+Let not jealousy 
+of any person arise in our hearts
+and let not others be vindictive to us,
+on the contrary, place into our hearts
+appreciation for the goodness 
+of our fellow beings.
+Let us not seek to find fault with them.
+May we speak to each person 
+with civility and gentleness.
+Let not hatred arise from one to another.
+Strengthen us 
+that we might love You more
+for You know well how our intention is 
+that it all should bring You
+pleasure and joy,
+for this is the root of our intention
+despite the fact 
+that we don't have a strong enough mind
+to keep the aim of the {translit he-Latn "kavanah"}
+of our heart, 
+focused on You.
+
+Enlighten us so that we might learn 
+to fully know Your good purpose.
+This is what we plead to 
+You, all merciful {dn God.}
+Please accept our prayer
+in compassion and good will.
+
+{translit he-Latn "Amen,"} let this be so willed by You.
+
+
+{file "ליקוטי תפילה לשבת" "Likkuti-tefilla-l'shabbat.xml"}
+{include block "Shabbat-Affirmattions.xml"}
+{include block "Yedid-Nefesh.xml"}
+{include block "Yah-Ekhsof.xml"}
+{include block "Anim-zmirot.xml"}
+{include block "El-Adon.xml"}
+{include block "Adon-Olam.xml"}
+{include block "Hymn.xml"}
+{include block "Psalms104b.xml"}
+{include block "Psalms139.xml"}
+{include block "Libbi-uvsari.xml"}
+{include block "Nishmat-Kol-Chai.xml"}
+{include block "Ahavat-Olam2.xml"}
+{include block "Shema2.xml"}
+{include block "Ga'al-Yisrael2.xml"}
+{include block "Shabat-Amidah.xml"}
+{include block "Shabbat-Zemirot.xml"}
+{include block "Blessing-for-the-Kahal2.xml"}
+
+
+{section {he ליקוטי תפילה לשבת}
+Sabbath Supplement to A Weekday Siddur \~ As I Can Say It
+(For Praying In The Vernacular)} 
+
+{file "Shabbat Affirmations" "Shabbat-Affirmattions.xml"}
+{section Shabbat Affirmations}
+
+{instruct You can add personal affirmations after reading these}
+
+{poetry}
+I affirm that {dn God} affirmed and sanctified the Holy Shabbat;
+I raise all toil, suffering, and frustration of the past week
+as my sacrifice to {dn God} and let go of it.
+I affirm the model of our ancestor's rest, and sanctification of {translit he-Latn "Shabbat."}
+I affirm the perfection of what is in the world, and I surrender all the urgings
+and all the strivings on the plane of action, and I offer my body to rest.
+I affirm the union of my {translit he-Latn "Nefesh"} with the Holy Queen and Bride.
+I affirm the union of my {translit he-Latn "Ruach"} with {dn God,}
+the lover of the infinitesimal and the particular with, {dn God} as the {translit he-Latn "Z'ayr Anpin."}
+I affirm the union of my {translit he-Latn "Neshama"} with the resting Creator, 
+the Revealer of Sinai and the Redeemer of the days of {translit he-Latn "Mashiach."}
+And I affirm the union of my additional soul, my {translit he-Latn "Neshama Yetera"}
+with the Ancient of Days to whom eternity is ever present.
+I affirm the blessings that come down for the coming week,
+and my willingness to be mindful of the Holy {translit he-Latn "Shabbat"} even in the midst of the week.
+
+{translit he-Latn "L'ch’vod Shabbat, 
+Shabbat Shalom Oo-m'vorach.
+Shabbat Nefesh, Shabbat Ruach. Shabbat N'shama,
+Shabbat Shalom Ribbono Shel Olam, Shabbat Shalom."}
+
+{file "ידיד נפש" "Yedid-Nefesh.xml"}
+{section Y’DID NEFESH}
+
+{poetry}
+{he י} You who love my soul,
+Compassion’s gentle source,
+Take my guiding motives
+And shape them to Your will.
+Like a darting deer
+I will flee to You.
+Before Your glorious Presence
+Humbly I do bow.
+Let Your sweet love
+Delight me with its thrill,
+Because no other dainty
+Will my hunger still.
+
+{he ה} How splendid is Your light.
+Which worlds do reflect!
+My soul is worn from craving
+For Your love’s delight.
+Please, good {dn G-d}, do heal her
+And show to her Your face,
+So my soul can see You
+And bathe in Your grace.
+There she will find strength
+And healing in this sight.
+Her joy will be complete then
+Eternal her delight.
+
+{he ו} What pity stirs in You
+Since days of old, my {dn G-d}!
+Be kind to me Your own child
+Begotten by Your love.
+For long and longing hours
+I yearned for your embrace
+To see my light in Your light
+Basking in Your grace.
+My heart’s desire is
+To harmonize with Yours
+Do not conceal Your pity
+Hide not that light of Yours.
+
+{he ה} Help, my Lover, spread
+Your canopy of peace,
+Enfold all human beings
+Give all pain surcease.
+Your presence on this earth plane
+Do make known to us
+And we shall respond then
+With song and with dance.
+Rush, my love, be quick,
+The time for love is now,
+Let Your gentle favor
+Grace us as of old. 
+{prose}
+
+{file "יה אכסוף" "Yah-Ekhsof.xml"}
+{section {dn Yah} EKHSOF NOAM SHABBAT}
+
+{poetry}
+{note After the Shabbat Hymn by 
+Reb Ahron of Karlin, The Great.}
+
+{dn Yah!} How I long for 
+the bliss of the Shabbat,
+united in secret 
+with Your own fervent wish.
+Give way to Your own 
+deep desire to love us.
+May {translit he-Latn "Sabbath"} in {translit he-Latn "Torah"}
+be our sacred bliss.
+Share Her with us 
+who desire to please You,
+Our deep thirst for union 
+be met with delight
+
+Holy Presence 
+filling all time and space! 
+Keep safe who keep Shabbat 
+in their longing all week.
+Like a deer that seeks water 
+by the banks of the river,
+We seek {translit he-Latn "Shabbat,"} the secret 
+of Your sacred Name!
+Grant us all week long 
+Her shimmering Presence,
+So our hearts and our faith 
+be pure service to You!
+
+Warmly embrace us 
+with Your kind compassion,
+Quench quickly our thirst 
+for Your unending Grace.
+
+Give us the bliss drink 
+from Eden's own river.
+Your praises we sing 
+with joy on our face.
+
+Let Jacobs gift to us- 
+echo all week long
+Infusing our lives
+with a {translit he-Latn "Shabbes"}-filled trace.
+
+Hail Shabbat, delight 
+of our souls and our Spirits.
+Ecstasy life-throb 
+am awed by Your love,
+Secure that Your caring 
+grants safety and nurture,
+You feed us sweet nectar 
+from Your Source above.
+As You embrace us 
+with Mothering comfort,
+In You I take refuge 
+and pledge You my love.
+
+{file "אנעים זמירות" "Anim-zmirot.xml"}
+{section AN’IM Z’MIROT – A HYMN OF GLORY}
+
+{poetry}
+I chant to please You, 
+I weave You dear songs.
+For You my soul yearns, 
+For You she longs.
+Nestled in Your palm 
+her love for You grows
+She will not rest 
+until it’s You she knows!
+I look for words 
+to speak Your praises
+my heart to You 
+its yearning raises.
+Therefore I will speak 
+the virtues of Your Fame
+And garland with excellence 
+the honor of Your Name.
+Though I do not see You, 
+still I draw Your Face,
+Portray Your features, 
+name Your Place.
+Your prophets spoke, 
+Your servants darkly knew
+In symbols and myths 
+they referred to You.
+When describing Your pow’r 
+and declaring Your care
+Of Your awesome compassion 
+they made us aware.
+Yet it is not Your Being 
+that they could describe
+Only the way Your compassion 
+touches our life.
+Countless their visions 
+of Your mysterious feats
+In all their forms 
+Your ONEness meets.
+They saw You young; 
+they saw You old.
+They saw You patient, 
+They saw You bold.
+Ancient of Days, 
+Eternally Just, 
+Each moment our Helper 
+in Whom we do trust. 
+Wearing Your helmet 
+as hero to help us
+Your strong arm, 
+Your right hand to save us.
+Your hair drenched with light drops, 
+all shining with brilliance.
+Your Darkness is shelter, 
+Your love in all radiance.
+How fair is Your kindness, 
+how splendid Your sight
+May our song rise to crown You 
+with endearing delight
+A jewel all golden 
+Your image sends rays
+with t’fillin on forehead 
+we follow Your ways.
+With grace and honor, 
+all splendid in glory
+Your people sing loudly 
+Your triumphal story
+In words of young lovers 
+they gaze at Your visage
+the letters of Torah in black 
+hold Your message.
+Justice Your mantle 
+in balance with kindness
+This gives You pleasure 
+delight and sublimeness.
+May we deserve to be scepter 
+in Your regal hand
+A crimson royal cape, 
+we Your loyal band.
+The burdened sufferers, 
+You sustained them with might
+How precious You held them, 
+so dear to Your sight.
+Your glory my pride is, 
+my delight for Your care
+So close You are, 
+to answer my pray’r.
+Your shining face 
+illumines my days
+I am awed by the magic 
+revealed in Your ways.
+To Moshe You showed 
+Your Head {translit he-Latn "T’fillin’s"} knot
+Your image was clear 
+in his mind and his thought.
+Though humble Your folk, 
+they are Your proud fame
+You’re enthroned on their praises; 
+they honor Your Name.
+Truth is Your Word, 
+enduring its worth
+From parent to child 
+its message flows forth.
+I cannot sing 
+Your praises complete,
+May those that I do sing 
+and reach You be sweet.
+Like perfume and incense 
+may my singing rise high
+A paean to crown You, 
+a poor lover’s sigh.
+My poor song devoid is 
+of all artifice
+still this loving song 
+is my best sacrifice.
+My blessings are lifting 
+to rise to new heights,
+To make fertile the birth 
+of the {translit he-Latn "Tzaddik"} with might.
+And with these blessings, 
+these love words so fond.
+With a nod of Your head, 
+I ask You: Respond. 
+Regard please these poor words 
+that I blush to recite
+My soul’s ardent longing 
+to give You delight.
+
+{file "אל אדון" "El-Adon.xml"}
+{section EL ADON}
+
+{poetry}
+{he א} A gentle {dn Lord} of all that is
+{he ב} Blessed and loved by each soul alive.
+{he ג} Great and good You fill all space.
+{he ד} Delight there is in knowing You.
+
+{he ה} How You transcend all holy life
+{he ו} Which bears You high above any throne
+{he ז} {translit he-Latn "Zekhut"} and equity radiate from You 
+{he ח} {translit he-Latn "Hesed"} and compassion the worlds reflect.
+
+{he ט} The stars and the planets You made to give light 
+{he י} You formed them all conscious, all worthy and wise
+{he כ} Knowledge and power You gave them to shine 
+{he ל} Like powerful assistants they serve You in space.
+
+{he מ} Much light and energy they radiate forth
+{he נ} No place is untouched by their gentle rays
+{he ס} So joyful their path is, so happy their course
+{he ע} Enroute to fulfill their Creator’s command.
+
+{he פ} Praising Your glory, they honor Your name 
+{he צ} Singing Your Majesty’s anthem of joy.
+{he ק} Quietly suns shine to answer Your call 
+{he ר} Reflections of moonlight change size at Your word.
+
+{he ש} {translit he-Latn "Seraphim,"} angels, and all heavenly hosts 
+{he ת} They praise You in concert with {translit he-Latn "Sfirot"} on high
+
+{emph A}ll elements {emph M}ingle 
+their harmonious tune 
+{emph N}ature and mankind the rhythm provide.
+
+
+{file "אדון עולם" "Adon-Olam.xml"}
+{section ADON OLAM}
+
+{poetry}
+You were cosmic {dn Lord} {dn Adonay} {translit he-Latn "Malakh"}
+Before there even was a world
+Then Your will all things did make 
+{dn Adonay} {translit he-Latn "Melekh"} we call you now.
+
+Once when all things will cease to be 
+{dn Adonay} {translit he-Latn "Yimlokh"} still true will be
+You were, You are, eternally 
+Resplendent to infinity.
+
+You alone, there are not two 
+To join as friends, as lovers do.
+
+Beginningless and without end 
+You keep all one 
+by plan and strength.
+
+You are my {dn G-d}, Redeemer, 
+Life Protecting me in war, in strife.
+My holy haven and my flag 
+My cup of health for what I lack.
+
+Into Your hand I trust my breath 
+You breathe in me by night by day.
+My body is Your tool, Your gift. 
+With You as mine I’m not afraid.
+
+
+{file "Hymn" "Hymn.xml"}
+{section HYMN}
+
+{poetry}
+Oh {dn Lord,} Oh {dn Lord,} come into my heart 
+Build there your shrine 
+and never depart
+Let every passion spring from you
+Let every song be new.
+Oh {dn Lord,} Oh {dn Lord,} come into my sight
+Consume the veil that hides 
+Your Light
+With holy joy and grace divine
+Let every moment shine.
+
+Oh {dn Lord,} transform this lowly sphere
+That boundaries may disappear
+In mutual dependency
+Let every soul be free.
+Our burden {dn Lord,} is great indeed
+For everywhere are people in need
+Reply, respond, with healing word
+Let every call be heard.
+Oh {dn Lord,} Oh {dn Lord,} come into our lives 
+With peace that blesses,
+love that revives
+The unity of all in all
+Let every thought recall.
+
+Oh {dn Lord,} let people be slaves no more 
+Fling open wide {translit he-Latn "Messiah’s"} door
+Salvation’s boundless benefit
+Let every breath admit.
+Oh {dn Lord,} may we be ever one
+A world of friends with quarrels none 
+Let every person know his soul
+Let every heart be whole.
+{translit he-Latn "Halleluya! Halleluya!"}
+
+
+{file "ברכי נפּשׁי" "Psalms104b.xml"}
+{section {he ברכי נפּשׁי} 
+Psalm 104}
+
+{poetry}
+/104:1 Bless {dn Yah,} breath of mine. 
+{dn YAH,} {dn my God,} You are so vast and great, 
+All veiled in pride and glory!
+
+/104:2 You are wrapped in Light. 
+The sky, You spread like a sheet.
+
+/104:3 Your upper chambers are water roofed, 
+As You bestride clouds. 
+You waft on the wings of wind.
+
+/104:4 The breezes, You send 
+are Your aides, 
+Your helpers, blazing flames.
+
+/104:5 You founded Earth, so sound, 
+To outlast time itself.
+
+/104:6 The abyss, You covered like a mantle 
+Water! On mountains rests.
+
+/104:7 You sound a roar and they flee. 
+Your thunder makes them shake.
+
+/104:8 Mountains high and valleys low... 
+Their places they assume.
+
+/104:9 You set them limits they cannot pass. 
+Never again to flood the land.
+
+/104:10 Springs flow into brooks 
+And snake between the mountains.
+
+/104:11 All the wild of field drink there. 
+The beasts slake there their thirst.
+
+/104:12 By their shores dwell birds that soar, 
+Sounding calls through leaves and reeds.
+
+/104:13 You drench the hills 
+From Your Upper Chambers. 
+
+From your hands' produce 
+The Earth is filled.
+
+/104:14 You grow fodder for the tamed beasts, 
+And herbs with human labor, 
+
+To bring forth bread from Earth.
+/104:15 And wine to delight the sad ones, 
+
+And oil... that softens skin, 
+And bread... that sustains the weak.
+
+/104:16 Even the trees you sate with sap. 
+The cedars You planted on the Lebanon.
+
+/104:17 There, birds find their nesting. 
+There, storks find homes to rest.
+
+/104:18 Antelopes bound on the heights. 
+Marmots hide behind rocks.
+
+/104:19 The Moon pulls tides and seasons. 
+The sun knows where to set.
+
+/104:20 You darken dusk to night. 
+The forest's night life stirs.
+
+/104:21 The big cats cry for prey, 
+Praying {dn God} for their food.
+
+/104:22 They return at the rising of the sun, 
+To crouch once more in lairs.
+
+/104:23 While humans go out to work, 
+To their toil, up to night.
+
+/104:24 How many things You do! 
+So wisely are they made. 
+All Earth, at Your command.
+
+/104:25 This vast sea beyond all grasp. 
+Countless are the creatures in her, 
+Tiny ones and giant whales.
+
+/104:26 There go stately ships. 
+This {translit he-Latn "Leviathan"} You shaped 
+To play and romp therein.
+
+/104:27 They all rely on Your care, 
+To feed them well each time.
+
+/104:28 You give to them and they take it. 
+Your hand's gifts sate them well.
+
+/104:29 You hide your face, they panic. 
+You recall their breaths, they die. 
+They return to their dust.
+
+/104:30 You send your spirit, 
+And they are re-created. 
+So too, You renew life on Earth.
+
+/104:31 Let Your glory, {dn Yah,} fill time and space. 
+Take Joy, O {dn Yah,} in what You do!
+
+/104:32 You look at Earth and she trembles, 
+Hills You touch, and they smoke.
+
+/104:33 I live Your song, my {dn Yah,} 
+My {dn Yah,} I am Your tune.
+
+/104:34 Let my talking give You joy. 
+I am so happy, my {dn Yah!}
+
+/104:35 I wish no sin exist on Earth. 
+All wickedness were gone. 
+
+Bless that {dn Yah,} my soul, my breath.
+
+{translit he-Latn "HALLELU-YAH!"}
+
+
+{file "תהילים קלט" "Psalms139.xml"}
+{section Psalm 139}
+
+{note I prefer this one as the 9th of R’ Nachman’s 10}
+
+{poetry}
+/139:1 Conductor – David's prayer set to music.
+{dn Yah!} You have scanned me 
+And discerned me.
+/139:2 You know when I am relaxed 
+or agitated. 
+From afar 
+You comprehend my fantasies.
+/139:3 You design my conduct and my repose. 
+You direct my paths so I can manage.
+
+/139:4 Before my mouth opens 
+You know what I am about to say.
+/139:5 You have shaped my past and my future. 
+Your hand, gently on my shoulder.
+
+/139:6 All this awes my awareness. 
+It is beyond my skills to fathom.
+
+/139:7 Whereto can I withdraw from Your spirit? 
+Flee from facing You?
+
+/139:8 If I would mount up to Heaven 
+There are You. 
+If I make my bed in Hell 
+You are there too.
+
+/139:9 Soaring on the wings of the dawn, 
+To find shelter in the setting sun, 
+/139:10 It would be Your hand, 
+that would carry me, 
+Your right hand, holding me safe.
+
+/139:11 If I want to find oblivion in darkness, 
+Trading light for darkness, 
+/139:12 To You, it would still not be dark.
+Night is as bright as day for You. 
+Dark and light – the same in Your sight.
+/139:13 You have designed my innards, 
+shaped me in the my mother's womb.
+/139:14 I am overcome with thanks 
+At Your awesome wonders, 
+Your astonishing works, 
+Of which my soul is aware.
+/139:15 My essence is not hidden from You, 
+Who have made me in concealment, 
+Who has knitted me beneath the surface.
+
+/139:16 Your eyes have seen me as embryo. 
+My days – are all inscribed 
+in Your ledger – 
+Days not yet shaped – 
+each one of them counted.
+
+/139:17 How precious are Your stirrings 
+in me Oh {dn God!}
+How powerful their impact!
+/139:18 I can't number them – 
+beyond all sand grains. 
+When I emerge from my reflection 
+I am still with You.
+
+/139:19 If You, {dn God,} would only rid us 
+from our evil! 
+If only the cruelty would disappear!
+/139:20 And defiance of You vanish, 
+Forgiveness overtaking enmity!
+
+/139:21 I detest hatred of You – {dn Yah!} 
+Quarrelsomeness repels me.
+/139:22 I loathe hostility to the utmost.
+
+/139:23 {dn God!} I open myself to Your scrutiny. 
+Know what is in my heart. 
+Examine and know my longings.
+/139:24 See and remove any defiance from me 
+And guide me in the way 
+that serves Your intent for our Earth.
+
+
+{file "לבי ובשרי" "Libbi-uvsari.xml"}
+{section Libbi uv'sari}
+
+{note by Ibn Ezra}
+
+{poetry}
+{emph A}ll potent {dn G-d}! You made me
+`Alive I am,' You told me
+Yet no one's eyes can see Me
+remaining flesh – alive 
+
+my heart and my flesh 
+they sing to You, 
+to You the Source of Life! 
+
+{emph B}rought forth we were by intent
+in counsel and consent
+yet hidden is what this meant
+from us who are alive
+
+{emph R}esplendent in Your glory
+all tales are but Your story
+praise to You who is pouring
+into our souls our life
+
+{emph H}ow generous on Your side
+To teach us laws which guide
+those who by them abide 
+as sources of good life
+
+{emph M}ight we be ever right
+and live all in the light
+what are we but a mite
+and yet You give us life
+
+{emph B}orn as we are of passion
+at times we lack compassion
+if only we could fashion
+a God-filled way of life
+
+{emph N}ear {dn G-d} to be we yearn
+From wicked ways to turn
+before bodies to dust return
+and souls to the Source of Life
+
+{emph E}very way will I adore You
+my fervent prayer implore You
+to open my path before You
+to sate my soul with life.
+
+{emph Z}eal filled our sires with fervor
+do rouse us from our torpor
+and help us meet our saviour
+Of Jesse's stock – in Life
+
+{emph R}emember! we kept Your trust
+May Your response be just
+and being fair You must
+decree us toward life
+
+{emph A}wed am I, amazed at You
+my arms I raise in pray'r to You
+my mouth will sings its praise to You
+Oh Source and Soul of Life!
+
+
+{file "נשמת" "Nishmat-Kol-Chai.xml"}
+{section Nishmat}
+
+{poetry}
+All breathing life
+adores Your Name
+{dn Yah,} {dn our God} – 
+All flesh alive
+is raised to ecstasy
+each time we become aware of You!
+Beyond endless Time 
+and Space that's vast
+You are Divine
+Only You are the One who
+ultimately extricates and frees
+ransoms, saves and sustains us
+and cares when we are in distress
+You, You alone secure our lives.
+
+You ultimate Cause and ultimate Effect,
+Source of all Creation
+You manifest in all birthing
+In every compliment it is You we praise
+You manage Your universe 
+with kindness –
+with compassion all beings in it.
+
+{dn Yah} ever awake and ever alert!
+You rouse us from the deepest sleep
+You give words to the speechless
+You release the imprisoned
+You support the stumbling
+You give dignity to the downtrodden
+Every appreciation we offer is Yours.
+
+If ocean-full our mouth were with music
+Our tongues singing 
+like the ceaseless surf
+Our lips praising You to the skies
+Our eyes blazing like sun and moon
+Our arms spread like soaring eagles
+Our legs sprinting like those of deers
+We could not thank You enough
+{dn Yah!} Our {dn God,} our parents' {dn God!}
+Neither could we celebrate by naming
+the times exceeding millions
+the places exceeding billions
+
+the favors You did
+for our parents and for us.
+
+{dn Yah!} Oh {dn God!}
+
+From oppression You redeemed us
+Now we can never be at home in slavery –
+During famines You fed us
+enough to live on
+You shielded us from wars and plagues
+From diseases of body and mind
+You pulled us out.
+To this moment Your caring helped us
+We never lacked Your kindness
+- Please don't ever abandon us {dn God!.} –
+
+Our limbs want each to thank You
+The air of each breath 
+You breathed into us
+Their very substance bless with gratitude
+with praise and celebration
+honoring that exalted holiness
+so majestic, that is Your fame!
+
+Our speech is appreciation
+our expression an oath of loyalty
+our attitude surrender
+our stance before You obedience
+our feelings overwhelming awe
+our inners singing scales of Your Names
+As it is in Scripture:
+All my very essence exclaims:
+{dn Yah!} Who? Like You?
+You inspire the gentle 
+to stand up to the bully
+The poor disempowered 
+to stand up to the thug.
+
+No other can claim to be what You are
+No other can pretend to be 
+THE GREAT {dn GOD}
+THE MIGHTY, THE AWESOME, 
+THE {dn GOD, MOST HIGH}
+Yet nesting in Heavens and Earth!
+So we will keep celebrating 
+and delighting
+and blessing Your Holy Name
+with David:
+`{dn Yahhh!} breathes my soul out to You.
+all my inners pulse with You!'
+Potent {dn God} Force!
+
+Magnanimous in Glory
+Ever prevailing
+Awesome Mystery!
+Majestic One, who presides over all destiny!
+Eternal {translit he-Latn "Sh'khinnah,"} Holy Beyond
+Saints sing {dn Yah!}
+In harmony with decent folks.
+
+Good people exalt You
+Saints are Your blessing
+Devotees sanctify You
+You delight in our inner holiness.
+
+{file "אהבת עולם" "Ahavat-Olam2.xml"}
+{section Ahavat Olam}
+
+{poetry}
+From ever
+You have loved us into life.
+{dn Yah}—{dn our G-d.} 
+You nourished us with kindness
+and abundance.
+
+Holy One!
+for the sake of Your plan
+for Your honor,
+and because we know
+that our parents trusted You,
+and You, in turn, taught them
+how to live life
+so as to be serving Your purpose.
+We ask You to share with us 
+in the same way.
+{dn our God,} kind Parent,
+we live in the embrace
+of Your caring.
+Make ours an understanding heart,
+To become aware and
+be careful and effective,
+in this way to make real
+what You speak to us in {translit he-Latn "Torah"}
+And with so much love.
+
+When we study {translit he-Latn "Torah"} –
+May we see clearly
+what is meant for us to know.
+When we do {translit he-Latn "Mitzvot,"}
+may all our feelings
+sit harmonious in our heart.
+
+Focus all our hearts’ longing
+to that moment
+when we stand in Your Presence
+in both awe and adoration.
+
+May we never have to be apologetic
+for our love for You
+
+Trusting You
+We are happy to see
+Your beneficent plan unfolding.
+
+May Your kindness and compassion
+Be available to us
+Please hurry
+Bring blessing and peace to us.
+Gather us, so we not be scattered
+all over the world.
+Lift the hold of estrangement from us.
+Lead us to live in this world
+so that we feel at home in it.
+
+You can do this for us.
+You have assigned us
+To do our special work in life
+You brought us close to You
+We are grateful.
+We hold You special.
+And are filled with love for You
+{translit he-Latn "Barukh attah {dn Yah}"}
+Who relates to us in Love
+{translit he-Latn "Amen"}
+
+{file "שמע" "Shema2.xml"}
+{include block "Shema-Yisrael2.xml"}
+{include block "Vahavta2.xml"}
+{include block "Vhaya2.xml"}
+{include block "Tzizit2.xml"}
+
+{file "שמע ישראל" "Shema-Yisrael2.xml"}
+{section Sh’ma’}
+
+{section Deuteronomy 6:4}
+
+{poetry}
+/6:4 Listen You Yisrael person,
+{instruct Say Your own name here.}
+{dn Yah who Is,} is {dn our God,} 
+{dn Yah who Is,}
+is One, Unique, All there Is.
+
+Through time and space
+Your glory shines, Majestic One.
+
+{file "ואהבתה" "Vahavta2.xml"}
+{section Deuteronomy 6:5-9}
+
+{poetry}
+/6:5 Love {dn Yah, who is} {dn Your God,} 
+in what Your heart is,
+in what You aspire to,
+in what You have made Your own.
+/6:6 May these values
+which I connect with Your life
+be implanted in Your feelings
+/6:7 May they become the norm
+for Your children:
+Address them 
+in the privacy of Your home,
+And on the errands You run.
+May they help You relax
+and activate You to be productive.
+/6:8 Display them visibly on Your arm.
+Let them focus Your attention.
+/6:9 See them at all transitions at home
+and in Your environment.
+
+
+{file "והיה" "Vhaya2.xml"}
+{section Deuteronomy 11:13-21}
+
+/11:13 How good it will be 
+when You really listen
+and hear my directions
+which I give to You today
+for loving {dn Yah who is} {dn Your God}
+and to act Godly 
+with feeling and inspiration.
+/11:14 Your earthly needs will be met
+at the right time,
+appropriate to the season.
+You will reap what You planted
+for Your delight and health.
+/11:15 Also Your animals will have ample feed.
+All of You will eat and be content.
+
+/11:16 Be careful – watch out!
+Don't let Your cravings delude You;
+don't become alienated;
+don't let Your cravings 
+become Your Gods;
+don't debase Yourself to them,
+/11:17 because the God-sense within You
+will become distorted.
+Heaven will be shut to You,
+grace will not descend,
+Earth will not yield her produce.
+Your rushing will destroy You!
+And Earth will not be able 
+to recover her good balance
+in which {dn God's} gifts manifest.
+
+/11:18 May these values of Mine reside
+in Your feelings and aspirations:
+marking what You produce,
+guiding what You perceive.
+/11:19 Teach them to Your children
+so that they are instructed
+how to make their homes sacred;
+and how they deal with traffic.
+
+(<I>May these values of Mine reside
+in Your feelings and aspirations</I>)
+even when You are depressed,
+and when You are elated.
+
+/11:20 Mark Your entrances and exits 
+with them,
+so You will be more aware.
+
+/11:21 Then, You and Your children 
+and their children,
+will live out on earth
+that divine promise 
+given to Your ancestors
+to live heavenly days
+right here on this earth. –
+
+
+{file "ציצית" "Tzizit2.xml"}
+{section Numbers 15:37-41}
+
+{poetry}
+/15:37 <I>{dn Yah who Is,} said to Moses</I>
+/15:38 `Speak, telling the Israel folks
+to make {translit he-Latn "tzitzit"}
+on the corners of their garments,
+so they will have generations
+to follow them.
+On each {translit he-Latn "tzizit"} tassel let them set
+a blue thread.
+/15:39 These {translit he-Latn "tzitzit"} are for Your benefit!
+Glance at them.
+And in Your seeing remember
+all the other directives of {dn Yah who Is,}
+and act on them!
+This way You will not be led astray,
+craving to see and want
+and then prostitute Yourself
+for Your cravings.
+/15:40 This way You will be mindful
+to actualize my directions
+for becoming dedicated to {dn Your God;}
+to be aware that
+/15:41 I Am {dn Yah Who is} {dn Your God,} 
+Who is the one who freed You
+from oppression
+in order to {dn God} You.
+I am {dn Yah who is} {dn Your God.} '
+
+That is the truth! –
+
+{file "גאל ישראל" "Ga'al-Yisrael2.xml"}
+{poetry}
+You, {dn Yah,} who saved our ancestors
+May You soon 
+bring redemption
+to us also.
+{prose}
+
+{file "עמידה של שבת" "Shabbat-Amidah.xml"}
+{include block "Avot2.xml"}
+{include block "Gevurot2.xml"}
+{include block "Kedushat-Hashem2.xml"}
+{include block "Mekadesh-HaShabbat.xml"}
+{include block "Avodah2.xml"}
+{include block "Hodaa2.xml"}
+{include block "Shalom2.xml"}
+
+{section The Amidah for Shabbat}
+
+{file "Avot" "Avot2.xml"}
+{poetry}
+{he בָּרוּךְ אַתָּה ה׳}
+I bow before You, {dn Yah,}
+Our indwelling {dn God,} Our parents' {dn God,}
+Abraham and Sarah’s {dn God,}
+Isaac and Rebeccah’s {dn God,}
+Jacob and Leah and Rachel’s {dn God,}
+Great, Powerful and Awesome {dn God.}
+{dn God} transcendent.
+You nurture us gently 
+And are kind to us.
+You, who posesses it all.
+You remember 
+How our parents loved You.
+Yes, we trust that You 
+Will bring redemption
+To us, their children’s children,
+Who chant Your name
+And love You...
+Our Prince, Our Helper, 
+Our Protector.
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah} 
+Magen Avraham U’foked Sarah"}
+
+{file "גבורות" "Gevurot2.xml"}
+{poetry}
+You are powerful with worlds {dn Adonay.}
+What is dead, you can make live.
+You are really capable of helping.
+You give dew (and rain) 
+To parched earth and souls.
+You feed all life with gentleness.
+You invigorate bodies 
+With mercy’s flow.
+You support us in falling.
+You heal us in sickness.
+You free us from compulsion.
+You keep faith 
+With those now dead.
+In Your might, 
+No one can compare with You.
+You deal out life and death.
+Yet in all this,
+You make salvation grow.
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah} 
+M’chayeh Hametim."}
+
+{file "קדושת השם" "Kedushat-Hashem2.xml"}
+You are Holy, Your name is Sacred.
+And those who daily aspire to be holy,
+Sing your {translit he-Latn "Halleluyah"} all day.
+
+Indeed, You are 
+the Great and Holy {dn God.}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah} 
+Ha’el hakkadosh."}
+
+{file "מקדש השבת" "Mekadesh-HaShabbat.xml"}
+You, {dn God,} 
+have implanted 
+in the heart of women and men 
+and in our society 
+the need and wish
+to rest one day each week. 
+How blessed are we – 
+how good is our destiny – 
+how beautiful our legacy. 
+We are blissful 
+to have been given 
+to rest on, the seventh day, 
+so too is it written in Your Torah;
+{emph `Yisrael’s descendants 
+are to observe the {translit he-Latn "Shabbat "}
+to make of the {translit he-Latn "Shabbat"} 
+an enduring contract 
+signifying a lasting connection 
+between Me and {translit he-Latn "B’nai Yisrael"}
+for by means of six periods 
+did {dn Yah} make heaven and earth to be 
+and in the seventh period 
+S\/He rested and breathed out.'}
+
+And through the Prophets in Your service You stated: 
+{emph `If you restrain your weekday habits
+because of the {translit he-Latn "Shabbat"}
+and do not pursue your business 
+on My holy day 
+and evoke your
+delight in {translit he-Latn "Shabbat"}
+celebrating it as the day.
+sanctified to {dn Yah} 
+and shall honor it 
+by not engaging in your business 
+nor having meaningless conversation. 
+Then you shall discover
+your delight in {dn Yah} 
+and I will make you sit 
+on top of the world 
+and fill you with the
+heritage of Jacob, your ancestor;'} 
+This is what came from {dn Yah’s} mouth.
+
+May it please You, {dn God,} 
+that we see the day 
+when all beings 
+who are weary and exhausted find rest – 
+then all of us will be fulfilled 
+and blissful recipients 
+of Your goodness. 
+That seventh day
+that you have signified and sanctified, 
+the most delightful of days 
+You have called it so we may
+remember and honor Your creation.
+
+Our {dn God,} our parents {dn God}
+Take pleasure as You see us rest
+When we do Your {translit he-Latn "Mitzvot"}
+Let them bring us to Holiness
+When the study Your {translit he-Latn "Torah"}
+Help us find the part 
+that is addressed to us
+Where we are hungry 
+feed us gently
+Were we have despaired 
+give us joy 
+When we serve you
+May it be with a pure heart.
+Grant us {dn Yah,} {dn our God,}  
+the boon
+Of love and good will
+To feel at home 
+in Your sacred {translit he-Latn "Shabbas"}
+And in this way to celebrate 
+Your holiness
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah} 
+Mekaddesh Hashabat."}
+
+{file "עבודה" "Avodah2.xml"}
+Take pleasure {dn God,} 
+In our way of praying.
+Teach us to encounter Your Presence.
+May we merit 
+To pray in Your Temple in Zion.
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah} 
+Hammachazir Sh’chinnato L’tzion."}
+
+{file "הודאה" "Hodaa2.xml"}
+Modim Anachnu Lach
+We are grateful {dn God} 
+and count our blessings
+{instruct here in your words detail your gratitude 
+for events in your life}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah} 
+HaTov Shimcha U’l’cha Na’eh L’hodot."}
+
+{file "שלום" "Shalom2.xml"}
+We pray for Peace
+{instruct in your own words}
+{he בָּרוּךְ אַתָּה ה׳}  {translit he-Latn "Barukh attah {dn Yah} 
+HaM’varech et Ammo Yisrael Bashalom"}
+
+{file "שבת זמירות" "Shabbat-Zemirot.xml"}
+{include block "Yom-Zeh.xml"}
+{include block "Yom-Shabbaton.xml"}
+
+{file "יום זה לישראל" "Yom-Zeh.xml"}
+{section Yom Zeh L-Yisra’el Orah V-simcha: Shabbat Menuchah}
+
+{note by Rabbi Yitzchak Luria}
+{instruct This version works best when sung to a Flamenco tune and the English version is done simultaneously with the Hebrew.}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{poetry}
+{he י}
+Your gift
+to those who strive with You
+is joy and light
+{translit he-Latn "Shabbat Menucha"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he צ}
+{emph C}ertain of Your holy ways
+You revealed to us at Sinai
+{translit he-Latn "Shabbat"} and other holy days
+we are to keep as You commanded
+You send your healing rays
+accept our human ways
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he ח}
+{emph Ch}arm is {translit he-Latn "Shabbat"} for the heart
+for the poor and broken people
+if all week we were depressed
+additional souls are ours on {translit he-Latn "Shabbat"}
+to help our anxious moods 
+breathe a relaxing sigh
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he ק}
+{emph C}onsecrated bride You blessed
+all other days gave her their blessing
+in the sixth and final phase
+You finished global creation
+There found the sorrowing 
+calm and security
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he ל}
+{emph L}et go of every form of toil
+You in Your kindness have commanded
+regal auras shine from us
+when we keep {translit he-Latn "Shabbat"} as is wanted
+I offer holy gifts
+a fragrant sacrifice
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he ו}
+{emph W}hat songs of love could I perform
+with rhythm and harmony and music
+to please your presence holy {dn God?}
+My soul delights in her surrender
+Do keep that promise {dn God}
+to your beloved folk
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he ר}
+{emph R}eceive my worship blessed {dn God}
+as if it was my life I offered
+This restful, blissful {translit he-Latn "Shabbat"} day
+with ample joy and sweet elation
+we feel secure and loved
+in Your protection {dn God}
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he י}
+{emph Y}our salvation do we trust
+{dn Yah} {dn God} most powerful and mighty
+David’s heirs – do send them soon
+to those who do transcend convention
+Let Freedom be proclaimed
+and with it space that’s safe
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he א}
+{emph A}wesome {dn God} who is most High 
+do look for us and give an answer
+redeem this troubled planet soon
+be kind and manifest Your caring
+revive our trust in You 
+with light and blissfulness
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he ח}
+{emph Ch}erish and Renew Your house
+enough the years it was in shambles
+With Your compassion Gentle {dn God}
+console the grieving ones in sorrow
+who puts her grief aside
+to sing You {translit he-Latn "Shabbat"} songs
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he ז}
+{emph Z}ealous to treasure this holy day
+keep us well in your remembrance
+protect and guard us 
+wondrous {dn God}
+This day and every other day
+Beloved do respond
+and grant deliverance
+{translit he-Latn "Shabbat Menuchah"}
+
+{translit he-Latn "YOM ZEH L-YISR’AEL ORAH--V’SHIMCHAH SHABBAT MENUCHAH"}
+
+{he ק}
+{emph C}ould celebration’s welcome song 
+be heard by Israel and her neighbors
+When that vast vision is fulfilled
+and all the world is safe from terror
+Our light has dawned this day
+and shines in every way
+{translit he-Latn "Shabbat Menuchah"}
+
+
+{file "יום שבתון" "Yom-Shabbaton.xml"}
+{section Yom Shabbaton Eyn Lishko’ach}
+
+{note by Yehudah Halevi}
+
+{he י}
+{emph Y}ou, dear {translit he-Latn "Shabbat,"}
+are always here for me;
+How fragrant 
+you linger in my awareness.
+Noah’s dove found rest and so can we,
+Weary ones from the toil of the week.
+
+{he ה}
+{emph H}onored are you by us, 
+the believers, Parents and children, 
+who keep you with zeal.
+Powerful is its message 
+on the Tablets of stone;
+We sing your praises 
+in prayer and at meals.
+
+{he ו}
+{emph W}hen at the Mount Sinai 
+in covenant we pledged
+We promised in one voice 
+to do and to listen,
+Responding to Your challenge 
+we answered together:
+You {dn God} are the One 
+who imbues us with strength.
+
+{he ד}
+{emph D}ear and Holy at Sinai 
+You spoke to us;
+{emph `Remember and Keep'} 
+this Day one of Seven,
+When fully you keep
+the {translit he-Latn "Shabbat"} together,
+You will be refreshed 
+and with vigor imbued.
+
+{he ה}
+{emph H}ow just like a lost sheep, so aimless, you wandered
+{emph Remember the Shabbat} 
+your promise and pledge
+`No evil will hurt you 
+if you keep the {translit he-Latn "Shabbat"}
+My rainbow will hold you 
+in safety forever.'
+
+{file "ברכה בשביל קהל" "Blessing-for-the-Kahal2.xml"}
+{instruct Here you say some of these blessings to those you davvened with and to your own day.}
+
+{poetry}
+{dn El Shaddai} bless you,
+Make you fruitful, give you the increase,
+that will become a
+source of harmony for people.
+
+From {dn El,} your parents' {dn God,} help for you!
+From {dn Shaddai,} all the blessings;
+Sky blessings from above,
+Blessings from the deepest strata below,
+Blessings of fertility and nurture.
+
+May {dn G-d} fulfill the blessing
+to Abraham in you, 
+and in your loved ones,
+along with you.
+Wherever, like Abraham,
+you once were a stranger there, 
+in that place, 
+may you be at home.
+Blessings of your parents (Jacob),
+to add more force
+to those of their parents,
+(Isaac and Abraham),
+to cap the desires of the ancient hills,
+be they upon your head (Joseph),
+and surround the heads of your siblings.
+{dn God} loves You.
+{dn God} blesses and increases you.
+{dn God} blesses your family and your land,
+your income and your holdings,
+right here on Earth,
+as {dn God} promised your parents.
+All peoples will bless you.
+You and your possessions,
+will all prosper.
+May {dn God} remove all illness and pain,
+all tensions and pressures
+you have known...
+
+The angel who redeemed me,
+from all that was corrupt,
+may that one bless these children.
+May my name, 
+that of Abraham and Isaac,
+be associated with theirs.
+
+Be blessed in the city.
+Be blessed in the country.
+Blessed as you arrive,
+Blessed as you are leaving.
+
+{dn God} decree for you blessing
+in what you have stored up
+for yourself from before,
+through your hands' work now,
+right here on Earth.
+This be your gift from {dn God.}
+May {dn God} open for you,
+treasures of heavenly goodness,
+of earthly timeliness,
+to succeed in what you do.
+May you have good credit,
+and not need it.
+{dn God} be with you and help you 
+at all times.
+May you not ever
+have to feel shame or blame.
+
+Go in joy, arrive in peace.
+Mountains and hills sing you on your way.
+Trees in the meadows applaud your trip.
+Draw waters of Joy
+from the source of help.
+May you live to the day
+that {dn God} be so present,
+the way we hoped, {dn Yah,}
+to be present to us all along,
+a real help in our lives!
+How we will then celebrate
+{dn God's} helpfulness!
+So you say to each other, {translit he-Latn "L’chayim!"}
+To you, {translit he-Latn "Shalom,"} to your home, {translit he-Latn "Shalom."}
+All of yours, {translit he-Latn "Shalom!"}
