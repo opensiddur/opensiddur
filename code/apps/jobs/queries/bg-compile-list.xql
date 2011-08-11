@@ -28,7 +28,7 @@ try {
   format:update-status($local:dest-collection, $local:source-resource, $format:list),
   let $source-path := concat($local:source-collection, "/", $local:source-resource)
   let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
-  let $compiled := format:list-compile($source-path)
+  let $compiled := format:list-compile($source-path, $local:user, $local:password)
   return 
     if (xmldb:store($local:dest-collection, $local:dest-resource, $compiled))
     then 

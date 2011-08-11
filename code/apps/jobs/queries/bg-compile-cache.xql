@@ -24,7 +24,7 @@ try {
   if ($paths:debug)
   then 
     util:log-system-out(
-      concat("Background caching for compile: ", $local:source-collection, "/", $local:source-resource)
+      concat("Background caching for compile: ", $local:source-collection, "/", $local:source-resource, " as ", $local:user, ":", $local:password)
     )
   else (),
   format:update-status($local:dest-collection, $local:source-resource, $format:caching),

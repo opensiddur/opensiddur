@@ -29,7 +29,7 @@ try {
   format:update-status($local:dest-collection, $local:source-resource, $format:format),
   let $source-path := concat($local:source-collection, "/", $local:source-resource)
   let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
-  let $compiled := format:format-xhtml($source-path, $local:style)
+  let $compiled := format:format-xhtml($source-path, $local:style, $local:user, $local:password)
   return 
     if (xmldb:store($local:dest-collection, $local:dest-resource, $compiled))
     then 
