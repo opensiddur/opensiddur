@@ -9,9 +9,13 @@ all: 1917JPS.xml
 1917JPS.pdf2txt.xml: Makefile
 	pdf2txt.py -p 16,17,18 -o 1917JPS.pdf2txt.xml -t xml -W 1 Tanakh-JPS1917.pdf
 
-1917JPS.xml: ../../code/input-conversion/1917JPS/1917JPS.xslt 1917JPS.pdf2txt.xml
+1917JPS.clean.xml: ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt
+	xsltproc ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt \
+	1917JPS.pdf2txt.xml > 1917JPS.clean.xml
+
+1917JPS.xml: ../../code/input-conversion/1917JPS/1917JPS.xslt 1917JPS.clean.xml
 	xsltproc ../../code/input-conversion/1917JPS/1917JPS.xslt \
-	1917JPS.pdf2txt.xml > 1917JPS.xml
+	1917JPS.clean.xml > 1917JPS.xml
 
 # page 16=genesis 1
 16.html: ../../code/input-conversion/1917JPS/jps2.xslt
