@@ -24,6 +24,7 @@ import module namespace jobs="http://jewishliturgy.org/apps/jobs"
 
 declare variable $format:temp-dir := '.format';
 declare variable $format:path-to-xslt := '/db/code/transforms';
+declare variable $format:rest-path-to-xslt := app:concat-path($paths:internal-rest-prefix, $format:path-to-xslt);
 
 (: stage numbers for compilation :)
 declare variable $format:queued := 0;
@@ -44,31 +45,57 @@ declare function format:_wrap-document(
 declare function format:data-compile(
 	$jlptei-uri-or-node as item()	
 	) as document-node() {
-	format:_wrap-document(
-		let $uri-or-node :=
-			if ($jlptei-uri-or-node instance of xs:string)
-			then (
-        jcache:cache-all($jlptei-uri-or-node),
+  format:data-compile($jlptei-uri-or-node, (), ())
+};
+
+declare function format:data-compile(
+	$jlptei-uri-or-node as item(),
+  $user as xs:string?,
+  $password as xs:string?
+	) as document-node() {
+  format:_wrap-document(
+    let $uri-or-node :=
+      if ($jlptei-uri-or-node instance of xs:string)
+      then (
+        jcache:cache-all($jlptei-uri-or-node, $user, $password),
         jcache:cached-document-path($jlptei-uri-or-node) (:concat($jlptei-uri-or-node,	'?format=fragmentation'):)
       )
-			else (
-        jcache:cache-all(document-uri(root($jlptei-uri-or-node))),
+      else (
+        jcache:cache-all(document-uri(root($jlptei-uri-or-node)), $user, $password),
         $jlptei-uri-or-node
       )
-		return
-			app:transform-xslt($uri-or-node, 
-				app:concat-path($format:path-to-xslt, 'data-compiler/data-compiler.xsl2'),
-				(), ())
-	)
+    return
+      app:transform-xslt($uri-or-node, 
+        app:concat-path($format:rest-path-to-xslt, 'data-compiler/data-compiler.xsl2'),
+        if ($user)
+        then (
+          <param name="user" value="{$user}"/>,
+          <param name="password" value="{$password}"/>
+        )
+        else (), ())
+  )
 };
 
 declare function format:list-compile(
 	$data-compiled-node as item()
 	) as document-node() {
+  format:list-compile($data-compiled-node, (), ())
+};
+
+declare function format:list-compile(
+	$data-compiled-node as item(),
+  $user as xs:string?,
+  $password as xs:string?
+	) as document-node() {
 	format:_wrap-document(
 		app:transform-xslt($data-compiled-node, 
-			app:concat-path($format:path-to-xslt, 'list-compiler/list-compiler.xsl2'),
-			(), ())
+			app:concat-path($format:rest-path-to-xslt, 'list-compiler/list-compiler.xsl2'),
+        if ($user)
+        then (
+          <param name="user" value="{$user}"/>,
+          <param name="password" value="{$password}"/>
+        )
+        else (), ())
 	)
 };
 
@@ -76,12 +103,29 @@ declare function format:format-xhtml(
 	$list-compiled-node as item(),
 	$style-href as xs:string?
 	) as document-node() {
+  format:format-xhtml($list-compiled-node, $style-href, (), ())
+};
+
+declare function format:format-xhtml(
+	$list-compiled-node as item(),
+	$style-href as xs:string?,
+  $user as xs:string?,
+  $password as xs:string?
+	) as document-node() {
 	format:_wrap-document(
 		app:transform-xslt($list-compiled-node, 
-			app:concat-path($format:path-to-xslt, 'format/xhtml/xhtml.xsl2'),
-			if ($style-href)
-			then <param name="style" value="{$style-href}"/>
-			else ()
+			app:concat-path($format:rest-path-to-xslt, 'format/xhtml/xhtml.xsl2'),
+      (
+        if ($style-href)
+        then <param name="style" value="{$style-href}"/>
+        else (),
+        if ($user)
+        then (
+          <param name="user" value="{$user}"/>,
+          <param name="password" value="{$password}"/>
+        )
+        else ()
+      )
 			, ())
 	)
 };
@@ -89,7 +133,7 @@ declare function format:format-xhtml(
 declare function format:format-xhtml(
 	$list-compiled-node as item()
 	) as document-node() {
-	format:format-xhtml($list-compiled-node, ())
+	format:format-xhtml($list-compiled-node, (), (), ())
 };
 
 declare function format:compile(
