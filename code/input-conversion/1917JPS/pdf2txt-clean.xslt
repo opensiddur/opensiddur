@@ -12,34 +12,49 @@
     </xsl:copy>
   </xsl:template>
 
+  <!-- separate out coordinates -->
+  <xsl:template match="@bbox">
+    <xsl:attribute name="x">
+      <xsl:value-of select="substring-before(., ',')" />
+    </xsl:attribute>
+    <xsl:attribute name="y">
+      <xsl:value-of select="substring-before(substring-after(., ','), ',')" />
+    </xsl:attribute>
+    <xsl:attribute name="x1">
+      <xsl:value-of select="substring-before(substring-after(substring-after(., ','), ','), ',')" />
+    </xsl:attribute>
+    <xsl:attribute name="y1">
+      <xsl:value-of select="substring-after(substring-after(substring-after(., ','), ','), ',')" />
+    </xsl:attribute>
+  </xsl:template>
+
   <xsl:template match="textline">
     <xsl:copy>
-      <!-- copy attributes -->
-      <xsl:apply-templates select="@*" />
+      <xsl:apply-templates select="@bbox" />
 
       <!-- select first text element, others handled recursively -->
-      <xsl:apply-templates select="text[1]" />
+      <xsl:apply-templates select="text[1]" mode="join" />
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="text">
+  <xsl:template match="text" mode="join">
     <xsl:variable name="size">
       <xsl:value-of select="@size" />
     </xsl:variable>
 
     <!-- join same size adjacent text elements -->
     <xsl:element name="text">
-      <xsl:attribute name="size">
-	<xsl:value-of select="@size" />
-      </xsl:attribute>
-      <xsl:call-template name="text-same-size">
-	<xsl:with-param name="size" select="$size" />
-      </xsl:call-template>
+	<xsl:attribute name="size">
+	  <xsl:value-of select="@size" />
+	</xsl:attribute>
+	<xsl:call-template name="text-same-size">
+	  <xsl:with-param name="size" select="$size" />
+	</xsl:call-template>
     </xsl:element>
 
     <!-- Recurse with next text element not same size -->
     <xsl:for-each select="following-sibling::text[@size != $size][1]">
-      <xsl:apply-templates select="." />
+      <xsl:apply-templates select="." mode="join" />
     </xsl:for-each>
 
   </xsl:template>
@@ -50,7 +65,7 @@
     <xsl:param name="size" />
     <!-- If no size, join in anyway -->
     <xsl:if test="not(@size) or @size=$size">
-      <xsl:value-of select="." />
+      <xsl:apply-templates select="." mode="inner" />
       <!-- Get next sibling and recurse -->      
       <xsl:for-each select="following-sibling::text[1]">
 	<xsl:call-template name="text-same-size">

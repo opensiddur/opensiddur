@@ -12,120 +12,131 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
   <xsl:output method="xml" version="1.0" indent="yes" />
 
   <xsl:strip-space elements="*" />
-  <xsl:preserve-space elements="text" />
+  <!-- xsl:preserve-space elements="text" / -->
 
   <!-- TODO
        BUG: text repeated in spans
        Make sure Hebrew is output
        Split columns (in progress)
-       Backup!!
        "Spell check" against a dictionary.
        Identify verse numbers, etc.
-       Paragraphs. Maybe we stripped out too much (&#10;)
+       Paragraphs.
        Poetry?
        Tidy
+       Extract Toc outline?
   -->
 
   <!-- TODO something cleaner than carrying around param like this? -->
   <xsl:template match="@*|*">
-    <xsl:param name="columnBoundaryX" />
+    <xsl:param name="columnSplit" />
     <xsl:copy>
       <xsl:apply-templates select="*|@*|node()">
-	<xsl:with-param name="columnBoundaryX" select="$columnBoundaryX" />
+	<xsl:with-param name="columnSplit" select="$columnSplit" />
       </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
 
   <xsl:template match="page">
 
-    <!-- Analyze column and footnote position. (Is there a cleaner way?) -->
-    <xsl:variable name="columnBoundaryX">
-      <xsl:for-each select="//rect">
-	<xsl:variable name="x"><xsl:value-of select="str:split(@bbox,',')[1]" /></xsl:variable>
-	<xsl:if test="(str:split(@bbox,',')[3])-($x) &lt; 1">
-	  <xsl:value-of select="$x" />
-	</xsl:if>
-      </xsl:for-each>
-    </xsl:variable>
-    <!-- TODO check that we only have one column boundary -->
+    <!-- Analyze column, header, footer, footnote boundaries. 
+	 Assumes two columns separated by a line. -->
     <!-- TODO what if we have 0 column boundaries (i.e., front matter, title pages) -->
+    <xsl:variable name="columnSplit">
+      <xsl:value-of select=".//rect[@x1 - @x &lt; 1]/@x" />
+    </xsl:variable>
+    <xsl:variable name="headerAbove">
+      <xsl:value-of select=".//rect[@x1 - @x &lt; 1]/@y1" />
+    </xsl:variable>
+    <xsl:variable name="footerBelow">
+      <xsl:value-of select=".//rect[@x1 - @x &lt; 1]/@y" />
+    </xsl:variable>
 
     <xsl:copy>
-      <xsl:attribute name="columnBoundaryX">
-	<xsl:value-of select="$columnBoundaryX" />
-      </xsl:attribute>
-      <xsl:apply-templates select="@*" />
-      <!-- rects divide columns and footnotes. Find them first. -->
-      <!-- TODO: are there ever any other rects? -->
-      <xsl:apply-templates select="rect" />
-      <xsl:apply-templates select="*[name()!='rect']">
-	<xsl:with-param name="columnBoundaryX" select="$columnBoundaryX" />
-      </xsl:apply-templates>
+      <xsl:apply-templates select="@id" />
+      <!-- this is just for debugging and could potentially be removed -->
+      <xsl:comment>
+	$columnSplit=<xsl:value-of select="$columnSplit" />
+	$headerAbove=<xsl:value-of select="$headerAbove" />
+	$footerBelow=<xsl:value-of select="$footerBelow" />
+      </xsl:comment>
+
+      <xsl:element name="header">
+	<xsl:apply-templates select=".//textline[@y &gt; $headerAbove]" />
+      </xsl:element>
+
+      <xsl:element name="main-body">
+	<xsl:apply-templates select=".//textline[(@y &lt;= $headerAbove) and 
+				     (@y &gt;= $footerBelow) and 
+				     (@x &lt;= $columnSplit)]" />
+	<xsl:comment>
+	  <xsl:text>
+	    column break
+	  </xsl:text>
+	</xsl:comment>
+	<xsl:apply-templates select=".//textline[(@y &lt;= $headerAbove) and 
+				     (@y &gt;= $footerBelow) and 
+				     (@x &gt; $columnSplit)]" />
+      </xsl:element>
+
+      <xsl:element name="footnotes">
+      </xsl:element>
+
+      <xsl:element name="footer">
+	<xsl:apply-templates select=".//textline[@y &lt; $footerBelow]" />
+      </xsl:element>
+
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="rect">
-      <!-- is there a way to make this prettier? -->
-      <xsl:variable name="x"><xsl:value-of select="substring-before(@bbox,',')" /></xsl:variable>
-      <xsl:variable name="x1">
-	<xsl:value-of select="substring-before(substring-after(substring-after(@bbox,','),','),',')" />
-      </xsl:variable>
-      <xsl:choose>
-	<xsl:when test="($x1)-($x) &lt; 1">
-	</xsl:when>
-	<xsl:otherwise>
-	  <footnoteBoundary>
-	    <xsl:apply-templates select="str:split(@bbox, ',')" />
-	  </footnoteBoundary>
-	</xsl:otherwise>
-      </xsl:choose>
-
+  <xsl:template match="rect[@y1-y &lt; 1]">
+    <footnoteBoundary>
+      <xsl:apply-templates select="str:split(@bbox, ',')" />
+    </footnoteBoundary>
   </xsl:template>
 
   <xsl:template match="textline">
-    <xsl:param name="columnBoundaryX" />
-    <xsl:copy>
-      <!-- copy attributes TODO might not always need this -->
-      <xsl:apply-templates select="@*" />
+    <!-- don't output if empty or whitespace only -->
+    <xsl:if test="normalize-space()">
+      <xsl:copy>
+	<xsl:apply-templates select="@* | *" />
 
-      <!-- columns -->
-      <xsl:attribute name="class">
-	<xsl:choose>
-	  <xsl:when test="substring-before(@bbox,',') &lt; $columnBoundaryX">
-	    <xsl:text>col-left</xsl:text>
-	  </xsl:when>
-	  <xsl:otherwise>
-	    <xsl:text>col-right</xsl:text>
-	  </xsl:otherwise>
-	</xsl:choose>
-      </xsl:attribute>
-
-      <!-- xsl:variable name="linetext" -->
-	<xsl:for-each select="text[1]">
-	  <xsl:call-template name="text" />
-	</xsl:for-each>
-      <!-- /xsl:variable -->
-      <!-- xsl:value-of select="normalize-space($linetext)" / -->
-    </xsl:copy>
+	<!-- xsl:variable name="linetext">
+	     <xsl:for-each select="text[1]">
+	     <xsl:call-template name="text" />
+	     </xsl:for-each>
+	     </xsl:variable -->
+	<!-- xsl:value-of select="normalize-space($linetext)" / -->
+      </xsl:copy>
+    </xsl:if>
   </xsl:template>
 
-  <xsl:template name="text">
-    <xsl:variable name="size">
-      <xsl:value-of select="@size" />
-    </xsl:variable>
-    <xsl:element name="span">
-      <xsl:attribute name="size">
-	<xsl:value-of select="@size" />
-      </xsl:attribute>
-      <xsl:value-of select="." />
-      <xsl:for-each select="following-sibling::text[@size=$size]">
-	<xsl:value-of select="." />
-      </xsl:for-each>
-    </xsl:element>
-    <xsl:for-each select="following-sibling::node()[@size!=$size][1]">
-      
-      <xsl:call-template name="text" />
-    </xsl:for-each>
+  <xsl:template match="text">
+    <!-- don't output if empty or whitespace only -->
+    <xsl:if test="normalize-space()">
+      <xsl:choose>
+	<xsl:when test="@size = 25.961" >
+	  <xsl:element name="chapter-number">
+	    <xsl:value-of select="." />
+	  </xsl:element>
+	</xsl:when>
+	<xsl:when test="@size = 6.327" >
+	  <xsl:element name="verse-number">
+	    <xsl:value-of select="." />
+	  </xsl:element>
+	</xsl:when>
+	<xsl:when test="@size = 10.035" >
+	  <xsl:value-of select="." />
+	</xsl:when>
+	<xsl:otherwise>
+	  <xsl:copy>
+	    <xsl:if test="@size != 10.035">
+	      <xsl:apply-templates select="@size" />
+	    </xsl:if>
+	    <xsl:value-of select="translate(.,'&#10;','&#9166;')" />
+	  </xsl:copy>
+	</xsl:otherwise>
+      </xsl:choose>
+    </xsl:if>
   </xsl:template>
 
 </xsl:stylesheet>
