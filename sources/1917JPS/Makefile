@@ -1,30 +1,55 @@
 # 1917 JPS project Makefile
+# for the OpenSiddur project
 # Copyright 2011 Marc Stober and licensed under the LGPL
 
-# given the PDF from JPS
+# Extracts text from public domain PDF format 1917 edition Tanakh
+# supplied by JPS into XML suitable for reuse.
 
-all: 1917JPS.xml
+all: 1917JPS.xml \
+		temp/sort-errors.txt # full build includes tests
 
-# todo put PDFMiner out put in a folder or something?
-1917JPS.pdf2txt.xml: Makefile
-	pdf2txt.py -p 16,17,18 -o 1917JPS.pdf2txt.xml -t xml -W 1 Tanakh-JPS1917.pdf
+# Extract from PDF to XML using PDFMiner.
+# page 16=Genesis 1
+# TODO: all the books/pages
+# TODO: join Hebrew better (e.g., p. 16)
+temp/1917JPS-pdf2txt.xml: Makefile
+	mkdir -p temp
+	pdf2txt.py -p 16,17,18 -o temp/1917JPS-pdf2txt.xml -t xml -W 1 Tanakh-JPS1917.pdf
 
-1917JPS.clean.xml: ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt
+# Clean of pdf2txt XML to make easier to work with.
+temp/pdf2txt-clean.xml: ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt \
+		temp/1917JPS-pdf2txt.xml
 	xsltproc ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt \
-	1917JPS.pdf2txt.xml > 1917JPS.clean.xml
+	temp/1917JPS-pdf2txt.xml > temp/pdf2txt-clean.xml
 
-1917JPS.xml: ../../code/input-conversion/1917JPS/1917JPS.xslt 1917JPS.clean.xml
+# Sort text into header, footer, columns, and footnotes.
+temp/columns.xml: ../../code/input-conversion/1917JPS/columns.xslt \
+		temp/pdf2txt-clean.xml
+	xsltproc ../../code/input-conversion/1917JPS/columns.xslt \
+	temp/pdf2txt-clean.xml > temp/columns.xml
+
+# Fix text that on the same line but out of order.
+temp/fix-lines.xml: ../../code/input-conversion/1917JPS/fix-lines.xslt \
+		temp/columns.xml
+	xsltproc ../../code/input-conversion/1917JPS/fix-lines.xslt \
+		temp/columns.xml > temp/fix-lines.xml
+
+# Test for text on same line but out of order.
+# TODO How to raise error in Makefile? How to make this raise error?
+temp/sort-errors.txt: ../../code/input-conversion/1917JPS/test-sort.xslt \
+		temp/fix-lines.xml
+	xsltproc ../../code/input-conversion/1917JPS/test-sort.xslt \
+	temp/fix-lines.xml > temp/sort-errors.txt
+
+# TODO Step 4: Join paragraphs
+# TODO "final"
+1917JPS.xml: ../../code/input-conversion/1917JPS/1917JPS.xslt \
+		temp/fix-lines.xml \
+		temp/sort-errors.txt
 	xsltproc ../../code/input-conversion/1917JPS/1917JPS.xslt \
-	1917JPS.clean.xml > 1917JPS.xml
+	temp/fix-lines.xml > 1917JPS.xml
 
-# page 16=genesis 1
-16.html: ../../code/input-conversion/1917JPS/jps2.xslt
-	xsltproc ../../code/input-conversion/1917JPS/jps2.xslt Tanakh-JPS1917.xml > 16.html
-
-17.html: ../../code/input-conversion/1917JPS/jps2.xslt
-	xsltproc --stringparam 'page' "17" \
-	../../code/input-conversion/1917JPS/jps2.xslt Tanakh-JPS1917.xml > 17.html
-
+# TODO Isn't there a PDFMiner tool to get this from outline in PDF?
 toc.txt: Tanakh-JPS1917.xml ../../code/input-conversion/1917JPS/toc.py
 # extract just the lines that *could* be in Table of Contents
 # to get it down to a manageable size
@@ -35,15 +60,9 @@ toc.txt: Tanakh-JPS1917.xml ../../code/input-conversion/1917JPS/toc.py
 # clean up temporary file
 	rm toc.tmp
 
-# TODO: instead of this, loop through generated TOC above to generate books
-# (make we actually generate another makefile with a bunch of lines like this?)
-genesis.xml: toc.txt
-	xsltproc --novalid --stringparam 'startpage' "16" --stringparam 'endpage' "90" \
-		../../code/input-conversion/1917JPS/jps.xslt Tanakh-JPS1917.xml > genesis.xml
-
 .PHONY: clean
 clean:
-	rm -f toc.txt
-# TODO: all the books/page
-	rm -f genesis.xml 
-	rm -f 16.html
+	mkdir -p temp
+	rm -f temp/*
+	rmdir temp
+
