@@ -215,6 +215,48 @@ declare function jobs:incomplete(
   )
 };
 
+(:~ cancel a job and all its dependent jobs
+ : note: a running job cannot be canceled, but dependent jobs will be
+ :)
+declare function jobs:cancel( 
+  $job-id as xs:integer
+  ) {
+  let $queue := 
+    system:as-user('admin', $magicpassword,
+      doc($jobs:queue-path))/jobs:jobs
+  let $job := $queue//jobs:job[jobs:id=$job-id]
+  where $job
+  return
+    let $can-cancel := 
+      if ($job/jobs:runas=xmldb:get-current-user() or xmldb:is-admin-user())
+      then true()
+      else 
+        error(xs:QName("err:AUTHORIZATION"), concat("The user ", xmldb:get-current-user(), 
+          " is not authorized to cancel job#", string($job-id), " which is owned by ",
+          $job/jobs:runas))
+    let $dependencies := $queue//jobs:job[jobs:depends=$job:id]
+    let $has-external-dependencies := 
+      some $d in $dependencies satisfies not($d/jobs:runas=$job/jobs:runas)
+    return (
+      (: find dependent jobs from the same user and cancel them :)
+      for $dependency in $dependencies[jobs:runas=$job/jobs:runas]
+      return
+        jobs:cancel($dependency/jobs:id/number()),
+      (: try to cancel the current job :)
+      if (not($job/jobs:running) and not($has-external-dependencies))
+      then 
+        (: cancel this job :)
+        system:as-user('admin', $magicpassword,
+          update delete $job
+        )
+      else (
+        (: cannot cancel a running job -- TODO? :)
+        (: cannot cancel a job that has dependencies from other users :)
+      )
+    )
+};
+  
+
 (:~ mark a job as running by the given $task-id :)
 declare function jobs:running(
   $job-id as xs:integer,
@@ -298,6 +340,7 @@ declare function jobs:run(
       catch * ($code, $description, $value) {
         local:record-exception($job-id, $code, $description, $value),
         jobs:incomplete($job-id), 
+        jobs:cancel($job-id),
         util:log-system-out(('Jobs module: An exception occurred while running job ',$job-id,': ', $code, ' ', $description, ' ', $value))
       }
     )
@@ -331,12 +374,12 @@ declare function local:record-exception(
     let $resource := string($error-element/jobs:resource)
     return
       if (xmldb:store($collection, $resource, 
-        <error>
+        <jobs:error>
           {$job}
-          <code>{$code}</code>
-          <description>{$description}</description>
-          <value>{$value}</value>
-        </error>
+          <jobs:code>{$code}</jobs:code>
+          <jobs:description>{$description}</jobs:description>
+          <jobs:value>{$value}</jobs:value>
+        </jobs:error>
         )
       then 
         xmldb:set-resource-permissions($collection, $resource, $runas, $runas,
