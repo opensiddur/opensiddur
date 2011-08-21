@@ -16,6 +16,10 @@ xquery version "3.0";
  :    <id/> <!-- job id - set by the code -->
  :    <depends/>+ <!-- depends on completion of other jobs -->
  :    <running/> <!-- contains task id that is currently running the task -->
+ :    <error>   <!-- where to store an exception output if an error occurs. The user who runs the job must have write access  -->
+ :      <collection/>
+ :      <resource/>
+ :    </error>
  :    <signature/> <!-- md5 of the query and all parameters; used for testing for uniqueness -->
  :  </job>
  : </jobs>
@@ -161,8 +165,9 @@ declare function jobs:enqueue(
   )
 };
 
-(:~ enqueue the listed jobs if there are no already-enqueued
- : jobs with the same query and parameter values 
+(:~ enqueue the listed jobs if there are not already-enqueued
+ : jobs with the same query and parameter values
+ : return the job ids of all the enqueued jobs 
  :)
 declare function jobs:enqueue-unique(
   $jobs as element(jobs:job)+,
@@ -172,8 +177,14 @@ declare function jobs:enqueue-unique(
   let $queue := 
     system:as-user('admin', $magicpassword, doc($jobs:queue-path))
   for $job in $jobs
-  where not(local:make-signature($job)=$queue//jobs:signature)
-  return jobs:enqueue($job, $user, $password)
+  let $signature := local:make-signature($job)
+  let $identical-job := $queue//jobs:signature[. = $signature]
+  return
+    if (exists($identical-job))
+    then
+      $identical-job/../jobs:id
+    else
+      jobs:enqueue($job, $user, $password)
 };
 
 (:~ mark a job completed :)
@@ -190,7 +201,8 @@ declare function jobs:complete(
   )
 };
 
-(:~ mark a job incomplete-- run, but an error encountered, so it must be run again :)
+(:~ mark a job incomplete-- run, but an error encountered, so it must be run again
+ :)
 declare function jobs:incomplete(
   $job-id as xs:integer
   ) as empty() {
@@ -264,7 +276,8 @@ declare function jobs:run(
             then util:log-system-out(("Jobs module attempting to run: ", $run))
             else (),
             let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
-            return (
+            return 
+            (
               util:eval($query , false(),
                 (
                 xs:QName('local:user'), $runas,
@@ -283,6 +296,7 @@ declare function jobs:run(
         xs:integer($job-id)
       }
       catch * ($code, $description, $value) {
+        local:record-exception($job-id, $code, $description, $value),
         jobs:incomplete($job-id), 
         util:log-system-out(('Jobs module: An exception occurred while running job ',$job-id,': ', $code, ' ', $description, ' ', $value))
       }
@@ -296,4 +310,37 @@ declare function jobs:is-task-running(
   system:as-user('admin', $magicpassword,
     some $j in doc($jobs:queue-path)//jobs:running satisfies $j=$task-id
   )
+};
+
+(:~ record an exception according to the jobs:error description in the given job :)
+declare function local:record-exception(
+  $job-id as xs:integer, 
+  $code as xs:string,
+  $description as xs:string,
+  $value as xs:string
+  ) as empty() {
+  let $job := 
+    system:as-user('admin', $magicpassword,
+      doc($jobs:queue-path)//jobs:job[jobs:id=$job-id]
+    )
+  let $error-element := $jobs/jobs:error
+  where $error-element
+  return
+    let $runas as xs:string := $job/jobs:runas/string()
+    let $collection := string($error-element/jobs:collection)
+    let $resource := string($error-element/jobs:resource)
+    return
+      if (xmldb:store($collection, $resource, 
+        <error>
+          {$job}
+          <code>{$code}</code>
+          <description>{$description}</description>
+          <value>{$value}</value>
+        </error>
+        )
+      then 
+        xmldb:set-resource-permissions($collection, $resource, $runas, $runas,
+          util:base-to-integer(0770,8))
+      else 
+        error(xs:QName("err:STORE"), "Cannot store the error output. This is very bad!")
 };
