@@ -37,8 +37,9 @@ declare namespace err="http://jewishliturgy.org/errors";
 declare option exist:optimize "enable=no";
 
 declare variable $jobs:queue-collection := '/code/apps/jobs/data';
-declare variable $jobs:queue-resource := 'queue.xml';
-declare variable $jobs:users-resource := 'users.xml';
+declare variable $jobs:queue-resource := "queue.xml";
+declare variable $jobs:users-resource := "users.xml";
+declare variable $jobs:next-id-resource := "next-id.xml";
 declare variable $jobs:queue-path := 
   concat($jobs:queue-collection, '/', $jobs:queue-resource);
 declare variable $jobs:users-path :=
@@ -56,7 +57,53 @@ declare function local:make-signature(
   return string(util:hash($us, 'md5', true()))
 };
 
-(: set up a task to be enqueued :)
+(: return the next viable job id 
+ : expects to be run as admin
+ :)
+declare function local:next-job-id(
+  $queue as document-node()
+  ) as xs:integer {
+  let $max-job-id as xs:integer := 2147483647
+  let $job-id-path :=
+    concat($jobs:queue-collection, "/", $jobs:next-id-resource)
+  let $create-jobs-id-path :=
+    if (doc-available($job-id-path))
+    then ()
+    else 
+      if (xmldb:store($jobs:queue-collection, $jobs:next-id-resource,
+        element jobs:next-id {1}
+      ))
+      then 
+        xmldb:set-resource-permissions(
+          $jobs:queue-collection, $jobs:next-id-resource,
+          "admin", "dba", util:base-to-integer(0770, 8)
+        )
+      else 
+        error(xs:QName("err:STORE"), "Cannot store the next job id. This is bad.")
+  let $next-id-element :=
+    doc($job-id-path)//jobs:next-id
+  let $this-id := 
+    $next-id-element/number()
+  return (
+    update value $next-id-element with (
+      if ($this-id = $max-job-id)
+      then 1
+      else ($this-id + 1)
+    ),
+    if ($queue//jobs:job-id=$this-id)
+    then ( 
+      (: try again to avoid conflict, which is only possible
+       if we have wrapped around :)
+      local:next-job-id($queue)
+    )
+    else
+      $this-id
+  )
+};
+
+(: set up a task to be enqueued.
+ : expects to be run as admin
+ :)
 declare function local:set-job-defaults(
   $jobs as element(jobs:job)+,
   $user as xs:string?
@@ -70,7 +117,7 @@ declare function local:set-job-defaults(
       if ($job/jobs:priority)
       then ()
       else element jobs:priority { 0 },
-      element jobs:id { (max($queue//jobs:id) + 1, 1)[1] },
+      element jobs:id { local:next-job-id($queue) },
       element jobs:signature { local:make-signature($job) }
     }
 };
@@ -227,14 +274,16 @@ declare function jobs:cancel(
   let $job := $queue//jobs:job[jobs:id=$job-id]
   where $job
   return
+    let $current-user := xmldb:get-current-user()
     let $can-cancel := 
-      if ($job/jobs:runas=xmldb:get-current-user() or xmldb:is-admin-user())
+      if ($job/jobs:runas=$current-user or 
+        xmldb:is-admin-user($current-user))
       then true()
       else 
-        error(xs:QName("err:AUTHORIZATION"), concat("The user ", xmldb:get-current-user(), 
+        error(xs:QName("err:AUTHORIZATION"), concat("The user ", $current-user, 
           " is not authorized to cancel job#", string($job-id), " which is owned by ",
           $job/jobs:runas))
-    let $dependencies := $queue//jobs:job[jobs:depends=$job:id]
+    let $dependencies := $queue//jobs:job[jobs:depends=$job-id]
     let $has-external-dependencies := 
       some $d in $dependencies satisfies not($d/jobs:runas=$job/jobs:runas)
     return (
@@ -292,58 +341,62 @@ declare function jobs:run(
   $task-id as xs:integer
   ) as xs:integer? {
   let $next-job := jobs:pop()
-  where exists($next-job)
+(: EDF: a bug in eXist is preventing where from working!
+  where exists($next-job) :)
   return
-    let $runas := $next-job/jobs:runas/string()
-    let $job-id := $next-job/jobs:id/number()
-    let $run := $next-job/jobs:run
-    let $null := 
-      if ($paths:debug)
-      then util:log-system-out(("Jobs module: Next job: ", $next-job, " runas=", $runas, " $id=", $job-id, " run=", $run, " exist=", exists($next-job)))
-      else ()
-    let $password :=
-      if ($runas='admin')
-      then $magicpassword
-      else 
-        string(
-          system:as-user('admin', $magicpassword, 
-          doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
-        ))
-    return (
-      jobs:running($job-id, $task-id),
-      try {
-        system:as-user($runas, $password,
-          (
-            if ($paths:debug)
-            then util:log-system-out(("Jobs module attempting to run: ", $run))
-            else (),
-            let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
-            return 
+    if (empty($next-job))
+    then ()
+    else
+      let $runas := $next-job/jobs:runas/string()
+      let $job-id := $next-job/jobs:id/number()
+      let $run := $next-job/jobs:run
+      let $null := 
+        if ($paths:debug)
+        then util:log-system-out(("Jobs module: Next job: ", $next-job, " runas=", $runas, " $id=", $job-id, " run=", $run, " exist=", exists($next-job)))
+        else ()
+      let $password :=
+        if ($runas='admin')
+        then $magicpassword
+        else 
+          string(
+            system:as-user('admin', $magicpassword, 
+            doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
+          ))
+      return (
+        jobs:running($job-id, $task-id),
+        try {
+          system:as-user($runas, $password,
             (
-              util:eval($query , false(),
-                (
-                xs:QName('local:user'), $runas,
-                xs:QName('local:password'), $password,
-                for $param in $run/jobs:param
-                let $qname := xs:QName(concat('local:', $param/jobs:name))
-                let $value := string($param/jobs:value)
-                return ($qname, $value)
+              if ($paths:debug)
+              then util:log-system-out(("Jobs module attempting to run: ", $run))
+              else (),
+              let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
+              return 
+              (
+                util:eval($query , false(),
+                  (
+                  xs:QName('local:user'), $runas,
+                  xs:QName('local:password'), $password,
+                  for $param in $run/jobs:param
+                  let $qname := xs:QName(concat('local:', $param/jobs:name))
+                  let $value := string($param/jobs:value)
+                  return ($qname, $value)
+                  )
                 )
               )
+            
             )
-          
-          )
-        ),
-        jobs:complete($job-id),
-        xs:integer($job-id)
-      }
-      catch * ($code, $description, $value) {
-        local:record-exception($job-id, $code, $description, $value),
-        jobs:incomplete($job-id), 
-        jobs:cancel($job-id),
-        util:log-system-out(('Jobs module: An exception occurred while running job ',$job-id,': ', $code, ' ', $description, ' ', $value))
-      }
-    )
+          ),
+          jobs:complete($job-id),
+          xs:integer($job-id)
+        }
+        catch * ($code, $description, $value) {
+          local:record-exception($job-id, $code, $description, $value),
+          jobs:incomplete($job-id), 
+          jobs:cancel($job-id),
+          util:log-system-out(('Jobs module: An exception occurred while running job ',$job-id,': ', $code, ' ', $description, ' ', $value))
+        }
+      )
 };
 
 (:~ determine if any task is running that has the given task id :)
@@ -380,7 +433,7 @@ declare function local:record-exception(
           <jobs:description>{$description}</jobs:description>
           <jobs:value>{$value}</jobs:value>
         </jobs:error>
-        )
+        ))
       then 
         xmldb:set-resource-permissions($collection, $resource, $runas, $runas,
           util:base-to-integer(0770,8))
