@@ -556,6 +556,42 @@ declare function api:get-data(
     else $data
 };
 
+declare function api:get-parameter(
+  $param as xs:string,
+  $default as xs:string?
+  ) as xs:string? {
+  api:get-parameter($param, $default, false())
+};
+
+(:~ get a parameter from query parameters, form encoded parameters, xml, or text
+ : @param $param parameter name
+ : @param $default parameter default value
+ : @param $allow-one-parameter If only one parameter can be given without a name (eg, text/plain), return it?
+ :)
+declare function api:get-parameter(
+  $param as xs:string,
+  $default as xs:string?,
+  $allow-one-parameter as xs:boolean?
+  ) as xs:string? {
+  (
+    request:get-parameter($param, ()),
+    let $method := api:get-method()
+    let $data := api:get-data()
+    where $method = "POST"
+    return
+      if ($data instance of xs:string and $allow-one-parameter)
+      then $data
+      else if ($data instance of node())
+      then 
+        if ($allow-one-parameter)
+        then $data/string()
+        else $data//*[name() = $param]/string()
+      else (),
+    $default
+  )[1]
+};
+
+
 (:~ run the given tests and return their results if the _test= query parameter is 
  : given and the method is GET. If this is not a testing call, return ()
  :)

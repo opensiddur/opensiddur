@@ -373,7 +373,7 @@ declare function format:format-query(
   		error(xs:QName('err:STORE'), concat('Could not store ', $document-path))
 };
 
-declare function local:status-xml(
+declare function format:status-xml(
   $resource as xs:string
   ) as xs:string {
   replace($resource, "\.xml$", ".status.xml")
@@ -389,7 +389,7 @@ declare function format:new-status(
   $source-resource as xs:string,
   $total-steps as xs:integer
   ) {
-  let $status-xml := local:status-xml($resource) 
+  let $status-xml := format:status-xml($resource) 
   return
     if (xmldb:store($collection, $status-xml, 
       <status>
@@ -423,7 +423,7 @@ declare function format:get-status(
   $collection as xs:string,
   $resource as xs:string
   ) as document-node() {
-  doc(concat($collection, "/", local:status-xml($resource)))
+  doc(concat($collection, "/", format:status-xml($resource)))
 };
 
 declare function format:update-status(
@@ -431,7 +431,7 @@ declare function format:update-status(
   $resource as xs:string,
   $new-stage as xs:integer
   ) {
-  let $status-doc := doc(concat($collection, "/", local:status-xml($resource)))
+  let $status-doc := doc(concat($collection, "/", format:status-xml($resource)))
   let $current := $status-doc//current
   return (
     update value $current with $new-stage
@@ -444,7 +444,7 @@ declare function format:complete-status(
   $collection as xs:string,
   $resource as xs:string
   ) {
-  let $status-doc := doc(concat($collection, "/", local:status-xml($resource)))
+  let $status-doc := doc(concat($collection, "/", format:status-xml($resource)))
   let $current := $status-doc//current
   let $completed := $status-doc//completed
   let $location := $status-doc//location

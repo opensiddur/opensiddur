@@ -1,10 +1,12 @@
 xquery version "1.0";
-(:~ Format a given resource, given the compile query parameter
+(:~ Format the resource.
+ : Required parameters:
+ :  to= format
+ :  output= group
  :
  : Available formats: xml
  : Method: POST
  : Status:
- :	200 OK 
  : 	202 Accepted, request is queued for processing
  :	401, 403 Authentication
  :	404 Bad format 
@@ -27,7 +29,8 @@ import module namespace format="http://jewishliturgy.org/modules/format"
 	at "/code/modules/format.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
 	at "/code/modules/cache-controller.xqm";
-	
+
+declare default element namespace "http://www.w3.org/1999/xhtml";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 declare variable $local:valid-formats := ('xml');
@@ -56,59 +59,53 @@ declare function local:post(
 	$doc as document-node(),
 	$compile as xs:string,
 	$output-share as xs:string
-	) as item() { 
+	) as item() {
 	let $document-uri := document-uri($doc)
-	let $cached-document-uri := jcache:cached-document-path($document-uri)
 	let $output-share-path := local:setup-output-share($doc, $output-share) 
-	let $document-name := util:document-name($document-uri)
-	let $extension := 
-		if (starts-with($compile, 'debug'))
-		then '.debug.xml'
-		else if ($compile = ('xhtml', 'html'))
-		then '.xhtml'
-		else '.xml'
-	let $output-document-name := replace($document-name, '\.xml$', $extension)
-	let $output-document-path := 
-		concat($output-share-path, '/', $output-document-name)
+  let $collection-name := util:collection-name($doc)
+	let $document-name := util:document-name($doc)
+  let $status-path := 
+    concat($output-share-path, "/", format:status-xml($document-name))
+  let $style := request:get-parameter("style","style.css")
 	return (
-		jcache:cache-all($document-uri),
-		if ($compile = 'fragmentation')
-		then
-			(
-				xmldb:copy(util:collection-name($cached-document-uri), $output-share-path, $document-name),
-				(: send back the cached copy of the document :)
-				response:set-status-code(200),
-				response:set-header('Location', data:db-path-to-api($output-document-path)),
-				doc($cached-document-uri)
-			)
-		else (
-			let $compiled := format:compile($cached-document-uri, $compile, ())
-			return (
-				if (xmldb:store($output-share-path, $output-document-name, $compiled))
-				then (
-					response:set-status-code(200),
-					if ($compile = ('html','xhtml'))
-					then
-						xmldb:copy('/code/transforms/format/xhtml', $output-share-path, 'style.css')
-					else (),
-					response:set-header('Location', data:db-path-to-api($output-document-path)),
-					$compiled
-				)
-				else api:error(500, "Cannot store result.", concat($output-share-path, '/', $output-document-name))
-			)
-		)
+    format:enqueue-compile(
+      $collection-name,
+      $document-name,
+      $output-share-path,
+      $compile,
+      $style
+    ),
+    response:set-status-code(202),
+  	response:set-header('Location', data:db-path-to-api($status-path)),
+    api:list(
+      element title {concat("Compile ", request:get-uri())},
+      element ul {
+        api:list-item(
+          "Status",
+          data:db-path-to-api($status-path),
+          "GET",
+          api:html-content-type(),
+          ()
+        )
+      },
+      0,
+      false(),
+      "POST",
+      (),
+      ("application/xml","text/xml","application/x-www-form-urlencoded")
+    )
 	)
 };
 
-if (api:allowed-method('POST'))
+if (api:allowed-method("POST"))
 then
 	let $purpose := request:get-parameter('purpose', ())
 	let $share-type := request:get-parameter('share-type', ())
 	let $owner := request:get-parameter('owner', ())
 	let $resource := request:get-parameter('resource', ())
 	let $format := request:get-parameter('format', 'txt')
-	let $compile := request:get-parameter('compile', ())
-	let $output-share := request:get-parameter('output', ())
+	let $compile := api:get-parameter('to', ())
+	let $output-share := api:get-parameter('output', ())
 	return
 		if ($output-share)
 		then
