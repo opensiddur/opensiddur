@@ -441,6 +441,27 @@ declare function api:list-item(
     </li>
 };
 
+(:~ all requestable form content types.
+ : If allow-text is true(), allow text/plain, which means
+ : only 1 parameter is required
+ :)
+declare function api:form-content-type(
+  $allow-text as xs:boolean?
+  ) as xs:string+ {
+  ("application/xml",
+  "text/xml",
+  "application/x-www-form-urlencoded",
+  if ($allow-text)
+  then "text/plain"
+  else ()
+  )
+};
+
+declare function api:form-content-type(
+  ) as xs:string+ {
+  api:form-content-type(false())
+};
+
 (:~ return the HTML content types for use in accept/request header :)
 declare function api:html-content-type(
   ) as xs:string+ {
