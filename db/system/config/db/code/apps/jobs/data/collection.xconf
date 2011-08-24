@@ -4,6 +4,7 @@
       <create qname="jobs:id" type="xs:integer"/>
       <create qname="jobs:running" type="xs:integer"/>
       <create qname="jobs:runas" type="xs:string"/>
+      <create qname="jobs:name" type="xs:string"/>
       <create qname="jobs:priority" type="xs:integer"/>
       <create qname="jobs:depends" type="xs:integer"/>
     </index>

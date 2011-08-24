@@ -267,13 +267,13 @@ declare function jobs:incomplete(
  :)
 declare function jobs:cancel( 
   $job-id as xs:integer
-  ) {
+  ) as empty() {
   let $queue := 
     system:as-user('admin', $magicpassword,
       doc($jobs:queue-path))/jobs:jobs
   let $job := $queue//jobs:job[jobs:id=$job-id]
   where $job
-  return
+  return  
     let $current-user := xmldb:get-current-user()
     let $can-cancel := 
       if ($job/jobs:runas=$current-user or 
@@ -286,11 +286,24 @@ declare function jobs:cancel(
     let $dependencies := $queue//jobs:job[jobs:depends=$job-id]
     let $has-external-dependencies := 
       some $d in $dependencies satisfies not($d/jobs:runas=$job/jobs:runas)
-    return (
+    return ( 
       (: find dependent jobs from the same user and cancel them :)
-      for $dependency in $dependencies[jobs:runas=$job/jobs:runas]
-      return
-        jobs:cancel($dependency/jobs:id/number()),
+      for $dependency in $dependencies
+      where $dependency/jobs:runas=$job/jobs:runas
+      return (
+        if ($paths:debug)
+        then 
+          util:log-system-out(concat("Cancel job dependency ", $dependency/jobs:id/number()))
+        else (),
+        util:log-system-out(
+          concat("WARNING: While cancelling job ", 
+          $job-id, " cannot cancel dependency ", 
+          $dependency/jobs:id/number()))
+        (:
+         : TODO: we can't cancel here because eXist fails on compile
+         :)
+        (:jobs:cancel($dependency/jobs:id/number()):)
+      ),
       (: try to cancel the current job :)
       if (not($job/jobs:running) and not($has-external-dependencies))
       then 
@@ -341,62 +354,58 @@ declare function jobs:run(
   $task-id as xs:integer
   ) as xs:integer? {
   let $next-job := jobs:pop()
-(: EDF: a bug in eXist is preventing where from working!
-  where exists($next-job) :)
+  where exists($next-job) 
   return
-    if (empty($next-job))
-    then ()
-    else
-      let $runas := $next-job/jobs:runas/string()
-      let $job-id := $next-job/jobs:id/number()
-      let $run := $next-job/jobs:run
-      let $null := 
-        if ($paths:debug)
-        then util:log-system-out(("Jobs module: Next job: ", $next-job, " runas=", $runas, " $id=", $job-id, " run=", $run, " exist=", exists($next-job)))
-        else ()
-      let $password :=
-        if ($runas='admin')
-        then $magicpassword
-        else 
-          string(
-            system:as-user('admin', $magicpassword, 
-            doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
-          ))
-      return (
-        jobs:running($job-id, $task-id),
-        try {
-          system:as-user($runas, $password,
+    let $runas := $next-job/jobs:runas/string()
+    let $job-id := $next-job/jobs:id/number()
+    let $run := $next-job/jobs:run
+    let $null := 
+      if ($paths:debug)
+      then util:log-system-out(("Jobs module: Next job: ", $next-job, " runas=", $runas, " $id=", $job-id, " run=", $run, " exist=", exists($next-job)))
+      else ()
+    let $password :=
+      if ($runas='admin')
+      then $magicpassword
+      else 
+        string(
+          system:as-user('admin', $magicpassword, 
+          doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
+        ))
+    return (
+      jobs:running($job-id, $task-id),
+      try {
+        system:as-user($runas, $password,
+          (
+            if ($paths:debug)
+            then util:log-system-out(("Jobs module attempting to run: ", $run))
+            else (),
+            let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
+            return 
             (
-              if ($paths:debug)
-              then util:log-system-out(("Jobs module attempting to run: ", $run))
-              else (),
-              let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
-              return 
-              (
-                util:eval($query , false(),
-                  (
-                  xs:QName('local:user'), $runas,
-                  xs:QName('local:password'), $password,
-                  for $param in $run/jobs:param
-                  let $qname := xs:QName(concat('local:', $param/jobs:name))
-                  let $value := string($param/jobs:value)
-                  return ($qname, $value)
-                  )
+              util:eval($query , false(),
+                (
+                xs:QName('local:user'), $runas,
+                xs:QName('local:password'), $password,
+                for $param in $run/jobs:param
+                let $qname := xs:QName(concat('local:', $param/jobs:name))
+                let $value := string($param/jobs:value)
+                return ($qname, $value)
                 )
               )
-            
             )
-          ),
-          jobs:complete($job-id),
-          xs:integer($job-id)
-        }
-        catch * ($code, $description, $value) {
-          local:record-exception($job-id, $code, $description, $value),
-          jobs:incomplete($job-id), 
-          jobs:cancel($job-id),
-          util:log-system-out(('Jobs module: An exception occurred while running job ',$job-id,': ', $code, ' ', $description, ' ', $value))
-        }
-      )
+          
+          )
+        ),
+        jobs:complete($job-id),
+        xs:integer($job-id)
+      }
+      catch * ($code, $description, $value) {
+        local:record-exception($job-id, $code, $description, $value),
+        jobs:incomplete($job-id), 
+        jobs:cancel($job-id),
+        util:log-system-out(('Jobs module: An exception occurred while running job ',$job-id,': ', $code, ' ', $description, ' ', $value))
+      }
+    )
 };
 
 (:~ determine if any task is running that has the given task id :)
