@@ -286,7 +286,18 @@ declare function jobs:cancel(
     let $dependencies := $queue//jobs:job[jobs:depends=$job-id]
     let $has-external-dependencies := 
       some $d in $dependencies satisfies not($d/jobs:runas=$job/jobs:runas)
-    return ( 
+    return (
+      (: try to cancel the current job :)
+      if (not($job/jobs:running) and not($has-external-dependencies))
+      then 
+        (: cancel this job :)
+        system:as-user('admin', $magicpassword,
+          update delete $job
+        )
+      else (
+        (: cannot cancel a running job -- TODO? :)
+        (: cannot cancel a job that has dependencies from other users :)
+      ),
       (: find dependent jobs from the same user and cancel them :)
       for $dependency in $dependencies
       where $dependency/jobs:runas=$job/jobs:runas
@@ -301,19 +312,9 @@ declare function jobs:cancel(
           $dependency/jobs:id/number()))
         (:
          : TODO: we can't cancel here because eXist fails on compile
+         : with a stack overflow
          :)
         (:jobs:cancel($dependency/jobs:id/number()):)
-      ),
-      (: try to cancel the current job :)
-      if (not($job/jobs:running) and not($has-external-dependencies))
-      then 
-        (: cancel this job :)
-        system:as-user('admin', $magicpassword,
-          update delete $job
-        )
-      else (
-        (: cannot cancel a running job -- TODO? :)
-        (: cannot cancel a job that has dependencies from other users :)
       )
     )
 };
