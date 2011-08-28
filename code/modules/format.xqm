@@ -376,7 +376,7 @@ declare function format:format-query(
 declare function format:status-xml(
   $resource as xs:string
   ) as xs:string {
-  replace($resource, "\.xml$", ".status.xml")
+  "status.xml"
 };
 
 (:~ make a new status file for the given collection and resource.
