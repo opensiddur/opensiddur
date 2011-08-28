@@ -165,9 +165,12 @@ declare function data:path-to-parts(
 (:~ convert an API path into exist:add-parameter elements 
  :)
 declare function data:path-to-parameters(
-	$path as xs:string
+	$path as item()
 	) as element(exist:add-parameter)+ {
-  let $tokenized-path := data:path-to-parts($path)
+  let $tokenized-path as element(data:path) :=
+    if ($path instance of element(data:path))
+    then $path
+    else data:path-to-parts($path)
 	return $tokenized-path/(
 		<exist:add-parameter name="purpose" value="{data:purpose}"/>,
 		<exist:add-parameter name="share-type" value="{data:share-type}"/>,
