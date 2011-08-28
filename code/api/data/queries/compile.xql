@@ -65,7 +65,7 @@ declare function local:post(
   let $collection-name := util:collection-name($doc)
 	let $document-name := util:document-name($doc)
   let $status-path := 
-    concat($output-share-path, "/", format:status-xml($document-name))
+    concat($output-share-path, "/status")
   let $style := request:get-parameter("style","style.css")
 	return (
     format:enqueue-compile(
@@ -92,7 +92,7 @@ declare function local:post(
       false(),
       "POST",
       (),
-      ("application/xml","text/xml","application/x-www-form-urlencoded")
+      api:form-content-type()
     )
 	)
 };
