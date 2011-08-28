@@ -39,13 +39,26 @@ then
 else (),
 let $has-search-query := request:get-parameter('q', ())
 let $uri := request:get-uri()
+let $path-parts := data:path-to-parts($uri)
+let $path-parameters := data:path-to-parameters($path-parts)
+let $null := 
+  util:log-system-out(("$path-parts for $uri=",$uri,"=", $path-parts, " $parameters=", $path-parameters))
 return
   if ($has-search-query)
   then
     <exist:dispatch>
       {app:pass-credentials-xq()}
       <exist:forward url="{$exist:controller}/../queries/search.xql">
-        {data:path-to-parameters($uri)}
+        {$path-parameters}
+      </exist:forward>
+    </exist:dispatch>
+  else if ($path-parts/data:subresource = "status")
+  then 
+    <exist:dispatch>
+      {app:pass-credentials-xq()}
+      <exist:forward url="{$exist:controller}/status.xql">
+        {$path-parameters}
+        <exist:add-parameter name="path" value="{$uri}"/>
       </exist:forward>
     </exist:dispatch>
   else
@@ -54,7 +67,7 @@ return
       <exist:forward url="{$exist:controller}/output.xql">
         {
         (: send all the normal parameters + the whole path :)
-        data:path-to-parameters($uri)
+        $path-parameters
         }
         <exist:add-parameter name="path" value="{$uri}"/>
       </exist:forward>

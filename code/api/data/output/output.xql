@@ -65,6 +65,8 @@ declare function local:get-menu(
 	let $uri := request:get-uri()
 	let $collections := data:top-collection($share-type, $owner)
 	let $ignore-collections := '(/trash/)|(/cache/)'
+	let $null := 
+	  util:log-system-out(("Output for $collection = ", $collections, " $share-type =", $share-type, " $owner=", $owner))
 	let $list :=
 	(
 		<ul class="common">{
@@ -189,6 +191,7 @@ then
 	let $resource := request:get-parameter('resource', ())
 	let $format := request:get-parameter('format', ())
 	let $path := request:get-parameter('path', ())
+	let $null := util:log-system-out(("path =", $path))
 	return
 		if (data:is-valid-share-type($share-type))
 		then 
