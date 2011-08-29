@@ -16,6 +16,12 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 declare variable $local:task-id external;
 
+declare variable $local:excluded-collections := concat("(",
+  string-join(
+    ("/output/","/trash/"),
+  ")|("),
+  ")");
+
 try {
   if ($paths:debug)
   then 
@@ -28,7 +34,9 @@ try {
       collection('/group')//tei:TEI/document-uri(root(.))
     )
   for $document in $documents
-  where not(system:as-user('admin', $magicpassword, jcache:is-up-to-date($document)))
+  where
+    not(matches($document, $local:excluded-collections)) and
+    not(system:as-user('admin', $magicpassword, jcache:is-up-to-date($document)))
   return
     jobs:enqueue-unique(
       element jobs:job {
