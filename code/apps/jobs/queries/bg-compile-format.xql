@@ -42,7 +42,7 @@ try {
           $owner, $group, $mode)
     else 
       error(xs:QName("err:STORE"), concat("Cannot store ", $dest-path)),
-  format:complete-status($local:dest-collection, $local:source-resource)
+  format:complete-status($local:dest-collection, $local:dest-resource)
 }
 catch * ($c, $d, $v) {
   util:log-system-out(("Error during background formatting: ", $c, " ", $d, " ", $v))

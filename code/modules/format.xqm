@@ -449,11 +449,13 @@ declare function format:complete-status(
   let $completed := $status-doc//completed
   let $location := $status-doc//location
   let $steps := $status-doc//steps
+  let $update-location := $current = $steps
   return (
     update value $completed with string($current), 
     update value $current with "",
-    if ($steps = $current)
-    then update value $location with concat($collection, "/", $resource)
+    if ($update-location)
+    then 
+      update value $location with concat($collection, "/", $resource)
     else ()
   )
 };
