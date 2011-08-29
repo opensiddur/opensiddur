@@ -381,6 +381,7 @@ declare function format:status-xml(
 
 (:~ make a new status file for the given collection and resource.
  : the status file will generally be in the destination collection
+ : and have the same permissions as the destination collection
  :)
 declare function format:new-status(
   $collection as xs:string,
@@ -400,9 +401,9 @@ declare function format:new-status(
       </status>
     ))
     then
-      let $owner := xmldb:get-owner($source-collection, $source-resource)
-      let $group := xmldb:get-group($source-collection, $source-resource) 
-      let $mode := xmldb:get-permissions($source-collection, $source-resource) 
+      let $owner := xmldb:get-owner($collection)
+      let $group := xmldb:get-group($collection) 
+      let $mode := xmldb:get-permissions($collection) 
       return
         xmldb:set-resource-permissions($collection, $status-xml, $owner, $group, $mode)
     else
