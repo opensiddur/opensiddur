@@ -304,6 +304,29 @@ declare function format:enqueue-compile(
             <jobs:depends>{string($list-job)}</jobs:depends>
           </jobs:job>, $user, $password)
       else ()
+    let $cleanup-job := 
+      for $d in 1 to (count($dest-resource) - 1 )
+      let $dp1 := $d + 1 
+      return
+        (: cleanup job :)
+        jobs:enqueue(
+          <jobs:job>
+            <jobs:run>
+              <jobs:query>/code/apps/jobs/queries/bg-cleanup.xql</jobs:query>
+              <jobs:param>
+                <jobs:name>collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>resource</jobs:name>
+                <jobs:value>{$dest-resource[$d]}</jobs:value>
+              </jobs:param>
+            </jobs:run>
+            <jobs:depends>{(
+              $frag-job, $data-job, $list-job, $format-job)[$dp1]/string()
+            }</jobs:depends>
+          </jobs:job>, $user, $password
+        )
     return ()
   )
 };
