@@ -4,6 +4,8 @@ xquery version "3.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
+import module namespace data="http://jewishliturgy.org/modules/data"
+  at "xmldb:exist:///code/api/modules/data.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
@@ -29,19 +31,34 @@ try {
   format:update-status($local:dest-collection, $local:source-resource, $format:format),
   let $source-path := concat($local:source-collection, "/", $local:source-resource)
   let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
-  let $compiled := format:format-xhtml($source-path, $local:style, $local:user, $local:password)
-  return 
+  let $style-dest-resource := replace($local:dest-resource, "(\.[^.]+)$", ".css")
+  let $dest-css-path := concat($local:dest-collection, "/", $style-dest-resource)
+  let $compiled := format:format-xhtml($source-path, $style-dest-resource, $local:user, $local:password)
+  let $style-css :=
+    util:binary-to-string(util:binary-doc(
+      if ($local:style)
+      then data:api-path-to-db($local:style)
+      else "/db/code/transforms/format/xhtml/style.css"
+    ))
+  let $owner := xmldb:get-owner($local:source-collection, $local:source-resource)
+  let $group := xmldb:get-group($local:source-collection, $local:source-resource)
+  let $mode := xmldb:get-permissions($local:source-collection, $local:source-resource)
+  return ( 
     if (xmldb:store($local:dest-collection, $local:dest-resource, $compiled))
     then 
-      let $owner := xmldb:get-owner($local:source-collection, $local:source-resource)
-      let $group := xmldb:get-group($local:source-collection, $local:source-resource)
-      let $mode := xmldb:get-permissions($local:source-collection, $local:source-resource)
-      return 
-        xmldb:set-resource-permissions(
-          $local:dest-collection, $local:dest-resource,
-          $owner, $group, $mode)
+      xmldb:set-resource-permissions(
+        $local:dest-collection, $local:dest-resource,
+        $owner, $group, $mode)
     else 
       error(xs:QName("err:STORE"), concat("Cannot store ", $dest-path)),
+    if (xmldb:store($local:dest-collection, $style-dest-resource, $style-css, "text/css"))
+    then
+      xmldb:set-resource-permissions(
+        $local:dest-collection, $style-dest-resource,
+        $owner, $group, $mode)
+    else
+      error(xs:QName("err:STORE"), concat("Cannot store ", $dest-css-path))
+  ),
   format:complete-status($local:dest-collection, $local:dest-resource)
 }
 catch * ($c, $d, $v) {

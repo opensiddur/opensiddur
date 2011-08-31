@@ -3,8 +3,8 @@ xquery version "1.0";
  : Required parameters:
  :  to= format
  :  output= group
+ :  style=  location of style file
  :
- : Available formats: xml
  : Method: POST
  : Status:
  : 	202 Accepted, request is queued for processing
@@ -64,9 +64,11 @@ declare function local:post(
 	let $output-share-path := local:setup-output-share($doc, $output-share) 
   let $collection-name := util:collection-name($doc)
 	let $document-name := util:document-name($doc)
+	let $Null := util:log-system-out(("output-share-path=",$output-share-path))
+	let $output-api-path := data:db-path-to-api($output-share-path)
   let $status-path := 
-    concat($output-share-path, "/status")
-  let $style := request:get-parameter("style","style.css")
+    concat($output-api-path, "/status")
+  let $style := request:get-parameter("style",())
 	return (
     format:enqueue-compile(
       $collection-name,
@@ -76,13 +78,13 @@ declare function local:post(
       $style
     ),
     response:set-status-code(202),
-  	response:set-header('Location', data:db-path-to-api($status-path)),
+  	response:set-header('Location', $output-api-path),
     api:list(
       element title {concat("Compile ", request:get-uri())},
       element ul {
         api:list-item(
-          "Status",
-          data:db-path-to-api($status-path),
+          "Compile status",
+          $status-path,
           "GET",
           api:html-content-type(),
           ()
