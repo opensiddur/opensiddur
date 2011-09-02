@@ -27,7 +27,7 @@ try {
       concat("Background caching for compile: ", $local:source-collection, "/", $local:source-resource, " as ", $local:user, ":", $local:password)
     )
   else (),
-  format:update-status($local:dest-collection, $local:source-resource, $format:caching),
+  format:update-status($local:dest-collection, $local:source-resource, $format:caching, $local:job-id),
   let $doc-path := concat($local:source-collection, "/", $local:source-resource)
   return (
     jcache:cache-all($doc-path, $local:user, $local:password),

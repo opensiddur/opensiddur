@@ -387,6 +387,7 @@ declare function jobs:run(
                 (
                 xs:QName('local:user'), $runas,
                 xs:QName('local:password'), $password,
+                xs:QName("local:job-id"), $job-id,
                 for $param in $run/jobs:param
                 let $qname := xs:QName(concat('local:', $param/jobs:name))
                 let $value := string($param/jobs:value)
@@ -450,3 +451,25 @@ declare function local:record-exception(
       else 
         error(xs:QName("err:STORE"), "Cannot store the error output. This is very bad!")
 };
+
+(:~ return how many jobs are ahead of a given job in the queue 
+ : returns empty if the job doesn't exist
+ :)
+declare function jobs:wait-in-queue(
+  $job-id as xs:integer
+  ) as xs:integer? {
+  let $job := 
+    system:as-user('admin', $magicpassword,
+      doc($jobs:queue-path)//jobs:job[jobs:id=$job-id]
+    )
+  let $priority := $job/jobs:priority/number()
+  where exists($job)
+  return
+    count(
+      $job/preceding-sibling::jobs:job
+        [not(jobs:running) and jobs:priority >= $priority] |
+      $job/following-sibling::jobs:job
+        [not(jobs:running) and jobs:priority > $priority]
+    )
+};
+  

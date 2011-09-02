@@ -25,7 +25,7 @@ try {
       concat("List compilation phase for ", $local:source-collection, "/", $local:source-resource)
     )
   else (),
-  format:update-status($local:dest-collection, $local:source-resource, $format:list),
+  format:update-status($local:dest-collection, $local:source-resource, $format:list, $local:job-id),
   let $source-path := concat($local:source-collection, "/", $local:source-resource)
   let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
   let $compiled := format:list-compile($source-path, $local:user, $local:password)

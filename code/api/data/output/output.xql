@@ -29,7 +29,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: output.xql 769 2011-04-29 00:02:54Z efraim.feinstein $
  :)
 import module namespace response="http://exist-db.org/xquery/response";
 import module namespace request="http://exist-db.org/xquery/request";

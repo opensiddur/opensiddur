@@ -195,7 +195,6 @@ declare function format:enqueue-compile(
         else ".xhtml"
       )
   return (
-    format:new-status($dest-collection, $source-resource, $source-collection, $source-resource, $total-steps),
     let $frag-job :=
       jobs:enqueue(
         <jobs:job>
@@ -327,7 +326,11 @@ declare function format:enqueue-compile(
             }</jobs:depends>
           </jobs:job>, $user, $password
         )
-    return ()
+    return 
+      format:new-status($dest-collection, 
+        $source-resource, 
+        $source-collection, $source-resource, 
+        $total-steps, xs:integer($frag-job))
   )
 };
 
@@ -411,7 +414,8 @@ declare function format:new-status(
   $resource as xs:string,
   $source-collection as xs:string,
   $source-resource as xs:string,
-  $total-steps as xs:integer
+  $total-steps as xs:integer,
+  $job-id as xs:integer
   ) {
   let $status-xml := format:status-xml($resource) 
   return
@@ -420,6 +424,7 @@ declare function format:new-status(
         <steps>{$total-steps}</steps>
         <current>0</current>
         <completed>0</completed>
+        <job>{$job-id}</job>
         <location/>
       </status>
     ))
@@ -439,6 +444,7 @@ declare function format:new-status(
  :       <steps></steps>         total number of steps
  :       <current></current>     current step
  :       <completed></completed> last step that was finished
+ :       <job></job>             job id of running or next job
  :       <location/>             location of the completed resource
  :     </status>
  :
@@ -453,12 +459,15 @@ declare function format:get-status(
 declare function format:update-status(
   $collection as xs:string,
   $resource as xs:string,
-  $new-stage as xs:integer
+  $new-stage as xs:integer,
+  $new-job as xs:integer
   ) {
   let $status-doc := doc(concat($collection, "/", format:status-xml($resource)))
   let $current := $status-doc//current
+  let $job := $status-doc//job
   return (
-    update value $current with $new-stage
+    update value $current with $new-stage,
+    update value $job with $new-job
   ) 
 };
 
@@ -473,10 +482,12 @@ declare function format:complete-status(
   let $completed := $status-doc//completed
   let $location := $status-doc//location
   let $steps := $status-doc//steps
+  let $job := $status-doc//job
   let $update-location := $current = $steps
   return (
     update value $completed with string($current), 
     update value $current with "",
+    update value $job with "",
     if ($update-location)
     then 
       update value $location with concat($collection, "/", $resource)

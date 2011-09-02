@@ -28,7 +28,7 @@ try {
       concat("Format compilation phase for ", $local:source-collection, "/", $local:source-resource)
     )
   else (),
-  format:update-status($local:dest-collection, $local:source-resource, $format:format),
+  format:update-status($local:dest-collection, $local:source-resource, $format:format, $local:job-id),
   let $source-path := concat($local:source-collection, "/", $local:source-resource)
   let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
   let $style-dest-resource := replace($local:dest-resource, "(\.[^.]+)$", ".css")

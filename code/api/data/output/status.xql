@@ -31,7 +31,9 @@ import module namespace data="http://jewishliturgy.org/modules/data"
 	at "/code/api/modules/data.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "/code/modules/format.xqm";
-  
+import module namespace jobs="http://jewishliturgy.org/apps/jobs"
+  at "/code/apps/jobs/modules/jobs.xqm";
+    
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 declare namespace html="http://www.w3.org/1999/xhtml";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -47,8 +49,16 @@ declare function local:get(
 	) as item() {
 	let $resource := request:get-parameter("resource", ())
 	let $api-path-wo-status := replace($path, "/status$", "")
-  let $db-collection-path := data:api-path-to-db($api-path-wo-status)
-  let $db-status-path := concat($db-collection-path, "/", format:status-xml($resource))
+  let $db-collection-path := 
+    replace(data:api-path-to-db($api-path-wo-status), "/[^/]+$", "")
+  let $db-status-path := 
+    concat($db-collection-path, "/", format:status-xml($resource))
+  let $null := util:log-system-out(
+  ("resource=",$resource, 
+  " api-path-wo-status=", $api-path-wo-status,
+  " ab-collection-path=", $db-collection-path,
+  " db-status-path=", $db-status-path)
+  )
 	return 
 		if (doc-available($db-status-path))
 		then 
@@ -59,6 +69,7 @@ declare function local:get(
 		  let $current := $status-doc/*[name()="current"]/number()
 		  let $steps := $status-doc/*[name()="steps"]/number()
 		  let $completed := $status-doc/*[name()="completed"]/number()
+		  let $job := $status-doc/*[name()="job"]/number()
 		  let $done := $completed = $steps
 		  return 
 		    api:list(
@@ -71,8 +82,12 @@ declare function local:get(
 		          then 
 		            <span xml:id="complete">Complete</span>
 		          else if ($current = 0)
-		          then
-		           <span xml:id="queue">Queued</span>
+		          then (
+		           <span xml:id="queue">Queued</span>,
+		           " with ",
+		           <span xml:id="ahead">{jobs:wait-in-queue($job)}</span>,
+		           " jobs ahead in the queue."
+		          )
 		          else (
 		            <span xml:id="at">{$completed}</span>,
 		            " of ",
