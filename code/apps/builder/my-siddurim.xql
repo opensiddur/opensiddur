@@ -128,6 +128,7 @@ declare function local:copy-metadata-to-builder(
 };
 
 let $builder-instance-id := 'builder' (: really just a metadata instance :)
+let $status-instance-id := 'status'
 let $login-instance-id := 'login'
 let $document-chooser-id := 'documents'
 let $search-chooser-id  := 'search'
@@ -147,6 +148,11 @@ return
 			),
       builder:document-chooser-instance(
         $search-chooser-id, true(), xmldb:get-current-user(), (), 'output'
+      ),
+      builder:status-instance(
+        $status-instance-id,
+        $document-chooser-id,
+        concat($document-chooser-id, "-error")
       ),
 			local:confirm-delete-instance('confirm-delete', 'control-confirm-delete')
 			}
@@ -194,14 +200,19 @@ return
 	    				'.', 'html:a/html:span', './html:a/@href', ()
 	    			)
     			
-  				)
+  				),
+  				false(),
+  				false(),
+  				"Status",
+  				<xf:output ref="./html:div[@class='status']"/>
 				)
 				
 				}
-        <h3>Search My Siddurim</h3>
+        <h3>Search and View My Compiled Siddurim</h3>
         <p>Use the box below to search your <strong>compiled</strong> siddurim:</p>
         {
-        builder:document-chooser-ui($search-chooser-id, $result-chooser-id, 
+        builder:document-chooser-ui($search-chooser-id, 
+          $result-chooser-id, 
           <xf:trigger appearance="minimal">
             <xf:label>View</xf:label>
             <xf:load ev:event="DOMActivate" show="new">
@@ -211,10 +222,14 @@ return
           true(), true(), "Result",
           <xf:repeat id="search-result" nodeset="./html:a/html:p">
             {builder:search-results-block()}
-          </xf:repeat>
+          </xf:repeat>,
+          (: this nodeset restriction removes uncompiled resources :)
+          "[html:a[@class='alt'][.='xhtml']]"
         )
         }
 			</fieldset>
+			{controls:debug-show-instance($document-chooser-id),
+			controls:debug-show-instance(concat($status-instance-id, "-result"))}
 		</xf:group>
 		)
 		,

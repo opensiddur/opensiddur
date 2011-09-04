@@ -4,8 +4,6 @@ xquery version "1.0";
  : Open Siddur Project
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
- :
- : $Id: compile.xql 768 2011-04-28 18:35:25Z efraim.feinstein $
  :)  
 import module namespace app="http://jewishliturgy.org/modules/app" 
  	at "/code/modules/app.xqm";
@@ -62,7 +60,7 @@ return
 				replace="none"
 				mode="asynchronous"
 				>
-				<xf:resource value="concat(instance('resource')/item, '?compile=xhtml&amp;output={app:auth-user()}')"/>
+				<xf:resource value="concat(instance('resource')/item, '/compile?to=xhtml&amp;output={app:auth-user()}')"/>
 				{
 				controls:submission-response(
 					$error-instance,
@@ -70,9 +68,6 @@ return
   				(
   					<xf:setvalue ref="instance('return')/path" 
   						value="event('response-headers')/self::header[name='Location']/value"/>,
-  					<xf:load show="new">
-  						<xf:resource value="instance('return')/path"/>
-  					</xf:load>,
   					<xf:toggle case="compile-done"/>
   				)
 				)
@@ -90,21 +85,13 @@ return
 			<xf:switch>
 				<xf:case id="compile-working">
 					<div>
-						Please wait while the Open Siddur compiles your new siddur...
+						Now submitting your siddur for compilation... 
 					</div>
 				</xf:case>
 				<xf:case id="compile-done">
 					<div class="compile-done">
-					Your compiled siddur should now appear in a new window or tab. 
-					If it does not, add 
-					{request:get-server-name()} as an exception to your popup blocker,
-          then
-          <xf:trigger>
-            <xf:label>click here.</xf:label>
-            <xf:load show="new" ev:event="DOMActivate">
-  						<xf:resource value="instance('return')/path"/>
-  					</xf:load>
-          </xf:trigger>
+					  Your siddur is now compiling. When it is ready, it will
+            be available on your <a href="/code/apps/builder/my-siddurim.xql">My siddurim</a> page.
 					</div>
 				</xf:case>
 			</xf:switch>

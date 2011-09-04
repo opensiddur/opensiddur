@@ -211,7 +211,7 @@ declare function builder:login-actions(
 declare function builder:document-chooser-instance(
 	$instance-id as xs:string
 	) as element()+ {
-	builder:document-chooser-instance($instance-id, true(), (), ())
+	builder:document-chooser-instance($instance-id, true(), (), (), ())
 };
 
 declare function builder:document-chooser-instance(
@@ -219,7 +219,7 @@ declare function builder:document-chooser-instance(
 	$allow-change-share-group as xs:boolean, 
 	$default-share-group as xs:string?
 	) as element()+ {
-	builder:document-chooser-instance($instance-id, $allow-change-share-group, $default-share-group, ())
+	builder:document-chooser-instance($instance-id, $allow-change-share-group, $default-share-group, (), ())
 };
 
 declare function builder:document-chooser-instance(
@@ -385,6 +385,123 @@ declare function builder:document-chooser-instance(
 	)
 };
 
+(:~ status instance is an addition to the document-chooser
+ : instance that activates after the document-chooser
+ : finishes 
+ :)
+declare function builder:status-instance(
+  $status-instance-id as xs:string,
+  $document-chooser-instance-id as xs:string,
+  $error-instance-id as xs:string
+  ) as element()+ {
+  <xf:instance id="{$status-instance-id}">
+    <status xmlns="">
+      <n>1</n>
+    </status>
+  </xf:instance>,
+  <xf:instance id="{$status-instance-id}-result">
+    <result xmlns=""/>
+  </xf:instance>,
+  <xf:instance id="{$status-instance-id}-result-compiled">
+    <div class="status" xmlns="http://www.w3.org/1999/xhtml">
+      Compiled
+    </div>
+  </xf:instance>,
+  <xf:instance id="{$status-instance-id}-result-queued">
+    <div class="status" xmlns="http://www.w3.org/1999/xhtml">
+      Queued: <span class="n"/> jobs ahead
+    </div>
+  </xf:instance>,
+  <xf:instance id="{$status-instance-id}-result-compiling">
+    <div class="status" xmlns="http://www.w3.org/1999/xhtml">
+      Compiling: <span class="n"/>/<span class="total"/> complete
+    </div>
+  </xf:instance>,
+  <xf:instance id="{$status-instance-id}-result-not-compiled">
+    <div class="status" xmlns="http://www.w3.org/1999/xhtml">
+      Not compiled
+    </div>
+  </xf:instance>,
+  <xf:submission id="{$status-instance-id}-submit"
+    method="get"
+    replace="instance"
+    instance="{$status-instance-id}-result"
+    >
+    <xf:resource 
+      value="concat(
+        substring-before(
+          instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]/html:a[@class='service']/@href,
+          '/original/'
+          ), 
+        '/output/',
+        substring-after(
+          instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]/html:a[@class='service']/@href,
+          '/original/'
+          ),
+        '/status')"/>
+    <xf:action ev:event="xforms-submit-error" if="event('response-status-code')=404">
+      {((: delete the previous status :))}
+      <xf:delete nodeset="instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]//html:div[@class='status']"/>,
+      {((: insert not compiled :))}
+      <xf:insert
+        origin="instance('{$status-instance-id}-result-not-compiled')"
+        nodeset="instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]/*"
+        position="after"/>
+      {((: go to the next one :))}
+      <xf:setvalue
+        ref="instance('{$status-instance-id}')/n"
+        value="instance('{$status-instance-id}')/n + 1" />
+      <xf:send 
+        if="instance('{$status-instance-id}')/n &lt;= count(instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li)"
+        submission="{$status-instance-id}-submit"/>
+    </xf:action>
+    <xf:action ev:event="xforms-submit-done">
+      {((: delete the previous status :))}
+      <xf:delete nodeset="instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]//html:div[@class='status']"/>,
+      {((: if complete :))}
+      <xf:insert
+        if="instance('{$status-instance-id}-result')//*[@xml:id='complete']"
+        origin="instance('{$status-instance-id}-result-compiled')"
+        nodeset="instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]/*"
+        position="after"/>
+      {((: if queued :))}
+      <xf:setvalue if="instance('{$status-instance-id}-result')//*[@xml:id='queue']"
+        ref="instance('{$status-instance-id}-result-queued')//html:span"
+        value="instance('{$status-instance-id}-result')//*[@xml:id='ahead']"/>
+      <xf:insert
+        if="instance('{$status-instance-id}-result')//*[@xml:id='queue']"
+        origin="instance('{$status-instance-id}-result-queued')"
+        nodeset="instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]/*"
+        position="after"/>
+      {((: if compiling :))}
+      <xf:setvalue if="instance('{$status-instance-id}-result')//*[@xml:id='at']"
+        ref="instance('{$status-instance-id}-result-compiling')//html:span[@class='n']"
+        value="instance('{$status-instance-id}-result')//*[@xml:id='at']"/>
+      <xf:setvalue if="instance('{$status-instance-id}-result')//*[@xml:id='of']"
+        ref="instance('{$status-instance-id}-result-compiling')//html:span[@class='total']"
+        value="instance('{$status-instance-id}-result')//*[@xml:id='of']"/>
+      <xf:insert
+        if="instance('{$status-instance-id}-result')//*[@xml:id='at']"
+        origin="instance('{$status-instance-id}-result-compiling')"
+        nodeset="instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]/*"
+        position="after"/>
+      {((: go to the next one :))}
+      <xf:setvalue
+        ref="instance('{$status-instance-id}')/n"
+        value="instance('{$status-instance-id}')/n + 1" />
+      <xf:send 
+        if="instance('{$status-instance-id}')/n &lt;= count(instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li)"
+        submission="{$status-instance-id}-submit"/>
+    </xf:action>
+  </xf:submission>,
+  <xf:action 
+    ev:event="xforms-submit-done" 
+    ev:observer="{$document-chooser-instance-id}-submit">
+    <xf:setvalue ref="instance('{$status-instance-id}')/n" value="1"/>
+    <xf:send submission="{$status-instance-id}-submit"/>
+  </xf:action>
+};
+
 (:~ return the id of the repeat control in the document chooser,
  : given its control id :)
 declare function builder:document-chooser-ui-repeat(
@@ -409,6 +526,25 @@ declare function builder:document-chooser-ui(
 	builder:document-chooser-ui($instance-id, $control-id, $actions, false(), false(), 'Status', 'N/A')
 };
 
+declare function builder:document-chooser-ui(
+  $instance-id as xs:string,
+  $control-id as xs:string,
+  $actions as element()+,
+  $allow-change-sharing as xs:boolean,
+  $allow-search as xs:boolean,
+  $results-column-title as item()+, 
+  $results-column-content as item()+
+  ) as element()+ {
+  builder:document-chooser-ui($instance-id,
+    $control-id,
+    $actions,
+    $allow-change-sharing,
+    $allow-search,
+    $results-column-title,
+    $results-column-content,
+    ())
+};
+
 (:~ 
  : in the style section, you need to add a faketable control style for this control.
  : the table's control id is {$control-id}-table, and it has 4 columns
@@ -417,6 +553,7 @@ declare function builder:document-chooser-ui(
  : @param $allow-search Whether to have a search box
  : @param $results-column-title title of middle column
  : @param $results-column-content content of middle column
+ : @param $nodeset-restriction an XPath that evaluates to a boolean and restricts the nodeset of html:li in the repeat
  :)
 declare function builder:document-chooser-ui(
 	$instance-id as xs:string,
@@ -425,7 +562,8 @@ declare function builder:document-chooser-ui(
 	$allow-change-sharing as xs:boolean,
   $allow-search as xs:boolean,
   $results-column-title as item()+, 
-  $results-column-content as item()+
+  $results-column-content as item()+,
+  $nodeset-restriction as xs:string?
 	) as element()+ {
 	<xf:group id="{$control-id}" ref="instance('{$instance-id}')">
 		<xf:group>
@@ -538,7 +676,7 @@ declare function builder:document-chooser-ui(
   			<div class="{$control-id}-column table-column">Actions</div>
   		</div>
   		<xf:repeat id="{builder:document-chooser-ui-repeat($control-id)}" 
-  			nodeset="/html:html/html:body/html:ul[@class='results']/html:li[not(html:a/@href=instance('{$instance-id}-exclude')/item)]">
+  			nodeset="/html:html/html:body/html:ul[@class='results']/html:li[not(html:a/@href=instance('{$instance-id}-exclude')/item)]{$nodeset-restriction}">
 	  		<div class="{$control-id}-row table-row">
 	    		<div class="{$control-id}-column table-column">
 	      		<xf:output ref="./html:a/html:span"/>
