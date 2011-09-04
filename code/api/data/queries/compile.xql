@@ -80,7 +80,7 @@ declare function local:post(
     response:set-status-code(202),
   	response:set-header('Location', $output-api-path),
     api:list(
-      element title {concat("Compile ", request:get-uri())},
+      element title {concat("Compile ", substring-before(request:get-uri(),"/compile"))},
       element ul {
         api:list-item(
           "Compile status",

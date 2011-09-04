@@ -74,7 +74,7 @@ declare function local:get(
 		  return 
 		    api:list(
 		      element title { 
-		        concat("Compile status for ", $path)
+		        concat("Compile status for ", substring-before($path,"/status"))
 		      },
 		      <ul>
 		        <li>Current status: {
