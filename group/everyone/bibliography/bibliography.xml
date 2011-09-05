@@ -62,7 +62,7 @@
                 </tei:monogr>
                 <tei:note type="copyright">
                     The transcriber has released the text "without restriction."  A copy of the license is in
-                    our <tei:ref type="url" target="http://jewishliturgy.googlecode.com/svn/sources/tanach/WLC/License.html">subversion repository</tei:ref>. 
+                    our <tei:ref type="url" target="https://github.com/opensiddur/opensiddur/blob/master/sources/tanach/WLC/License.html">git repository</tei:ref>. 
                   </tei:note>
             </tei:biblStruct>
           </tei:div>
