@@ -13,15 +13,11 @@ import module namespace jcache="http://jewishliturgy.org/modules/cache"
 declare variable $local:resource external;
 :)
 
-try {
-  if ($paths:debug)
-  then 
-    util:log-system-out(
-      concat('Background cleanup ', $local:resource)
-    )
-  else (),
-  xmldb:remove($local:collection, $local:resource)
-}
-catch * ($c, $d, $v) {
-  util:log-system-out(("Error during background cleanup: ", $c, " ", $d, " ", $v))
-}
+
+if ($paths:debug)
+then 
+  util:log-system-out(
+    concat('Background cleanup ', $local:resource)
+  )
+else (),
+xmldb:remove($local:collection, $local:resource)

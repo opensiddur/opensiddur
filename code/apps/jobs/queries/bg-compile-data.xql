@@ -18,32 +18,28 @@ declare variable $local:dest-collection external;     destination collection for
 declare variable $local:dest-resource external;       destination resource name
 :)
 
-try {
-  if ($paths:debug)
+
+if ($paths:debug)
+then 
+  util:log-system-out(
+    concat("Data compilation phase for ", $local:source-collection, "/", $local:source-resource)
+  )
+else (),
+format:update-status($local:dest-collection, $local:source-resource, $format:data, $local:job-id),
+let $source-path := concat($local:source-collection, "/", $local:source-resource)
+let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
+let $compiled := format:data-compile($source-path, $local:user, $local:password)
+return 
+  if (xmldb:store($local:dest-collection, $local:dest-resource, $compiled))
   then 
-    util:log-system-out(
-      concat("Data compilation phase for ", $local:source-collection, "/", $local:source-resource)
-    )
-  else (),
-  format:update-status($local:dest-collection, $local:source-resource, $format:data, $local:job-id),
-  let $source-path := concat($local:source-collection, "/", $local:source-resource)
-  let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
-  let $compiled := format:data-compile($source-path, $local:user, $local:password)
-  return 
-    if (xmldb:store($local:dest-collection, $local:dest-resource, $compiled))
-    then 
-      let $owner := xmldb:get-owner($local:source-collection, $local:source-resource)
-      let $group := xmldb:get-group($local:source-collection, $local:source-resource)
-      let $mode := xmldb:get-permissions($local:source-collection, $local:source-resource)
-      return 
-        xmldb:set-resource-permissions(
-          $local:dest-collection, $local:dest-resource,
-          $owner, $group, $mode)
-    else 
-      error(xs:QName("err:STORE"), concat("Cannot store ", $dest-path)),
-  format:complete-status($local:dest-collection, $local:source-resource)
-}
-catch * ($c, $d, $v) {
-  util:log-system-out(("Error during background data compilation: ", $c, " ", $d, " ", $v))
-}
+    let $owner := xmldb:get-owner($local:source-collection, $local:source-resource)
+    let $group := xmldb:get-group($local:source-collection, $local:source-resource)
+    let $mode := xmldb:get-permissions($local:source-collection, $local:source-resource)
+    return 
+      xmldb:set-resource-permissions(
+        $local:dest-collection, $local:dest-resource,
+        $owner, $group, $mode)
+  else 
+    error(xs:QName("err:STORE"), concat("Cannot store ", $dest-path)),
+format:complete-status($local:dest-collection, $local:source-resource)
 

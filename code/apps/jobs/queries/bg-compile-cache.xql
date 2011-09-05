@@ -20,31 +20,27 @@ declare variable $local:user external;
 declare variable $local:password external;
 :)
 
-try {
-  if ($paths:debug)
+if ($paths:debug)
+then 
+  util:log-system-out(
+    concat("Background caching for compile: ", $local:source-collection, "/", $local:source-resource, " as ", $local:user, ":", $local:password)
+  )
+else (),
+format:update-status($local:dest-collection, $local:source-resource, $format:caching, $local:job-id),
+let $doc-path := concat($local:source-collection, "/", $local:source-resource)
+return (
+  jcache:cache-all($doc-path, $local:user, $local:password),
+  if (xmldb:store($local:dest-collection, $local:dest-resource, doc(jcache:cached-document-path($doc-path))))
   then 
-    util:log-system-out(
-      concat("Background caching for compile: ", $local:source-collection, "/", $local:source-resource, " as ", $local:user, ":", $local:password)
-    )
-  else (),
-  format:update-status($local:dest-collection, $local:source-resource, $format:caching, $local:job-id),
-  let $doc-path := concat($local:source-collection, "/", $local:source-resource)
-  return (
-    jcache:cache-all($doc-path, $local:user, $local:password),
-    if (xmldb:store($local:dest-collection, $local:dest-resource, doc(jcache:cached-document-path($doc-path))))
-    then 
-      let $owner := xmldb:get-owner($local:source-collection, $local:source-resource)
-      let $group := xmldb:get-group($local:source-collection, $local:source-resource)
-      let $mode := xmldb:get-permissions($local:source-collection, $local:source-resource)
-      return 
-        xmldb:set-resource-permissions(
-          $local:dest-collection, $local:dest-resource,
-          $owner, $group, $mode)
-    else
-      error(xs:QName("err:STORE"), concat("Cannot store ", $local:dest-collection, "/", $local:dest-resource))
-  ),
-  format:complete-status($local:dest-collection, $local:source-resource)
-}
-catch * ($c, $d, $v) {
-  util:log-system-out(("Error during background caching: ", $c, " ", $d, " ", $v))
-}
+    let $owner := xmldb:get-owner($local:source-collection, $local:source-resource)
+    let $group := xmldb:get-group($local:source-collection, $local:source-resource)
+    let $mode := xmldb:get-permissions($local:source-collection, $local:source-resource)
+    return 
+      xmldb:set-resource-permissions(
+        $local:dest-collection, $local:dest-resource,
+        $owner, $group, $mode)
+  else
+    error(xs:QName("err:STORE"), concat("Cannot store ", $local:dest-collection, "/", $local:dest-resource))
+),
+format:complete-status($local:dest-collection, $local:source-resource)
+
