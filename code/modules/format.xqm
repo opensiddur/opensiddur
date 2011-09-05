@@ -26,6 +26,9 @@ declare variable $format:temp-dir := '.format';
 declare variable $format:path-to-xslt := '/db/code/transforms';
 declare variable $format:rest-path-to-xslt := app:concat-path($paths:internal-rest-prefix, $format:path-to-xslt);
 
+(: resource where compilation errors are stored :)
+declare variable $format:compile-error-resource := "compile-error.xml";
+
 (: stage numbers for compilation :)
 declare variable $format:queued := 0;
 declare variable $format:caching := 1;
@@ -194,6 +197,11 @@ declare function format:enqueue-compile(
         then ".list.xml"
         else ".xhtml"
       )
+  let $error-element := 
+    <jobs:error>
+      <jobs:collection>{$dest-collection}</jobs:collection>
+      <jobs:resource>{$format:compile-error-resource}</jobs:resource>
+    </jobs:error>
   return (
     let $frag-job :=
       jobs:enqueue(
@@ -217,6 +225,7 @@ declare function format:enqueue-compile(
               <jobs:value>{$dest-resource[1]}</jobs:value>
             </jobs:param>
           </jobs:run>
+          {$error-element}
         </jobs:job>, $user, $password)
     let $data-job := 
       if ($total-steps >= 2)
@@ -243,6 +252,7 @@ declare function format:enqueue-compile(
               </jobs:param>
             </jobs:run>
             <jobs:depends>{string($frag-job)}</jobs:depends>
+            {$error-element}
           </jobs:job>, $user, $password)
       else ()  
     let $list-job :=
@@ -270,6 +280,7 @@ declare function format:enqueue-compile(
               </jobs:param>
             </jobs:run>
             <jobs:depends>{string($data-job)}</jobs:depends>
+            {$error-element}
           </jobs:job>, $user, $password)
       else ()
     let $format-job :=
@@ -301,6 +312,7 @@ declare function format:enqueue-compile(
               </jobs:param>
             </jobs:run>
             <jobs:depends>{string($list-job)}</jobs:depends>
+            {$error-element}
           </jobs:job>, $user, $password)
       else ()
     let $cleanup-job := 
@@ -324,13 +336,16 @@ declare function format:enqueue-compile(
             <jobs:depends>{(
               $frag-job, $data-job, $list-job, $format-job)[$dp1]/string()
             }</jobs:depends>
+            {$error-element}
           </jobs:job>, $user, $password
         )
-    return 
+    return (
+      xmldb:remove($dest-collection, $format:compile-error-resource),
       format:new-status($dest-collection, 
         $source-resource, 
         $source-collection, $source-resource, 
         $total-steps, xs:integer($frag-job))
+    )
   )
 };
 

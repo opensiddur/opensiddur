@@ -422,6 +422,11 @@ declare function builder:status-instance(
       Not compiled
     </div>
   </xf:instance>,
+  <xf:instance id="{$status-instance-id}-result-error">
+    <div class="status" xmlns="http://www.w3.org/1999/xhtml">
+      Error
+    </div>
+  </xf:instance>,
   <xf:submission id="{$status-instance-id}-submit"
     method="get"
     replace="instance"
@@ -458,6 +463,12 @@ declare function builder:status-instance(
     <xf:action ev:event="xforms-submit-done">
       {((: delete the previous status :))}
       <xf:delete nodeset="instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]//html:div[@class='status']"/>,
+      {((: if an error occurred during compile :))}
+      <xf:insert
+        if="instance('{$status-instance-id}-result')//*[@xml:id='error']"
+        origin="instance('{$status-instance-id}-result-error')"
+        nodeset="instance('{$document-chooser-instance-id}')//html:ul[@class='results']/html:li[number(instance('{$status-instance-id}')/n)]/*"
+        position="after"/>
       {((: if complete :))}
       <xf:insert
         if="instance('{$status-instance-id}-result')//*[@xml:id='complete']"

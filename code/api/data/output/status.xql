@@ -53,12 +53,8 @@ declare function local:get(
     replace(data:api-path-to-db($api-path-wo-status), "/[^/]+$", "")
   let $db-status-path := 
     concat($db-collection-path, "/", format:status-xml($resource))
-  let $null := util:log-system-out(
-  ("resource=",$resource, 
-  " api-path-wo-status=", $api-path-wo-status,
-  " ab-collection-path=", $db-collection-path,
-  " db-status-path=", $db-status-path)
-  )
+  let $db-error-path :=
+    concat($db-collection-path, "/", $format:compile-error-resource)
 	return 
 		if (doc-available($db-status-path))
 		then 
@@ -66,6 +62,7 @@ declare function local:get(
 		  (: TODO: there's a bug in eXist's query 
 		   which prevents us from using a blank namespace
 		   :)
+		  let $error-doc := doc($db-error-path)
 		  let $current := $status-doc/*[name()="current"]/number()
 		  let $steps := $status-doc/*[name()="steps"]/number()
 		  let $completed := $status-doc/*[name()="completed"]/number()
@@ -78,7 +75,16 @@ declare function local:get(
 		      },
 		      <ul>
 		        <li>Current status: {
-		          if ($done)
+		          if (exists($error-doc))
+		          then (
+		            <span xml:id="error">Error</span>,
+		            <div xml:id="error-details">
+		              <div>Code: <span xml:id="error-code">{$error-doc//jobs:code/node()}</span></div>
+		              <div>Description: <span xml:id="error-description">{$error-doc//jobs:description/node()}</span></div>
+		              <div>Value: <span xml:id="error-value">{$error-doc//jobs:value/node()}</span></div>
+		            </div>
+		          )
+		          else if ($done)
 		          then 
 		            <span xml:id="complete">Complete</span>
 		          else if ($current = 0)
