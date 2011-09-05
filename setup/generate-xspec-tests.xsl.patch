@@ -1,5 +1,5 @@
---- ../db/code/modules/resources/xspec/generate-xspec-tests.xsl	2010-09-19 19:47:08.000000000 -0400
-+++ generate-xspec-tests.new.xsl	2010-11-05 00:40:48.000000000 -0400
+--- ../db/code/modules/resources/xspec/src/compiler/generate-xspec-tests.xsl	2011-09-05 15:42:49.223090164 -0400
++++ ../db/code/modules/resources/xspec/src/compiler/generate-xspec-tests.xsl	2011-09-05 17:24:55.518909152 -0400
 @@ -5,6 +5,7 @@
  <!--  URI:        http://xspec.googlecode.com/                             -->
  <!--  Tags:                                                                -->
@@ -8,7 +8,7 @@
  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
  
  
-@@ -47,6 +48,8 @@
+@@ -50,6 +51,8 @@
      <xsl:apply-templates select="." mode="x:copy-namespaces" />
    	<import href="{$stylesheet-uri}" />
    	<import href="{resolve-uri('generate-tests-utils.xsl', static-base-uri())}"/>
@@ -16,4 +16,4 @@
 +    <strip-space elements="*"/>
      <!-- This namespace alias is used for when the testing process needs to test
           the generation of XSLT! -->
-     <namespace-alias stylesheet-prefix="o" result-prefix="xsl" />
+     <namespace-alias stylesheet-prefix="__x" result-prefix="xsl" />

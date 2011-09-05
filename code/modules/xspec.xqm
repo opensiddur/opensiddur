@@ -5,7 +5,6 @@ xquery version "1.0";
  : 
  : Copyright 2010 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
- : $Id: xspec.xqm 738 2011-04-15 02:21:55Z efraim.feinstein $
  :)
 
 module namespace xspec="http://jewishliturgy.org/modules/xspec";
@@ -21,7 +20,7 @@ declare namespace err="http://jewishliturgy.org/errors";
 (:declare namespace xxml="http://jewishliturgy.org/ns/xml-alias";:)
 
 declare variable $xspec:collection as xs:string := 
-  '/code/modules/resources/xspec';
+  '/code/modules/resources/xspec/src/compiler';
 (:
 declare variable $xspec:xxml-namespace-uri := 
   'http://jewishliturgy.org/ns/xml-alias';
