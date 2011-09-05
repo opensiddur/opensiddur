@@ -340,7 +340,10 @@ declare function format:enqueue-compile(
           </jobs:job>, $user, $password
         )
     return (
-      xmldb:remove($dest-collection, $format:compile-error-resource),
+      if (doc-available(concat($dest-collection, "/", $format:compile-error-resource)))
+      then
+        xmldb:remove($dest-collection, $format:compile-error-resource)
+      else (),
       format:new-status($dest-collection, 
         $source-resource, 
         $source-collection, $source-resource, 
