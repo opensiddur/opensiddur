@@ -37,6 +37,9 @@ declare option exist:serialize "method=xhtml media-type=text/xml indent=yes omit
 	doctype-system=http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"; 
 
 
+(: delay between updates to (reloads of) the document instances :)
+declare variable $local:update-delay-ms := 30000;
+
 (:~ instance for the confirm delete dialog 
  : the instance holds the resource that will be deleted
  :
@@ -160,9 +163,28 @@ return
 				<!-- workaround for Firefox bug -->
 				<tei:TEI j:junk="1" xrx:junk="1" html:junk="1" xml:lang="en"/>
 			</xf:instance>
+			{((: set up the reset for the document chooser instances every 30s :))}
+			<xf:action ev:event="xforms-ready">
+			  <xf:dispatch delay="{$local:update-delay-ms}" 
+			    targetid="reset" name="reset-document-instances"/>
+			</xf:action>
 		</xf:model>,
 		<title>Open Siddur Builder</title>,
 		(
+		(: this group serves to reset the document instances :)
+		<xf:group id="reset">
+		  <xf:action ev:event="reset-document-instances">
+  		  <xf:dispatch 
+  		    if="count(instance('{$document-chooser-id}')//html:ul[@class='results']/html:li/html:div[@class='status'][not(normalize-space(.)='Compiled')]) &gt; 0"
+  		    targetid="reset"
+  		    name="do-reset-document-instances"/>
+  		  <xf:dispatch delay="{$local:update-delay-ms}" 
+  		    targetid="reset" name="reset-document-instances"/>
+  		</xf:action>
+  		<xf:action ev:event="do-reset-document-instances">
+  		  <xf:send submission="{$document-chooser-id}-submit"/>
+  		</xf:action>
+		</xf:group>,
 		<xf:group id="control-my-siddurim">
 			<fieldset>
 				<h2>My Siddurim</h2>
