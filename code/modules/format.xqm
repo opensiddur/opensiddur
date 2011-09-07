@@ -202,6 +202,8 @@ declare function format:enqueue-compile(
       <jobs:collection>{$dest-collection}</jobs:collection>
       <jobs:resource>{$format:compile-error-resource}</jobs:resource>
     </jobs:error>
+  let $priority-element :=
+    <jobs:priority>10</jobs:priority>
   return (
     let $frag-job :=
       jobs:enqueue(
@@ -225,7 +227,7 @@ declare function format:enqueue-compile(
               <jobs:value>{$dest-resource[1]}</jobs:value>
             </jobs:param>
           </jobs:run>
-          {$error-element}
+          {$error-element, $priority-element}
         </jobs:job>, $user, $password)
     let $data-job := 
       if ($total-steps >= 2)
@@ -252,7 +254,7 @@ declare function format:enqueue-compile(
               </jobs:param>
             </jobs:run>
             <jobs:depends>{string($frag-job)}</jobs:depends>
-            {$error-element}
+            {$error-element, $priority-element}
           </jobs:job>, $user, $password)
       else ()  
     let $list-job :=
@@ -280,7 +282,7 @@ declare function format:enqueue-compile(
               </jobs:param>
             </jobs:run>
             <jobs:depends>{string($data-job)}</jobs:depends>
-            {$error-element}
+            {$error-element, $priority-element}
           </jobs:job>, $user, $password)
       else ()
     let $format-job :=
@@ -312,7 +314,7 @@ declare function format:enqueue-compile(
               </jobs:param>
             </jobs:run>
             <jobs:depends>{string($list-job)}</jobs:depends>
-            {$error-element}
+            {$error-element, $priority-element}
           </jobs:job>, $user, $password)
       else ()
     let $cleanup-job := 
@@ -336,7 +338,7 @@ declare function format:enqueue-compile(
             <jobs:depends>{(
               $frag-job, $data-job, $list-job, $format-job)[$dp1]/string()
             }</jobs:depends>
-            {$error-element}
+            {$error-element, $priority-element}
           </jobs:job>, $user, $password
         )
     return (
