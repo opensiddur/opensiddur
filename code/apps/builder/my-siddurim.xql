@@ -150,7 +150,7 @@ return
 				$document-chooser-id
 			),
       builder:document-chooser-instance(
-        $search-chooser-id, true(), xmldb:get-current-user(), (), 'output'
+        $search-chooser-id, true(), app:auth-user(), (), 'output'
       ),
       builder:status-instance(
         $status-instance-id,
