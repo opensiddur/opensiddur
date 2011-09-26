@@ -278,6 +278,16 @@ declare function builder:document-chooser-instance(
         <scope/>
 			</action>
 		</xf:instance>,
+		(: the saved-search and saved-action are used 
+		 : to save the user submission while we update
+		 : the previous submission 
+		 :)
+		<xf:instance id="{$instance-id}-saved-search">
+		  <options xmlns=""/>
+		</xf:instance>,
+		<xf:instance id="{$instance-id}-saved-action">
+      <action xmlns=""/>
+    </xf:instance>,
 		<xf:bind nodeset="instance('{$instance-id}-action')/owner" 
 			calculate="instance('{$share-options-id}')/owner"/>,
     (: set the search scope using a checkbox :)
@@ -381,7 +391,27 @@ declare function builder:document-chooser-instance(
   			(), 
   			()
   		)
-		}</xf:submission>
+		}</xf:submission>,
+		<xf:submission id="{$instance-id}-submit-saved"
+      ref="instance('{$instance-id}-saved-search')"
+      method="get"
+      replace="instance"
+      instance="{$instance-id}"
+      includenamespaceprefixes="">
+      <xf:resource value="
+      concat('/code/api/data/', 
+        instance('{$instance-id}-saved-action')/data-type,
+        choose(instance('{$instance-id}-saved-action')/share-type != '', concat('/', instance('{$instance-id}-saved-action')/share-type), ''),
+        choose(instance('{$instance-id}-saved-action')/owner != '', concat('/', instance('{$instance-id}-saved-action')/owner), ''),
+        choose(instance('{$instance-id}-saved-action')/scope != '', concat('/.../', instance('{$instance-id}-saved-action')/scope), '')
+        )"/>
+      {
+      controls:submission-response(
+        $error-instance-id,
+        (), 
+        ()
+      )
+    }</xf:submission>
 	)
 };
 
@@ -510,6 +540,12 @@ declare function builder:status-instance(
     ev:observer="{$document-chooser-instance-id}-submit">
     <xf:setvalue ref="instance('{$status-instance-id}')/n" value="1"/>
     <xf:send submission="{$status-instance-id}-submit"/>
+  </xf:action>,
+  <xf:action 
+    ev:event="xforms-submit-done" 
+    ev:observer="{$document-chooser-instance-id}-submit-saved">
+    <xf:setvalue ref="instance('{$status-instance-id}')/n" value="1"/>
+    <xf:send submission="{$status-instance-id}-submit"/>
   </xf:action>
 };
 
@@ -554,6 +590,21 @@ declare function builder:document-chooser-ui(
     $results-column-title,
     $results-column-content,
     ())
+};
+
+(:~ command set to save the current search :)
+declare function builder:save-document-chooser-search(
+  $instance-id as xs:string
+  ) as element()+ {
+  <xf:delete nodeset="instance('{$instance-id}-saved-search')/*"/>,
+  <xf:delete nodeset="instance('{$instance-id}-saved-action')/*"/>,
+  <xf:insert 
+    origin="instance('{$instance-id}-search')/*"
+    context="instance('{$instance-id}-saved-search')"/>,
+  <xf:insert 
+    origin="instance('{$instance-id}-action')/*"
+    context="instance('{$instance-id}-saved-action')"
+    />
 };
 
 (:~ 
@@ -636,14 +687,18 @@ declare function builder:document-chooser-ui(
             </xf:input>
             <xf:submit submission="{$instance-id}-submit">
               <xf:label>Search</xf:label>
-              <xf:setvalue ev:event="DOMActivate" ref="instance('{$instance-id}-search')/start" 
-                value="substring-before(substring-after(context()/@href, 'start='), '&amp;')"/>
+              <xf:action ev:event="DOMActivate">
+                <xf:setvalue ref="instance('{$instance-id}-search')/start" 
+                  value="substring-before(substring-after(context()/@href, 'start='), '&amp;')"/>
+                {builder:save-document-chooser-search($instance-id)}
+              </xf:action>
             </xf:submit>
             <xf:submit submission="{$instance-id}-submit">
               <xf:label>Reset</xf:label>
               <xf:action ev:event="DOMActivate">
                 <xf:setvalue ref="instance('{$instance-id}-search')/start" value="1"/>
                 <xf:setvalue ref="instance('{$instance-id}-search')/q" value=""/>
+                {builder:save-document-chooser-search($instance-id)}
               </xf:action>
             </xf:submit>
           </div>

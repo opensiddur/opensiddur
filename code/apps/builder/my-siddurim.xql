@@ -165,6 +165,10 @@ return
 			</xf:instance>
 			{((: set up the reset for the document chooser instances every 30s :))}
 			<xf:action ev:event="xforms-ready">
+			  {
+			  builder:save-document-chooser-search($document-chooser-id),
+			  builder:save-document-chooser-search($search-chooser-id)
+			  }
 			  <xf:dispatch delay="{$local:update-delay-ms}" 
 			    targetid="reset" name="reset-document-instances"/>
 			</xf:action>
@@ -182,7 +186,8 @@ return
   		    targetid="reset" name="reset-document-instances"/>
   		</xf:action>
   		<xf:action ev:event="do-reset-document-instances">
-  		  <xf:send submission="{$document-chooser-id}-submit"/>
+  		  <xf:send submission="{$document-chooser-id}-submit-saved"/>
+  		  <xf:send submission="{$search-chooser-id}-submit-saved"/>
   		</xf:action>
 		</xf:group>,
 		<xf:group id="control-my-siddurim">
