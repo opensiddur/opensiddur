@@ -155,7 +155,16 @@ declare function local:get(
                 if ($subresource)
                 then concat($api-doc, '/', if ($subresource='seg') then concat('id/', $result/@xml:id) else $subresource)
                 else $api-doc
-              let $alt-desc := 'db'
+              let $alt := ( 
+                if ($path-parts/data:purpose = "output")
+                then (
+                  "xhtml", concat($api-doc, ".xhtml"),
+                  "css", concat($api-doc, ".css"),
+                  "status", concat($api-doc, "/status")
+                )
+                else (), 
+                ('db', $doc-uri)
+              )
               let $supported-methods := (
                 "GET",
                 ("POST")[$subresource = ("repository")],
@@ -183,7 +192,7 @@ declare function local:get(
                 )
               order by ft:score($result) descending
               return
-                api:list-item($desc, $link, $supported-methods, $accept-content-types, $request-content-types, ($alt-desc, $doc-uri))  
+                api:list-item($desc, $link, $supported-methods, $accept-content-types, $request-content-types, $alt)  
             }</ul>)
   return (
     api:serialize-as('xhtml'),

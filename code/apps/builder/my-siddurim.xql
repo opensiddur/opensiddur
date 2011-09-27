@@ -256,6 +256,7 @@ return
         }
 			</fieldset>
 			{controls:debug-show-instance($document-chooser-id),
+			controls:debug-show-instance($search-chooser-id),
 			controls:debug-show-instance(concat($status-instance-id, "-result"))}
 		</xf:group>
 		)
