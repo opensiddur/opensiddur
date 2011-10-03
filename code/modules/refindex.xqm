@@ -132,3 +132,69 @@ declare function ridx:make-index-entries(
       attribute node { $ptr-node-id }
     }
 };
+
+(:~ Look up if the current node specifically or, including any
+ : of its ancestors (default true() unless $without-ancestors is set)
+ : is referenced in a reference of type $ns:$local-name/@type, 
+ : in the $n-th position
+ : If any of the optional parameters are not found, do not limit
+ : based on them.
+ : The search is performed for nodes only within $context, which may be 
+ : a collection or a document-node()
+ :)
+declare function ridx:lookup(
+  $node as node(),
+  $context as document-node()*,
+  $ns as xs:string*,
+  $local-name as xs:string*,
+  $type as xs:string*,
+  $n as xs:integer*,
+  $without-ancestors as xs:boolean?
+  ) as node()* {
+  let $defaulted-context :=
+    if (exists($context))
+    then 
+      for $c in $context
+      return 
+        doc(
+          replace(document-uri($c), "^(/db)?/", 
+            concat("/", $ridx:ridx-collection, "/")
+          )
+        )
+    else collection(concat("/db/", $ridx:ridx-collection))
+  let $nodes :=
+    if ($without-ancestors) 
+    then $node[@xml:id]
+    else $node/ancestor-or-self::*[@xml:id]
+  where exists($nodes)
+  return
+    let $uris := 
+      for $nd in $nodes
+      return 
+        uri:absolutize-uri(
+          concat("#", $nd/@xml:id/string()), $nd
+        )
+    for $entry in $defaulted-context//ridx:entry[
+        @ref=$uris
+        and
+        (
+          if (exists($ns))
+          then @ns=$ns
+          else true()
+        ) and
+        (
+          if (exists($local-name))
+          then @local-name=$local-name
+          else true() 
+        ) and
+        (
+          if (exists($n))
+          then @n=$n
+          else true()
+        )
+      ]
+    let $original-doc := doc(
+        replace(document-uri(root($entry)), concat("/", $ridx:ridx-collection), "")
+      )
+    return util:node-by-id($original-doc, $entry/@node)
+};
