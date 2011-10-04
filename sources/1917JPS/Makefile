@@ -23,6 +23,9 @@ temp/pdf2txt-clean.xml: ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt \
 	temp/1917JPS-pdf2txt.xml > temp/pdf2txt-clean.xml
 
 # Sort text into header, footer, columns, and footnotes.
+# TODO not sure footnote working - see p. 3
+# TODO not sure this really helps us get where we need to go?
+# TODO see TODO's in columns.xslt
 temp/columns.xml: ../../code/input-conversion/1917JPS/columns.xslt \
 		temp/pdf2txt-clean.xml
 	xsltproc ../../code/input-conversion/1917JPS/columns.xslt \
@@ -42,6 +45,8 @@ temp/sort-errors.txt: ../../code/input-conversion/1917JPS/test-sort.xslt \
 	temp/fix-lines.xml > temp/sort-errors.txt
 
 # TODO Step 4: Join paragraphs
+# for each textline: if new paragraph
+# p should NOT be a container like HTML since heirarchy is book, chapter, verse
 # TODO "final"
 1917JPS.xml: ../../code/input-conversion/1917JPS/1917JPS.xslt \
 		temp/fix-lines.xml \

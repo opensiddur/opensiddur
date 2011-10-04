@@ -19,7 +19,7 @@ xmlns:exsl="http://exslt.org/common"
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="header | column | footnotes| footer">
+  <xsl:template match="header | column | footnotes | footer">
     <xsl:copy>
       <!-- pass first textline node into groups function -->
       <xsl:apply-templates select="textline[1]" mode="groups" />

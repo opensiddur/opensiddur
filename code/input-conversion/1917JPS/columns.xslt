@@ -26,6 +26,15 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
        "Spell check" against a dictionary?
        Tidy?
        Extract Toc outline?
+       BUG: text repeated in spans (still?)
+       Make sure Hebrew is output
+       Split columns (in progress)
+       "Spell check" against a dictionary.
+       Paragraphs.
+       Poetry?
+       small caps
+       xmllint - -format - -encode UTF-8 1917JPS.xml | less
+       Extract Toc outline?
   -->
 
   <xsl:template match="@*|*">
@@ -66,18 +75,22 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
       </xsl:element>
 
       <xsl:element name="column">
+
 	<xsl:apply-templates select=".//textline[(@y &lt;= $headerAbove) and 
 				     (@y &gt;= $footerBelow) and 
 				     (@x &lt;= $columnSplit)]" />
+
       </xsl:element>
 
-      <xsl:element name="footnotes">
+      <xsl:element name="column-break">
       </xsl:element>
 
       <xsl:element name="column">
+
 	<xsl:apply-templates select=".//textline[(@y &lt;= $headerAbove) and 
 				     (@y &gt;= $footerBelow) and 
 				     (@x &gt; $columnSplit)]" />
+
       </xsl:element>
 
       <xsl:element name="footnotes">
@@ -118,23 +131,23 @@ on the PDF of the JPS 1917 Tanakh, transform into more useful XML.
       <xsl:choose>
 	<xsl:when test="@size = 25.961" >
 	  <xsl:element name="chapter-number">
-	    <xsl:value-of select="." />
+	    <xsl:value-of select="normalize-space()" />
 	  </xsl:element>
 	</xsl:when>
 	<xsl:when test="@size = 6.327" >
+	  <xsl:text>&#10;</xsl:text>
 	  <xsl:element name="verse-number">
-	    <xsl:value-of select="." />
+	    <xsl:value-of select="normalize-space()" />
 	  </xsl:element>
 	</xsl:when>
 	<xsl:when test="@size = 10.035" >
-	  <xsl:value-of select="." />
+	  <!-- "normal" text -->
+	  <xsl:value-of select="normalize-space()" />
 	</xsl:when>
 	<xsl:otherwise>
 	  <xsl:copy>
-	    <xsl:if test="@size != 10.035">
-	      <xsl:apply-templates select="@size" />
-	    </xsl:if>
-	    <xsl:value-of select="translate(.,'&#10;','&#9166;')" />
+	    <xsl:apply-templates select="@size" />
+	    <xsl:value-of select="normalize-space()" />
 	  </xsl:copy>
 	</xsl:otherwise>
       </xsl:choose>
