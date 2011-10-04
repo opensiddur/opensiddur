@@ -19,7 +19,10 @@
     <triggers>
         <!-- the global trigger is not working, need to repeat it -->
         <trigger class="org.exist.collections.triggers.XQueryTrigger">
-            <parameter name="url" value="xmldb:exist:///db/code/triggers/document-uri.xql"/>
+            <parameter name="url" value="xmldb:exist:///db/code/triggers/global-trigger.xqm"/>
+            <parameter name="document-uri" value="1"/>
+            <parameter name="update-record" value="1"/>
+            <parameter name="reference-index" value="1"/>
         </trigger>
     </triggers>
 </collection>

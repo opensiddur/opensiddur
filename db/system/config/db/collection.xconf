@@ -6,7 +6,10 @@
     </index>
     <triggers>
         <trigger class="org.exist.collections.triggers.XQueryTrigger">
-            <parameter name="url" value="xmldb:exist:///db/code/triggers/document-uri.xql"/>
+            <parameter name="url" value="xmldb:exist:///db/code/triggers/global-trigger.xqm"/>
+            <parameter name="document-uri" value="1"/>
+            <parameter name="update-record" value=""/>
+            <parameter name="reference-index" value=""/>
         </trigger>
         <!--trigger class="org.exist.collections.triggers.XQueryTrigger">
             <parameter name="url" value="xmldb:exist:///db/code/triggers/uri-index.xql"/>

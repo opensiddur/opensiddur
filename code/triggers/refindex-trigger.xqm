@@ -1,0 +1,78 @@
+xquery version "1.0";
+(:~ trigger functions for the reference index
+ : should be called from the main trigger
+ : TODO: ideally, this would be a separate trigger, but eXist seems
+ : to have a bug where it will not run more than one trigger at a time
+ :
+ : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Released under the GNU Lesser General Public License version 3 or later
+ :)
+module namespace trigger = 'http://jewishliturgy.org/triggers/refindex';
+
+import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+  at "xmldb:exist:///code/modules/refindex.xqm";
+
+declare function trigger:after-copy-collection(
+  $new-uri as xs:anyURI, 
+  $uri as xs:anyURI
+  ) {
+  ridx:reindex(collection($new-uri))
+};
+ 
+declare function trigger:after-move-collection(
+  $new-uri as xs:anyURI, 
+  $uri as xs:anyURI
+  ) {
+  ridx:reindex(collection($new-uri)),
+  xmldb:remove(ridx:index-collection($uri))
+};
+
+declare function trigger:before-delete-collection(
+  $uri as xs:anyURI
+  ) {
+  xmldb:remove(ridx:index-collection($uri))
+};
+
+declare function trigger:after-create-document(
+  $uri as xs:anyURI
+  ) {
+  ridx:reindex($uri)
+};
+
+declare function trigger:after-update-document(
+  $uri as xs:anyURI
+  ) {
+  ridx:reindex($uri)
+};
+
+declare function trigger:after-copy-document(
+  $new-uri as xs:anyURI, 
+  $uri as xs:anyURI
+  ) {
+  ridx:reindex($new-uri)
+};
+
+declare function trigger:after-move-document(
+  $new-uri as xs:anyURI, 
+  $uri as xs:anyURI
+  ) {
+  let $tokens := tokenize($new-uri, "/")[.]
+  let $old-resource := $tokens[last()]
+  let $old-collection := 
+    ridx:index-collection(
+      string-join(subsequence($tokens, 1, count($tokens) - 1), "/")
+    )
+  return (
+    xmldb:remove($old-collection, $old-resource),
+    ridx:reindex($uri)
+  )
+};
+
+declare function trigger:before-delete-document(
+  $uri as xs:anyURI
+  ) {
+  let $doc := doc($uri)
+  let $collection := ridx:index-collection(util:collection-name($doc))
+  let $resource := util:document-name($doc)
+  return xmldb:remove($collection, $resource)
+};
