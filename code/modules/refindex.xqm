@@ -26,6 +26,13 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 (: the default cache is under this directory :)
 declare variable $ridx:ridx-collection := "refindex";
 
+(:~ given a collection, return its index :)
+declare function ridx:index-collection(
+  $collection as xs:string
+  ) as xs:string {
+  app:concat-path(("/", $ridx:ridx-collection, $collection))
+};
+
 (:~ make an index collection path that mirrors the same path in 
  : the normal /db hierarchy 
  : @param $path-base the constant base at the start of the path
@@ -67,7 +74,6 @@ declare function local:make-mirror-collection-path(
     )
 };
 
-
 (:~ index or reindex a document given its location by collection
  : and resource name :)
 declare function ridx:reindex(
@@ -77,10 +83,19 @@ declare function ridx:reindex(
   ridx:reindex(doc(app:concat-path($collection, $resource)))
 };
 
-(:~ index or reindex a document from the given document node :)
+(:~ index or reindex a document from the given document node
+ : which may be specified as a node or an xs:anyURI or xs:string
+ :)
 declare function ridx:reindex(
-  $doc as document-node()
+  $doc-items as item()*
   ) as empty() {
+  for $doc-item in $doc-items
+  let $doc := 
+    typeswitch($doc-item)
+    case document-node() 
+      return $doc-item
+    default 
+      return doc($doc-item)
   let $collection := replace(util:collection-name($doc), "^/db", "")
   let $resource := util:document-name($doc)
   let $make-mirror-collection :=
