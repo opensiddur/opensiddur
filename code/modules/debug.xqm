@@ -6,7 +6,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
- : $Id: grammar2.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $
  :)
 module namespace debug="http://jewishliturgy.org/transform/debug";
 
@@ -16,6 +15,12 @@ declare variable $debug:info := 3;
 declare variable $debug:detail := 4;
 declare variable $debug:level := $debug:detail;
 
+declare variable $debug:settings-file := "/db/code/debug.xml";
+declare variable $debug:settings := doc($debug:settings-file);
+
+(:~ debugging output function
+ : if the source is listed in /db/code/debug.xm
+ :)
 declare function debug:debug(
 	$level as xs:integer,
 	$source as item()*,
@@ -27,12 +32,19 @@ declare function debug:debug(
 			element source { $source},
 			element message { $message }
 		}
+	let $source-level := 
+	  (
+	  $debug:settings//debug:settings/@override/number(),
+	  $debug:settings//debug:module[@name=$source]/@level/number(),
+	  $debug:settings//debug:settings/@level/number(),
+	  $debug:level
+	  )[1]
 	return
-	if ($level = $debug:error)
-	then error(xs:QName('debug:ERROR'), $xmsg)
-	else if ($level <= $debug:level)
-	then util:log-system-out($xmsg)
-	else ()
+  	if ($level = $debug:error)
+  	then error(xs:QName('debug:ERROR'), $xmsg)
+  	else if ($level <= $source-level)
+  	then util:log-system-out($xmsg) (: TODO: this should replace with a custom logger :)
+  	else ()
 };
 
 (:~ Debugging function to turn a long string into a short one :)
