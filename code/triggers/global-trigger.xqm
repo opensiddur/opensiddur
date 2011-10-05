@@ -16,11 +16,11 @@ import module namespace docuri="http://jewishliturgy.org/triggers/document-uri"
   at "xmldb:exist:///code/triggers/document-uri.xqm";
 
 (: enable the triggers individually by collection 
- : pass in 0 or "" for disabled, anything else for enabled
+ : pass in 0 for disabled anything else for enabled
  :)
-declare variable $local:document-uri external;
-declare variable $local:update-record external;
-declare variable $local:reference-index external;
+declare variable $local:document-uri as xs:integer? external;
+declare variable $local:update-record as xs:integer? external;
+declare variable $local:reference-index as xs:integer? external;
 
 declare function trigger:after-copy-collection(
   $new-uri as xs:anyURI, 
