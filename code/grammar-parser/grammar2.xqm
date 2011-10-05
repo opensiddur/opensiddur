@@ -52,6 +52,8 @@ import module namespace debug="http://jewishliturgy.org/transform/debug"
 declare namespace p="http://jewishliturgy.org/ns/parser";
 declare namespace r="http://jewishliturgy.org/ns/parser-result";
 
+declare variable $grammar:debug-id := "grammar";
+
 (:~ identity template that can stay in the current mode 
  : @param $node node to make identity of 
  : @param $mode function of arity 1 to call on children
@@ -109,14 +111,14 @@ declare function local:chain-next(
         $context/not(self::p:zeroOrOne or self::p:zeroOrMore))
     then (
     	(: no match to this.  no need to chain. :)
-      debug:debug($debug:detail, 'chain-next', 'CHAIN COMPLETE'),
+      debug:debug($debug:detail, $grammar:debug-id, 'chain next: CHAIN COMPLETE'),
       <r:no-match/>,
       $remainder
     )
     else if ($context/parent::p:choice)
     then (
     	(: the parent is a choice element, we don't need to chain continue :)
-    	debug:debug($debug:detail, 'chain-next', 'NOT CHAINING CHOICE'),
+    	debug:debug($debug:detail, $grammar:debug-id, 'chain next: NOT CHAINING CHOICE'),
       $match, 
       $remainder
     )
@@ -124,8 +126,8 @@ declare function local:chain-next(
 			(: we have a match and are not in a choice construct,
         so we need to chain to the next sibling  :)
       debug:debug($debug:detail,
-      	'chain-next',
-      	('CHAINING TO ', ($context/following-sibling::*[1]/name(), 'NOTHING')[1], ' remainder=', $remainder)
+      	$grammar:debug-id,
+      	('chain-next: CHAINING TO ', ($context/following-sibling::*[1]/name(), 'NOTHING')[1], ' remainder=', $remainder)
       ),
       let $chain-result as element()* :=
       	grammar:grammar(
@@ -233,8 +235,8 @@ declare function grammar:number(
   	if (empty($match) and $found-already eq 0)
   	then (
     	debug:debug(
-    		$debug:detail,
-    		'zeroOrOne|zeroOrMore|oneOrMore',('NO MATCH for ', $context, ' for string ', 
+    		$debug:detail, $grammar:debug-id,
+    		('zeroOrOne|zeroOrMore|oneOrMore: ','NO MATCH for ', $context, ' for string ', 
           debug:abbr-string(substring($string,$string-position)))
       ),
       local:chain-next(
@@ -254,16 +256,16 @@ declare function grammar:number(
     then (
     	(: return remainder back through the recursion :)
       debug:debug(
-      	$debug:detail,
-      	'zeroOrOne|zeroOrMore|oneOrMore',
-      	('NO MATCH and FOUND ALREADY for ', $context, ' for string ', 
+      	$debug:detail, $grammar:debug-id,
+      	('zeroOrOne|zeroOrMore|oneOrMore: ',
+      	'NO MATCH and FOUND ALREADY for ', $context, ' for string ', 
           debug:abbr-string(substring($string,$string-position)))
       ),
       $remainder
     )
     else if ($match and $context instance of element(p:zeroOrOne))
     then (
-    	debug:debug($debug:detail, 'zeroOrOne', ('MATCH for ', $context, ' for string ', debug:abbr-string($string))),
+    	debug:debug($debug:detail, $grammar:debug-id, ('zeroOrOne: ', 'MATCH for ', $context, ' for string ', debug:abbr-string($string))),
     	$match,
     	local:chain-next(
     		$context, $string, $string-position, $result
@@ -271,9 +273,9 @@ declare function grammar:number(
     )
     else (
     	debug:debug(
-    		$debug:detail,
-    		'zeroOrOne|zeroOrMore|oneOrMore',
-    		('MATCH and *orMore for ', $context, ' for string ', 
+    		$debug:detail, $grammar:debug-id,
+    		('zeroOrOne|zeroOrMore|oneOrMore: ',
+    		'MATCH and *orMore for ', $context, ' for string ', 
           debug:abbr-string(substring($string,$string-position)))
       ),
       let $or-more-match as element()* :=
@@ -287,7 +289,8 @@ declare function grammar:number(
         (: $match and zeroOrMore or OneOrMore :)
         if ($found-already eq 0)
         then (
-        	debug:debug($debug:info, '*OrMore COMPLETED.  Chaining next', ()),
+        	debug:debug($debug:info, $grammar:debug-id, 
+        	'*OrMore COMPLETED.  Chaining next'),
         	local:chain-next(
         		$context,
         		$string,
@@ -296,7 +299,7 @@ declare function grammar:number(
         	)
         )
         else (
-        	debug:debug($debug:info, '*OrMore returning chained results', ()),
+        	debug:debug($debug:info, $grammar:debug-id, '*OrMore returning chained results'),
           ($match, $or-more-match)
         )
  			)
@@ -487,11 +490,11 @@ declare function grammar:p-end(
 	) as element()+ {
 	if ($string-position > string-length($string))
 	then (
-		debug:debug($debug:info, 'p:end', 'FOUND'),
+		debug:debug($debug:info, $grammar:debug-id, ('p:end: ', 'FOUND')),
     <r:end/>
   )
   else (
-  	debug:debug($debug:info, 'p:end', 'FAIL'),
+  	debug:debug($debug:info, $grammar:debug-id, ('p:end: ', 'FAIL')),
     <r:no-match/>,
     <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
   )          
