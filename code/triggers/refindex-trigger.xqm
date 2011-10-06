@@ -12,10 +12,15 @@ module namespace trigger = 'http://jewishliturgy.org/triggers/refindex';
 import module namespace ridx="http://jewishliturgy.org/modules/refindex"
   at "xmldb:exist:///code/modules/refindex.xqm";
 
+(: namespaces of the root element that the trigger will work on :)
+declare variable $trigger:namespaces := 
+  ("http://www.tei-c.org/ns/1.0", "http://jewishliturgy.org/ns/jlptei/1.0");
+
 declare function local:is-exempt(
   $uri as xs:anyURI
   ) as xs:boolean {
-  util:is-binary-doc($uri) or not(doc-available($uri))
+  util:is-binary-doc($uri) or not(doc-available($uri)) 
+    or empty(doc($uri)/*[namespace-uri(.)=$trigger:namespaces])
 };
 
 declare function trigger:after-copy-collection(

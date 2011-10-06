@@ -18,15 +18,15 @@ import module namespace docuri="http://jewishliturgy.org/triggers/document-uri"
 (: enable the triggers individually by collection 
  : pass in 0 for disabled anything else for enabled
  :)
-declare variable $local:document-uri as xs:integer? external;
-declare variable $local:update-record as xs:integer? external;
-declare variable $local:reference-index as xs:integer? external;
+declare variable $local:document-uri as xs:string? external;
+declare variable $local:update-record as xs:string? external;
+declare variable $local:reference-index as xs:string? external;
 
 declare function trigger:after-copy-collection(
   $new-uri as xs:anyURI, 
   $uri as xs:anyURI
   ) {
-  if ($local:reference-index)
+  if (xs:boolean($local:reference-index))
   then refindex:after-copy-collection($new-uri, $uri)
   else ()
 };
@@ -35,7 +35,7 @@ declare function trigger:after-move-collection(
   $new-uri as xs:anyURI, 
   $uri as xs:anyURI
   ) {
-  if ($local:reference-index)
+  if (xs:boolean($local:reference-index))
   then refindex:after-move-collection($new-uri, $uri)
   else ()
 };
@@ -43,7 +43,7 @@ declare function trigger:after-move-collection(
 declare function trigger:before-delete-collection(
   $uri as xs:anyURI
   ) {
-  if ($local:reference-index)
+  if (xs:boolean($local:reference-index))
   then refindex:before-delete-collection($uri)
   else ()
 };
@@ -51,13 +51,13 @@ declare function trigger:before-delete-collection(
 declare function trigger:after-create-document(
   $uri as xs:anyURI
   ) {
-  if ($local:update-record)
+  if (xs:boolean($local:update-record))
   then updateflag:after-create-document($uri)
   else (),
-  if ($local:document-uri)
+  if (xs:boolean($local:document-uri))
   then docuri:after-create-document($uri)
   else (),
-  if ($local:reference-index)
+  if (xs:boolean($local:reference-index))
   then refindex:after-create-document($uri)
   else ()
 };
@@ -65,13 +65,13 @@ declare function trigger:after-create-document(
 declare function trigger:after-update-document(
   $uri as xs:anyURI
   ) {
-  if ($local:update-record)
+  if (xs:boolean($local:update-record))
   then updateflag:after-update-document($uri)
   else (),
-  if ($local:document-uri)
+  if (xs:boolean($local:document-uri))
   then docuri:after-update-document($uri)
   else (),
-  if ($local:reference-index)
+  if (xs:boolean($local:reference-index))
   then refindex:after-update-document($uri)
   else ()
 };
@@ -80,13 +80,13 @@ declare function trigger:after-copy-document(
   $new-uri as xs:anyURI, 
   $uri as xs:anyURI
   ) {
-  if ($local:update-record)
+  if (xs:boolean($local:update-record))
   then updateflag:after-copy-document($new-uri, $uri)
   else (),
-  if ($local:document-uri)
+  if (xs:boolean($local:document-uri))
   then docuri:after-copy-document($new-uri, $uri)
   else (),
-  if ($local:reference-index)
+  if (xs:boolean($local:reference-index))
   then refindex:after-copy-document($new-uri, $uri)
   else ()
 };
@@ -95,13 +95,13 @@ declare function trigger:after-move-document(
   $new-uri as xs:anyURI, 
   $uri as xs:anyURI
   ) {
-  if ($local:update-record)
+  if (xs:boolean($local:update-record))
   then updateflag:after-move-document($new-uri, $uri)
   else (),
-  if ($local:document-uri)
+  if (xs:boolean($local:document-uri))
   then docuri:after-move-document($new-uri, $uri)
   else (),
-  if ($local:reference-index)
+  if (xs:boolean($local:reference-index))
   then refindex:after-move-document($new-uri, $uri)
   else ()
 };
@@ -109,7 +109,7 @@ declare function trigger:after-move-document(
 declare function trigger:before-delete-document(
   $uri as xs:anyURI
   ) {
-  if ($local:reference-index)
+  if (xs:boolean($local:reference-index))
   then refindex:before-delete-document($uri)
   else ()
 };
@@ -117,7 +117,7 @@ declare function trigger:before-delete-document(
 declare function trigger:after-delete-document(
   $uri as xs:anyURI
   ) {
-  if ($local:update-record)
+  if (xs:boolean($local:update-record))
   then updateflag:after-delete-document($uri)
   else ()
 };
