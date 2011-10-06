@@ -1,7 +1,6 @@
 xquery version "1.0";
 (:~ 
  : Support functions for user management
- : $Id: user.xqm 708 2011-02-24 05:40:58Z efraim.feinstein $
  :)
 
 module namespace user="http://jewishliturgy.org/modules/user";
@@ -44,7 +43,7 @@ declare function user:new-profile(
   return ( 
     (: profile is readable, but not writable by group, everything by user :)
     xmldb:set-resource-permissions($home, $user:profile-resource, $user-name, $user-name, 
-      util:base-to-integer(0740,8)),
+      util:base-to-integer(0744,8)),
     $path
   )
 };
