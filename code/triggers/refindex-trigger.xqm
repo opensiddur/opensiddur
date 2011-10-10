@@ -35,13 +35,19 @@ declare function trigger:after-move-collection(
   $uri as xs:anyURI
   ) {
   ridx:reindex(collection($new-uri)),
-  xmldb:remove(ridx:index-collection($uri))
+  let $index-collection := ridx:index-collection($uri)
+  where xmldb:collection-available($index-collection)
+  return
+    xmldb:remove($index-collection)
 };
 
 declare function trigger:before-delete-collection(
   $uri as xs:anyURI
   ) {
-  xmldb:remove(ridx:index-collection($uri))
+  let $index-collection := ridx:index-collection($uri)
+  where xmldb:collection-available($index-collection)
+  return
+    xmldb:remove($index-collection)
 };
 
 declare function trigger:after-create-document(
@@ -82,7 +88,10 @@ declare function trigger:after-move-document(
     )
   where not(local:is-exempt($new-uri))
   return (
-    xmldb:remove($old-collection, $old-resource),
+    if (doc-available(concat($old-collection, "/", $old-resource)))
+    then
+      xmldb:remove($old-collection, $old-resource)
+    else (),
     ridx:reindex($uri)
   )
 };
@@ -95,6 +104,7 @@ declare function trigger:before-delete-document(
     let $doc := doc($uri)
     let $collection := ridx:index-collection(util:collection-name($doc))
     let $resource := util:document-name($doc)
+    where doc-available(concat($collection, "/", $resource))
     return xmldb:remove($collection, $resource)
   else ()
 };
