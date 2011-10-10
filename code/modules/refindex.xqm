@@ -148,6 +148,15 @@ declare function ridx:make-index-entries(
     }
 };
 
+declare function ridx:lookup(
+  $node as node(),
+  $context as document-node()*,
+  $ns as xs:string*,
+  $local-name as xs:string*
+  ) as node()* {
+  ridx:lookup($node,$context,$ns,$local-name,(),(),())
+};
+
 (:~ Look up if the current node specifically or, including any
  : of its ancestors (default true() unless $without-ancestors is set)
  : is referenced in a reference of type $ns:$local-name/@type, 
