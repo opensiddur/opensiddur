@@ -19,6 +19,8 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
   at "xmldb:exist:///code/modules/follow-uri.xqm";
+import module namespace magic="http://jewishliturgy.org/magic"
+  at "xmldb:exist:///code/magic/magic.xqm";
 
 declare namespace err="http://jewishliturgy.org/errors";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -101,7 +103,7 @@ declare function ridx:reindex(
   let $make-mirror-collection :=
    (: TODO: this should not have to be admin-ed. really, it should
    be setuid! :)
-    system:as-user("admin", $magicpassword, 
+    system:as-user("admin", $magic:password, 
       local:make-mirror-collection-path($ridx:ridx-collection, $collection)
     )
   let $mirror-collection :=
@@ -131,7 +133,7 @@ declare function ridx:make-index-entries(
   let $element := $rattr/parent::element()
   let $ptr-node-id := util:node-id($element)
   let $type := ($element, $element/(ancestor::tei:linkGrp|ancestor::tei:joinGrp)[1])[1]/@type/string()
-  for $follow at $n in tokenize($rattr/string(), "\s+")[not(starts-with(., "http://"))]
+  for $follow at $n in tokenize($rattr/string(), "\s+")[not(matches(., "^http[s]?://"))]
   let $null := util:log-system-out(("Following: ", $follow))
   let $returned := uri:follow-uri($follow, $element, uri:follow-steps($element))
   for $followed in $returned

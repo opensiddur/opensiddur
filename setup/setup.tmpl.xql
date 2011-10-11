@@ -25,9 +25,9 @@ xquery version "1.0";
     let $collection := util:collection-name(string($xquery))
     let $resource := util:document-name(string($xquery))
     let $code := util:binary-to-string(util:binary-doc($xquery))
-    where contains($code, "$magicpassword")
+    where matches($code, "$magic(:)?password")
     return 
       xmldb:store($collection, $resource, 
-        replace($code, "\$magicpassword", "'ADMINPASSWORD'"), 
+        replace($code, "\$magic(:)?password", "'ADMINPASSWORD'"), 
         'application/xquery')
 )
