@@ -35,7 +35,10 @@ declare function debug:debug(
 	let $source-level := 
 	  (
 	  $debug:settings//debug:settings/@override/number(),
-	  $debug:settings//debug:module[@name=$source]/@level/number(),
+	  if ($source castable as xs:string)
+	  then
+	    $debug:settings//debug:module[@name=string($source)]/@level/number()
+	  else (),
 	  $debug:settings//debug:settings/@level/number(),
 	  $debug:level
 	  )[1]
