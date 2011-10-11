@@ -243,12 +243,14 @@ db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 		make db
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
 	@echo "Copying files to database..."
-	@#copy the triggers first so eXist will know where they are during restore
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/triggers/__contents__.xml -ouri=xmldb:exist:// 
 	@#copy the transliteration DTD first so eXist will know where they are during restore
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/group/everyone/transliteration/__contents__.xml -ouri=xmldb:exist:// 
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/system/__contents__.xml -ouri=xmldb:exist:// 	
+	@#copy the code first so eXist will know where the triggers and support modules are during restore
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/__contents__.xml -ouri=xmldb:exist:// 
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist://
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/system/__contents__.xml -ouri=xmldb:exist:// 	
+	@#copy the transforms directory again so the tests that require the document URI trigger will run
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/transforms/__contents__.xml -ouri=xmldb:exist:// 
 	$(EXISTCLIENT) -qls -u admin -F $(SETUPDIR)/setup.xql
 	rm -f $(SETUPDIR)/setup.xql
 	@echo "Done."
