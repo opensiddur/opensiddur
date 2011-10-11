@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.0";
 
 (:~ reference index module
  :
@@ -15,6 +15,8 @@ module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
 
 import module namespace app="http://jewishliturgy.org/modules/app"
   at "xmldb:exist:///code/modules/app.xqm";
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
   at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
@@ -103,9 +105,25 @@ declare function ridx:reindex(
   let $make-mirror-collection :=
    (: TODO: this should not have to be admin-ed. really, it should
    be setuid! :)
+   try {
     system:as-user("admin", $magic:password, 
       local:make-mirror-collection-path($ridx:ridx-collection, $collection)
     )
+   }
+   catch * {
+    (: TODO: this code is here to account for a bug where, in the
+     : restore process, the admin password is considered to be blank
+     : even though it had been set. It affects eXist r14669 under 
+     : circumstances that I can't figure out. Hopefully, it will not
+     : affect future versions, but if it does, we need this code
+     : to work around it. A warning will be displayed when this code
+     : executes. The warning is irrelevant to a user.
+     :)
+    debug:debug($debug:warn, "refindex", "The admin password is blank. This is a bug in eXist, I think."),
+    system:as-user("admin", "", 
+      local:make-mirror-collection-path($ridx:ridx-collection, $collection)
+    )
+   }
   let $mirror-collection :=
     app:concat-path(("/", $ridx:ridx-collection, $collection))
   let $owner := xmldb:get-owner($collection, $resource)
