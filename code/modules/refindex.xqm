@@ -134,13 +134,11 @@ declare function ridx:make-index-entries(
   let $ptr-node-id := util:node-id($element)
   let $type := ($element, $element/(ancestor::tei:linkGrp|ancestor::tei:joinGrp)[1])[1]/@type/string()
   for $follow at $n in tokenize($rattr/string(), "\s+")[not(matches(., "^http[s]?://"))]
-  let $null := util:log-system-out(("Following: ", $follow))
   let $returned := uri:follow-uri($follow, $element, uri:follow-steps($element))
   for $followed in $returned
   where $followed/@xml:id
   return
     element ridx:entry {
-      util:log-system-out(("in link ", $element, " reference ", $followed/@xml:id/string(), " is $n = ", $n)),
       attribute ref { uri:absolutize-uri(concat("#", $followed/@xml:id/string()), $followed) },
       attribute ns { namespace-uri($element) },
       attribute local-name { local-name($element) },
