@@ -15,6 +15,9 @@
             <text qname="html:title"/>
             <text qname="html:body"/>
         </lucene>
+        <!-- for responsibility indexes -->
+        <create qname="@j:role" type="xs:string"/>
+        <create qname="@resp" type="xs:string"/>
     </index>
     <triggers>
         <!-- the global trigger is not working, need to repeat it -->
