@@ -37,7 +37,7 @@ declare function resp:contributor-entry(
  :)
 declare function resp:query(
   $node as node()
-  ) as element(tei:respons)* {
+  ) as node()* {
   ridx:lookup($node, collection("/group"),
    $resp:tei-ns, "respons")
 };
@@ -48,7 +48,7 @@ declare function resp:query(
 declare function resp:query(
   $node as node(),
   $resp-type as xs:string
-  ) as element(tei:respons)* {
+  ) as node()* {
   ridx:lookup($node, collection("/group"),
     $resp:tei-ns, "respons", (), (), ())[@j:role=$resp-type]
 };
@@ -72,8 +72,8 @@ declare function local:public-profile-by-id(
   let $doc-in-group-hierarchy := $path-tokens[1] = "group"
   let $group := 
     if ($doc-in-group-hierarchy)
-    then "everyone"
-    else $path-tokens[2]
+    then $path-tokens[2]
+    else "everyone"
   let $profile-with-id := 
     collection(concat("/group/", $group, "/contributors"))//id($id)
   let $profile-root := root($profile-with-id)
@@ -116,11 +116,13 @@ declare function local:make-public-profile(
     let $group-profile-collection := "contributors"
     let $profile-collection := 
       let $pc := concat($group-collection, "/", $group-profile-collection)
-      where not(xmldb:collection-available($pc))
       return (
-        if (xmldb:create-collection($group-collection, $group-profile-collection))
-        then xmldb:set-collection-permissions($current-col, $owner, $group, $mode)
-        else error(xs:QName('err:CREATE'), concat("Cannot create collection", $group-collection, "/", $group-profile-collection)),
+        if (xmldb:collection-available($pc))
+        then ()
+        else
+          if (xmldb:create-collection($group-collection, $group-profile-collection))
+          then xmldb:set-collection-permissions($pc, $group, $group, util:base-to-integer(0774,8))
+          else error(xs:QName('err:CREATE'), concat("Cannot create collection", $group-collection, "/", $group-profile-collection)),
         $pc
       )
     let $resource-name := concat($identifier, ".xml") 
@@ -237,7 +239,17 @@ declare function resp:add(
       string-join($resp:valid-responsibility-types, ",")))
   else 
     let $profile-id := 
-      local:public-profile-by-id($node, $identifier)
+      let $existing := local:public-profile-by-id($node, $identifier)
+      return
+        if ($existing)
+        then $existing
+        else 
+          let $new := local:make-public-profile($node, $identifier)
+          return
+            if ($new)
+            then $new
+            else error(xs:QName("err:NOPROFILE"), 
+              concat("The user ", $identifier, " has no profile and there is no way to make one. Upload a profile manually"))
     let $doc := root($node)
     return (
       update insert 
@@ -255,13 +267,49 @@ declare function resp:remove(
   $resp-type as xs:string?,
   $identifier as xs:string
   ) {
-  ()
+  let $doc := root($node)
+  let $profile-id := local:public-profile-by-id($node, $identifier)
+  let $resp-to-remove := resp:query($node, $resp-type)[@resp=$profile-id]
+  where exists($resp-to-remove)
+  return (
+    for $resp in $resp-to-remove
+    let $targets := 
+      uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
+      except $node
+    return (
+      update insert 
+        local:make-ranges($targets, (), (), 
+          $resp-type, $resp/@locus/string(), $profile-id) 
+          into $doc//j:respList
+    ),
+    update delete $resp-to-remove,
+    local:collapse-ranges($doc, $profile-id, $resp-type)
+  )
 };
 
-(:~ a node is being removed, remove all 
- : responsibility references to it :)
+(:~ remove a node and responsibility references to it
+ :)
 declare function resp:remove(
   $node as element()
   ) {
-  ()
+  let $doc := root($node)
+  let $resp-to-remove := resp:query($node)
+  let $profile-ids := $resp-to-remove/@resp/string()
+  let $resp-types := $resp-to-remove/@j:role/string()
+  return (
+    for $resp in $resp-to-remove
+    let $targets :=
+     uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
+     except $node
+    return
+      update insert local:make-ranges($targets, (), (),
+        $resp/@j:role/string(), $resp/@locus/string(), 
+        $resp/@resp/string()) into $doc//j:respList,
+    update delete ($resp-to-remove, $node),
+    for $profile-id in $profile-ids
+    for $resp-type in $resp-types
+    where exists($resp-to-remove)
+    return
+      local:collapse-ranges($doc, $profile-id, $resp-type)
+  )
 };
