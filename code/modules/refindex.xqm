@@ -216,25 +216,23 @@ declare function ridx:lookup(
         uri:absolutize-uri(
           concat("#", $nd/@xml:id/string()), $nd
         )
-    for $entry in $defaulted-context//ridx:entry[
-        @ref=$uris
-        and
-        (
+    for $entry in $defaulted-context//ridx:entry
+        [@ref=$uris]
+        [
           if (exists($ns))
           then @ns=$ns
           else true()
-        ) and
-        (
+        ]
+        [
           if (exists($local-name))
           then @local-name=$local-name
           else true() 
-        ) and
-        (
+        ]
+        [
           if (exists($n))
           then @n=$n
           else true()
-        )
-      ]
+        ]
     let $original-doc := doc(
         replace(document-uri(root($entry)), concat("/", $ridx:ridx-collection), "")
       )
