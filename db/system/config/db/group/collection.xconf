@@ -18,6 +18,7 @@
         <!-- for responsibility indexes -->
         <create qname="@j:role" type="xs:string"/>
         <create qname="@resp" type="xs:string"/>
+        <create qname="@locus" type="xs:string"/>
     </index>
     <triggers>
         <!-- the global trigger is not working, need to repeat it -->
