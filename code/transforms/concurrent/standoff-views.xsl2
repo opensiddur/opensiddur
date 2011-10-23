@@ -106,8 +106,9 @@
  
   <xd:doc>
     <xd:short>Responsibility links become views</xd:short>
+    <xd:detail>Only match when there is an @target. We cannot handle @match yet.</xd:detail>
   </xd:doc>
-  <xsl:template match="tei:respons" mode="make-standoff-views" 
+  <xsl:template match="tei:respons[@target]" mode="make-standoff-views" 
     as="element(j:view)*">
     <xsl:variable name="context" as="element(tei:respons)" select="."/>
     <xsl:for-each select="tokenize(@target,'\s+')">
@@ -115,6 +116,7 @@
         <xsl:call-template name="run-make-standoff-views">
           <xsl:with-param name="context" as="element()" select="$context"/>
           <xsl:with-param name="uri" as="xs:string" select="."/>
+          <xsl:with-param name="steps" as="xs:integer" select="0"/>
         </xsl:call-template>
       </xsl:variable>
     
@@ -186,9 +188,10 @@
   <xsl:template name="run-make-standoff-views" as="item()*">
     <xsl:param name="context" as="element()"/>
     <xsl:param name="uri" as="xs:string"/>
+    <xsl:param name="steps" as="xs:integer" select="func:follow-steps($context, -1)"/>
     
     <xsl:variable name="result" as="element()*">
-      <xsl:apply-templates select="func:follow-uri($uri, $context, -1)" 
+      <xsl:apply-templates select="func:follow-uri($uri, $context, $steps)" 
         mode="#current"/>
     </xsl:variable>
     <xsl:variable name="context-uri" as="xs:anyURI" select="func:original-document-uri($context)"/>
