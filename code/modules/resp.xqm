@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.0";
 (:~ module to handle attribution of responsibility within the database
  :
  : Open Siddur Project
@@ -7,6 +7,8 @@ xquery version "1.0";
  :)
 module namespace resp = "http://jewishliturgy.org/modules/resp";
 
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "xmldb:exist:///code/modules/app.xqm";
 import module namespace ridx="http://jewishliturgy.org/modules/refindex"
   at "xmldb:exist:///code/modules/refindex.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
@@ -177,7 +179,8 @@ declare function local:make-ranges(
   $previous-element as element()?,
   $resp-type as xs:string,
   $locus as xs:string,
-  $profile-id as xs:string
+  $profile-id as xs:string,
+  $ignore-nodes as node()*
   ) as element(tei:respons)* {
   if (empty($targets))
   then
@@ -186,46 +189,86 @@ declare function local:make-ranges(
     else local:write-respons-element($begin-element, $previous-element, $resp-type, $locus, $profile-id)
   else
     let $this := $targets[1]
-    let $preceding := $this/preceding-sibling::*[@xml:id][1]
+    let $preceding := $this/preceding-sibling::*[@xml:id][not(. is $ignore-nodes)][1]
     return
       if ((empty($previous-element)) or ($preceding is $previous-element))
       then
         local:make-ranges(
-          subsequence($targets,2), ($begin-element, $this)[1], $this, $resp-type, $locus, $profile-id)
+          subsequence($targets,2), ($begin-element, $this)[1], $this, 
+            $resp-type, $locus, $profile-id, $ignore-nodes)
       else (
         local:write-respons-element($begin-element,$previous-element, $resp-type, $locus, $profile-id),
-        local:make-ranges(subsequence($targets,2), $this, $this, $resp-type, $locus, $profile-id)
+        local:make-ranges(subsequence($targets,2), $this, $this, 
+          $resp-type, $locus, $profile-id, $ignore-nodes)
       )
 }; 
 
 (: collapse the responsibilities of $profile-id in a given document 
- : into ranges
+ : into ranges; ignore $ignore-nodes, which will be subsequently deleted
  :)
 declare function local:collapse-ranges(
   $doc as document-node(),
-  $profile-id as xs:string,
-  $resp-type as xs:string
+  $profile-ids as xs:string+,
+  $resp-types as xs:string+,
+  $ignore-nodes as node()*
   ) {
-  let $all-respons := $doc//tei:respons[@j:role=$resp-type and @resp=$profile-id]
-  let $all-targets := (
-    for $respons in $all-respons
-    return uri:follow-tei-link($respons)
-    ) | ((: sort into document order:))
-  let $new-ranges := local:make-ranges($all-targets, (), (), $resp-type, "value", $profile-id)
-  where exists($new-ranges)
+  for $profile-id in $profile-ids
+  for $resp-type in $resp-types
+  let $all-respons := $doc//tei:respons[@j:role=$resp-type][@resp=$profile-id]
+    [@target] (: reject uncollapsable @match responsibilities :)
+  return
+  for $respons-locus in $all-respons
+  group $respons-locus as $l-respons by $respons-locus/@locus as $locus
   return (
-    update insert $new-ranges into $doc//j:respList,
+    let $all-targets := (
+      for $respons in $l-respons
+      return uri:follow-tei-link($respons, 1)
+      ) | ((: sort into document order:))
+    let $new-ranges := 
+      local:make-ranges($all-targets, (), (), $resp-type, $locus, $profile-id, $ignore-nodes)
+    where exists($new-ranges)
+    return 
+      update insert $new-ranges into $doc//j:respList,
     update delete $all-respons
   )
 };
 
-(:~ declare that the user with the given $identifier is 
- : responsible for $resp-type on node() 
- :)
 declare function resp:add(
   $node as element(), 
   $resp-type as xs:string,
   $identifier as xs:string
+  ) {
+  resp:add($node,$resp-type,$identifier, "location value")
+};
+
+(:~ get a relative link to the profile; if it doesn't exist, make one :)
+declare function local:get-public-profile(
+  $node as node(),
+  $identifier as xs:string
+  ) as xs:string? {
+  let $existing := local:public-profile-by-id($node, $identifier)
+  return
+    if ($existing)
+    then $existing
+    else 
+      let $new := local:make-public-profile($node, $identifier)
+      return
+        if ($new)
+        then $new
+        else error(xs:QName("err:NOPROFILE"), 
+          concat("The user ", $identifier, " has no profile and there is no way to make one. Upload a profile manually"))
+};
+  
+
+(:~ declare that the user with the given $identifier is 
+ : responsible for $resp-type on node(). The responsibility extends
+ : to $locus (default "value") 
+ :)
+declare function resp:add(
+  $node as element(), 
+  $resp-type as xs:string,
+  $identifier as xs:string,
+  $locus as xs:string
   ) {
   (: does the element have @xml:id? if not, error :)
   if (not($node/@xml:id))
@@ -238,26 +281,53 @@ declare function resp:add(
       "The responsibility type must be selected from: ",
       string-join($resp:valid-responsibility-types, ",")))
   else 
-    let $profile-id := 
-      let $existing := local:public-profile-by-id($node, $identifier)
-      return
-        if ($existing)
-        then $existing
-        else 
-          let $new := local:make-public-profile($node, $identifier)
-          return
-            if ($new)
-            then $new
-            else error(xs:QName("err:NOPROFILE"), 
-              concat("The user ", $identifier, " has no profile and there is no way to make one. Upload a profile manually"))
+    let $profile-id := local:get-public-profile($node, $identifier)
     let $doc := root($node)
     return (
       update insert 
-        local:write-respons-element((),$node,$resp-type,"value",$profile-id)
+        local:write-respons-element((),$node,$resp-type,$locus,$profile-id)
         into $doc//j:respList,
-      local:collapse-ranges($doc,$profile-id,$resp-type)
+      local:collapse-ranges($doc,$profile-id,$resp-type, ())
     )
 };
+
+(:~ declare that $identifier is responsible for $attribute 
+ : with responsibility type $resp-type and locus $locus
+ : Note that these are not indexed properly. 
+ :)
+declare function resp:add-attribute(
+  $attribute as attribute(),
+  $resp-type as xs:string,
+  $identifier as xs:string,
+  $locus as xs:string
+  ) {
+  (: does the element have @xml:id? if not, error :)
+  if (not($resp-type=$resp:valid-responsibility-types))
+  then
+    (: is the resp-type valid? if not, error :)
+    error(xs:QName("err:INPUT"), concat(
+      "The responsibility type must be selected from: ",
+      string-join($resp:valid-responsibility-types, ",")))
+  else 
+    let $profile-id := 
+      local:get-public-profile($attribute/parent::*, $identifier)      
+    let $doc := root($attribute)
+    return (
+      update insert 
+        element tei:respons {
+          attribute locus { $locus },
+          attribute resp { $profile-id },
+          attribute j:role { $resp-type },
+          attribute match {
+            app:xpath($attribute)
+          }
+        }
+        into $doc//j:respList 
+      (: , this kind of resp is not indexed yet, but could be
+      local:collapse-ranges($doc,$profile-id,$resp-type):)
+    )
+};
+
 
 (:~ declare that $identifier is no longer considered responsible 
  : for $resp-type on $node 
@@ -268,48 +338,50 @@ declare function resp:remove(
   $identifier as xs:string
   ) {
   let $doc := root($node)
-  let $profile-id := local:public-profile-by-id($node, $identifier)
-  let $resp-to-remove := resp:query($node, $resp-type)[@resp=$profile-id]
-  where exists($resp-to-remove)
-  return (
-    for $resp in $resp-to-remove
-    let $targets := 
-      uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
-      except $node
+  where $node/@xml:id
+  return
+    let $profile-id := local:public-profile-by-id($node, $identifier)
+    let $resp-to-remove := resp:query($node, $resp-type)[@resp=$profile-id]
+    where exists($resp-to-remove)
     return (
-      update insert 
-        local:make-ranges($targets, (), (), 
-          $resp-type, $resp/@locus/string(), $profile-id) 
-          into $doc//j:respList
-    ),
-    update delete $resp-to-remove,
-    local:collapse-ranges($doc, $profile-id, $resp-type)
-  )
+      for $resp in $resp-to-remove
+      let $targets := 
+        uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
+        except $node
+      return (
+        update insert 
+          local:make-ranges($targets, (), (), 
+            $resp-type, $resp/@locus/string(), $profile-id, ()) 
+            into $doc//j:respList
+      ),
+      update delete $resp-to-remove,
+      local:collapse-ranges($doc, $profile-id, $resp-type, ())
+    )
 };
 
-(:~ remove a node and responsibility references to it
+(:~ remove all responsibility references to a node
  :)
 declare function resp:remove(
   $node as element()
   ) {
   let $doc := root($node)
-  let $resp-to-remove := resp:query($node)
-  let $profile-ids := $resp-to-remove/@resp/string()
-  let $resp-types := $resp-to-remove/@j:role/string()
-  return (
-    for $resp in $resp-to-remove
-    let $targets :=
-     uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
-     except $node
-    return
-      update insert local:make-ranges($targets, (), (),
-        $resp/@j:role/string(), $resp/@locus/string(), 
-        $resp/@resp/string()) into $doc//j:respList,
-    update delete ($resp-to-remove, $node),
-    for $profile-id in $profile-ids
-    for $resp-type in $resp-types
-    where exists($resp-to-remove)
-    return
-      local:collapse-ranges($doc, $profile-id, $resp-type)
-  )
+  where $node/@xml:id
+  return
+    let $resp-to-remove := resp:query($node)
+    let $profile-ids := $resp-to-remove/@resp/string()
+    let $resp-types := $resp-to-remove/@j:role/string()
+    return (
+      for $resp in $resp-to-remove
+      let $targets :=
+       uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
+       except $node
+      return
+        update insert local:make-ranges($targets, (), (),
+          $resp/@j:role/string(), $resp/@locus/string(), 
+          $resp/@resp/string(), $node) into $doc//j:respList,
+      update delete $resp-to-remove,
+      if (exists($resp-to-remove))
+      then local:collapse-ranges($doc, $profile-ids, $resp-types, $node)
+      else ()
+    )
 };
