@@ -38,7 +38,6 @@
         <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
         </p>
       </xd:detail>
-      <xd:svnId>$Id: credits.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
   </xd:doc>
 
   
@@ -94,9 +93,9 @@
   </xsl:template>
   
   <xd:doc>
-    <xd:short>Skip tei:item in credits entries</xd:short>
+    <xd:short>Skip tei:item and contributor type div in credits entries</xd:short>
   </xd:doc>
-  <xsl:template match="tei:item" mode="credits">
+  <xsl:template match="tei:item|tei:div[@type='contributor']" mode="credits">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
   
