@@ -212,25 +212,27 @@ declare function local:collapse-ranges(
   $resp-types as xs:string+,
   $ignore-nodes as node()*
   ) {
-  for $profile-id in $profile-ids
-  for $resp-type in $resp-types
-  let $all-respons := $doc//tei:respons[@j:role=$resp-type][@resp=$profile-id]
-    [@target] (: reject uncollapsable @match responsibilities :)
-  return
-  for $respons-locus in $all-respons
-  group $respons-locus as $l-respons by $respons-locus/@locus as $locus
-  return (
-    let $all-targets := (
-      for $respons in $l-respons
-      return uri:follow-tei-link($respons, 1)
-      ) | ((: sort into document order:))
-    let $new-ranges := 
-      local:make-ranges($all-targets, (), (), $resp-type, $locus, $profile-id, $ignore-nodes)
-    where exists($new-ranges)
-    return 
-      update insert $new-ranges into $doc//j:respList,
-    update delete $all-respons
-  )
+  (# exist:batch-transaction #) {
+    for $profile-id in $profile-ids
+    for $resp-type in $resp-types
+    let $all-respons := $doc//tei:respons[@j:role=$resp-type][@resp=$profile-id]
+      [@target] (: reject uncollapsable @match responsibilities :)
+    return (
+      for $respons-locus in $all-respons
+      group $respons-locus as $l-respons by $respons-locus/@locus as $locus
+      return 
+        let $all-targets := (
+          for $respons in $l-respons
+          return uri:follow-tei-link($respons, 1)
+          ) | ((: sort into document order:))
+        let $new-ranges := 
+          local:make-ranges($all-targets, (), (), $resp-type, $locus, $profile-id, $ignore-nodes)
+        where exists($new-ranges)
+        return 
+          update insert $new-ranges into $doc//j:respList,
+      update delete $all-respons
+    )
+  }
 };
 
 declare function resp:add(
@@ -344,17 +346,19 @@ declare function resp:remove(
     let $resp-to-remove := resp:query($node, $resp-type)[@resp=$profile-id]
     where exists($resp-to-remove)
     return (
-      for $resp in $resp-to-remove
-      let $targets := 
-        uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
-        except $node
-      return (
-        update insert 
-          local:make-ranges($targets, (), (), 
-            $resp-type, $resp/@locus/string(), $profile-id, ()) 
-            into $doc//j:respList
-      ),
-      update delete $resp-to-remove,
+      (#exist:batch-transaction#) {
+        for $resp in $resp-to-remove
+        let $targets := 
+          uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
+          except $node
+        return (
+          update insert 
+            local:make-ranges($targets, (), (), 
+              $resp-type, $resp/@locus/string(), $profile-id, ()) 
+              into $doc//j:respList
+        ),
+        update delete $resp-to-remove
+      },
       local:collapse-ranges($doc, $profile-id, $resp-type, ())
     )
 };
@@ -371,15 +375,17 @@ declare function resp:remove(
     let $profile-ids := $resp-to-remove/@resp/string()
     let $resp-types := $resp-to-remove/@j:role/string()
     return (
-      for $resp in $resp-to-remove
-      let $targets :=
-       uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
-       except $node
-      return
-        update insert local:make-ranges($targets, (), (),
-          $resp/@j:role/string(), $resp/@locus/string(), 
-          $resp/@resp/string(), $node) into $doc//j:respList,
-      update delete $resp-to-remove,
+      (# exist:batch-transaction #) {
+        for $resp in $resp-to-remove
+        let $targets :=
+         uri:follow-uri($resp/@target/string(), $resp, uri:follow-steps($resp))
+         except $node
+        return
+          update insert local:make-ranges($targets, (), (),
+            $resp/@j:role/string(), $resp/@locus/string(), 
+            $resp/@resp/string(), $node) into $doc//j:respList,
+        update delete $resp-to-remove
+      },
       if (exists($resp-to-remove))
       then local:collapse-ranges($doc, $profile-ids, $resp-types, $node)
       else ()
