@@ -236,5 +236,13 @@ declare function ridx:lookup(
     let $original-doc := doc(
         replace(document-uri(root($entry)), concat("/", $ridx:ridx-collection), "")
       )
-    return util:node-by-id($original-doc, $entry/@node)
+    return 
+      try {
+        util:node-by-id($original-doc, $entry/@node)
+      }
+      catch * ($a, $b, $c) {
+        debug:debug($debug:warn,"refindex", ("A query for ", $node, " failed on util:node-by-id. ", " The entry was: ", $entry))(:,
+        ridx:reindex(root($entry)),
+        ridx:lookup($node, $context, $ns, $local-name, $type, $n, $without-ancestors):)
+      }
 };
