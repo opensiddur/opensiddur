@@ -32,30 +32,23 @@ declare function trigger:log-trigger-event($uri as xs:anyURI, $event as xs:strin
 };
 
 declare function trigger:write-document-uri($uri as xs:anyURI) {
-  (: WARNING: these must be changed if the server/port won't be accessible locally this way! :)
   if (not(util:is-binary-doc($uri)) and doc-available($uri) and not(trigger:is-exempt($uri)))
   then
     (: the document is an XML document and it exists :)
-    let $server := 'localhost'
-    let $port := 8080
     let $root := doc($uri)
     let $TEI := $root/tei:TEI
-    let $full-uri := (:concat('http://', $server, ':', $port, document-uri($root)):)
-     (: concat('xmldb:exist://', document-uri($root)) :)
-      document-uri($root)
-    return
-      if (exists($TEI))
-      then (
-        (: write @jx:document-uri :)
-        if (not($TEI/@jx:document-uri = $full-uri)) 
-        then update insert attribute {'jx:document-uri'}{$full-uri} into $TEI
-        else (),
-        (: write @xml:base :)
-        if (not($TEI/@xml:base = $full-uri))
-        then update insert attribute {'xml:base'}{$full-uri} into $TEI
-        else ()
-      )
-      else ()
+    let $full-uri := document-uri($root)
+    where exists($TEI)
+    return (# exist:batch-transaction #) {
+      (: write @xml:base :)
+      let $xmlbase := $root/tei:TEI/@xml:base
+      where not($xmlbase = $full-uri)
+      return update insert attribute xml:base {$full-uri} into $root/tei:TEI,
+      (: write @jx:document-uri :)
+      let $document-uri := $root/tei:TEI/@jx:document-uri
+      where not($document-uri = $full-uri)
+      return update insert attribute jx:document-uri {$full-uri} into $root/tei:TEI
+    }
   else ()
 };
 
