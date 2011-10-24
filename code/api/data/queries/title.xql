@@ -68,7 +68,7 @@ declare function local:put(
 	$subresource as xs:string,
 	$format as xs:string?
 	) as empty() {
-	let $content := request:get-data()
+	let $content := api:get-data()
 	let $type := 
 		if (not($content/@type))
 		then 

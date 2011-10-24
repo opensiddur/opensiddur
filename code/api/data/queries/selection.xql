@@ -46,6 +46,8 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 	at "/code/api/modules/api.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
 	at "/code/api/modules/data.xqm";
+import module namespace resp="http://jewishliturgy.org/modules/resp"
+  at "/code/modules/resp.xqm";
 import module namespace scache="http://jewishliturgy.org/modules/scache"
 	at "/code/api/modules/scache.xqm";
 	
@@ -155,7 +157,7 @@ declare function local:put(
 	$index as xs:string?,
 	$format as xs:string?
 	) as element()? {
-	let $data := request:get-data()
+	let $data := api:get-data()
 	let $node := 
 		if (exists($index))
 		then $selection/id($index)
@@ -166,10 +168,15 @@ declare function local:put(
 			api:error(404, "Not found")
 		else
 			if (node-name($data) = node-name($node))
-			then (
-				response:set-status-code(204),
-				update replace $node with $data
-			)
+			then 
+			  let $doc := root($node)
+			  return
+  			(
+  				response:set-status-code(204),
+  				resp:remove($node),
+  				update replace $node with $data,
+  				resp:add($doc//id($data/@xml:id), "editor", app:auth-user(), "location value")
+  			)
 			else
 				api:error(400, "Input data must be the right type")
 };
@@ -184,7 +191,8 @@ declare function local:post(
 		if ($index)
 		then $selection/id($index)
 		else $selection
-	let $data := request:get-data()
+	let $data := api:get-data()
+	let $doc := root($node)
 	let $id := 
 		(: assign an xml:id if one does not already exist in the node :)
 		if (not(string($data/@xml:id)))
@@ -205,17 +213,26 @@ declare function local:post(
 			api:error(400, "Only tei:ptr can be posted here.")
 		else ( 
 			(: the POST is requesting a move of the xml:id, the old one should be deleted :)
-			update delete $old-id,
+			if (exists($old-id))
+			then (
+			  resp:remove($old-id),
+			  update delete $old-id
+			) 
+			else (), 
 			if ($node instance of element(j:selection))
-			then 
+			then (
 				(: POST into selection = POST at beginning of selection :)
 				if (empty($selection/tei:ptr))
 				then update insert $ptr-with-xmlid into $selection
-				else update insert $ptr-with-xmlid preceding $selection/tei:ptr[1]
+				else update insert $ptr-with-xmlid preceding $selection/tei:ptr[1],
+				resp:add($doc//id($id), "editor", app:auth-user(), "location value")
+			)
 			else if ($node instance of element(tei:ptr))
-			then
+			then (
 				(: POST to ptr = POST after pointer :)
-				update insert $ptr-with-xmlid following $node
+				update insert $ptr-with-xmlid following $node,
+				resp:add($doc//id($id), "editor", app:auth-user(), "location value")
+			)
 			else 
 				api:error(404, "ID not found", $index)
 		)
@@ -249,6 +266,7 @@ declare function local:delete(
 			then (
 				(: TODO: check for references! :)
 				response:set-status-code(204),
+				resp:remove($node),
 				update delete $node
 			)
 			else

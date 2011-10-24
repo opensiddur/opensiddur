@@ -16,7 +16,9 @@ import module namespace app="http://jewishliturgy.org/modules/app"
 	at "/code/modules/app.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
 	at "/code/modules/paths.xqm";
-
+import module namespace resp="http://jewishliturgy.org/modules/resp"
+  at "/code/modules/resp.xqm";
+  
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace err="http://jewishliturgy.org/errors";
@@ -280,15 +282,26 @@ declare function data:update-replace-or-insert(
 	$parent as element(),
 	$new-content as node()
 	) as xs:string {
-	if (exists($node))
-	then (
-		update replace $node with $new-content,
-		'replaced'
-	)
-	else (
-		update insert $new-content into $parent,
-		'inserted'
-	)
+	let $doc := root($node)
+	return (
+  	if (exists($node))
+  	then (
+  	  if ($node/@xml:id)
+  	  then resp:remove($node)
+  	  else (),
+  		update replace $node with $new-content,
+  		'replaced'
+  	)
+  	else (
+  		update insert $new-content into $parent,
+  		'inserted'
+  	),
+  	if ($new-content/@xml:id)
+  	then
+  	  resp:add($doc//id($new-content/@xml:id), 
+  	    "editor", app:auth-user(), "location value")
+  	else ()
+  )
 };
 
 (:~ if $node exists, replace its value with $new-content.
@@ -301,19 +314,34 @@ declare function data:update-value-or-insert(
 	$wrapper as element(),
 	$new-content as item()
 	) as xs:string {
-	if (exists($node))
-	then (
-		update value $node with $new-content,
-		'replaced'
-	)
-	else (
-		update insert 
-			element {node-name($wrapper)} {
-				$wrapper/@*,
-				$new-content
-			} into $parent,
-		'inserted'
-	)
+	let $doc := (root($node), root($parent))[1]
+	return 
+  	if (exists($node))
+  	then (
+  	  for $n in $node/descendant::*[@xml:id]
+  	  return
+  	    resp:remove($n),
+  		update value $node with $new-content,
+  		let $id := $doc//id(($new-content, $node)/@xml:id[1])
+  		where exists($id)
+  		return
+  		  resp:add($id, "editor", app:auth-user(), "value"),
+  		'replaced'
+  	)
+  	else 
+  	  let $xmlid := 
+  	    ($wrapper/@xml:id/string(), 
+        concat("_", util:uuid()))[1]
+      return (
+  		update insert 
+  			element {node-name($wrapper)} {
+  				$wrapper/(@* except @xml:id),
+  				attribute xml:id { $xmlid },
+  				$new-content
+  			} into $parent,
+  			resp:add($doc//id($xmlid), "editor", app:auth-user(), "location value"),
+  			'inserted'
+  		)
 };
 
 (:~ given an id, find which virtual resource to forward to :)
