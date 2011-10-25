@@ -50,7 +50,7 @@ declare function uri:absolutize-uri(
 	let $base-path as xs:anyURI := uri:uri-base-path($uri)
 	return
     xs:anyURI(
-    if ($base-path and (starts-with($uri, "http://") or doc-available($base-path)))
+    if ($base-path and (matches($uri, "^http[s]?://") or doc-available($base-path)))
     then $uri
     else resolve-uri($uri,base-uri($context) )
     )
