@@ -190,7 +190,7 @@
     <xsl:param name="uri" as="xs:string"/>
     <xsl:param name="steps" as="xs:integer" select="func:follow-steps($context, -1)"/>
     
-    <xsl:variable name="result" as="element()*">
+    <xsl:variable name="result" as="node()*">
       <xsl:apply-templates select="func:follow-uri($uri, $context, $steps)" 
         mode="#current"/>
     </xsl:variable>
