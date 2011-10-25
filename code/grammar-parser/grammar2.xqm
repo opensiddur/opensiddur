@@ -38,7 +38,6 @@ xquery version "1.0";
  : Copyright 2010-2011 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
- : $Id: grammar2.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $
  :)
 module namespace grammar="http://jewishliturgy.org/transform/grammar";
 
@@ -365,7 +364,7 @@ declare function grammar:p-choice(
   	$result/self::r:choice-match[not(r:no-match)]
   let $match-length as xs:integer* :=
   	for $s in $successful-matches
-  	let $match-element as element()* := $s/r:*[not(name()=('r:remainder'))]
+  	let $match-element as element()* := $s/(r:* except r:remainder)
   	let $max-difference as xs:integer? :=
     	xs:integer(max($match-element//@end) - min($match-element//@begin))
   	return ($max-difference, 0)[1]
@@ -402,7 +401,7 @@ declare function grammar:p-termRef(
   		$string-position)
   let $matched-part as xs:string :=
   	string-join(
-    	$result/self::* except $result/self::r:remainder
+    	$result/(self::* except self::r:remainder)
     	,'')
   return (
   	local:chain-next(
