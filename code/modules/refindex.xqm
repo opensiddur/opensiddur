@@ -151,8 +151,11 @@ declare function ridx:make-index-entries(
   let $element := $rattr/parent::element()
   let $ptr-node-id := util:node-id($element)
   let $type := ($element, $element/(ancestor::tei:linkGrp|ancestor::tei:joinGrp)[1])[1]/@type/string()
-  for $follow at $n in tokenize($rattr/string(), "\s+")[not(matches(., "^http[s]?://"))]
-  let $returned := uri:follow-uri($follow, $element, uri:follow-steps($element))
+  for $follow at $n in tokenize($rattr/string(), "\s+")
+  let $returned := 
+    if (matches($follow, "^http[s]?://"))
+    then ()
+    else uri:follow-uri($follow, $element, uri:follow-steps($element))
   for $followed in $returned
   where $followed/@xml:id
   return
