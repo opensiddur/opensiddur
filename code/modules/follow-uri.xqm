@@ -271,28 +271,72 @@ declare function uri:follow-cached-uri(
   )
 };
 
+(:~ faster routine to follow a pointer one step
+ : Only works with shorthand pointers and #range() and 
+ : does not support caching
+ :)
+declare function uri:fast-follow(
+  $uri as xs:string,
+  $context as node(),
+  $steps as xs:integer
+  ) as node()* {
+  let $full-uri as xs:anyURI :=
+    uri:absolutize-uri($uri, $context)
+  let $base-path as xs:anyURI := 
+    uri:uri-base-path($full-uri)
+  let $fragment as xs:anyURI := 
+    uri:uri-fragment(string($full-uri))
+  let $document as document-node()? := doc($base-path)
+  let $pointer-destination as node()* :=
+    if ($fragment) 
+    then 
+      uri:follow(
+        if (starts-with($fragment, "range("))
+        then 
+          let $left := 
+            $document//id(substring-before(substring-after($fragment, "("), ","))
+          let $right := 
+            $document//id(substring-before(substring-after($fragment, ","), ")"))
+          return ($left | ($left/following::* intersect $right/preceding::*) | $right)
+        else $document//id($fragment), 
+        $steps, (), true()
+      )
+    else $document
+  return $pointer-destination
+};
+
 declare function uri:follow-tei-link(
 	$context as element()
 	) as node()* {
-	uri:follow-tei-link($context, -1, ())
+	uri:follow-tei-link($context, -1, (), ())
 };
 
 declare function uri:follow-tei-link(
 	$context as element(),
 	$steps as xs:integer
 	) as node()* {
-	uri:follow-tei-link($context, $steps, ())
+	uri:follow-tei-link($context, $steps, (), ())
+};
+
+declare function uri:follow-tei-link(
+  $context as element(),
+  $steps as xs:integer,
+  $cache-type as xs:string?
+  ) as node()* {
+  uri:follow-tei-link($context, $steps, $cache-type, ())
 };
 
 (:~ Handle the common processing involved in following TEI links
  : @param $context Link to follow
  : @param $steps Specifies the maximum number of steps to evaluate.  Negative for infinity (default)
  : @param $cache-type Specifies the cache type to use (eg, fragmentation).  Empty for none (default)
+ : @param $fast use the fast follow algorithm (default false())
  :)
 declare function uri:follow-tei-link(
 	$context as element(),
   $steps as xs:integer,
-  $cache-type as xs:string?
+  $cache-type as xs:string?,
+  $fast as xs:boolean?
 	) as node()* {
   let $targets as xs:string+ := 
     tokenize(string($context/(@target|@targets)),'\s+')
@@ -302,11 +346,15 @@ declare function uri:follow-tei-link(
     	if ($steps = 0)
     	then $context
     	else 
-    		(: evaluate='all' or nonexistent :)
-        uri:follow-cached-uri(
-        	$t, $context, 
-          uri:follow-steps($context, $steps), 
-          $cache-type)
+    	  if ($fast)
+    	  then
+    	    uri:fast-follow($t, $context, 
+    	      uri:follow-steps($context, $steps))
+    	  else
+          uri:follow-cached-uri(
+          	$t, $context, 
+            uri:follow-steps($context, $steps), 
+            $cache-type)
 };
 
 (:~ calculate the number of steps to pass to follow-cached-uri()
@@ -338,15 +386,25 @@ declare function uri:follow-steps(
 (:----------- follow a pointer mode -------------:)
 
 declare function uri:follow(
+  $node as node()*,
+  $steps as xs:integer,
+  $cache-type as xs:string?
+  ) as node()* {
+  uri:follow($node, $steps, $cache-type, ())
+};
+
+
+declare function uri:follow(
 	$node as node()*,
 	$steps as xs:integer,
-	$cache-type as xs:string?
+	$cache-type as xs:string?,
+	$fast as xs:boolean?
 	) as node()* {
 	for $n in $node
 	return
 		typeswitch($n)
-		case element(tei:join) return uri:tei-join($n, $steps, $cache-type)
-		case element(tei:ptr) return uri:tei-ptr($n, $steps, $cache-type) 
+		case element(tei:join) return uri:tei-join($n, $steps, $cache-type, $fast)
+		case element(tei:ptr) return uri:tei-ptr($n, $steps, $cache-type, $fast) 
 		default return $n
 };  
 
@@ -354,13 +412,14 @@ declare function uri:follow(
 declare function uri:tei-ptr(
 	$context as element(),
   $steps as xs:integer,
-  $cache-type as xs:string?
+  $cache-type as xs:string?,
+  $fast as xs:boolean?
   ) as node()* {
  	if ($context/@type = 'url')
  	then $context
  	else if ($context/parent::tei:joinGrp)
- 	then uri:tei-join($context, $steps, $cache-type)
- 	else uri:follow-tei-link($context, $steps, $cache-type) 
+ 	then uri:tei-join($context, $steps, $cache-type, $fast)
+ 	else uri:follow-tei-link($context, $steps, $cache-type, $fast) 
 };
 
 (:~ tei:join or tei:ptr acting as a join being followed.  
@@ -370,10 +429,11 @@ declare function uri:tei-ptr(
 declare function uri:tei-join(
 	$context as element(),
 	$steps as xs:integer,
-	$cache-type as xs:string?
+	$cache-type as xs:string?,
+	$fast as xs:boolean?
 	) as node()* {
 	let $joined-elements as element()* :=
-		for $pj in uri:follow-tei-link($context, $steps, $cache-type)
+		for $pj in uri:follow-tei-link($context, $steps, $cache-type, $fast)
     return
     	if ($pj/@scope='branches')
       then $pj/node()

@@ -155,7 +155,7 @@ declare function ridx:make-index-entries(
   let $returned := 
     if (matches($follow, "^http[s]?://"))
     then ()
-    else uri:follow-uri($follow, $element, uri:follow-steps($element))
+    else uri:fast-follow($follow, $element, uri:follow-steps($element))
   for $followed in $returned
   where $followed/@xml:id
   return
