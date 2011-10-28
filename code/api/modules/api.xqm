@@ -483,6 +483,11 @@ declare function api:tei-content-type(
   )
 };
 
+declare function api:xml-content-type(
+  ) as xs:string+ {
+  "text/xml", "application/xml"
+};
+
 (:~ output an API error and set the HTTP response code 
  : @param $status-code return status
  : @param $message return message (text preferred, but may contain XML)

@@ -104,6 +104,11 @@ declare function local:get-menu(
         ("POST"), 
         ("text/plain", "application/xml"),
         api:html-content-type()
+      ),
+      api:list-item("XML Navigation", concat($base, "/nav"),
+        ("GET"), 
+        api:html-content-type(),
+        ()
       )
 		}</ul>
 	return (

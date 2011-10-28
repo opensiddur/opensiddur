@@ -35,6 +35,7 @@ declare variable $local:subresource :=
 		<s xquery="{$local:query-base}/selection.xql">selection</s>
 		<s xquery="{$local:query-base}/literal.xql">front</s>
     <s xquery="{$local:query-base}/compile.xql">compile</s>
+    <s xquery="{$local:query-base}/nav.xql">nav</s>
 	</subresource>;
 
 if ($paths:debug)
@@ -98,7 +99,7 @@ return
 				<exist:add-parameter name="owner" value="{$owner}"/>
 			</exist:forward>
 		</exist:dispatch>
-	else if ($n-tokens = (3, 4, 5))
+	else if ($n-tokens = (3, 4, 5) or $sr = "nav")
 	then (
 		if ($paths:debug)
 		then
