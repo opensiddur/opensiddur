@@ -36,8 +36,30 @@ declare variable $local:entry-points := (
   "j:repository",
   "j:view"
   );
+  
+declare variable $local:accepted-formats := $nav:accept-content-types;
 
-declare function local:get(
+declare function local:get-tei(
+  $base as node(),
+  $format as xs:string
+  ) as element()? {
+  api:serialize-as($format[1]),
+  if ($format = "flat")
+  then ()
+  else 
+    if (count($base) = 1)
+    then $base
+    else 
+      (: in order to make valid XML, we need to wrap the
+       : returned elements
+       :)
+      element nav:wrapper { 
+        attribute n { count($base) },
+        $base
+      }
+};
+
+declare function local:get-xhtml(
 	$base as node()
 	) as element()? {
 	if ($base instance of document-node())
@@ -100,12 +122,15 @@ then
 	let $resource := request:get-parameter('resource', ())
 	let $subresource := request:get-parameter('subresource', ())
 	let $subsubresource := request:get-parameter('subsubresource', ())[.]
-	let $format := request:get-parameter('format', 'xhtml')
+	let $format := api:get-accept-format($local:accepted-formats)
 	let $doc := data:doc($purpose, $share-type, $owner, $resource, 'xml', ())
 	let $method := api:get-method() 
 	return (
-		if ($doc instance of document-node())
+	  if ($format instance of api:error)
+	  then $format
+		else if ($doc instance of document-node())
 		then
+		  let $format := api:simplify-format($format)
 		  let $nav-url-path := substring-after(request:get-uri(), "/nav")
 		  let $path := nav:url-to-xpath($nav-url-path)
 		  let $xpath := $path/nav:path/string()
@@ -116,7 +141,15 @@ then
 		    else $doc
 			return
 				if ($method = 'GET')
-				then local:get($base)
+				then 
+				  if (empty($base))
+				  then api:error(404, "Not found", $nav-url-path)
+				  else 
+				    if ($format = "xhtml")
+				    then local:get-xhtml($base)
+				    else if ($format = ("xml", "tei"))
+				    then local:get-tei($base, $format)
+				    else error(xs:QName("err:WTF"), "You should never get here")
 				else if ($method = "POST")
 				then local:post()
 				else local:delete()

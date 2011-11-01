@@ -246,6 +246,32 @@ declare function api:get-accept-format(
     else $negotiated-ct[1]
 };
 
+(:~ simplify the format returned by api:get-accept-format()
+ : return: 'tei' (request is specifically for tei), 'xml' (request is for generic xml), 
+ :  'xhtml' (request is for xhtml), 'none' (content negotiation failed)
+ :  subsequent strings include any parameters
+ :)
+declare function api:simplify-format(
+  $format as element(),
+  $default-format as xs:string
+  ) as xs:string+ {
+  if ($format instance of element(api:error))
+  then 'none'
+  else (
+    let $fmt-string := concat($format/api:major, "/", $format/api:minor)
+    return 
+      if ($fmt-string = ("text/xml", "application/xml"))
+      then "xml"
+      else if ($fmt-string = ("application/xhtml+xml", "text/html"))
+      then "xhtml"
+      else if ($fmt-string = ("application/tei+xml"))
+      then "tei"
+      else $default-format
+      , 
+    $format/api:param/@name/string()
+  )
+};
+
 declare function api:list(
 	$title as element(title),
 	$list-body as element(ul)+,
@@ -553,7 +579,7 @@ declare function api:serialize-as(
 			'method=text media-type=text/css'
 		else if ($ser = ('xml','tei'))
 		then
-			'method=xml media-type=application/xml omit-xml-declaration=no indent=yes'
+			concat('method=xml media-type=application/', 'tei+'[$ser="tei"] ,'xml omit-xml-declaration=no indent=yes')
 		else if ($ser = 'xhtml')
 		then
 		  'method=xhtml media-type=text/html omit-xml-declaration=no indent=yes'

@@ -44,49 +44,45 @@ declare function nav:url-to-xpath(
     let $url-tokens := tokenize($url, "/")[.]
     return
       element nav:xpath {
-        if ($url-tokens[1] = "id")
-        then 
-          let $id-token := $url-tokens[2] 
-          let $id := 
-            if (contains($id-token, ";"))
-            then substring-before($id-token, ";")
-            else $id-token
-          return (
-            element nav:path {
-              concat("id('", $id-token  , "')")
-            },
-            element nav:position {
-              substring-after($id-token, ";")
-            }
+        element nav:path { 
+          string-join((
+            if (starts-with($url, "/"))
+            then ""
+            else (),
+            let $n-tokens := count($url-tokens)
+            for $token at $n in $url-tokens
+            let $regex :=
+              concat("(([^.]+)\.)?([^,;@]+)(@([^,;]+))?(,(\d+))?", 
+                if ($n = count($url-tokens)) 
+                then "(;(\S+))?"
+                else "")
+            let $groups := text:groups($token, $regex)
+            let $prefix := $groups[3]
+            let $element := $groups[4]
+            let $type := $groups[6]
+            let $index := $groups[8]
+            return
+              if ($token = "-id")
+              then
+                if ($n = $n-tokens)
+                then "*[@xml:id]"
+                else concat("id('", $url-tokens[$n + 1] ,"')")
+              else if ($url-tokens[$n - 1] = "-id")
+              then () 
+              else
+                string-join((
+                  $prefix, ":"[$prefix], 
+                  if ($element castable as xs:integer)
+                  then ("*[", $element, "]")
+                  else $element, ("[@type='", $type, "']")[$type], ("[", $index, "]")[$index]
+                  ),"")
+                ),
+            "/"
           )
-        else (
-          element nav:path { 
-            string-join(("",
-              for $token at $n in $url-tokens
-              let $regex :=
-                concat("(([^.]+)\.)?([^,;@]+)(@([^,;]+))?(,(\d+))?", 
-                  if ($n = count($url-tokens)) 
-                  then "(;(\S+))?"
-                  else "")
-              let $groups := text:groups($token, $regex)
-              let $prefix := $groups[3]
-              let $element := $groups[4]
-              let $type := $groups[6]
-              let $index := $groups[8]
-              return string-join((
-                $prefix, ":"[$prefix], 
-                if ($element castable as xs:integer)
-                then ("*[", $element, "]")
-                else $element, ("[@type='", $type, "']")[$type], ("[", $index, "]")[$index]
-                ),"")
-              ),
-              "/"
-            )
-          },
-          element nav:position {
-            substring-after($url-tokens[last()], ";")
-          }
-        )
+        },
+        element nav:position {
+          substring-after($url-tokens[last()], ";")
+        }
       }
       
 };
@@ -94,30 +90,38 @@ declare function nav:url-to-xpath(
 declare function nav:xpath-to-url(
   $xpath as xs:string
   ) as xs:string {
-  if (matches($xpath, "^/?id\("))
-  then
-    let $groups := text:groups($xpath, "/?id\('([^']+)'\)")
-    return concat("/id/", $groups[2])
-  else
-    let $xpath-tokens := tokenize($xpath, "/")[.]
-    return
-      string-join(
-        for $token in $xpath-tokens
-        let $groups := text:groups($token, "(([^:]+):)?(([^\[\*]+)|(\*\[(\d+)\]))(\[@type='(\S*)'\])?(\[(\d+)\])?")
-        let $prefix := $groups[3]
-        let $element := $groups[5]
-        let $nelement := $groups[7]
-        let $type := $groups[9]
-        let $index := $groups[11]
-        return 
-          string-join(($prefix, "."[$prefix], $element, $nelement, ("@", $type)[$type], (",", $index)[$index]), ""),
+  let $xpath-tokens := tokenize($xpath, "/")[.]
+  return
+    string-join(
+      (
+      if (starts-with($xpath, "/"))
+      then ""
+      else (),
+      for $token in $xpath-tokens
+      let $groups := text:groups($token, "(([^:]+):)?(([^\[\*]+)|(\*\[(\d+)\]))(\[@type='(\S*)'\])?(\[(\d+)\])?")
+      let $prefix := $groups[3]
+      let $element := $groups[5]
+      let $nelement := $groups[7]
+      let $type := $groups[9]
+      let $index := $groups[11]
+      return
+        if (starts-with($token, "*[@xml:id]"))
+        then
+          "-id"
+        else if (matches($token, "^id\("))
+        then
+          let $id := text:groups($token, "id\('([^']+)'\)")
+          return concat("-id/", $id[2])
+        else
+          string-join(($prefix, "."[$prefix], $element, $nelement, ("@", $type)[$type], (",", $index)[$index]), "")
+      ),
         "/"
       )
 };
 
 (:~ return an XML hierarchy as an HTML navigation page :)
 declare function nav:xml-to-navigation(
-  $root as element(),
+  $root as element()+,
   $position as xs:string?
   ) as element() {
   api:serialize-as("xhtml"),
@@ -126,13 +130,17 @@ declare function nav:xml-to-navigation(
   return
     api:list(
       element title { attribute class {"service"}, 
-        string-join(($root/name(), ("(", $root/@xml:id, ")")[$root/@xml:id/string()]), "") },
-      let $children := $root/*
+        string-join(($root[1]/name(), ("(", $root/@xml:id, ")")[count($root) = 1 and $root/@xml:id/string()]), "") },
+      let $children := 
+        if (count($root) = 1)
+        then $root/*
+        else $root
       return
         element ul {
           if (empty($children))
           then
-            element li { attribute class {"literal-value"}, string($root) }
+            (element li { attribute class {"literal-value"}, string($root) })
+              [string($root)]
           else
             for $child in $children
             let $name := $child/name()
