@@ -16,18 +16,12 @@ declare variable $nav:accept-content-types :=
     (
       api:html-content-type(),
       api:xml-content-type(),
-      for $x in api:xml-content-type() 
-      return concat($x, "; flat"),
-      api:tei-content-type(), 
-      concat(api:tei-content-type(), "; flat")
+      api:tei-content-type()
     );
 declare variable $nav:request-content-types :=
     (
       api:xml-content-type(),
-      for $x in api:xml-content-type() 
-      return concat($x, "; flat"),
-      api:tei-content-type(), 
-      concat(api:tei-content-type(), "; flat")
+      api:tei-content-type()
     );
 
 (:~ convert a nav URL to an XPath expression
@@ -160,7 +154,7 @@ declare function nav:xml-to-navigation(
             for $child in $children
             let $name := $child/name()
             let $type := $child/@type/string()
-            let $n := count($child/preceding-sibling::*[name()=$name][($type, true())[1]]) + 1
+            let $n := count($child/preceding-sibling::*[name()=$name][if ($type) then (@type=$type) else true()]) + 1
             let $link := 
               concat($this-url, "/",
                 nav:xpath-to-url(

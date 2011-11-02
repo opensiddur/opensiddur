@@ -46,20 +46,17 @@ declare function local:get-tei(
   $base as node(),
   $format as xs:string
   ) as element()? {
-  api:serialize-as($format[1]),
-  if ($format = "flat")
-  then ()
+  api:serialize-as($format[1]), 
+  if (count($base) = 1)
+  then $base
   else 
-    if (count($base) = 1)
-    then $base
-    else 
-      (: in order to make valid XML, we need to wrap the
-       : returned elements
-       :)
-      element nav:wrapper { 
-        attribute n { count($base) },
-        $base
-      }
+    (: in order to make valid XML, we need to wrap the
+     : returned elements
+     :)
+    element nav:wrapper { 
+      attribute n { count($base) },
+      $base
+    }
 };
 
 declare function local:get-xhtml(
