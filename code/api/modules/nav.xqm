@@ -62,7 +62,9 @@ declare function nav:url-to-xpath(
             let $type := $groups[6]
             let $index := $groups[8]
             return
-              if ($token = "-id")
+              if ($n = $n-tokens and $token = "-compile")
+              then ()
+              else if ($token = "-id")
               then
                 if ($n = $n-tokens)
                 then "*[@xml:id]"
@@ -82,6 +84,9 @@ declare function nav:url-to-xpath(
         },
         element nav:position {
           substring-after($url-tokens[last()], ";")
+        },
+        element nav:activity {
+          $url-tokens[last()][.=("-compile")]
         }
       }
       
@@ -129,13 +134,23 @@ declare function nav:xml-to-navigation(
   let $this-url := request:get-uri()
   return
     api:list(
-      element title { attribute class {"service"}, 
+      element title { 
         string-join(($root[1]/name(), ("(", $root/@xml:id, ")")[count($root) = 1 and $root/@xml:id/string()]), "") },
       let $children := 
         if (count($root) = 1)
         then $root/*
         else $root
-      return
+      return (
+        element ul {
+          attribute class { "common" },
+          api:list-item(
+            element span { attribute class {"service"}, "compile" },
+            concat($this-url, "/-compile"),
+            "GET",
+            api:html-content-type(),
+            (), ()
+          )
+        },
         element ul {
           if (empty($children))
           then
@@ -170,7 +185,7 @@ declare function nav:xml-to-navigation(
                     concat($link, ";after")
                   )
                 )
-      },
+      }),
       0,
       false(),
       $methods,

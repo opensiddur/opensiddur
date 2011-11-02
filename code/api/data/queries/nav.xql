@@ -24,9 +24,12 @@ import module namespace scache="http://jewishliturgy.org/modules/scache"
 	at "/code/api/modules/scache.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "/code/api/modules/nav.xqm";
-	
+import module namespace icompile="http://jewishliturgy.org/modules/icompile"
+  at "/code/api/modules/icompile.xqm";
+  	
 declare default element namespace "http://www.w3.org/1999/xhtml";
 
+declare namespace err="http://jewishliturgy.org/errors";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 
@@ -126,15 +129,16 @@ then
 	let $doc := data:doc($purpose, $share-type, $owner, $resource, 'xml', ())
 	let $method := api:get-method() 
 	return (
-	  if ($format instance of api:error)
+	  if ($format instance of element(api:error))
 	  then $format
 		else if ($doc instance of document-node())
 		then
-		  let $format := api:simplify-format($format)
+		  let $format := api:simplify-format($format, "xml")
 		  let $nav-url-path := substring-after(request:get-uri(), "/nav")
 		  let $path := nav:url-to-xpath($nav-url-path)
 		  let $xpath := $path/nav:path/string()
 		  let $position := $path/nav:position/string()
+		  let $activity := $path/nav:activity/string()
 		  let $base := 
 		    if ($xpath)
 		    then util:eval(concat("$doc/", $xpath))
@@ -145,7 +149,14 @@ then
 				  if (empty($base))
 				  then api:error(404, "Not found", $nav-url-path)
 				  else 
-				    if ($format = "xhtml")
+				    if ($activity = "-compile")
+				    then
+				      icompile:compile(
+				        $base, 
+				        false(),
+				        $format = "xhtml"
+				      )
+				    else if ($format = "xhtml")
 				    then local:get-xhtml($base)
 				    else if ($format = ("xml", "tei"))
 				    then local:get-tei($base, $format)
