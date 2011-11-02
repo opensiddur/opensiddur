@@ -30,7 +30,13 @@ declare function debug:debug(
 	let $xmsg :=
 		element { $level-strings[min(($level, count($level-strings)))] } {
 			element source { $source},
-			element message { $message }
+			element message { 
+			  for $m in $message
+			  return 
+			   if ($m instance of attribute())
+			   then concat("attribute(", $m/name(), ")=", $m/string())
+			   else $m
+			}
 		}
 	let $source-level := 
 	  (
