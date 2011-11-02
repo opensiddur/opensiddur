@@ -15,7 +15,7 @@
     <xd:short>intermediate-links mode: finds tei:ptr inside j:concurrent that would get "lost" if the links were followed.
     Insert them in the j:links section as tei:ptr's
     </xd:short>
-    <xd:copyright>Copyright 2010 Efraim Feinstein (LGPL 3+)</xd:copyright>
+    <xd:copyright>Copyright 2010-2011 Efraim Feinstein (LGPL 3+)</xd:copyright>
     <xd:detail>
         <p>This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU Lesser General Public License as published by
@@ -44,7 +44,7 @@
       <xsl:copy-of select="@*"/>
       <xsl:choose>
         <xsl:when test="empty(j:links)">
-          <xsl:variable name="int-links" as="element(tei:ptr)*">
+          <xsl:variable name="int-links" as="element()*">
             <xsl:apply-templates select="//j:concurrent" mode="intermediate-links"/>
           </xsl:variable>
           <xsl:if test="exists($int-links)">
@@ -86,5 +86,20 @@
       </xsl:if>
       <xsl:sequence select="@* except (@xml:id, @xml:base)"/>
     </tei:ptr>
+  </xsl:template>
+  
+  <xd:doc>
+  	<xd:short>views disappear in the concurrency process, make them 
+  	point the something resembling a view</xd:short>
+  </xd:doc>
+  <xsl:template match="j:view[@xml:id]|j:selection[@xml:id]" mode="intermediate-links">
+  	<tei:join jx:id="{@xml:id}" result="{name()}" 
+  		target="{string-join(for $x in */@xml:id return concat('#', $x),' ')}"
+  	  >
+  	  <xsl:if test="base-uri(.) ne (//j:links,//tei:TEI)[1]/base-uri()">
+        <xsl:attribute name="xml:base" select="base-uri(.)"/>
+      </xsl:if>
+	  <xsl:sequence select="@* except (@xml:id, @xml:base)"/>
+  	</tei:join>
   </xsl:template>
 </xsl:stylesheet>

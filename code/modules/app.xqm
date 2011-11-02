@@ -16,6 +16,8 @@ import module namespace session="http://exist-db.org/xquery/session";
 import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 import module namespace util="http://exist-db.org/xquery/util";
 
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
 	at "xmldb:exist:///code/modules/paths.xqm";
 
@@ -411,12 +413,15 @@ declare function app:transform-xslt(
     else app:concat-path($paths:rest-prefix, $xslt-uri)
   let $user := (app:auth-user(), $parameters[@name='user']/@value/string())[1]
   let $password := (app:auth-password(), $parameters[@name='password']/@value)[1]
-  let $absolute-uri := 
-    concat('xmldb:exist://', 
-      if ($user)
-      then concat($user,':',$password,'@')
-      else '', 
-      $document-uri)
+  let $absolute-uri :=
+    if ($document-uri instance of xs:anyAtomicType)
+    then
+      concat('xmldb:exist://', 
+        if ($user)
+        then concat($user,':',$password,'@')
+        else '', 
+        $document-uri)
+    else ()
   let $xslt :=
     <xsl:stylesheet 
       xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
@@ -442,10 +447,14 @@ declare function app:transform-xslt(
       </xsl:template>
     </xsl:stylesheet>
   return (
-  	if ($paths:debug)
-  	then
-    	util:log-system-out(('Running XSLT (as ', $user,':',$password,'=',xmldb:get-current-user(),') ', $xslt-uri-abs, ' on ', if ($document-uri instance of node()) then 'node' else $absolute-uri))
-    else (),
+    debug:debug($debug:detail, 
+      "app", 
+      string-join(("Running XSLT (as ", $user, ":", $password, "=", 
+        xmldb:get-current-user(), ") ", 
+        $xslt-uri-abs, " on ", 
+        if ($document-uri instance of node()) 
+        then "node" 
+        else $absolute-uri), "")), 
     transform:transform(<app:root/>, $xslt, (
     	if ($parameters or $user) 
     	then 
