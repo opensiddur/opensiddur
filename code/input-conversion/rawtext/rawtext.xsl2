@@ -433,13 +433,16 @@ The previous match was:
           <xsl:with-param name="body" as="element(tei:body)" tunnel="yes">
             <tei:body>
               <j:concurrent>
+              	<xsl:attribute name="xml:id" select="'concurrent'"/>
                 <xsl:variable name="selection-index" as="element(tei:ptr)+">
                   <xsl:apply-templates select="descendant::r:FileCommand" mode="index-selection"/>
                 </xsl:variable>
                 <j:selection>
+               	  <xsl:attribute name="xml:id" select="'selection'"/>
                   <xsl:sequence select="$selection-index"/>
                 </j:selection>
                 <j:view type="div">
+                  <xsl:attribute name="xml:id" select="'view_div'"/>
                   <tei:div>
                     <xsl:attribute name="xml:id" select="'main'"/>
                     <tei:ab>
@@ -695,9 +698,11 @@ The previous match was:
                     <xsl:apply-templates select="$repository-content" mode="selection"/>
                   </xsl:variable>
                   <j:selection>
+                  	<xsl:attribute name="xml:id" select="'selection'"/>
                     <xsl:sequence select="$selection-content"/>
                   </j:selection>
                   <j:view type="div">
+                  	<xsl:attribute name="xml:id" select="'view_div'"/>
                     <tei:div>
                       <xsl:attribute name="xml:id" select="'main'"/>
                       <xsl:for-each-group select="$grouped-segments" group-by="@section">
@@ -733,6 +738,7 @@ The previous match was:
                     </tei:div>
                   </j:view>
                   <j:view type="p">
+                  	<xsl:attribute name="xml:id" select="'view_p'"/>
                     <xsl:for-each-group select="$grouped-segments[@p]" 
                       group-by="xs:integer(@p)">
                       <xsl:sort select="xs:integer(current-grouping-key())" data-type="number" />
@@ -748,6 +754,7 @@ The previous match was:
                   </j:view>
                   <xsl:if test="$grouped-segments/@lg">
                     <j:view type="lg">
+                      <xsl:attribute name="xml:id" select="'view_lg'"/>
                       <xsl:for-each-group select="$grouped-segments[@lg]" group-by="@lg">
                         <tei:lg>
                           <xsl:attribute name="xml:id" select="concat('lg', current-grouping-key())"/>
@@ -767,6 +774,7 @@ The previous match was:
                   </xsl:if>
                   <xsl:if test="$grouped-segments/@verse">
                     <j:view type="verse">
+                      <xsl:attribute name="xml:id" select="'view_verse'"/>
                       <xsl:for-each-group select="$grouped-segments[@verse]" group-by="xs:integer(@chapter)">
                         <xsl:sort select="xs:integer(@chapter)" data-type="number" />
                         <xsl:for-each-group select="current-group()" group-by="xs:integer(@verse)">
@@ -793,6 +801,7 @@ The previous match was:
                   <!-- segments inside named content -->
                   <xsl:if test="$grouped-segments/@name">
                     <j:view type="ab">
+                      <xsl:attribute name="xml:id" select="'view_ab_named'"/>
                       <xsl:for-each-group select="$grouped-segments[@name]" group-by="@name">
                         <tei:ab>
                           <xsl:attribute name="xml:id" select="current-grouping-key()"/>
