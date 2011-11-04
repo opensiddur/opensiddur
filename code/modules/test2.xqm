@@ -134,7 +134,7 @@ declare function t:init-prolog($test as element(test)) {
          	), "&#x0a;"
         )
 	return
-		string-join(($imports, $vars, $test/../functions), '')
+		string-join(($imports, $vars, $test/ancestor::*/functions), '')
 };
 
 declare function t:test($result as item()*) {
