@@ -266,6 +266,8 @@ declare function api:simplify-format(
       then "xhtml"
       else if ($fmt-string = ("application/tei+xml"))
       then "tei"
+      else if ($fmt-string = ("text/css"))
+      then "css"
       else $default-format
       , 
     $format/api:param/@name/string()
@@ -563,33 +565,51 @@ declare function api:error-message(
 	api:error((), $message, $object)
 };
 
+declare function api:serialize-as(
+  $serialization as xs:string
+  ) {
+  api:serialize-as($serialization, ())
+};
+
 (:~ dynamically declare serialization options as txt, tei, xml, xhtml, or html (xhtml w/o indent)
  : @param $serialization type of serialization
+ : @param $accept-format result of api:get-accept-formats() - attempt to match content type to the requested one
  :)
 declare function api:serialize-as(
-	$serialization as xs:string
+	$serialization as xs:string,
+	$accept-format as element(api:content-type)?
 	) as empty() {
 	let $ser := lower-case($serialization)
+	let $accept-format-match := 
+    api:simplify-format($accept-format, "none")=$ser
+  let $media-type :=
+    if ($accept-format-match)
+    then concat($accept-format/api:major, "/", $accept-format/api:minor) 
+    else ()
 	let $options :=
 		if ($ser = ('txt', 'text'))
 		then
-			'method=text media-type=text/plain'
+			concat('method=text media-type=', ($media-type, 'text/plain')[1])
 		else if ($ser = 'css')
 		then 
-			'method=text media-type=text/css'
+			concat('method=text media-type=', ($media-type, 'text/css')[1])
 		else if ($ser = ('xml','tei'))
 		then
-			concat('method=xml media-type=application/', 'tei+'[$ser="tei"] ,'xml omit-xml-declaration=no indent=yes')
+			concat('method=xml omit-xml-declaration=no indent=yes media-type=', 
+			  ($media-type, 
+			  concat('application/', 'tei+'[$ser="tei"] ,'xml'))[1])
 		else if ($ser = 'xhtml')
 		then
-		  'method=xhtml media-type=text/html omit-xml-declaration=no indent=yes'
+		  concat('method=xhtml omit-xml-declaration=no indent=yes media-type=',
+		    ($media-type, 'text/html')[1])
 		 (:
         doctype-public="-//W3C//DTD&#160;XHTML&#160;1.1//EN"
         doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"'
         :)
     else if ($ser = 'html')
     then
-    	'method=xhtml media-type=text/html omit-xml-declaration=no indent=no'
+    	concat('method=xhtml omit-xml-declaration=no indent=no media-type=',
+    	  ($media-type, 'text/html')[1])
 		else
 			error(xs:QName('err:INTERNAL'),concat('Undefined serialization option: ', $serialization))
 	return
@@ -651,7 +671,9 @@ declare function api:tests(
   $test-source as xs:string
   ) as element()? {
   if (api:get-method() = "GET" and request:get-parameter("_test", ()))
-  then
+  then (
+    api:serialize-as("xhtml"),
     t:format-testResult(t:run-testSuite(doc($test-source)/*))
+  )
   else ()
 };
