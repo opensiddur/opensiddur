@@ -9,7 +9,8 @@ declare function apitest:clear() {
 };
 
 declare function apitest:get($uri as xs:string, $headers as element()*) {
-  httpclient:get(xs:anyURI(concat($apitest:server, $uri)), true(), $headers)
+  httpclient:get(xs:anyURI(concat($apitest:server, $uri)), true(), 
+    element headers { $headers })
 };
 
 declare function apitest:post($uri as xs:string, $headers as element()*, $content as item()) {
