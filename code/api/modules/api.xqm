@@ -516,6 +516,11 @@ declare function api:xml-content-type(
   "text/xml", "application/xml"
 };
 
+declare function api:text-content-type(
+  ) as xs:string+ {
+  "text/plain"
+};
+
 (:~ output an API error and set the HTTP response code 
  : @param $status-code return status
  : @param $message return message (text preferred, but may contain XML)
