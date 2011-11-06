@@ -268,6 +268,8 @@ declare function api:simplify-format(
       then "tei"
       else if ($fmt-string = ("text/css"))
       then "css"
+      else if ($fmt-string = ("text/plain"))
+      then "txt"
       else $default-format
       , 
     $format/api:param/@name/string()
@@ -654,7 +656,7 @@ declare function api:get-parameter(
     request:get-parameter($param, ()),
     let $method := api:get-method()
     let $data := api:get-data()
-    where $method = "POST"
+    where $method = ("POST", "PUT")
     return
       if ($data instance of xs:string and $allow-one-parameter)
       then $data

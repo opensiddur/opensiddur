@@ -320,9 +320,10 @@ declare function t:xpath($output as item()*, $xpath as node()) {
     return (
     	util:declare-namespace($prefix, $nsuri)
     ),
+    let $imports := string-join($xpath/ancestor::*/imports, " ")
     let $expr := $xpath/string()
     return
-    	util:eval(concat("$output/(", $expr, ")"))
+    	util:eval(concat($imports, " $output/(", $expr, ")"))
     (: ^ EDF: I don't understand why this code wasn't the code above
         if (matches($expr, "^\s*/")) then
             util:eval(concat("$output", $expr))
