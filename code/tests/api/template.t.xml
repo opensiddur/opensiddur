@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:http="http://expath.org/ns/http-client">
+  <suiteName>NAME ME</suiteName>
+  <description>
+    <p>Test SOMETHING</p>
+    <author>Efraim Feinstein</author>
+  </description>
+  <setup/>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
+  <imports>
+    import module namespace apitest="http://jewishliturgy.org/modules/apitest"
+      at "xmldb:exist:///code/tests/api/apitest.xqm";
+  </imports>
+  <TestSet>
+    <testName>HTTP GET</testName>
+    <setup/>
+    <imports>
+    </imports>
+    <functions>
+    </functions>
+    <tearDown/>
+    <test>
+      <task>GET</task>
+      <code><![CDATA[
+        apitest:get("***", <header name="Accept" value="application/xhtml+xml"/>)
+      ]]></code>
+      <class href="common.t.xml#SelfConsistentMenu"/> 
+      <class href="common.t.xml#Testing"/> 
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>HTTP PUT</testName>
+    <setup/>
+    <imports>
+    </imports>
+    <functions>
+    </functions>
+    <tearDown/>
+    <test>
+      <task>PUT</task>
+      <code><![CDATA[
+        apitest:put("***", (), <x/>)
+      ]]></code>
+      <class href="common.t.xml#SelfConsistentMenu"/> 
+      <class href="common.t.xml#Testing"/> 
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>HTTP POST</testName>
+    <setup/>
+    <imports>
+    </imports>
+    <functions>
+    </functions>
+    <tearDown/>
+    <test>
+      <task>PUT</task>
+      <code><![CDATA[
+        apitest:post("***", (), <x/>)
+      ]]></code>
+      <class href="common.t.xml#SelfConsistentMenu"/> 
+      <class href="common.t.xml#Testing"/> 
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>HTTP DELETE</testName>
+    <setup/>
+    <imports>
+    </imports>
+    <functions>
+    </functions>
+    <tearDown/>
+    <test>
+      <task>PUT</task>
+      <code><![CDATA[
+        apitest:delete("***", ())
+      ]]></code>
+      <class href="common.t.xml#SelfConsistentMenu"/> 
+      <class href="common.t.xml#Testing"/> 
+    </test>
+  </TestSet>
+</TestSuite>
