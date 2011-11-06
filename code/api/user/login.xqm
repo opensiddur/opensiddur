@@ -34,7 +34,7 @@ declare variable $login:test-source := "/code/tests/api/user/login.t.xml";
 declare function login:title(
   $uri as xs:anyAtomicType
   ) as xs:string {
-  "Login"
+  "Session based login"
 };
 
 declare function login:allowed-methods(

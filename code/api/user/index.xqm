@@ -10,7 +10,11 @@ module namespace index="http://jewishliturgy.org/api/user";
 
 import module namespace api="http://jewishliturgy.org/modules/api" 
 	at "/code/api/modules/api.xqm";
-
+import module namespace login="http://jewishliturgy.org/api/user/login"
+  at "login.xqm";
+import module namespace logout="http://jewishliturgy.org/api/user/logout"
+  at "logout.xqm";
+  
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 
 declare variable $index:allowed-methods := "GET";
@@ -76,30 +80,11 @@ declare function index:get() {
       api:serialize-as("xhtml", $accepted),
       let $user-name := request:get-parameter('user-name', ())
       let $base := '/code/api/user'
+      let $uri := request:get-uri()
       let $list-body := (
         <ul class="common">{
-          api:list-item(
-            <span>Session-based login</span>,
-            concat($base, "/login"),
-            ("GET","POST","PUT","DELETE"),
-            api:html-content-type(),
-            ( api:xml-content-type(), 
-              api:form-content-type(),
-              api:text-content-type()
-            ),
-            ()
-          ),
-          api:list-item(
-            <span>Session-based logout</span>,
-            concat($base, "/logout"),
-            ("GET", "POST", "DELETE"),
-            api:html-content-type(),
-            ( api:xml-content-type(), 
-              api:form-content-type(),
-              api:text-content-type()
-            ),
-            ()
-          )
+          login:list-entry(concat($base, "/login")),
+          logout:list-entry(concat($base, "/logout"))
         }</ul>,
         if ($user-name)
         then
