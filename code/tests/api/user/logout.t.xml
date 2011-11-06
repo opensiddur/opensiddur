@@ -19,14 +19,14 @@
     import module namespace apitest="http://jewishliturgy.org/modules/apitest"
       at "xmldb:exist:///code/tests/api/apitest.xqm";
   </imports>
-  <setup><![CDATA[
+  <setup><code><![CDATA[
     apitest:put("/code/api/user/login/testuser", 
       <header name="Accept" value="text/plain"/>, 
       "testuser")
-    ]]></setup>
-  <tearDown><![CDATA[ 
+    ]]></code></setup>
+  <tearDown><code><![CDATA[ 
   apitest:clear()
-  ]]></tearDown>
+  ]]></code></tearDown>
   <TestSet>
     <testName>HTTP GET while logged in</testName>
     <imports>
@@ -69,9 +69,9 @@
     </imports>
     <functions>
     </functions>
-    <tearDown><![CDATA[
+    <tearDown><code><![CDATA[
       apitest:clear()
-    ]]></tearDown>
+    ]]></code></tearDown>
     <test>
       <code><![CDATA[
       apitest:put("/code/api/user/logout", (), <x/>)

@@ -49,18 +49,18 @@
   </TestSet>
   <TestSet>
     <testName>HTTP GET while logged in</testName>
-    <setup><![CDATA[
+    <setup><code><![CDATA[
     apitest:put("/code/api/user/login/testuser", 
       <header name="Accept" value="text/plain"/>, 
       "testuser")
-    ]]></setup>
+    ]]></code></setup>
     <imports>
     </imports>
     <functions>
     </functions>
-    <tearDown><![CDATA[
+    <tearDown><code><![CDATA[
     apitest:clear()
-    ]]></tearDown>
+    ]]></code></tearDown>
     <test>
       <task>Accept text/plain...</task>
       <code><![CDATA[
@@ -78,9 +78,9 @@
     </imports>
     <functions>
     </functions>
-    <tearDown><![CDATA[
+    <tearDown><code><![CDATA[
       apitest:clear()
-    ]]></tearDown>
+    ]]></code></tearDown>
     <test>
       <task>Correct login and user name, content type text/plain</task>
       <code><![CDATA[
@@ -126,17 +126,17 @@
   </TestSet>
   <TestSet>
     <testName>HTTP DELETE while logged in</testName>
-    <setup><![CDATA[
+    <setup><code><![CDATA[
     apitest:put("/code/api/user/login/testuser", 
       <header name="Accept" value="text/plain"/>, 
       "testuser")
-    ]]></setup>
+    ]]></code></setup>
     <imports></imports>
     <functions>
     </functions>
-    <tearDown><![CDATA[
+    <tearDown><code><![CDATA[
     apitest:clear() 
-    ]]></tearDown>
+    ]]></code></tearDown>
     <test>
       <task>Attempt to delete login</task>
       <code><![CDATA[
