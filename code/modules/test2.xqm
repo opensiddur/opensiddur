@@ -64,6 +64,8 @@ at "java:org.exist.xquery.modules.xmldiff.XmlDiffModule";
 
 declare function t:setup-action($action) {
     typeswitch ($action)
+        case element(code) return
+            t:setup-run($action)
         case element(create-collection) return
             xdb:create-collection($action/@parent, $action/@name)
         case element(store) return
@@ -76,6 +78,10 @@ declare function t:setup-action($action) {
             xdb:remove($action/@collection, $action/@name)
         default return
             ()
+};
+
+declare function t:setup-run($action as element(code)) {
+    util:eval(concat(t:init-prolog($action), $action/string()))
 };
 
 declare function t:store($action as element(store)) {
@@ -116,7 +122,7 @@ declare function t:declare-variable($var as element(variable)) as item()? {
             util:serialize($children, ())
 };
 
-declare function t:init-prolog($test as element(test)) {
+declare function t:init-prolog($test as element()) {
 	let $imports := $test/ancestor::*/imports
 	let $vars :=
 	    string-join(
