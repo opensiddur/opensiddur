@@ -37,7 +37,7 @@ temp/get-blocks.xml: ../../code/input-conversion/1917JPS/get-blocks.xsl2 \
 temp/fix-chapter-numbers.xml: ../../code/input-conversion/1917JPS/fix-chapter-numbers.xsl2 \
 		temp/get-blocks.xml
 	../../lib/saxon -s temp/get-blocks.xml -o temp/fix-chapter-numbers.xml \
-		../../code/input-conversion/1917JPS/fix-chapter-number.xsl2
+		../../code/input-conversion/1917JPS/fix-chapter-numbers.xsl2
 
 # TODO: semi-final form (structured format organized by pages of PDF file):
 #Tanakh-JPS1917-pdf-pages.xml:

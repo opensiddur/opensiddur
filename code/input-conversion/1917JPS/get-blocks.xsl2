@@ -7,7 +7,7 @@ Sort each page into columns (i.e.,  columns, header, footer, and footnotes).
 This is done by analyzing the position of the text relative
 to the vertical line separating the columns.
 -->
-<xsl:stylesheet version="1.0"
+<xsl:stylesheet version="2.0"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
 		xmlns:str="http://exslt.org/strings">
   <xsl:output method="xml" version="1.0" indent="yes" />
@@ -43,7 +43,7 @@ to the vertical line separating the columns.
   <xsl:template match="page">
 
     <!-- select the vertical rect that divides columns -->
-    <xsl:variable name="splitter" select="rect[@w &lt; 2]" />
+    <xsl:variable name="splitter" select="rect[@w &lt; 2][1]" />
 
     <xsl:copy>
       <xsl:apply-templates select="@id" />
@@ -54,26 +54,25 @@ to the vertical line separating the columns.
       </xsl:element>    
 
       <xsl:variable name="splitter-top" select="$splitter/@y + $splitter/@h" />
-
       <xsl:element name="header">
 	<xsl:apply-templates select="*[@y &gt; $splitter-top]" />
       </xsl:element>
 
       <xsl:call-template name="column">
 	<xsl:with-param name="nodes" select="*[(@y &lt;= $splitter-top) and 
-				     (@y &gt;= $splitter/@y) and 
-				     (@x &lt;= $splitter/@x)]" />
+				     (@y &gt;= number($splitter/@y)) and 
+				     (@x &lt;= number($splitter/@x))]" />
       </xsl:call-template>
 
       <xsl:call-template name="column">
 	<xsl:with-param name="nodes" select="*[(@y &lt;= $splitter-top) and 
-				     (@y &gt;= $splitter/@y) and 
-				     (@x &gt; $splitter/@x)]" />
+				     (@y &gt;= number($splitter/@y)) and 
+				     (@x &gt; number($splitter/@x))]" />
 
       </xsl:call-template>
 
       <xsl:element name="footer">
-	<xsl:apply-templates select="*[@y &lt; $splitter/@y]" />
+	<xsl:apply-templates select="*[@y &lt; number($splitter/@y)]" />
       </xsl:element>
 
     </xsl:copy>
@@ -84,35 +83,19 @@ to the vertical line separating the columns.
     <xsl:element name="column">
       <xsl:variable name="footnote-splitter-y">
 	<xsl:choose>
-	  <xsl:when test="rect[@w &gt; 2]">
-	    <xsl:value-of select="rect[@w &gt; 2]/@y" />
+	  <xsl:when test="$nodes[(name() = 'rect') and (@w &gt; 2)]">
+	    <xsl:value-of select="$nodes[(name() = 'rect') and (@w &gt; 2)]/@y" />
 	  </xsl:when>
 	  <xsl:otherwise>
 	    <xsl:text>0</xsl:text>
 	  </xsl:otherwise>
 	</xsl:choose>
       </xsl:variable>
-      <xsl:apply-templates select="$nodes[@y &gt; $footnote-splitter-y]" />
+      <xsl:apply-templates select="$nodes[@y &gt; number($footnote-splitter-y)]" />
       <xsl:element name="footnotes">
-	<xsl:apply-templates select="$nodes[@y &lt; $footnote-splitter-y]" />
+	<xsl:apply-templates select="$nodes[@y &lt; number($footnote-splitter-y)]" />
       </xsl:element>
     </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="textline">
-    <!-- don't output if empty or whitespace only -->
-    <xsl:if test="normalize-space()">
-      <xsl:copy>
-	<xsl:apply-templates select="@* | *" />
-
-	<!-- xsl:variable name="linetext">
-	     <xsl:for-each select="text[1]">
-	     <xsl:call-template name="text" />
-	     </xsl:for-each>
-	     </xsl:variable -->
-	<!-- xsl:value-of select="normalize-space($linetext)" / -->
-      </xsl:copy>
-    </xsl:if>
   </xsl:template>
 
   <!-- TODO reuse this -->

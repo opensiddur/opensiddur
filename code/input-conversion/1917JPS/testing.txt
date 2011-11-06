@@ -4,11 +4,14 @@
 * Paragraphs (poetry) including within verses - example?
 * Parsha names
 * Section, books, minor books
-* Chapter numbers
+* Chapter numbers 
+** including multi-digit
 * Verse numbers
 * Verse number 1 (not explicitly shown)
 * Hebrew words
 * Small caps
 * Italics
 * Footnotes
-* Footnotes like a-text-a (or is that just 1985?)
+** footnotes in only one column
+** footnote reference numbers/links
+** Footnotes like a-text-a (or is that just 1985?)
