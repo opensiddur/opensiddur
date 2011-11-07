@@ -85,6 +85,17 @@ declare function t:setup-run($action as element(code)) {
     util:eval(concat(t:init-prolog($action), $action/string()))
 };
 
+(: return whether a test should run :)
+declare function t:if($condition as element(if)*) as xs:boolean {
+  empty($condition) or (
+  every $cond in $condition
+    satisfies (
+      not(normalize-space($cond)) or 
+        boolean(util:eval(concat(t:init-prolog($cond), $cond/string())))
+    )
+  )
+};
+
 declare function t:store($action as element(store)) {
     let $type := if ($action/@type) then $action/@type/string() else "application/xml"
     let $data :=
@@ -345,6 +356,8 @@ declare function t:run-testSuite($suite as element(TestSuite)) as element() {
 	let $copy := util:expand($suite)
 	let $as-user := ($copy/asUser/string(), "guest")[1]
 	let $password := ($copy/password/string(), "guest")[1]
+	let $if := t:if($copy/if) 
+	where $if 
 	return
 		<TestSuite>
 			{$copy/suiteName}
@@ -371,6 +384,8 @@ declare function t:run-testSet($set as element(TestSet)) {
     	else util:expand($set)
     let $as-user := ($copy/asUser/string(), "guest")[1]
     let $password := ($copy/password/string(), "guest")[1]
+    let $if := t:if($copy/if)
+    where $if
     return 
       system:as-user($as-user, $password,
         util:expand(
@@ -378,7 +393,7 @@ declare function t:run-testSet($set as element(TestSet)) {
            {$copy/testName}
            {$copy/description}
            {
-               for $test at $p in $copy/test[empty(@ignore) or @ignore = "no"]
+               for $test at $p in $copy/test[empty(@ignore) or @ignore = "no"][t:if(if)]
                let $null := t:setup($copy/setup)
                let $result :=  t:run-test($test, $p)
                let $null := t:tearDown($copy/tearDown)
