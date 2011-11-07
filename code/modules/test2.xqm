@@ -12,6 +12,7 @@ xquery version "1.0";
  : * namespace change to avoid conflict with the original version
  :
  : * allow setup to be optional (not all tests require a setup)
+ : ** allow setup to include code
  : 
  : * add a top-level TestSuite element to contain multiple TestSet elements
  :  and a function t:run-testSuite()
@@ -342,18 +343,22 @@ declare function t:xpath($output as item()*, $xpath as node()) {
 (:~ Front-end to run a test suite :)
 declare function t:run-testSuite($suite as element(TestSuite)) as element() {
 	let $copy := util:expand($suite)
+	let $as-user := ($copy/asUser/string(), "guest")[1]
+	let $password := ($copy/password/string(), "guest")[1]
 	return
 		<TestSuite>
 			{$copy/suiteName}
 			{$copy/description}
 			{
-        let $null := t:setup($copy/setup)
-        let $result :=
-  				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
-	  			return
-		  			t:run-testSet($set)
-        let $null := t:tearDown($copy/tearDown)
-        return $result
+			  system:as-user($as-user, $password, 
+  			  let $null := t:setup($copy/setup)
+          let $result :=
+    				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
+  	  			return
+  		  			t:run-testSet($set)
+          let $null := t:tearDown($copy/tearDown)
+          return $result
+        )
 			}
 		</TestSuite>
 };
@@ -364,8 +369,12 @@ declare function t:run-testSet($set as element(TestSet)) {
     	if ($set/parent::TestSuite)
     	then $set
     	else util:expand($set)
-    let $null := t:setup($copy/setup)
-    let $result := util:expand(
+    let $as-user := ($copy/asUser/string(), "guest")[1]
+    let $password := ($copy/password/string(), "guest")[1]
+    return 
+      system:as-user($as-user, $password,
+        let $null := t:setup($copy/setup)
+        let $result := util:expand(
            <TestSet>
            {$copy/testName}
            {$copy/description}
@@ -376,8 +385,9 @@ declare function t:run-testSet($set as element(TestSet)) {
            }
            </TestSet>
         )
-    let $null := t:tearDown($copy/tearDown)
-    return $result
+        let $null := t:tearDown($copy/tearDown)
+        return $result
+      )
 };
 
 declare function local:pass-string($pass as xs:boolean) {
