@@ -14,7 +14,9 @@ import module namespace login="http://jewishliturgy.org/api/user/login"
   at "login.xqm";
 import module namespace logout="http://jewishliturgy.org/api/user/logout"
   at "logout.xqm";
-  
+import module namespace prof="http://jewishliturgy.org/api/user/profile"
+  at "profile.xqm";
+    
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 
 declare variable $index:allowed-methods := "GET";
@@ -89,23 +91,13 @@ declare function index:get() {
         if ($user-name)
         then
           <ul class="results">{
-            api:list-item(
-              <span>{$user-name}</span>,
-              concat($base, "/", $user-name),
-              ("GET","PUT"),
-              api:html-content-type(),
-              ( api:xml-content-type(), 
-                api:form-content-type(),
-                api:text-content-type()
-              ),
-              ()
-            )
+            prof:list-entry(concat($base, "/", $user-name))
           }</ul>
         else ()
       )
       return
         api:list(
-          <title>Open Siddur User API</title>,
+          <title>{index:title($uri)}</title>,
           $list-body,
           count($list-body/self::ul[@class="results"]/li),
           false(),
