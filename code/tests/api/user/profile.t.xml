@@ -18,6 +18,7 @@
     import module namespace apitest="http://jewishliturgy.org/modules/apitest"
       at "xmldb:exist:///code/tests/api/apitest.xqm";
   </imports>
+  <variable name="magicpassword"><![CDATA[apitest:magicpassword()]]></variable>
   <TestSet>
     <testName>HTTP GET, not logged in</testName>
     <setup/>
@@ -365,10 +366,9 @@
       <xpath desc="return status code 404">./@statusCode = 404</xpath>
     </test>
   </TestSet>
-  <!-- WARNING: without typing in the admin password, you cannot
-  test new user creation in this file! -->
-  <TestSet ignore="yes">
-    <testName>HTTP PUT to create a new user</testName>
+  <TestSet>
+    <testName>HTTP PUT to create a new user: will only run if the magicpassword request parameter is set</testName>
+    <if>apitest:if-magicpassword()</if>
     <setup/>
     <imports>
     </imports>
@@ -377,18 +377,27 @@
     <tearDown>
       <code><![CDATA[
         system:as-user("admin", $magicpassword, 
-          xmldb:remove("/group/testuser2"),
-          xmldb:delete-user("testuser2"),
-          sm:delete-group("testuser2")
-        )
+            (
+              xmldb:remove("/group/testuser2"),
+              xmldb:delete-user("testuser2"),
+              sm:delete-group("testuser2")
+            )
+          )
       ]]></code>
     </tearDown>
     <test>
-      <task>Attempt to create a new user</task>
+      <task>Attempt to create a new user sending XML</task>
       <code><![CDATA[
         apitest:put("/code/api/user/testuser2", (), <password>newpassword</password>)
       ]]></code>
-      <xpath desc="return status code 201">./statusCode = 201</xpath> 
+      <xpath desc="return status code 201">./@statusCode = 201</xpath> 
+    </test>
+    <test>
+      <task>Attempt to create a new user sending text</task>
+      <code><![CDATA[
+        apitest:put("/code/api/user/testuser2", (), "newpassword")
+      ]]></code>
+      <xpath desc="return status code 201">./@statusCode = 201</xpath> 
     </test>
   </TestSet>
   <TestSet>
