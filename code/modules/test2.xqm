@@ -373,20 +373,20 @@ declare function t:run-testSet($set as element(TestSet)) {
     let $password := ($copy/password/string(), "guest")[1]
     return 
       system:as-user($as-user, $password,
-        let $null := t:setup($copy/setup)
-        let $result := util:expand(
+        util:expand(
            <TestSet>
            {$copy/testName}
            {$copy/description}
            {
                for $test at $p in $copy/test[empty(@ignore) or @ignore = "no"]
-               return 
-                  t:run-test($test, $p)
+               let $null := t:setup($copy/setup)
+               let $result :=  t:run-test($test, $p)
+               let $null := t:tearDown($copy/tearDown)
+               return $result 
+               
            }
            </TestSet>
         )
-        let $null := t:tearDown($copy/tearDown)
-        return $result
       )
 };
 
