@@ -13,6 +13,8 @@ import module namespace api="http://jewishliturgy.org/modules/api"
   at "/code/api/modules/api.xqm";
 import module namespace umenu="http://jewishliturgy.org/api/user"
   at "/code/api/user/index.xqm";
+import module namespace dmenu="http://jewishliturgy.org/api/data"
+  at "/code/api/data/data.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 
@@ -77,12 +79,7 @@ declare function index:get(
       let $list-body := 
         <ul class="common">{
           umenu:list-entry(concat($base, "/user")),
-          api:list-item(
-            "Data",
-            concat($base, "/data"),
-            "GET",
-            api:html-content-type(), ()
-          )
+          dmenu:list-entry(concat($base, "/data"))
         }</ul>
       return (
         api:serialize-as('xhtml', $accepted),
