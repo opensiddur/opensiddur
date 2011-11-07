@@ -120,7 +120,7 @@ declare function ridx:reindex(
      : executes. The warning is irrelevant to a user.
      :)
     debug:debug($debug:warn, "refindex", "The admin password is blank. This is a bug in eXist, I think."),
-    system:as-user("admin", $magic:password, 
+    system:as-user("admin", "", 
       local:make-mirror-collection-path($ridx:ridx-collection, $collection)
     )
    }
