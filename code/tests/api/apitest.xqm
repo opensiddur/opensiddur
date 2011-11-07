@@ -1,6 +1,13 @@
 xquery version "1.0";
+(: API testing helper functions 
+ :
+ : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org> 
+ : Licensed under the GNU Lesser General Public License, version 3 or later
+ :)
 
 module namespace apitest="http://jewishliturgy.org/modules/apitest";
+
+declare namespace t="http://exist-db.org/xquery/testing/modified";
 
 declare variable $apitest:server := concat('http://', request:get-server-name(), ':', request:get-server-port());
 
@@ -79,3 +86,19 @@ declare function apitest:delete($uri as xs:string, $headers as element()*) {
     </headers>)
 };
 
+(:~ give a password (or an empty sequence) from the "magicpassword"
+ : request parameter if it can be found.
+ :)
+declare function apitest:magicpassword(
+  ) as xs:string? {
+  if (request:exists())
+  then request:get-parameter("magicpassword", ())
+  else ()
+};
+
+(:~ report back whether the magicpassword exists
+ :)
+declare function apitest:if-magicpassword(
+  ) as xs:boolean? {
+  boolean(apitest:magicpassword())
+};
