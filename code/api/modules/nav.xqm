@@ -65,6 +65,8 @@ declare function nav:url-to-xpath(
                 else concat("id('", $url-tokens[$n + 1] ,"')")
               else if ($url-tokens[$n - 1] = "-id")
               then () 
+              else if ($token = "...")
+              then ""
               else
                 string-join((
                   $prefix, ":"[$prefix], 
@@ -89,14 +91,14 @@ declare function nav:url-to-xpath(
 declare function nav:xpath-to-url(
   $xpath as xs:string
   ) as xs:string {
-  let $xpath-tokens := tokenize($xpath, "/")[.]
+  let $xpath-tokens := tokenize($xpath, "/") 
   return
     string-join(
       (
       if (starts-with($xpath, "/"))
       then ""
       else (),
-      for $token in $xpath-tokens
+      for $token at $n in $xpath-tokens
       let $groups := text:groups($token, "(([^:]+):)?(([^\[\*]+)|(\*\[(\d+)\]))(\[@type='(\S*)'\])?(\[(\d+)\])?")
       let $prefix := $groups[3]
       let $element := $groups[5]
@@ -104,7 +106,12 @@ declare function nav:xpath-to-url(
       let $type := $groups[9]
       let $index := $groups[11]
       return
-        if (starts-with($token, "*[@xml:id]"))
+        if (not($token))  
+        then
+         (: // tokenizes to an empty token, but at the beginning of the string, 
+          an empty token means the path began with / :)
+          "..."[$n > 1]
+        else if (starts-with($token, "*[@xml:id]"))
         then
           "-id"
         else if (matches($token, "^id\("))
