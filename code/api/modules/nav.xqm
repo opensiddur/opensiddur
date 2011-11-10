@@ -7,10 +7,18 @@ module namespace nav = 'http://jewishliturgy.org/modules/nav';
 
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "api.xqm";
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "xmldb:exist:///code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "xmldb:exist:///code/modules/debug.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml";
+
+declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
+declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
+declare namespace rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+declare namespace cc="http://web.resource.org/cc/";
 
 declare variable $nav:accept-content-types :=
     (
@@ -23,6 +31,76 @@ declare variable $nav:request-content-types :=
       api:xml-content-type(),
       api:tei-content-type()
     );
+
+(: these are path shortcuts to specific places
+ : note that they are expected to be in a string-join(*, "/")
+ : so / => //
+ :)
+declare variable $nav:shortcuts :=
+  <nav:shortcuts>
+    <nav:shortcut path="..." to=""/>
+    <nav:shortcut path="-selection" to="/j:selection">
+      <nav:name>Selection</nav:name>
+    </nav:shortcut>
+    <nav:shortcut path="-repository" to="/j:repository">
+      <nav:name>Repository</nav:name>
+    </nav:shortcut>
+    <nav:shortcut path="-license" to="/tei:availability">
+      <nav:name>License</nav:name>
+    </nav:shortcut>
+    <nav:shortcut path="-concurrent" to="/j:concurrent">
+      <nav:name>Concurrent</nav:name>
+    </nav:shortcut>
+    <nav:shortcut path="-view" to="/j:view">
+      <nav:name>Views</nav:name>
+    </nav:shortcut>
+    <nav:shortcut path="-lang" to="tei:TEI/@xml:lang">
+      <nav:name>Primary language</nav:name>
+    </nav:shortcut>
+    <nav:shortcut path="-title" to="/tei:title[@type='main']">
+      <nav:name>Title</nav:name>
+    </nav:shortcut>
+    <nav:shortcut path="-subtitle" to="/tei:title[@type='sub']">
+      <nav:name>Subtitle</nav:name>
+    </nav:shortcut> 
+  </nav:shortcuts>;
+
+declare function nav:sequence-to-api-path(
+  $node as node()*
+  ) as xs:string* {
+  for $n in $node
+  let $doc := root($n)
+  let $doc-uri := document-uri($doc)
+  let $purpose := tokenize($doc-uri, "/")[5]
+  let $doc-name := replace(util:document-name($doc), "\.[^.]+$", "")
+  return
+    concat("/code/api/data/", $purpose, "/", $doc-name, 
+      if ($n instance of document-node())
+      then ""
+      else concat("/", nav:xpath-to-url(app:xpath($n))))
+};
+
+(:~ given a complete navigation API URL, return a sequence :)
+declare function nav:api-path-to-sequence(
+  $url as xs:string
+  ) as node()* {
+  let $tokens := tokenize(replace($url, "^(/code/api/data)?/", ""), "/")
+  let $purpose := $tokens[1]
+  let $resource := concat($tokens[2], ".xml")[$tokens[2] != "..."]
+  let $docs :=
+    if ($resource)
+    then collection("/group")
+      (: the collection name is of the form (1)/db(2)/group(3)/[group](4)/[purpose](5) :)
+      [util:document-name(.)=$resource]
+      [tokenize(util:collection-name(.),"/")[5]=$purpose]
+    else collection("/group")[tokenize(util:collection-name(.),"/")[5]=$purpose]
+  let $xpath := nav:url-to-xpath(string-join(("",subsequence($tokens, 3)), "/"))/nav:path/string()
+  where exists($docs)
+  return
+    if ($xpath)
+    then util:eval(concat("$docs", $xpath))
+    else $docs
+};
 
 (:~ convert a nav URL to an XPath expression
  : if the URL contains any illegal characters, 
@@ -46,15 +124,17 @@ declare function nav:url-to-xpath(
             let $n-tokens := count($url-tokens)
             for $token at $n in $url-tokens
             let $regex :=
-              concat("(([^.]+)\.)?([^,;@]+)(@([^,;]+))?(,(\d+))?", 
+              concat("^(@)?(([^.]+)\.)?([^,;@]+)(@([^,;]+))?(,(\d+))?", 
                 if ($n = count($url-tokens)) 
                 then "(;(\S+))?"
                 else "")
             let $groups := text:groups($token, $regex)
-            let $prefix := $groups[3]
-            let $element := $groups[4]
-            let $type := $groups[6]
-            let $index := $groups[8]
+            let $is-attribute := $groups[2]
+            let $prefix := $groups[4]
+            let $element := $groups[5]
+            let $type := $groups[7]
+            let $index := $groups[9]
+            let $shortcut := $nav:shortcuts/*[@path=$token]/@to
             return
               if ($n = $n-tokens and $token = "-compile")
               then ()
@@ -65,15 +145,17 @@ declare function nav:url-to-xpath(
                 else concat("id('", $url-tokens[$n + 1] ,"')")
               else if ($url-tokens[$n - 1] = "-id")
               then () 
-              else if ($token = "...")
-              then ""
               else
-                string-join((
-                  $prefix, ":"[$prefix], 
-                  if ($element castable as xs:integer)
-                  then ("*[", $element, "]")
-                  else $element, ("[@type='", $type, "']")[$type], ("[", $index, "]")[$index]
-                  ),"")
+                if ($shortcut)
+                then string($shortcut)
+                else
+                  string-join((
+                    $is-attribute,
+                    $prefix, ":"[$prefix], 
+                    if ($element castable as xs:integer)
+                    then ("*[", $element, "]")
+                    else $element, ("[@type='", $type, "']")[$type], ("[", $index, "]")[$index]
+                    ),"")
                 ),
             "/"
           )
@@ -99,12 +181,13 @@ declare function nav:xpath-to-url(
       then ""
       else (),
       for $token at $n in $xpath-tokens
-      let $groups := text:groups($token, "(([^:]+):)?(([^\[\*]+)|(\*\[(\d+)\]))(\[@type='(\S*)'\])?(\[(\d+)\])?")
-      let $prefix := $groups[3]
-      let $element := $groups[5]
-      let $nelement := $groups[7]
-      let $type := $groups[9]
-      let $index := $groups[11]
+      let $groups := text:groups($token, "^(@)?(([^:]+):)?(([^\[\*]+)|(\*\[(\d+)\]))(\[@type='(\S*)'\])?(\[(\d+)\])?")
+      let $is-attribute := $groups[2]
+      let $prefix := $groups[4]
+      let $element := $groups[6]
+      let $nelement := $groups[8]
+      let $type := $groups[10]
+      let $index := $groups[12]
       return
         if (not($token))  
         then
@@ -125,7 +208,8 @@ declare function nav:xpath-to-url(
       )
 };
 
-(:~ return an XML hierarchy as an HTML navigation page :)
+(:~ return an XML hierarchy as an HTML navigation page
+ : TODO: this needs to be reworked :)
 declare function nav:xml-to-navigation(
   $root as element()+,
   $position as xs:string?
