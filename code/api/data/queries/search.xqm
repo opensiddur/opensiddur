@@ -278,7 +278,14 @@ declare function local:get-search-results(
   $uri as xs:string
   ) as item()* {
   let $q := request:get-parameter("q", ())
-  let $sequence := nav:api-path-to-sequence($uri)
+  let $seq := nav:api-path-to-sequence($uri)
+  let $sequence :=
+    typeswitch($seq)
+    case document-node()+ return 
+      if ($q)
+      then $seq//(tei:title|tei:seg)
+      else $seq
+    default return $seq
   return 
     if ($q)
     then
@@ -329,7 +336,7 @@ declare function search:get() {
             api:list(
               <title>{search:title($uri)}</title>,
               $list-body,
-              count($list-body/self::ul[@class="results"]/li),
+              count($results),
               false(),
               search:allowed-methods($uri),
               search:accept-content-type($uri),

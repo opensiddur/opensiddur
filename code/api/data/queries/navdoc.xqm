@@ -17,6 +17,7 @@ import module namespace navat="http://jewishliturgy.org/api/data/navat"
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 
 declare variable $navdoc:allowed-methods := ("GET","PUT","DELETE");
 declare variable $navdoc:accept-content-type := (
@@ -166,7 +167,7 @@ declare function navdoc:get() {
           <title>{navdoc:title($uri)}</title>,
           $list-body,
           count($list-body/self::ul[@class="results"]/li),
-          false(),
+          true(),
           navdoc:allowed-methods($uri),
           navdoc:accept-content-type($uri),
           navdoc:request-content-type($uri),

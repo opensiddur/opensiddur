@@ -20,6 +20,7 @@ import module namespace resp="http://jewishliturgy.org/modules/resp"
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace err="http://jewishliturgy.org/errors";
+declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 
 declare variable $navel:allowed-methods := ("GET","PUT","POST","DELETE");
 declare variable $navel:accept-content-type := (
@@ -90,6 +91,24 @@ declare function navel:supports-positional(
   return
     name($element)=("tei:ptr")
 };
+
+(:~ return true() if the element in question supports indexed
+ : full text search :)
+declare function navel:supports-search(
+  $item as item()
+  ) as xs:boolean {
+  let $element :=
+    if ($item instance of element())
+    then $item
+    else nav:api-path-to-sequence($item)
+  return
+    typeswitch ($element)
+    case element(tei:seg) return true()
+    case element(j:repository) return true()
+    case element(tei:title) return true()
+    default return false()
+};
+
 
 declare function navel:list-entry(
   $uri-or-element as item()
@@ -198,52 +217,63 @@ declare function local:get-noposition(
     )
     else (
       api:serialize-as("xhtml", $accepted),
+      let $results := ($root/@*, $children)
       let $list-body := (
         <ul class="common">{
           navel:position-links($uri)
         }</ul>,
-        <ul class="results">{
-          for $attribute in $root/@*
-          return navat:list-entry(concat($uri, "/@", nav:xpath-to-url(name($attribute)))),
+        let $start := request:get-parameter("start", 1)
+        let $max-results := request:get-parameter("max-results", $api:default-max-results)
+        let $show := subsequence($results, $start, $max-results)
+        return 
+        element ul {
+          attribute class { "results" },
+          for $result in $show
+          return
+            typeswitch($result)
+            case attribute()
+            return navat:list-entry(concat($uri, "/@", nav:xpath-to-url(name($result))))
+            case element() 
+            return
+              let $name := $result/name()
+              let $type := $result/@type/string()
+              let $n := count($result/preceding-sibling::*[name()=$name][if ($type) then (@type=$type) else true()]) + 1
+              let $link := 
+                concat($uri, "/",
+                  nav:xpath-to-url(
+                    string-join(($name,
+                      ("[@type='", $type, "']")[$type], 
+                      "[", $n, "]"),"")
+                  )
+                )
+              return 
+                api:list-item(
+                    element span { 
+                      attribute class {"service"}, 
+                      navel:title($result)
+                    }, 
+                    $link,
+                    navel:allowed-methods($result),
+                    navel:accept-content-type($result),
+                    navel:request-content-type($result),
+                    for $position in ("before", "after")
+                    let $position-link := concat($uri, ";", $position)
+                    return ($position, $position-link)
+                  )
+            default return (),
           if (empty($children))
           then
             (element li { attribute class {"content"}, string($root) })
               [string($root)]
-          else
-            for $child in $children
-            let $name := $child/name()
-            let $type := $child/@type/string()
-            let $n := count($child/preceding-sibling::*[name()=$name][if ($type) then (@type=$type) else true()]) + 1
-            let $link := 
-              concat($uri, "/",
-                nav:xpath-to-url(
-                  string-join(($name,
-                    ("[@type='", $type, "']")[$type], 
-                    "[", $n, "]"),"")
-                )
-              )
-            return 
-              api:list-item(
-                  element span { 
-                    attribute class {"service"}, 
-                    navel:title($child)
-                  }, 
-                  $link,
-                  navel:allowed-methods($child),
-                  navel:accept-content-type($child),
-                  navel:request-content-type($child),
-                  for $position in ("before", "after")
-                  let $position-link := concat($uri, ";", $position)
-                  return ($position, $position-link)
-                )
-        }</ul>
+          else ()
+        }
       )
       return
         api:list(
           <title>{navel:title($uri)}</title>,
           $list-body,
-          count($list-body/self::ul[@class="results"]/li),
-          false(),
+          count($results),
+          navel:supports-search($uri),
           navel:allowed-methods($uri),
           navel:accept-content-type($uri),
           navel:request-content-type($uri),
