@@ -4,6 +4,7 @@ fix-chapter-numbers.xsl2 for the OpenSiddur project.
 Copyright 2011 Marc Stober and licensed under the GNU LGPL.
 
 Put chapter number in the correct place in the flow of text.
+Also mark paragraph breaks.
 -->
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
@@ -47,6 +48,9 @@ Put chapter number in the correct place in the flow of text.
 	    </xsl:element>
 	  </xsl:if>
 	</xsl:for-each>
+	<xsl:if test="(@x = '46.824') or (@x ='234.070')">
+	  <xsl:element name="paragraph-break" />
+	</xsl:if>
       </xsl:if>	  
       <!-- finally output the text element -->
       <xsl:copy>

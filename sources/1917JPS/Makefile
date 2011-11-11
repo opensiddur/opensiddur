@@ -28,12 +28,14 @@ temp/bbox2xywh.xml: ../../code/input-conversion/1917JPS/bbox2xywh.xsl2 \
 
 # Step 2: Grouping text into blocks...
 # TODO: see TODO's in xslt
+# TODO: front matter tables
 temp/get-blocks.xml: ../../code/input-conversion/1917JPS/get-blocks.xsl2 \
 		temp/bbox2xywh.xml
 	../../lib/saxon -s temp/bbox2xywh.xml -o temp/get-blocks.xml \
 		../../code/input-conversion/1917JPS/get-blocks.xsl2
 
-# Step 3: Fixing chapter numbers...
+# Step 3: Fixing chapter numbers and marking paragraphs...
+# TODO: paragraphs in footnotes and elsewhere?
 temp/fix-chapter-numbers.xml: ../../code/input-conversion/1917JPS/fix-chapter-numbers.xsl2 \
 		temp/get-blocks.xml
 	../../lib/saxon -s temp/get-blocks.xml -o temp/fix-chapter-numbers.xml \
