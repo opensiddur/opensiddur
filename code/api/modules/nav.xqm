@@ -84,6 +84,7 @@ declare function nav:sequence-to-api-path(
 declare function nav:api-path-to-sequence(
   $url as xs:string
   ) as node()* {
+  let $excluded := "updated.xml"
   let $tokens := tokenize(replace($url, "^(/code/api/data)?/", ""), "/")
   let $purpose := $tokens[1]
   let $resource := concat($tokens[2], ".xml")[$tokens[2] != "..."]
@@ -93,7 +94,9 @@ declare function nav:api-path-to-sequence(
       (: the collection name is of the form (1)/db(2)/group(3)/[group](4)/[purpose](5) :)
       [util:document-name(.)=$resource]
       [tokenize(util:collection-name(.),"/")[5]=$purpose]
-    else collection("/group")[tokenize(util:collection-name(.),"/")[5]=$purpose]
+    else collection("/group")
+      [tokenize(util:collection-name(.),"/")[5]=$purpose]
+      [not(util:document-name(.)=$excluded)]
   let $xpath := nav:url-to-xpath(string-join(("",subsequence($tokens, 3)), "/"))/nav:path/string()
   where exists($docs)
   return

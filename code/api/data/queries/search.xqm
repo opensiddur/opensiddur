@@ -292,7 +292,14 @@ declare function local:get-search-results(
       for $result in $sequence[ft:query(., $q)]
       order by ft:score($result) descending
       return $result
-    else $sequence
+    else 
+      for $result in $sequence
+      order by (
+        typeswitch ($result)
+        case document-node() return string($result//tei:title[@type="main"])
+        default return string($result)
+      )
+      return $result
 };
 
 declare function search:get() {
