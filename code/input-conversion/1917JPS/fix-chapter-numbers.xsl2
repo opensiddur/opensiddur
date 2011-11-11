@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+fix-chapter-numbers.xsl2 for the OpenSiddur project.
+Copyright 2011 Marc Stober and licensed under the GNU LGPL.
+
+Put chapter number in the correct place in the flow of text.
+-->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+  <xsl:output method="xml" indent="yes"/>
+
+  <!-- default identity template -->
+  <xsl:template match="@* | node()">
+    <xsl:copy>
+      <xsl:apply-templates select="@* | node()"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="text">
+    <!-- for each text that is not chapter number -->
+    <xsl:if test="not(./@size='25.961')">
+      <!-- if the start of a new line -->
+      <xsl:variable name="preceding-y">
+	<xsl:choose>
+	  <xsl:when test="preceding-sibling::text">
+	    <xsl:value-of select="preceding-sibling::text[position()=1]/@y" />
+	  </xsl:when>
+	  <xsl:otherwise>
+	    <!-- if not preceded by text node, start of a new line, too -->
+	    <xsl:value-of select="0" />
+	  </xsl:otherwise>
+	</xsl:choose>
+      </xsl:variable>
+      <xsl:if test="abs($preceding-y - ./@y) &gt; 10">
+	<!-- xsl:comment>new line</xsl:comment -->
+	<!-- then first output the chapter number that should be here -->
+	<xsl:variable name="top">
+	  <xsl:value-of select="number(./@y + ./@h)" />
+	</xsl:variable>
+	<xsl:for-each select="../text[@size='25.961']">
+	  <xsl:variable name="ch-top">
+	    <xsl:value-of select="number(./@y + ./@h)" />
+	  </xsl:variable>
+	  <xsl:if test="abs($top - $ch-top) &lt; 5">
+	    <xsl:element name="text">
+	      <xsl:apply-templates select="@* | node()"/>
+	    </xsl:element>
+	  </xsl:if>
+	</xsl:for-each>
+      </xsl:if>	  
+      <!-- finally output the text element -->
+      <xsl:copy>
+	<xsl:apply-templates select="@* | node()"/>
+      </xsl:copy>
+    </xsl:if>
+  </xsl:template>
+
+</xsl:stylesheet>

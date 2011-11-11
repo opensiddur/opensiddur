@@ -18,7 +18,7 @@ all: Tanakh-JPS1917-canonical.xml
 # TODO: all the books/pages
 temp/pdf2txt.xml: Makefile
 	mkdir -p temp
-	pdf2txt.py -n -m 18 -p 16,17,18 -o temp/pdf2txt.xml Tanakh-JPS1917.pdf
+	pdf2txt.py -n -m 21 -p 16,17,18,19,20,21 -o temp/pdf2txt.xml Tanakh-JPS1917.pdf
 
 # Step 1: Extracting layout coordinates...
 temp/bbox2xywh.xml: ../../code/input-conversion/1917JPS/bbox2xywh.xsl2 \
