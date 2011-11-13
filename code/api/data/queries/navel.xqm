@@ -14,6 +14,8 @@ import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "nav.xqm";
 import module namespace navat="http://jewishliturgy.org/api/data/navat"
   at "navat.xqm";
+import module namespace expanded="http://jewishliturgy.org/api/data/expanded"
+  at "expanded.xqm";
 import module namespace resp="http://jewishliturgy.org/modules/resp"
   at "/code/modules/resp.xqm";
 
@@ -220,7 +222,11 @@ declare function local:get-noposition(
       let $results := ($root/@*, $children)
       let $list-body := (
         <ul class="common">{
-          navel:position-links($uri)
+          navel:position-links($uri),
+          if ($root instance of element(j:view) or
+            $root instance of element(j:concurrent))
+          then expanded:list-entry(concat($uri, "/-expanded"))
+          else ()
         }</ul>,
         let $start := request:get-parameter("start", 1)
         let $max-results := request:get-parameter("max-results", $api:default-max-results)
