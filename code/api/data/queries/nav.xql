@@ -17,12 +17,16 @@ import module namespace navel="http://jewishliturgy.org/api/data/navel"
   at "/code/api/data/queries/navel.xqm";
 import module namespace navat="http://jewishliturgy.org/api/data/navat"
   at "/code/api/data/queries/navat.xqm";
+import module namespace compile = "http://jewishliturgy.org/api/data/compile"
+  at "/code/api/data/queries/compile.xqm";
 import module namespace search="http://jewishliturgy.org/api/data/search"
   at "/code/api/data/queries/search.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml";
 
-let $sequence := nav:api-path-to-sequence(request:get-uri())
+let $uri := request:get-uri()
+let $sequence := nav:api-path-to-sequence($uri)
+let $activity := nav:url-to-xpath($uri)/nav:activity/string()
 return
   if (empty($sequence))
   then 
@@ -33,6 +37,9 @@ return
   else
     typeswitch($sequence)
     case element() return navel:go($sequence)
-    case document-node() return navdoc:go($sequence)
+    case document-node() return 
+      if ($activity = "-compiled")
+      then compile:go($sequence)
+      else navdoc:go($sequence)
     case attribute() return navat:go($sequence)
     default return api:error(404, "Not found")

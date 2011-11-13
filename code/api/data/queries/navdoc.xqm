@@ -14,6 +14,8 @@ import module namespace navel="http://jewishliturgy.org/api/data/navel"
   at "navel.xqm";
 import module namespace navat="http://jewishliturgy.org/api/data/navat"
   at "navat.xqm";
+import module namespace compile="http://jewishliturgy.org/api/data/compile"
+  at "compile.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -155,6 +157,16 @@ declare function navdoc:get() {
               $allowed-methods,
               $accept-content-types,
               $request-content-types,
+              ()
+            ),
+          let $compile-link := concat($uri, "/-compiled")
+          return
+            api:list-item(
+              <span>{compile:title($compile-link)}</span>,
+              $compile-link,
+              compile:allowed-methods($compile-link),
+              compile:accept-content-type($compile-link),
+              compile:request-content-type($compile-link),
               ()
             )
         }</ul>,

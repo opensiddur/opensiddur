@@ -62,7 +62,7 @@ declare variable $nav:shortcuts :=
     </nav:shortcut>
     <nav:shortcut path="-subtitle" to="/tei:title[@type='sub']">
       <nav:name>Subtitle</nav:name>
-    </nav:shortcut> 
+    </nav:shortcut>
   </nav:shortcuts>;
 
 declare function nav:sequence-to-api-path(
@@ -117,6 +117,7 @@ declare function nav:url-to-xpath(
     api:error(404, "The given URL contains illegal characters", $url)
   else 
     let $url-tokens := tokenize($url, "/")[.]
+    let $activities := ("-compiled", "-html", "-expanded")
     return
       element nav:xpath {
         element nav:path { 
@@ -139,7 +140,7 @@ declare function nav:url-to-xpath(
             let $index := $groups[9]
             let $shortcut := $nav:shortcuts/*[@path=$token]/@to
             return
-              if ($n = $n-tokens and $token = "-compile")
+              if ($n = $n-tokens and $token = $activities)
               then ()
               else if ($token = "-id")
               then
@@ -167,7 +168,8 @@ declare function nav:url-to-xpath(
           substring-after($url-tokens[last()], ";")
         },
         element nav:activity {
-          $url-tokens[last()][.=("-compile")]
+          (: last() should work here, but an eXist bug(?) is preventing it from doing so :)
+          $url-tokens[count($url-tokens)][.=$activities]
         }
       }
       
