@@ -386,11 +386,17 @@ declare function navel:go(
 };
 
 declare function navel:go(
-  $doc as element()
+  $e as element()
   ) {
   let $method := api:get-method()
+  let $activity := nav:url-to-xpath(request:get-uri())/nav:activity/string()
   return
-    if ($method = "GET")
+    if ($activity = "-expanded" and (
+      $e instance of element(j:view) or 
+      $e instance of element(j:concurrent)
+      ))
+    then expanded:go($e)
+    else if ($method = "GET")
     then navel:get()
     else if ($method = "PUT") 
     then navel:put()

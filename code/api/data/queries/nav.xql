@@ -19,8 +19,6 @@ import module namespace navat="http://jewishliturgy.org/api/data/navat"
   at "/code/api/data/queries/navat.xqm";
 import module namespace compile = "http://jewishliturgy.org/api/data/compile"
   at "/code/api/data/queries/compile.xqm";
-import module namespace expanded = "http://jewishliturgy.org/api/data/expanded"
-  at "/code/api/data/queries/expanded.xqm";
 import module namespace search="http://jewishliturgy.org/api/data/search"
   at "/code/api/data/queries/search.xqm";
 
@@ -39,14 +37,6 @@ return
     search:go($sequence)
   else
     typeswitch($sequence)
-    case element(j:view) return
-      if ($activity = "-expanded")
-      then expanded:go($sequence) 
-      else navel:go($sequence)
-    case element(j:concurrent) return
-      if ($activity = "-expanded")
-      then expanded:go($sequence) 
-      else navel:go($sequence)
     case element() return navel:go($sequence)
     case document-node() return 
       if ($activity = "-compiled")
