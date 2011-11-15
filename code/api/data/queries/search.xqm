@@ -69,7 +69,7 @@ declare function search:accept-content-type(
 declare function search:request-content-type(
   $uri as item()+
   ) as xs:string* {
-  if (is-root($uri))
+  if (local:is-root($uri))
   then
     (
       api:html-content-type(),

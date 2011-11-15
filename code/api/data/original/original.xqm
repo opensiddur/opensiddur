@@ -37,13 +37,19 @@ declare function local:make-resource-name(
   local:make-resource-name($title, 0)
 };
 
+declare function local:disallowed() {
+  (: This probably needs no changes :)
+  api:allowed-method($search:allowed-methods),
+  api:error((), "Method not allowed")
+};
+
 declare function local:make-resource-name(
   $title as xs:string,
   $n as xs:integer
   ) as xs:string {
   let $proposed := concat(encode-for-uri($title),"_"[$n > 0],xs:string($n)[$n > 0], ".xml")
   return
-    if (exists(collection("/group")[util:document-uri(.) = $proposed]))
+    if (exists(collection("/group")[util:document-name(.) = $proposed]))
     then local:make-resource-name($title, $n + 1)
     else $proposed
 };

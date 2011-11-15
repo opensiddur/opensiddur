@@ -45,9 +45,6 @@ declare variable $nav:shortcuts :=
     <nav:shortcut path="-repository" to="/j:repository">
       <nav:name>Repository</nav:name>
     </nav:shortcut>
-    <nav:shortcut path="-license" to="/tei:availability">
-      <nav:name>License</nav:name>
-    </nav:shortcut>
     <nav:shortcut path="-concurrent" to="/j:concurrent">
       <nav:name>Concurrent</nav:name>
     </nav:shortcut>
@@ -117,7 +114,7 @@ declare function nav:url-to-xpath(
     api:error(404, "The given URL contains illegal characters", $url)
   else 
     let $url-tokens := tokenize($url, "/")[.]
-    let $activities := ("-compiled", "-html", "-expanded")
+    let $activities := ("-compiled", "-html", "-expanded", "-license")
     return
       element nav:xpath {
         element nav:path { 

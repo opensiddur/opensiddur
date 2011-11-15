@@ -19,8 +19,11 @@ import module namespace navat="http://jewishliturgy.org/api/data/navat"
   at "/code/api/data/queries/navat.xqm";
 import module namespace compile = "http://jewishliturgy.org/api/data/compile"
   at "/code/api/data/queries/compile.xqm";
+import module namespace lic = "http://jewishliturgy.org/api/data/license"
+  at "/code/api/data/queries/license.xqm";
 import module namespace search="http://jewishliturgy.org/api/data/search"
   at "/code/api/data/queries/search.xqm";
+
 
 declare default element namespace "http://www.w3.org/1999/xhtml";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -41,6 +44,8 @@ return
     case document-node() return 
       if ($activity = "-compiled")
       then compile:go($sequence)
+      else if ($activity = "-license")
+      then lic:go($sequence)
       else navdoc:go($sequence)
     case attribute() return navat:go($sequence)
     default return api:error(404, "Not found")
