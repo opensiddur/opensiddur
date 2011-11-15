@@ -31,6 +31,8 @@ module namespace jobs="http://jewishliturgy.org/apps/jobs";
 
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "xmldb:exist:///code/modules/paths.xqm";
+import module namespace magic="http://jewishliturgy.org/magic"
+  at "xmldb:exist:///code/magic/magic.xqm";
 
 declare namespace err="http://jewishliturgy.org/errors";
 
@@ -129,7 +131,7 @@ declare function local:delete-jobs-user(
   $user as xs:string,
   $exclude-job-id as xs:integer?
   ) as empty() {
-  system:as-user('admin', $magicpassword, 
+  system:as-user('admin', $magic:password, 
     let $jobs := doc($jobs:queue-path)
     let $users := doc($jobs:users-path)
     where empty($jobs//(jobs:job[jobs:runas=$user][not(jobs:id=$exclude-job-id)]))
@@ -148,7 +150,7 @@ declare function local:add-jobs-user(
   }
   where not($user='guest')
   return
-    system:as-user('admin', $magicpassword, 
+    system:as-user('admin', $magic:password, 
       if (doc-available($jobs:users-path))
       then
         let $users := doc($jobs:users-path)/jobs:users
@@ -184,7 +186,7 @@ declare function jobs:enqueue(
   return 
     error(xs:QName('err:SECURITY'), concat("For security reasons, all scheduled tasks must be in the /db/code collection in the database, offender: ", $job//jobs:query))
   ,
-  system:as-user('admin', $magicpassword,
+  system:as-user('admin', $magic:password,
     let $defaulted := local:set-job-defaults($jobs, $user)
     let $queue := doc($jobs:queue-path)/jobs:jobs
     return (
@@ -222,7 +224,7 @@ declare function jobs:enqueue-unique(
   $password as xs:string
   ) as element(jobs:id)* {
   let $queue := 
-    system:as-user('admin', $magicpassword, doc($jobs:queue-path))
+    system:as-user('admin', $magic:password, doc($jobs:queue-path))
   for $job in $jobs
   let $signature := local:make-signature($job)
   let $identical-job := $queue//jobs:signature[. = $signature]
@@ -238,7 +240,7 @@ declare function jobs:enqueue-unique(
 declare function jobs:complete(
   $job-id as xs:integer
   ) as empty() {
-  system:as-user('admin', $magicpassword,
+  system:as-user('admin', $magic:password,
     let $queue := doc($jobs:queue-path)/jobs:jobs
     let $this-job := $queue/jobs:job[jobs:id=$job-id]  
     return (
@@ -253,7 +255,7 @@ declare function jobs:complete(
 declare function jobs:incomplete(
   $job-id as xs:integer
   ) as empty() {
-  system:as-user('admin', $magicpassword,
+  system:as-user('admin', $magic:password,
     let $queue := doc($jobs:queue-path)/jobs:jobs
     let $this-job := $queue/jobs:job[jobs:id=$job-id]  
     return (
@@ -269,7 +271,7 @@ declare function jobs:cancel(
   $job-id as xs:integer
   ) as empty() {
   let $queue := 
-    system:as-user('admin', $magicpassword,
+    system:as-user('admin', $magic:password,
       doc($jobs:queue-path))/jobs:jobs
   let $job := $queue//jobs:job[jobs:id=$job-id]
   where $job
@@ -291,7 +293,7 @@ declare function jobs:cancel(
       if (not($job/jobs:running) and not($has-external-dependencies))
       then 
         (: cancel this job :)
-        system:as-user('admin', $magicpassword,
+        system:as-user('admin', $magic:password,
           update delete $job
         )
       else (
@@ -325,7 +327,7 @@ declare function jobs:running(
   $job-id as xs:integer,
   $task-id as xs:integer?
   ) as empty() {
-  system:as-user('admin', $magicpassword,
+  system:as-user('admin', $magic:password,
     let $queue := doc($jobs:queue-path)/jobs:jobs
     return
       update insert element jobs:running { $task-id } into 
@@ -337,7 +339,7 @@ declare function jobs:running(
 declare function jobs:pop(
   ) as element(jobs:job)? {
   let $queue := 
-    system:as-user('admin', $magicpassword,
+    system:as-user('admin', $magic:password,
       doc($jobs:queue-path))/jobs:jobs
   let $max-priority := max($queue//jobs:priority[not(../jobs:running)])
   let $job-ids := $queue//jobs:id
@@ -366,10 +368,10 @@ declare function jobs:run(
       else ()
     let $password :=
       if ($runas='admin')
-      then $magicpassword
+      then $magic:password
       else 
         string(
-          system:as-user('admin', $magicpassword, 
+          system:as-user('admin', $magic:password, 
           doc($jobs:users-path)//jobs:user[jobs:name=$runas]/jobs:password
         ))
     return (
@@ -414,7 +416,7 @@ declare function jobs:run(
 declare function jobs:is-task-running(
   $task-id as xs:integer
   ) as xs:boolean {
-  system:as-user('admin', $magicpassword,
+  system:as-user('admin', $magic:password,
     some $j in doc($jobs:queue-path)//jobs:running satisfies $j=$task-id
   )
 };
@@ -427,7 +429,7 @@ declare function local:record-exception(
   $value as xs:string
   ) as empty() {
   let $job := 
-    system:as-user('admin', $magicpassword,
+    system:as-user('admin', $magic:password,
       doc($jobs:queue-path)//jobs:job[jobs:id=$job-id]
     )
   let $error-element := $jobs/jobs:error
@@ -459,7 +461,7 @@ declare function jobs:wait-in-queue(
   $job-id as xs:integer
   ) as xs:integer? {
   let $job := 
-    system:as-user('admin', $magicpassword,
+    system:as-user('admin', $magic:password,
       doc($jobs:queue-path)//jobs:job[jobs:id=$job-id]
     )
   let $priority := $job/jobs:priority/number()
