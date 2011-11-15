@@ -87,7 +87,7 @@ TEXMLOPTIONS ?= -e utf8
 #	--doc makes TEI documentation, 
 #	--docpdf makes PDF documentation (broken!)
 #	--dochtml makes HTML documentation
-ROMAOPTIONS ?= --xsl=$(LIBDIR)/tei/Stylesheets --localsource=$(LIBDIR)/tei/Vesta/resources/local/p5subset.xml --doc --dochtml 
+ROMAOPTIONS ?= --xsl=$(LIBDIR)/tei/Stylesheets --localsource=`absolutize $(LIBDIR)/tei/P5/p5subset.xml` --doc --dochtml 
 
 # XML validator options
 RELAXNGOPTIONS ?= $(TEIDOCDIR)/jlptei.rng
