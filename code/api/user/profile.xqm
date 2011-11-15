@@ -434,7 +434,8 @@ declare function prof:put() {
           if (api:require-authentication-as($user-name, true()))
           then (
             (: same user requests, so we change it :)
-            xmldb:change-user($user-name, $password, (), ())
+            xmldb:change-user($user-name, $password, (), ()),
+            response:set-status-code(204)
           )
           else 
             (: change password for a different user: that's an error :)

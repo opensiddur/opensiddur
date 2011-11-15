@@ -290,7 +290,7 @@
       <code><![CDATA[
         apitest:put("/code/api/user/testuser", (), "newpasswordtext")
       ]]></code>
-      <xpath desc="return status code 200">./@statusCode = 200</xpath>
+      <xpath desc="return status code 200">./@statusCode = 204</xpath>
       <xpath desc="testuser's password has been changed">xmldb:authenticate("/group/testuser", "testuser", "newpasswordtext")</xpath> 
     </test>
     <test>
@@ -298,7 +298,7 @@
       <code><![CDATA[
         apitest:put("/code/api/user/testuser", (), <password>newpassword</password>)
       ]]></code>
-      <xpath desc="return status code 200">./@statusCode = 200</xpath>
+      <xpath desc="return status code 200">./@statusCode = 204</xpath>
       <xpath desc="testuser's password has been changed">xmldb:authenticate("/group/testuser", "testuser", "newpassword")</xpath> 
     </test>
     <test>
