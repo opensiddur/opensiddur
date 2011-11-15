@@ -35,7 +35,7 @@ xquery version "1.0";
    (: replace the password in $magic:password :)
    let $code := util:binary-to-string(util:binary-doc("/code/magic/magic.xqm"))
    let $newcode :=
-     replace($code, '(variable\s+\$magic:password\s+:=\s+)""','$1"ADMINPASSWORD"')
+      replace($code, '(variable\s+\$magic:password\s+:=\s+)""','$1"ADMINPASSWORD"')
    return 
-     xmldb:store("/code/magic", "magic.xqm", $newcode, "application/xquery")
+    xmldb:store("/code/magic", "magic.xqm", $newcode, "application/xquery")
 )
