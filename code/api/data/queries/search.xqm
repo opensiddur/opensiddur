@@ -16,6 +16,8 @@ import module namespace navel="http://jewishliturgy.org/api/data/navel"
   at "navel.xqm";
 import module namespace navat="http://jewishliturgy.org/api/data/navat"
   at "navat.xqm";
+import module namespace orig="http://jewishliturgy.org/api/data/original"
+  at "/code/api/data/original/original.xqm";
   
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -40,10 +42,22 @@ declare function search:title(
     else $uri
 };
 
+(: the root can be used to POST to a new document :)
+declare function local:is-root(
+  $uri as item()+
+  ) as xs:boolean {
+  $uri instance of xs:anyAtomicType
+    and not(replace($uri, "^(/code/api/data)?/original(/)?", ""))
+};
+
 declare function search:allowed-methods(
   $uri as item()+
   ) as xs:string* {
-  $search:allowed-methods
+  if (local:is-root($uri))
+  then
+    ("GET", "POST")
+  else
+    $search:allowed-methods
 };
 
 declare function search:accept-content-type(
@@ -55,7 +69,15 @@ declare function search:accept-content-type(
 declare function search:request-content-type(
   $uri as item()+
   ) as xs:string* {
-  $search:request-content-type
+  if (is-root($uri))
+  then
+    (
+      api:html-content-type(),
+      api:xml-content-type(),
+      api:tei-content-type()
+    )
+  else
+    $search:request-content-type
 };
 
 declare function search:list-entry(
@@ -76,151 +98,6 @@ declare function local:disallowed() {
   api:allowed-method($search:allowed-methods),
   api:error((), "Method not allowed")
 };
-
-(:
-declare function local:get(
-  $path as xs:string
-  ) as item() {
-  let $path-parts := data:path-to-parts($path)
-  let $db-path := data:api-path-to-db($path)
-  let $top-level :=
-    if (string($path-parts/data:resource))
-    then 
-      if (doc-available($db-path)) 
-      then doc($db-path)
-      else api:error(404, "Document not found or inaccessible", $db-path)
-    else if (string($path-parts/data:owner))
-    then collection($db-path)
-    else
-       no owner, top identifiable level is share-type 
-      collection(concat('/',$path-parts/data:share-type))
-  let $collection :=
-    if ($top-level instance of document-node())
-    then util:collection-name($top-level)
-    else if (string($path-parts/data:owner))
-    then $db-path
-    else concat('/',$path-parts/data:share-type)
-  return
-    if ($top-level instance of element(error))
-    then (
-      api:serialize-as('xml'), 
-      $top-level
-    )
-    else if (string($path-parts/data:subresource) and not($path-parts/data:subresource = $local:valid-subresources))
-    then (
-      api:serialize-as('xml'),
-      api:error(404, "Invalid subresource", string($path-parts/data:subresource))
-    )
-    else 
-      let $query := request:get-parameter('q', ())
-      let $start := xs:integer(request:get-parameter('start', 1))
-      let $max-results := 
-        xs:integer(request:get-parameter('max-results', $api:default-max-results))
-      let $subresource := $path-parts/data:subresource/string()
-      let $uri := request:get-uri()
-      let $results :=
-        if (false() (-scache:is-up-to-date($collection, $uri, $query)-))
-        then 
-          scache:get-request($uri, $query)
-        else
-          scache:store($uri, $query,
-            <ul class="results">{ 
-              for $result in (
-                if ($subresource)
-                then
-                  (- subresources -)
-                  if ($subresource = 'title')
-                  then 
-                    if ($path-parts/data:purpose = 'output')
-                    then $top-level//html:title[ft:query(.,$query)]
-                    else $top-level//tei:title[ft:query(.,$query)]
-                  else if ($subresource = 'repository')
-                  then $top-level//j:repository[ft:query(.,$query)]
-                  else $top-level//tei:seg[ft:query(.,$query)]
-                else if ($path-parts/data:purpose = 'output')
-                then
-                  (- HTML based -- TODO: what happens when we have non-HTML output? -)
-                  $top-level//html:body[ft:query(., $query)]
-                else
-                  (- TEI-based -)
-                  $top-level//(j:repository|tei:title)[ft:query(., $query)]
-              )
-              let $root := root($result)
-              let $doc-uri := document-uri($root)
-              let $title := $root//(tei:title[@type='main' or not(@type)]|html:title)
-              let $title-lang := string($title/ancestor-or-self::*[@xml:lang][1]/@xml:lang)
-              let $formatted-result := local:result-with-lang($result)
-              let $desc := (
-                (- desc contains the document title and the context of the search result -)
-                <span>{
-                  if ($title-lang)
-                  then (
-                    attribute lang {$title-lang},
-                    attribute xml:lang {$title-lang}
-                  ) 
-                  else (),
-                  normalize-space($title)
-                }</span>,
-                $formatted-result
-              )
-              let $api-doc := data:db-path-to-api($doc-uri)
-              let $link := 
-                if ($subresource)
-                then concat($api-doc, '/', if ($subresource='seg') then concat('id/', $result/@xml:id) else $subresource)
-                else $api-doc
-              let $alt := ( 
-                if ($path-parts/data:purpose = "output")
-                then (
-                  "xhtml", concat($api-doc, ".xhtml"),
-                  "css", concat($api-doc, ".css"),
-                  "status", concat($api-doc, "/status")
-                )
-                else (), 
-                ('db', $doc-uri)
-              )
-              let $supported-methods := (
-                "GET",
-                ("POST")[$subresource = ("repository")],
-                ("PUT")[$subresource = ("seg", "title")],
-                ("DELETE")[$subresource = ("seg", "title")]
-              )
-              let $request-content-types := (
-                (api:html-content-type())[not($subresource)],
-                (api:tei-content-type("tei:seg"))[$subresource = ("repository", "seg")],
-                (api:tei-content-type("tei:title"))[$subresource = "title"],
-                ("text/plain")[$subresource = ("title", "seg")]
-              )
-              let $accept-content-types := (
-                (api:html-content-type())[not($subresource)],
-                (api:tei-content-type())[$subresource = ("repository", "seg")],
-                (api:tei-content-type())[$subresource = "title"],
-                ("text/plain")[$subresource = ("title", "seg")]
-              )
-              where 
-                $formatted-result and (
-                (- if there's no owner, then we've searched through everything. Need to filter for purpose-)
-                if (string($path-parts/data:owner))
-                then true()
-                else data:path-to-parts($api-doc)/data:purpose/string() eq $path-parts/data:purpose/string()
-                )
-              order by ft:score($result) descending
-              return
-                api:list-item($desc, $link, $supported-methods, $accept-content-types, $request-content-types, $alt)  
-            }</ul>)
-  return (
-    api:serialize-as('xhtml'),
-    api:list(
-      <title>Search results for {$uri}?q={$query}</title>,
-      $results,
-      count(scache:get($uri, $query)/li),
-      true(),
-      "GET",
-      api:html-content-type(), 
-      ()
-    )        
-  )
-};
-:)
 
 declare function local:show-element(
   $result as element(),
@@ -358,7 +235,11 @@ declare function search:put() {
 };
 
 declare function search:post() {
-  local:disallowed()
+  let $uri := request:get-uri()
+  return
+    if (local:is-root($uri))
+    then orig:post()
+    else local:disallowed()
 };
 
 declare function search:delete() {

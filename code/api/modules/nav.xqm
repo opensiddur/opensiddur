@@ -85,7 +85,7 @@ declare function nav:api-path-to-sequence(
   $url as xs:string
   ) as node()* {
   let $excluded := "updated.xml"
-  let $tokens := tokenize(replace($url, "^(/code/api/data)?/", ""), "/")
+  let $tokens := tokenize(replace($url, "^(/code/api/data)?/", ""), "/")[.]
   let $purpose := $tokens[1]
   let $resource := concat($tokens[2], ".xml")[$tokens[2] != "..."]
   let $docs :=

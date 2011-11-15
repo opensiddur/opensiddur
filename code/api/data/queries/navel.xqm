@@ -317,7 +317,7 @@ declare function navel:put() {
     $data/@xml:id/string(), 
     concat(local-name($data), "_", util:uuid())
     )[1]
-  let $accepted := api:get-accept-format($navdoc:request-content-type)
+  let $accepted := api:get-accept-format($navel:request-content-type)
   let $position := substring-after($uri, ";")[.=("before", "after")]
   return
     if (not($accepted instance of element(api:content-type)))
@@ -356,13 +356,41 @@ declare function navel:put() {
       return (
         if ($return instance of element(error))
         then ()
-        else resp:add($doc/id($new-id), "author", app:auth-user(), "location value"),
+        else (
+          resp:add($doc/id($new-id), "author", app:auth-user(), "location value"),
+          response:set-status-code(201)
+        ),
         $return
       )
 };
 
 declare function navel:post() {
-  local:disallowed()
+  let $uri := request:get-uri()
+  let $element := nav:api-path-to-sequence($uri)
+  let $doc := root($element)
+  let $requested := api:get-accept-format($navel:request-content-type)
+  let $unauthorized := local:unauthorized-write($uri)
+  return
+    if (not($requested instance of element(api:content-type)))
+    then $requested
+    else if ($unauthorized)
+    then $unauthorized
+    else
+      let $data := api:get-data()
+      let $new-id := (
+        $data/@xml:id/string(), 
+        concat(local-name($data), "_", util:uuid())
+        )[1]
+      return 
+        if (empty($doc/id($new-id)))
+        then (
+          update insert $data into $element,
+          resp:add($doc/id($new-id), "author", app:auth-user(), "value"),
+          response:set-status-code(201)
+        )
+        else 
+          api:error(400, "The identifier cannot be repeated", $new-id)
+  
 };
 
 declare function navel:delete() {
@@ -389,13 +417,16 @@ declare function navel:go(
   $e as element()
   ) {
   let $method := api:get-method()
-  let $activity := nav:url-to-xpath(request:get-uri())/nav:activity/string()
+  let $uri := request:get-uri()
+  let $activity := nav:url-to-xpath($uri)/nav:activity/string()
   return
     if ($activity = "-expanded" and (
       $e instance of element(j:view) or 
       $e instance of element(j:concurrent)
       ))
     then expanded:go($e)
+    else if (not($method = navel:allowed-methods($uri)))
+    then local:disallowed()
     else if ($method = "GET")
     then navel:get()
     else if ($method = "PUT") 
