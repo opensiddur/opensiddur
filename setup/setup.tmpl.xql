@@ -19,6 +19,7 @@ xquery version "1.0";
   util:catch('*', xmldb:create-group('testuser'), ('Group testuser existed. Skipping creation.')),
   xmldb:create-user('testuser','testuser', ('testuser','everyone'), '/group/testuser'),
   (: replace $magicpassword in XQuery files in /code with the admin password :)
+  (:
   for $xquery in collection('/code')//document-uri(.)
   where matches($xquery, "xq[ml]$") and not(contains($xquery, "magic.xqm"))
   return
@@ -30,4 +31,11 @@ xquery version "1.0";
       xmldb:store($collection, $resource, 
         replace($code, "\$magic[:]?password", "'ADMINPASSWORD'"), 
         'application/xquery')
+   :)
+   (: replace the password in $magic:password :)
+   let $code := util:binary-to-string(util:binary-doc("/code/magic/magic.xqm"))
+   let $newcode :=
+     replace($code, '(variable\s+\$magic:password\s+:=\s+)""','$1"ADMINPASSWORD"')
+   return 
+     xmldb:store("/code/magic", "magic.xqm", $newcode, "application/xquery")
 )

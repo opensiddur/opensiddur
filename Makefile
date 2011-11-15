@@ -122,6 +122,7 @@ XSPECREPO = http://xspec.googlecode.com/svn/trunk/
 
 XSLTFORMSDIR = $(LIBDIR)/xsltforms
 XSLTFORMSREPO = https://xsltforms.svn.sourceforge.net/svnroot/xsltforms
+XSLTFORMS_REVISION ?= -r 513
 
 XSLTDOCDIR = $(LIBDIR)/XSLTDoc
 XSLTDOCREPO = https://xsltdoc.svn.sourceforge.net/svnroot/xsltdoc/trunk/xsltdoc
@@ -325,10 +326,10 @@ $(XSPECDIR):
 	svn co $(XSPECREPO) $(XSPECDIR)
 
 svn-xsltforms: $(XSLTFORMSDIR)
-	svn update $(XSLTFORMSDIR)
+	svn update $(XSLTFORMS_REVISION) $(XSLTFORMSDIR)
 
 $(XSLTFORMSDIR):
-	svn co $(XSLTFORMSREPO) $(XSLTFORMSDIR)
+	svn co $(XSLTFORMS_REVISION) $(XSLTFORMSREPO) $(XSLTFORMSDIR)
 
 svn-xsltdoc: $(XSLTDOCDIR)
 	svn update $(XSLTDOCDIR)
