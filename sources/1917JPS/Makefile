@@ -41,6 +41,13 @@ temp/fix-chapter-numbers.xml: ../../code/input-conversion/1917JPS/fix-chapter-nu
 	../../lib/saxon -s temp/get-blocks.xml -o temp/fix-chapter-numbers.xml \
 		../../code/input-conversion/1917JPS/fix-chapter-numbers.xsl2
 
+# Step 4: Merge adjacent text elements
+# TODO: merge space-only text element with preceding
+temp/join-text.xml: ../../code/input-conversion/1917JPS/join-text.xsl2 \
+		temp/fix-chapter-numbers.xml
+	../../lib/saxon -s temp/fix-chapter-numbers.xml -o temp/join-text.xml \
+		../../code/input-conversion/1917JPS/join-text.xsl2
+
 # TODO: semi-final form (structured format organized by pages of PDF file):
 #Tanakh-JPS1917-pdf-pages.xml:
 
@@ -49,7 +56,7 @@ temp/fix-chapter-numbers.xml: ../../code/input-conversion/1917JPS/fix-chapter-nu
 
 # # old approach
 # # Clean of pdf2txt XML to make easier to work with.
-# temp/pdf2txt-clean.xml: ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt \
+# temp/pdf2txt-clean.xml: ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt 
 # 		temp/1917JPS-pdf2txt.xml
 # 	xsltproc ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt \
 # 	temp/1917JPS-pdf2txt.xml > temp/pdf2txt-clean.xml
