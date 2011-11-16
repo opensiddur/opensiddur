@@ -121,10 +121,7 @@ declare function local:get-reference(
     then doc($user-profile-uri)/*
     else 
       if (user:new-profile($user-name))
-      then (
-        response:redirect-to(request:get-uri()),
-        api:error((), "User profile did not exist and I successfully created it. Retry the request.")
-      )
+      then doc($user-profile-uri)/*
       else
         api:error(500, "User profile did not exist and could not be created")
   return
@@ -306,8 +303,9 @@ declare function prof:list-entry(
 };
 
 declare function local:disallowed() {
-  api:allowed-method(prof:allowed-methods(request:get-uri())),
-  api:error((), "Method not allowed")
+  let $d := api:allowed-method(prof:allowed-methods(request:get-uri()))
+  where (not($d))
+  return api:error((), "Method not allowed")
 };
 
 (: determine authorization. If not authorized, return an error element. :)
