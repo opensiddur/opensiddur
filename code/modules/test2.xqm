@@ -326,32 +326,14 @@ declare function t:normalize-node($node as node()) {
 };
 
 declare function t:xpath($output as item()*, $xpath as node()) {
-	let $xpath-element := if ($xpath instance of element()) then $xpath else $xpath/..
-	return (
-    for $prefix in in-scope-prefixes($xpath-element)
-    let $nsuri := namespace-uri-for-prefix($prefix, $xpath-element)
-    return ( 
-        if ($prefix != 'xml') then
-            util:declare-namespace($prefix, $nsuri)
-        else ()
-    ),
-    for $nselm in $xpath-element/ancestor::*/namespace
-    let $prefix := string($nselm/@prefix)
-    let $nsuri := string($nselm)
-    return (
-    	util:declare-namespace($prefix, $nsuri)
-    ),
-    let $imports := string-join($xpath/ancestor::*/imports, " ")
-    let $expr := $xpath/string()
-    return
-    	util:eval(concat($imports, " $output/(", $expr, ")"))
-    (: ^ EDF: I don't understand why this code wasn't the code above
-        if (matches($expr, "^\s*/")) then
-            util:eval(concat("$output", $expr))
-        else
-            util:eval($expr)
-    :)
- 	)
+	let $xpath-element := 
+	  if ($xpath instance of element()) 
+	  then $xpath 
+	  else $xpath/..
+  let $prolog := t:init-prolog($xpath-element)
+  let $expr := $xpath/string()
+  return
+    util:eval(concat($prolog, " $output/(", $expr, ")"))
 };
 
 (:~ Front-end to run a test suite :)
