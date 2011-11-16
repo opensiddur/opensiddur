@@ -66,8 +66,9 @@ declare function index:list-entry(
 };
 
 declare function local:disallowed() {
-  api:allowed-method($index:allowed-methods),
-  api:error((), "Method not allowed")
+  let $d := api:allowed-method($index:allowed-methods)
+  where not($d)
+  return api:error((), "Method not allowed")
 };
 
 declare function index:get() {

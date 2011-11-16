@@ -66,9 +66,9 @@ declare function expanded:list-entry(
 };
 
 declare function local:disallowed() {
-  (: This probably needs no changes :)
-  api:allowed-method($expanded:allowed-methods),
-  api:error((), "Method not allowed")
+  let $d := api:allowed-method($expanded:allowed-methods)
+  where not($d)
+  return api:error((), "Method not allowed")
 };
 
 declare function expanded:get() {

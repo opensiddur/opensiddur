@@ -72,9 +72,9 @@ declare function navat:list-entry(
 };
 
 declare function local:disallowed() {
-  (: This probably needs no changes :)
-  api:allowed-method($navdoc:allowed-methods),
-  api:error((), "Method not allowed")
+  let $d := api:allowed-method($navdoc:allowed-methods)
+  where not($d)
+  return api:error((), "Method not allowed")
 };
 
 (: check if we have access to the document and if it exists 

@@ -30,7 +30,12 @@ declare variable $search:accept-content-type := (
   api:tei-content-type()
   );
 declare variable $search:request-content-type := ();
-declare variable $search:test-source := "/code/api/data/search.t.xml";
+declare variable $search:test-source :=
+  let $uri := request:get-uri()
+  return
+    if ($uri = "/code/api/data/original") 
+    then $orig:test-source
+    else "/code/api/data/search.t.xml";
 
 declare function search:title(
   $uri as xs:anyAtomicType
@@ -94,9 +99,9 @@ declare function search:list-entry(
 };
 
 declare function local:disallowed() {
-  (: This probably needs no changes :)
-  api:allowed-method($search:allowed-methods),
-  api:error((), "Method not allowed")
+  let $d := api:allowed-method($search:allowed-methods)
+  where not($d)
+  return api:error((), "Method not allowed")
 };
 
 declare function local:show-element(

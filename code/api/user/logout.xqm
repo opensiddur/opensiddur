@@ -67,8 +67,9 @@ declare function logout:list-entry(
 
 declare function local:disallowed() {
   (: This probably needs no changes :)
-  api:allowed-method($logout:allowed-methods),
-  api:error((), "Method not allowed")
+  let $d := api:allowed-method($logout:allowed-methods)
+  where not($d)
+  return api:error((), "Method not allowed")
 };
 
 (:~ GET is either a request to log out or a discovery request. 

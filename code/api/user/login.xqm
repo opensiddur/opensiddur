@@ -70,9 +70,9 @@ declare function login:list-entry(
 };
 
 declare function local:disallowed() {
-  (: This probably needs no changes :)
-  api:allowed-method($login:allowed-methods),
-  api:error((), "Method not allowed")
+  let $d := api:allowed-method($login:allowed-methods)
+  where not($d)
+  return api:error((), "Method not allowed")
 };
 
 (:~ GET is usually a query for who is logged in. 
