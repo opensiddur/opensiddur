@@ -102,3 +102,9 @@ declare function apitest:if-magicpassword(
   ) as xs:boolean? {
   boolean(apitest:magicpassword())
 };
+
+(:~ log in under the testuser account :)
+declare function apitest:login(
+  ) {
+  apitest:put("/code/api/user/login/testuser",(),"testuser")
+};
