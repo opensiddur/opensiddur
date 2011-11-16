@@ -21,8 +21,9 @@
     <xpath desc="endIndex - startIndex = number of results">
       let $start := number($output//html:meta[@name='startIndex']/@content)
       let $end := number($output//html:meta[@name='endIndex']/@content)
-      return ((if ($start) then 1 else 0) + $end - $start eq count($output//html:ul[@class='results']/html:li),
-        util:log-system-out(($start, ' ', $end, ' ', $output))
+      return (
+        (if ($start) then 1 else 0) + $end - $start eq count($output//html:ul[@class='results']/html:li)
+        )
       )
     </xpath>
     <xpath desc="endIndex &lt;= number of results">
