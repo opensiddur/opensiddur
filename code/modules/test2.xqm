@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.0";
 (: Testing module
  : Original author: Wolfgang Meier (eXist db)
  : 
@@ -74,7 +74,10 @@ declare function t:setup-action($action) {
 				case element(store-files) return
             t:store-files($action)
         case element(remove-collection) return
-            xdb:remove($action/@collection)
+            if (xdb:collection-available($action/@collection))
+            then
+              xdb:remove($action/@collection)
+            else ()
         case element(remove-document) return
             xdb:remove($action/@collection, $action/@name)
         default return
