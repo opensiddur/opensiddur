@@ -171,7 +171,15 @@ declare function local:get-search-results(
   return 
     if ($q)
     then
+      let $owner := request:get-parameter("owner", ())
+      let $group := request:get-parameter("group", ())
       for $result in $sequence[ft:query(., $q)]
+        [if ($owner) then xmldb:get-owner(.)=$owner else true()]
+        [ if ($group) 
+          then 
+            xmldb:get-group(util:collection-name(.), util:document-name(.))=$group
+          else true()
+        ]
       order by ft:score($result) descending
       return $result
     else 
