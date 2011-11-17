@@ -30,6 +30,7 @@ declare variable $orig:request-content-type := (
   api:tei-content-type(),
   api:xml-content-type()
   );
+declare variable $orig:test-source := "/code/tests/api/data/original/original.t.xml";
 
 declare function local:make-resource-name(
   $title as xs:string
@@ -68,7 +69,7 @@ declare function orig:post() {
   then
     let $user := app:auth-user()
     let $data := api:get-data()
-    let $title := $data//tei:title[@type="main"]
+    let $title := $data/descendant-or-self::tei:title[@type="main"]
     return 
       if (not($data instance of element(tei:TEI)
         or $data instance of element(tei:title)))
@@ -76,22 +77,28 @@ declare function orig:post() {
         api:error(400, "You must post a valid JLPTEI document or a title")
       else if (empty($title))
       then 
-        api:error(400, "The document must contain a tei:title element")
+        api:error(400, "The document must contain a tei:title element", ($data, util:get-sequence-type($data), $title))
       else 
         (: TODO: real validation here! :)
         let $resource := local:make-resource-name(string($title[1]))
-        let $collection := concat("/group/", $user)
-        return
-          if (xmldb:store($collection, $resource, 
+        let $collection := concat("/group/", $user, "/original")
+        let $make := 
+          app:make-collection-path($collection, "/",
+            $user, $user, xmldb:get-permissions(concat("/group/", $user)))
+        let $new-document-uri :=
+          xmldb:store($collection, $resource, 
             if ($data instance of element(tei:TEI))
             then $data
-            else doc("/code/api/data/resources/template.xml")))
+            else doc("/code/api/data/resources/template.xml"))
+        return
+          if ($new-document-uri)
           then (
             xmldb:set-resource-permissions($collection, $resource,
               $user, $user, util:base-to-integer(0740, 8)),
             if ($data instance of element(tei:title))
             then 
-              update replace doc(concat($collection, "/", $resource)//tei:title[@type="main"][1])
+              update replace 
+                doc($new-document-uri)//tei:title[@type="main"][1]
                 with $title
             else (),
             response:set-status-code(201),
