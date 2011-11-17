@@ -234,7 +234,7 @@ declare function search:get() {
               <title>{search:title($uri)}</title>,
               $list-body,
               count($results),
-              false(),
+              true(),
               search:allowed-methods($uri),
               search:accept-content-type($uri),
               search:request-content-type($uri),
