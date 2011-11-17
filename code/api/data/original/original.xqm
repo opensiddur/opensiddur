@@ -80,6 +80,7 @@ declare function orig:post() {
         api:error(400, "The document must contain a tei:title element", ($data, util:get-sequence-type($data), $title))
       else 
         (: TODO: real validation here! :)
+        let $uri := request:get-uri()
         let $resource := local:make-resource-name(string($title[1]))
         let $collection := concat("/group/", $user, "/original")
         let $make := 
