@@ -31,13 +31,16 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 let $uri := request:get-uri()
 let $sequence := nav:api-path-to-sequence($uri)
 let $activity := nav:url-to-xpath($uri)/nav:activity/string()
+let $index-uri := "/code/api/data/original"
 return
-  if (empty($sequence))
-  then 
-    api:error(404, "Not found")
-  else if (count($sequence) > 1 or request:get-parameter("q", ()))
+  if (count($sequence) > 1 or 
+    request:get-parameter("q", ()) or 
+    $uri = $index-uri)
   then
     search:go($sequence)
+  else if (empty($sequence))
+  then 
+    api:error(404, "Not found")
   else
     typeswitch($sequence)
     case element() return navel:go($sequence)
