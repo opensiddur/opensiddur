@@ -38,9 +38,6 @@ return
     $uri = $index-uri)
   then
     search:go($sequence)
-  else if (empty($sequence))
-  then 
-    api:error(404, "Not found")
   else
     typeswitch($sequence)
     case element() return navel:go($sequence)
