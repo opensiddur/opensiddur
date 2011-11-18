@@ -566,9 +566,9 @@ TODO:
                     </tei:div>
                   </j:view>
                 </j:concurrent>
-                <j:respository>
+                <j:repository>
                   <xsl:attribute name="xml:id" select="'repository'"/>
-                </j:respository>
+                </j:repository>
               </tei:body>
             </xsl:with-param>
             <xsl:with-param name="license" tunnel="yes"
