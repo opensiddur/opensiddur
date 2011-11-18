@@ -53,10 +53,11 @@ declare function navel:title(
 declare function navel:allowed-methods(
   $uri-or-element as item()
   ) as xs:string* {
-  let $position := 
+  let $xpath :=
     if ($uri-or-element instance of element())
     then ()
-    else substring-after($uri-or-element, ";")
+    else nav:url-to-xpath($uri-or-element)
+  let $position :=  $xpath/nav:position/string()
   return
     if ($position=("before","after"))
     then ("GET", "PUT")
