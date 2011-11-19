@@ -31,7 +31,6 @@
 # db-sync DBAPASS=<database password> - synchronize code, data, and common from the development working copy to a running database; 
 # db-syncclean - clean the __contents__.xml files left by syncing the database 
 # 
-# $Id: Makefile 776 2011-05-01 07:34:30Z efraim.feinstein $
 
 # Local changes to variables should go in Makefile.local
 # Any variable set in this file may be overridden by a setting in Makefile.local
@@ -122,7 +121,7 @@ XSPECREPO = http://xspec.googlecode.com/svn/trunk/
 
 XSLTFORMSDIR = $(LIBDIR)/xsltforms
 XSLTFORMSREPO = https://xsltforms.svn.sourceforge.net/svnroot/xsltforms
-XSLTFORMS_REVISION ?= -r 516
+XSLTFORMS_REVISION ?= -r 519
 
 XSLTDOCDIR = $(LIBDIR)/XSLTDoc
 XSLTDOCREPO = https://xsltdoc.svn.sourceforge.net/svnroot/xsltdoc/trunk/xsltdoc
