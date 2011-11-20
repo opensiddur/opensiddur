@@ -175,27 +175,29 @@ declare function t:run-test($test as element(test), $count as xs:integer) {
 	   if ($test/@trace eq 'yes') then 
 	       (system:clear-trace(), system:enable-tracing(true(), false()))
      else ()
-    let $highlight-option := concat("highlight-matches=",
-          if ($test/expected//@*[matches(., '^(\|{3}).*\1$')] and $test/expected//exist:match) then "both"
-          else if ($test/expected//@*[matches(., '^(\|{3}).*\1$')]) then "attributes"
-          else if ($test/expected//exist:match) then "elements"
-          else "none"        
-          )
-    let $serialize-options := 
-      let $decls := ($test/../*[name() ne 'test']|$test/code)[matches(., 'declare[\- ]option(\((&#34;|&#39;)|\s+)exist:serialize(\2,)?\s+(&#34;|&#39;).*?\4[;)]')]
-      let $ops1 := $decls/replace(., "declare[\- ]option(\((&#34;|&#39;)|\s+)exist:serialize(\2,)?\s+(&#34;|&#39;)(.*?)\4[;)]", "_|$5_")
-      let $ops2 :=
-        for $a in $ops1
-        for $b in tokenize($a, '_')[starts-with(., '|')]
-        return tokenize(substring-after($b, '|'), '\s+')
-      return if (count($ops2[matches(., 'highlight-matches')]))
-        then string-join($ops2, ' ')
-        else string-join(($ops2, $highlight-option), ' ')      
-    let $queryOutput :=
-		util:catch("*",
-			util:eval(concat($context, $test/code/string())),
-			<error>Compilation error: {$util:exception-message}</error>
-		)
+  let $highlight-option := concat("highlight-matches=",
+        if ($test/expected//@*[matches(., '^(\|{3}).*\1$')] and $test/expected//exist:match) then "both"
+        else if ($test/expected//@*[matches(., '^(\|{3}).*\1$')]) then "attributes"
+        else if ($test/expected//exist:match) then "elements"
+        else "none"        
+        )
+  let $serialize-options := 
+    let $decls := ($test/../*[name() ne 'test']|$test/code)[matches(., 'declare[\- ]option(\((&#34;|&#39;)|\s+)exist:serialize(\2,)?\s+(&#34;|&#39;).*?\4[;)]')]
+    let $ops1 := $decls/replace(., "declare[\- ]option(\((&#34;|&#39;)|\s+)exist:serialize(\2,)?\s+(&#34;|&#39;)(.*?)\4[;)]", "_|$5_")
+    let $ops2 :=
+      for $a in $ops1
+      for $b in tokenize($a, '_')[starts-with(., '|')]
+      return tokenize(substring-after($b, '|'), '\s+')
+    return if (count($ops2[matches(., 'highlight-matches')]))
+      then string-join($ops2, ' ')
+      else string-join(($ops2, $highlight-option), ' ')      
+  let $queryOutput :=
+	  try {
+	    util:eval(concat($context, $test/code/string()))
+	  }
+	  catch * {
+	    <error>Compilation error: {$util:exception-message}</error>
+	  }
 	let $output := if ($test/@trace eq 'yes') then system:trace() else $queryOutput
   let $expanded :=
         if ($output instance of element(error)) then
