@@ -261,7 +261,7 @@ db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 
 # install the WLC files into $WLCDBDIR on the database and assure that they're
 # ready to be used (note: may overwrite existing files, use with caution)
-db-install-wlc: tanach
+db-install-wlc: ridx-disable tanach ridx-enable
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 774 -c /db/group/everyone -u admin -g everyone $(TEXTDIR)/wlc
 	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -ouri=xmldb:exist://
 
@@ -347,4 +347,14 @@ svn-exist: $(EXISTSRCDIR)
 
 $(EXISTSRCDIR):
 	svn co $(EXIST_REVISION) $(EXISTSRCREPO) $(EXISTSRCDIR)
+
+.PHONY: ridx-enable ridx-disable
+ridx-enable:
+	@echo Re-enabling the index and indexing database references. This may take a while... 
+	read -p "Admin password: " ADMPASS && \
+  $(EXISTCLIENT) -u admin -P "$$ADMPASS" -qls -F $(SETUPDIR)/enable-refindex.xql && \
+	$(EXISTCLIENT) -qls -u admin -P "$$ADMPASS" -F $(SETUPDIR)/reindex-refindex.xql
+
+ridx-disable:
+	$(EXISTCLIENT) -u admin -P $$(read -p "Admin password: " ADMPASS && echo $$ADMPASS) -qls -F $(SETUPDIR)/disable-refindex.xql
 
