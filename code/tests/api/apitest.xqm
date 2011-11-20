@@ -10,9 +10,17 @@ module namespace apitest="http://jewishliturgy.org/modules/apitest";
 declare namespace t="http://exist-db.org/xquery/testing/modified";
 
 declare variable $apitest:server := concat('http://', request:get-server-name(), ':', request:get-server-port());
+declare variable $apitest:user-name := "testuser";
+declare variable $apitest:password := "testuser";
+
 
 declare function apitest:clear() {
   httpclient:clear-all()
+};
+
+declare function apitest:auth-header(
+  ) as element(header) {
+  apitest:auth-header($apitest:user-name, $apitest:password)
 };
 
 declare function apitest:auth-header(
@@ -103,8 +111,15 @@ declare function apitest:if-magicpassword(
   boolean(apitest:magicpassword())
 };
 
-(:~ log in under the testuser account :)
 declare function apitest:login(
   ) {
-  apitest:put("/code/api/user/login/testuser",(),"testuser")
+  apitest:login($apitest:user-name, $apitest:password)
+};
+
+(:~ log in under the testuser account :)
+declare function apitest:login(
+  $user-name as xs:string,
+  $password as xs:string
+  ) {
+  apitest:put(concat("/code/api/user/login/", $user-name),(),$password)
 };
