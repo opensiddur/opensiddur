@@ -189,6 +189,50 @@ declare function ridx:lookup(
   ridx:lookup($node,$context,$ns,$local-name,(),(),())
 };
 
+declare function ridx:lookup-document(
+  $docs as item()*
+  ) as node()* {
+  ridx:lookup-document($docs, false())
+};
+
+(:~ return all references to a document
+ : @param $accept-same if true(), include all references that
+ :  are in the same document. Default false()
+ :)
+declare function ridx:lookup-document(
+  $docs as item()*,
+  $accept-same as xs:boolean
+  ) as node()* {
+  for $doc in $docs
+  let $doc-uri :=
+    typeswitch ($doc)
+    case node() return document-uri(root($doc))
+    default return 
+      (: this code will normalize the URI to the same as the document-uri
+      function will return :)
+      document-uri(doc($doc))
+  let $mirror-uri :=
+      app:concat-path(("/", $ridx:ridx-collection, replace($doc-uri, "^/db", "")))
+  let $mirror-doc := doc($mirror-uri)
+  let $idx-collection := ridx:index-collection("/")
+  let $db-idx-collection := concat("^/db/", $ridx:ridx-collection)
+  for $entry in 
+    collection($idx-collection)//ridx:entry
+      [starts-with(@ref, $doc-uri)]
+      [$accept-same or not(root(.) is $mirror-doc)]
+  let $original-doc := doc(replace(document-uri(root($entry)), $db-idx-collection, ""))
+  return
+    try {
+      util:node-by-id($original-doc, $entry/@node)
+    }
+    catch * {
+      debug:debug($debug:info, 
+        "refindex", 
+        ("A query could not find a node in ", $original-doc, " - is the index expired?")
+      )
+    }    
+};
+
 (:~ Look up if the current node specifically or, including any
  : of its ancestors (default true() unless $without-ancestors is set)
  : is referenced in a reference of type $ns:$local-name/@type, 
