@@ -42,13 +42,14 @@ temp/fix-chapter-numbers.xml: ../../code/input-conversion/1917JPS/fix-chapter-nu
 		../../code/input-conversion/1917JPS/fix-chapter-numbers.xsl2
 
 # Step 4: Merge adjacent text elements
-# TODO: merge space-only text element with preceding
 temp/join-text.xml: ../../code/input-conversion/1917JPS/join-text.xsl2 \
 		temp/fix-chapter-numbers.xml
 	../../lib/saxon -s temp/fix-chapter-numbers.xml -o temp/join-text.xml \
 		../../code/input-conversion/1917JPS/join-text.xsl2
 
 # TODO: semi-final form (structured format organized by pages of PDF file):
+# TODO: strip remaining whitespace-only nodes. also, normalize-space within text elements?
+# TODO: "Lord" small caps.
 #Tanakh-JPS1917-pdf-pages.xml:
 
 # TODO: final form (organized by section, book, chapter, verse):

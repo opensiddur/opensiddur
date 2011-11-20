@@ -6,7 +6,8 @@ Copyright 2011 Marc Stober and licensed under the GNU LGPL.
 Join adjacent single-character text elements
 with the same font and size. 
 -->
-<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+ xmlns:my="https://github.com/marcstober/opensiddur/blob/master/code/input-conversion/1917JPS/join-text.xsl2/my">
 
   <xsl:output method="xml" indent="yes"/>
   <xsl:strip-space elements="*" />
@@ -19,11 +20,18 @@ with the same font and size.
     </xsl:copy>
   </xsl:template>
 
+  <!-- function to decide if given text element should be joined with previous -->
+  <xsl:function name="my:is-same-text">
+    <xsl:param name="preceding" />
+    <xsl:param name="this" />
+    <!-- if not preceded by a text element with same font and size -->
+    <xsl:value-of select="($this/@font = $preceding/@font) and ($this/@size = $preceding/@size)"/>
+  </xsl:function>
+
   <!-- for each text element -->
   <xsl:template match="text">
-    <!-- if not preceded by a text element with same font and size -->
-    <xsl:variable name="preceding-text" select="preceding-sibling::*[1][local-name() = 'text']" />
-    <xsl:if test="not(@font = $preceding-text/@font) or not(@size = $preceding-text/@size)">
+    <xsl:variable name="preceding" select="preceding-sibling::*[1][local-name() = 'text']" />
+    <xsl:if test="my:is-same-text($preceding, .) = 'false'">
       <!-- start a new text element -->
       <xsl:element name="text">
 	<!-- ** output content ** -->
@@ -38,8 +46,7 @@ with the same font and size.
 	<xsl:variable name="font" select="@font" />
 	<xsl:variable name="size" select="@size" />
 	<xsl:call-template name="join-same">
-	  <xsl:with-param name="font" select="$font" />
-	  <xsl:with-param name="size" select="$size" />
+	  <xsl:with-param name="preceding" select="." />
 	</xsl:call-template>
       </xsl:element>
     </xsl:if>
@@ -47,19 +54,23 @@ with the same font and size.
 
   <!-- called recursively to output adjacent elements -->
   <xsl:template name="join-same">
-    <xsl:param name="font" />
-    <xsl:param name="size" />
-    <xsl:if test="(@font = $font) and (@size = $size)">
+    <xsl:param name="preceding" />
+    <xsl:if test="my:is-same-text($preceding, .) = 'true'">
       <xsl:value-of select="text()" />
-      <xsl:variable name="font" select="@font" />
+      <xsl:variable name="preceding" select="." />
       <xsl:variable name="size" select="@size" />
       <xsl:for-each select="following-sibling::*[1][local-name() = 'text']">
 	<xsl:call-template name="join-same">
-	  <xsl:with-param name="font" select="$font" />
-	  <xsl:with-param name="size" select="$size" />
+	  <xsl:with-param name="preceding" select="$preceding" />
 	</xsl:call-template>
       </xsl:for-each>
     </xsl:if>
   </xsl:template>
+
+  <!-- don't pass splitter or rect elements, or empty footnotes elements, 
+       any further down the pipeline -->
+  <xsl:template match="splitter | rect | footnotes[not(*)]">
+  </xsl:template>
+
 
 </xsl:stylesheet>

@@ -48,8 +48,10 @@ Also mark paragraph breaks.
 	    </xsl:element>
 	  </xsl:if>
 	</xsl:for-each>
-	<xsl:if test="(@x = '46.824') or (@x ='234.070')">
-	  <xsl:element name="paragraph-break" />
+	<xsl:if test="not(parent::footnotes)">
+	  <xsl:if test="(@x = '46.824') or (@x ='234.070')">
+	    <xsl:element name="paragraph-break" />
+	  </xsl:if>
 	</xsl:if>
       </xsl:if>	  
       <!-- finally output the text element -->
