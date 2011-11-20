@@ -13,10 +13,6 @@ to the vertical line separating the columns.
   <xsl:output method="xml" version="1.0" indent="yes" />
 
   <!-- TODO
-       Convert to XSL2
-       Footnotes
-       Paragraphs (poetry?)
-       Make sure Hebrew is output (correctly)
        See how pages without columns (front matter, etc.) output.
        "Spell check" against a dictionary?
        Tidy?
