@@ -363,12 +363,13 @@ declare function t:run-testSuite($suite as element(TestSuite)) as element() {
 
 (:~ Front-end to run a single test set :)
 declare function t:run-testSet($set as element(TestSet)) {
+    let $suite := $set/parent::TestSuite
     let $copy := 
-    	if ($set/parent::TestSuite)
+    	if ($suite)
     	then $set
     	else util:expand($set)
-    let $as-user := ($copy/asUser/string(), "guest")[1]
-    let $password := ($copy/password/string(), "guest")[1]
+    let $as-user := (($copy/asUser, $suite/asUser)/string(), "guest")[1]
+    let $password := (($copy/password, $suite/password)/string(), "guest")[1]
     let $if := t:if($copy/if)
     where $if
     return 
