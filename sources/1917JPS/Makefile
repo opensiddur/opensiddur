@@ -11,11 +11,11 @@ all: Tanakh-JPS1917-canonical.xml
 # insert <paragraph-break> when
 # - before chapter number
 # - if x < previous-x and (x = 46.824 or x = 232.479)
-# problem with -n mode: chapter numbers in wrong place
 
 # Step 0: Converting PDF to XML...
 # page 16=Genesis 1
-# TODO: all the books/pages
+# TODO: all the books/pages - at least some more samples to start
+# TODO: separate files?
 temp/pdf2txt.xml: Makefile
 	mkdir -p temp
 	pdf2txt.py -n -m 21 -p 16,17,18,19,20,21 -o temp/pdf2txt.xml Tanakh-JPS1917.pdf
@@ -54,37 +54,9 @@ temp/join-text.xml: ../../code/input-conversion/1917JPS/join-text.xsl2 \
 # TODO: final form (organized by section, book, chapter, verse):
 #Tanakh-JPS1917-canonical.xml:
 
-# # old approach
-# # Clean of pdf2txt XML to make easier to work with.
-# temp/pdf2txt-clean.xml: ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt 
-# 		temp/1917JPS-pdf2txt.xml
-# 	xsltproc ../../code/input-conversion/1917JPS/pdf2txt-clean.xslt \
-# 	temp/1917JPS-pdf2txt.xml > temp/pdf2txt-clean.xml
+# TODO: testing, diff against other version from Efraim
 
-# # Fix text that on the same line but out of order.
-# # TODO: fix characters ("text" elements, e.g. heb. beresit above Gen. 1)
-# temp/fix-lines.xml: ../../code/input-conversion/1917JPS/fix-lines.xslt \
-# 		temp/columns.xml
-# 	xsltproc ../../code/input-conversion/1917JPS/fix-lines.xslt \
-# 		temp/columns.xml > temp/fix-lines.xml
-
-# # Test for text on same line but out of order.
-# # TODO How to raise error in Makefile? How to make this raise error?
-# temp/sort-errors.txt: ../../code/input-conversion/1917JPS/test-sort.xslt \
-# 		temp/fix-lines.xml
-# 	xsltproc ../../code/input-conversion/1917JPS/test-sort.xslt \
-# 	temp/fix-lines.xml > temp/sort-errors.txt
-
-# # TODO Step 4: Join paragraphs
-# # for each textline: if new paragraph
 # # p should NOT be a container like HTML since heirarchy is book, chapter, verse
-# # TODO "final"
-# 1917JPS.xml: ../../code/input-conversion/1917JPS/1917JPS.xslt \
-# 		temp/fix-lines.xml \
-# 		temp/sort-errors.txt
-# 	xsltproc ../../code/input-conversion/1917JPS/1917JPS.xslt \
-# 	temp/fix-lines.xml > 1917JPS.xml
-
 # # TODO Isn't there a PDFMiner tool to get this from outline in PDF?
 # toc.txt: Tanakh-JPS1917.xml ../../code/input-conversion/1917JPS/toc.py
 # # extract just the lines that *could* be in Table of Contents

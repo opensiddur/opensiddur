@@ -22,12 +22,10 @@ with the same font and size.
   <!-- for each text element -->
   <xsl:template match="text">
     <!-- if not preceded by a text element with same font and size -->
-    <!-- if (font != pre-font) or (size != pre-size) -->
-    <xsl:variable name="preceding-text" select="preceding-sibling::text[1]" />
+    <xsl:variable name="preceding-text" select="preceding-sibling::*[1][local-name() = 'text']" />
     <xsl:if test="not(@font = $preceding-text/@font) or not(@size = $preceding-text/@size)">
       <!-- start a new text element -->
       <xsl:element name="text">
-
 	<!-- ** output content ** -->
 	<!-- don't output the default font -->
 	<xsl:if test="@font != 'Times New Roman'">
@@ -55,7 +53,7 @@ with the same font and size.
       <xsl:value-of select="text()" />
       <xsl:variable name="font" select="@font" />
       <xsl:variable name="size" select="@size" />
-      <xsl:for-each select="following-sibling::text[1]">
+      <xsl:for-each select="following-sibling::*[1][local-name() = 'text']">
 	<xsl:call-template name="join-same">
 	  <xsl:with-param name="font" select="$font" />
 	  <xsl:with-param name="size" select="$size" />
