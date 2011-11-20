@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.0";
 (: install setup script 
  :
  : Open Siddur Project
@@ -14,10 +14,22 @@ xquery version "1.0";
 	(: add a demo user :)
   xmldb:create-group('demouser'),
 	xmldb:create-user('demouser', 'resuomed', ('demouser','everyone'), '/group/demouser'),
-	(: create a test user/group with a home collection where test files can be created and destroyed
+	(: create two test user/groups and home collections where test files can be created and destroyed
   :)
-  util:catch('*', xmldb:create-group('testuser'), ('Group testuser existed. Skipping creation.')),
+  try {
+    xmldb:create-group('testuser')
+  }
+  catch { 
+    util:log-system-out('Group testuser existed. Skipping creation.')
+  },
   xmldb:create-user('testuser','testuser', ('testuser','everyone'), '/group/testuser'),
+  try {
+    xmldb:create-group('testuser2')
+  }
+  catch { 
+    util:log-system-out('Group testuser2 existed. Skipping creation.')
+  },
+  xmldb:create-user('testuser2','testuser2', ('testuser2','everyone'), '/group/testuser2'),
   (: replace $magicpassword in XQuery files in /code with the admin password :)
   (:
   for $xquery in collection('/code')//document-uri(.)
