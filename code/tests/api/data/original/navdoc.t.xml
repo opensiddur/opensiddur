@@ -132,8 +132,7 @@
     </tearDown>
     <test>
       <task>POST XML while logged in</task>
-      <code><![CDATA[
-      util:log-system-out("***POST"), 
+      <code><![CDATA[ 
       apitest:post("/code/api/data/original/Test%20Document",
         (), doc("/code/api/data/resources/template.xml"))
       ]]></code>
