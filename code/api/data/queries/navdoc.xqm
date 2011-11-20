@@ -9,7 +9,7 @@ module namespace navdoc = 'http://jewishliturgy.org/api/data/navdoc';
 import module namespace api="http://jewishliturgy.org/modules/api" 
   at "/code/api/modules/api.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
-  at "nav.xqm";
+  at "/code/api/modules/nav.xqm";
 import module namespace navel="http://jewishliturgy.org/api/data/navel"
   at "navel.xqm";
 import module namespace navat="http://jewishliturgy.org/api/data/navat"
@@ -33,7 +33,7 @@ declare variable $navdoc:request-content-type := (
   api:xml-content-type(),
   api:tei-content-type()
   );
-declare variable $navdoc:test-source := "/code/tests/api/original/navdoc.t.xml";
+declare variable $navdoc:test-source := "/code/tests/api/data/original/navdoc.t.xml";
 
 declare function navdoc:title(
   $uri-or-doc-node as item()
@@ -190,6 +190,7 @@ declare function navdoc:put() {
   let $uri := request:get-uri()
   let $unauthorized := local:unauthorized-write($uri)
   let $doc := nav:api-path-to-sequence($uri)
+  let $root := $doc/*
   let $replacement := api:get-data()
   let $accepted := api:get-accept-format($navdoc:request-content-type)
   return
@@ -197,15 +198,18 @@ declare function navdoc:put() {
     then $accepted
     else if ($unauthorized)
     then $unauthorized
+    else if (not(local-name($replacement)=local-name($root))
+      and (namespace-uri($replacement)=namespace-uri($root)))
+    then
+      api:error(400, "The new document must have the same root element as the one it is replacing.", name($replacement))
     else 
-      let $root := $doc/*
-      return
-        if (local-name($replacement)=local-name($root) 
-          and namespace-uri($replacement)=namespace-uri($root))
-        then 
-          update replace $root with $replacement 
-        else
-          api:error(400, "Content is not the same type as the document")
+      if (xmldb:store(util:collection-name($doc), util:document-name($doc),
+        $replacement))
+      then (
+        response:set-status-code(204)
+        )
+      else 
+        api:error(500, "The document could not be stored.")
 };
 
 declare function navdoc:post() {

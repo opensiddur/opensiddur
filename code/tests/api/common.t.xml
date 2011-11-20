@@ -7,6 +7,15 @@
   xmlns:httpclient="http://exist-db.org/xquery/httpclient">
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="httpclient">http://exist-db.org/xquery/httpclient</namespace>
+  <TestClass xml:id="Unauthorized">
+    <xpath desc="returns status code 401">./@statusCode = 401</xpath>
+  </TestClass>
+  <TestClass xml:id="Forbidden">
+    <xpath desc="returns status code 403">./@statusCode = 403</xpath>
+  </TestClass>
+  <TestClass xml:id="NotFound">
+    <xpath desc="returns status code 404">./@statusCode = 404</xpath>
+  </TestClass>
   <TestClass xml:id="Testing">
     <xpath desc="one test link is present">count(.//html:link[@rel='test'])=1</xpath>
     <xpath desc="one test source link is present">count(.//html:link[@rel='test-source'])=1</xpath>
