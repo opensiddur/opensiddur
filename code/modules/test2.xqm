@@ -352,14 +352,10 @@ declare function t:run-testSuite($suite as element(TestSuite)) as element() {
 			{$copy/suiteName}
 			{$copy/description}
 			{
-			  system:as-user($as-user, $password, 
-  			  let $null := t:setup($copy/setup)
-          let $result :=
-    				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
-  	  			return
-  		  			t:run-testSet($set)
-          let $null := t:tearDown($copy/tearDown)
-          return $result
+			  system:as-user($as-user, $password,          
+  				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
+	  			return
+		  			t:run-testSet($set)
         )
 			}
 		</TestSuite>
@@ -384,11 +380,10 @@ declare function t:run-testSet($set as element(TestSet)) {
            {$copy/description}
            {
                for $test at $p in $copy/test[empty(@ignore) or @ignore = "no"][t:if(if)]
-               let $null := t:setup($copy/setup)
+               let $null := (t:setup($suite/setup), t:setup($copy/setup))
                let $result :=  t:run-test($test, $p)
-               let $null := t:tearDown($copy/tearDown)
+               let $null := (t:tearDown($copy/tearDown), t:tearDown($suite/tearDown))
                return $result 
-               
            }
            </TestSet>
         )
