@@ -30,6 +30,10 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 (: the default cache is under this directory :)
 declare variable $ridx:ridx-collection := "refindex";
 
+(: if this file exists, reference indexing should be skipped.
+ :)
+declare variable $ridx:disable-flag := "disabled.xml";
+
 (:~ given a collection, return its index :)
 declare function ridx:index-collection(
   $collection as xs:string
@@ -93,55 +97,62 @@ declare function ridx:reindex(
 declare function ridx:reindex(
   $doc-items as item()*
   ) as empty() {
-  for $doc-item in $doc-items
-  let $doc := 
-    typeswitch($doc-item)
-    case document-node() 
-      return $doc-item
-    default 
-      return doc($doc-item)
-  let $collection := replace(util:collection-name($doc), "^/db", "")
-  let $resource := util:document-name($doc)
-  let $make-mirror-collection :=
-   (: TODO: this should not have to be admin-ed. really, it should
-   be setuid! :)
-   try {
-    system:as-user("admin", $magic:password, 
-      local:make-mirror-collection-path($ridx:ridx-collection, $collection)
-    )
-   }
-   catch * {
-    (: TODO: this code is here to account for a bug where, in the
-     : restore process, the admin password is considered to be blank
-     : even though it had been set. It affects eXist r14669 under 
-     : circumstances that I can't figure out. Hopefully, it will not
-     : affect future versions, but if it does, we need this code
-     : to work around it. A warning will be displayed when this code
-     : executes. The warning is irrelevant to a user.
-     :)
-    debug:debug($debug:warn, "refindex", "The admin password is blank. This is a bug in eXist, I think."),
-    system:as-user("admin", "", 
-      local:make-mirror-collection-path($ridx:ridx-collection, $collection)
-    )
-   }
-  let $mirror-collection :=
-    app:concat-path(("/", $ridx:ridx-collection, $collection))
-  let $owner := xmldb:get-owner($collection, $resource)
-  let $group := xmldb:get-group($collection, $resource)
-  let $mode := xmldb:get-permissions($collection, $resource)
-  let $stored := 
-    if (xmldb:store($mirror-collection, $resource, 
-      element ridx:index {
-        ridx:make-index-entries($doc//@target|$doc//@targets)
-      }
-    ))
-    then 
-      xmldb:set-resource-permissions(
-        $mirror-collection, $resource,
-        $owner, $group, $mode
+  let $disabled := doc-available(concat("/", $ridx:ridx-collection, "/", $ridx:disable-flag))
+  where not($disabled)
+  return
+    for $doc-item in $doc-items
+    let $doc := 
+      typeswitch($doc-item)
+      case document-node() 
+        return $doc-item
+      default 
+        return doc($doc-item)
+    let $collection := replace(util:collection-name($doc), "^/db", "")
+    let $resource := util:document-name($doc)
+    let $make-mirror-collection :=
+     (: TODO: this should not have to be admin-ed. really, it should
+     be setuid! :)
+     try {
+      system:as-user("admin", $magic:password, 
+        local:make-mirror-collection-path($ridx:ridx-collection, $collection)
       )
-    else ()
-  return () 
+     }
+     catch * {
+      (: TODO: this code is here to account for a bug where, in the
+       : restore process, the admin password is considered to be blank
+       : even though it had been set. It affects eXist r14669 under 
+       : circumstances that I can't figure out. Hopefully, it will not
+       : affect future versions, but if it does, we need this code
+       : to work around it. A warning will be displayed when this code
+       : executes. The warning is irrelevant to a user.
+       :)
+      debug:debug($debug:warn, "refindex", "The admin password is blank. This is a bug in eXist, I think."),
+      system:as-user("admin", "", 
+        local:make-mirror-collection-path($ridx:ridx-collection, $collection)
+      )
+     }
+    let $mirror-collection :=
+      app:concat-path(("/", $ridx:ridx-collection, $collection))
+    let $owner := xmldb:get-owner($collection, $resource)
+    let $group := xmldb:get-group($collection, $resource)
+    let $mode := xmldb:get-permissions($collection, $resource)
+    let $last-modified := xmldb:last-modified($collection, $resource)
+    let $idx-last-modified := xmldb:last-modified($mirror-collection, $resource)
+    where ($last-modified > $idx-last-modified)
+    return
+      let $stored := 
+        if (xmldb:store($mirror-collection, $resource, 
+          element ridx:index {
+            ridx:make-index-entries($doc//@target|$doc//@targets)
+          }
+        ))
+        then 
+          xmldb:set-resource-permissions(
+            $mirror-collection, $resource,
+            $owner, $group, $mode
+          )
+        else ()
+      return () 
 };
 
 declare function ridx:make-index-entries(
@@ -248,4 +259,41 @@ declare function ridx:lookup(
         ridx:reindex(root($entry)),
         ridx:lookup($node, $context, $ns, $local-name, $type, $n, $without-ancestors):)
       }
+};
+
+(:~ disable the reference index: you must be admin! :)
+declare function ridx:disable(
+  ) as xs:boolean {
+  let $user := xmldb:get-current-user()
+  let $idx-collection := concat("/",$ridx:ridx-collection)
+  return
+    xmldb:is-admin-user($user)
+    and (
+      if (xmldb:store(
+        $idx-collection,
+        $ridx:disable-flag,
+        <ridx:index-disabled/>
+        ))
+      then (
+        xmldb:set-resource-permissions($idx-collection,
+          $ridx:disable-flag, $user, "dba", util:base-to-integer(0774, 8)
+        ), true()
+      )
+      else false()
+    )
+};
+
+(:~ re-enable the reference index: you must be admin to run! :)
+declare function ridx:enable(
+  ) as xs:boolean {
+  let $idx-collection := concat("/", $ridx:ridx-collection)
+  return
+    if (xmldb:is-admin-user(xmldb:get-current-user())
+      and doc-available(concat($idx-collection, "/", $ridx:disable-flag))
+      )
+    then (
+      xmldb:remove($idx-collection, $ridx:disable-flag),
+      true()
+    )
+    else false()
 };
