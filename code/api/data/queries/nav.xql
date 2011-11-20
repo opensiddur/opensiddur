@@ -28,6 +28,7 @@ import module namespace search="http://jewishliturgy.org/api/data/search"
 declare default element namespace "http://www.w3.org/1999/xhtml";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 
+let $auth := app:authenticate()
 let $uri := request:get-uri()
 let $sequence := nav:api-path-to-sequence($uri)
 let $activity := nav:url-to-xpath($uri)/nav:activity/string()
