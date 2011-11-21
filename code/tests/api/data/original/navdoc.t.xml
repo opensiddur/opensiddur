@@ -267,7 +267,8 @@
       <code><![CDATA[
         apitest:delete("/code/api/data/original/Referee", ())
       ]]></code>
-      <xpath desc="returns status code 400">./@statusCode = 400</xpath> 
+      <xpath desc="returns status code 400">./@statusCode = 400</xpath>
+      <xpath desc="object contains reference to where the document is referenced">.//object/reference = "/code/api/data/original/Referencing%20Document"</xpath> 
     </test>
   </TestSet>
 </TestSuite>
