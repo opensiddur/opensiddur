@@ -138,7 +138,7 @@ declare function ridx:reindex(
     let $mode := xmldb:get-permissions($collection, $resource)
     let $last-modified := xmldb:last-modified($collection, $resource)
     let $idx-last-modified := xmldb:last-modified($mirror-collection, $resource)
-    where ($last-modified > $idx-last-modified)
+    where empty($last-modified) or empty($idx-last-modified) or ($last-modified > $idx-last-modified)
     return
       let $stored := 
         if (xmldb:store($mirror-collection, $resource, 
