@@ -305,7 +305,7 @@ declare function api:list(
  : @param $supported-methods List of HTTP methods that this URI will support (default GET)
  : @param $accept-content-types List of content types for the Accept header in GET (default application/xhtml+xml, text/html)
  : @param $request-content-types List of Content-Type header in PUT or POST request (no default)
- : @param $test-source Pointer to the test source if this API supports the ?_test= parameter
+ : @param $test-source URL(s) to the test source(s) if this API supports the ?_test= parameter
  :)
 declare function api:list(
 	$title as element(title),
@@ -315,7 +315,7 @@ declare function api:list(
 	$supported-methods as xs:string*,
 	$accept-content-types as xs:string*,
 	$request-content-types as xs:string*,
-  $test-source as xs:string?
+  $test-source as xs:string*
 	) as element(html) {
 	let $my-uri := request:get-uri()
 	let $params := (
@@ -334,13 +334,12 @@ declare function api:list(
 			<head>
 				<title>{string($title)}</title>
 				{
-        (: add a link to the tests, if available :)
-        if ($test-source)
-        then (
-          <link rel="test" href="{$my-uri}?_test=1"/>,
-          <link rel="test-source" href="{$test-source}"/>
-        )
-        else (),
+        (: add links to the tests, if available :)
+        for $source in $test-source
+        return (
+          <link rel="test" href="{$my-uri}?_test={$source}"/>,
+          <link rel="test-source" href="{$source}"/>
+        ),
 				(: add first, previous, next, and last links :)
 				if ($start > 1 and $n-results >= 1)
 				then (
@@ -677,10 +676,13 @@ declare function api:get-parameter(
 declare function api:tests(
   $test-source as xs:string
   ) as element()? {
-  if (api:get-method() = "GET" and request:get-parameter("_test", ()))
-  then (
-    api:serialize-as("xhtml"),
-    t:format-testResult(t:run-testSuite(doc($test-source)/*))
-  )
+  let $test-param := request:get-parameter("_test", ())
+  let $test-to-run := ($test-param[doc-available(.)], $test-source)[1]
+  return
+    if (api:get-method() = "GET" and $test-param)
+    then (
+      api:serialize-as("xhtml"),
+      t:format-testResult(t:run-testSuite(doc($test-to-run)/*))
+    )
   else ()
 };
