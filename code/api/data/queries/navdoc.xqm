@@ -242,7 +242,10 @@ declare function navdoc:delete() {
                 for $ref in $references
                 return document-uri(root($ref))
               )
-            return nav:sequence-to-api-path(doc($referencing-doc))
+            return 
+              <reference xmlns="">{
+                nav:sequence-to-api-path(doc($referencing-doc))
+              }</reference>
           ) 
 };
 
