@@ -16,7 +16,8 @@
       apitest:post("/code/api/data/original", 
         apitest:auth-header(),
         doc("/code/tests/api/data/original/navdoc-test.xml")
-        )
+        ),
+      apitest:clear()
     ]]></code>
   </setup>
   <tearDown>
@@ -175,7 +176,7 @@
       ]]></code>
     </tearDown>
     <test serialize="method=text">
-      <task>PUT</task>
+      <task>PUT TEI data</task>
       <code><![CDATA[
         apitest:put("/code/api/data/original/Test%20Document", 
           (), 
@@ -183,6 +184,15 @@
       ]]></code>
       <xpath desc="returns status code 204">./@statusCode = 204</xpath>
       <xpath desc="document has been replaced">doc("/group/testuser/original/Test%20Document.xml")//tei:title = "Test Document 2"</xpath> 
+    </test>
+    <test>
+      <task>PUT non-TEI root</task>
+      <code><![CDATA[
+        apitest:put("/code/api/data/original/Test%20Document", 
+          (), 
+          <tei:div>Not a full TEI file</tei:div>)
+      ]]></code>
+      <xpath desc="returns status code 400">./@statusCode = 400</xpath> 
     </test>
   </TestSet>
   <TestSet>
@@ -234,6 +244,30 @@
       ]]></code>
       <xpath desc="returns status code 204">./@statusCode = 204</xpath>
       <xpath desc="document has been removed">not(doc-available("/group/testuser/original/Test%20Document.xml"))</xpath> 
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>DELETE a document that is referenced by another document</testName>
+    <setup>
+      <code><![CDATA[
+      apitest:login(),
+      apitest:post("/code/api/data/original", (), 
+        doc("/code/tests/api/data/original/navdoc-test-referee.xml")),
+      apitest:post("/code/api/data/original", (), 
+        doc("/code/tests/api/data/original/navdoc-test-reference.xml"))
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      apitest:clear()
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>DELETE</task>
+      <code><![CDATA[
+        apitest:delete("/code/api/data/original/Referee", ())
+      ]]></code>
+      <xpath desc="returns status code 400">./@statusCode = 400</xpath> 
     </test>
   </TestSet>
 </TestSuite>

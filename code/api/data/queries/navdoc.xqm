@@ -8,6 +8,8 @@ module namespace navdoc = 'http://jewishliturgy.org/api/data/navdoc';
 
 import module namespace api="http://jewishliturgy.org/modules/api" 
   at "/code/api/modules/api.xqm";
+import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+  at "/code/modules/refindex.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "/code/api/modules/nav.xqm";
 import module namespace navel="http://jewishliturgy.org/api/data/navel"
@@ -224,12 +226,24 @@ declare function navdoc:delete() {
     then $unauthorized
     else 
       let $doc := nav:api-path-to-sequence($uri)
+      let $references := ridx:lookup-document($doc)
       let $collection := util:collection-name($doc)
       let $name := util:document-name($doc)
-      return (
-        xmldb:remove($collection, $name),
-        response:set-status-code(204)
-      )
+      return 
+        if (empty($references))
+        then (
+          xmldb:remove($collection, $name),
+          response:set-status-code(204)
+        )
+        else 
+          api:error(400, "You cannot delete a document that other documents reference. The other documents are listed.",
+            for $referencing-doc in 
+              distinct-values(
+                for $ref in $references
+                return document-uri(root($ref))
+              )
+            return nav:sequence-to-api-path(doc($referencing-doc))
+          ) 
 };
 
 declare function navdoc:go(
