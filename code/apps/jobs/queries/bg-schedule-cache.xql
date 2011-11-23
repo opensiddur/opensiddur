@@ -5,8 +5,8 @@ xquery version "3.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
-import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "xmldb:exist:///code/modules/paths.xqm";
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
   at "xmldb:exist:///code/modules/cache-controller.xqm";
 import module namespace jobs="http://jewishliturgy.org/apps/jobs"
@@ -20,20 +20,18 @@ declare variable $local:task-id external;
 
 declare variable $local:excluded-collections := concat("(",
   string-join(
-    ("/output/","/trash/"),
+    ("/output/","/trash/","/template.xml$"),
   ")|("),
   ")");
 
 try {
-  if ($paths:debug)
-  then 
-    util:log-system-out(
-      concat('In uncached resource scheduler at ', string(current-dateTime()))
-    )
-  else (),
+  debug:debug($debug:info,
+    "jobs",
+    concat('In uncached resource scheduler at ', string(current-dateTime()))
+    ),
   let $documents :=
     system:as-user('admin', $magic:password,
-      collection('/group')//tei:TEI/document-uri(root(.))
+      (collection('/group')|collection('/code'))/tei:TEI/document-uri(root(.))
     )
   for $document in $documents
   where
@@ -54,5 +52,7 @@ try {
     )
 }
 catch * ($c, $d, $v) {
-  util:log-system-out(('Error in cache scheduler: ', $c, ' ', $d, ' ', $v))
+  debug:debug($debug:warn, "jobs",
+    ('Error in cache scheduler: ', $c, ' ', $d, ' ', $v)
+  )
 }
