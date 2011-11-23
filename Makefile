@@ -31,7 +31,6 @@
 # db-sync DBAPASS=<database password> - synchronize code, data, and common from the development working copy to a running database; 
 # db-syncclean - clean the __contents__.xml files left by syncing the database 
 # 
-# $Id: Makefile 776 2011-05-01 07:34:30Z efraim.feinstein $
 
 # Local changes to variables should go in Makefile.local
 # Any variable set in this file may be overridden by a setting in Makefile.local
@@ -185,7 +184,7 @@ $(DBDIR)/schema:
 IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 
 # build eXist (what dependencies should this have?)
-$(EXIST_INSTALL_JAR): svn-exist
+$(EXIST_INSTALL_JAR):
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
 	rm -f $(LIBDIR)/exist/extensions/indexes/lucene/lib/*2.9.2.jar
 	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/lib/lucene*2.9.3.jar $(LIBDIR)/exist/extensions/indexes/lucene/lib
@@ -227,21 +226,29 @@ clean-hebmorph-lucene:
 	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant clean
 
 # Install a copy of the eXist database
-.PHONY: db-install db-install-wlc bf-install db-uninstall db-sync db-syncclean
-db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
+.PHONY: db-install db-install-nonet db-install-wlc bf-install db-uninstall db-sync db-syncclean installer patches lucene-install copy-files setup-password
+db-install: submodules svn-exist code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db copy-files setup-password   
+
+#installer that does not rely on the presence of a network. 
+db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db-nonet copy-files setup-password
+	@echo "Done."
+	touch $(EXIST_INSTALL_DIR)/EXIST.AUTOINSTALLED
+
+installer: $(EXIST_INSTALL_JAR)
 	java -jar $(EXIST_INSTALL_JAR) -p $(EXIST_INSTALL_DIR)
+
+patches:
 	$(XSLT) -s $(EXIST_INSTALL_DIR)/conf.xml -o $(EXIST_INSTALL_DIR)/conf.xml $(SETUPDIR)/setup-conf-xml.xsl2
 	-patch -Nd $(EXIST_INSTALL_DIR) < $(SETUPDIR)/mime-types.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/webapp/WEB-INF < $(SETUPDIR)/controller-config.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/tools/jetty/etc < $(SETUPDIR)/jetty.xml.patch
+
+lucene-install: installer $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/lucene.hebrew.jar 
+
+$(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/lucene.hebrew.jar:
 	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
-	# kluge:
-	#cp $(DBDIR)/data/global/transliteration/hebrew.dtd $(EXIST_INSTALL_DIR)
-	@read -p "Set the password for admin database user: " ADMPASS && \
-	  echo "Setting admin password..." && \
-		cat $(SETUPDIR)/setup.tmpl.xql | sed "s/ADMINPASSWORD/$$ADMPASS/g" > $(SETUPDIR)/setup.xql && \
-		echo "done."  && \
-		make db
+
+copy-files:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
 	@echo "Copying files to database..."
 	@#copy the transliteration DTD first so eXist will know where they are during restore
@@ -252,10 +259,17 @@ db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/system/__contents__.xml -ouri=xmldb:exist:// 	
 	@#copy the transforms directory again so the tests that require the document URI trigger will run
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/transforms/__contents__.xml -ouri=xmldb:exist:// 
+
+.PHONY: setup-password
+setup-password: $(SETUPDIR)/setup.xql
+
+$(SETUPDIR)/setup.xql:
+	@read -p "Set the password for admin database user: " ADMPASS && \
+	  echo "Setting admin password..." && \
+		cat $(SETUPDIR)/setup.tmpl.xql | sed "s/ADMINPASSWORD/$$ADMPASS/g" > $(SETUPDIR)/setup.xql && \
+		echo "done."
 	$(EXISTCLIENT) -qls -u admin -F $(SETUPDIR)/setup.xql
 	rm -f $(SETUPDIR)/setup.xql
-	@echo "Done."
-	touch $(EXIST_INSTALL_DIR)/EXIST.AUTOINSTALLED
 
 #$(EXIST_INSTALL_DIR)/EXIST.AUTOINSTALLED: 
 #	make db-install
@@ -294,8 +308,11 @@ db-sync:
 	$(EXISTBACKUP) -u admin -p $(DBAPASS) -r `pwd`/$(DATADIR)/__contents__.xml -ouri=xmldb:exist://localhost:8080/xmlrpc
 	$(EXISTBACKUP) -u admin -p $(DBAPASS) -r `pwd`/$(COMMONDIR)/__contents__.xml -ouri=xmldb:exist://localhost:8080/xmlrpc
 
+.PHONY: db db-nonet
+db: externals db-nonet
+
 # patch error status ignored because it returns 1 if patches are already applied
-db: externals schema transforms $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tests
+db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tests
 	mkdir -p $(DBDIR)/xforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources
