@@ -11,7 +11,7 @@ declare namespace xsl="http://www.w3.org/1999/XSL/Transform";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
 	at "/code/modules/paths.xqm";
 
-let $path-to-transliterator := '/code/transforms/stage1/translit.xsl2'
+let $path-to-transliterator := '/code/transforms/translit/translit.xsl2'
 let $path-to-tables := '/group/everyone/transliteration'
 let $data := request:get-data()
 let $table := $data/table
