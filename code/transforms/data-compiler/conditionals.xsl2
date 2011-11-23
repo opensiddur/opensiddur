@@ -51,7 +51,6 @@
 				<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
 			</p>
 		</xd:detail>
-		<xd:svnId>$Id: conditionals.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
 	</xd:doc>
 
   <xd:doc>
@@ -168,7 +167,7 @@
     </xsl:variable>
     <xsl:for-each select="$match-with-settings">
       <xsl:copy>
-        <xsl:copy-of select="@*"/>
+        <xsl:apply-templates select="@*" mode="#current"/>
         <xsl:if test="exists($new-settings)">
           <jx:set>
             <xsl:sequence select="$new-settings"/>
@@ -276,7 +275,9 @@
     it's an identity transform</xd:short>
   </xd:doc>
   <xsl:template match="element()" mode="process-conditionals">
-    <xsl:call-template name="identity-in-mode"/>
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </xsl:copy>
   </xsl:template>
 
   <!-- standardize-features -->
@@ -289,7 +290,7 @@
 	</xd:doc>
 	<xsl:template match="tei:fs" mode="standardize-features">
 		<xsl:copy>
-			<xsl:copy-of select="@* except @feats"/>
+			<xsl:apply-templates select="@* except @feats" mode="#current"/>
   			<xsl:if test="@feats">
           <xsl:apply-templates select="for $feat in tokenize(@feats,'\s+') return func:follow-uri($feat, ., -1)" 
             mode="#current"/>
@@ -303,7 +304,7 @@
 	</xd:doc>
 	<xsl:template match="tei:fs" mode="set-features">
 		<xsl:copy>
-			<xsl:copy-of select="@* except @feats"/>
+			<xsl:apply-templates select="@* except @feats" mode="#current"/>
       <xsl:variable name="present-features" as="element(tei:f)*">
   			<xsl:if test="@feats">
           <xsl:apply-templates select="for $feat in tokenize(@feats,'\s+') return func:follow-uri($feat, ., -1)" 
@@ -327,7 +328,7 @@
 	</xd:doc>
 	<xsl:template match="tei:f" mode="standardize-features set-features">
 		<xsl:copy>
-      <xsl:copy-of select="@* except @fVal"/>
+      <xsl:apply-templates select="@* except @fVal" mode="#current"/>
 			<xsl:if test="@fVal">
 				<xsl:apply-templates 
           select="for $fVal in tokenize(@fVal, '\s+') return func:follow-uri($fVal, ., -1)" mode="#current"/>
@@ -375,7 +376,7 @@
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
-					<xsl:copy-of select="@*"/>
+					<xsl:apply-templates select="@*" mode="#current"/>
 					<xsl:sequence select="$contents"/>
 				</xsl:copy>
 			</xsl:otherwise>
@@ -458,7 +459,9 @@
     <xd:short>Default is identity template</xd:short>
   </xd:doc>
   <xsl:template match="*" mode="standardize-features set-features">
-    <xsl:call-template name="identity-in-mode"/>
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </xsl:copy>
   </xsl:template>
 
 
@@ -649,7 +652,7 @@
           </xsl:if>
         </xsl:variable>
         <xsl:copy>
-          <xsl:copy-of select="@*"/>
+          <xsl:apply-templates select="@*" mode="#current"/>
           
           <xsl:variable name="associations" 
             as="element(jx:conditional)*" 
@@ -786,4 +789,19 @@
   </xd:doc>
   <xsl:template match="text()" mode="evaluate-conditionals"/>
 
+  <xd:doc>
+    <xd:short>Match @xml:id elements with high priority, 
+    convert @xml:id to @jx:id</xd:short>
+  </xd:doc>
+  <xsl:template match="@xml:id" mode="#all">
+    <xsl:attribute name="jx:id" select="."/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>The default operation for an attribute is identity</xd:short>
+  </xd:doc>
+  <xsl:template match="@*" mode="#all">
+    <xsl:copy/>
+  </xsl:template>
+  
 </xsl:stylesheet>
