@@ -9,9 +9,7 @@ module namespace format="http://jewishliturgy.org/modules/format";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace err="http://jewishliturgy.org/errors";
-
-import module namespace util="http://exist-db.org/xquery/util";
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
+declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
   at "xmldb:exist:///code/modules/app.xqm";
@@ -78,6 +76,32 @@ declare function format:data-compile(
         else (), ())
   )
 };
+
+declare function format:transliterate(
+  $uri-or-node as item(),
+  $user as xs:string?,
+  $password as xs:string?
+  ) as document-node() {
+  format:_wrap-document(
+    app:transform-xslt($uri-or-node, 
+      app:concat-path($format:rest-path-to-xslt, 'translit/translit-main.xsl2'),
+      (
+        if ($user)
+        then (
+          <param name="user" value="{$user}"/>,
+          <param name="password" value="{$password}"/>
+        )
+        else (), 
+        <param name="transliteration-tables" value="{
+          string-join(
+            collection("/group")/tr:table/document-uri(root(.)),
+            " ")
+        }"/>
+      ), ()
+    )
+  )
+};
+
 
 declare function format:list-compile(
 	$data-compiled-node as item()
