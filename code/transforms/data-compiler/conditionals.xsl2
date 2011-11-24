@@ -158,24 +158,11 @@
       ' $next-settings:', $next-settings), 
       '@xml:id p=901', $debug-detail)"/>
     
-    <xsl:variable name="match-with-settings" as="node()*">
-      <xsl:next-match>
-        <xsl:with-param name="current-settings" 
-          as="document-node(element(jx:current-settings))?"
-          tunnel="yes" select="$next-settings"/>
-      </xsl:next-match>
-    </xsl:variable>
-    <xsl:for-each select="$match-with-settings">
-      <xsl:copy>
-        <xsl:apply-templates select="@*" mode="#current"/>
-        <xsl:if test="exists($new-settings)">
-          <jx:set>
-            <xsl:sequence select="$new-settings"/>
-          </jx:set>
-        </xsl:if>
-        <xsl:sequence select="node()"/>
-      </xsl:copy>
-    </xsl:for-each>
+    <xsl:next-match>
+      <xsl:with-param name="current-settings" 
+        as="document-node(element(jx:current-settings))?"
+        tunnel="yes" select="$next-settings"/>
+    </xsl:next-match>
   </xsl:template>
 
 	<xd:doc>

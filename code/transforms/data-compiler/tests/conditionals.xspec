@@ -63,7 +63,6 @@
       <x:expect label="and association=NO results in presence of structure and content with instruction" 
         test="//*[@jx:id='p3_M_N']">
         <tei:p jx:id="p3_M_N">
-          <jx:set>...</jx:set>
           <jx:associate>...</jx:associate>
           <tei:note jx:id="instruction">...</tei:note>
           <tei:ab>...</tei:ab>
@@ -72,7 +71,6 @@
       <x:expect label="and association=YES results in presence of structure and content with instruction" 
         test="//*[@jx:id='p3_M_Y']">
         <tei:p jx:id="p3_M_Y">
-          <jx:set>...</jx:set>
           <jx:associate>...</jx:associate>
           <tei:note jx:id="instruction">...</tei:note>
           <tei:ab>...</tei:ab>
