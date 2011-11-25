@@ -24,7 +24,7 @@ debug:debug($debug:info,
   "compilation",
   concat("Transliteration phase for ", $local:source-collection, "/", $local:source-resource)
   ),
-format:update-status($local:dest-collection, $local:source-resource, $format:transliteration, $local:job-id),
+format:update-status($local:dest-collection, $local:source-resource, $format:transliterate, $local:job-id),
 let $source-path := concat($local:source-collection, "/", $local:source-resource)
 let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
 let $source-doc := doc($source-path)
