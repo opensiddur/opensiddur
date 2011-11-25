@@ -79,6 +79,17 @@
   </xsl:variable>
   <xsl:key name="tables" match="table" use="@shortname"/>
 
+  <xsl:variable name="tei-ns" as="xs:string" select="'http://www.tei-c.org/ns/1.0'"/>
+  <xsl:variable name="j-ns" as="xs:string" select="'http://jewishliturgy.org/ns/jlptei/1.0'"/>
+
+  <xd:doc>
+    <xd:short>Elements that if an element is a descendant of them and not inside
+    a parallelGrp, will not cause the transliterator to form
+    a new parallelGrp</xd:short>
+  </xd:doc>
+  <xsl:variable name="ancestor-exceptions" as="xs:QName+"
+    select="(QName($tei-ns, 'note'))"/>
+
   <xd:doc>
     <xd:short>Return a transliteration table by its short name</xd:short>
   </xd:doc>
@@ -140,9 +151,19 @@
     </xsl:variable>
     
     <xsl:choose>
-      <xsl:when test="exists($table) and 
+      <!-- 
+        does a table exist?
+        is this the alignment element?
+        is this element an exception?
+      -->
+      <xsl:when test="
+        exists($table) and 
         local-name(.)=local-name-from-QName($alignment-element) and 
-        namespace-uri(.)=namespace-uri-from-QName($alignment-element)">
+        namespace-uri(.)=namespace-uri-from-QName($alignment-element)
+        and not(
+          some $ancestor in ancestor-or-self::* 
+          satisfies QName(namespace-uri($ancestor), local-name($ancestor))=$ancestor-exceptions
+          )">
         <j:parallelGrp>
           <j:original>
             <xsl:sequence select="$next"/>
@@ -218,7 +239,6 @@
   </xsl:template>
 
   <xsl:template match="node()">
-    <xsl:message><xsl:sequence select="name(.)"/></xsl:message>
     <xsl:copy>
       <xsl:copy-of select="@*"/>
       <xsl:apply-templates />
