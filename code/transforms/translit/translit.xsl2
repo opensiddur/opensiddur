@@ -152,37 +152,44 @@
 		
 		<xsl:variable name="replaced" as="xs:string*">
 			<xsl:analyze-string select="$word" flags="x"
-			regex="&yod;([&sheva;]?)([\P{{L}}]*)&he;([\P{{L}}]*)&vav;([&qamats;&patah;&hiriq;])([\P{{L}}]*)&he;([\P{{L}}]*)$">
+			regex="(&yod;([&sheva;]?)([\P{{L}}]*)&he;([\P{{L}}]*)&vav;([&qamats;&patah;&hiriq;])([\P{{L}}]*)&he;([\P{{L}}]*)$)|(&yod;([&sheva;]?)&yod;[&qamats;]?$)">
 				<xsl:matching-substring>
 					<xsl:variable name="msg">matching: <xsl:value-of select="regex-group(0)"/></xsl:variable>
 					<xsl:sequence select="func:debug($msg,'translit.xsl2(text(),mode=replace-tetragrammaton)',$debug-detail)"/>
 					<xsl:choose>
-						<xsl:when test="regex-group(4)='&hiriq;'">
+						<xsl:when test="regex-group(5)='&hiriq;'">
 							<!-- elohim -->
 							<xsl:value-of select="string-join(
 								('&aleph;',
-								if (regex-group(1)='&sheva;') then '&hatafsegol;' else '',
-								regex-group(2),
-								'&lamed;&holam;',
+								if (regex-group(2)='&sheva;') then '&hatafsegol;' else '',
 								regex-group(3),
+								'&lamed;&holam;',
+								regex-group(4),
 								'&he;&hiriq;',
-								regex-group(5),
+								regex-group(6),
 								'&finalmem;',
-								regex-group(6)),'')"/>
+								regex-group(7)),'')"/>
 						</xsl:when>
+                        <xsl:when test="regex-group(8)">
+                          <!-- adonai without cantillation -->
+                          <xsl:value-of select="string-join(
+                            ('&aleph;',
+                            if (regex-group(9)='&sheva;') then '&hatafpatah;' else '',
+                            '&dalet;&holam;&nun;&yod;')"/>
+                        </xsl:when>
 						<xsl:otherwise>
 							<!-- adonai -->
 							<xsl:value-of select="string-join(
 								('&aleph;',
-								if (regex-group(1)='&sheva;') then '&hatafpatah;' else '',
-								regex-group(2),
-								'&dalet;&holam;',
+								if (regex-group(2)='&sheva;') then '&hatafpatah;' else '',
 								regex-group(3),
-								'&nun;',
+								'&dalet;&holam;',
 								regex-group(4),
+								'&nun;',
 								regex-group(5),
+								regex-group(6),
 								'&yod;',
-								regex-group(6)),'')"/>
+								regex-group(7)),'')"/>
 						</xsl:otherwise>
 					</xsl:choose>
 				</xsl:matching-substring>
