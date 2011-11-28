@@ -279,12 +279,8 @@ declare function local:dependencies(
   let $dependencies := $all-jobs[jobs:depends=$job-id]
   where exists($dependencies)
   return (
-    $dependencies
-    (: TODO: insert this code when the following bug is fixed:
-    http://sourceforge.net/mailarchive/message.php?msg_id=28459184
-     ,
+    $dependencies,
     local:dependencies($dependencies/jobs:id/number())
-    :)
   )
 };
 
@@ -380,34 +376,42 @@ declare function jobs:run(
       jobs:running($job-id, $task-id),
       system:as-user($runas, $password,
         (
-          try {
-            debug:debug($debug:info,
-            "jobs",
-            ("Jobs module attempting to run: ", $run)),
-            let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
-            return 
-            (
-              util:eval($query , false(),
-                (
-                xs:QName('local:user'), $runas,
-                xs:QName('local:password'), $password,
-                xs:QName("local:job-id"), $job-id,
-                for $param in $run/jobs:param
-                let $qname := xs:QName(concat('local:', $param/jobs:name))
-                let $value := string($param/jobs:value)
-                return ($qname, $value)
+          let $completed-job :=
+            try {
+              debug:debug($debug:info,
+              "jobs",
+              ("Jobs module attempting to run: ", $run)),
+              let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
+              return 
+              (
+                util:eval($query , false(),
+                  (
+                  xs:QName('local:user'), $runas,
+                  xs:QName('local:password'), $password,
+                  xs:QName("local:job-id"), $job-id,
+                  for $param in $run/jobs:param
+                  let $qname := xs:QName(concat('local:', $param/jobs:name))
+                  let $value := string($param/jobs:value)
+                  return ($qname, $value)
+                  )
                 )
-              )
-            ),
-            jobs:complete($job-id),
-            xs:integer($job-id)
-          }
-          catch * ($code, $description, $value) {
-            debug:debug($debug:info, "jobs", ("Caught an exception while running job: ", $job-id, " Exception:", $code, " ", $description, " ", $value)),
-            local:record-exception($job-id, $code, $description, $value),
-            jobs:incomplete($job-id), 
-            jobs:cancel($job-id)
-          }  
+              ),
+              jobs:complete($job-id),
+              xs:integer($job-id)
+            }
+            catch * ($code, $description, $value) {
+              debug:debug($debug:info, "jobs", ("Caught an exception while running job: ", $job-id, " Exception:", $code, " ", $description, " ", $value)),
+              local:record-exception($job-id, $code, $description, $value),
+              jobs:incomplete($job-id)
+            }
+          return
+            (: this odd coding is necessary because this code
+             : will cause a stack overflow
+             : if it is inside a catch clause
+             :)
+            if ($completed-job instance of xs:integer)
+            then $completed-job
+            else jobs:cancel($job-id)
         )
       )
     )
