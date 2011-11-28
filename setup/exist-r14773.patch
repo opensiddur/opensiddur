@@ -1,0 +1,13 @@
+Index: src/org/exist/xquery/Predicate.java
+===================================================================
+--- lib/exist/src/org/exist/xquery/Predicate.java	(revision 14772)
++++ lib/exist/src/org/exist/xquery/Predicate.java	(revision 14773)
+@@ -287,6 +287,8 @@
+ 		if (inner == null)
+ 			result = Sequence.EMPTY_SEQUENCE;
+ 		else {
++			if (executionMode == UNKNOWN)
++				executionMode = BOOLEAN;
+ 			int recomputedExecutionMode = executionMode;
+ 
+ 			Sequence innerSeq = null;

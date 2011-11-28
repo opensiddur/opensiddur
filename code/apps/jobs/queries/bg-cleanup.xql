@@ -4,20 +4,17 @@ xquery version "3.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
-import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "xmldb:exist:///code/modules/paths.xqm";
-import module namespace jcache="http://jewishliturgy.org/modules/cache"
-  at "xmldb:exist:///code/modules/cache-controller.xqm";
-
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 (:
 declare variable $local:resource external;
 :)
 
 
-if ($paths:debug)
+debug:debug($debug:info, "jobs",
+ concat('Background cleanup ', $local:resource)
+  ),
+if (doc-available(concat($local:collection, "/", $local:resource)))
 then 
-  util:log-system-out(
-    concat('Background cleanup ', $local:resource)
-  )
-else (),
-xmldb:remove($local:collection, $local:resource)
+  xmldb:remove($local:collection, $local:resource)
+else ()
