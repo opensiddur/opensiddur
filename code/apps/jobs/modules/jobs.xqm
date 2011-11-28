@@ -427,19 +427,16 @@ declare function local:record-exception(
   $description as xs:string,
   $value as xs:string
   ) as empty() {
-  let $null := debug:debug($debug:info, "jobs", ("just got into record-exception. I am ", xmldb:get-current-user(), " $job=", $job-id))
   let $job :=
     system:as-user("admin", $magic:password,
       doc($jobs:queue-path)//jobs:job[jobs:id=$job-id]
     )
   let $error-element := $job/jobs:error
-  let $null := debug:debug($debug:info, "jobs", ("in record-exception. Error-element=", $error-element))
   where exists($error-element)
   return
     let $runas as xs:string := $job/jobs:runas/string()
     let $collection := string($error-element/jobs:collection)
     let $resource := string($error-element/jobs:resource)
-    let $null := debug:debug($debug:info, "jobs", ("in record-exception: collection/resource=", $collection, "/", $resource))
     return
       if (xmldb:store($collection, $resource, 
         <jobs:error>
@@ -453,8 +450,7 @@ declare function local:record-exception(
         xmldb:set-resource-permissions($collection, $resource, $runas, $runas,
           util:base-to-integer(0770,8))
       else 
-        error(xs:QName("err:STORE"), "Cannot store the error output. This is very bad!"),
-  debug:debug($debug:info, "jobs", "after record exception")
+        error(xs:QName("err:STORE"), "Cannot store the error output. This is very bad!")
 };
 
 (:~ return how many jobs are ahead of a given job in the queue 
@@ -478,3 +474,22 @@ declare function jobs:wait-in-queue(
     )
 };
   
+(:~ run this when a user changes password.
+ : You must be dba or the user in question to make this work
+ :)
+declare function jobs:change-password(
+  $user as xs:string,
+  $new-password as xs:string
+  ) as empty() {
+  let $logged-in-user := app:auth-user()
+  return
+    if (xmldb:is-admin-user($logged-in-user) or $user=$logged-in-user)
+    then 
+      system:as-user("admin", $magic:password,
+        update value 
+          doc($jobs:users-path)//jobs:user[jobs:name=$user]/jobs:password
+          with $new-password
+      )
+    else
+      error(xs:QName("err:AUTHORIZATION"), "To change a password, you must be admin or the user whose password you are changing.")
+};
