@@ -35,6 +35,8 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
   at "xmldb:exist:///code/magic/magic.xqm";
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "xmldb:exist:///code/modules/app.xqm";
 
 declare namespace err="http://jewishliturgy.org/errors";
 
