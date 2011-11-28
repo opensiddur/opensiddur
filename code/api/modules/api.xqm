@@ -574,7 +574,13 @@ declare function api:get-data(
   return
     if ($data instance of xs:base64Binary)
     then util:binary-to-string($data)
-    else $data
+    else 
+      (: eXist switched from returning elements to document nodes 
+       : this wrapper changes back to the old behavior
+       :)
+      typeswitch($data)
+      case document-node() return $data/node()
+      default return $data
 };
 
 declare function api:get-parameter(
