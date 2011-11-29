@@ -19,14 +19,14 @@ xquery version "3.0";
   try {
     xmldb:create-group('testuser')
   }
-  catch { 
+  catch * { 
     util:log-system-out('Group testuser existed. Skipping creation.')
   },
   xmldb:create-user('testuser','testuser', ('testuser','everyone'), '/group/testuser'),
   try {
     xmldb:create-group('testuser2')
   }
-  catch { 
+  catch * { 
     util:log-system-out('Group testuser2 existed. Skipping creation.')
   },
   xmldb:create-user('testuser2','testuser2', ('testuser2','everyone'), '/group/testuser2'),
