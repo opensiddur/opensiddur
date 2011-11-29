@@ -121,7 +121,7 @@ XSPECREPO = http://xspec.googlecode.com/svn/trunk/
 
 XSLTFORMSDIR = $(LIBDIR)/xsltforms
 XSLTFORMSREPO = https://xsltforms.svn.sourceforge.net/svnroot/xsltforms
-XSLTFORMS_REVISION ?= -r 519
+XSLTFORMS_REVISION ?= -r 520
 
 XSLTDOCDIR = $(LIBDIR)/XSLTDoc
 XSLTDOCREPO = https://xsltdoc.svn.sourceforge.net/svnroot/xsltdoc/trunk/xsltdoc
@@ -186,6 +186,7 @@ IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 # build eXist (what dependencies should this have?)
 $(EXIST_INSTALL_JAR): svn-exist
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
+	-patch -N -p0 < $(SETUPDIR)/exist-r14773.patch
 	rm -f $(LIBDIR)/exist/extensions/indexes/lucene/lib/*2.9.2.jar
 	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/lib/lucene*2.9.3.jar $(LIBDIR)/exist/extensions/indexes/lucene/lib
 	cd $(LIBDIR)/exist && \

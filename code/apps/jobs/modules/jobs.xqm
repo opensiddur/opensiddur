@@ -29,14 +29,18 @@ xquery version "3.0";
  :)
 module namespace jobs="http://jewishliturgy.org/apps/jobs";
 
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
   at "xmldb:exist:///code/magic/magic.xqm";
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "xmldb:exist:///code/modules/app.xqm";
 
 declare namespace err="http://jewishliturgy.org/errors";
 
-declare option exist:optimize "enable=no";
+(:declare option exist:optimize "enable=no";:)
 
 declare variable $jobs:queue-collection := '/code/apps/jobs/data';
 declare variable $jobs:queue-resource := "queue.xml";
@@ -256,15 +260,31 @@ declare function jobs:incomplete(
   $job-id as xs:integer
   ) as empty() {
   system:as-user('admin', $magic:password,
-    let $queue := doc($jobs:queue-path)/jobs:jobs
-    let $this-job := $queue/jobs:job[jobs:id=$job-id]  
+    let $this-job := doc($jobs:queue-path)//jobs:job[jobs:id=$job-id]
     return (
-      update delete $this-job//jobs:running
+      update delete $this-job/jobs:running
     )
   )
 };
 
-(:~ cancel a job and all its dependent jobs
+(:~ find all downstream dependencies of a given job :)
+declare function local:dependencies(
+  $job-ids as xs:integer+
+  ) as element(jobs:job)* {
+  let $all-jobs :=
+    system:as-user("admin", $magic:password,
+      doc($jobs:queue-path)//jobs:job
+    )
+  for $job-id in $job-ids
+  let $dependencies := $all-jobs[jobs:depends=$job-id]
+  where exists($dependencies)
+  return (
+    $dependencies,
+    local:dependencies($dependencies/jobs:id/number())
+  )
+};
+
+(:~ cancel a job and all its dependent jobs because of a given error
  : note: a running job cannot be canceled, but dependent jobs will be
  :)
 declare function jobs:cancel( 
@@ -274,51 +294,27 @@ declare function jobs:cancel(
     system:as-user('admin', $magic:password,
       doc($jobs:queue-path))/jobs:jobs
   let $job := $queue//jobs:job[jobs:id=$job-id]
-  where $job
-  return  
+  where exists($job)
+  return
     let $current-user := xmldb:get-current-user()
     let $can-cancel := 
-      if ($job/jobs:runas=$current-user or 
+      ($job/jobs:runas=$current-user or 
         xmldb:is-admin-user($current-user))
-      then true()
-      else 
+      or 
         error(xs:QName("err:AUTHORIZATION"), concat("The user ", $current-user, 
           " is not authorized to cancel job#", string($job-id), " which is owned by ",
           $job/jobs:runas))
-    let $dependencies := $queue//jobs:job[jobs:depends=$job-id]
-    let $has-external-dependencies := 
-      some $d in $dependencies satisfies not($d/jobs:runas=$job/jobs:runas)
+    let $dependencies := local:dependencies($job-id)
     return (
       (: try to cancel the current job :)
-      if (not($job/jobs:running) and not($has-external-dependencies))
-      then 
-        (: cancel this job :)
+      if ($job/jobs:running)
+      then
+        error(xs:QName("err:RUNNING"), concat("The jobs module attempted to cancel a running job ", $job-id, ", an illegal operation. It should have called jobs:incomplete() first. This is a bug."))
+      else 
         system:as-user('admin', $magic:password,
-          update delete $job
+          update delete ($job, $dependencies)
         )
-      else (
-        (: cannot cancel a running job -- TODO? :)
-        (: cannot cancel a job that has dependencies from other users :)
-      ),
-      (: find dependent jobs from the same user and cancel them :)
-      for $dependency in $dependencies
-      where $dependency/jobs:runas=$job/jobs:runas
-      return (
-        if ($paths:debug)
-        then 
-          util:log-system-out(concat("Cancel job dependency ", $dependency/jobs:id/number()))
-        else (),
-        util:log-system-out(
-          concat("WARNING: While cancelling job ", 
-          $job-id, " cannot cancel dependency ", 
-          $dependency/jobs:id/number()))
-        (:
-         : TODO: we can't cancel here because eXist fails on compile
-         : with a stack overflow
-         :)
-        (:jobs:cancel($dependency/jobs:id/number()):)
       )
-    )
 };
   
 
@@ -363,9 +359,11 @@ declare function jobs:run(
     let $job-id := $next-job/jobs:id/number()
     let $run := $next-job/jobs:run
     let $null := 
-      if ($paths:debug)
-      then util:log-system-out(("Jobs module: Next job: ", $next-job, " runas=", $runas, " $id=", $job-id, " run=", $run, " exist=", exists($next-job)))
-      else ()
+      debug:debug($debug:info,
+      "jobs",
+      ("Jobs module: Next job: ", $next-job, 
+      " runas=", $runas, " $id=", $job-id, 
+      " run=", $run, " exist=", exists($next-job)))
     let $password :=
       if ($runas='admin')
       then $magic:password
@@ -376,39 +374,46 @@ declare function jobs:run(
         ))
     return (
       jobs:running($job-id, $task-id),
-      try {
-        system:as-user($runas, $password,
-          (
-            if ($paths:debug)
-            then util:log-system-out(("Jobs module attempting to run: ", $run))
-            else (),
-            let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
-            return 
-            (
-              util:eval($query , false(),
-                (
-                xs:QName('local:user'), $runas,
-                xs:QName('local:password'), $password,
-                xs:QName("local:job-id"), $job-id,
-                for $param in $run/jobs:param
-                let $qname := xs:QName(concat('local:', $param/jobs:name))
-                let $value := string($param/jobs:value)
-                return ($qname, $value)
+      system:as-user($runas, $password,
+        (
+          let $completed-job :=
+            try {
+              debug:debug($debug:info,
+              "jobs",
+              ("Jobs module attempting to run: ", $run)),
+              let $query := util:binary-to-string(util:binary-doc($run/jobs:query))
+              return 
+              (
+                util:eval($query , false(),
+                  (
+                  xs:QName('local:user'), $runas,
+                  xs:QName('local:password'), $password,
+                  xs:QName("local:job-id"), $job-id,
+                  for $param in $run/jobs:param
+                  let $qname := xs:QName(concat('local:', $param/jobs:name))
+                  let $value := string($param/jobs:value)
+                  return ($qname, $value)
+                  )
                 )
-              )
-            )
-          
-          )
-        ),
-        jobs:complete($job-id),
-        xs:integer($job-id)
-      }
-      catch * ($code, $description, $value) {
-        local:record-exception($job-id, $code, $description, $value),
-        jobs:incomplete($job-id), 
-        jobs:cancel($job-id),
-        util:log-system-out(('Jobs module: An exception occurred while running job ',$job-id,': ', $code, ' ', $description, ' ', $value))
-      }
+              ),
+              jobs:complete($job-id),
+              xs:integer($job-id)
+            }
+            catch * ($code, $description, $value) {
+              debug:debug($debug:info, "jobs", ("Caught an exception while running job: ", $job-id, " Exception:", $code, " ", $description, " ", $value)),
+              local:record-exception($job-id, $code, $description, $value),
+              jobs:incomplete($job-id)
+            }
+          return
+            (: this odd coding is necessary because this code
+             : will cause a stack overflow
+             : if it is inside a catch clause
+             :)
+            if ($completed-job instance of xs:integer)
+            then $completed-job
+            else jobs:cancel($job-id)
+        )
+      )
     )
 };
 
@@ -417,7 +422,7 @@ declare function jobs:is-task-running(
   $task-id as xs:integer
   ) as xs:boolean {
   system:as-user('admin', $magic:password,
-    some $j in doc($jobs:queue-path)//jobs:running satisfies $j=$task-id
+    exists(doc($jobs:queue-path)//jobs:running[.=$task-id])
   )
 };
 
@@ -428,12 +433,12 @@ declare function local:record-exception(
   $description as xs:string,
   $value as xs:string
   ) as empty() {
-  let $job := 
-    system:as-user('admin', $magic:password,
+  let $job :=
+    system:as-user("admin", $magic:password,
       doc($jobs:queue-path)//jobs:job[jobs:id=$job-id]
     )
-  let $error-element := $jobs/jobs:error
-  where $error-element
+  let $error-element := $job/jobs:error
+  where exists($error-element)
   return
     let $runas as xs:string := $job/jobs:runas/string()
     let $collection := string($error-element/jobs:collection)
@@ -475,3 +480,22 @@ declare function jobs:wait-in-queue(
     )
 };
   
+(:~ run this when a user changes password.
+ : You must be dba or the user in question to make this work
+ :)
+declare function jobs:change-password(
+  $user as xs:string,
+  $new-password as xs:string
+  ) as empty() {
+  let $logged-in-user := app:auth-user()
+  return
+    if (xmldb:is-admin-user($logged-in-user) or $user=$logged-in-user)
+    then 
+      system:as-user("admin", $magic:password,
+        update value 
+          doc($jobs:users-path)//jobs:user[jobs:name=$user]/jobs:password
+          with $new-password
+      )
+    else
+      error(xs:QName("err:AUTHORIZATION"), "To change a password, you must be admin or the user whose password you are changing.")
+};
