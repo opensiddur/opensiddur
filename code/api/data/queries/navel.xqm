@@ -34,7 +34,7 @@ declare variable $navel:request-content-type := (
   api:xml-content-type(),
   api:tei-content-type()
   );
-declare variable $navel:test-source := "/code/tests/api/original/navel.t.xml";
+declare variable $navel:test-source := "/code/tests/api/data/original/navel.t.xml";
 
 (: the element can be given as an element() or a uri to the element :)
 declare function navel:title(
