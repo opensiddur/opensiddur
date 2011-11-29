@@ -18,6 +18,8 @@ import module namespace user="http://jewishliturgy.org/modules/user"
   at "/code/modules/user.xqm";  
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "/code/modules/debug.xqm";
+import module namespace jobs="http://jewishliturgy.org/apps/jobs"
+  at "/code/apps/jobs/modules/jobs.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 
@@ -433,6 +435,7 @@ declare function prof:put() {
           then (
             (: same user requests, so we change it :)
             xmldb:change-user($user-name, $password, (), ()),
+            jobs:change-password($user-name, $password),
             response:set-status-code(204)
           )
           else 
