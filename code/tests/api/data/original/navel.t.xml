@@ -26,11 +26,14 @@
   </tearDown>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
   <imports>
     import module namespace httpclient="http://exist-db.org/xquery/httpclient";
     import module namespace apitest="http://jewishliturgy.org/modules/apitest"
       at "xmldb:exist:///code/tests/api/apitest.xqm";
+    import module namespace resp="http://jewishliturgy.org/modules/resp"
+      at "xmldb:exist:///code/modules/resp.xqm";
   </imports>
   <TestSet>
   	<testName>GET with authentication</testName>
@@ -127,8 +130,6 @@
       <class href="../../common.t.xml#NotFound"/>
     </test>
   </TestSet>
-  <!-- continue from here -->
-  <!-- 
   <TestSet>
     <testName>POST with authentication</testName>
     <setup>
@@ -142,27 +143,48 @@
       ]]></code>
     </tearDown>
     <test>
-      <task>POST non-XML data</task>
+      <task>POST text</task>
       <code><![CDATA[
       apitest:post("/code/api/data/original/Test%20Document/.../tei.w,1",
         (), "test")
       ]]></code>
-      <xpath desc="return status code 400">./@statusCode = 400</xpath>
+      <xpath desc="return status code 201">./@statusCode = 201</xpath>
+      <xpath desc="the text content has been appended">ends-with(doc("/group/testuser/original/Test%20Document.xml")/id("w1"),"test")</xpath>
+      <xpath desc="the user is given responsibility credit for authorship">
+      ((:ends-with(resp:query(
+          doc("/group/testuser/original/Test%20Document.xml")/id('w1'), 
+          "author")/@resp, "#testuser")
+      )):))</xpath>
     </test>
     <test>
       <task>POST XML</task>
       <code><![CDATA[ 
-      apitest:post("/code/api/data/original/Test%20Document",
-        (), doc("/code/api/data/resources/template.xml"))
+      apitest:post("/code/api/data/original/Test%20Document/.../j.repository",
+        (), <tei:seg xml:lang="en">Test</tei:seg>)
       ]]></code>
+      <xpath desc="return status code 201">./@statusCode = 201</xpath>
+      <xpath desc="the XML has been added to the document">count(doc("/group/testuser/original/Test%20Document.xml")//j:repository/tei:seg)=2</xpath>
+      <xpath desc="the XML has been assigned an @xml:id">exists(doc("/group/testuser/original/Test%20Document.xml")//tei:seg[.="Test"]/@xml:id)</xpath>
+      <xpath desc="a Location header is returned">exists(.//httpclient:header[@name="Location"])</xpath>
     </test>
     <test>
       <task>POST XML with a duplicated xml:id</task>
+      <code><![CDATA[
+      apitest:post("/code/api/data/original/Test%20Document/.../j.repository", (),
+        <tei:seg xml:id="r_1" xml:lang="en">Test</tei:seg>)
+      ]]></code>
+      <xpath desc="return status code 400">./@statusCode = 400</xpath>
     </test>
     <test>
       <task>POST an invalid XML element into the selection</task>
+      <code><![CDATA[
+      apitest:post("/code/api/data/original/Test%20Document/.../j.selection", (),
+        <tei:seg xml:id="r2" xml:lang="en">Test</tei:seg>)
+      ]]></code>
+      <xpath desc="return status code 400">./@statusCode = 400</xpath>
     </test>
   </TestSet>
+  <!-- 
   <TestSet>
     <testName>POST without authentication</testName>
     <test>

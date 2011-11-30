@@ -32,7 +32,8 @@ declare variable $navel:accept-content-type := (
   );
 declare variable $navel:request-content-type := (
   api:xml-content-type(),
-  api:tei-content-type()
+  api:tei-content-type(),
+  api:text-content-type()
   );
 declare variable $navel:test-source := "/code/tests/api/data/original/navel.t.xml";
 
@@ -378,16 +379,38 @@ declare function navel:post() {
     then $unauthorized
     else
       let $data := api:get-data()
-      let $new-id := (
-        $data/@xml:id/string(), 
-        concat(local-name($data), "_", util:uuid())
-        )[1]
-      return 
+      let $new-id :=
+        if ($data instance of element())
+        then
+          (
+            $data/@xml:id/string(), 
+            concat(local-name($data), "_", util:uuid())
+          )[1]
+        else ()
+      return
         if (empty($doc/id($new-id)))
         then (
-          update insert $data into $element,
-          resp:add($doc/id($new-id), "author", app:auth-user(), "value"),
-          response:set-status-code(201)
+          update insert ( 
+            typeswitch($data)
+            case element() return 
+              element {QName(namespace-uri($data), name($data))} {
+                ($data/@xml:id, attribute xml:id { $new-id })[1],
+                $data/(@* except @xml:id),
+                $data/node()
+              }
+            default return text { $data }
+            ) into $element,
+          let $data-id :=
+            ($new-id,
+            (: inserting text; use the id of the containing element :) 
+            $element/ancestor-or-self::*[@xml:id][1]/@xml:id/string()
+            )[1]
+          let $new-element := $doc/id($data-id)
+          return (
+            resp:add($new-element, "author", app:auth-user(), "value"),
+            response:set-header("Location", nav:sequence-to-api-path($new-element)),
+            response:set-status-code(201)
+          )
         )
         else 
           api:error(400, "The identifier cannot be repeated", $new-id)
