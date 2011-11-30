@@ -104,55 +104,63 @@ declare function ridx:reindex(
     let $doc := 
       typeswitch($doc-item)
       case document-node() 
-        return $doc-item
+        return 
+          $doc-item
+            [not(util:is-binary-doc(document-uri(.)))]
       default 
-        return doc($doc-item)
-    let $collection := replace(util:collection-name($doc), "^/db", "")
-    let $resource := util:document-name($doc)
-    let $make-mirror-collection :=
-     (: TODO: this should not have to be admin-ed. really, it should
-     be setuid! :)
-     try {
-      system:as-user("admin", $magic:password, 
-        local:make-mirror-collection-path($ridx:ridx-collection, $collection)
-      )
-     }
-     catch * {
-      (: TODO: this code is here to account for a bug where, in the
-       : restore process, the admin password is considered to be blank
-       : even though it had been set. It affects eXist r14669 under 
-       : circumstances that I can't figure out. Hopefully, it will not
-       : affect future versions, but if it does, we need this code
-       : to work around it. A warning will be displayed when this code
-       : executes. The warning is irrelevant to a user.
-       :)
-      debug:debug($debug:warn, "refindex", "The admin password is blank. This is a bug in eXist, I think."),
-      system:as-user("admin", "", 
-        local:make-mirror-collection-path($ridx:ridx-collection, $collection)
-      )
-     }
-    let $mirror-collection :=
-      app:concat-path(("/", $ridx:ridx-collection, $collection))
-    let $owner := xmldb:get-owner($collection, $resource)
-    let $group := xmldb:get-group($collection, $resource)
-    let $mode := xmldb:get-permissions($collection, $resource)
-    let $last-modified := xmldb:last-modified($collection, $resource)
-    let $idx-last-modified := xmldb:last-modified($mirror-collection, $resource)
-    where empty($last-modified) or empty($idx-last-modified) or ($last-modified > $idx-last-modified)
+        return 
+          if (util:is-binary-doc($doc-item))
+          then ()
+          else doc($doc-item)
+    (: do not index binary documents :)
+    where exists($doc)
     return
-      let $stored := 
-        if (xmldb:store($mirror-collection, $resource, 
-          element ridx:index {
-            ridx:make-index-entries($doc//@target|$doc//@targets)
-          }
-        ))
-        then 
-          xmldb:set-resource-permissions(
-            $mirror-collection, $resource,
-            $owner, $group, $mode
-          )
-        else ()
-      return () 
+      let $collection := replace(util:collection-name($doc), "^/db", "")
+      let $resource := util:document-name($doc)
+      let $make-mirror-collection :=
+       (: TODO: this should not have to be admin-ed. really, it should
+       be setuid! :)
+       try {
+        system:as-user("admin", $magic:password, 
+          local:make-mirror-collection-path($ridx:ridx-collection, $collection)
+        )
+       }
+       catch * {
+        (: TODO: this code is here to account for a bug where, in the
+         : restore process, the admin password is considered to be blank
+         : even though it had been set. It affects eXist r14669 under 
+         : circumstances that I can't figure out. Hopefully, it will not
+         : affect future versions, but if it does, we need this code
+         : to work around it. A warning will be displayed when this code
+         : executes. The warning is irrelevant to a user.
+         :)
+        debug:debug($debug:warn, "refindex", "The admin password is blank. This is a bug in eXist, I think."),
+        system:as-user("admin", "", 
+          local:make-mirror-collection-path($ridx:ridx-collection, $collection)
+        )
+       }
+      let $mirror-collection :=
+        app:concat-path(("/", $ridx:ridx-collection, $collection))
+      let $owner := xmldb:get-owner($collection, $resource)
+      let $group := xmldb:get-group($collection, $resource)
+      let $mode := xmldb:get-permissions($collection, $resource)
+      let $last-modified := xmldb:last-modified($collection, $resource)
+      let $idx-last-modified := xmldb:last-modified($mirror-collection, $resource)
+      where empty($last-modified) or empty($idx-last-modified) or ($last-modified > $idx-last-modified)
+      return
+        let $stored := 
+          if (xmldb:store($mirror-collection, $resource, 
+            element ridx:index {
+              ridx:make-index-entries($doc//@target|$doc//@targets)
+            }
+          ))
+          then 
+            xmldb:set-resource-permissions(
+              $mirror-collection, $resource,
+              $owner, $group, $mode
+            )
+          else ()
+        return () 
 };
 
 declare function ridx:make-index-entries(
@@ -166,7 +174,7 @@ declare function ridx:make-index-entries(
   let $returned := 
     if (matches($follow, "^http[s]?://"))
     then ()
-    else uri:fast-follow($follow, $element, uri:follow-steps($element))
+    else uri:fast-follow($follow, $element, uri:follow-steps($element), true())
   for $followed in $returned
   where $followed/@xml:id
   return
