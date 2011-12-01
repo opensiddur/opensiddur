@@ -26,6 +26,10 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
       <head>
 	<!-- make sure browsers see this as UTF-8 -->
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<!-- Make sure iPhone reflows the text to its screen size 
+	     (otherwise it defaults to a zoomed-out 980px viewport). 
+	     See: http://developer.apple.com/library/IOs/#documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html  -->
+	<meta name = "viewport" content = "initial-scale = 1.0" />
 	<style type="text/css">
 	  <!-- todo more readable body size and line height? 
 	       see http://www.alistapart.com/articles/howtosizetextincss -->
