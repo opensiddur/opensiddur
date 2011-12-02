@@ -280,3 +280,34 @@ declare function nav:xml-to-navigation(
       $nav:request-content-types    
     )
 };
+
+(:~ convert an API path to a path in the database :)
+declare function nav:api-path-to-db-path(
+  $api-path as xs:anyAtomicType
+  ) as xs:string {
+  let $refto := nav:api-path-to-sequence($api-path)
+  let $base-path := document-uri(root($refto))
+  let $fragment := $refto/@xml:id/string()
+  return
+    string-join(($base-path, $fragment), "#")
+};
+
+declare function nav:db-path-to-api-path(
+  $db-path as xs:anyAtomicType,
+  $context as node()? 
+  ) as xs:string {
+  let $base := 
+    if (contains($db-path, "#"))
+    then substring-before($db-path, "#")
+    else $db-path
+  let $abs-base :=
+    if (exists($context))
+    then resolve-uri($base, base-uri($context))
+    else $base
+  let $fragment :=
+    substring-after($db-path, "#")[.]
+  return
+    string-join((
+      nav:sequence-to-api-path(doc($abs-path)), $fragment), "/-id/"
+      )
+};
