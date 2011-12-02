@@ -184,41 +184,70 @@
       <xpath desc="return status code 400">./@statusCode = 400</xpath>
     </test>
   </TestSet>
-  <!-- 
   <TestSet>
     <testName>POST without authentication</testName>
     <test>
-      <task>POST XML</task>
+      <task>POST text</task>
       <code><![CDATA[ 
-      apitest:post("/code/api/data/original/Test%20Document",
-        (), doc("/code/api/data/resources/template.xml"))
+      apitest:post("/code/api/data/original/Test%20Document/.../tei:w,1",
+        (), "text")
       ]]></code>
+      <class href="../../common.t.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
     <testName>POST authenticated as a different user</testName>
-    <test>
-      <task>POST XML</task>
+    <setup>
       <code><![CDATA[
-      
+      apitest:login("testuser2", "testuser2")
       ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      apitest:clear()
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>POST text</task>
+      <code><![CDATA[
+      apitest:post("/code/api/data/original/Test%20Document/.../tei:w,1",
+        (), "text")
+      ]]></code>
+      <class href="../../common.t.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
     <testName>PUT without authentication</testName>
     <test>
-      <task>PUT</task>
+      <task>PUT XML</task>
 	  <code><![CDATA[
-        apitest:put("/code/api/data/original/Test%20Document", 
+        apitest:put("/code/api/data/original/Test%20Document/.../tei:w,1", 
           (), 
-          doc("/code/tests/api/data/original/navdoc-test.xml"))
-	  ]]></code> 
+          <tei:w xml:lang="en">Test</tei:w>)
+	  ]]></code>
+      <class href="../../common.t.xml#NotFound"/> 
     </test>
   </TestSet>
   <TestSet>
     <testName>PUT with authentication as a different user</testName>
+    <setup>
+      <code><![CDATA[
+      apitest:login("testuser2", "testuser2")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      apitest:clear()
+      ]]></code>
+    </tearDown>
     <test>
-      <task>PUT</task>
+      <task>PUT XML</task>
+      <code><![CDATA[
+        apitest:put("/code/api/data/original/Test%20Document/.../tei:w,1", 
+          (), 
+          <tei:w xml:lang="en">Test</tei:w>)
+	  ]]></code>
+      <class href="../../common.t.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -236,23 +265,43 @@
     <test serialize="method=text">
       <task>PUT an element of the same type as the original</task>
       <code><![CDATA[
-        apitest:put("/code/api/data/original/Test%20Document", 
+        apitest:put("/code/api/data/original/Test%20Document/.../tei.w,1", 
           (), 
-          doc("/code/tests/api/data/original/navdoc-test-2.xml"))
+          <tei:w xml:lang="en">Replaced</tei:w>)
       ]]></code>
       <xpath desc="returns status code 204">./@statusCode = 204</xpath>
-      <xpath desc="document has been replaced">doc("/group/testuser/original/Test%20Document.xml")//tei:title = "Test Document 2"</xpath> 
+      <xpath desc="element has been replaced">doc("/group/testuser/original/Test%20Document.xml")//tei:w = "Replaced"</xpath>
+      <xpath desc="new element has an xml:id">exists(doc("/group/testuser/original/Test%20Document.xml")//tei:w[.="Replaced"]/@xml:id)</xpath> 
     </test>
     <test>
       <task>PUT an element of a different type from the original</task>
       <code><![CDATA[
+        apitest:put("/code/api/data/original/Test%20Document/.../tei.w,1", 
+          (), 
+          <tei:p xml:lang="en">Replaced</tei:p>)
       ]]></code>
       <xpath desc="returns status code 400">./@statusCode = 400</xpath> 
     </test>
     <test>
-      <task>PUT an element where the replaced element is externally referenced</task>
+      <task>PUT an element with a new id where the replaced element is externally referenced</task>
+      <code><![CDATA[
+        apitest:put("/code/api/data/original/Test%20Document/.../j.view@div/tei.div,1/tei.ptr,1", 
+          (), 
+          <tei:ptr xml:id="newdiv" target="#se1"/>)
+      ]]></code>
+      <xpath desc="returns status code 400">./@statusCode = 400</xpath>
+    </test>
+    <test>
+      <task>PUT an element where the replaced element's child is externally referenced</task>
+      <code><![CDATA[
+        apitest:put("/code/api/data/original/Test%20Document/.../j.view@div/tei.div,1", 
+          (), 
+          <tei:div xml:lang="en"><tei:ptr target="#se1"/></tei:div>)
+      ]]></code>
+      <xpath desc="returns status code 400">./@statusCode = 400</xpath>
     </test>
   </TestSet>
+  <!-- 
   <TestSet>
     <testName>DELETE without authentication</testName>
     <test>

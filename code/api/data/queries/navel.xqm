@@ -316,7 +316,8 @@ declare function navel:put() {
   let $element := nav:api-path-to-sequence($uri)
   let $data := api:get-data()
   let $new-id := (
-    $data/@xml:id/string(), 
+    $data/@xml:id/string(),
+    $element/@xml:id/string(), 
     concat(local-name($data), "_", util:uuid())
     )[1]
   let $accepted := api:get-accept-format($navel:request-content-type)
