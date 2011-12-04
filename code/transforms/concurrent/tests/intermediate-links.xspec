@@ -23,7 +23,7 @@
   </x:pending>
   <x:scenario label="intermediate-links mode">
     <x:scenario label="Single hop">
-      <x:context mode="intermediate-links" href="concurrent-context.xml">
+      <x:context mode="intermediate-links" href="../tests-with-document-uri/concurrent-context.xml">
       </x:context>
       <x:expect label="Returns intermediate links" test="//j:links">
         <j:links>

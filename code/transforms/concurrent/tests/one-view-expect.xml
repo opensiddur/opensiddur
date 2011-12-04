@@ -11,11 +11,17 @@
   <tei:text>
     <jx:joined-concurrent>
       <tei:p jx:id="p1">
-        <tei:ptr jx:id="sA" target="#rA"/>
-        <tei:ptr jx:id="sB" target="#rB"/>
+        <tei:ptr jx:id="sA" target="#rA">
+          <tei:seg jx:id="rA">A</tei:seg>
+        </tei:ptr>
+        <tei:ptr jx:id="sB" target="#rB">
+          <tei:seg jx:id="rB">B</tei:seg>
+        </tei:ptr>
       </tei:p>
       <tei:p jx:id="p2">
-        <tei:ptr jx:id="sC" target="#rC"/>              
+        <tei:ptr jx:id="sC" target="#rC">
+          <tei:seg jx:id="rC">C</tei:seg>
+        </tei:ptr>              
       </tei:p>
     </jx:joined-concurrent>
     <j:repository>

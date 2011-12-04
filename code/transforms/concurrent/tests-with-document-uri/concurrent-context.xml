@@ -18,5 +18,10 @@
       </tei:p>
     </j:view>
   </j:concurrent>
+  <j:repository>
+    <tei:seg xml:id="r1">r1</tei:seg>
+    <tei:seg xml:id="r2">r2</tei:seg>
+    <tei:seg xml:id="r3">r3</tei:seg>
+  </j:repository>
 </tei:TEI>
 

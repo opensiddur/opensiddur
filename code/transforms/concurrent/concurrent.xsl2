@@ -49,70 +49,6 @@
   </xd:doc>
   <xsl:param name="current-document-uri" as="xs:string?" select="()"/>
   
-  <!-- 
-  <xsl:variable name="maximum-priority" as="xs:integer" select="10000"/>
-
-  <xd:doc>
-    <xd:short>Return the sorting priority of an element in multiple hierarchies</xd:short>
-    <xd:param name="context">The element</xd:param>
-  </xd:doc>
-  <xsl:function name="func:get-sort-priority" as="xs:integer">
-    <xsl:param name="context" as="element()"/>
-    
-    <xsl:sequence select="
-      if ($context/self::j:parallelGrp or 
-        $context/self::j:parallel or 
-        $context/self::j:original) 
-      then $maximum-priority
-      else if (not($context/descendant-or-self::*[@jx:selection])) 
-      then func:get-sort-priority($context/parent::*)
-      else count($context/descendant-or-self::*[@jx:selection]) 
-        (:1 + sum(
-        for $child in $context/element()
-          return func:get-sort-priority($child)):)
-    "/>
-  </xsl:function>
--->
-<!--
-  <xd:doc>
-    <xd:short>Match the document element and apply templates to
-    a copy which makes the base URI explicit.  If the document URI can't be 
-    found, use the current-document-uri parameter.</xd:short>
-    <xd:detail>No copy is made if the document URI is detectable.</xd:detail>
-    <xd:param name="current-document-uri">Tunneled parameter for current document's base URI,
-    which may have to be specified manually.  Defaults to the value in the stylesheet parameter
-    of the same name; if not, tries to find it from the document-uri() function.  Fails if
-    no document URI is specified.</xd:param>
-  </xd:doc>
-  <xsl:template match="/*">
-    <xsl:param name="current-document-uri" tunnel="yes" as="xs:anyURI" 
-      select="xs:anyURI(($current-document-uri, document-uri(root(.)))[1])"/>
-    <xsl:message>root template: $current-document-uri = <xsl:value-of select="$current-document-uri"/></xsl:message>   
- 
-    <xsl:variable name="with-base" as="element(tei:TEI)">
-      <xsl:copy>
-        <xsl:attribute name="jx:document-uri" 
-          select="$current-document-uri"/>
-        <xsl:attribute name="xml:base" 
-          select="(@xml:base, $current-document-uri)[1]"/>
-        <xsl:sequence select="@*|child::node()"/>
-      </xsl:copy>
-    </xsl:variable>
-    <xsl:apply-templates select="$with-base" mode="pass-root">
-      <xsl:with-param name="current-document-uri" tunnel="yes" as="xs:anyURI" select="$current-document-uri"/>
-    </xsl:apply-templates>
-  </xsl:template>
-  
-  <xd:doc>
-    <xd:short>Identity template for tei:TEI</xd:short>
-  </xd:doc>
-  <xsl:template match="tei:TEI" mode="pass-root">
-    <xsl:copy>
-      <xsl:copy-of select="@*"/>
-      <xsl:apply-templates />
-    </xsl:copy>
-  </xsl:template>
--->
   <xd:doc>
     <xd:short>Catch tei:TEI, add a j:links section and run intermediate-links mode, if necessary</xd:short>
   </xd:doc>
@@ -164,11 +100,11 @@
     <xd:short>Find @xml:id and convert it to @jx:id in default mode</xd:short>
     <xd:detail>Low priority; higher priority templates will have to convert on their own</xd:detail>
   </xd:doc>
-  <xsl:template match="*[@xml:id]" priority="0">
+  <xsl:template match="*[@xml:id]" priority="0" mode="#default">
     <xsl:copy>
       <xsl:sequence select="@* except @xml:id"/>
       <xsl:attribute name="jx:id" select="@xml:id"/>
-      <xsl:apply-templates/>
+      <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
 
@@ -208,6 +144,16 @@
     </xsl:variable>
     
     <xsl:sequence select="func:debug($unflattened, '$unflattened', $debug-detail)"/>
+    
+    <xsl:variable name="expanded-internal" as="element()">
+      <xsl:apply-templates select="$unflattened" mode="expand-internal">
+        <xsl:with-param name="document-context" as="element()"
+          select="$context" tunnel="yes"/>
+      </xsl:apply-templates>
+    </xsl:variable>
+    
+    <xsl:sequence select="func:debug($expanded-internal, '$expanded-internal', $debug-detail)"/>
+    
     <jx:joined-concurrent>
       <!-- copy the context here, if changed -->
       <xsl:if test="@xml:id">
@@ -217,10 +163,7 @@
         <xsl:with-param name="attributes" as="attribute()*" select="@* except @xml:id"/>
       </xsl:call-template>
       <!--xsl:attribute name="jx:document-uri" select="func:document-id(root(.))"/-->
-      <xsl:apply-templates select="$unflattened" mode="cleanup-unflatten">
-        <xsl:with-param name="document-context" as="element()"
-          select="$context" tunnel="yes"/>
-      </xsl:apply-templates>
+      <xsl:apply-templates select="$expanded-internal" mode="cleanup-unflatten"/>
     </jx:joined-concurrent>
 	</xsl:template>
 
@@ -1142,14 +1085,29 @@
   <xsl:template match="jx:unflattened" mode="cleanup-unflatten">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
-  <!-- 
-  <xd:doc>
-    <xd:short>Replace pointers in the selection with their content</xd:short>
-  </xd:doc>  
-  <xsl:template match="tei:ptr[@jx:selection]" mode="cleanup-unflatten">
-    <xsl:param name="document-context" select="element()" tunnel="yes"/>
-    <xsl:sequence 
-      select="func:follow-uri(@target, $document-context, -1)"/>
+
+  <xsl:template match="*" mode="expand-internal">
+    <xsl:copy>
+      <xsl:copy-of select="@* except @xml:id"/>
+      <xsl:if test="@xml:id">
+        <xsl:attribute name="jx:id" select="@xml:id"/>
+      </xsl:if>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
   </xsl:template>
-   -->
+
+  <xd:doc>
+    <xd:short>Expand internal pointers in the selection with their content</xd:short>
+  </xd:doc>  
+  <xsl:template match="tei:ptr[@jx:selection]" mode="expand-internal">
+    <xsl:param name="document-context" as="element()" select="." tunnel="yes"/>
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:if test="func:uri-base-path(
+        func:absolutize-uri(@target, .))=func:original-document-uri(.)">
+        <xsl:apply-templates mode="#current"
+          select="func:follow-uri(@target, $document-context, func:follow-steps(., -1))"/>
+      </xsl:if>
+    </xsl:copy>
+  </xsl:template>
 </xsl:stylesheet>

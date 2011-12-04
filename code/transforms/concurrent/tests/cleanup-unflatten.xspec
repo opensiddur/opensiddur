@@ -11,7 +11,12 @@
   <x:pending>
     <x:scenario label="garbage">
       <x:call function="func:junk"/>
-      <x:expect><func:junk/><jx:junk/><j:junk/><tei:junk/></x:expect>
+      <x:expect><func:junk/><jx:junk/><j:junk/><tei:junk/>
+        <!-- this is here to make the cleanup-unflatten tests work right -->
+        <tei:seg xml:id="r1">r1</tei:seg>
+        <tei:seg xml:id="r2">r2</tei:seg>
+        <tei:seg xml:id="r3">r3</tei:seg>
+      </x:expect>
     </x:scenario>
   </x:pending>
   <x:scenario label="func:make-unique-xmlid">
@@ -43,7 +48,7 @@
     <x:context mode="cleanup-unflatten"/>
     <x:scenario label="multipart element">
       <x:context>
-        <jx:unflattened jx:document-uri="cleanup-unflatten.xspec" xml:base="cleanup-unflatten.xspec" xml:lang="en">
+        <jx:unflattened jx:document-uri="/code/transforms/concurrent/tests/cleanup-unflatten.xspec" xml:base="cleanup-unflatten.xspec" xml:lang="en">
           <root>
             <tei:div jx:id="sA" jx:part="1" jx:priority="3">
               <tei:ptr xml:id="sA1" jx:id="sA1" jx:selection="111" target="#r1" />

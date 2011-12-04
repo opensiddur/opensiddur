@@ -24,9 +24,9 @@
 
   <x:scenario label="All modes">
     <x:scenario label="j:concurrent, one hierarchy">
-      <x:context href="concurrent-context.xml">
+      <x:context href="../tests-with-document-uri/concurrent-context.xml">
       </x:context>
-      <x:expect label="joined hierarchy/selection" href="concurrent-expect.xml">
+      <x:expect label="joined hierarchy/selection" href="../tests/concurrent-expect.xml">
       </x:expect>
     </x:scenario>
 
