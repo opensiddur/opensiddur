@@ -101,5 +101,6 @@
       </xsl:if>
 	  <xsl:sequence select="@* except (@xml:id, @xml:base)"/>
   	</tei:join>
+    <xsl:apply-templates select="self::j:view/*" mode="#current"/>
   </xsl:template>
 </xsl:stylesheet>
