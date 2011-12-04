@@ -13,6 +13,8 @@ import module namespace jobs="http://jewishliturgy.org/apps/jobs"
   at "xmldb:exist:///code/apps/jobs/modules/jobs.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
   at "xmldb:exist:///code/magic/magic.xqm";
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -20,20 +22,19 @@ declare variable $local:task-id external;
 
 declare variable $local:excluded-collections := concat("(",
   string-join(
-    ("/output/","/trash/"),
+    ("/output/","/trash/","/template.xml$"),
   ")|("),
   ")");
 
 try {
-  if ($paths:debug)
-  then 
-    util:log-system-out(
-      concat('In uncached resource scheduler at ', string(current-dateTime()))
-    )
-  else (),
+  debug:debug(
+    $debug:info,
+    "bg-schedule-cache",
+    concat('In uncached resource scheduler at ', string(current-dateTime()))
+    ),
   let $documents :=
     system:as-user('admin', $magic:password,
-      collection('/group')//tei:TEI/document-uri(root(.))
+      collection(("/group","/code"))/tei:TEI/document-uri(root(.))
     )
   for $document in $documents
   where
