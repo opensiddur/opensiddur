@@ -1062,15 +1062,18 @@ The previous match was:
     </xsl:if>
     <!-- add line and line group if we're in poetry mode -->
     <xsl:if test="(preceding::r:PoetryMode|preceding::r:ProseMode)[1]/self::r:PoetryMode">
+      <xsl:variable name="lg-start" as="element()?" select="
+        if ($verse) 
+        then $verse-div
+        else preceding-sibling::r:SegmentedText[last()]"/>
       <xsl:attribute name="lg" select="
         if ($verse) 
         then count(preceding::r:VerseDivision[. >>  $starting-point])
         else $p-count"/>
-      <xsl:attribute name="l" select="1 + count(preceding::r:SegmentedText[
-        r:EOL and 
-        (if ($verse) 
-        then (. >> $verse-div) 
-        else (. >> preceding-sibling::r:SegmentedText[last()])) ])"/>
+      <xsl:attribute name="l" select="1 + count((
+        preceding::r:SegmentedText[
+          r:EOL and 
+          (. >> $lg-start)], $lg-start[self::r:SegmentedText][r:EOL][not(current() is $lg-start)]))"/>
     </xsl:if>
     <!-- add the naming group if the text is named  -->
     <xsl:if test="ancestor::r:NamedCommand">
