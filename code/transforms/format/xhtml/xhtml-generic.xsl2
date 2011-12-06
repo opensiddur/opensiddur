@@ -3,6 +3,7 @@
   version="2.0" 
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
   xmlns:html="http://www.w3.org/1999/xhtml"
@@ -64,8 +65,13 @@
   
   <xsl:template match="@xml:lang" as="attribute()*">
     <xsl:if test="../..[not(lang(.))]">
+      <xsl:variable name="my-direction" as="xs:string"
+        select="func:direction-by-language(.)"/>
       <xsl:copy/>
       <xsl:attribute name="lang" select="."/>
+      <xsl:if test="func:direction-by-language(..) ne $my-direction">
+        <xsl:attribute name="dir" select="$my-direction"/>
+      </xsl:if>
     </xsl:if>
   </xsl:template>
   
@@ -169,5 +175,8 @@
   
   <!-- elements that are moved from their original positions -->
   <xsl:template match="tei:label[@n=('chapter','verse')]"/>
+  
+  <!-- remove computer-readable licensing boilerplate -->
+  <xsl:template match="rdf:RDF"/>
   
 </xsl:stylesheet>
