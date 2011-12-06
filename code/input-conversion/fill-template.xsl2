@@ -35,8 +35,6 @@
         .
       </p>
     </xd:detail>
-    <xd:svnId>$Id: fill-template.xsl2 171 2009-04-03 20:11:36Z
-      efraim.feinstein $</xd:svnId>
   </xd:doc>
 
   <xd:doc>
@@ -63,9 +61,6 @@
                 <xsl:processing-instruction
                     name="fillin">license</xsl:processing-instruction>
               </tei:availability>
-              <tei:idno type="svn">
-                <xsl:value-of select="string-join(('$','Id','$'),'')" />
-              </tei:idno>
             </tei:publicationStmt>
             <tei:sourceDesc>
               <xsl:processing-instruction
@@ -76,10 +71,6 @@
             <tei:appInfo>
               <tei:application ident="fill-template.xsl2"
                 version="1.0">
-                <tei:label>
-                  <xsl:value-of
-                    select="translate('$Id: fill-template.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $','$',' ')" />
-                </tei:label>
               </tei:application>
             </tei:appInfo>
           </tei:encodingDesc>
