@@ -48,7 +48,7 @@
     <xsl:sequence select="concat('id-', .)"/>
   </xsl:template>
   
-  <xsl:template match="@type|@subtype" mode="class" as="xs:string">
+  <xsl:template match="@type|@subtype|@n" mode="class" as="xs:string">
     <xsl:sequence select="concat(name(.), '-', .)"/>
   </xsl:template>
   
