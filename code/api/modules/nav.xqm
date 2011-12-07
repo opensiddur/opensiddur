@@ -296,6 +296,14 @@ declare function nav:db-path-to-api-path(
   $db-path as xs:anyAtomicType,
   $context as node()? 
   ) as xs:string {
+  nav:db-path-to-api-path($db-path,$context, true())
+};
+
+declare function nav:db-path-to-api-path(
+  $db-path as xs:anyAtomicType,
+  $context as node()?,
+  $include-api-prefix as xs:boolean
+  ) as xs:string {
   let $base := 
     if (contains($db-path, "#"))
     then substring-before($db-path, "#")
@@ -306,8 +314,12 @@ declare function nav:db-path-to-api-path(
     else $base
   let $fragment :=
     substring-after($db-path, "#")[.]
-  return
+  let $api-path := 
     string-join((
-      nav:sequence-to-api-path(doc($abs-path)), $fragment), "/-id/"
+      nav:sequence-to-api-path(doc($abs-base)), $fragment), "/-id/"
       )
+  return
+    if ($include-api-prefix)
+    then $api-path
+    else replace($api-path, "^/code/api", "")
 };
