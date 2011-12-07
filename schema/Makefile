@@ -21,10 +21,6 @@
 
 JLPTEI_FILE=jlptei.xml
 
-odd-depend: $(CODEDIR)/depend.xsl2 $(ALL_DEPEND) $(TEMPDIR)
-		echo JLPTEIODD_DEPEND=$(ODDDIR)/$(JLPTEI_FILE) `$(XSLT)  -s $(ODDDIR)/$(JLPTEI_FILE)  $(CODEDIR)/depend.xsl2 ` >> Makefile.depend 
-#		echo TRODD_DEPEND=`$(XSLT)  -s $(ODDDIR)/tr.odd  $(CODEDIR)/depend.xsl2 ` >> Makefile.depend 
-
 .PHONY: odddoc odddoc-clean schema-clean
 odddoc: jlpteidoc 
 # trdoc removed
@@ -49,6 +45,6 @@ p5subset: $(LIBDIR)/tei/P5/p5subset.xml
 $(LIBDIR)/tei/P5/p5subset.xml:
 	cd $(LIBDIR)/tei/P5 && make p5subset.xml 
 
-$(TEIDOCDIR)/jlptei.doc.html: p5subset $(JLPTEIODD_DEPEND) $(ODDDIR)/Makefile $(ODDDIR)/jlptei.xml
+$(TEIDOCDIR)/jlptei.doc.html: p5subset $(wildcard $(ODDDIR)/*.xml) $(wildcard $(ODDDIR)/*.sch) $(wildcard $(ODDDIR)/*.xsl2) $(ODDDIR)/Makefile 
 	$(TEIROMA) $(ODDDIR)/$(JLPTEI_FILE) $(TEIDOCDIR)
 	
