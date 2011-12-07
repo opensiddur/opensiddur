@@ -323,7 +323,6 @@ db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tes
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-common-tests.xsl.patch
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-tests-utils.xsl.patch
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-xspec-tests.xsl.patch
-	cp $(TRANSFORMS-DIR)/format/xhtml/muxhtml.xsl2 $(DBDIR)/code/transforms/format/xhtml
 
 db-clean:
 	rm -fr $(DBDIR)/schema $(DBDIR)/code $(DBDIR)/common $(DBDIR)/cache
