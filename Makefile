@@ -279,7 +279,10 @@ $(SETUPDIR)/setup.xql:
 
 # install the WLC files into $WLCDBDIR on the database and assure that they're
 # ready to be used (note: may overwrite existing files, use with caution)
-db-install-wlc: ridx-disable tanach ridx-enable
+db-install-wlc: ridx-disable tanach tanach2db ridx-enable
+
+.PHONY: tanach2db
+tanach2db:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 774 -c /db/group/everyone -u admin -g everyone $(TEXTDIR)/wlc
 	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -ouri=xmldb:exist://
 
