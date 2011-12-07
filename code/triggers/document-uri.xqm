@@ -12,8 +12,10 @@ xquery version "1.0";
 :)
 module namespace trigger='http://jewishliturgy.org/triggers/document-uri';
 
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
-import module namespace util="http://exist-db.org/xquery/util";
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
+import module namespace nav="http://jewishliturgy.org/modules/nav"
+  at "xmldb:exist:///code/api/modules/nav.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
@@ -28,7 +30,7 @@ declare function trigger:is-exempt(
 };
 
 declare function trigger:log-trigger-event($uri as xs:anyURI, $event as xs:string) {
-  util:log-system-out(('TRIGGER: document-uri.xql called: ', $event, ' on ', $uri))
+  debug:debug($debug:info, "trigger", ('document-uri.xql called: ', $event, ' on ', $uri))
 };
 
 declare function trigger:write-document-uri($uri as xs:anyURI) {
@@ -36,8 +38,8 @@ declare function trigger:write-document-uri($uri as xs:anyURI) {
   then
     (: the document is an XML document and it exists :)
     let $root := doc($uri)
-    let $TEI := $root/tei:TEI
-    let $full-uri := document-uri($root)
+    let $TEI := $root/tei:*
+    let $full-uri := nav:db-path-to-api-path(document-uri($root), $root, false())
     where exists($TEI)
     return (# exist:batch-transaction #) {
       (: write @xml:base :)
