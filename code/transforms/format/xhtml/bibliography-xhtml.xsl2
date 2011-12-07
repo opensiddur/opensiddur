@@ -86,8 +86,8 @@
     <div>
       <xsl:call-template name="set-attributes"/>
       <xsl:apply-templates mode="#current"/>
-      <xsl:text>. </xsl:text>
     </div>
+    <xsl:text>. </xsl:text>
   </xsl:template>
 
 
