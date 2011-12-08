@@ -372,13 +372,18 @@
         ' mapped URI = ', if (contains(substring-before(string($base-path),'/'), ':'))
         then (:it has a protocol, so it's already an absolute URI :)
           $base-path
+        else if (empty($uri-map))
+        then 'EMPTY!'
         else key(
             if ($cache-type = $fragmentation-cache-type) 
             then 'map-cached-uri' 
             else 'map-uri', 
             $base-path,
-            $uri-map),
-        ' cache-type = ', $cache-type), 'func:follow-uri', $debug-detail+1)"/>    
+            $uri-map)/string(),
+        ' cache-type = ', $cache-type), 'func:follow-uri', 
+        if (empty($uri-map))
+        then $debug-error
+        else $debug-detail+1)"/>    
     <!--xsl:message>func:follow-uri $uri = <xsl:value-of select="$uri"/> $parameters = <xsl:value-of select="$parameters"/></xsl:message-->
     <xsl:variable name="document" as="document-node()?"
       select="
@@ -386,13 +391,11 @@
         if (contains(substring-before(string($base-path),'/'), ':'))
         then (:it has a protocol, so it's already an absolute URI :)
           $base-path
-        else 
-          key(
-            if ($cache-type = $fragmentation-cache-type) 
-            then 'map-cached-uri' 
-            else 'map-uri', 
-            $base-path,
-            $uri-map)
+        else if ($cache-type = $fragmentation-cache-type)
+        then
+          key('map-cached-uri', concat($cache-type, ':', $base-path), $uri-map)
+        else
+          key('map-uri', $base-path, $uri-map)
       )"/>
       
     <xsl:variable name="pointer-destination" as="node()*">
