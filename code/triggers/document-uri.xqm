@@ -43,13 +43,13 @@ declare function trigger:write-document-uri($uri as xs:anyURI) {
     where exists($TEI)
     return (# exist:batch-transaction #) {
       (: write @xml:base :)
-      let $xmlbase := $root/tei:TEI/@xml:base
+      let $xmlbase := $root/*/@xml:base
       where not($xmlbase = $full-uri)
-      return update insert attribute xml:base {$full-uri} into $root/tei:TEI,
+      return update insert attribute xml:base {$full-uri} into $TEI,
       (: write @jx:document-uri :)
-      let $document-uri := $root/tei:TEI/@jx:document-uri
+      let $document-uri := $root/*/@jx:document-uri
       where not($document-uri = $full-uri)
-      return update insert attribute jx:document-uri {$full-uri} into $root/tei:TEI
+      return update insert attribute jx:document-uri {$full-uri} into $TEI
     }
   else ()
 };
