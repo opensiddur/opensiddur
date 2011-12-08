@@ -10,9 +10,6 @@ module namespace format="http://jewishliturgy.org/modules/format";
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace err="http://jewishliturgy.org/errors";
 
-import module namespace util="http://exist-db.org/xquery/util";
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
-
 import module namespace app="http://jewishliturgy.org/modules/app" 
   at "xmldb:exist:///code/modules/app.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache" 
@@ -485,10 +482,10 @@ declare function format:update-status(
   let $status-doc := doc(concat($collection, "/", format:status-xml($resource)))
   let $current := $status-doc//current
   let $job := $status-doc//job
-  return (
+  return (# exist:batch-transaction #) {
     update value $current with $new-stage,
     update value $job with $new-job
-  ) 
+  }
 };
 
 (:~ Complete the current processing stage. If the processing is entirely complete,
@@ -504,7 +501,7 @@ declare function format:complete-status(
   let $steps := $status-doc//steps
   let $job := $status-doc//job
   let $update-location := $current = $steps
-  return (
+  return (# exist:batch-transaction #) {
     update value $completed with string($current), 
     update value $current with "",
     update value $job with "",
@@ -512,5 +509,5 @@ declare function format:complete-status(
     then 
       update value $location with concat($collection, "/", $resource)
     else ()
-  )
+  }
 };
