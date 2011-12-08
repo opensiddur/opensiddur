@@ -365,7 +365,7 @@ TODO:
         then func:make-word-xmlid(following-sibling::*[1])
         else func:debug(('note I do not know what to link it to', parent::*), 'x', $debug-error)"/>
     <tei:link type="note" targets="{string-join(
-      ($file,$extension,'#',$link-to-id, ' #note_',.),'')}"/>
+      ($file,'#',$link-to-id, ' #note_',.),'')}"/>
   </xsl:template>
 	
   <xsl:template match="text()" mode="link-notes"/>
@@ -395,7 +395,7 @@ TODO:
       select="document($input-file)"/>
     <xsl:variable name="bibl-content" as="element(tei:bibl)">
 			<tei:bibl xml:id="biblKimball2010">
-	      <tei:ptr target="../{$bibliography-file-name}{$extension}#Kimball2010" />
+	      <tei:ptr target="../{$bibliography-file-name}#Kimball2010" />
 			</tei:bibl>
     </xsl:variable>
     <xsl:variable name="license-content" as="element()+">
@@ -424,7 +424,7 @@ TODO:
     </xsl:variable>
     <xsl:variable name="respList-content" as="element(j:respList)">
       <j:respList>
-        <tei:respons j:role="transcriber" locus="value" target="#repository" resp="../{$contributors-file-name}{$extension}#Christopher.Kimball"/>
+        <tei:respons j:role="transcriber" locus="value" target="#repository" resp="../{$contributors-file-name}#Christopher.Kimball"/>
       </j:respList>
     </xsl:variable>
 		<xsl:variable name="links-content" as="element(j:links)">
@@ -474,7 +474,7 @@ TODO:
                         select="names/name" as="xs:string" />
                       <xsl:variable name="book-uri"
                         select="func:bookref-to-uri($book, ())" />
-                      <tei:ptr target="{$book-uri}{$extension}#main">
+                      <tei:ptr target="{$book-uri}#main">
 												<xsl:attribute name="xml:id" select="concat('se_',$book-uri)"/> 
                       </tei:ptr>
                     </xsl:for-each>
@@ -543,7 +543,7 @@ TODO:
                           select="@n" />
                         <xsl:variable name="chap-uri"
                           select="func:bookref-to-uri($book, $chap)" />
-                        <tei:ptr target="{$chap-uri}{$extension}#main"> 
+                        <tei:ptr target="{$chap-uri}#main"> 
 													<xsl:attribute name="xml:id" select="concat('se_ch',$chap)"/>
 												</tei:ptr>
                       </xsl:for-each>
