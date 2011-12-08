@@ -430,7 +430,9 @@ declare function app:transform-xslt(
           <xsl:param name="uri-map" as="document-node()">
             <xsl:document>
               <uri-map xmlns="">{
-                for $document in collection("/group")[namespace-uri(*)="http://www.tei-c.org/ns/1.0"]
+                for $document in collection("/group")
+                  [namespace-uri(*)="http://www.tei-c.org/ns/1.0"]
+                  [not(contains(document-uri(.), "/output/"))]
                 let $doc-uri := document-uri($document)
                 return
                   <map 

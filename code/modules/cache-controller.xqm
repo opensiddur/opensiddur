@@ -14,14 +14,12 @@ xquery version "3.0";
 
 module namespace jcache="http://jewishliturgy.org/modules/cache";
 
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
-import module namespace request="http://exist-db.org/xquery/request";
-import module namespace transform="http://exist-db.org/xquery/transform";
-import module namespace util="http://exist-db.org/xquery/util";
 import module namespace app="http://jewishliturgy.org/modules/app" 
 	at "xmldb:exist:///code/modules/app.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
 	at "xmldb:exist:///code/modules/paths.xqm";
+import module namespace nav="http://jewishliturgy.org/modules/nav"
+  at "xmldb:exist:///code/api/modules/nav.xqm";
 
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
@@ -319,7 +317,13 @@ declare function jcache:find-dependent-resources(
   ) as xs:string* {
   if (not($path = $resources-checked))
   then (
-    let $doc := doc($path)
+    let $doc :=
+      (: the given path may be an API path or a database path :)
+      let $api := nav:api-path-to-sequence($path)
+      return
+        if ($api)
+        then $api
+        else doc($path)
     let $this-resources-checked := (
       $resources-checked,
       document-uri($doc)
