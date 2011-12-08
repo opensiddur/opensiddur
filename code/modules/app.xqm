@@ -10,12 +10,6 @@ xquery version "1.0";
  :)
 module namespace app="http://jewishliturgy.org/modules/app";
 
-import module namespace response="http://exist-db.org/xquery/response";
-import module namespace request="http://exist-db.org/xquery/request";
-import module namespace session="http://exist-db.org/xquery/session";
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
-import module namespace util="http://exist-db.org/xquery/util";
-
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
@@ -24,6 +18,8 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform";
 declare namespace err="http://jewishliturgy.org/errors";
+declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 
 (:~ return application version as a string :)
 declare function app:get-version(
@@ -428,6 +424,25 @@ declare function app:transform-xslt(
       xmlns:app="http://jewishliturgy.org/modules/app"
       version="2.0"
       exclude-result-prefixes="app">
+      {
+        if ($user)
+        then
+          <xsl:param name="uri-map" as="document-node()">
+            <xsl:document>
+              <uri-map xmlns="">{
+                for $document in collection("/group")[namespace-uri(*)="http://www.tei-c.org/ns/1.0"]
+                let $doc-uri := document-uri($document)
+                return
+                  <map 
+                    from="{$document/*/@jx:document-uri}" 
+                    to="xmldb:exist://{$user}:{$password}@{$doc-uri}">
+                    <cache type="fragmentation" to="xmldb:exist://{$user}:{$password}@{replace($doc-uri, '/db', '/db/cache')}"/>
+                  </map>
+              }</uri-map>              
+            </xsl:document>
+          </xsl:param>
+        else ()
+      }
       <xsl:include href="{$xslt-uri-abs}"/>
       <xsl:template match="app:root">
       	<xsl:variable name="to-apply" as="document-node()">{

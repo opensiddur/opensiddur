@@ -15,6 +15,8 @@ import module namespace grammar="http://jewishliturgy.org/transform/grammar"
 	at "/code/grammar-parser/grammar2.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
 	at "/code/modules/cache-controller.xqm";
+import module namespace nav="http://jewishliturgy.org/modules/nav"
+  at "/code/api/modules/nav.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
@@ -248,17 +250,15 @@ declare function uri:follow-cached-uri(
 	) as node()* {
   let $full-uri as xs:anyURI :=
   	uri:absolutize-uri($uri, $context)
-  let $base-path as xs:anyURI := 
-  	uri:uri-base-path(
-  		string(
-	    	if ($cache-type=$uri:fragmentation-cache-type)
-	      then uri:cached-document-path(string($full-uri))
-	      else $full-uri
-      )
-    )
+	let $base-path := uri:uri-base-path($full-uri)
   let $fragment as xs:anyURI := 
   	uri:uri-fragment(string($full-uri))      
-	let $document as document-node()? := doc($base-path)
+	let $document as document-node()? := 
+	  let $doc := nav:api-path-to-sequence($base-path)
+	  return
+	    if ($cache-type=$uri:fragmentation-cache-type)
+	    then doc(uri:cached-document-path(document-uri($doc)))
+	    else $doc
 	let $pointer-destination as node()* :=
 		uri:follow(
 			if ($fragment) 
@@ -307,7 +307,8 @@ declare function uri:fast-follow(
     uri:uri-base-path($full-uri)
   let $fragment as xs:anyURI := 
     uri:uri-fragment(string($full-uri))
-  let $document as document-node()? := doc($base-path)
+  let $document as document-node()? := 
+    nav:api-path-to-sequence($base-path)
   let $pointer-destination as node()* :=
     if ($fragment) 
     then 
