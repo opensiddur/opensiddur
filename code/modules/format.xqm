@@ -34,7 +34,7 @@ declare variable $format:list := 3;
 declare variable $format:format := 4;
 
 
-declare function format:_wrap-document(
+declare function local:wrap-document(
 	$node as node()
 	) as document-node() {
 	if ($node instance of document-node())
@@ -53,7 +53,7 @@ declare function format:data-compile(
   $user as xs:string?,
   $password as xs:string?
 	) as document-node() {
-  format:_wrap-document(
+  local:wrap-document(
     let $uri-or-node :=
       if ($jlptei-uri-or-node instance of xs:string)
       then (
@@ -87,7 +87,7 @@ declare function format:list-compile(
   $user as xs:string?,
   $password as xs:string?
 	) as document-node() {
-	format:_wrap-document(
+	local:wrap-document(
 		app:transform-xslt($data-compiled-node, 
 			app:concat-path($format:rest-path-to-xslt, 'list-compiler/list-compiler.xsl2'),
         if ($user)
@@ -112,7 +112,7 @@ declare function format:format-xhtml(
   $user as xs:string?,
   $password as xs:string?
 	) as document-node() {
-	format:_wrap-document(
+	local:wrap-document(
 		app:transform-xslt($list-compiled-node, 
 			app:concat-path($format:rest-path-to-xslt, 'format/xhtml/xhtml.xsl2'),
       (
@@ -134,6 +134,27 @@ declare function format:format-xhtml(
 	$list-compiled-node as item()
 	) as document-node() {
 	format:format-xhtml($list-compiled-node, (), (), ())
+};
+
+(:~ compile XHTML to intermediate TEI :)
+declare function format:reverse-xhtml(
+  $node as item(),
+  $user as xs:string?,
+  $password as xs:string?
+  ) as document-node() {
+  local:wrap-document(
+    app:transform-xslt($node, 
+      app:concat-path($format:rest-path-to-xslt, 'format/reverse-xhtml/reverse.xsl2'),
+      (
+        if ($user)
+        then (
+          <param name="user" value="{$user}"/>,
+          <param name="password" value="{$password}"/>
+        )
+        else ()
+      )
+      , ())
+  )
 };
 
 declare function format:compile(
