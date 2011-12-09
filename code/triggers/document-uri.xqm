@@ -25,7 +25,7 @@ declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare function trigger:is-exempt(
   $uri as xs:anyURI)
   as xs:boolean {
-  let $exempt-collections := ('tests', 'test', 'updated.xml')
+  let $exempt-collections := ('tests', 'test', 'cache', 'updated.xml')
   let $collections := tokenize($uri,'/')
   return $collections = $exempt-collections
 };
