@@ -381,7 +381,7 @@ $Id: stml-grammar.xml 749 2011-04-18 19:13:26Z efraim.feinstein $
     </zeroOrOne>
   </term>
   <term name="EOL">
-	<expAnon>[\r\n]</expAnon>
+    <expAnon>\r?\n</expAnon>
   </term>
   <term name="VerseDivision">
     <expAnon>/</expAnon>
