@@ -430,13 +430,13 @@ declare function app:transform-xslt(
           <xsl:param name="uri-map" as="document-node()">
             <xsl:document>
               <uri-map xmlns="">{
-                for $document in collection("/group")
+                for $document in collection(("/group","/code"))
                   [namespace-uri(*)="http://www.tei-c.org/ns/1.0"]
                   [not(contains(document-uri(.), "/output/"))]
                 let $doc-uri := document-uri($document)
                 return
                   <map 
-                    from="{$document/*/@jx:document-uri}" 
+                    from="{($document/*/@jx:document-uri, $doc-uri)[1]}" 
                     to="xmldb:exist://{$user}:{$password}@{$doc-uri}">
                     <cache type="fragmentation" to="xmldb:exist://{$user}:{$password}@{replace($doc-uri, '/db', '/db/cache')}"/>
                   </map>

@@ -18,6 +18,7 @@ import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "xmldb:exist:///code/api/modules/nav.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 
 (: exempt certain collections and sub-collections from document-uri triggering :)
@@ -36,10 +37,14 @@ declare function trigger:log-trigger-event($uri as xs:anyURI, $event as xs:strin
 declare function trigger:write-document-uri($uri as xs:anyURI) {
   if (not(util:is-binary-doc($uri)) and doc-available($uri) and not(trigger:is-exempt($uri)))
   then
-    (: the document is an XML document and it exists :)
+    (: the document is an JLPTEI XML document and it exists :)
     let $root := doc($uri)
-    let $TEI := $root/tei:*
-    let $full-uri := nav:db-path-to-api-path(document-uri($root), $root, false())
+    let $doc-uri := document-uri($root)
+    let $TEI := $root/(tei:*|j:*|jx:*)
+    let $full-uri := 
+      if (starts-with($doc-uri, "/db/group"))
+      then nav:db-path-to-api-path($doc-uri, $root, false())
+      else $doc-uri
     where exists($TEI)
     return (# exist:batch-transaction #) {
       (: write @xml:base :)
