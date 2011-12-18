@@ -116,7 +116,7 @@
     <xd:param name="additional-views">additional views to process as if 
     they were part of the current hierarchy</xd:param>
   </xd:doc>
-	<xsl:template match="j:concurrent[j:selection]" as="element(jx:joined-concurrent)">
+  <xsl:template match="j:concurrent[j:selection]" as="element(jx:joined-concurrent)">
     <xsl:param name="additional-views" tunnel="yes" as="element(j:view)*"
       select="()"/>
     <xsl:sequence select="func:debug($additional-views, 'concurrent:additional-views', $debug-detail)"/>   
@@ -326,6 +326,13 @@
     </xsl:variable>
     
     <xsl:sequence select="func:debug($unflattened, '$unflattened', $debug-detail)"/>
+    
+    <xsl:variable name="expanded-internal" as="element()">
+      <xsl:apply-templates select="$unflattened" mode="expand-internal"/>
+    </xsl:variable>
+    
+    <xsl:sequence select="func:debug($expanded-internal, '$expanded-internal', $debug-detail)"/>
+    
     <jx:joined-concurrent>
       <!-- copy the context here, if changed -->
       <xsl:if test="@xml:id">
@@ -334,9 +341,7 @@
       <xsl:call-template name="copy-attributes-and-context-if-changed">
         <xsl:with-param name="attributes" as="attribute()*" select="@* except @xml:id"/>
       </xsl:call-template>
-      <xsl:apply-templates select="$unflattened" mode="cleanup-unflatten">
-        <xsl:with-param name="document-context" as="element()"
-          select="$context" tunnel="yes"/>
+      <xsl:apply-templates select="$expanded-internal" mode="cleanup-unflatten">
       </xsl:apply-templates>
     </jx:joined-concurrent>
   </xsl:template>
@@ -1098,13 +1103,16 @@
 
   <xd:doc>
     <xd:short>Expand internal pointers in the selection with their content</xd:short>
+    <xd:detail>External pointers in parallel groups are treated like internal pointers</xd:detail>
   </xd:doc>  
   <xsl:template match="tei:ptr[@jx:selection]" mode="expand-internal">
     <xsl:param name="document-context" as="element()" select="." tunnel="yes"/>
+ 
     <xsl:copy>
       <xsl:copy-of select="@*"/>
-      <xsl:if test="func:uri-base-path(
-        func:absolutize-uri(@target, .))=func:original-document-uri(.)">
+      <xsl:if test="exists(ancestor::j:parallelGrp) or 
+        func:uri-base-path(
+          func:absolutize-uri(@target, .))=func:original-document-uri(.)">
         <xsl:apply-templates mode="#current"
           select="func:follow-uri(@target, $document-context, func:follow-steps(., -1))"/>
       </xsl:if>
