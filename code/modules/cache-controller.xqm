@@ -315,15 +315,15 @@ declare function jcache:find-dependent-resources(
   $path as xs:string,
   $resources-checked as xs:string*
   ) as xs:string* {
-  if (not($path = $resources-checked))
-  then (
-    let $doc :=
+  let $doc :=
       (: the given path may be an API path or a database path :)
       let $api := nav:api-path-to-sequence($path)
       return
         if ($api)
         then $api
         else doc($path)
+  where not(document-uri($doc) = $resources-checked)
+  return
     let $this-resources-checked := (
       $resources-checked,
       document-uri($doc)
@@ -352,8 +352,6 @@ declare function jcache:find-dependent-resources(
       return jcache:find-dependent-resources($new-target, $this-resources-checked)
     return
       distinct-values(($this-resources-checked, $recurse))
-  )
-  else ( (: path already checked :) )
 };
 
 (:~ return a path to a cached document - whether it exists or not -
