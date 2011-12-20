@@ -43,6 +43,15 @@
     <xsl:sequence select="$node/ancestor-or-self::*[@property='document-source'][1]/@resource"/>
   </xsl:function>
 
+  <xsl:variable name="ns-map" as="element()">
+    <ns-map>
+      <ns prefix="j" ns="http://jewishliturgy.org/ns/jlptei/1.0"/>
+      <ns prefix="jx" ns="http://jewishliturgy.org/ns/jlp-processor"/>
+      <ns prefix="tei" ns="http://www.tei-c.org/ns/1.0"/>
+    </ns-map>
+  </xsl:variable>
+    
+
   <xsl:template match="@property[.='document-source']" as="attribute()+">
     <xsl:attribute name="jx:document-uri" select="../@resource"/>
   </xsl:template>
@@ -65,9 +74,18 @@
     </tei:TEI>
   </xsl:template>
 
+  <xd:doc>
+    <xd:short>Convert class-coded attributes to tei/j/jx attributes; add jx:id if it is not already present</xd:short>
+  </xd:doc>
   <xsl:template name="get-attributes" as="attribute()*">
     <xsl:param name="classes" select="tokenize(@class, '\s+')" as="xs:string*"/>
+    <xsl:param name="set-id" as="xs:boolean" select="true()"/>
     <xsl:param name="additional-attributes" select="()" as="attribute()*"/>
+    
+    <xsl:variable name="name-class" as="xs:string?" 
+      select="$classes[some $prefix in $ns-map/ns/@prefix satisfies starts-with(., concat($prefix, '-'))]"/>
+    <xsl:variable name="local-name" as="xs:string"
+      select="substring-after($name-class, '-')"/>   
     
     <xsl:variable name="my-id-class" as="xs:string?" select="$classes[starts-with(., 'id-')]"/>
     <xsl:variable name="my-document" as="xs:string?" 
@@ -83,7 +101,7 @@
         <xsl:when test="$prefix=('type', 'subtype', 'n')">
           <xsl:attribute name="{$prefix}" select="$content"/>
         </xsl:when>
-        <xsl:when test="$prefix='id'">
+        <xsl:when test="$prefix='id' and $set-id">
           <xsl:attribute name="jx:id" select="$content"/>
         </xsl:when>
         <!-- TODO: does not handle the case of a manually added next or prev! -->
@@ -104,19 +122,15 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each>
+    <!-- add a jx:id attribute if one does not already exist -->
+    <xsl:if test="not($my-id-class) and $set-id">
+      <xsl:attribute name="jx:id" select="concat($local-name, '-', generate-id(.))"/>
+    </xsl:if>
   </xsl:template>
 
   <!-- elements that convert back from div or span -->  
   <xsl:template match="html:div|html:span" mode="#default reorder">
     <xsl:variable name="classes" select="tokenize(@class, '\s+')" as="xs:string*"/>
-    <xsl:variable name="ns-map" as="element()">
-      <ns-map>
-        <ns prefix="j" ns="http://jewishliturgy.org/ns/jlptei/1.0"/>
-        <ns prefix="jx" ns="http://jewishliturgy.org/ns/jlp-processor"/>
-        <ns prefix="tei" ns="http://www.tei-c.org/ns/1.0"/>
-      </ns-map>
-    </xsl:variable>
-    <xsl:message><xsl:sequence select="concat(name(.), ' ', @class)"/></xsl:message>
     <xsl:variable name="name-class" as="xs:string?" 
       select="$classes[some $prefix in $ns-map/ns/@prefix satisfies starts-with(., concat($prefix, '-'))]"/>
     <xsl:variable name="local-name" as="xs:string"
@@ -152,25 +166,60 @@
     </tei:ab>
   </xsl:template>
   
+  <xd:doc>
+    <xd:short>Convert pointers into one pointer per link</xd:short>
+  </xd:doc>
   <xsl:template match="html:div[contains(@class, 'tei-ptr')][not(contains(@class, 'type-url'))]">
-    <tei:ptr>
-      <xsl:call-template name="get-attributes"/>
-      <xsl:attribute name="target">
-        <xsl:variable name="my-document" as="xs:string"
-          select="func:source-document-by-node(.)"/>
-        <xsl:variable name="target-ids" as="xs:string*" 
-          select="
-            for $child in *, 
-              $id in tokenize($child/@class, '\s+')[starts-with(., 'id-')]
-            return concat(
-              if (func:source-document-by-node($child) = $my-document) 
-              then '' 
-              else func:source-document-by-node($child), '#', substring-after($id, 'id-'))">
-        </xsl:variable>
-        <xsl:sequence select="string-join($target-ids, ' ')"/>
-      </xsl:attribute>
-      <xsl:apply-templates/>
-    </tei:ptr>
+    <xsl:variable name="context" as="element(tei:ptr)" select="."/>
+    
+    <xsl:variable name="context-classes" as="xs:string*" select="tokenize(@class, '\s+')"/>
+    <xsl:variable name="common-attributes" as="attribute()*">
+      <xsl:call-template name="get-attributes">
+        <xsl:with-param name="set-id" as="xs:boolean" select="false()"/>
+        <xsl:with-param name="classes" as="xs:string+" 
+          select="$context-classes[not(starts-with(., 'target-'))]"/> 
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:variable name="my-document" as="xs:string"
+      select="func:source-document-by-node(.)"/>
+    <xsl:variable name="my-id" as="xs:string?" 
+      select="substring-after($context-classes[starts-with(., 'id-')],'id-')"/>
+    
+    <!-- this has to exclude tei:label[@type=n-chapter|n-verse];
+    if there are any more elements to ignore, will have to write
+    this differently
+     -->
+    <xsl:for-each select="* except *[contains(@class, 'tei-label') and (contains(@class, 'n-chapter') or contains(@class, 'n-verse'))]">
+      <xsl:variable name="classes" as="xs:string*" select="tokenize(@class, '\s+')"/>
+      <xsl:variable name="name-class" as="xs:string?" 
+        select="(
+          $classes[some $prefix in $ns-map/ns/@prefix satisfies starts-with(., concat($prefix, '-'))],
+          local-name(.)
+          )[1]"/>
+      <xsl:variable name="local-name" as="xs:string"
+        select="substring-after($name-class, '-')"/>
+
+      <tei:ptr>
+        <xsl:attribute name="jx:id" 
+          select="if (position()=1 and $my-id) then $my-id else concat('ptr-', generate-id(.))"/>
+        <xsl:attribute name="target">
+          <xsl:variable name="target-ids" as="xs:string*" 
+            select="
+              for $id in ($classes[starts-with(., 'id-')], 
+                concat('id-', $local-name, '-', generate-id(.)))[1]
+              return concat(
+                if (func:source-document-by-node(.) = $my-document) 
+                then '' 
+                else func:source-document-by-node(.), '#', substring-after($id, 'id-')
+                )">
+          </xsl:variable>
+
+          <xsl:sequence select="string-join($target-ids, ' ')"/>
+        </xsl:attribute>
+        <xsl:sequence select="common-attributes"/>
+        <xsl:apply-templates select="."/>
+      </tei:ptr>
+    </xsl:for-each>
   </xsl:template>
   
   <!-- elements that are moved from their original positions -->
