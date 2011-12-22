@@ -212,18 +212,22 @@ declare function jcache:is-up-to-date(
 };
 
 (:~ determine if a given document is up to date in the given cache, including dependencies
- : @param $document-path Path to document in the database (assumed to be a document!)
+ : @param $document-path db or api path to document in the database (assumed to be a document!)
  : @param $cache Subdirectory name of the cache to use 
  :)
 declare function jcache:is-up-to-date(
 	$document-path as xs:string,
 	$cache as xs:string) 
 	as xs:boolean {
-  let $sanitized-document-path := replace($document-path, '^http://[^/]+', '')
-	let $collection := util:collection-name($sanitized-document-path)
-	let $resource := util:document-name($sanitized-document-path)
+  let $sanitized-document := 
+    if (doc-available($document-path))
+    then doc($document-path)
+    else (: api path :)
+      nav:api-path-to-sequence($document-path)
+	let $collection := util:collection-name($sanitized-document)
+	let $resource := util:document-name($sanitized-document)
 	let $cache-collection := jcache:cached-document-path($collection)
-	let $cached-document-path := jcache:cached-document-path($sanitized-document-path)
+	let $cached-document-path := jcache:cached-document-path(document-uri($sanitized-document))
 	return
     xmldb:collection-available($cache-collection) and
 		doc-available($cached-document-path) and
