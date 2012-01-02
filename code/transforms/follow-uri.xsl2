@@ -59,6 +59,22 @@
   <xsl:variable name="fragmentation-cache-type" as="xs:string" select="'fragmentation'"/>
 
   <xd:doc>
+    <xd:short>Look up a document by internal URI</xd:short>
+  </xd:doc>
+  <xsl:function name="func:uri-map-lookup" as="xs:string">
+    <xsl:param name="uri" as="xs:string"/>
+    <xsl:param name="cache-type" as="xs:string"/>
+    <xsl:sequence select="
+      key(
+        if ($cache-type = $fragmentation-cache-type) 
+        then 'map-cached-uri' 
+        else 'map-uri', 
+        $uri,
+        $uri-map)/string()
+      )"/>
+  </xsl:function>
+
+  <xd:doc>
     <xd:short>Return the original document uri of a node, given the 
     possibility that processing was done by concurrent.xsl2</xd:short>
     <xd:detail>When this function is called, you want a URI.  

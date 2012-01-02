@@ -14,6 +14,8 @@
   xmlns:x="http://jewishliturgy.org/ns/temp"
   exclude-result-prefixes="#all"
 >
+  <xsl:import href="../../../common/common.xsl2"/>
+  
   <xsl:output method="xml" version="1.0" encoding="UTF-8"  
     doctype-system="about:legacy-compat" 
     indent="no"/>
@@ -36,8 +38,6 @@
     </xd:detail>
   </xd:doc>
     
-  <xsl:import href="../../../common/common.xsl2"/>
-  
   <!-- href to this document's style -->
   <xsl:param name="style" as="xs:string" select="'style.css'"/>
   
@@ -73,6 +73,13 @@
         <xsl:attribute name="dir" select="$my-direction"/>
       </xsl:if>
     </xsl:if>
+  </xsl:template>
+  
+  <!-- I don't know if this is *always* right, but it will be
+  needed to make @href point to the right place if it comes 
+  from an @target copy... -->
+  <xsl:template match="@xml:base" as="attribute()?">
+    <xsl:copy/>
   </xsl:template>
   
   <xsl:template match="@*"/>
