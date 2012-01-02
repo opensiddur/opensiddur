@@ -361,3 +361,107 @@ declare function reverse:rebuild-view(
       then local:recurse-rebuild-view($snippet,$ancestor-view)
       else ()
 };
+
+(:~ merge all repositories in the rebuild set :)
+declare function reverse:merge-repositories(
+  $reverse-data as element(reverse:rebuild)
+  ) {
+  for $repository in $reverse-data/reverse:repository
+  return reverse:merge-repository($repository)
+};
+
+(:~ merge a single repository :)
+declare function reverse:merge-repository(
+  $additions as element(reverse:repository)
+  ) {
+    let $doc := nav:api-path-to-sequence($additions/@document)
+    let $repository := $doc//j:repository
+    for $segment in $additions/tei:seg
+    let $replaces := $doc/id($segment/@xml:id)
+    return 
+      if (exists($replaces))
+      then 
+        (: possible optimization: is $segment different than $replaces? :)
+        update replace $replaces with $segment
+      else
+        update insert $segment into $repository
+};  
+
+declare function reverse:merge-selection(
+  $additions as element(reverse:selection)
+  ) {
+    let $doc := nav:api-path-to-sequence($additions/@document)
+    let $selection := $doc//j:selection
+    let $selection-ptrs := $selection/tei:ptr
+    let $first-common-ptr := $selection-ptrs[@xml:id=$additions/tei:ptr/@xml:id][1]
+    let $additions-first-common := $additions/tei:ptr[@xml:id=$first-common-ptr/@xml:id]
+    let $last-common-ptr := $selection-ptrs[@xml:id=$additions/tei:ptr/@xml:id][last()]
+    let $additions-last-common := $additions/tei:ptr[@xml:id=$last-common-ptr/@xml:id]
+    let $new-selection := (
+      $first-common-ptr/preceding-sibling::*,
+      $additions-first-common/preceding-sibling::*,
+      $first-common-ptr,
+      $additions-first-common/following-sibling::*[. << $additions-last-common],
+      $last-common-ptr[not(. is $first-common-ptr)],
+      $additions-last-common/following-sibling::*,
+      $last-common-ptr/following-sibling::*
+    )
+    return 
+      update replace $selection with 
+        element j:selection {
+          $selection/@*,
+          $new-selection
+        }
+};
+
+declare function reverse:merge-view(
+  $additions as element(reverse:view)
+  ) {
+  let $doc := nav:api-path-to-sequence($additions/@document)
+  let $equivalent-view := $doc//j:view[@type=$additions/@type]
+  let $first-common-element := $equivalent-view/*[@xml:id=$additions/*/@xml:id][1]
+  let $last-common-element := $equivalent-view/*[@xml:id=$additions/*/@xml:id][last()]
+  let $additions-first-common := $additions/*[@xml:id=$first-common-element/@xml:id]
+  let $additions-last-common := $additions/*[@xml:id=$last-common-element/*/@xml:id]
+  let $new-view := 
+    element j:view {
+      if ($equivalent-view)
+      then $equivalent-view/@*
+      else $additions/@*,
+      $first-common-ptr/preceding-sibling::*,
+      $additions-first-common/preceding-sibling::*,
+      $first-common-ptr,
+      $additions-first-common/following-sibling::*[. << $additions-last-common],
+      $last-common-ptr[not(. is $first-common-ptr)],
+      $additions-last-common/following-sibling::*,
+      $last-common-ptr/following-sibling::*
+    }
+  return 
+    if (exists($equiavelent-view))
+    then update replace $equivalent-view with $new-view
+    else update insert $new-view into $doc//j:concurrent
+};
+
+declare function reverse:merge-selections(
+  $reverse-data as element(reverse:rebuild)
+  ) {
+  for $selection in $reverse-data/reverse:selection
+  return reverse:merge-selection($selection)
+};
+
+declare function reverse:merge-views(
+  $reverse-data as element(reverse:rebuild)
+  ) {
+  for $view in reverse-data/reverse:view
+  return reverse:merge-view($view)
+};
+
+declare function reverse:merge(
+  $reverse-data as element(reverse:rebuild)
+  ) {
+  (#exist:batch-transaction#) {
+    reverse:merge-repositories($reverse-data),
+    reverse:merge-selections($reverse-data),
+    reverse:merge-views($reverse-data)
+  }
+};
