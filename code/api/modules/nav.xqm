@@ -114,7 +114,7 @@ declare function nav:url-to-xpath(
     api:error(404, "The given URL contains illegal characters", $url)
   else 
     let $url-tokens := tokenize($url, "/")[.]
-    let $activities := ("-compiled", "-html", "-expanded", "-license")
+    let $activities := ("-combined", "-compiled", "-html", "-expanded", "-license")
     return
       element nav:xpath {
         element nav:path { 

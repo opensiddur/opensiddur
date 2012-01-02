@@ -494,7 +494,17 @@ declare function api:form-content-type(
 (:~ return the HTML content types for use in accept/request header :)
 declare function api:html-content-type(
   ) as xs:string+ {
-  ("application/xhtml+xml", "text/html")
+  api:html-content-type(())
+};
+
+
+(:~ return the HTML content types for use in accept/request header 
+ : if $reject-text is true, do not allow text/html
+ :)
+declare function api:html-content-type(
+  $reject-text as xs:boolean?
+  ) as xs:string+ {
+  ("application/xhtml+xml", ("text/html")[not($reject-text)])
 };
 
 declare function api:tei-content-type(

@@ -19,6 +19,8 @@ import module namespace navat="http://jewishliturgy.org/api/data/navat"
   at "/code/api/data/queries/navat.xqm";
 import module namespace compile = "http://jewishliturgy.org/api/data/compile"
   at "/code/api/data/queries/compile.xqm";
+import module namespace combine = "http://jewishliturgy.org/api/data/combine"
+  at "/code/api/data/queries/combine.xqm";
 import module namespace lic = "http://jewishliturgy.org/api/data/license"
   at "/code/api/data/queries/license.xqm";
 import module namespace search="http://jewishliturgy.org/api/data/search"
@@ -41,10 +43,15 @@ return
     search:go($sequence)
   else
     typeswitch($sequence)
-    case element() return navel:go($sequence)
+    case element() return 
+      if ($activity = "-combined")
+      then combine:go($sequence)
+      else navel:go($sequence)
     case document-node() return 
       if ($activity = "-compiled")
       then compile:go($sequence)
+      else if ($activity = "-combined")
+      then combine:go($sequence)
       else if ($activity = "-license")
       then lic:go($sequence)
       else navdoc:go($sequence)
