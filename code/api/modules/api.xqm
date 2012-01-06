@@ -215,6 +215,12 @@ declare function api:get-accept-format(
   api:get-accept-format($accepted-formats, request:get-header('Accept'))
 };
 
+declare function api:get-request-format(
+  $accepted-formats as xs:string
+  ) {
+  api:get-accept-format($accepted-formats, request:get-header('Content-Type'))
+};
+
 (:~ perform content negotiation:
  : return the highest priority requested format of the data 
  : If none can be found acceptable, return error 406 and an error message
