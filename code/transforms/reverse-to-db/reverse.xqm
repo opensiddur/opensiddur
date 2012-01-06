@@ -157,7 +157,7 @@ declare function reverse:generate-id(
 declare function reverse:reverse(
   $intermed as element(tei:TEI),
   $start-resource as xs:string
-  ) {
+  ) as element(reverse:rebuild) {
   element reverse:rebuild {
     reverse:rebuild-repository($intermed),
     (: find and process all snippets (views and selections) :)
@@ -428,16 +428,16 @@ declare function reverse:merge-view(
       if ($equivalent-view)
       then $equivalent-view/@*
       else $additions/@*,
-      $first-common-ptr/preceding-sibling::*,
+      $first-common-element/preceding-sibling::*,
       $additions-first-common/preceding-sibling::*,
-      $first-common-ptr,
+      $first-common-element,
       $additions-first-common/following-sibling::*[. << $additions-last-common],
-      $last-common-ptr[not(. is $first-common-ptr)],
+      $last-common-element[not(. is $first-common-element)],
       $additions-last-common/following-sibling::*,
-      $last-common-ptr/following-sibling::*
+      $last-common-element/following-sibling::*
     }
   return 
-    if (exists($equiavelent-view))
+    if (exists($equivalent-view))
     then update replace $equivalent-view with $new-view
     else update insert $new-view into $doc//j:concurrent
 };
@@ -452,7 +452,7 @@ declare function reverse:merge-selections(
 declare function reverse:merge-views(
   $reverse-data as element(reverse:rebuild)
   ) {
-  for $view in reverse-data/reverse:view
+  for $view in $reverse-data/reverse:view
   return reverse:merge-view($view)
 };
 

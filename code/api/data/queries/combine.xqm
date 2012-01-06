@@ -9,6 +9,8 @@
  :)
 module namespace combine = 'http://jewishliturgy.org/api/data/combine';
 
+import module namespace app="http://jewishliturgy.org/modules/app" 
+  at "/code/modules/app.xqm";
 import module namespace api="http://jewishliturgy.org/modules/api" 
   at "/code/api/modules/api.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
@@ -102,8 +104,6 @@ declare function local:disallowed() {
   return api:error((), "Method not allowed")
 };
 
-(: EDIT FROM HERE :)
-
 declare function combine:get() {
   let $test-result := api:tests($combine:test-source)
   let $accepted := api:get-accept-format($combine:accept-content-type)
@@ -149,8 +149,43 @@ declare function combine:get() {
       )
 };
 
+(: check if the user has write access to a document :)
+declare function local:unauthorized-write(
+  $uri as xs:string
+  ) as element()? {
+  let $element := nav:api-path-to-sequence($uri)
+  where empty($element) 
+  return
+    api:error(404, "Not found", $uri)
+};
+
 declare function combine:put() {
-  local:disallowed()
+  let $accepted := api:get-request-format($combine:request-content-type)
+  let $uri := request:get-uri()
+  let $unauthorized := local:unauthorized-write($uri)
+  let $data := api:get-data()
+  return
+    if (not($accepted instance of element(api:content-type)))
+    then $accepted
+    else if ($unauthorized)
+    then $unauthorized
+    else
+      let $format := api:simplify-format($accepted, "none")
+      let $tei-data :=
+        if ($format = ("xhtml", "html"))
+        then 
+          format:reverse-xhtml($data, app:auth-user(), app:auth-password())/*
+        else $data
+      return
+        if (not($tei-data instance of element(tei:TEI)))
+        then (
+          api:error(400, "Combined data must have a tei:TEI root element"),
+          util:log-system-out(("Combined data: ", $tei-data))
+        )
+        else (
+          reverse:merge(reverse:reverse($tei-data, $uri)),
+          response:set-status-code(204)
+        )
 };
 
 declare function combine:post() {
