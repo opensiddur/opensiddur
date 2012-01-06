@@ -320,7 +320,7 @@ declare function navel:put() {
     $element/@xml:id/string(), 
     concat(local-name($data), "_", util:uuid())
     )[1]
-  let $accepted := api:get-accept-format($navel:request-content-type)
+  let $accepted := api:get-request-format($navel:request-content-type)
   let $position := substring-after($uri, ";")[.=("before", "after")]
   return
     if (not($accepted instance of element(api:content-type)))
