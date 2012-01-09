@@ -137,6 +137,12 @@ declare function combine:get() {
             if ($cached-content/@xml:base)
             then ()
             else attribute xml:base { base-uri($cached-content) },
+            if ($cached-content/@jx:document-uri)
+            then ()
+            else $cached-content/ancestor::*[@jx:document-uri][1]/@jx:document-uri,
+            if ($cached-content/@xml:lang)
+            then ()
+            else $cached-content/ancestor::*[@xml:lang][1]/@xml:lang,
             $cached-content/(@*|*)
           }
       return (
