@@ -69,7 +69,7 @@
         select="func:direction-by-language(.)"/>
       <xsl:copy/>
       <xsl:attribute name="lang" select="."/>
-      <xsl:if test="func:direction-by-language(..) ne $my-direction">
+      <xsl:if test="func:direction-by-language(../..) ne $my-direction">
         <xsl:attribute name="dir" select="$my-direction"/>
       </xsl:if>
     </xsl:if>
