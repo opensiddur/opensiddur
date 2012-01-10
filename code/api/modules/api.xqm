@@ -593,7 +593,7 @@ declare function api:serialize-as(
   api:serialize-as($serialization, ())
 };
 
-(:~ dynamically declare serialization options as txt, tei, xml, xhtml, or html (xhtml w/o indent)
+(:~ dynamically declare serialization options as none, txt, tei, xml, xhtml, or html (xhtml w/o indent)
  : @param $serialization type of serialization
  : @param $accept-format result of api:get-accept-formats() - attempt to match content type to the requested one
  :)
@@ -609,7 +609,7 @@ declare function api:serialize-as(
     then concat($accept-format/api:major, "/", $accept-format/api:minor) 
     else ()
 	let $options :=
-		if ($ser = ('txt', 'text'))
+		if ($ser = ('none', 'txt', 'text'))
 		then
 			concat('method=text media-type=', ($media-type, 'text/plain')[1])
 		else if ($ser = 'css')
