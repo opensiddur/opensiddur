@@ -155,7 +155,7 @@ declare function reverse:generate-id(
  : @param $start-resource the resource which the TEI is POSTed to
  :)
 declare function reverse:reverse(
-  $intermed as element(tei:TEI),
+  $intermed as element(),
   $start-resource as xs:string
   ) as element(reverse:rebuild) {
   element reverse:rebuild {
@@ -241,7 +241,7 @@ declare function local:remove-jx(
 
 (:~ build text repository entries :)
 declare function reverse:rebuild-repository(
-  $full as element(tei:TEI)
+  $full as element()
   ) as element(reverse:repository)* {
   for $segment in $full//tei:seg
   group 
