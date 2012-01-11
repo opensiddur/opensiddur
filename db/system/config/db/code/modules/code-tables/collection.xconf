@@ -1,0 +1,6 @@
+<collection xmlns="http://exist-db.org/collection-config/1.0">
+    <index>
+      <!-- range indexes -->
+      <create qname="@from" type="xs:integer"/>
+    </index>
+</collection>

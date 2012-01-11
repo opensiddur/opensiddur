@@ -465,3 +465,36 @@ declare function reverse:merge(
     reverse:merge-views($reverse-data)
   }
 };
+
+declare variable $reverse:nonunicode-data :=
+  doc("/code/modules/code-tables/non-unicode-combining-classes.xml")/*;
+
+(:~ Normalize a string based on non-Unicode combining classes, used by
+ : some reverse formatters
+ : @param original-string The string to convert
+ :)
+declare function reverse:normalize-nonunicode(
+  $original-string as xs:string
+  ) as xs:string { 
+  let $tokenized-string-xml :=
+    element string {
+      for $cp at $n in string-to-codepoints($original-string)
+      let $comb-class as xs:integer := 
+        xs:integer(($reverse:nonunicode-data/*[@from=$cp], 0)[1])
+      return element ch { attribute cp { $cp }, attribute cc { $comb-class }, attribute n { $n } }
+    }
+  return
+    string-join(
+      let $last-char := count($tokenized-string-xml/*) + 1
+      for $ch0 in $tokenized-string-xml/ch[@cc = 0]
+      let $next-ch0 := xs:integer(($ch0/following-sibling::*[@cc = 0][1]/@n, $last-char)[1])
+      return
+        for $ch in ($ch0, $ch0/following-sibling::*[@n < $next-ch0])
+        order by $ch/@cc/number()
+        return
+          codepoints-to-string($ch/@cp),
+      ""
+    )
+};
+  
+  
