@@ -219,6 +219,7 @@ declare function local:is-correct-type(
 };
 
 (:~ transform that copies everything,
+ : performs nonunicode normalization
  : removes @jx:* attributes and assigns xml:ids
  :)
 declare function local:remove-jx(
@@ -228,6 +229,8 @@ declare function local:remove-jx(
   for $n in $nodes 
   return 
     typeswitch ($n)
+    case text() return
+      text { reverse:normalize-nonunicode($n) }
     case element() return
       element { QName(namespace-uri($n), name($n)) }{
         $n/(@* except @jx:*),
