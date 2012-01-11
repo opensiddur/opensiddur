@@ -149,9 +149,11 @@ declare function combine:get() {
         api:serialize-as($format, $accepted),
         if ($format = ("xml", "tei"))
         then $cached-xml
-        else 
+        else (
           (: html :)
-          format:format-xhtml($cached-xml, ())
+          format:format-xhtml($cached-xml, ()),
+          util:declare-option("exist:serialize", "indent=no")
+        )
       )
 };
 
@@ -183,13 +185,14 @@ declare function combine:put() {
           format:reverse-xhtml($data, app:auth-user(), app:auth-password())/*
         else $data
       return
-        if (not($tei-data instance of element(tei:TEI)))
+        if (not($tei-data[@jx:document-uri]))
         then (
-          api:error(400, "Combined data must have a tei:TEI root element"),
+          api:error(400, "Combined data must make reference to its origin (@jx:document-uri) in the root element"),
           util:log-system-out(("Combined data: ", $tei-data))
         )
         else (
           reverse:merge(reverse:reverse($tei-data, $uri)),
+          api:serialize-as("none"),
           response:set-status-code(204)
         )
 };
