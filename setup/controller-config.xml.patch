@@ -11,7 +11,7 @@
 + 	allow legacy (demo) to access through /exist -->
 +  	<!-- -->
 +  	<root pattern="/exist/rest" path="xmldb:exist:///"/>
-+   <root pattern="/fs/.*" path="/"/>
++   <root pattern="/exist/" path="/"/>
 +   <root pattern="/db" path="xmldb:exist:///db"/>
 + 	<root pattern="/.*" path="xmldb:exist:///db"/>
     
