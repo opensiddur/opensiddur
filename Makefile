@@ -230,13 +230,18 @@ clean-hebmorph-lucene:
 	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant clean
 
 # Install a copy of the eXist database
-.PHONY: db-install db-install-nonet db-install-wlc bf-install db-uninstall db-sync db-syncclean installer patches lucene-install copy-files setup-password
-db-install: submodules svn-exist code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db copy-files setup-password   
+.PHONY: db-install db-install-nonet db-install-wlc bf-install db-uninstall db-sync db-syncclean installer patches lucene-install copy-files copy-libs setup-password
+db-install: submodules svn-exist code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db copy-files copy-libs setup-password   
 
 #installer that does not rely on the presence of a network. 
-db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db-nonet copy-files setup-password
+db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db-nonet copy-files copy-libs setup-password
 	@echo "Done."
 	touch $(EXIST_INSTALL_DIR)/EXIST.AUTOINSTALLED
+
+# copy libraries that are stored in the filesystem
+copy-libs:
+	mkdir -p $(EXIST_INSTALL_DIR)/webapp/aloha
+	cp -r $(LIBDIR)/aloha/src/* $(EXIST_INSTALL_DIR)/webapp/aloha
 
 installer: $(EXIST_INSTALL_JAR)
 	java -jar $(EXIST_INSTALL_JAR) -p $(EXIST_INSTALL_DIR)
