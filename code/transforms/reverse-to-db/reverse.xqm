@@ -107,7 +107,6 @@ declare function local:get-ancestor-view-type(
         }
   return 
     $lookup/(
-      util:log-system-out($lookup),
       (: some bug prevents ancestor-or-self from working... :)
       self::j:view|
       self::j:selection|
@@ -148,7 +147,49 @@ declare function reverse:generate-id(
   )
 };
 
+declare function local:recurse-find-views(
+  $snippets as element()*,
+  $from-document as xs:string
+  ) as xs:string* {
+  for $snippet in $snippets[not(@jx:document-uri != $from-document)]
+  let $my-view-type := 
+    $reverse:view-type-map/view-type/*
+      [local-name(.)=local-name($snippet)]
+      [namespace-uri(.)=namespace-uri($snippet)]
+      [not(@type) or (@type=$snippet/@type)]/../@type/string()
+  return
+    ($my-view-type, local:recurse-find-views($snippet/*, $from-document))
+};
 
+(:~ return back which view types exist in the given snippet :)
+declare function reverse:find-views(
+  $snippet as element()
+  ) as xs:string* {
+  distinct-values(local:recurse-find-views($snippet, $snippet/@jx:document-uri))
+}; 
+
+(: find a starting point for view processing :)
+declare function reverse:reverse-views(
+  $intermed-snippet as element()+,
+  $doc as document-node()
+  ) as element(reverse:view)* {
+  for $snippet in $intermed-snippet
+  let $view-types := reverse:find-views($snippet)
+  let $null := 
+    util:log-system-out(
+      ("**** view-types for snippet ", $snippet, " are: ", string-join($view-types, ","))
+    )
+  for $view-type in $view-types 
+  return
+    element reverse:view { 
+      attribute document {$snippet/@jx:document-uri},
+      let $result := reverse:rebuild-view($snippet, $doc, $view-type)
+      return (
+        util:log-system-out(("rebuild-view:", $result )),
+        $result
+      )
+    }
+}; 
 
 (:~ main entry point for reversal operations. 
  : @param @intermed the fragmentation TEI
@@ -161,29 +202,15 @@ declare function reverse:reverse(
   element reverse:rebuild {
     reverse:rebuild-repository($intermed),
     (: find and process all snippets (views and selections) :)
-    let $snippets := $intermed//*[@jx:document-uri]
+    let $snippets := $intermed/descendant-or-self::*[@jx:document-uri]
     for $snippet at $n in $snippets
-    let $parent := $snippet/..
     let $doc := nav:api-path-to-sequence($snippet/@jx:document-uri)
-    let $replaces := 
-      if ($snippet/@jx:id)
-      then 
-        (: the snippet derives from something referenced by jx:id directly :)
-        $doc/id($snippet/@jx:id)
-      else ()
-        (: the snippet derives from something referenced by #range :)
     return (
-      if ($replaces/ancestor-or-self::j:view)
-      then
-        element reverse:view { 
-          attribute document {$snippet/@jx:document-uri},
-          reverse:rebuild-view($snippet, $replaces/ancestor-or-self::j:view)
-        }
-      else (),
       element reverse:selection {
         attribute document { $snippet/@jx:document-uri },
         reverse:rebuild-selection($snippet, $doc//j:selection)
-      }
+      },
+      reverse:reverse-views($snippet, $doc)
     )
   }
     
@@ -200,14 +227,15 @@ declare function local:is-in-other-view(
 
 declare function local:is-correct-type(
   $snippet as element(), 
-  $ancestor-view as element()
+  $view-type as xs:string
   ) as xs:boolean {
   let $ln := local-name($snippet)
   let $ns := namespace-uri($snippet)
   let $type := $snippet/@type
   return
     exists(
-      $reverse:view-type-map/view-type[@type=$ancestor-view/@type]/*
+      $reverse:view-type-map/view-type
+        [@type=$view-type]/*
         [$ln = local-name(.)]
         [$ns = namespace-uri(.)]
         [
@@ -268,12 +296,10 @@ declare function reverse:rebuild-selection(
   ) {
   let $doc-uri := $snippet/ancestor-or-self::*[@jx:document-uri][1]/@jx:document-uri/string()
   let $doc := nav:api-path-to-sequence($doc-uri)
-  let $null := util:log-system-out(("rebuild-selection for ", $doc-uri, "#", $snippet/@jx:id))
   return
     if ($snippet instance of element(tei:ptr) and not($snippet/@type="url"))
     then
       let $snippet-equivalent := $doc/id($snippet/@jx:id)
-      let $null := util:log-system-out(("pointer equivalent = ", $snippet-equivalent))
       return 
         if ($snippet-equivalent/ancestor::j:selection is $selection)
         then
@@ -283,7 +309,6 @@ declare function reverse:rebuild-selection(
           }
         else ()
     else (
-      util:log-system-out("not a pointer"),
       for $element in $snippet/element()
       return
         reverse:rebuild-selection($element, $selection)
@@ -302,12 +327,13 @@ declare function reverse:identify-ancestor-view(
 
 declare function local:recurse-rebuild-view(
   $snippet as element(),
-  $ancestor-view as element(j:view)
+  $doc as document-node(),
+  $view-type as xs:string
   ) {
   for $node in $snippet/node()
   return
     typeswitch($node)
-    case element() return reverse:rebuild-view($node, $ancestor-view)
+    case element() return reverse:rebuild-view($node, $doc, $view-type)
     default return $node
 };
 
@@ -316,19 +342,17 @@ declare function local:recurse-rebuild-view(
  :)
 declare function reverse:rebuild-view(
   $snippet as element(),
-  $ancestor-view as element(j:view)
+  $doc as document-node(),
+  $view-type as xs:string
   ) {
-  let $document := root($ancestor-view)
-  let $equivalent := $document/id($snippet/@jx:id)
+  let $equivalent := $doc/id($snippet/@jx:id)
   let $snippet-from-view := 
     $equivalent/(ancestor::j:view|ancestor::j:repository|ancestor::j:selection)
   return
-    if ($snippet-from-view is $ancestor-view or
-      local:is-correct-type($snippet, $ancestor-view)
-      )
+    if (local:is-correct-type($snippet, $view-type))
     then
-      (: element is from the view this currently being processed.
-       : or it is the correct type for this 
+      (: element is from the view that is currently being processed.
+       : or it is the correct type for it 
        : copy it.
        :)
       element { QName(namespace-uri($snippet), name($snippet))}{
@@ -337,7 +361,7 @@ declare function reverse:rebuild-view(
         then
           attribute xml:id { $snippet/@jx:id }
         else (),
-        local:recurse-rebuild-view($snippet,$ancestor-view) 
+        local:recurse-rebuild-view($snippet,$doc,$view-type) 
       }
     else if ($snippet instance of element(tei:ptr))
     then
@@ -361,7 +385,7 @@ declare function reverse:rebuild-view(
        : skip it
        :)
       if ($snippet/descendant::tei:ptr)
-      then local:recurse-rebuild-view($snippet,$ancestor-view)
+      then local:recurse-rebuild-view($snippet,$doc,$view-type)
       else ()
 };
 
@@ -455,6 +479,7 @@ declare function reverse:merge-selections(
 declare function reverse:merge-views(
   $reverse-data as element(reverse:rebuild)
   ) {
+  let $null := util:log-system-out(("***merge-views from", $reverse-data))
   for $view in $reverse-data/reverse:view
   return reverse:merge-view($view)
 };
@@ -463,9 +488,13 @@ declare function reverse:merge(
   $reverse-data as element(reverse:rebuild)
   ) {
   (#exist:batch-transaction#) {
+    util:log-system-out("merge-repositories..."),
     reverse:merge-repositories($reverse-data),
+    util:log-system-out("merge-selections..."),
     reverse:merge-selections($reverse-data),
-    reverse:merge-views($reverse-data)
+    util:log-system-out("merge-views..."),
+    reverse:merge-views($reverse-data),
+    util:log-system-out("done")
   }
 };
 
