@@ -9,6 +9,8 @@ xquery version "1.0";
  :)
 module namespace reverse = 'http://jewishliturgy.org/modules/reverse';
 
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "xmldb:exist:///code/api/modules/nav.xqm";
 
@@ -20,102 +22,47 @@ declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare variable $reverse:view-type-map :=
   <view-type-map>
     <view-type type="div">
-      <tei:div/>
-      <tei:head/>
-      <tei:ab/>
+      <tei:div>
+        <tei:head/>
+        <tei:ab/>
+      </tei:div>
     </view-type>
     <view-type type="verse">
-      <tei:ab type="verse"/>
-      <tei:label/>
+      <tei:ab type="verse">
+        <tei:label/>
+      </tei:ab>
     </view-type>
     <view-type type="choice">
-      <tei:choice/>
-      <j:option/>
+      <tei:choice>
+        <j:option/>
+      </tei:choice>
     </view-type>
     <view-type type="lg">
-      <tei:lg/>
-      <tei:l/>
+      <tei:lg>
+        <tei:l/>
+      </tei:lg>
     </view-type>
     <view-type type="p">
-      <tei:p/>
-      <tei:s/>
+      <tei:p>
+        <tei:s/>
+      </tei:p>
     </view-type>
     <view-type type="s">
       <tei:s/>
     </view-type>
     <view-type type="list">
-      <tei:list/>
-      <tei:item/>
-      <tei:head/>
+      <tei:list>
+        <tei:head/>
+        <tei:item/>
+      </tei:list>
     </view-type>
     <view-type type="parallel">
-      <j:parallelGrp/>
-      <j:parallel/>
-      <j:original/>
+      <j:parallelGrp>
+        <j:parallel/>
+        <j:original/>
+      </j:parallelGrp>
     </view-type>
   </view-type-map>;
-
-declare function reverse:view-type(
-  $snippet as element(), 
-  $ancestor-view as element()
-  ) as xs:boolean {
-  let $ln := local-name($snippet)
-  let $ns := namespace-uri($snippet)
-  let $type := $snippet/@type
-  return
-    exists(
-      $reverse:view-type-map/view-type[@type=$ancestor-view/@type]/*
-        [$ln = local-name(.)]
-        [$ns = namespace-uri(.)]
-        [
-          if ($type) 
-          then @type = $type  
-          else true()
-        ]
-    )
-};
-
-
-declare function local:get-ancestor-view-type(
-  $node as node()
-  ) as element() {
-  let $my-document-start := $node/ancestor-or-self::*[@jx:document-uri][1]
-  let $my-document := $my-document-start/@jx:document-uri/string()
-  let $closest-id := $node/ancestor-or-self::*[@jx:id][1][not(self::tei:ptr)]
-    [(. is $my-document-start) or (. >> $my-document-start)]/@jx:id
-  let $lookup := 
-    if ($my-document and $closest-id)
-    then 
-      nav:api-path-to-sequence($my-document)/id($closest-id)
-    else 
-      (: take a guess by the element type :)
-      typeswitch($node)
-      case element(tei:ptr) return
-        if ($node/@type="url")
-        then <j:repository/>
-        else <j:selection/>
-      case element(tei:seg) return <j:repository/>
-      case element(tei:w) return <j:repository/>
-      case element(tei:pc) return <j:repository/>
-      default return 
-        element j:view {
-          ($reverse:view-type-map/view-type
-            [local-name(.)=local-name($node)]
-            [namespace-uri(.)=namespace-uri($node)]/@type,
-            attribute type { local-name($node) }
-          )[1]
-        }
-  return 
-    $lookup/(
-      (: some bug prevents ancestor-or-self from working... :)
-      self::j:view|
-      self::j:selection|
-      self::j:repository|
-      ancestor-or-self::j:view|
-      ancestor-or-self::j:selection|
-      ancestor-or-self::j:repository
-    )
-};
 
 declare function reverse:generate-id(
   $node as node()
@@ -149,23 +96,34 @@ declare function reverse:generate-id(
 
 declare function local:recurse-find-views(
   $snippets as element()*,
-  $from-document as xs:string
+  $from-document as xs:string,
+  $parent-names as xs:QName*
   ) as xs:string* {
   for $snippet in $snippets[not(@jx:document-uri != $from-document)]
+  let $snippet-qname := QName(namespace-uri($snippet), local-name($snippet))
   let $my-view-type := 
-    $reverse:view-type-map/view-type/*
+    $reverse:view-type-map/view-type/descendant-or-self::*
       [local-name(.)=local-name($snippet)]
       [namespace-uri(.)=namespace-uri($snippet)]
-      [not(@type) or (@type=$snippet/@type)]/../@type/string()
+      [not(@type) or (@type=$snippet/@type)]
+      [
+        let $p := parent::* except parent::view-type
+        return
+          if ($p)
+          then $parent-names=$snippet-qname
+          else true()
+      ]/../@type/string()
   return
-    ($my-view-type, local:recurse-find-views($snippet/*, $from-document))
+    ($my-view-type, 
+      local:recurse-find-views($snippet/*, $from-document, ($parent-names, $snippet-qname))
+    )
 };
 
 (:~ return back which view types exist in the given snippet :)
 declare function reverse:find-views(
   $snippet as element()
   ) as xs:string* {
-  distinct-values(local:recurse-find-views($snippet, $snippet/@jx:document-uri))
+  distinct-values(local:recurse-find-views($snippet, $snippet/@jx:document-uri, ()))
 }; 
 
 (: find a starting point for view processing :)
@@ -175,17 +133,22 @@ declare function reverse:reverse-views(
   ) as element(reverse:view)* {
   for $snippet in $intermed-snippet
   let $view-types := reverse:find-views($snippet)
+(:
   let $null := 
     util:log-system-out(
       ("**** view-types for snippet ", $snippet, " are: ", string-join($view-types, ","))
     )
+:)
   for $view-type in $view-types 
   return
     element reverse:view { 
       attribute document {$snippet/@jx:document-uri},
-      let $result := reverse:rebuild-view($snippet, $doc, $view-type)
+      attribute type { $view-type },
+      let $result := reverse:rebuild-view($snippet, $doc, $view-type, ())
       return (
+(:      
         util:log-system-out(("rebuild-view:", $result )),
+:)      
         $result
       )
     }
@@ -227,7 +190,8 @@ declare function local:is-in-other-view(
 
 declare function local:is-correct-type(
   $snippet as element(), 
-  $view-type as xs:string
+  $view-type as xs:string,
+  $parent-names as xs:QName*
   ) as xs:boolean {
   let $ln := local-name($snippet)
   let $ns := namespace-uri($snippet)
@@ -235,13 +199,23 @@ declare function local:is-correct-type(
   return
     exists(
       $reverse:view-type-map/view-type
-        [@type=$view-type]/*
+        [@type=$view-type]/descendant-or-self::*
         [$ln = local-name(.)]
         [$ns = namespace-uri(.)]
+        [
+          not(@type) or @type=$type 
+        ]
         [
           if ($type) 
           then @type = $type  
           else true()
+        ]
+        [
+          let $p := parent::* except parent::view-type
+          return
+            if ($p)
+            then $parent-names=QName(namespace-uri($p), local-name($p))
+            else true()
         ]
     )
 };
@@ -328,12 +302,16 @@ declare function reverse:identify-ancestor-view(
 declare function local:recurse-rebuild-view(
   $snippet as element(),
   $doc as document-node(),
-  $view-type as xs:string
-  ) {
+  $view-type as xs:string,
+  $parent-names as xs:QName*
+  ) as node()* {
   for $node in $snippet/node()
   return
     typeswitch($node)
-    case element() return reverse:rebuild-view($node, $doc, $view-type)
+    case text() return
+      text { reverse:normalize-nonunicode($node) }
+    case element() return 
+      reverse:rebuild-view($node, $doc, $view-type, $parent-names)
     default return $node
 };
 
@@ -343,26 +321,30 @@ declare function local:recurse-rebuild-view(
 declare function reverse:rebuild-view(
   $snippet as element(),
   $doc as document-node(),
-  $view-type as xs:string
+  $view-type as xs:string,
+  $parent-names as xs:QName*
   ) {
   let $equivalent := $doc/id($snippet/@jx:id)
   let $snippet-from-view := 
     $equivalent/(ancestor::j:view|ancestor::j:repository|ancestor::j:selection)
   return
-    if (local:is-correct-type($snippet, $view-type))
+    if (local:is-correct-type($snippet, $view-type, $parent-names))
     then
       (: element is from the view that is currently being processed.
        : or it is the correct type for it 
        : copy it.
        :)
-      element { QName(namespace-uri($snippet), name($snippet))}{
-        $snippet/(@* except (@jx:id, @jx:document-uri)),
-        if ($snippet/@jx:id)
-        then
-          attribute xml:id { $snippet/@jx:id }
-        else (),
-        local:recurse-rebuild-view($snippet,$doc,$view-type) 
-      }
+      let $my-qname := QName(namespace-uri($snippet), name($snippet))
+      let $my-local-qname := QName(namespace-uri($snippet), local-name($snippet))
+      return
+        element { $my-qname }{
+          $snippet/(@* except (@jx:id, @jx:document-uri)),
+          if ($snippet/@jx:id)
+          then
+            attribute xml:id { $snippet/@jx:id }
+          else (),
+          local:recurse-rebuild-view($snippet,$doc,$view-type, ($parent-names, $my-local-qname)) 
+        }
     else if ($snippet instance of element(tei:ptr))
     then
       element tei:ptr {
@@ -385,7 +367,7 @@ declare function reverse:rebuild-view(
        : skip it
        :)
       if ($snippet/descendant::tei:ptr)
-      then local:recurse-rebuild-view($snippet,$doc,$view-type)
+      then local:recurse-rebuild-view($snippet,$doc,$view-type, $parent-names)
       else ()
 };
 
@@ -449,20 +431,33 @@ declare function reverse:merge-view(
   let $first-common-element := $equivalent-view/*[@xml:id=$additions/*/@xml:id][1]
   let $last-common-element := $equivalent-view/*[@xml:id=$additions/*/@xml:id][last()]
   let $additions-first-common := $additions/*[@xml:id=$first-common-element/@xml:id]
-  let $additions-last-common := $additions/*[@xml:id=$last-common-element/*/@xml:id]
+  let $additions-last-common := $additions/*[@xml:id=$last-common-element/@xml:id]
   let $new-view := 
     element j:view {
       if ($equivalent-view)
       then $equivalent-view/@*
-      else $additions/@*,
+      else $additions/(@* except @document),
       $first-common-element/preceding-sibling::*,
       $additions-first-common/preceding-sibling::*,
-      $first-common-element,
+      $additions-first-common, (: the new version should be used :)
       $additions-first-common/following-sibling::*[. << $additions-last-common],
-      $last-common-element[not(. is $first-common-element)],
+      $additions-last-common[not(. is $additions-first-common)],
       $additions-last-common/following-sibling::*,
       $last-common-element/following-sibling::*
     }
+(:
+  let $null := util:log-system-out((
+    "****Merging view: ",
+    "equivalent=", $equivalent-view, 
+    " ^^^^ additions=", $additions, 
+    " $$$$ new-view =", $new-view,
+    " first-common-element =", $first-common-element,
+    " additions-first-common = ", $additions-first-common,
+    " last-common-element =", $last-common-element,
+    " additions-last-common =", $additions-last-common,
+    " middle elements = ", $additions-first-common/following-sibling::*[. << $additions-last-common]
+    ))
+:)
   return 
     if (exists($equivalent-view))
     then update replace $equivalent-view with $new-view
@@ -479,7 +474,9 @@ declare function reverse:merge-selections(
 declare function reverse:merge-views(
   $reverse-data as element(reverse:rebuild)
   ) {
+  (:
   let $null := util:log-system-out(("***merge-views from", $reverse-data))
+  :)
   for $view in $reverse-data/reverse:view
   return reverse:merge-view($view)
 };
@@ -488,13 +485,13 @@ declare function reverse:merge(
   $reverse-data as element(reverse:rebuild)
   ) {
   (#exist:batch-transaction#) {
-    util:log-system-out("merge-repositories..."),
+    debug:debug($debug:info, "reverse", "merge-repositories..."),
     reverse:merge-repositories($reverse-data),
-    util:log-system-out("merge-selections..."),
+    debug:debug($debug:info, "reverse", "merge-selections..."),
     reverse:merge-selections($reverse-data),
-    util:log-system-out("merge-views..."),
+    debug:debug($debug:info, "reverse", "merge-views..."),
     reverse:merge-views($reverse-data),
-    util:log-system-out("done")
+    debug:debug($debug:info, "reverse", "done")
   }
 };
 
