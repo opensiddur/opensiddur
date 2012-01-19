@@ -71,7 +71,7 @@
         else 'map-uri', 
         $uri,
         $uri-map)/string()
-      )"/>
+      "/>
   </xsl:function>
 
   <xd:doc>
