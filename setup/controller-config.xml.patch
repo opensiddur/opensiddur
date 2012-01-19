@@ -2,7 +2,7 @@
 --- controller-config.xml.ef	2011-05-15 15:22:00.000000000 -0400
 ***************
 *** 42,47 ****
---- 42,55 ----
+--- 42,56 ----
     <root pattern="/apps/tamboti" path="xmldb:exist:///db/library"/>
   
     <root pattern="/apps" path="xmldb:exist:///db"/>
