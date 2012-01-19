@@ -3,8 +3,10 @@ xquery version "1.0";
  : Roundtrip fragmentation markup TEI to JLPTEI and save it to the
  : database 
  :
+ : Debugging code: reverse
+ :
  : Open Siddur Project 
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace reverse = 'http://jewishliturgy.org/modules/reverse';
@@ -220,26 +222,146 @@ declare function local:is-correct-type(
     )
 };
 
-(:~ transform that copies everything,
- : performs nonunicode normalization
- : removes @jx:* attributes and assigns xml:ids
+declare function local:split-words(
+  $string as xs:string
+  ) as element()* {
+  local:split-words($string, ())
+};
+
+
+(:~ split a string into multiple words (tei:w/tei:pc) 
+ :
+ : This code is derived from split-word.xsl2 
  :)
-declare function local:remove-jx(
-  $nodes as node()*,
-  $ancestor as element()
+declare function local:split-words(
+  $string as xs:string,
+  $first-xmlid as xs:string?
+  ) as element()* {
+  (: need to split into characters & control characters, punctuation, spaces :)
+  let $text-groups := text:groups($string, "(\s*(([\p{L}\p{M}\p{N}\p{S}\p{C}]+)|(\p{P}))\s*)")
+  let $remainder := substring-after($string, $text-groups[2])
+  let $word-chars := $text-groups[4]
+  let $punct-chars := $text-groups[5]
+  return (
+    if ($word-chars)
+    then 
+      element tei:w {
+        attribute xml:id { 
+          ($first-xmlid, concat("w-", util:random(1000000)))[1] 
+        },
+        reverse:normalize-nonunicode($word-chars)
+      }
+    else if ($punct-chars)
+    then 
+      element tei:pc {
+        attribute xml:id { 
+          concat("pc-", util:random(1000000))
+        },
+        $punct-chars
+      }
+    else (),
+    if ($remainder)
+    then local:split-words($remainder, ())
+    else ()
+  )
+};
+
+(: possibilities for transforming nodes in tei:w:
+ : 1. text() -> split into w/pc
+ : 2. text()[spc]element()[spc]text() -> split text()s into w/pc, pass through element()
+ : 3. text()element()[spc]text() -> split text(), last incorporated into <tei:w>text() element()</tei:w>  
+ :)
+declare function local:transform-w-child(
+  $nodes as node()*
+  ) as node()* {
+  let $this-xmlid := ($nodes[1]/../(@xml:id, @jx:id)[1])[empty($nodes[1]/preceding-sibling::node())]
+  return
+    typeswitch($nodes[1])
+    case empty() return ()
+    case element() return (
+      let $this := local:reverse-transform($nodes[1])
+      let $next := local:transform-w-child(subsequence($nodes, 2))
+      return 
+        if (
+          $next and 
+          ($nodes[2] instance of element() or 
+            not(matches($nodes[2], "^\s")))
+           )
+        then (
+          element tei:w {
+            (
+              $this-xmlid, 
+              $next[1]/@*, 
+              attribute xml:id {concat("w-", util:random(1000000))}
+            )[1],
+            $this,
+            $next[1]/node()
+          },
+          subsequence($next, 2)
+        )
+        else (
+          element tei:w {
+           ($this-xmlid, attribute xml:id {concat("w-", util:random(1000000))})[1],
+           $this
+          },
+          $next
+        )
+    )
+    case $n1 as text() return
+      if ($n1/following-sibling::element() and not(matches($n1, "\s$")))
+      then
+        let $this := local:split-words($n1, $this-xmlid)
+        let $next := local:transform-w-child(subsequence($nodes,2))
+        return (
+          subsequence($this, 1, count($this) - 1),
+          element tei:w {
+            $this[last()]/(@*|node()),
+            $next[1]/node()
+          },
+          subsequence($next,2)
+        )
+      else (
+        local:split-words($n1, $this-xmlid),
+        local:transform-w-child(subsequence($nodes, 2))
+      )
+    default return
+      ($nodes[1], local:transform-w-child(subsequence($nodes, 2)))
+};
+
+declare function local:transform-w(
+  $w as element(tei:w)
+  ) as element(tei:w)+ {
+  local:transform-w-child($w/node()[1])
+};
+
+(:~ transform that copies everything,
+ : performs nonunicode normalization,
+ : corrects tei:w/tei:pc to contain one word/punct character
+ : removes @jx:* attributes,
+ : assigns xml:ids
+ :)
+declare function local:reverse-transform(
+  $nodes as node()*
   ) as node()* {
   for $n in $nodes 
   return 
     typeswitch ($n)
+    case element(tei:w) return
+      local:transform-w($n)
     case text() return
-      text { reverse:normalize-nonunicode($n) }
+      if ($n/(ancestor::tei:w|ancestor::tei:c|ancestor::tei:g|ancestor::tei:pc))
+      then $n
+      else local:split-words($n)
     case element() return
       element { QName(namespace-uri($n), name($n)) }{
         $n/(@* except @jx:*),
-        attribute xml:id {
-          $n/@jx:id 
-        },
-        local:remove-jx($n/node(), $ancestor)
+        if ($n/@jx:id)
+        then
+          attribute xml:id {
+            $n/@jx:id 
+          }
+        else (),
+        local:reverse-transform($n/node())
       }
     default return $n
 };
@@ -260,7 +382,7 @@ declare function reverse:rebuild-repository(
         $document-segment as $doc-seg
         by $document-segment/@jx:id as $id
       return 
-        local:remove-jx($doc-seg, <j:repository/>)
+        local:reverse-transform($doc-seg)
     }
 };
 
