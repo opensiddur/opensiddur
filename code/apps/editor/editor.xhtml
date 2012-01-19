@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8"/>
   <title>Open Siddur Editor</title>
   <link rel="stylesheet" type="text/css" href="/code/transforms/format/xhtml/style.css"/>
+  <link rel="stylesheet" type="text/css" href="styles/editor.css"/>
   <link rel="stylesheet" href="/lib/aloha/css/aloha.css" id="aloha-style-include" type="text/css"/>
   <script src="/lib/aloha/lib/aloha.js" data-aloha-plugins="common/format"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -11,7 +12,9 @@
   <script type="text/javascript">//<![CDATA[
   	var username = "demouser";
   	var password = "resuomed";
-  	var resource = "Genesis001";
+  	var resource = function() {
+  	  return $("#resource").val();
+  	};
   	
   	var authHeader = function() {
   	  var base64 = Base64.encode(username + ":" + password);
@@ -20,7 +23,7 @@
   	  	
   	var readData = function () {
   	  $.ajax({
-  		  url: "/code/api/data/original/"+ resource +"/-concurrent/-combined",
+  		  url: "/code/api/data/original/"+ resource() +"/-concurrent/-combined",
   		  headers : $.extend({"Accept":"application/xhtml+xml"}, authHeader()),
   		  dataType: "xml",
   		  error: function(jqXHR, errorType) {
@@ -34,7 +37,7 @@
   	
   	var saveData = function () {
   	  $.ajax({
-  		  url: "/code/api/data/original/"+resource+"/-concurrent/-combined",
+  		  url: "/code/api/data/original/"+resource()+"/-concurrent/-combined",
   		  type: "POST",
   		  headers: $.extend({"X-HTTP-Method-Override":"PUT"}, authHeader()),
   		  contentType: "application/xhtml+xml",
@@ -66,6 +69,8 @@
 <body>
   <button id="reload">Reload</button>
   <button id="save">Save</button>
+  <label for="resource">Resource:</label>
+  <input id="resource" value="Genesis001"/>
   <div id="content" class="editable">Insert content here</div>
 </body>
 </html>
