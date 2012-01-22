@@ -25,3 +25,14 @@
 .tei-w {
   border: 1px solid red;
 }
+
+.external {
+  border: 1px solid green;
+  display:block;
+}
+
+.external a {
+   /* this isn't really a semantic thing, it's a display thing */
+   direction:ltr;
+   display:block;
+}

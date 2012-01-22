@@ -203,18 +203,36 @@
         <xsl:attribute name="jx:id" 
           select="if (position()=1 and $my-id) then $my-id else concat('ptr-', generate-id(.))"/>
         <xsl:attribute name="target">
-          <xsl:variable name="target-ids" as="xs:string*" 
-            select="
-              for $id in ($classes[starts-with(., 'id-')], 
-                concat('id-', $local-name, '-', generate-id(.)))[1]
-              return concat(
-                if (func:source-document-by-node(.) = $my-document) 
-                then '' 
-                else func:source-document-by-node(.), '#', substring-after($id, 'id-')
-                )">
-          </xsl:variable>
-
-          <xsl:sequence select="string-join($target-ids, ' ')"/>
+          <xsl:choose>
+            <xsl:when test="../contains(@class, 'external') and self::html:a">
+              <!-- unexpanded external pointer -->
+              <xsl:variable name="external-ptr" as="xs:string" 
+                select="(., @href)[1]"/>
+              <xsl:variable name="base-ptr" as="xs:string"
+                select="
+                  if (contains($external-ptr,'/-id/'))
+                  then substring-before($external-ptr, '/-id/')
+                  else $external-ptr"/>
+              <xsl:variable name="fragment-ptr" as="xs:string"
+                select="
+                  for $frag in substring-after($external-ptr, '/-id/')[.]
+                  return concat('#', $frag)"/>
+              <xsl:sequence select="concat($base-ptr, $fragment-ptr)"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:variable name="target-ids" as="xs:string*" 
+                select="
+                  for $id in ($classes[starts-with(., 'id-')], 
+                    concat('id-', $local-name, '-', generate-id(.)))[1]
+                  return concat(
+                    if (func:source-document-by-node(.) = $my-document) 
+                    then '' 
+                    else func:source-document-by-node(.), '#', substring-after($id, 'id-')
+                    )">
+              </xsl:variable>
+              <xsl:sequence select="string-join($target-ids, ' ')"/>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:attribute>
         <xsl:sequence select="common-attributes"/>
         <xsl:apply-templates select="."/>
