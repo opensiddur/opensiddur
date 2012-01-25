@@ -37,7 +37,10 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
 	  .verse-number { 
 	    color: #BBB;
 	  }
+	/* improve readability with line height */
+	body { /*font-size: 16px;*/ line-height: 1.6; }
 	</style>
+
       </head>
       <body>
 	<div style="margin-bottom: 5px">
