@@ -244,7 +244,11 @@ declare function api:get-accept-format(
       where 
         $request/api:major = ($accept/api:major, "*") and 
         $request/api:minor = ($accept/api:minor, "*") and
-        (every $param in $request/api:param satisfies $accept/api:param[@name=$param/@name]=string($param))
+        (: additional parameters - like charset - can be ignored, not
+         : actual requirements? - we just cannot contradict the request
+         :)
+        (every $param in $request/api:param satisfies 
+          not($accept/api:param[@name=$param/@name]!=string($param)))
       return $accept
   return
     if (empty($negotiated-ct))
