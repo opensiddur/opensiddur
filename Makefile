@@ -95,7 +95,7 @@ ROMAOPTIONS ?= --xsl=$(LIBDIR)/tei/Stylesheets --localsource=`absolutize $(LIBDI
 RELAXNGOPTIONS ?= $(TEIDOCDIR)/jlptei.rng
 
 # default eXist install directory
-EXIST_INSTALL_DIR ?= /usr/local/eXist
+EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
@@ -135,7 +135,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 14669
+EXIST_REVISION ?= -r 15878
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -189,7 +189,6 @@ IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 # build eXist (what dependencies should this have?)
 $(EXIST_INSTALL_JAR):
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
-	-patch -N -p0 < $(SETUPDIR)/exist-r14773.patch
 	rm -f $(LIBDIR)/exist/extensions/indexes/lucene/lib/*2.9.2.jar
 	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/lib/lucene*2.9.3.jar $(LIBDIR)/exist/extensions/indexes/lucene/lib
 	cd $(LIBDIR)/exist && \
