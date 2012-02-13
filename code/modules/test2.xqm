@@ -195,8 +195,8 @@ declare function t:run-test($test as element(test), $count as xs:integer) {
 	  try {
 	    util:eval(concat($context, $test/code/string()))
 	  }
-	  catch * ($err, $desc, $val) {
-	    <error>Compilation error ({$err}): {$desc, $val}</error>
+	  catch * {
+	    <error>Compilation error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
 	  }
 	let $output := if ($test/@trace eq 'yes') then system:trace() else $queryOutput
   let $expanded :=
@@ -210,8 +210,8 @@ declare function t:run-test($test as element(test), $count as xs:integer) {
                     return
                         util:serialize($x, $options)
                 }
-                catch * ($err, $desc, $val) {
-                  <error>Serialization error ({$err}): {$desc, $val}</error>
+                catch * {
+                  <error>Serialization error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
                 }
             return
                 if ($serialized instance of element(error)) then

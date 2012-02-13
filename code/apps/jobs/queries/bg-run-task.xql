@@ -4,8 +4,8 @@ xquery version "3.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
-import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "xmldb:exist:///code/modules/paths.xqm";
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace jobs="http://jewishliturgy.org/apps/jobs"
   at "xmldb:exist:///code/apps/jobs/modules/jobs.xqm";
 
@@ -22,14 +22,20 @@ declare function local:run-next-task(
 };
 
 try {
-  if ($paths:debug)
-  then 
-    util:log-system-out(
-      concat('In background task executive id ', $local:task-id, ' at ', string(current-dateTime()))
-      )
-  else (),
+  debug:debug(
+    $debug:info,
+    "jobs",
+    concat('In background task executive id ', $local:task-id, ' at ', string(current-dateTime()))
+  ),
   local:run-next-task()
 }
-catch * ($code, $d, $v) {
-  util:log-system-out(('EXCEPTION IN BG-RUN-TASK: ', $code, ' ', $d, ' ', $v))
+catch * {
+  debug:debug(
+    $debug:warn,
+    "jobs",
+    (
+      'EXCEPTION IN BG-RUN-TASK: ', 
+      debug:print-exception($err:module, $err:line-number, $err:column-number, $err:code, $err:value, $err:description)
+    )
+  )
 }

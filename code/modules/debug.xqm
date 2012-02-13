@@ -85,3 +85,19 @@ declare function debug:list-attributes(
 	)
 };
 
+(:~ write an error message for a given exception :)
+declare function debug:print-exception(
+  $module as xs:string?, 
+  $line-number as xs:integer?,
+  $column-number as xs:integer?,
+  $code as xs:string?,
+  $value as xs:string?,
+  $description as xs:string?
+  ) as xs:string {
+  concat(
+    $module, ":", $line-number, ":", 
+    $column-number, ","[$code], $code, ":"[$value], $value, ": "[$description], 
+    $description,
+    ";"
+  )
+};

@@ -5,8 +5,6 @@ xquery version "3.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
-import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
   at "xmldb:exist:///code/modules/cache-controller.xqm";
 import module namespace jobs="http://jewishliturgy.org/apps/jobs"
@@ -54,6 +52,11 @@ try {
       'admin', $magic:password
     )
 }
-catch * ($c, $d, $v) {
-  util:log-system-out(('Error in cache scheduler: ', $c, ' ', $d, ' ', $v))
+catch * {
+  debug:debug($debug:warn,
+    "jobs",
+    ('Error in cache scheduler: ', 
+    debug:print-exception($err:module, $err:line-number, $err:column-number, $err:code, $err:value, $err:description)
+    )
+  )
 }

@@ -7,7 +7,7 @@ xquery version "3.0";
  : Note: the jcache prefix is used to avoid a conflict with
  : eXist's cache module
  :
- : Copyright 2010-2011 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2010-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -16,8 +16,10 @@ module namespace jcache="http://jewishliturgy.org/modules/cache";
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
 	at "xmldb:exist:///code/modules/app.xqm";
+import module namespace debug="http://jewishliturgy.org/transform/debug" 
+	at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
-	at "xmldb:exist:///code/modules/paths.xqm";
+  at "xmldb:exist:///code/modules/paths.xqm";	
 import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "xmldb:exist:///code/api/modules/nav.xqm";
 
@@ -130,10 +132,11 @@ declare function local:make-cache-collection-path(
     let $group := xmldb:get-group($this-step)
     let $mode := xmldb:get-permissions($this-step)
     return (
-      if ($paths:debug)
-      then 
-    		util:log-system-out(('creating new cache collection: ', $cache-this-step, ' owner/group/permissions=', $owner, '/',$group, '/',util:integer-to-base($mode,8)))
-      else (),
+      debug:debug($debug:info,
+        "cache",
+        ('creating new cache collection: ', $cache-this-step, ' owner/group/permissions=', $owner, '/',$group, '/',util:integer-to-base($mode,8))
+      )
+      ,
       if (xmldb:create-collection($cache-previous-step, $new-collection))
 			then xmldb:set-collection-permissions($cache-this-step, $owner, $group, $mode)
   		else error(xs:QName('err:CREATE'), concat('Cannot create cache collection ', $this-step))
@@ -182,14 +185,23 @@ declare function local:commit-cache(
           else ()
           ), ())
         }
-      	catch * ($code, $desc, $value) {
+      	catch * {
       		(: make sure the flag is removed if app:transform-xslt fails :)
       		local:remove-flag($collection, $resource),
-          util:log-system-out(("Error during transform-xslt in cache-controller: ", $code, " ", $desc, " ", $value)),
+          debug:debug($debug:warn,
+            "cache",
+            ("Error during transform-xslt in cache-controller: ", 
+            debug:print-exception(
+              $err:module, $err:line-number, $err:column-number,
+              $err:code, $err:value, $err:description
+            )
+            )
+          ),
       		error(
-            if ($code castable as xs:QName) 
-            then $code cast as xs:QName
-            else xs:QName("err:TRANSFORM"), concat ($code, " ", $desc, " ", $value))
+            if ($err:code castable as xs:QName) 
+            then $err:code cast as xs:QName
+            else xs:QName("err:TRANSFORM"), $err:description, $err:value
+          )
       	}
     return (
       if (xmldb:store($cache, $resource, $transform-result))

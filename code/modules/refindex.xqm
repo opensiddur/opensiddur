@@ -306,7 +306,7 @@ declare function ridx:lookup(
       try {
         util:node-by-id($original-doc, $entry/@node)
       }
-      catch * ($a, $b, $c) {
+      catch * {
         debug:debug($debug:warn,"refindex", ("A query for ", $node, " failed on util:node-by-id. ", " The entry was: ", $entry))(:,
         ridx:reindex(root($entry)),
         ridx:lookup($node, $context, $ns, $local-name, $type, $n, $without-ancestors):)
