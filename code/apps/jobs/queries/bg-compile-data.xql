@@ -1,11 +1,13 @@
 xquery version "3.0";
 (:~ perform the data compilation stage in the background 
  :  
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
-import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "xmldb:exist:///code/modules/paths.xqm";
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "xmldb:exist:///code/modules/app.xqm"; 
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "xmldb:exist:///code/modules/format.xqm";
 
@@ -18,13 +20,11 @@ declare variable $local:dest-collection external;     destination collection for
 declare variable $local:dest-resource external;       destination resource name
 :)
 
-
-if ($paths:debug)
-then 
-  util:log-system-out(
-    concat("Data compilation phase for ", $local:source-collection, "/", $local:source-resource)
-  )
-else (),
+debug:debug(
+  $debug:info,
+  "jobs",
+  concat("Data compilation phase for ", $local:source-collection, "/", $local:source-resource)
+  ),
 format:update-status($local:dest-collection, $local:source-resource, $format:data, $local:job-id),
 let $source-path := concat($local:source-collection, "/", $local:source-resource)
 let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
@@ -32,13 +32,7 @@ let $compiled := format:data-compile($source-path, $local:user, $local:password)
 return 
   if (xmldb:store($local:dest-collection, $local:dest-resource, $compiled))
   then 
-    let $owner := xmldb:get-owner($local:source-collection, $local:source-resource)
-    let $group := xmldb:get-group($local:source-collection, $local:source-resource)
-    let $mode := xmldb:get-permissions($local:source-collection, $local:source-resource)
-    return 
-      xmldb:set-resource-permissions(
-        $local:dest-collection, $local:dest-resource,
-        $owner, $group, $mode)
+    app:mirror-permissions($source-path, $dest-path)
   else 
     error(xs:QName("err:STORE"), concat("Cannot store ", $dest-path)),
 format:complete-status($local:dest-collection, $local:source-resource)

@@ -8,7 +8,7 @@ xquery version "3.0";
  : the linking elements that make the references
  :
  : Open Siddur Project
- : Copyright 2011 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
@@ -17,8 +17,6 @@ import module namespace app="http://jewishliturgy.org/modules/app"
   at "xmldb:exist:///code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "xmldb:exist:///code/modules/debug.xqm";
-import module namespace paths="http://jewishliturgy.org/modules/paths" 
-  at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
   at "xmldb:exist:///code/modules/follow-uri.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
@@ -58,26 +56,24 @@ declare function local:make-mirror-collection-path(
     let $mirror-this-step := concat("/",string-join(subsequence($steps, 2, $step - 1),"/"))
     let $previous-step := concat('/', string-join(subsequence($steps, 1, $step - 1), '/'))
     let $new-collection := $steps[$step]
-    let $null := util:log-system-out(("step ", $step, ":", $this-step, " new-collection=",$new-collection, " from ", $previous-step))
-    let $owner := 
-      if ($step = 1)
-      then "admin"
-      else xmldb:get-owner($mirror-this-step)
-    let $group := 
-      if ($step = 1)
-      then "dba"
-      else xmldb:get-group($mirror-this-step)
-    let $mode := 
-      if ($step = 1)
-      then util:base-to-integer(0770, 8)
-      else xmldb:get-permissions($mirror-this-step)
+    let $null := 
+      debug:debug(
+        $debug:info,
+        "refindex",
+        (("step ", $step, ":", $this-step, " new-collection=",$new-collection, " from ", $previous-step))
+      )
     return (
-      if ($paths:debug)
-      then 
-        util:log-system-out(('creating new index collection: ', $this-step, ' from ', $previous-step, ' to ', $new-collection ,' owner/group/permissions=', $owner, '/',$group, '/',util:integer-to-base($mode,8)))
-      else (),
+      debug:debug(
+        $debug:info,
+        "refindex",
+        ('creating new index collection: ', $this-step, ' from ', $previous-step, ' to ', $new-collection ,' owner/group/permissions=', $owner, '/',$group, '/',util:integer-to-base($mode,8))
+      ),
       if (xmldb:create-collection($previous-step, $new-collection))
-      then xmldb:set-collection-permissions($this-step, $owner, $group, $mode)
+      then 
+        app:mirror-permissions(
+          if ($step = 1)
+          then "/db"
+          else $mirror-this-step, $this-step)
       else error(xs:QName('err:CREATE'), concat('Cannot create index collection ', $this-step))
     )
 };
@@ -141,9 +137,8 @@ declare function ridx:reindex(
        }
       let $mirror-collection :=
         app:concat-path(("/", $ridx:ridx-collection, $collection))
-      let $owner := xmldb:get-owner($collection, $resource)
-      let $group := xmldb:get-group($collection, $resource)
-      let $mode := xmldb:get-permissions($collection, $resource)
+      let $original-path := concat($collection, "/", $resource)
+      let $mirror-path := concat($mirror-collection, "/", $resource)
       let $last-modified := xmldb:last-modified($collection, $resource)
       let $idx-last-modified := xmldb:last-modified($mirror-collection, $resource)
       where empty($last-modified) or empty($idx-last-modified) or ($last-modified > $idx-last-modified)
@@ -154,11 +149,8 @@ declare function ridx:reindex(
               ridx:make-index-entries($doc//@target|$doc//@targets)
             }
           ))
-          then 
-            xmldb:set-resource-permissions(
-              $mirror-collection, $resource,
-              $owner, $group, $mode
-            )
+          then
+            app:mirror-permissions($original-path, $mirror-path)
           else ()
         return () 
 };

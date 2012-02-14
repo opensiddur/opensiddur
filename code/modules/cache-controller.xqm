@@ -52,12 +52,11 @@ declare function local:set-flag(
   let $in-progress-resource := $in-progress-path[2]
   return
     if (xmldb:store($in-progress-collection, $in-progress-resource, <in-progress/>))
-    then 
-      let $owner := xmldb:get-owner($collection, $resource)
-      let $group := xmldb:get-group($collection, $resource)
-      let $mode := xmldb:get-permissions($collection, $resource)
-      return
-        xmldb:set-resource-permissions($in-progress-collection, $in-progress-resource, $owner, $group, $mode)
+    then
+      app:mirror-permissions(
+        concat($collection, "/", $resource), 
+        concat($in-progress-collection, "/", $in-progress-resource)
+      )
     else error(xs:QName('err:STORE'), concat('Cannot store progress indicator ', $in-progress-path))
 };
 
@@ -103,13 +102,10 @@ declare function local:set-cache-permissions(
 	$collection as xs:string,
 	$resource as xs:string
 	) as empty() {
-  let $cache := jcache:cached-document-path($collection)
-  let $owner := xmldb:get-owner($collection, $resource)
-  let $group := xmldb:get-group($collection, $resource)
-  let $permissions := xmldb:get-permissions($collection, $resource)
-  return
-  	xmldb:set-resource-permissions($cache, $resource,
-      $owner, $group, $permissions)
+  app:mirror-permissions(
+    concat($collection, "/", $resource),
+    concat($cache, "/", $resource)
+  )
 };
 
 
@@ -128,9 +124,6 @@ declare function local:make-cache-collection-path(
   return
     let $cache-previous-step := jcache:cached-document-path(concat('/', string-join(subsequence($steps, 1, $step - 1), '/')))
     let $new-collection := $steps[$step]
-    let $owner := xmldb:get-owner($this-step)
-    let $group := xmldb:get-group($this-step)
-    let $mode := xmldb:get-permissions($this-step)
     return (
       debug:debug($debug:info,
         "cache",
@@ -138,7 +131,8 @@ declare function local:make-cache-collection-path(
       )
       ,
       if (xmldb:create-collection($cache-previous-step, $new-collection))
-			then xmldb:set-collection-permissions($cache-this-step, $owner, $group, $mode)
+			then 
+			  app:mirror-permissions($this-step, $cache-this-step)
   		else error(xs:QName('err:CREATE'), concat('Cannot create cache collection ', $this-step))
     )
 };

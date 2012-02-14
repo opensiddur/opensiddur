@@ -13,7 +13,7 @@ xquery version "1.0";
  : Returns Location header
  :
  : Open Siddur Project 
- : Copyright 2011 Efraim Feinstein
+ : Copyright 2011-2012 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace compile="http://jewishliturgy.org/api/data/compile";
@@ -136,13 +136,14 @@ declare function local:setup-output-share(
   let $document-name := util:document-name($doc)
   let $group-collection := concat('/group/', $output-share)
   let $output-share-path := concat($group-collection, '/output/', replace($document-name, '\.xml$', ''))
+  let $permissions := sm:get-permissions(xs:anyURI($group-collection))
   return (
     app:make-collection-path(
       $output-share-path, 
       '/db',
-      xmldb:get-owner($group-collection),
-      xmldb:get-group($group-collection),
-      xmldb:get-permissions($group-collection)
+      $permissions/*/@owner/string(),
+      $permissions/*/@group/string(),
+      $permissions/*/@mode/string()
       ),
     $output-share-path
   )
