@@ -2,7 +2,7 @@
 #
 # Sets up rules for building, and includes Makefiles from all targets
 #
-# Copyright 2008-2011 Efraim Feinstein
+# Copyright 2008-2012 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -99,7 +99,7 @@ EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
-EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-setup-1.5.0dev.jar
+EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-setup-2.0-tech-preview.jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
 EXISTBACKUP ?= $(EXIST_INSTALL_DIR)/bin/backup.sh
 
@@ -135,7 +135,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 15878
+EXIST_REVISION ?= -r 15880
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -230,10 +230,10 @@ clean-hebmorph-lucene:
 
 # Install a copy of the eXist database
 .PHONY: db-install db-install-nonet db-install-wlc bf-install db-uninstall db-sync db-syncclean installer patches lucene-install copy-files copy-libs setup-password
-db-install: submodules svn-exist code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db copy-files copy-libs setup-password   
+db-install: submodules svn-exist code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db setup-password copy-files copy-libs   
 
 #installer that does not rely on the presence of a network. 
-db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db-nonet copy-files copy-libs setup-password
+db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db-nonet setup-password copy-files copy-libs
 	@echo "Done."
 	touch $(EXIST_INSTALL_DIR)/EXIST.AUTOINSTALLED
 
@@ -260,13 +260,13 @@ copy-files:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
 	@echo "Copying files to database..."
 	@#copy the transliteration DTD first so eXist will know where they are during restore
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/group/everyone/transliteration/__contents__.xml -ouri=xmldb:exist:// 
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/group/everyone/transliteration/__contents__.xml -u admin -p $(ADMINPASSWORD) -P $(ADMINPASSWORD) -ouri=xmldb:exist://  
 	@#copy the code first so eXist will know where the triggers and support modules are during restore
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/__contents__.xml -ouri=xmldb:exist:// 
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist://
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/system/__contents__.xml -ouri=xmldb:exist:// 	
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)" 
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/system/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)" 	
 	@#copy the transforms directory again so the tests that require the document URI trigger will run
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/transforms/__contents__.xml -ouri=xmldb:exist:// 
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/transforms/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)" 
 
 .PHONY: setup-password
 setup-password: $(SETUPDIR)/setup.xql
