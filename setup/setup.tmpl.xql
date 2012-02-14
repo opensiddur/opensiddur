@@ -30,24 +30,17 @@ xquery version "3.0";
     util:log-system-out('Group testuser2 existed. Skipping creation.')
   },
   xmldb:create-user('testuser2','testuser2', ('testuser2','everyone'), '/group/testuser2'),
-  (: replace $magicpassword in XQuery files in /code with the admin password :)
-  (:
-  for $xquery in collection('/code')//document-uri(.)
-  where matches($xquery, "xq[ml]$") and not(contains($xquery, "magic.xqm"))
-  return
-    let $collection := util:collection-name(string($xquery))
-    let $resource := util:document-name(string($xquery))
-    let $code := util:binary-to-string(util:binary-doc($xquery))
-    where matches($code, "\$magic[:]?password")
-    return 
-      xmldb:store($collection, $resource, 
-        replace($code, "\$magic[:]?password", "'ADMINPASSWORD'"), 
-        'application/xquery')
-   :)
-   (: replace the password in $magic:password :)
-   let $code := util:binary-to-string(util:binary-doc("/code/magic/magic.xqm"))
-   let $newcode :=
-      replace($code, '(variable\s+\$magic:password\s+:=\s+)""','$1"ADMINPASSWORD"')
-   return 
+  (: replace the password in $magic:password :)
+  xmldb:create-collection("/db", "code"),
+  xmldb:create-collection("/db/code", "magic"),
+  let $newcode :=
+    "xquery version '1.0';
+    module namespace magic = 'http://jewishliturgy.org/magic';
+
+    declare variable $magic:password := 'ADMINPASSWORD';
+
+    declare function magic:null() {()};
+    "
+  return 
     xmldb:store("/code/magic", "magic.xqm", $newcode, "application/xquery")
 )
