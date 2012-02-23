@@ -99,7 +99,7 @@ EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
-EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-setup-2.0-tech-preview.jar
+EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1-dev.jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
 EXISTBACKUP ?= $(EXIST_INSTALL_DIR)/bin/backup.sh
 
@@ -135,7 +135,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 15880
+EXIST_REVISION ?= -r 15929
 
 all:  code input-conversion xsltdoc odddoc lib
 
