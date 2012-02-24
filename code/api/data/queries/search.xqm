@@ -111,8 +111,8 @@ declare function local:show-result-context(
   ) as element(li) {
   element li {
     $list-entry/(@*|node()),
-    let $c := $context[$context]
-    where ($c)
+    let $c := $context
+    where not($c instance of element(search:empty))
     return 
       element { QName(namespace-uri($c), name($c)) }{
         attribute class { "result-context" },
@@ -225,7 +225,7 @@ declare function search:show-results(
  : the API's URI.
  : Return the results in the form:
  :  (result1, context1, result2, context2...)
- : If no context is available, return false() as the context 
+ : If no context is available, return <search:empty/> as the context 
  :)
 declare function local:get-search-results(
   $seq as item()*
@@ -238,6 +238,7 @@ declare function local:get-search-results(
       then $seq//(tei:title|tei:seg)
       else $seq
     default return $seq
+  let $empty-result := <search:empty/>
   let $return-value := 
     if ($q)
     then
@@ -250,27 +251,29 @@ declare function local:get-search-results(
             xmldb:get-group(util:collection-name(.), util:document-name(.))=$group
           else true()
         ][.]
-      let $sum := (kwic:summarize($result, <config xmlns="" width="40"/>), false())[1]
+      let $sum := kwic:summarize($result, <config xmlns="" width="40"/>)
       let $summary := 
-        if ($sum)
+        if (exists($sum))
         then 
           (: kwic returns no-namespace! :)
           element p {
             for $span in $sum/*
             return element span { $span/(@*|node()) }
           }
-        else $sum  
+        else $empty-result
       (: WARNING: order by results in *missing elements* -- requires investigation :)
       (:order by ft:score($result) descending:)
       return ($result, $summary)
     else 
       for $result in $sequence
+      (:
       order by (
         typeswitch ($result)
         case document-node() return string($result//tei:title[@type="main"])
         default return string($result)
       )
-      return ($result, false())
+      :)
+      return ($result, $empty-result)
   return (
     $return-value,
     util:log-system-out(("***Return value=", $return-value))
@@ -289,8 +292,7 @@ declare function search:get() {
     else if ($test-result)
     then $test-result
     else 
-      let $results := local:get-search-results($seq)
-      let $null := util:log-system-out(("***results = ", $results))
+      let $results  := local:get-search-results($seq)
       let $start := xs:integer(request:get-parameter("start", 1))
       let $max-results := 
         xs:integer(request:get-parameter("max-results", $api:default-max-results))
