@@ -4,7 +4,7 @@
  : and PUTs back a combined version using the roundtrip transform
  : May GET/PUT in either XML or transformed XHTML. 
  :
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace combine = 'http://jewishliturgy.org/api/data/combine';
@@ -120,7 +120,7 @@ declare function combine:get() {
       let $doc-uri := document-uri($doc-root)
       let $null := 
         (: make sure the cache is up to date :)
-        jcache:cache-all($doc-uri)
+        jcache:cache-all($doc-uri, app:auth-user(), app:auth-password())
       let $cached-document-path := jcache:cached-document-path($doc-uri)
       let $cached-document := doc($cached-document-path)
       let $cached-xml := 
