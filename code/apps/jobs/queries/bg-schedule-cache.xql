@@ -35,8 +35,6 @@ try {
       collection(("/group","/code"))/tei:TEI/document-uri(root(.))
     )
   for $document in $documents
-  let $null :=
-    debug:debug($debug:detail, "jobs", ("attempting to schedule:", $document))
   where
     not(matches($document, $local:excluded-collections)) and
     not(system:as-user('admin', $magic:password, jcache:is-up-to-date($document)))
