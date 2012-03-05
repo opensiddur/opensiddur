@@ -11,8 +11,8 @@ xquery version "1.0";
 
 module namespace admin="http://jewishliturgy.org/modules/admin";
 
-import module namespace util="http://exist-db.org/xquery/util";
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
+import module namespace magic="http://jewishliturgy.org/magic"
+  at "xmldb:exist:///code/magic/magic.xqm";
 
 (: This is fscked up insecure! :)
 declare variable $admin:admin-user as xs:string := 'userman';
@@ -28,7 +28,7 @@ declare function admin:new-user(
   else
     let $home-collection := concat('/db/group/', $new-user)
     return
-    (system:as-user($admin:admin-user, $magicpassword, (
+    (system:as-user($admin:admin-user, $magic:password, (
       xmldb:create-group($new-user),
       xmldb:create-user($new-user, $new-password,
         ($new-user, 'everyone'), $home-collection),
@@ -44,7 +44,7 @@ declare function admin:change-password(
   $new-password as xs:string)
   as xs:boolean {
   if (xmldb:authenticate('/db', $user-name, $old-password))
-  then (system:as-user($admin:admin-user, $magicpassword,
+  then (system:as-user($admin:admin-user, $magic:password,
     xmldb:change-user($user-name, $new-password, (), ())), true())
   else false()
 };
@@ -73,7 +73,7 @@ declare function admin:change-groups(
     and not($remove-groups=$user-name)
   return 
     if ($allow-add) 
-    then system:as-user($admin:admin-user, $magicpassword,
+    then system:as-user($admin:admin-user, $magic:password,
       xmldb:change-user($user-name, (), 
         for $group in ($user-groups,$add-groups[not(.=$user-groups)])
         return if ($group=$remove-groups) then () else $group, ())
@@ -89,6 +89,6 @@ declare function admin:change-groups(
 declare function admin:reindex(
   $collection as xs:string
   ) as xs:boolean {
-  system:as-user($admin:admin-user, $magicpassword,
+  system:as-user($admin:admin-user, $magic:password,
     xmldb:reindex($collection))
 };

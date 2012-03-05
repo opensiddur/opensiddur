@@ -29,7 +29,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: original.xql 769 2011-04-29 00:02:54Z efraim.feinstein $
  :)
 import module namespace response="http://exist-db.org/xquery/response";
 import module namespace request="http://exist-db.org/xquery/request";
@@ -55,6 +54,8 @@ declare namespace err="http://jewishliturgy.org/errors";
 declare option exist:serialize "method=xhtml media-type=text/html omit-xml-declaration=no indent=yes 
         doctype-public=-//W3C//DTD&#160;XHTML&#160;1.1//EN
         doctype-system=http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd";
+
+declare variable $local:test-uri := "/code/tests/api/data/original/original.t.xml";
 
 (:~ POST, may return errors :)
 declare function local:post(
@@ -153,7 +154,7 @@ declare function local:get(
 									else $doc-name-no-ext
 								}</span>,
 								$link, "GET",
-                (api:tei-content-type()),
+                (api:html-content-type(), api:tei-content-type()),
                 (),
 								("db", replace($doc-uri, '^/db', ''))
 							)
@@ -173,11 +174,14 @@ declare function local:get(
       true(),
       ("GET", "POST"),
       api:html-content-type(),
-      api:tei-content-type()
+      api:tei-content-type(),
+      $local:test-uri
 		)
 	)
 };
 
+(
+api:tests($local:test-uri),
 if (api:allowed-method(('GET', 'POST')))
 then
 	let $auth := api:request-authentication() or true()
@@ -200,3 +204,4 @@ then
 else
 	(: disallowed method :) 
 	()
+)[1]

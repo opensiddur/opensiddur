@@ -1,0 +1,11 @@
+<collection xmlns="http://exist-db.org/collection-config/1.0">
+    <index xmlns:jobs="http://jewishliturgy.org/apps/jobs">
+      <!-- range indexes -->
+      <create qname="jobs:id" type="xs:integer"/>
+      <create qname="jobs:running" type="xs:integer"/>
+      <create qname="jobs:runas" type="xs:string"/>
+      <create qname="jobs:name" type="xs:string"/>
+      <create qname="jobs:priority" type="xs:integer"/>
+      <create qname="jobs:depends" type="xs:integer"/>
+    </index>
+</collection>

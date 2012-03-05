@@ -11,10 +11,18 @@ import module namespace jcache="http://jewishliturgy.org/modules/cache"
   at "xmldb:exist:///code/modules/cache-controller.xqm";
 import module namespace jobs="http://jewishliturgy.org/apps/jobs"
   at "xmldb:exist:///code/apps/jobs/modules/jobs.xqm";
+import module namespace magic="http://jewishliturgy.org/magic"
+  at "xmldb:exist:///code/magic/magic.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 declare variable $local:task-id external;
+
+declare variable $local:excluded-collections := concat("(",
+  string-join(
+    ("/output/","/trash/"),
+  ")|("),
+  ")");
 
 try {
   if ($paths:debug)
@@ -24,11 +32,13 @@ try {
     )
   else (),
   let $documents :=
-    system:as-user('admin', $magicpassword,
+    system:as-user('admin', $magic:password,
       collection('/group')//tei:TEI/document-uri(root(.))
     )
   for $document in $documents
-  where not(system:as-user('admin', $magicpassword, jcache:is-up-to-date($document)))
+  where
+    not(matches($document, $local:excluded-collections)) and
+    not(system:as-user('admin', $magic:password, jcache:is-up-to-date($document)))
   return
     jobs:enqueue-unique(
       element jobs:job {
@@ -40,7 +50,7 @@ try {
           }
         }
       },
-      'admin', $magicpassword
+      'admin', $magic:password
     )
 }
 catch * ($c, $d, $v) {

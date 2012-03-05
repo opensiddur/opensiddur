@@ -535,3 +535,60 @@ declare function app:identity-view(
 		}
 	</exist:forward>
 };
+
+(: return an XPath that points to the given node :)
+declare function app:xpath(
+  $node as node()?
+  ) as xs:string? {
+  string-join((
+    let $p := $node/parent::node()
+    where exists($p) 
+    return
+      if (not($p instance of document-node()))
+      then app:xpath($p)
+      else "",
+    typeswitch ($node)
+    case document-node() 
+    return "/"
+    case element() 
+    return
+      let $nn := node-name($node)
+      return concat(
+        $nn,
+        let $ctp := count($node/preceding-sibling::element()[node-name(.)=$nn])
+        let $ctf := count($node/following-sibling::element()[node-name(.)=$nn])
+        where ($ctp + $ctf) > 0 
+        return concat("[", $ctp + 1, "]")
+      )
+    case text() 
+    return concat(
+      "text()",
+      let $ctp := count($node/preceding-sibling::text())
+      let $ctf := count($node/following-sibling::text())
+      where ($ctp + $ctf) > 0 
+      return concat("[", $ctp + 1, "]")
+    )
+    case attribute() return concat("@", node-name($node))
+    case comment() 
+    return concat(
+      "comment()",
+      let $ctp := count($node/preceding-sibling::comment())
+      let $ctf := count($node/following-sibling::comment())
+      where ($ctp + $ctf) > 0 
+      return concat("[", $ctp + 1, "]")
+    )
+    case processing-instruction() 
+    return 
+      let $nn := node-name($node)
+      return
+        concat(
+          "processing-instruction(", $nn, ")",
+          let $ctp := count($node/preceding-sibling::processing-instruction()[node-name(.)=$nn])
+          let $ctf := count($node/following-sibling::processing-instruction()[node-name(.)=$nn])
+          where ($ctp + $ctf) > 0 
+          return concat("[", $ctp + 1, "]")
+        ) 
+    default return ()
+  ), "/"
+  )
+};

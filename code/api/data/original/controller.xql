@@ -34,6 +34,7 @@ declare variable $local:subresource :=
 		<s xquery="{$local:query-base}/literal.xql">repository</s>
 		<s xquery="{$local:query-base}/selection.xql">selection</s>
 		<s xquery="{$local:query-base}/literal.xql">front</s>
+    <s xquery="{$local:query-base}/compile.xql">compile</s>
 	</subresource>;
 
 if ($paths:debug)
@@ -50,7 +51,6 @@ then
 	</debug>
 	)
 else (),
-let $has-compile-query := request:get-parameter('compile', ())
 let $has-search-query := request:get-parameter('q', ())
 let $path-tokens := tokenize($exist:path, '/')[.]
 let $n-tokens := count($path-tokens)
@@ -104,21 +104,7 @@ return
 		then
 			util:log-system-out(('controller: subresource for ', $exist:path,'= ', $sr))
 		else (),
-		if ($has-compile-query)
-		then
-			<exist:dispatch>
-				{app:pass-credentials-xq()}
-				<exist:forward url="{$local:query-base}/compile.xql">
-					<exist:add-parameter name="purpose" value="{$purpose}"/>
-					<exist:add-parameter name="share-type" value="{$share-type}"/>
-					<exist:add-parameter name="owner" value="{$owner}"/>
-					<exist:add-parameter name="resource" value="{$resource}"/>
-					<exist:add-parameter name="subresource" value="{$sr}"/>
-					<exist:add-parameter name="subsubresource" value="{$subsubresource}"/>
-					<exist:add-parameter name="format" value="{$format}"/>
-				</exist:forward>
-			</exist:dispatch>
-		else if ($sr = $local:subresource/s)
+		if ($sr = $local:subresource/s)
 		then 
 			(: subresource handled in its own query :)
 			<exist:dispatch>

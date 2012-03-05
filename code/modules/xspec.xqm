@@ -3,9 +3,8 @@ xquery version "1.0";
  : coverage test, because it requires a special Java class.
  : Assumes the xspec XSLTs are in $xspec:collection
  : 
- : Copyright 2010 Efraim Feinstein
+ : Copyright 2010-2011 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
- : $Id: xspec.xqm 738 2011-04-15 02:21:55Z efraim.feinstein $
  :)
 
 module namespace xspec="http://jewishliturgy.org/modules/xspec";
@@ -21,7 +20,7 @@ declare namespace err="http://jewishliturgy.org/errors";
 (:declare namespace xxml="http://jewishliturgy.org/ns/xml-alias";:)
 
 declare variable $xspec:collection as xs:string := 
-  '/code/modules/resources/xspec';
+  '/code/modules/resources/xspec/src';
 (:
 declare variable $xspec:xxml-namespace-uri := 
   'http://jewishliturgy.org/ns/xml-alias';
@@ -134,7 +133,7 @@ declare function xspec:create-test-stylesheet(
       xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
       xmlns:t="http://www.jenitennison.com/xslt/xspec"
       xml:base="http://localhost:8080/db/code/modules/resources/xspec/"> 
-      <xsl:include href="{app:concat-path($xspec:collection, '/generate-xspec-tests.xsl')}" />
+      <xsl:include href="{app:concat-path($xspec:collection, 'compiler/generate-xspec-tests.xsl')}" />
     </xsl:stylesheet>
   return (
     transform:transform($absolutize-transformed, $xspec-transform, ())
@@ -190,7 +189,7 @@ declare function xspec:format-report(
     xspec:_load-xml-from-item($report)
   return
     transform:transform($report-doc, 
-      doc(concat($xspec:collection, '/format-xspec-report.xsl')),
+      doc(concat($xspec:collection, '/reporter/format-xspec-report.xsl')),
       ())
 };
 
@@ -226,7 +225,7 @@ declare function xspec:test(
           <xsl:template match="html:link">
             <xsl:copy>
               <xsl:copy-of select="(@type,@rel)"/>
-              <xsl:attribute name="href" select="'{$paths:rest-prefix}{$xspec:collection}/test-report.css'"/>
+              <xsl:attribute name="href" select="'{$paths:rest-prefix}{$xspec:collection}/reporter/test-report.css'"/>
             </xsl:copy>
           </xsl:template>
         </xsl:stylesheet>

@@ -36,7 +36,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: resource.xql 769 2011-04-29 00:02:54Z efraim.feinstein $
  :)
 import module namespace api="http://jewishliturgy.org/modules/api"
 	at "/code/api/modules/api.xqm";
@@ -100,6 +99,11 @@ declare function local:get-menu(
         ("GET", "POST"), 
         (api:html-content-type(), api:tei-content-type("j:repository")),
         api:tei-content-type("tei:seg")
+      ),
+			api:list-item('Compile', concat($base, '/compile'),
+        ("POST"), 
+        ("text/plain", "application/xml"),
+        api:html-content-type()
       )
 		}</ul>
 	return (

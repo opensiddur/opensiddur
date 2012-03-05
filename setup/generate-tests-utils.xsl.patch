@@ -1,5 +1,5 @@
---- ../db/code/modules/resources/xspec/generate-tests-utils.xsl	2010-09-08 12:34:37.000000000 -0400
-+++ ../db/code/modules/resources/xspec/generate-tests-utils.xsl	2010-10-17 17:10:47.000000000 -0400
+--- ../db/code/modules/resources/xspec/src/compiler/generate-tests-utils.xsl	2011-09-05 15:42:49.227090163 -0400
++++ ../db/code/modules/resources/xspec/src/compiler/generate-tests-utils.xsl	2011-09-05 17:40:23.102881740 -0400
 @@ -5,6 +5,7 @@
  <!--  URI:        http://xspec.googlecode.com/                             -->
  <!--  Tags:                                                                -->
@@ -17,13 +17,12 @@
                  xmlns:test="http://www.jenitennison.com/xslt/unit-test"
                  xmlns:x="http://www.jenitennison.com/xslt/xspec"
                  extension-element-prefixes="test"
--                xmlns:t="http://www.jenitennison.com/xslt/unit-testAlias">
-+                xmlns:t="http://www.jenitennison.com/xslt/unit-testAlias"
-+                xmlns:xxml="http://jewishliturgy.org/ns/xml-alias">
+                 xmlns:pkg="http://expath.org/ns/pkg"
++                xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
+                 xmlns:t="http://www.jenitennison.com/xslt/unit-testAlias">
  
- <xsl:namespace-alias stylesheet-prefix="t" result-prefix="test"/>
- 
-@@ -239,7 +241,21 @@
+ <pkg:import-uri>http://www.jenitennison.com/xslt/xspec/generate-tests-utils.xsl</pkg:import-uri>
+@@ -242,7 +244,21 @@
      </xsl:otherwise>
    </xsl:choose>
  </xsl:function>  
@@ -46,7 +45,7 @@
  <test:tests>
    <test:title>test:node-deep-equal function</test:title>
    <test:test id="node-deep-equal.1">
-@@ -385,13 +401,13 @@
+@@ -388,13 +404,13 @@
        <xsl:choose>
          <xsl:when test="node-name($node1) eq node-name($node2)">
            <xsl:variable name="atts1" as="attribute()*">

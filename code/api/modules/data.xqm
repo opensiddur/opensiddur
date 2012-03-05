@@ -5,7 +5,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: data.xqm 769 2011-04-29 00:02:54Z efraim.feinstein $
  :) 
 module namespace data="http://jewishliturgy.org/modules/data";
 
@@ -17,7 +16,9 @@ import module namespace app="http://jewishliturgy.org/modules/app"
 	at "/code/modules/app.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
 	at "/code/modules/paths.xqm";
-
+import module namespace resp="http://jewishliturgy.org/modules/resp"
+  at "/code/modules/resp.xqm";
+  
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace err="http://jewishliturgy.org/errors";
@@ -38,10 +39,10 @@ declare function data:api-path-to-db(
 	let $owner := $tok[3]
 	let $purpose := $tok[1]
 	let $resource :=
-		let $resource-index := 
-			if ($purpose = 'output')
+		let $resource-index := 4
+		(:	if ($purpose = 'output')
 			then 5
-			else 4
+			else 4:)
 		let $resource-noext := replace($tok[$resource-index], '(\.\S+)?$', '')
 		let $ext := substring-after($tok[$resource-index], '.')
 		return 
@@ -49,12 +50,17 @@ declare function data:api-path-to-db(
 				if ($purpose = 'output')
 				then
 					(: output paths reference collections, not xml files directly :) 
-					concat($tok[4], '/')
+					concat($resource-noext, '/')
 				else '',
 				$resource-noext, 
         (: add an extension if the resource is not blank :)
         if ($resource-noext)
-        then concat('.', if ($ext) then $ext else 'xml')
+        then concat('.', 
+          if ($ext) 
+          then $ext 
+          else if ($purpose = "output")
+          then "xhtml"
+          else "xml")
         else ''
 			)[.]
 	let $xmlid := 
@@ -83,10 +89,11 @@ declare function data:db-path-to-api(
 	let $owner := $tok[2]
 	let $purpose := $tok[3]
 	let $resource-token :=
-		if ($purpose = 'output')
+		(:if ($purpose = 'output')
 		then 
 			concat($tok[4], '/', $tok[5])
-		else $tok[4]
+		else :) 
+		$tok[4]
 	let $resource := 
 		replace(
 			if (contains($resource-token, '#'))
@@ -165,9 +172,12 @@ declare function data:path-to-parts(
 (:~ convert an API path into exist:add-parameter elements 
  :)
 declare function data:path-to-parameters(
-	$path as xs:string
+	$path as item()
 	) as element(exist:add-parameter)+ {
-  let $tokenized-path := data:path-to-parts($path)
+  let $tokenized-path as element(data:path) :=
+    if ($path instance of element(data:path))
+    then $path
+    else data:path-to-parts($path)
 	return $tokenized-path/(
 		<exist:add-parameter name="purpose" value="{data:purpose}"/>,
 		<exist:add-parameter name="share-type" value="{data:share-type}"/>,
@@ -254,7 +264,7 @@ declare function data:top-collection(
 	$share-type as xs:string?,
 	$owner as xs:string?
 	) as xs:string* {
-	if (exists($share-type))
+	if ($share-type)
 	then
 		app:concat-path(concat('/', $share-type), $owner)
 	else
@@ -272,15 +282,26 @@ declare function data:update-replace-or-insert(
 	$parent as element(),
 	$new-content as node()
 	) as xs:string {
-	if (exists($node))
-	then (
-		update replace $node with $new-content,
-		'replaced'
-	)
-	else (
-		update insert $new-content into $parent,
-		'inserted'
-	)
+	let $doc := root($node)
+	return (
+  	if (exists($node))
+  	then (
+  	  if ($node/@xml:id)
+  	  then resp:remove($node)
+  	  else (),
+  		update replace $node with $new-content,
+  		'replaced'
+  	)
+  	else (
+  		update insert $new-content into $parent,
+  		'inserted'
+  	),
+  	if ($new-content/@xml:id)
+  	then
+  	  resp:add($doc//id($new-content/@xml:id), 
+  	    "editor", app:auth-user(), "location value")
+  	else ()
+  )
 };
 
 (:~ if $node exists, replace its value with $new-content.
@@ -293,19 +314,34 @@ declare function data:update-value-or-insert(
 	$wrapper as element(),
 	$new-content as item()
 	) as xs:string {
-	if (exists($node))
-	then (
-		update value $node with $new-content,
-		'replaced'
-	)
-	else (
-		update insert 
-			element {node-name($wrapper)} {
-				$wrapper/@*,
-				$new-content
-			} into $parent,
-		'inserted'
-	)
+	let $doc := (root($node), root($parent))[1]
+	return 
+  	if (exists($node))
+  	then (
+  	  for $n in $node/descendant::*[@xml:id]
+  	  return
+  	    resp:remove($n),
+  		update value $node with $new-content,
+  		let $id := $doc//id(($new-content, $node)/@xml:id[1])
+  		where exists($id)
+  		return
+  		  resp:add($id, "editor", app:auth-user(), "value"),
+  		'replaced'
+  	)
+  	else 
+  	  let $xmlid := 
+  	    ($wrapper/@xml:id/string(), 
+        concat("_", util:uuid()))[1]
+      return (
+  		update insert 
+  			element {node-name($wrapper)} {
+  				$wrapper/(@* except @xml:id),
+  				attribute xml:id { $xmlid },
+  				$new-content
+  			} into $parent,
+  			resp:add($doc//id($xmlid), "editor", app:auth-user(), "location value"),
+  			'inserted'
+  		)
 };
 
 (:~ given an id, find which virtual resource to forward to :)

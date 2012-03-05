@@ -441,6 +441,27 @@ declare function api:list-item(
     </li>
 };
 
+(:~ all requestable form content types.
+ : If allow-text is true(), allow text/plain, which means
+ : only 1 parameter is required
+ :)
+declare function api:form-content-type(
+  $allow-text as xs:boolean?
+  ) as xs:string+ {
+  ("application/xml",
+  "text/xml",
+  "application/x-www-form-urlencoded",
+  if ($allow-text)
+  then "text/plain"
+  else ()
+  )
+};
+
+declare function api:form-content-type(
+  ) as xs:string+ {
+  api:form-content-type(false())
+};
+
 (:~ return the HTML content types for use in accept/request header :)
 declare function api:html-content-type(
   ) as xs:string+ {
@@ -553,8 +574,50 @@ declare function api:get-data(
   return
     if ($data instance of xs:base64Binary)
     then util:binary-to-string($data)
-    else $data
+    else 
+      (: eXist switched from returning elements to document nodes 
+       : this wrapper changes back to the old behavior
+       :)
+      typeswitch($data)
+      case document-node() return $data/node()
+      default return $data
 };
+
+declare function api:get-parameter(
+  $param as xs:string,
+  $default as xs:string?
+  ) as xs:string? {
+  api:get-parameter($param, $default, false())
+};
+
+(:~ get a parameter from query parameters, form encoded parameters, xml, or text
+ : @param $param parameter name
+ : @param $default parameter default value
+ : @param $allow-one-parameter If only one parameter can be given without a name (eg, text/plain), return it?
+ :)
+declare function api:get-parameter(
+  $param as xs:string,
+  $default as xs:string?,
+  $allow-one-parameter as xs:boolean?
+  ) as xs:string? {
+  (
+    request:get-parameter($param, ()),
+    let $method := api:get-method()
+    let $data := api:get-data()
+    where $method = "POST"
+    return
+      if ($data instance of xs:string and $allow-one-parameter)
+      then $data
+      else if ($data instance of node())
+      then 
+        if ($allow-one-parameter)
+        then $data/string()
+        else $data//*[name() = $param]/string()
+      else (),
+    $default
+  )[1]
+};
+
 
 (:~ run the given tests and return their results if the _test= query parameter is 
  : given and the method is GET. If this is not a testing call, return ()

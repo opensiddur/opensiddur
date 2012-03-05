@@ -3,7 +3,7 @@
 # Sets up dependencies for the XSLT files
 # Assumes that it will be included after the definitions in the top level Makefile
 #
-# Copyright 2008-2010 Efraim Feinstein
+# Copyright 2008-2011 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -18,7 +18,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/
 #
-# $Id: Makefile 452 2010-02-16 02:08:52Z efraim.feinstein $
 
 JLPTEI_FILE=jlptei.xml
 
@@ -44,6 +43,12 @@ $(TEIDOCDIR)/tr.doc.html: $(TRODD_DEPEND) $(ODDDIR)/Makefile
 .PHONY: jlpteidoc 
 jlpteidoc: $(TEIDOCDIR)/jlptei.doc.html
 
-$(TEIDOCDIR)/jlptei.doc.html: $(JLPTEIODD_DEPEND) $(ODDDIR)/Makefile $(ODDDIR)/jlptei.xml
+.PHONY: p5subset
+p5subset: $(LIBDIR)/tei/P5/p5subset.xml
+
+$(LIBDIR)/tei/P5/p5subset.xml:
+	cd $(LIBDIR)/tei/P5 && make p5subset.xml 
+
+$(TEIDOCDIR)/jlptei.doc.html: p5subset $(JLPTEIODD_DEPEND) $(ODDDIR)/Makefile $(ODDDIR)/jlptei.xml
 	$(TEIROMA) $(ODDDIR)/$(JLPTEI_FILE) $(TEIDOCDIR)
 	

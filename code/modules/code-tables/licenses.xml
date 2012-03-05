@@ -13,7 +13,7 @@
   <license xml:lang="en">
     <desc>Creative Commons Zero</desc>
     <id>http://www.creativecommons.org/publicdomain/zero/1.0</id>
-    <tei:availability status="free">
+    <tei:availability status="free" xml:id="availability-license-cc0">
       <tei:p xml:lang="en">
         To the extent possible under law, the contributors who associated
         <tei:ref type="license" target="http://www.creativecommons.org/publicdomain/zero/1.0">Creative Commons Zero
@@ -33,7 +33,7 @@
   <license xml:lang="en">
     <desc>Creative Commons Attribution 3.0 Unported</desc>
     <id>http://creativecommons.org/licenses/by/3.0</id>
-    <tei:availability status="restricted">
+    <tei:availability status="restricted" xml:id="availability-license-cc-by">
       <tei:p xml:lang="en">Copyright <tei:date></tei:date> by the Contributors to the Open Siddur Project. 
       This file is available under the 
       <tei:ref type="license" target="http://creativecommons.org/licenses/by/3.0">Creative Commons Attribution 3.0 Unported</tei:ref> license.
@@ -53,7 +53,7 @@
   <license xml:lang="en">
     <desc>Creative Commons Attribution-ShareAlike 3.0 Unported</desc>
     <id>http://creativecommons.org/licenses/by-sa/3.0</id>
-    <tei:availability status="restricted">
+    <tei:availability status="restricted" xml:id="availability-license-cc-by-sa">
       <tei:p xml:lang="en">Copyright <tei:date></tei:date> by the Contributors to the Open Siddur Project. 
       This file is available under the 
       <tei:ref type="license" target="http://creativecommons.org/licenses/by-sa/3.0">Creative Commons Attribution-ShareAlike 3.0 Unported</tei:ref> 

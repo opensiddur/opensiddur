@@ -17,15 +17,20 @@ xquery version "1.0";
  : Open Siddur Project 
  : Copyright 2011 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
- : $Id: license.xql 718 2011-03-29 05:23:51Z efraim.feinstein $
  :)
 import module namespace request="http://exist-db.org/xquery/request";
 import module namespace response="http://exist-db.org/xquery/response";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
 	at "/code/api/modules/api.xqm";
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "/code/modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
 	at "/code/api/modules/data.xqm";
+import module namespace resp="http://jewishliturgy.org/modules/resp"
+  at "/code/modules/resp.xqm";
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "/code/modules/debug.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -54,18 +59,25 @@ declare function local:put(
 	$format as xs:string?
 	) as element()? {
 	let $license-templates := doc('/code/modules/code-tables/licenses.xml')/code-table
-	let $data := request:get-data()
+	let $data := api:get-data()
 	let $new-lic := 
 		if ($format = 'txt')
 		then string($data)
 		else string(($data/self::tei:ptr/@target, $data)[1])
 	let $boilerplate :=
 		$license-templates/license[id=$new-lic]/tei:availability
+	let $doc := root($node)
 	return 
 		if (exists($boilerplate))
 		then (
 			response:set-status-code(204),
-			update replace $node with $boilerplate
+			debug:debug($debug:detail, "license.xql", "before resp:remove()"),
+			resp:remove($node),
+			update replace $node with $boilerplate,
+			debug:debug($debug:detail, "license.xql", (
+			  "document boilerplate id: ", $boilerplate/@xml:id/string(), " in context: ", 
+			  $doc//id($boilerplate/@xml:id))),
+			resp:add($doc//id($boilerplate/@xml:id), "editor", app:auth-user(), "value")
 		)
 		else 
 			api:error(400, "The given license URI is not allowed.", $new-lic) 
@@ -76,6 +88,7 @@ if (api:allowed-method(('GET', 'PUT')))
 then
 	let $auth := api:request-authentication() or true()
 	(: $user-name the user name in the request URI :)
+	let $null :=       util:log-system-out("HERE")
 	let $purpose := request:get-parameter('purpose', ())
 	let $share-type := request:get-parameter('share-type', ())
 	let $owner := request:get-parameter('owner', ())

@@ -184,7 +184,7 @@
 	<xsl:template match="j:concurrent[j:selection]" as="element(jx:joined-concurrent)">
     <xsl:param name="additional-views" tunnel="yes" as="element(j:view)*"
       select="()"/>
-       
+    <xsl:sequence select="func:debug($additional-views, 'concurrent:additional-views', $debug-detail)"/>   
     <xsl:variable name="context" select="." as="element(j:concurrent)"/>
     <xsl:sequence select="func:debug(($context/j:selection/@jx:uid, generate-id($context/j:selection)), 'j:concurrent selection id (uid, generate-id)', $debug-detail)"/>
         

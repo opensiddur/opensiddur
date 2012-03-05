@@ -29,7 +29,6 @@ xquery version "1.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: output.xql 769 2011-04-29 00:02:54Z efraim.feinstein $
  :)
 import module namespace response="http://exist-db.org/xquery/response";
 import module namespace request="http://exist-db.org/xquery/request";
@@ -62,67 +61,112 @@ declare function local:get-menu(
 	$share-type as xs:string?,
 	$owner as xs:string?
 	) as element() {
+	let $user := app:auth-user()
 	let $uri := request:get-uri()
-	let $collections := data:top-collection($share-type, $owner)
+	let $collections := 
+	  let $top := data:top-collection($share-type, $owner)
+	  return
+	    if ($owner)
+	    then $top
+	    else 
+        if ($user)
+        then 
+          for $group in xmldb:get-user-groups($user)
+          return concat("/group/", $group)
+        else ( (: TODO: allow public accessible outputs? :) )
 	let $ignore-collections := '(/trash/)|(/cache/)'
+	let $null := 
+	  util:log-system-out(("Output for $collection = ", string-join($collections, ","), " $share-type =", $share-type, " $owner=", $owner))
 	let $list :=
 	(
 		<ul class="common">{
 			if (not($share-type))
 			then (
-				api:list-item('Group output', '/code/api/data/output/group', "GET", api:html-content-type(), ())
+				api:list-item('Group output', 
+				  '/code/api/data/output/group', 
+				  "GET", 
+				  api:html-content-type(), 
+				  ())
 			)
 			else if (not($owner))
 			then (
-				let $user := app:auth-user()
-				return
-					if ($user)
-					then (
-						for $group in xmldb:get-user-groups($user)
-						return
-							api:list-item($group, concat('/code/api/data/output/group/', $group), "GET", api:html-content-type(), ())
-					)
-					else ( (:do not display data about not logged in users :) )
+				if ($user)
+				then (
+					for $group in xmldb:get-user-groups($user)
+					return
+						api:list-item($group, 
+						  concat('/code/api/data/output/group/', $group), 
+						  "GET", 
+						  api:html-content-type(), 
+						  ())
+				)
+				else ( (:do not display data about not logged in users :) )
 			)
 			else 
 				( (: share type and owner present:) )
 		}</ul>,
-		if (scache:is-up-to-date($uri, '', $collections))
-		then scache:get-request($uri, '')
-		else scache:store($uri, '', 
-			<ul class="results">{
-				for $collection in $collections
-				return
-					for $title in collection($collection)//html:title
-					let $doc-uri := document-uri(root($title))
-					let $doc-name-no-ext := replace(util:document-name($doc-uri), '\.(xml|xhtml|html)$', '')
-					let $collection-name := replace(util:collection-name($title), '^(/db)?/', '')
-					let $share-type-owner := 
-            string-join(subsequence(tokenize($collection-name, '/'), 1, 2), '/')
-					let $link := 
-						concat('/code/api/data/output/', $share-type-owner, '/',
-							$doc-name-no-ext, '/', $doc-name-no-ext)
-					let $title-string := normalize-space($title)
-					let $lang := $title/ancestor-or-self[@xml:lang][1]/@xml:lang
-					where contains($doc-uri,'/output/') and not(matches($doc-uri, $ignore-collections))
-					order by $title-string
-					return 
-							api:list-item(
-								<span>{
-									$lang, 
-									if ($lang) then attribute lang {string($lang)} else (),
-									if ($title)
-									then $title-string
-									else $doc-name-no-ext
-								}</span>,
-								$link, "GET", api:html-content-type(),
-                ("xhtml", concat($link, ".xhtml"),
-                "css", concat($link, ".css"),
-								"db", replace($doc-uri, "^/db", "")
-                )
-							)
-			}</ul>
-		)
+		if (exists($collections))
+		then 
+  		if (scache:is-up-to-date($collections, $uri, ""))
+  		then scache:get-request($uri, '')
+  		else scache:store($uri, '', 
+  			<ul class="results">{
+  				for $collection in $collections
+  				let $output-collection := concat($collection, "/output")
+  				where xmldb:collection-available($output-collection)
+  				return
+    				for $subcollection in xmldb:get-child-collections($output-collection)
+    				let $collection-name := concat($output-collection, "/", $subcollection)
+    				let $title := collection($collection-name)//html:title
+    				let $doc-uri := concat($collection-name, "/", $subcollection, ".xhtml") 
+    				  (:document-uri(root($title)):)
+            let $null :=
+              util:log-system-out(("subcollection = ", $collection-name, " $doc-uri=", $doc-uri))
+    				let $doc-name-no-ext := 
+    				  if ($title)
+    				  then
+    				    replace(util:document-name($doc-uri), '\.(xml|xhtml|html)$', '')
+    				  else $subcollection
+    				let $share-type-owner := 
+              string-join(subsequence(tokenize($collection-name, '/'), 2, 2), '/')
+    				let $link := 
+    					concat('/code/api/data/output/', $share-type-owner, '/',
+    						$doc-name-no-ext, 
+    						'/'[exists($title)], 
+    						$doc-name-no-ext[exists($title)])
+    				let $title-string := 
+    				  if ($title)
+    				  then normalize-space($title)
+    				  else $doc-name-no-ext
+    				let $lang := $title/ancestor-or-self[@xml:lang][1]/@xml:lang
+    				let $null := 
+    				  util:log-system-out((
+    				  "$doc-uri=", $doc-uri, 
+    				  " available=", doc-available($doc-uri))
+    				  )
+    				where not(matches($doc-uri, $ignore-collections))
+    				order by $title-string
+    				return 
+    						api:list-item(
+    							<span>{
+    								$lang, 
+    								if ($lang) then attribute lang {string($lang)} else (),
+    								$title-string
+    							}</span>,
+    							$link, "GET", api:html-content-type(), (),
+                  (
+                    if (doc-available($doc-uri))
+                    then(
+                      "xhtml", concat($link, ".xhtml"),
+                      "css", concat($link, ".css"),
+                      "db", replace($doc-uri, "^/db", "")
+                    )
+                    else (),
+                    ("status", concat($link, "/status"))
+                  )
+    						)
+  			}</ul>)
+  		else ( (: no collections to browse :) )
 	)
 	let $n-results := count(scache:get($uri, '')/li)
 	return (
@@ -154,6 +198,7 @@ declare function local:get(
 		else $format
 	let $db-path := data:api-path-to-db(concat($path, if ($original-format) then '' else '.xhtml'))
 	return (
+	  util:log-system-out(("$db-path =", $db-path)),
 		if ($format = 'xhtml')
 		then 
 			if (doc-available($db-path))
@@ -189,6 +234,7 @@ then
 	let $resource := request:get-parameter('resource', ())
 	let $format := request:get-parameter('format', ())
 	let $path := request:get-parameter('path', ())
+	let $null := util:log-system-out(("path =", $path))
 	return
 		if (data:is-valid-share-type($share-type))
 		then 

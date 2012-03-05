@@ -42,8 +42,11 @@ tmp/
 *.pyc
 
 # local files project
+.buildpath
 .project
+.settings
 private-scripts/
+
 
 # patch rejects
 *.rej

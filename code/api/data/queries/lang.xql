@@ -17,15 +17,18 @@ xquery version "1.0";
  : Open Siddur Project 
  : Copyright 2011 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
- : $Id: lang.xql 718 2011-03-29 05:23:51Z efraim.feinstein $
  :)
 import module namespace request="http://exist-db.org/xquery/request";
 import module namespace response="http://exist-db.org/xquery/response";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
 	at "/code/api/modules/api.xqm";
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "/code/modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
 	at "/code/api/modules/data.xqm";
+import module namespace resp="http://jewishliturgy.org/modules/resp"
+  at "/code/modules/resp.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -51,7 +54,8 @@ declare function local:put(
 	$format as xs:string?
 	) as empty() {
 	response:set-status-code(204),
-	update replace $node with attribute xml:lang {string(request:get-data())} 
+	update replace $node with attribute xml:lang {string(api:get-data())},
+	resp:add-attribute($node, "editor", app:auth-user(), "value")
 };
 
 if (api:allowed-method(('GET', 'PUT')))

@@ -307,6 +307,26 @@
   </xsl:function>
 
   <xd:doc>
+    <xd:short>Determine the default number of steps to follow</xd:short>
+    <xd:param name="context">The context of the link</xd:param>
+    <xd:param name="steps">A default number if one cannot be figured out or the number of steps already traversed</xd:param>
+  </xd:doc>
+  <xsl:function name="func:follow-steps" as="xs:integer">
+    <xsl:param name="context" as="element()"/>
+    <xsl:param name="steps" as="xs:integer"/>
+
+    <xsl:variable name="evaluate" as="xs:string?"
+      select="($context/(@evaluate,../(tei:linkGrp|../tei:joinGrp)/@evaluate)[1])/string()"/>
+    <xsl:sequence select="
+      if ($evaluate='none') 
+      then 0 
+      else if ($evaluate='one') 
+      then 1
+      else $steps - 1"/>
+  </xsl:function>
+
+
+  <xd:doc>
     <xd:short>Given the full path to a document, return its cached version's path</xd:short>
     <xd:detail>Replace this with jcache:cached-document-path() when
     native XSLT comes around</xd:detail>
@@ -403,11 +423,7 @@
         </xsl:when>
         <xsl:otherwise><!-- evaluate='all' or nonexistent -->
           <xsl:sequence select="func:follow-cached-uri(., $context, 
-            if ($evaluate='none') 
-            then 0 
-            else if ($evaluate='one') 
-            then 1
-            else $steps - 1, 
+            func:follow-steps($context, $steps), 
             $cache-type)"/>
         </xsl:otherwise>
       </xsl:choose>

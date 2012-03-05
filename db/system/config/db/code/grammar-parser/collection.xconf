@@ -1,0 +1,6 @@
+<collection xmlns="http://exist-db.org/collection-config/1.0">
+    <index xmlns:jx="http://jewishliturgy.org/ns/jlp-processor">
+      <!-- range indexes -->
+      <create qname="@name" type="xs:string"/>
+    </index>
+</collection>

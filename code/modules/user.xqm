@@ -1,7 +1,10 @@
 xquery version "1.0";
 (:~ 
  : Support functions for user management
- : $Id: user.xqm 708 2011-02-24 05:40:58Z efraim.feinstein $
+ :
+ : Copyright 2010-2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Open Siddur Project
+ : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 
 module namespace user="http://jewishliturgy.org/modules/user";
@@ -17,12 +20,22 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 
 declare variable $user:profile-resource := 'profile.xml';
 
-declare variable $user:profile-prototype :=
-	<user-profile xmlns="">
-      <tei:name/>
-      <tei:email/>
-      <tei:orgName/>
-    </user-profile>;
+declare variable $user:profile-prototype as element(tei:div) :=
+	<tei:div type="contributor" xml:id="{app:auth-user()}">
+    <tei:name/>
+    <tei:email/>
+    <tei:orgName/>
+  </tei:div>;
+
+declare function local:set-user-id(
+  $profile as element(tei:div),
+  $name as xs:string
+  ) as element(tei:div) {
+  element tei:div {
+    attribute xml:id { $name },
+    $profile/(@* except @xml:id,*)
+  }
+};
 
 (:~ @return a URI pointing to a user's profile :)
 declare function user:profile-uri(
@@ -39,12 +52,12 @@ declare function user:new-profile(
   ) as xs:string {
   let $home := xmldb:get-user-home($user-name)
   let $path := xmldb:store($home, $user:profile-resource,
-    $user:profile-prototype)
+    local:set-user-id($user:profile-prototype, $user-name))
   where $path
   return ( 
     (: profile is readable, but not writable by group, everything by user :)
     xmldb:set-resource-permissions($home, $user:profile-resource, $user-name, $user-name, 
-      util:base-to-integer(0740,8)),
+      util:base-to-integer(0744,8)),
     $path
   )
 };

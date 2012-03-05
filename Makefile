@@ -87,7 +87,7 @@ TEXMLOPTIONS ?= -e utf8
 #	--doc makes TEI documentation, 
 #	--docpdf makes PDF documentation (broken!)
 #	--dochtml makes HTML documentation
-ROMAOPTIONS ?= --xsl=$(LIBDIR)/tei/Stylesheets --doc --dochtml 
+ROMAOPTIONS ?= --xsl=$(LIBDIR)/tei/Stylesheets --localsource=`absolutize $(LIBDIR)/tei/P5/p5subset.xml` --doc --dochtml 
 
 # XML validator options
 RELAXNGOPTIONS ?= $(TEIDOCDIR)/jlptei.rng
@@ -122,6 +122,7 @@ XSPECREPO = http://xspec.googlecode.com/svn/trunk/
 
 XSLTFORMSDIR = $(LIBDIR)/xsltforms
 XSLTFORMSREPO = https://xsltforms.svn.sourceforge.net/svnroot/xsltforms
+XSLTFORMS_REVISION ?= -r 520
 
 XSLTDOCDIR = $(LIBDIR)/XSLTDoc
 XSLTDOCREPO = https://xsltdoc.svn.sourceforge.net/svnroot/xsltdoc/trunk/xsltdoc
@@ -186,6 +187,7 @@ IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 # build eXist (what dependencies should this have?)
 $(EXIST_INSTALL_JAR): svn-exist
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
+	-patch -N -p0 < $(SETUPDIR)/exist-r14773.patch
 	rm -f $(LIBDIR)/exist/extensions/indexes/lucene/lib/*2.9.2.jar
 	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/lib/lucene*2.9.3.jar $(LIBDIR)/exist/extensions/indexes/lucene/lib
 	cd $(LIBDIR)/exist && \
@@ -243,12 +245,14 @@ db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene
 		make db
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
 	@echo "Copying files to database..."
-	@#copy the triggers first so eXist will know where they are during restore
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/triggers/__contents__.xml -ouri=xmldb:exist:// 
 	@#copy the transliteration DTD first so eXist will know where they are during restore
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/group/everyone/transliteration/__contents__.xml -ouri=xmldb:exist:// 
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/system/__contents__.xml -ouri=xmldb:exist:// 	
+	@#copy the code first so eXist will know where the triggers and support modules are during restore
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/__contents__.xml -ouri=xmldb:exist:// 
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist://
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/system/__contents__.xml -ouri=xmldb:exist:// 	
+	@#copy the transforms directory again so the tests that require the document URI trigger will run
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/transforms/__contents__.xml -ouri=xmldb:exist:// 
 	$(EXISTCLIENT) -qls -u admin -F $(SETUPDIR)/setup.xql
 	rm -f $(SETUPDIR)/setup.xql
 	@echo "Done."
@@ -323,10 +327,10 @@ $(XSPECDIR):
 	svn co $(XSPECREPO) $(XSPECDIR)
 
 svn-xsltforms: $(XSLTFORMSDIR)
-	svn update $(XSLTFORMSDIR)
+	svn update $(XSLTFORMS_REVISION) $(XSLTFORMSDIR)
 
 $(XSLTFORMSDIR):
-	svn co $(XSLTFORMSREPO) $(XSLTFORMSDIR)
+	svn co $(XSLTFORMS_REVISION) $(XSLTFORMSREPO) $(XSLTFORMSDIR)
 
 svn-xsltdoc: $(XSLTDOCDIR)
 	svn update $(XSLTDOCDIR)

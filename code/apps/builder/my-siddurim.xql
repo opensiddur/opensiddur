@@ -37,6 +37,9 @@ declare option exist:serialize "method=xhtml media-type=text/xml indent=yes omit
 	doctype-system=http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"; 
 
 
+(: delay between updates to (reloads of) the document instances :)
+declare variable $local:update-delay-ms := 30000;
+
 (:~ instance for the confirm delete dialog 
  : the instance holds the resource that will be deleted
  :
@@ -128,6 +131,7 @@ declare function local:copy-metadata-to-builder(
 };
 
 let $builder-instance-id := 'builder' (: really just a metadata instance :)
+let $status-instance-id := 'status'
 let $login-instance-id := 'login'
 let $document-chooser-id := 'documents'
 let $search-chooser-id  := 'search'
@@ -146,7 +150,12 @@ return
 				$document-chooser-id
 			),
       builder:document-chooser-instance(
-        $search-chooser-id, true(), xmldb:get-current-user(), (), 'output'
+        $search-chooser-id, true(), app:auth-user(), (), 'output'
+      ),
+      builder:status-instance(
+        $status-instance-id,
+        $document-chooser-id,
+        concat($document-chooser-id, "-error")
       ),
 			local:confirm-delete-instance('confirm-delete', 'control-confirm-delete')
 			}
@@ -154,9 +163,33 @@ return
 				<!-- workaround for Firefox bug -->
 				<tei:TEI j:junk="1" xrx:junk="1" html:junk="1" xml:lang="en"/>
 			</xf:instance>
+			{((: set up the reset for the document chooser instances every 30s :))}
+			<xf:action ev:event="xforms-ready">
+			  {
+			  builder:save-document-chooser-search($document-chooser-id),
+			  builder:save-document-chooser-search($search-chooser-id)
+			  }
+			  <xf:dispatch delay="{$local:update-delay-ms}" 
+			    targetid="reset" name="reset-document-instances"/>
+			</xf:action>
 		</xf:model>,
 		<title>Open Siddur Builder</title>,
 		(
+		(: this group serves to reset the document instances :)
+		<xf:group id="reset">
+		  <xf:action ev:event="reset-document-instances">
+  		  <xf:dispatch 
+  		    if="count(instance('{$document-chooser-id}')//html:ul[@class='results']/html:li/html:div[@class='status'][not(normalize-space(.)='Compiled')]) &gt; 0"
+  		    targetid="reset"
+  		    name="do-reset-document-instances"/>
+  		  <xf:dispatch delay="{$local:update-delay-ms}" 
+  		    targetid="reset" name="reset-document-instances"/>
+  		</xf:action>
+  		<xf:action ev:event="do-reset-document-instances">
+  		  <xf:send submission="{$document-chooser-id}-submit-saved"/>
+  		  <xf:send submission="{$search-chooser-id}-submit-saved"/>
+  		</xf:action>
+		</xf:group>,
 		<xf:group id="control-my-siddurim">
 			<fieldset>
 				<h2>My Siddurim</h2>
@@ -194,14 +227,19 @@ return
 	    				'.', 'html:a/html:span', './html:a/@href', ()
 	    			)
     			
-  				)
+  				),
+  				false(),
+  				false(),
+  				"Status",
+  				<xf:output ref="./html:div[@class='status']"/>
 				)
 				
 				}
-        <h3>Search My Siddurim</h3>
+        <h3>Search and View My Compiled Siddurim</h3>
         <p>Use the box below to search your <strong>compiled</strong> siddurim:</p>
         {
-        builder:document-chooser-ui($search-chooser-id, $result-chooser-id, 
+        builder:document-chooser-ui($search-chooser-id, 
+          $result-chooser-id, 
           <xf:trigger appearance="minimal">
             <xf:label>View</xf:label>
             <xf:load ev:event="DOMActivate" show="new">
@@ -211,10 +249,15 @@ return
           true(), true(), "Result",
           <xf:repeat id="search-result" nodeset="./html:a/html:p">
             {builder:search-results-block()}
-          </xf:repeat>
+          </xf:repeat>,
+          (: this nodeset restriction removes uncompiled resources :)
+          "[html:a[@class='alt'][.='xhtml']]"
         )
         }
 			</fieldset>
+			{controls:debug-show-instance($document-chooser-id),
+			controls:debug-show-instance($search-chooser-id),
+			controls:debug-show-instance(concat($status-instance-id, "-result"))}
 		</xf:group>
 		)
 		,
