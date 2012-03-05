@@ -101,7 +101,7 @@ EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 LOCALPATH ?= /usr/local
 EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1-dev.jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
-EXISTBACKUP ?= $(EXIST_INSTALL_DIR)/bin/backup.sh
+EXISTBACKUP ?= java -Dexist.home=$(EXIST_INSTALL_DIR) -jar $(EXIST_INSTALL_DIR)/start.jar org.exist.backup.Main 
 
 RESOLVERPATH ?= $(LIBDIR)/resolver-1.2.jar
 CP ?= /bin/cp
@@ -135,7 +135,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 15929
+EXIST_REVISION ?= -r 16003
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -259,14 +259,13 @@ $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/lucene.hebrew.jar:
 copy-files:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
 	@echo "Copying files to database..."
-	@#copy the transliteration DTD first so eXist will know where they are during restore
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/group/everyone/transliteration/__contents__.xml -u admin -p $(ADMINPASSWORD) -P $(ADMINPASSWORD) -ouri=xmldb:exist://  
-	@#copy the code first so eXist will know where the triggers and support modules are during restore
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)" 
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/system/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)" 	
-	@#copy the transforms directory again so the tests that require the document URI trigger will run
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/transforms/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)" 
+	@#copy the transliteration DTD first so eXist will know where they are during restore  
+	@#then copy the code so eXist will know where the triggers and support modules are during restore, then copy everything else with system *last* so the triggers will not engage
+	@#finally, copy the transforms directory again so the tests that require the document URI trigger will run
+	for d in group/everyone/transliteration cache code data group schema xforms system code/transforms; do \
+	echo $$d; \
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/$$d/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"; \
+	done 
 
 .PHONY: setup-password
 setup-password: $(SETUPDIR)/setup.xql
@@ -288,7 +287,7 @@ db-install-wlc: ridx-disable tanach tanach2db ridx-enable
 .PHONY: tanach2db
 tanach2db:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 774 -c /db/group/everyone -u admin -g everyone $(TEXTDIR)/wlc
-	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -ouri=xmldb:exist://
+	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -u admin -p "$(ADMINPASSWORD)" -ouri=xmldb:exist://
 
 # Install a new copy of the database with betterFORM trunk
 bf-install: db-install
