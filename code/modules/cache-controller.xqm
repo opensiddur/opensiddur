@@ -102,10 +102,12 @@ declare function local:set-cache-permissions(
 	$collection as xs:string,
 	$resource as xs:string
 	) as empty() {
-  app:mirror-permissions(
-    concat($collection, "/", $resource),
-    concat($cache, "/", $resource)
-  )
+	let $cache := jcache:cached-document-path($collection)
+	return
+    app:mirror-permissions(
+      concat($collection, "/", $resource),
+      concat($cache, "/", $resource)
+    )
 };
 
 
@@ -127,7 +129,7 @@ declare function local:make-cache-collection-path(
     return (
       debug:debug($debug:info,
         "cache",
-        ('creating new cache collection: ', $cache-this-step, ' owner/group/permissions=', $owner, '/',$group, '/',util:integer-to-base($mode,8))
+        ('creating new cache collection: ', $cache-this-step, ' mirroring permissions of ', $this-step)
       )
       ,
       if (xmldb:create-collection($cache-previous-step, $new-collection))
