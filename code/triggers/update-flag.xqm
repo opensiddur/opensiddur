@@ -3,14 +3,16 @@ xquery version "1.0";
 (:
 	Add updated.xml to a collection, indicating the time of the update
 
-  Copyright 2010-2011 Efraim Feinstein
+  Copyright 2010-2012 Efraim Feinstein
   Open Siddur Project
   Licensed under the GNU Lesser General Public License, version 3 or later
 :)
 module namespace trigger='http://jewishliturgy.org/triggers/update';
 
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
-import module namespace util="http://exist-db.org/xquery/util";
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "xmldb:exist:///code/modules/app.xqm";
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
@@ -28,7 +30,10 @@ declare function trigger:is-exempt(
 
 
 declare function trigger:log-trigger-event($uri as xs:anyURI, $event as xs:string) {
-  util:log-system-out(('TRIGGER: collection update record called: ', $event, ' on ', $uri))
+  debug:debug($debug:info,
+    "trigger",
+    ('TRIGGER: collection update record called: ', $event, ' on ', $uri)
+  )
 };
 
 declare function trigger:write-update-record($uri as xs:anyURI) {
@@ -41,9 +46,14 @@ declare function trigger:write-update-record($uri as xs:anyURI) {
     return
       if (xmldb:store($collection, 'updated.xml', 
         <updated xmlns="">{current-dateTime()}</updated>))
-      then ()
+      then 
+        app:mirror-permissions(
+          $collection, 
+          concat($collection, "/updated.xml"))
       else 
-        util:log-system-out(('Error storing collection update record for ', $collection))
+        debug:debug($debug:warn,
+          "trigger",
+          ('Error storing collection update record for ', $collection))
   else ()
 };
 
