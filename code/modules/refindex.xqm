@@ -66,7 +66,10 @@ declare function local:make-mirror-collection-path(
       debug:debug(
         $debug:info,
         "refindex",
-        ('creating new index collection: ', $this-step, ' from ', $previous-step, ' to ', $new-collection ,' owner/group/permissions=', $owner, '/',$group, '/',util:integer-to-base($mode,8))
+        ('creating new index collection: ', 
+        $this-step, ' from ', 
+        $previous-step, ' to ', 
+        $new-collection)
       ),
       if (xmldb:create-collection($previous-step, $new-collection))
       then 
@@ -310,18 +313,21 @@ declare function ridx:disable(
   ) as xs:boolean {
   let $user := xmldb:get-current-user()
   let $idx-collection := concat("/",$ridx:ridx-collection)
+  let $idx-flag := xs:anyURI(concat($idx-collection, "/", $ridx:disable-flag))
   return
     xmldb:is-admin-user($user)
     and (
+      local:make-mirror-collection-path($ridx:ridx-collection, "/"),
       if (xmldb:store(
         $idx-collection,
         $ridx:disable-flag,
         <ridx:index-disabled/>
         ))
       then (
-        xmldb:set-resource-permissions($idx-collection,
-          $ridx:disable-flag, $user, "dba", util:base-to-integer(0774, 8)
-        ), true()
+        sm:chown($idx-flag, $user),
+        sm:chgrp($idx-flag, "dba"),
+        sm:chmod($idx-flag, "rwxrwxr--"), 
+        true()
       )
       else false()
     )
