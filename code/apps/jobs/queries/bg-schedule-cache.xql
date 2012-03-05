@@ -2,7 +2,7 @@ xquery version "3.0";
 (:~ task to find uncached resources and schedule the background
  : task to execute them
  :  
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
@@ -27,7 +27,7 @@ declare variable $local:excluded-collections := concat("(",
 try {
   debug:debug(
     $debug:info,
-    "bg-schedule-cache",
+    "jobs",
     concat('In uncached resource scheduler at ', string(current-dateTime()))
     ),
   let $documents :=
@@ -35,6 +35,8 @@ try {
       collection(("/group","/code"))/tei:TEI/document-uri(root(.))
     )
   for $document in $documents
+  let $null :=
+    debug:debug($debug:detail, "jobs", ("attempting to schedule:", $document))
   where
     not(matches($document, $local:excluded-collections)) and
     not(system:as-user('admin', $magic:password, jcache:is-up-to-date($document)))
