@@ -68,6 +68,7 @@ declare function local:remove-flag(
   let $in-progress-path := local:get-flag-path($collection, $resource)
   let $in-progress-collection := $in-progress-path[1]
   let $in-progress-resource := $in-progress-path[2]
+  where doc-available(concat($in-progress-collection, "/", $in-progress-resource))
   return
     xmldb:remove($in-progress-collection, $in-progress-resource)
 };
@@ -83,8 +84,7 @@ declare function local:flag-is-active(
   let $in-progress-path := local:get-flag-path($collection, $resource)
   let $cache-collection := $in-progress-path[1]
   let $in-progress-resource := $in-progress-path[2]
-  let $cache-exists := xmldb:collection-available($cache-collection)
-  let $caching-in-progress := doc-available(concat($cache-collection, $in-progress-resource))
+  let $caching-in-progress := doc-available(concat($cache-collection, "/", $in-progress-resource))
   let $caching-too-long := $caching-in-progress and 
     xmldb:last-modified($cache-collection, $in-progress-resource) gt (xs:dayTimeDuration("P0DT0H5M0S") + current-dateTime())
   return
@@ -287,7 +287,11 @@ declare function jcache:clear-cache-resource(
     if (starts-with(replace($collection, '^(/db)?/',''), $jcache:cache-collection))
     then $collection
     else jcache:cached-document-path($collection)
-  where (app:require-authentication() and exists(local:flag-is-active($collection, $resource)))
+  where (
+    app:require-authentication() and 
+    exists(local:flag-is-active($collection, $resource)) and (: this is just to call it... :)
+    doc-available(concat($ccollection, "/", $resource))
+  )
   return xmldb:remove($ccollection, $resource)
 };
 
