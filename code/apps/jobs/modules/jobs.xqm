@@ -403,7 +403,7 @@ declare function jobs:run(
               debug:debug($debug:info, 
                 "jobs", 
                 ("Caught an exception while running job: ", $job-id, " Exception:", 
-                debug:print-exception($err:module, $err:line-number, $err:column-number, $err:code, $err:value))),
+                debug:print-exception($err:module, $err:line-number, $err:column-number, $err:code, $err:value, $err:description))),
               local:record-exception($job-id, $err:code, $err:description, $err:value),
               jobs:incomplete($job-id)
             }
