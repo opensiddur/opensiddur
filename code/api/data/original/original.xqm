@@ -94,8 +94,9 @@ declare function orig:post() {
         return
           if ($new-document-uri)
           then (
-            xmldb:set-resource-permissions($collection, $resource,
-              $user, $user, util:base-to-integer(0740, 8)),
+            sm:chown(xs:anyURI($new-document-uri), $user),
+            sm:chgrp(xs:anyURI($new-document-uri), $user),
+            sm:chmod(xs:anyURI($new-document-uri), "rw-r-----"),
             if ($data instance of element(tei:title))
             then 
               update replace 
