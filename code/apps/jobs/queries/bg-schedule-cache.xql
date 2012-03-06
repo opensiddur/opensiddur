@@ -2,11 +2,9 @@ xquery version "3.0";
 (:~ task to find uncached resources and schedule the background
  : task to execute them
  :  
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
-import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
   at "xmldb:exist:///code/modules/cache-controller.xqm";
 import module namespace jobs="http://jewishliturgy.org/apps/jobs"
@@ -29,7 +27,7 @@ declare variable $local:excluded-collections := concat("(",
 try {
   debug:debug(
     $debug:info,
-    "bg-schedule-cache",
+    "jobs",
     concat('In uncached resource scheduler at ', string(current-dateTime()))
     ),
   let $documents :=
@@ -54,6 +52,11 @@ try {
       'admin', $magic:password
     )
 }
-catch * ($c, $d, $v) {
-  util:log-system-out(('Error in cache scheduler: ', $c, ' ', $d, ' ', $v))
+catch * {
+  debug:debug($debug:warn,
+    "jobs",
+    ('Error in cache scheduler: ', 
+    debug:print-exception($err:module, $err:line-number, $err:column-number, $err:code, $err:value, $err:description)
+    )
+  )
 }

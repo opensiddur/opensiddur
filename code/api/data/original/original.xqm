@@ -4,7 +4,7 @@ xquery version "1.0";
  : A title must be provided		
  :
  : Open Siddur Project
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :)
@@ -85,7 +85,7 @@ declare function orig:post() {
         let $collection := concat("/group/", $user, "/original")
         let $make := 
           app:make-collection-path($collection, "/",
-            $user, $user, xmldb:get-permissions(concat("/group/", $user)))
+            $user, $user, sm:get-permissions(xs:anyURI(concat("/group/", $user)))/*/@mode/string())
         let $new-document-uri :=
           xmldb:store($collection, $resource, 
             if ($data instance of element(tei:TEI))
@@ -94,8 +94,9 @@ declare function orig:post() {
         return
           if ($new-document-uri)
           then (
-            xmldb:set-resource-permissions($collection, $resource,
-              $user, $user, util:base-to-integer(0740, 8)),
+            sm:chown(xs:anyURI($new-document-uri), $user),
+            sm:chgrp(xs:anyURI($new-document-uri), $user),
+            sm:chmod(xs:anyURI($new-document-uri), "rw-r-----"),
             if ($data instance of element(tei:title))
             then 
               update replace 

@@ -2,7 +2,7 @@
 #
 # Sets up rules for building, and includes Makefiles from all targets
 #
-# Copyright 2008-2011 Efraim Feinstein
+# Copyright 2008-2012 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -95,13 +95,13 @@ ROMAOPTIONS ?= --xsl=$(LIBDIR)/tei/Stylesheets --localsource=`absolutize $(LIBDI
 RELAXNGOPTIONS ?= $(TEIDOCDIR)/jlptei.rng
 
 # default eXist install directory
-EXIST_INSTALL_DIR ?= /usr/local/eXist
+EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
-EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-setup-1.5.0dev.jar
+EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-setup-2.0-tech-preview.jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
-EXISTBACKUP ?= $(EXIST_INSTALL_DIR)/bin/backup.sh
+EXISTBACKUP ?= java -Dexist.home=$(EXIST_INSTALL_DIR) -jar $(EXIST_INSTALL_DIR)/start.jar org.exist.backup.Main 
 
 RESOLVERPATH ?= $(LIBDIR)/resolver-1.2.jar
 CP ?= /bin/cp
@@ -133,9 +133,9 @@ TEIDIR = $(LIBDIR)/tei
 TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 
 EXISTSRCDIR = $(LIBDIR)/exist
-EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
+EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/stable/eXist-2.0.x
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 14669
+EXIST_REVISION ?= -r 16109
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -189,7 +189,6 @@ IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 # build eXist (what dependencies should this have?)
 $(EXIST_INSTALL_JAR):
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
-	-patch -N -p0 < $(SETUPDIR)/exist-r14773.patch
 	rm -f $(LIBDIR)/exist/extensions/indexes/lucene/lib/*2.9.2.jar
 	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/lib/lucene*2.9.3.jar $(LIBDIR)/exist/extensions/indexes/lucene/lib
 	cd $(LIBDIR)/exist && \
@@ -231,10 +230,10 @@ clean-hebmorph-lucene:
 
 # Install a copy of the eXist database
 .PHONY: db-install db-install-nonet db-install-wlc bf-install db-uninstall db-sync db-syncclean installer patches lucene-install copy-files copy-libs setup-password
-db-install: submodules svn-exist code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db copy-files copy-libs setup-password   
+db-install: submodules svn-exist code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db setup-password copy-files copy-libs   
 
 #installer that does not rely on the presence of a network. 
-db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db-nonet copy-files copy-libs setup-password
+db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db-nonet setup-password copy-files copy-libs
 	@echo "Done."
 	touch $(EXIST_INSTALL_DIR)/EXIST.AUTOINSTALLED
 
@@ -260,14 +259,12 @@ $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/lucene.hebrew.jar:
 copy-files:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
 	@echo "Copying files to database..."
-	@#copy the transliteration DTD first so eXist will know where they are during restore
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/group/everyone/transliteration/__contents__.xml -ouri=xmldb:exist:// 
-	@#copy the code first so eXist will know where the triggers and support modules are during restore
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/__contents__.xml -ouri=xmldb:exist:// 
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist://
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/system/__contents__.xml -ouri=xmldb:exist:// 	
-	@#copy the transforms directory again so the tests that require the document URI trigger will run
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/code/transforms/__contents__.xml -ouri=xmldb:exist:// 
+	@#copy the transliteration DTD first so eXist will know where they are during restore  
+	@#then copy the code so eXist will know where the triggers and support modules are during restore, then copy everything else with system *last* so the triggers will not engage
+	@#finally, copy the transforms directory again so the tests that require the document URI trigger will run
+	for d in group/everyone/transliteration cache code data group schema xforms system code/transforms; do \
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/$$d/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"; \
+	done 
 
 .PHONY: setup-password
 setup-password: $(SETUPDIR)/setup.xql
@@ -289,7 +286,7 @@ db-install-wlc: ridx-disable tanach tanach2db ridx-enable
 .PHONY: tanach2db
 tanach2db:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 774 -c /db/group/everyone -u admin -g everyone $(TEXTDIR)/wlc
-	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -ouri=xmldb:exist://
+	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -u admin -p "$(ADMINPASSWORD)" -ouri=xmldb:exist://
 
 # Install a new copy of the database with betterFORM trunk
 bf-install: db-install

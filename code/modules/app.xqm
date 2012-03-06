@@ -5,7 +5,7 @@ xquery version "1.0";
  : mostly authentication issues.
  :
  : Open Siddur Project
- : Copyright 2010-2011 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2010-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace app="http://jewishliturgy.org/modules/app";
@@ -60,23 +60,22 @@ declare function local:get-auth-string() as xs:string* {
     let $username := ($user-name-basic, $user-name-hdr, $user-name-attribute, $user-name-param)[1]
     let $password := ($password-basic, $password-hdr, $password-attribute, $password-param)[1]
     return (
-      if ($paths:debug)
-      then
-        util:log-system-out(
-          <authenticate>
-            <uri>{request:get-uri()}</uri>
-            <header>{$authorization, exists($authorization)}</header>
-            <attribute>{$user-name-attribute, exists($user-name-attribute)}</attribute>
-            <cookie>{$auth-cookie, exists($auth-cookie)}</cookie>
-            <hdr>{$user-name-hdr, $password-hdr, exists($user-name-hdr)}</hdr>
-            <user-param>{$user-name-param, $password-param, exists($user-name-param)}</user-param>
-            <return>
-              <user>{$username}</user>
-              <password>{$password}</password>
-            </return>
-          </authenticate>
-        )
-      else (),
+      debug:debug(
+        $debug:info,
+        "app",
+        <authenticate>
+          <uri>{request:get-uri()}</uri>
+          <header>{$authorization, exists($authorization)}</header>
+          <attribute>{$user-name-attribute, exists($user-name-attribute)}</attribute>
+          <cookie>{$auth-cookie, exists($auth-cookie)}</cookie>
+          <hdr>{$user-name-hdr, $password-hdr, exists($user-name-hdr)}</hdr>
+          <user-param>{$user-name-param, $password-param, exists($user-name-param)}</user-param>
+          <return>
+            <user>{$username}</user>
+            <password>{$password}</password>
+          </return>
+        </authenticate>
+      ),
       $username, $password)
   else ()
 };
@@ -125,21 +124,23 @@ declare function app:authenticate()
   let $password as xs:string? := $authorization[2]
   let $logged-in as xs:boolean := boolean(xmldb:get-current-user()[not(. = 'guest')])
   return (
-  	if ($paths:debug)
-  	then
-  		util:log-system-out(('authenticate() : get-auth-string is ', $authorization))
-  	else (), 
+  	debug:debug(
+  	  $debug:info, 
+  	  "app",
+  	  ('authenticate() : get-auth-string is ', $authorization)
+  	), 
   	$logged-in or (
     if ($user-name and $password)
     then (
     	xmldb:login('/db', $user-name, $password),
-    	if ($paths:debug)
-    	then
-    		util:log-system-out(('logging you in as :', $user-name))
-    	else ()
+    	debug:debug(
+    	  $debug:info,
+    	  "app",
+    		('logging you in as :', $user-name)
+    	)
     )
     else false() )
-    )
+  )
 };
 
 (:~ specify that authentication (aside from guest) is required
@@ -190,7 +191,7 @@ declare function app:make-collection-path(
 	$origin as xs:string,
 	$owner as xs:string,
 	$group as xs:string,
-	$mode as xs:integer) 
+	$mode as xs:string) 
 	as empty() {
 	let $origin-sl := 
 		if (ends-with($origin, '/'))
@@ -224,7 +225,11 @@ declare function app:make-collection-path(
 						util:log-system-out(($origin-sl, $to-create, ' creating'))
 					else (),
 					if (xmldb:create-collection($origin-sl, $to-create))
-					then xmldb:set-collection-permissions($current-col, $owner, $group, $mode)
+					then (
+					  sm:chown(xs:anyURI($current-col), $owner),
+					  sm:chgrp(xs:anyURI($current-col), $group),
+					  sm:chmod(xs:anyURI($current-col), $mode)
+					)
 					else error(xs:QName('err:CREATE'), concat('Cannot create collection', $origin-sl, $to-create))
 				),
 				if ($second-part) 
@@ -616,5 +621,26 @@ declare function app:xpath(
         ) 
     default return ()
   ), "/"
+  )
+};
+
+(:~ set the permissions of the path $dest to 
+ : be equivalent to the permissions of the path $source
+ :)
+declare function app:mirror-permissions(
+  $source as xs:anyAtomicType,
+  $dest as xs:anyAtomicType
+  ) as empty() {
+  let $source := $source cast as xs:anyURI
+  let $dest := $dest cast as xs:anyURI
+  let $permissions := sm:get-permissions($source) 
+  let $owner := $permissions/*/@owner/string()
+  let $group := $permissions/*/@group/string()
+  let $mode := $permissions/*/@mode/string() 
+  return (
+    sm:chown($dest, $owner),
+    sm:chgrp($dest, $group),
+    sm:chmod($dest, $mode)
+    (: TODO: copy ACL's also :)
   )
 };

@@ -123,11 +123,16 @@ declare function local:make-public-profile(
         then ()
         else
           if (xmldb:create-collection($group-collection, $group-profile-collection))
-          then xmldb:set-collection-permissions($pc, $group, $group, util:base-to-integer(0774,8))
+          then (
+            sm:chown(xs:anyURI($pc), $group),
+            sm:chgrp(xs:anyURI($pc), $group),
+            sm:chmod(xs:anyURI($pc), "rwxrwxr-x")
+          )
           else error(xs:QName('err:CREATE'), concat("Cannot create collection", $group-collection, "/", $group-profile-collection)),
         $pc
       )
-    let $resource-name := concat($identifier, ".xml") 
+    let $resource-name := concat($identifier, ".xml")
+    let $resource-path := concat($profile-collection, "/", $resource-name) 
     return (
       if (xmldb:store($profile-collection, $resource-name, 
         element tei:ptr { 
@@ -136,12 +141,11 @@ declare function local:make-public-profile(
             replace(document-uri(root($has-identifier)), "^/db", "")  
           } 
         } ))
-      then
-        xmldb:set-resource-permissions(
-          $profile-collection, $resource-name,
-          $group, $group, 
-          util:base-to-integer(0770, 8)
-          )
+      then (
+        sm:chown(xs:anyURI($resource-path), $group),
+        sm:chgrp(xs:anyURI($resource-path), $group),
+        sm:chmod(xs:anyURI($resource-path), "rwxrwx---")
+      )
       else
         error(xs:QName("err:CREATE"), concat("Cannot create public profile for ", $identifier)),
       local:public-profile-by-id($node, $identifier)

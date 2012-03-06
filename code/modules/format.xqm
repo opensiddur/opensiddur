@@ -1,7 +1,7 @@
 (:~
  : XQuery functions to output a given XML file in a format.
  : 
- : Copyright 2011 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -467,11 +467,7 @@ declare function format:new-status(
       </status>
     ))
     then
-      let $owner := xmldb:get-owner($collection)
-      let $group := xmldb:get-group($collection) 
-      let $mode := xmldb:get-permissions($collection) 
-      return
-        xmldb:set-resource-permissions($collection, $status-xml, $owner, $group, $mode)
+      app:mirror-permissions($collection, concat($collection, "/", $status-xml))
     else
       error(xs:QName("err:STORE"), concat("Cannot store status file ", $status-xml))
 };

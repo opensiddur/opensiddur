@@ -4,10 +4,12 @@ xquery version "3.0";
  : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "xmldb:exist:///code/api/modules/app.xqm"; 
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "xmldb:exist:///code/api/modules/data.xqm";
-import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "xmldb:exist:///code/modules/paths.xqm";
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "xmldb:exist:///code/modules/format.xqm";
 
@@ -21,12 +23,11 @@ declare variable $local:dest-resource external;       destination resource name
 declare variable $local:style external;               style CSS @href
 :)
 
-if ($paths:debug)
-then 
-  util:log-system-out(
-    concat("Format compilation phase for ", $local:source-collection, "/", $local:source-resource)
-  )
-else (),
+debug:debug(
+  $debug:info,
+  "jobs",
+  concat("Format compilation phase for ", $local:source-collection, "/", $local:source-resource)
+  ),
 format:update-status($local:dest-collection, $local:source-resource, $format:format, $local:job-id),
 let $source-path := concat($local:source-collection, "/", $local:source-resource)
 let $dest-path := concat($local:dest-collection, "/", $local:dest-resource)
@@ -39,22 +40,15 @@ let $style-css :=
     then data:api-path-to-db($local:style)
     else "/db/code/transforms/format/xhtml/style.css"
   ))
-let $owner := xmldb:get-owner($local:source-collection, $local:source-resource)
-let $group := xmldb:get-group($local:source-collection, $local:source-resource)
-let $mode := xmldb:get-permissions($local:source-collection, $local:source-resource)
 return ( 
   if (xmldb:store($local:dest-collection, $local:dest-resource, $compiled))
   then 
-    xmldb:set-resource-permissions(
-      $local:dest-collection, $local:dest-resource,
-      $owner, $group, $mode)
+    app:mirror-permissions($source-path, $dest-path)
   else 
     error(xs:QName("err:STORE"), concat("Cannot store ", $dest-path)),
   if (xmldb:store($local:dest-collection, $style-dest-resource, $style-css, "text/css"))
   then
-    xmldb:set-resource-permissions(
-      $local:dest-collection, $style-dest-resource,
-      $owner, $group, $mode)
+    app:mirror-permissions($source-path, $dest-css-path)
   else
     error(xs:QName("err:STORE"), concat("Cannot store ", $dest-css-path))
 ),
