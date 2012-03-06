@@ -236,6 +236,8 @@ declare function jcache:is-up-to-date(
 	let $resource := util:document-name($sanitized-document)
 	let $cache-collection := jcache:cached-document-path($collection)
 	let $cached-document-path := jcache:cached-document-path(document-uri($sanitized-document))
+	(: in some tests, collection and/or resource are empty :)
+	where $collection and $resource 
 	return
     xmldb:collection-available($cache-collection) and
 		doc-available($cached-document-path) and
