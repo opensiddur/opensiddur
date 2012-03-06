@@ -14,6 +14,8 @@ import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
 	at "xmldb:exist:///code/modules/paths.xqm";
+import module namespace magic="http://jewishliturgy.org/magic"
+  at "xmldb:exist:///code/magic/magic.xqm";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform";
@@ -637,10 +639,13 @@ declare function app:mirror-permissions(
   let $owner := $permissions/*/@owner/string()
   let $group := $permissions/*/@group/string()
   let $mode := $permissions/*/@mode/string() 
-  return (
-    sm:chown($dest, $owner),
-    sm:chgrp($dest, $group),
-    sm:chmod($dest, $mode)
-    (: TODO: copy ACL's also :)
+  return 
+    system:as-user("admin", $magic:password,
+    (
+      sm:chmod($dest, $mode),
+      sm:chgrp($dest, $group),
+      sm:chown($dest, $owner)
+      (: TODO: copy ACL's also :)
+    )
   )
 };
