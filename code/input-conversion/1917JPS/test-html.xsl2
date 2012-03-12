@@ -116,7 +116,8 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
   </xsl:template>
 
   <!-- supress empty text nodes -->
-  <xsl:template match="text[normalize-space() = '']">
+  <!-- priority to prevent ambiguous matches -->
+  <xsl:template match="text[normalize-space() = '']" priority="1">
   </xsl:template>
 
   <xsl:template match="paragraph-break">

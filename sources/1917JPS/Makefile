@@ -54,10 +54,13 @@ temp/join-text.xml: $(scriptsdir)/join-text.xsl2 \
 		$(scriptsdir)/join-text.xsl2
 
 # test-html: HTML we can proofread, not neccessarily final/supported/canonical structure
+# validate against schema
 test-html.html: $(scriptsdir)/test-html.xsl2 \
 		temp/join-text.xml
 	../../lib/saxon -s temp/join-text.xml -o test-html.html \
 		$(scriptsdir)/test-html.xsl2
+	xmllint --valid --noout Tanakh-JPS1917.xml --schema 1917JPS.xsd
+
 
 # TODO: semi-final form (structured format organized by pages of PDF file):
 # TODO: strip remaining whitespace-only nodes. also, normalize-space within text elements?

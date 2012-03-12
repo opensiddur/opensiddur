@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+# TODO: tests to list sections, etc.?
+# TODO: test that chapter/verse numbers in correct order and count
+# TODO: also correct count of books and sections
+# TODO: how to fail make for bad test?
+# TODO: basic/default text element?
+# TODO: front matter?
+section-title xml:lang=he
+section-title xml:lang=en
+INFER: section
+subsection-title
+INFER: subsection # i.e., The Twelve.
+book-title
+INFER: book
+chapter-number
+INFER: chapter
+verse-number
+INFER: verse
+INFER: verse for verse 1
+INFER: verse for verse number 1
+paragraph-break # TODO: P element in HTML?
+note original-symbol= # inline
+original-page-number # what was printed in the original, where it was printed
+processed-page-start id= # top of each page
+parashah-title
+
+</xs:schema>
