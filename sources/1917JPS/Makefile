@@ -53,13 +53,20 @@ temp/join-text.xml: $(scriptsdir)/join-text.xsl2 \
 	../../lib/saxon -s temp/fix-chapter-numbers.xml -o temp/join-text.xml \
 		$(scriptsdir)/join-text.xsl2
 
+# Step n: semi-final XML that should validate against custom XSD
+# TODO should be a step not just copying a file
+1917JPS.xml: temp/join-text.xml
+	cp temp/join-text.xml 1917JPS.xml
+
 # test-html: HTML we can proofread, not neccessarily final/supported/canonical structure
 # validate against schema
+# TODO make validation its own step (but what's the target?)
+# TODO see TODO's in XSD
 test-html.html: $(scriptsdir)/test-html.xsl2 \
-		temp/join-text.xml
+		1917JPS.xml	
 	../../lib/saxon -s temp/join-text.xml -o test-html.html \
 		$(scriptsdir)/test-html.xsl2
-	xmllint --valid --noout Tanakh-JPS1917.xml --schema 1917JPS.xsd
+	xmllint --valid --noout 1917JPS.xml --schema 1917JPS.xsd
 
 
 # TODO: semi-final form (structured format organized by pages of PDF file):

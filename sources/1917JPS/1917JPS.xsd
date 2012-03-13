@@ -1,28 +1,49 @@
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-# TODO: tests to list sections, etc.?
-# TODO: test that chapter/verse numbers in correct order and count
-# TODO: also correct count of books and sections
-# TODO: how to fail make for bad test?
-# TODO: basic/default text element?
-# TODO: front matter?
-section-title xml:lang=he
-section-title xml:lang=en
-INFER: section
-subsection-title
-INFER: subsection # i.e., The Twelve.
-book-title
-INFER: book
-chapter-number
-INFER: chapter
-verse-number
-INFER: verse
-INFER: verse for verse 1
-INFER: verse for verse number 1
-paragraph-break # TODO: P element in HTML?
-note original-symbol= # inline
-original-page-number # what was printed in the original, where it was printed
-processed-page-start id= # top of each page
-parashah-title
+<!--
+TODO: tests to list sections, etc.?
+TODO: test that chapter/verse numbers in correct order and count
+TODO: also correct count of books and sections
+TODO: how to fail make for bad test?
+TODO: basic/default text element?
+TODO: front matter?
+-->
+<!-- TODO: expect section title to occur more than once with xml:lang=he and en? -->
+<xs:element name="section-title" type="xs:string" /> 
+<!-- TODO: INFER: section -->
+<xs:element name="subsection-title" type="xs:string" /> 
+<!-- TODO: INFER: subsection # i.e., The Twelve. -->
+<xs:element name="book-title" type="xs:string" />
+<!-- TODO: INFER: book -->
+<xs:element name="chapter-number" type="xs:integer" />
+<!-- TODO: INFER: chapter -->
+<xs:element name="verse-number" type="xs:integer" />
+<!-- TODO: INFER: verse -->
+<!-- TODO: INFER: verse for verse 1 -->
+<!-- TODO: INFER: verse for verse number 1 -->
+<!-- TODO: P element in HTML? -->
+<xs:element name="paragraph-break">
+  <xs:complexType>
+    <xs:complexContent>
+      <xs:restriction base="xs:anyType"/>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:element>
+<!-- inline -->
+<xs:element name="note">
+  <xs:complexType>
+    <xs:attribute name="original-symbol" type="xs:string" />
+  </xs:complexType>
+</xs:element>
+<!-- what was printed in the original, where it was printed -->
+<xs:element name="original-page-number" type="xs:string" />
+<!-- top of each page -->
+<xs:element name="processed-page-start">
+  <xs:complexType>
+    <xs:attribute name="id" type="xs:integer" />
+  </xs:complexType>
+</xs:element>
+<!-- xml:lang=he -->
+<xs:element name="parashah-title" type="xs:string" />
 
 </xs:schema>
