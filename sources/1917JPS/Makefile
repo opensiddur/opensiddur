@@ -5,9 +5,13 @@
 # Extracts text from public domain PDF format 1917 edition Tanakh
 # supplied by JPS into XML suitable for reuse.
 
+# If this Makefile changes, the whole thing will re-run?
+ 
 # TODO: "Spell check" against a dictionary?
 # TODO: Tidy?
 # TODO: Extract Toc outline?
+# TODO: join pages (XSD compliance)
+# TODO: other xmllint error about DTD?
 
 # for now we are just building the test HTML
 all: test-html.html # TODO Tanakh-JPS1917-canonical.xml
@@ -53,10 +57,17 @@ temp/join-text.xml: $(scriptsdir)/join-text.xsl2 \
 	../../lib/saxon -s temp/fix-chapter-numbers.xml -o temp/join-text.xml \
 		$(scriptsdir)/join-text.xsl2
 
+# Step 5: Flatten pages
+temp/join-pages.xml: $(scriptsdir)/join-pages.xsl2 \
+		temp/join-text.xml
+	../../lib/saxon -s temp/join-text.xml -o temp/join-pages.xml \
+		$(scriptsdir)/join-pages.xsl2
+
 # Step n: semi-final XML that should validate against custom XSD
 # TODO should be a step not just copying a file
-1917JPS.xml: temp/join-text.xml
-	cp temp/join-text.xml 1917JPS.xml
+1917JPS.xml: temp/join-pages.xml
+	cp temp/join-pages.xml 1917JPS.xml
+	xmllint --noout 1917JPS.xml --schema 1917JPS.xsd
 
 # test-html: HTML we can proofread, not neccessarily final/supported/canonical structure
 # validate against schema
@@ -66,7 +77,6 @@ test-html.html: $(scriptsdir)/test-html.xsl2 \
 		1917JPS.xml	
 	../../lib/saxon -s temp/join-text.xml -o test-html.html \
 		$(scriptsdir)/test-html.xsl2
-	xmllint --valid --noout 1917JPS.xml --schema 1917JPS.xsd
 
 
 # TODO: semi-final form (structured format organized by pages of PDF file):

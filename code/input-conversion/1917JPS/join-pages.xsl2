@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+join-pages.xsl2 for the OpenSiddur project.
+Copyright 2012 Marc Stober and licensed under the GNU LGPL.
+
+Flatten page elements.
+-->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"> 
+
+  <xsl:output method="xml" indent="yes"/>
+  <xsl:strip-space elements="*" />
+  <xsl:preserve-space elements="text" />
+
+  <!-- default identity template -->
+  <xsl:template match="@* | node()">
+    <xsl:copy>
+      <xsl:apply-templates select="@* | node()" />
+    </xsl:copy>
+  </xsl:template>
+
+	<xsl:template match="pages">
+		<xsl:element name="bible">
+			<xsl:apply-templates select="@* | node()" />
+		</xsl:element>
+	</xsl:template>
+
+	<xsl:template match="page">
+		<xsl:apply-templates select="node()" />
+	</xsl:template>
+
+
+</xsl:stylesheet>

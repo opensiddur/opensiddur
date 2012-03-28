@@ -8,6 +8,11 @@ TODO: how to fail make for bad test?
 TODO: basic/default text element?
 TODO: front matter?
 -->
+<xs:annotation>
+  <xs:documentation xml:lang="en">
+	bible is the root element.
+  </xs:documentation>
+</xs:annotation><xs:element name="bible" />
 <!-- TODO: expect section title to occur more than once with xml:lang=he and en? -->
 <xs:element name="section-title" type="xs:string" /> 
 <!-- TODO: INFER: section -->
