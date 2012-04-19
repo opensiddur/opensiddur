@@ -32,7 +32,7 @@ try {
     ),
   let $documents :=
     system:as-user('admin', $magic:password,
-      collection(("/group","/code"))/tei:TEI/document-uri(root(.))
+      (collection('/group')|collection('/code'))/tei:TEI/document-uri(root(.))
     )
   for $document in $documents
   let $doc := replace($doc, '^http://localhost(:\d+)?(/db)?','/db')

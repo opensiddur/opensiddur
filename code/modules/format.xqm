@@ -9,6 +9,7 @@ module namespace format="http://jewishliturgy.org/modules/format";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace err="http://jewishliturgy.org/errors";
+declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
   at "xmldb:exist:///code/modules/app.xqm";
@@ -30,8 +31,9 @@ declare variable $format:compile-error-resource := "compile-error.xml";
 declare variable $format:queued := 0;
 declare variable $format:caching := 1;
 declare variable $format:data := 2;
-declare variable $format:list := 3;
-declare variable $format:format := 4;
+declare variable $format:transliterate := 3;
+declare variable $format:list := 4;
+declare variable $format:format := 5;
 
 
 declare function local:wrap-document(
@@ -75,6 +77,32 @@ declare function format:data-compile(
         else (), ())
   )
 };
+
+declare function format:transliterate(
+  $uri-or-node as item(),
+  $user as xs:string?,
+  $password as xs:string?
+  ) as document-node() {
+  format:_wrap-document(
+    app:transform-xslt($uri-or-node, 
+      app:concat-path($format:rest-path-to-xslt, 'translit/translit-main.xsl2'),
+      (
+        if ($user)
+        then (
+          <param name="user" value="{$user}"/>,
+          <param name="password" value="{$password}"/>
+        )
+        else (), 
+        <param name="transliteration-tables" value="{
+          string-join(
+            collection("/group")/tr:table/document-uri(root(.)),
+            " ")
+        }"/>
+      ), ()
+    )
+  )
+};
+
 
 declare function format:list-compile(
 	$data-compiled-node as item()
@@ -191,13 +219,15 @@ declare function format:enqueue-compile(
   let $password := ($password, app:auth-password())[1]
   let $total-steps := 
     if ($final-format = "fragmentation")
-    then 1
+    then $format:caching
     else if ($final-format = "debug-data-compile")
-    then 2
+    then $format:data
+    else if ($final-format = "debug-data-translit")
+    then $format:transliterate
     else if ($final-format = "debug-list-compile")
-    then 3
+    then $format:list
     else if ($final-format = ("html","xhtml"))
-    then 4
+    then $format:format
     else 
       (: unknown format :)
       error(xs:QName("err:FORMAT"), concat("Unknown format: ", $final-format))
@@ -207,11 +237,13 @@ declare function format:enqueue-compile(
     return
       replace(
         $source-resource, "\.xml$", 
-        if ($i = 1)
+        if ($i = $format:caching)
         then ".frag.xml"
-        else if ($i = 2)
+        else if ($i = $format:data)
         then ".data.xml"
-        else if ($i = 3)
+        else if ($i = $format:transliterate)
+        then ".trans.xml"
+        else if ($i = $format:list)
         then ".list.xml"
         else ".xhtml"
       )
@@ -242,13 +274,13 @@ declare function format:enqueue-compile(
             </jobs:param>
             <jobs:param>
               <jobs:name>dest-resource</jobs:name>
-              <jobs:value>{$dest-resource[1]}</jobs:value>
+              <jobs:value>{$dest-resource[$format:caching]}</jobs:value>
             </jobs:param>
           </jobs:run>
           {$error-element, $priority-element}
         </jobs:job>, $user, $password)
     let $data-job := 
-      if ($total-steps >= 2)
+      if ($total-steps >= $format:data)
       then
         jobs:enqueue(
           <jobs:job>
@@ -268,7 +300,35 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-resource</jobs:name>
-                <jobs:value>{$dest-resource[2]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:data]}</jobs:value>
+              </jobs:param>
+            </jobs:run>
+            <jobs:depends>{string($frag-job)}</jobs:depends>
+            {$error-element, $priority-element}
+          </jobs:job>, $user, $password)
+      else ()  
+    let $translit-job := 
+      if ($total-steps >= $format:transliterate)
+      then
+        jobs:enqueue(
+          <jobs:job>
+            <jobs:run>
+              <jobs:query>/code/apps/jobs/queries/bg-compile-translit.xql</jobs:query>
+              <jobs:param>
+                <jobs:name>source-collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>source-resource</jobs:name>
+                <jobs:value>{$dest-resource[$format:transliterate - 1]}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-resource</jobs:name>
+                <jobs:value>{$dest-resource[$format:transliterate]}</jobs:value>
               </jobs:param>
             </jobs:run>
             <jobs:depends>{string($frag-job)}</jobs:depends>
@@ -276,7 +336,7 @@ declare function format:enqueue-compile(
           </jobs:job>, $user, $password)
       else ()  
     let $list-job :=
-      if ($total-steps >= 3)
+      if ($total-steps >= $format:list)
       then
         jobs:enqueue(
           <jobs:job>
@@ -288,7 +348,7 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>source-resource</jobs:name>
-                <jobs:value>{$dest-resource[2]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:list - 1]}</jobs:value>
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-collection</jobs:name>
@@ -296,15 +356,15 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-resource</jobs:name>
-                <jobs:value>{$dest-resource[3]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:list]}</jobs:value>
               </jobs:param>
             </jobs:run>
-            <jobs:depends>{string($data-job)}</jobs:depends>
+            <jobs:depends>{string($translit-job)}</jobs:depends>
             {$error-element, $priority-element}
           </jobs:job>, $user, $password)
       else ()
     let $format-job :=
-      if ($total-steps >= 4)
+      if ($total-steps >= $format:format)
       then
         jobs:enqueue(
           <jobs:job>
@@ -316,7 +376,7 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>source-resource</jobs:name>
-                <jobs:value>{$dest-resource[3]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:format - 1]}</jobs:value>
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-collection</jobs:name>
@@ -324,7 +384,7 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-resource</jobs:name>
-                <jobs:value>{$dest-resource[4]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:format]}</jobs:value>
               </jobs:param>
               <jobs:param>
                 <jobs:name>style</jobs:name>
@@ -354,7 +414,7 @@ declare function format:enqueue-compile(
               </jobs:param>
             </jobs:run>
             <jobs:depends>{(
-              $frag-job, $data-job, $list-job, $format-job)[$dp1]/string()
+              $frag-job, $data-job, $translit-job, $list-job, $format-job)[$dp1]/string()
             }</jobs:depends>
             {$error-element, $priority-element}
           </jobs:job>, $user, $password

@@ -19,6 +19,12 @@
         <create qname="@j:role" type="xs:string"/>
         <create qname="@resp" type="xs:string"/>
         <create qname="@locus" type="xs:string"/>
+        
+        <!-- for searches of feature structures and declarations -->
+        <create qname="@name" type="xs:string"/>
+
+        <!-- for various types of searches -->
+        <create qname="@type" type="xs:string"/>
     </index>
     <triggers>
         <!-- the global trigger is not working, need to repeat it -->
