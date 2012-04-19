@@ -226,7 +226,7 @@ declare function jcache:is-up-to-date(
 declare function jcache:is-up-to-date(
 	$document-path as xs:string,
 	$cache as xs:string) 
-	as xs:boolean {
+	as xs:boolean? {
   let $sanitized-document := 
     if (doc-available($document-path))
     then doc($document-path)

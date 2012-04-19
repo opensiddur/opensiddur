@@ -35,9 +35,10 @@ try {
       collection(("/group","/code"))/tei:TEI/document-uri(root(.))
     )
   for $document in $documents
+  let $doc := replace($doc, '^http://localhost(:\d+)?(/db)?','/db')
   where
-    not(matches($document, $local:excluded-collections)) and
-    not(system:as-user('admin', $magic:password, jcache:is-up-to-date($document)))
+    not(matches($doc, $local:excluded-collections)) and
+    not(system:as-user('admin', $magic:password, jcache:is-up-to-date($doc)))
   return
     jobs:enqueue-unique(
       element jobs:job {
@@ -45,7 +46,7 @@ try {
           element jobs:query { 'xmldb:exist:///code/apps/jobs/queries/bg-cache.xql' },
           element jobs:param {
             element jobs:name { 'resource' },
-            element jobs:value { $document }
+            element jobs:value { $doc }
           }
         }
       },
