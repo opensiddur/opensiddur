@@ -23,7 +23,6 @@ text/wlc/
 db/*
 !db/controller.xql
 !db/system/
-!db/data
 
 # contents list
 __contents__.xml

@@ -71,4 +71,13 @@
       </xsl:if>
     </xsl:copy>
   </xsl:template>
+
+  <!-- add catalog for hebrew.dtd -->
+  <xsl:template match="entity-resolver">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <catalog uri="${{WEBAPP_HOME}}/WEB-INF/opensiddur-catalog.xml"/>
+      <xsl:apply-templates/>
+    </xsl:copy>
+  </xsl:template>
 </xsl:stylesheet>  

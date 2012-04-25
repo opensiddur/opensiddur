@@ -56,5 +56,5 @@ xsltdoc-clean:
 	rm -fr $(DOCDIR)
 
 .PHONY: code-clean
-code-clean: transforms-clean 
+code-clean:  
 

@@ -135,7 +135,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/stable/eXist-2.0.x
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 16109
+EXIST_REVISION ?= -r 16279
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -259,7 +259,9 @@ $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/lucene.hebrew.jar:
 copy-files:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
 	@echo "Copying files to database..."
-	@#copy the transliteration DTD first so eXist will know where they are during restore  
+	@#copy the transliteration DTD first so eXist will know where they are during restore 
+	cp $(SETUPDIR)/opensiddur-catalog.xml $(EXIST_INSTALL_DIR)/webapp/WEB-INF
+	cp $(SETUPDIR)/hebrew.dtd $(EXIST_INSTALL_DIR)/webapp/WEB-INF/entities
 	@#then copy the code so eXist will know where the triggers and support modules are during restore, then copy everything else with system *last* so the triggers will not engage
 	@#finally, copy the transforms directory again so the tests that require the document URI trigger will run
 	for d in group/everyone/transliteration cache code data group schema xforms system code/transforms; do \
@@ -324,13 +326,14 @@ db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tes
 	mkdir -p $(DBDIR)/xforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources
+	rsync $(RSYNC_EXCLUDE) -a --delete data $(DBDIR)
 	cp $(CODEDIR)/common/params.xsl2 $(DBDIR)/code/common	
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-common-tests.xsl.patch
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-tests-utils.xsl.patch
 	-patch -p1 -Nr - < $(SETUPDIR)/generate-xspec-tests.xsl.patch
 
 db-clean:
-	rm -fr $(DBDIR)/schema $(DBDIR)/code $(DBDIR)/common $(DBDIR)/cache
+	rm -fr $(DBDIR)/schema $(DBDIR)/code $(DBDIR)/data $(DBDIR)/common $(DBDIR)/cache
 
 # equivalent of svn externals
 .PHONY: db-externals
