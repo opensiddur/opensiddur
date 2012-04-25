@@ -12,7 +12,7 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
 	at "/code/modules/paths.xqm";
 
 let $path-to-transliterator := '/code/transforms/translit/translit.xsl2'
-let $path-to-tables := '/group/everyone/transliteration'
+let $path-to-tables := '/data/transliteration'
 let $data := request:get-data()
 let $table := $data/table
 let $text := $data/text 

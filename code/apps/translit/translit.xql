@@ -17,7 +17,7 @@ declare namespace xrx="http://jewishliturgy.org/ns/xrx";
 declare option exist:serialize "method=xhtml media-type=text/xml indent=no process-pi-xsl=no";
 
 declare variable $local:path-to-transliteration-tables :=
-	'/group/everyone/transliteration';
+	'/data/transliteration';
 
 declare function local:translit-instance(
 	$instance-id as xs:string)
