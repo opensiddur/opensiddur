@@ -29,6 +29,10 @@
         <module class="org.exist.xquery.modules.scheduler.SchedulerModule"
           uri="http://exist-db.org/xquery/scheduler" />
       </xsl:if>
+      <xsl:if test="empty(module[@uri='http://exist-db.org/xquery/xmldiff'])">
+        <module class="org.exist.xquery.modules.xmldiff.XmlDiffModule"
+          uri="http://exist-db.org/xquery/xmldiff" />
+      </xsl:if>
     </xsl:copy>
   </xsl:template>
   
