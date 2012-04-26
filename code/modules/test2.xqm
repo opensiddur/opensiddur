@@ -336,8 +336,13 @@ declare function t:xpath($output as item()*, $xpath as node()) {
 	  else $xpath/..
   let $prolog := t:init-prolog($xpath-element)
   let $expr := $xpath/string()
+  let $test-element := $xpath/ancestor::test
   return
-    util:eval(concat($prolog, " $output/(", $expr, ")"))
+    util:eval(concat($prolog, 
+      if ($test-element/@output="text")
+      then "("
+      else " $output/(", 
+      $expr, ")"))
 };
 
 (:~ Front-end to run a test suite :)
