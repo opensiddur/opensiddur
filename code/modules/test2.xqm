@@ -346,10 +346,14 @@ declare function t:xpath($output as item()*, $xpath as node()) {
 };
 
 (:~ Front-end to run a test suite :)
-declare function t:run-testSuite($suite as element(TestSuite)) as element() {
+declare function t:run-testSuite(
+  $suite as element(TestSuite),
+  $run-user as xs:string?,
+  $run-password as xs:string?
+  ) as element() {
 	let $copy := util:expand($suite)
-	let $as-user := ($copy/asUser/string(), "guest")[1]
-	let $password := ($copy/password/string(), "guest")[1]
+	let $as-user := ($copy/asUser/string(), $run-user, "guest")[1]
+	let $password := ($copy/password/string(), $run-password, "guest")[1]
 	let $if := t:if($copy/if) 
 	where $if 
 	return
@@ -366,6 +370,11 @@ declare function t:run-testSuite($suite as element(TestSuite)) as element() {
 		</TestSuite>
 };
 
+declare function t:run-testSuite(
+  $suite as element(TestSuite)
+  ) as element() {
+  t:run-testSuite($suite, (), ())
+};
 (:~ Front-end to run a single test set :)
 declare function t:run-testSet($set as element(TestSet)) {
     let $suite := $set/parent::TestSuite
