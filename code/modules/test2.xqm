@@ -364,7 +364,7 @@ declare function t:run-testSuite(
 			  system:as-user($as-user, $password,          
   				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
 	  			return
-		  			t:run-testSet($set)
+		  			t:run-testSet($set, $as-user, $password)
         )
 			}
 		</TestSuite>
@@ -376,14 +376,18 @@ declare function t:run-testSuite(
   t:run-testSuite($suite, (), ())
 };
 (:~ Front-end to run a single test set :)
-declare function t:run-testSet($set as element(TestSet)) {
+declare function t:run-testSet(
+  $set as element(TestSet),
+  $run-user as xs:string?,
+  $run-password as xs:string?
+  ) {
     let $suite := $set/parent::TestSuite
     let $copy := 
     	if ($suite)
     	then $set
     	else util:expand($set)
-    let $as-user := (($copy/asUser, $suite/asUser)/string(), "guest")[1]
-    let $password := (($copy/password, $suite/password)/string(), "guest")[1]
+    let $as-user := (($copy/asUser, $suite/asUser)/string(), $run-user, "guest")[1]
+    let $password := (($copy/password, $suite/password)/string(), $run-password, "guest")[1]
     let $if := t:if($copy/if)
     where $if
     return 
@@ -402,6 +406,12 @@ declare function t:run-testSet($set as element(TestSet)) {
            </TestSet>
         )
       )
+};
+
+declare function t:run-testSet(
+  $set as element(TestSet)
+  ) {
+  t:run-testSet($set, (), ())
 };
 
 declare function local:pass-string($pass as xs:boolean) {
