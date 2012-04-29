@@ -64,6 +64,44 @@
       ]]></code>
       <expected>/mirror</expected>
     </test>
+    <test output="text">
+      <task>Handles /db prefix in first parameter</task>
+      <code><![CDATA[
+        mirror:mirror-path("/db/mirror", "/db/group/testuser")
+      ]]></code>
+      <expected>/mirror/group/testuser</expected>
+    </test>
+    <test output="text">
+      <task>Handles non-/db prefix in second parameter</task>
+      <code><![CDATA[
+        mirror:mirror-path("/group/testuser/mirror", "/db/group/testuser")
+      ]]></code>
+      <expected>/group/testuser/mirror</expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>mirror:unmirror-path()</testName>
+    <test output="text">
+      <task>/db in both parameters, self</task>
+      <code><![CDATA[
+        mirror:unmirror-path("/db/mirror", "/db/mirror")
+      ]]></code>
+      <expected>/</expected> 
+    </test>
+    <test output="text">
+      <task>/group/testuser/mirror's base</task>
+      <code><![CDATA[
+        mirror:unmirror-path("/group/testuser/mirror", "/group/testuser/mirror")
+      ]]></code>
+      <expected>/group/testuser</expected> 
+    </test>
+    <test output="text">
+      <task>mirror with further collections</task>
+      <code><![CDATA[
+        mirror:unmirror-path("/group/testuser/mirror", "/group/testuser/mirror/one/two")
+      ]]></code>
+      <expected>/group/testuser/one/two</expected> 
+    </test>
   </TestSet>
   <TestSet>
     <testName>mirror:make-collection-path()</testName>
@@ -98,27 +136,25 @@
         mirror:make-collection-path($mirror-collection,"/group/testuser/one/two/three/four")
       ]]></code>
       <xpath desc="mirror collection created">xmldb:collection-available("/group/testuser/mirror")</xpath>
-      <xpath desc="mirror collection 'one' created">xmldb:collection-available("/group/testuser/mirror/group/testuser/one")</xpath>
-      <xpath desc="mirror collection 'two' created">xmldb:collection-available("/group/testuser/mirror/group/testuser/one/two")</xpath>
-      <xpath desc="mirror collection 'three' created">xmldb:collection-available("/group/testuser/mirror/group/testuser/one/two/three")</xpath>
-      <xpath desc="mirror collection 'four' created">xmldb:collection-available("/group/testuser/mirror/group/testuser/one/two/three/four")</xpath>
-      <xpath desc="mirror collection has same permissions as /db">local:same-permissions("/group/testuser/mirror","/db")</xpath>
-      <xpath desc="mirror collection 'one' has same permissions as /db/group/testuser/one (changed owner/group/mode)">local:same-permissions("/group/testuser/mirror/group/testuser/one","/group/testuser/one")</xpath>
-      <xpath desc="mirror collection 'two' has same permissions as /db/one/two (allowed user ACE)">local:same-permissions("/group/testuser/mirror/group/testuser/one/two","/group/testuser/one/two")</xpath>
-      <xpath desc="mirror collection 'three' has same permissions as /db/one/two/three (allowed group ACE)">local:same-permissions("/group/testuser/mirror/group/testuser/one/two/three","/group/testuser/one/two/three")</xpath>
-      <xpath desc="mirror collection 'four' has same permissions as /db/one/two/three/four (allowed user ACE, disallowed group ACE)">local:same-permissions("/group/testuser/mirror/group/testuser/one/two/three/four","/group/testuser/one/two/three/four")</xpath>
+      <xpath desc="mirror collection 'one' created">xmldb:collection-available("/group/testuser/mirror/one")</xpath>
+      <xpath desc="mirror collection 'two' created">xmldb:collection-available("/group/testuser/mirror/one/two")</xpath>
+      <xpath desc="mirror collection 'three' created">xmldb:collection-available("/group/testuser/mirror/one/two/three")</xpath>
+      <xpath desc="mirror collection 'four' created">xmldb:collection-available("/group/testuser/mirror/one/two/three/four")</xpath>
+      <xpath desc="mirror collection has same permissions as parent">local:same-permissions("/group/testuser/mirror","/group/testuser")</xpath>
+      <xpath desc="mirror collection 'one' has same permissions as /db/group/testuser/one (changed owner/group/mode)">local:same-permissions("/group/testuser/mirror/one","/group/testuser/one")</xpath>
+      <xpath desc="mirror collection 'two' has same permissions as /db/group/testuser/one/two (allowed user ACE)">local:same-permissions("/group/testuser/mirror/one/two","/group/testuser/one/two")</xpath>
+      <xpath desc="mirror collection 'three' has same permissions as /db/group/testuser/one/two/three (allowed group ACE)">local:same-permissions("/group/testuser/mirror/one/two/three","/group/testuser/one/two/three")</xpath>
+      <xpath desc="mirror collection 'four' has same permissions as /db/group/testuser/one/two/three/four (allowed user ACE, disallowed group ACE)">local:same-permissions("/group/testuser/mirror/one/two/three/four","/group/testuser/one/two/three/four")</xpath>
     </test>
   </TestSet>
   <TestSet>
     <testName>mirror:is-up-to-date() where resource is newer</testName>
     <setup>
       <create-collection parent="/group/testuser" name="mirror"/>
-      <create-collection parent="/group/testuser/mirror" name="group"/>
-      <create-collection parent="/group/testuser/mirror/group" name="testuser"/>
       <store collection="/group/testuser" name="test.xml">
         <test/>
       </store>
-      <store collection="/group/testuser/mirror/group/testuser" name="test.xml">
+      <store collection="/group/testuser/mirror" name="test.xml">
         <mirror/>
       </store>
     </setup>
@@ -154,9 +190,7 @@
     <testName>mirror:is-up-to-date() where resource is older</testName>
     <setup>
       <create-collection parent="/group/testuser" name="mirror"/>
-      <create-collection parent="/group/testuser/mirror" name="group"/>
-      <create-collection parent="/group/testuser/mirror/group" name="testuser"/>
-      <store collection="/group/testuser/mirror/group/testuser" name="test.xml">
+      <store collection="/group/testuser/mirror" name="test.xml">
         <mirror/>
       </store>
       <store collection="/group/testuser" name="test.xml">
@@ -199,21 +233,18 @@
       <code><![CDATA[
         mirror:store($mirror-collection, "/group/testuser", "test.xml", <mirror/>)
       ]]></code>
-      <expected desc="returns path of mirror document">/group/testuser/mirror/group/testuser/test.xml</expected>
+      <expected desc="returns path of mirror document">/group/testuser/mirror/test.xml</expected>
       <xpath desc="mirror collection created">xmldb:collection-available("/group/testuser/mirror")</xpath>
-      <xpath desc="mirror resource created">doc-available("/group/testuser/mirror/group/testuser/test.xml")</xpath>
-      <xpath desc="mirror resource has same permissions as original">local:same-permissions("/group/testuser/test.xml", "/group/testuser/mirror/group/testuser/test.xml")</xpath>
+      <xpath desc="mirror resource created">doc-available("/group/testuser/mirror/test.xml")</xpath>
+      <xpath desc="mirror resource has same permissions as original">local:same-permissions("/group/testuser/test.xml", "/group/testuser/mirror/test.xml")</xpath>
     </test>
   </TestSet>
   <TestSet>
     <testName>mirror:remove()</testName>
     <setup>
       <create-collection parent="/group/testuser" name="mirror"/>
-      <create-collection parent="/group/testuser/mirror" name="group"/>
-      <create-collection parent="/group/testuser/mirror/group" name="testuser"/>
-      <create-collection parent="/group/testuser/mirror/group/testuser" name="one"/>
-      <create-collection parent="/group/testuser/mirror/group/testuser/one" name="two"/>
-      <store collection="/group/testuser/mirror/group/testuser/one" name="test.xml">
+      <create-collection parent="/group/testuser/mirror" name="one"/>
+      <store collection="/group/testuser/mirror/one" name="test.xml">
         <test/>
       </store>
     </setup>
@@ -232,7 +263,7 @@
       <code><![CDATA[
         mirror:remove($mirror-collection, "/group/testuser/one")
       ]]></code>
-      <xpath desc="collection removed">not(xmldb:collection-available("/group/testuser/mirror/group/testuser/one"))</xpath>
+      <xpath desc="collection removed">not(xmldb:collection-available("/group/testuser/mirror/one"))</xpath>
     </test>
   </TestSet>
 </TestSuite>

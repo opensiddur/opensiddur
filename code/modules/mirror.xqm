@@ -26,40 +26,47 @@ declare function mirror:mirror-path(
   $mirror as xs:string,
   $path as xs:string
   ) as xs:string {
-  app:concat-path(("/", $mirror, replace($path, "^/db", "")[.]))
+  let $mirror-no-db := replace($mirror, "^/db", "")
+  let $path-no-db := replace($path, "^/db", "")
+  let $base-paths := tokenize($mirror-no-db,"/")
+  let $base-path := string-join(subsequence($base-paths, 1, count($base-paths) - 1), "/")
+  return app:concat-path(("/", $mirror-no-db, replace($path-no-db, 
+        concat("^(", $base-path, ")?"), 
+        ""))[.])
+};
+
+declare function mirror:unmirror-path(
+  $mirror as xs:string,
+  $mirrored-path as xs:string
+  ) as xs:string {
+  let $mirror-no-db := replace($mirror, "^/db", "")
+  let $tokens := tokenize($mirror-no-db, "/")
+  let $mirrored-path-no-db := replace($mirrored-path, "^/db", "")
+  let $unmirror := string-join(subsequence($tokens, 1, count($tokens) - 1), "/")
+  return
+    app:concat-path(("/", $unmirror, substring-after($mirrored-path-no-db, $mirror-no-db))[.])
 };
 
 (:~ make a mirror collection path that mirrors the same path in 
  : the normal /db hierarchy 
  : @param $mirror the location of the mirror
- : @param $path the path to mirror (relative to /db)
+ : @param $path the path that should be mirrored (relative to /db)
  :)
 declare function mirror:make-collection-path(
   $mirror as xs:string,
   $path as xs:string
   ) as empty-sequence() {
-  (: create the mirror collection :)
-  let $mirror-tokens := tokenize($mirror, "/")
-  let $self-previous := string-join(subsequence($mirror-tokens, 1, count($mirror-tokens) - 1), "/")
-  let $self := $mirror-tokens[count($mirror-tokens)]
-  let $steps := tokenize(replace($path, '^(/db)?', "db"), '/')[.]
-  let $null := debug:debug($debug:info, "mirror", ("steps: ", string-join($steps,",")))
+  let $unmirror-base := mirror:unmirror-path($mirror, $mirror)
+  let $mirrored-path := mirror:mirror-path($mirror, $path)
+  let $steps := tokenize(substring-after($mirrored-path, $unmirror-base), '/')[.]
   for $step in 1 to count($steps)
   let $this-step := 
-    if ($step = 1)
-    then "/db"
-    else concat("/", string-join(subsequence($steps, 2, $step - 1), '/'))
+    app:concat-path(($unmirror-base, subsequence($steps, 2, $step - 1)))
   let $mirror-this-step := mirror:mirror-path($mirror,$this-step)
-  let $mirror-previous-step := 
-    if ($step = 1)
-    then $self-previous
-    else mirror:mirror-path($mirror, concat("/", string-join(subsequence($steps, 2, $step - 2), '/')))
+  let $mirror-previous-step := app:concat-path(($unmirror-base, subsequence($steps, 1, $step - 1)))
   where not(xmldb:collection-available($mirror-this-step))
   return
-    let $new-collection := 
-      if ($step = 1)
-      then $self
-      else $steps[$step]
+    let $new-collection := $steps[$step]
     let $null := 
       debug:debug(
         $debug:info,
