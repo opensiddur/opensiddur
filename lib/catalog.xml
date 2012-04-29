@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- catalog for command line utilities -->
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <system systemId="hebrew.dtd" uri="../setup/hebrew.dtd"/>
+    <public publicId="HEBREW" uri="../setup/hebrew.dtd"/>
+</catalog>

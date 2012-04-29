@@ -108,9 +108,9 @@ CP ?= /bin/cp
 JAVAOPTIONS ?=
 SAXONJAR ?= $(LIBDIR)/saxonhe-9.2.1.5.jar
 # CPSEP=classpath separator - : on Unix, ; on Windows
-JCLASSPATH ?= "$(SAXONJAR):$(RESOLVERPATH):$(COMMONDIR)"
+JCLASSPATH ?= "$(RESOLVERPATH):$(SAXONJAR)"
 SAXONCLASS ?= net.sf.saxon.Transform
-XSLT ?= java $(JAVAOPTIONS) -cp "$(JCLASSPATH)" $(SAXONCLASS)  $(XSLTOPTIONS) 
+XSLT ?= java $(JAVAOPTIONS) -cp "$(JCLASSPATH)" -Dxml.catalog.files=$(LIBDIR)/catalog.xml -Dxml.catalog.verbosity=1 $(SAXONCLASS) $(XSLTOPTIONS) 
 XSLTDOC ?= $(LIBDIR)/XSLTDoc/xsl/xsltdoc.xsl
 TEIROMA ?= $(LIBDIR)/tei/Roma/roma2.sh $(ROMAOPTIONS)
 RELAXNG ?= $(LIBDIR)/jing $(RELAXNGOPTIONS)
@@ -264,7 +264,7 @@ copy-files:
 	cp $(SETUPDIR)/hebrew.dtd $(EXIST_INSTALL_DIR)/webapp/WEB-INF/entities
 	@#then copy the code so eXist will know where the triggers and support modules are during restore, then copy everything else with system *last* so the triggers will not engage
 	@#finally, copy the transforms directory again so the tests that require the document URI trigger will run
-	for d in group/everyone/transliteration cache code data group schema xforms system code/transforms; do \
+	for d in cache code data group schema xforms system code/transforms; do \
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/$$d/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"; \
 	done 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xsl:stylesheet [
-<!ENTITY % hebrewent SYSTEM "../../../group/everyone/transliteration/hebrew.dtd">
+<!ENTITY % hebrewent PUBLIC "HEBREW" "hebrew.dtd">
 %hebrewent;
 ]>
 <!-- 
