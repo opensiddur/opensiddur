@@ -155,14 +155,14 @@ declare function t:init-prolog($test as element()) {
          	), "&#x0a;"
         )
 	return
-		string-join(($imports, $vars, $test/ancestor::*/functions), '')
+		string-join(("xquery version '3.0';&#x0a;", $imports, $vars, $test/ancestor::*/functions), '')
 };
 
 declare function t:test($result as item()*) {
-    if ($result instance of xs:boolean) then
-        $result
-    else
-        exists($result)
+  typeswitch($result)
+  case xs:boolean return $result
+  case xs:boolean+ return $result=true() (: any? :)
+  default return exists($result)
 };
 
 (:~ run a single test and record the results of its assertions
@@ -193,7 +193,8 @@ declare function t:run-test($test as element(test), $count as xs:integer) {
       else string-join(($ops2, $highlight-option), ' ')      
   let $queryOutput :=
 	  try {
-	    util:eval(concat($context, $test/code/string()))
+	    let $full-code := concat($context, $test/code/string())
+	    return util:eval($full-code)
 	  }
 	  catch * {
 	    <error>Compilation error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
@@ -337,12 +338,14 @@ declare function t:xpath($output as item()*, $xpath as node()) {
   let $prolog := t:init-prolog($xpath-element)
   let $expr := $xpath/string()
   let $test-element := $xpath/ancestor::test
-  return
-    util:eval(concat($prolog, 
+  let $code :=
+   concat($prolog, 
       if ($test-element/@output="text")
       then "("
       else " $output/(", 
-      $expr, ")"))
+      $expr, ")")
+  return
+    util:eval($code)
 };
 
 (:~ Front-end to run a test suite :)
