@@ -10,9 +10,10 @@ and related or neighboring rights to this work.
 A copy of the Creative Commons Zero public domain declaration
 can be found at http://www.creativecommons.org/publicdomain/zero/1.0
 
-$Id: Society_of_Biblical_Literature-1999.tr.xml 709 2011-02-24 06:37:44Z efraim.feinstein $ 
 -->
 <tr:table xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
+    <tr:title xml:lang="en">SBL</tr:title>
+    <tr:description xml:lang="en">The transliteration system used by the Society of Biblical Literature</tr:description>
     <tr:tr from="א" to="ʾ"/>
     <tr:tr from="ב" to="b̲"/>
     <tr:tr from="בּ" to="b"/>

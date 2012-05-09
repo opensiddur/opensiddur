@@ -13,6 +13,8 @@ can be found at http://www.creativecommons.org/publicdomain/zero/1.0
 
 -->
 <tr:table xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
+    <tr:title xml:lang="en">Strong's Dictionary</tr:title>
+    <tr:description xml:lang="en">The transliteration system used in Strong's Dictionary (1890)</tr:description>
     <tr:option name="replace-tetragrammaton" value="off"/>
     <tr:option name="suppress-hiriq-male-dagesh" value="on"/>
     <tr:tr from="א" to="ʼ" silent="ʼ"/>

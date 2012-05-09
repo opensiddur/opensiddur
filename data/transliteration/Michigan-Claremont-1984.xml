@@ -13,6 +13,8 @@ can be found at http://www.creativecommons.org/publicdomain/zero/1.0
 
 -->
 <tr:table xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
+    <tr:title xml:lang="en">Michigan-Claremont</tr:title>
+    <tr:description xml:lang="en">Michigan-Claremont Encoding</tr:description>
     <tr:tr from="א" to=")" silent=")"/>
     <tr:tr from="ב" to="B"/>
     <tr:tr from="בּ" to="B"/>
