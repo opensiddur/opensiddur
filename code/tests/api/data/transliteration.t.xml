@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
+  <suiteName>Transliteration API</suiteName>
+  <description>Test transliteration API function calls</description>
+  <author>Efraim Feinstein</author>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <imports>
+  import module namespace tran="http://jewishliturgy.org/api/transliteration"
+    at "xmldb:exist:///code/api/data/transliteration.xqm";
+  import module namespace data="http://jewishliturgy.org/modules/data"
+    at "xmldb:exist:///code/api/modules/data.xqm";
+  </imports>
+  <namespace prefix="tr">http://jewishliturgy.org/ns/tr/1.0</namespace>
+  <namespace prefix="rest">http://exquery.org/ns/rest/annotation/</namespace>
+  <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <variable name="valid" as="document-node()"><![CDATA[document {
+    <tr:table>
+      <tr:title xml:lang="en">Valid</tr:title>
+      <tr:description xml:lang="en">A minimal valid transliteration table for testing</tr:description>
+      <tr:tr from="a" to="a"/>
+    </tr:table>
+  }]]></variable>
+  <variable name="invalid" as="document-node()"><![CDATA[document {
+    <tr:not-a-table/>
+  }]]></variable>
+  <setup>
+    <create-collection parent="/data/transliteration" name="1900"/>
+    <create-collection parent="/data/transliteration/1900" name="01"/>
+    <store collection="/data/transliteration/1900/01" name="Test.xml">
+      <tr:table>
+        <tr:title xml:lang="en">Test</tr:title>
+        <tr:description xml:lang="en">A test</tr:description>
+        <tr:tr from="a" to="a"/>
+      </tr:table>
+    </store>
+    <store collection="/data/transliteration/1900/01" name="Test%202.xml">
+      <tr:table>
+        <tr:title xml:lang="en">Test 2</tr:title>
+        <tr:description xml:lang="en">Another test</tr:description>
+        <tr:tr from="b" to="b"/>
+      </tr:table>
+    </store>
+    <store collection="/data/transliteration/1900/01" name="Mivchan.xml">
+      <tr:table>
+        <tr:title xml:lang="en">Mivchan</tr:title>
+        <tr:description xml:lang="en">Test in Hebrew</tr:description>
+        <tr:tr from="c" to="c"/>
+      </tr:table>
+    </store>  
+    <store collection="/data/transliteration/1900/01" name="Garbage.xml">
+      <tr:table>
+        <tr:title xml:lang="en">Garbage</tr:title>
+        <tr:description xml:lang="en">Just some garbage</tr:description>
+        <tr:tr from="d" to="d"/>
+      </tr:table>
+    </store>
+  </setup>
+  <tearDown>
+    <remove-collection collection="/data/transliteration/1900"/>
+  </tearDown>
+  <TestClass xml:id="SearchResults">
+    <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method/@value="html5"</xpath>
+    <xpath desc="reference to Open Search @profile">.//html:head[@profile="http://a9.com/-/spec/opensearch/1.1/"]</xpath>
+    <xpath desc="@startIndex is present">count(.//html:meta[@name='startIndex'])=1</xpath>
+    <xpath desc="@endIndex is present">count(.//html:meta[@name='endIndex'])=1</xpath>
+    <xpath desc="@totalResults is present">count(.//html:meta[@name='totalResults'])=1</xpath>
+    <xpath desc="@itemsPerPage is present">count(.//html:meta[@name='itemsPerPage'])=1</xpath>
+    <xpath desc="endIndex - startIndex + 1 = number of results">
+      let $start := number($output//html:meta[@name='startIndex']/@content)
+      let $end := number($output//html:meta[@name='endIndex']/@content)
+      let $to-count :=
+        if ($output//html:ul[@class="results"])
+        then $output//html:li[@class="result"]
+        else $output//html:li[@class="context"]
+      return ((if ($start) then 1 else 0) + $end - $start eq count($to-count)
+      )
+    </xpath>
+    <xpath desc="endIndex &lt;= number of results">
+      number(.//html:meta[@name='endIndex']/@content) &lt;= number(.//html:meta[@name='totalResults']/@content)
+    </xpath>
+  </TestClass>
+  <TestSet>
+    <testName>tran:get()</testName>
+    <asUser>testuser</asUser>
+    <password>testuser</password>
+    <test>
+      <task>Get an existing resource</task>
+      <code><![CDATA[
+        tran:get("Test")
+      ]]></code>
+      <xpath desc="returns a transliteration table">tr:table</xpath>
+    </test>
+    <test>
+      <task>Get a non-existing resource</task>
+      <code><![CDATA[
+        tran:get("DoesNotExist")
+      ]]></code>
+      <xpath desc="returns a 404 error">self::rest:response/http:response/@status=404</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>tran:list()</testName>
+    <test>
+      <task>List all resources</task>
+      <code><![CDATA[
+        tran:list("", 1, 100)
+      ]]></code>
+      <xpath desc="returns at least 3 results">count(.//html:li[@class="result"])&gt;=3</xpath>
+      <class href="#SearchResults"/>
+    </test>
+    <test>
+      <task>List some resources</task>
+      <code><![CDATA[
+        tran:list("", 1, 2)
+      ]]></code>
+      <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
+      <class href="#SearchResults"/>
+    </test>
+    <test>
+      <task>Respond to a query</task>
+      <code><![CDATA[
+        tran:list("Test", 1, 100)
+      ]]></code>
+      <xpath desc="returns 3 results">count(.//html:ol[@class="results"]/html:li)=3</xpath>
+      <class href="#SearchResults"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>tran:delete()</testName>
+    <asUser>testuser</asUser>
+    <password>testuser</password>
+    <setup>
+      <code><![CDATA[
+        sm:add-user-ace(xs:anyURI("/data/transliteration/1900/01/Garbage.xml"), "testuser2", false(), "w")
+      ]]></code>
+    </setup>
+    <test>
+      <task>Delete a transliteration that does exist</task>
+      <code><![CDATA[
+        tran:delete("Garbage")
+      ]]></code>
+      <xpath desc="return value is 204">self::rest:response/http:response/@status=204</xpath>
+      <xpath desc="data is removed">not(doc-available("/data/transliteration/1900/01/Garbage.xml"))</xpath>
+    </test>
+    <test>
+      <task>Delete a transliteration that does not exist</task>
+      <code><![CDATA[
+        tran:delete("NotExist")
+      ]]></code>
+      <xpath desc="return value is 404">self::rest:response/http:response/@status=404</xpath>
+    </test>
+    <test>
+      <task>Delete where no access is granted and user is logged in</task>
+      <code><![CDATA[
+        system:as-user("testuser2", "testuser2", tran:delete("Garbage"))
+      ]]></code>
+      <xpath desc="return value is 403">self::rest:response/http:response/@status=403</xpath>
+    </test>
+    <test ignore="yes">
+      <task>Delete a transliteration that is referenced from elsewhere</task>
+      <code><![CDATA[
+        tran:delete("ExternalReference")
+      ]]></code>
+      <xpath desc="return value is 400">self::rest:response/http:response/@status=400</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>tran:post()</testName>
+    <asUser>testuser</asUser>
+    <password>testuser</password>
+    <setup>
+      <code><![CDATA[
+        sm:insert-user-ace(xs:anyURI("/data/transliteration"), 0, "testuser2", false(), "w")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+        sm:remove-ace(xs:anyURI("/data/transliteration"), 0),
+        let $created := collection("/data/transliteration")//tr:table[tr:title="Valid"]
+        where ($created)
+        return
+          let $month-collection := util:collection-name($created)
+          let $year-collection := util:collection-name($month-collection)
+          let $doc-name := util:document-name($created)
+          let $remove-month-collection := count(collection($month-collection))=1
+          let $remove-year-collection := count(collection($year-collection))=1
+          return (
+            xmldb:remove($month-collection, $doc-name),
+            if ($remove-month-collection)
+            then 
+              xmldb:remove($month-collection)
+            else (),
+            if ($remove-year-collection)
+            then
+              xmldb:remove($year-collection)
+            else ()
+          )
+      ]]>
+      </code>
+    </tearDown>
+    <test>
+      <task>Post a valid transliteration</task>
+      <code><![CDATA[
+      tran:post($valid)
+      ]]></code>
+      <xpath desc="return status code is 201">self::rest:response/http:response/@status=201</xpath>
+      <xpath desc="A location header specifies where the document is stored">exists(self::rest:response/http:response/http:header[@name="Location"])</xpath>
+      <xpath desc="A new document has been created at the location">exists(data:doc("transliteration", "Valid"))</xpath>
+    </test>
+    <test>
+      <task>Post an invalid transliteration</task>
+      <code><![CDATA[
+      tran:post($invalid)
+      ]]></code>
+      <xpath desc="return status code is 400">self::rest:response/http:response/@status=400</xpath>
+    </test>
+    <test>
+      <task>Post a valid transliteration as an unauthorized user</task>
+      <code><![CDATA[
+      system:as-user("testuser2","testuser2",tran:post($valid))
+      ]]></code>
+      <xpath desc="return status code is 403">self::rest:response/http:response/@status=403</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>tran:put()</testName>
+    <setup>
+      <code><![CDATA[
+        sm:add-user-ace(xs:anyURI("/data/transliteration/1900/01/Garbage.xml"), "testuser2", false(), "w")
+      ]]></code>
+    </setup>
+    <test>
+      <task>Put valid data to an existing resource</task>
+      <code><![CDATA[
+      tran:put("Garbage", $valid)
+      ]]></code>
+      <xpath desc="return status code is 204">self::rest:response/http:response/@status=204</xpath>
+      <xpath desc="document data has been changed">data:doc("transliteration", "Garbage")//tr:title="Valid"</xpath>
+    </test>
+    <test>
+      <task>Put data to a non-existing resource</task>
+      <task>Put valid data to an existing resource</task>
+      <code><![CDATA[
+      tran:put("NotExist", $valid)
+      ]]></code>
+      <xpath desc="return status code is 404">self::rest:response/http:response/@status=404</xpath>
+    </test>
+    <test>
+      <task>Put invalid data to an existing resource</task>
+      <code><![CDATA[
+      tran:put("Garbage", $invalid)
+      ]]></code>
+      <xpath desc="return status code is 400">self::rest:response/http:response/@status=400</xpath>
+    </test>
+    <test>
+      <task>Put valid data to an existing resource as an unauthorized user</task>
+      <code><![CDATA[
+      system:as-user("testuser2","testuser2",tran:put("Garbage", $valid))
+      ]]></code>
+      <xpath desc="return status code is 403">self::rest:response/http:response/@status=403</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Actions as an unauthenticated user</testName>
+    <asUser/>
+    <password/>
+    <test>
+      <task>tran:get()</task>
+      <code><![CDATA[
+      tran:get("Test")
+      ]]></code>
+      <xpath desc="returns a transliteration table">tr:table</xpath>
+    </test>
+    <test>
+      <task>tran:list()</task>
+      <code><![CDATA[
+      tran:list("", 1, 100)
+      ]]></code>
+      <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
+      <class href="#SearchResults"/>
+    </test>
+    <test>
+      <task>tran:post()</task>
+      <code><![CDATA[
+      tran:post($valid)
+      ]]></code>
+      <xpath desc="return status code 401">self::rest:response/http:response/@status=401</xpath>
+    </test>
+    <test>
+      <task>tran:delete()</task>
+      <code><![CDATA[
+        tran:delete("Garbage")
+      ]]></code>
+      <xpath desc="return status code 401">
+      self::rest:response/http:response/@status=401</xpath>
+    </test>
+    <test>
+      <task>tran:put()</task>
+      <code><![CDATA[
+      tran:put("Garbage", $valid)
+      ]]></code>
+      <xpath desc="return status code 401">self::rest:response/http:response/@status=401</xpath>
+    </test>
+  </TestSet>
+</TestSuite>
