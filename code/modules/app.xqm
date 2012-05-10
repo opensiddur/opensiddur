@@ -187,6 +187,7 @@ declare function app:context-resource()
  : @param $owner owner user of any new collections
  : @param $group owner group of any new collections
  : @param $mode permissions mode of any new collections
+ : @deprecated Replaced by app:make-collection-path(..., $permissions)
  :)
 declare function app:make-collection-path(
 	$path as xs:string, 
@@ -240,6 +241,55 @@ declare function app:make-collection-path(
 				)
 		else ()
 };
+
+(:~ make a collection path that does not exist; (like mkdir -p)
+ : create new collections with the given mode, owner and group
+ : @param $path directory path
+ : @param $origin path begins at
+ : @param $permissions an sm:permissions document
+ :)
+declare function app:make-collection-path(
+  $path as xs:string, 
+  $origin as xs:string,
+  $permissions as document-node(element((:sm:permissions:)))
+  ) as empty-sequence() {
+  let $origin-sl := 
+    if (ends-with($origin, '/'))
+    then $origin
+    else concat($origin, '/')
+  let $path-no-sl :=
+    if (starts-with($path, '/'))
+    then substring($path, 2)
+    else $path
+  let $first-part := substring-before($path-no-sl, '/')
+  let $second-part := substring-after($path-no-sl, '/')
+  let $to-create := 
+    if ($first-part) 
+    then $first-part 
+    else $path-no-sl
+  return
+    if ($to-create)
+    then 
+      let $current-col := concat($origin-sl, $to-create)
+      return (
+        if (xmldb:collection-available($current-col))
+        then 
+          debug:debug($debug:detail, "app", ($current-col, ' already exists'))
+        else (
+          debug:debug($debug:detail, "app", ($origin-sl, $to-create, ' creating')),
+          let $path := xmldb:create-collection($origin-sl, $to-create)
+          return
+            if ($path)
+            then app:copy-permissions(xs:anyURI($path),$permissions)
+            else error(xs:QName('err:CREATE'), concat('Cannot create collection', $origin-sl, $to-create))
+        ),
+        if ($second-part) 
+        then app:make-collection-path($second-part, $current-col, $permissions)
+        else ()
+        )
+    else ()
+};
+
 
 (:~ obfuscate an email address if the user is not logged in
  : @param $address Address to obfuscate
@@ -626,16 +676,12 @@ declare function app:xpath(
   )
 };
 
-(:~ set the permissions of the path $dest to 
- : be equivalent to the permissions of the path $source
- :)
-declare function app:mirror-permissions(
-  $source as xs:anyAtomicType,
-  $dest as xs:anyAtomicType
-  ) as empty() {
-  let $source := $source cast as xs:anyURI
+(:~ copy permissions from $permissions to $dest :)
+declare function app:copy-permissions(
+  $dest as xs:anyAtomicType,
+  $permissions as document-node(element((:sm:permissions:)))
+  ) as empty-sequence() {
   let $dest := $dest cast as xs:anyURI
-  let $permissions := sm:get-permissions($source) 
   let $owner := $permissions/*/@owner/string()
   let $group := $permissions/*/@group/string()
   let $mode := $permissions/*/@mode/string() 
@@ -644,8 +690,31 @@ declare function app:mirror-permissions(
     (
       sm:chmod($dest, $mode),
       sm:chgrp($dest, $group),
-      sm:chown($dest, $owner)
-      (: TODO: copy ACL's also :)
+      sm:chown($dest, $owner),
+      sm:clear-acl($dest),  (: clear ACE, so we can just copy everything :)
+      for 
+        $acl in $permissions/*/sm:acl,
+        $ace in $acl/sm:ace
+      let $who := $ace/@who/string()
+      let $allowed := $ace/@access_type = "ALLOWED"
+      let $mode := $ace/@mode/string()
+      order by $ace/@index/number()
+      return
+        if ($ace/@target="USER")
+        then sm:add-user-ace($dest, $who, $allowed, $mode)
+        else sm:add-group-ace($dest, $who, $allowed, $mode)
     )
   )
+};
+
+(:~ set the permissions of the path $dest to 
+ : be equivalent to the permissions of the path $source
+ :)
+declare function app:mirror-permissions(
+  $source as xs:anyAtomicType,
+  $dest as xs:anyAtomicType
+  ) as empty-sequence() {
+  let $source := $source cast as xs:anyURI
+  let $permissions := sm:get-permissions($source) 
+  return app:copy-permissions($dest, $permissions)
 };
