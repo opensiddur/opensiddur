@@ -18,6 +18,10 @@ import module namespace t="http://exist-db.org/xquery/testing/modified"
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 
+declare namespace http="http://expath.org/ns/http-client";
+declare namespace rest="http://exquery.org/ns/rest/annotation/";
+declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+
 declare variable $api:default-max-results := 50;
 
 (:~ the API allows POST to be used instead of PUT and DELETE 
@@ -542,6 +546,45 @@ declare function api:text-content-type(
   "text/plain"
 };
 
+(:~ output an API error and set the HTTP response code
+ : for RESTXQ 
+ : @param $status-code return status
+ : @param $message return message (text preferred, but may contain XML)
+ : @param $object (optional) error object
+ :)
+declare function api:rest-error(
+  $status-code as xs:integer?,
+  $message as item()*, 
+  $object as item()*
+  ) as item()+ {
+  <rest:response>
+    <output:serialization-parameters>
+      <output:method value="xml"/>
+    </output:serialization-parameters>
+    <http:response status="{$status-code}"/>
+  </rest:response>,
+  <error xmlns="">
+    <path>{
+      if (request:exists())
+      then request:get-uri()
+      else ()}</path>
+    <message>{$message}</message>
+    {
+      if (exists($object))
+      then
+        <object>{$object}</object>
+      else ()
+    }
+  </error>
+};
+
+declare function api:rest-error(
+  $status-code as xs:integer?,
+  $message as item()*
+  ) as item()+ {
+  api:rest-error($status-code, $message, ())
+};
+
 (:~ output an API error and set the HTTP response code 
  : @param $status-code return status
  : @param $message return message (text preferred, but may contain XML)
@@ -711,4 +754,39 @@ declare function api:tests(
       t:format-testResult(t:run-testSuite(doc($test-to-run)/*))
     )
   else ()
+};
+
+(:~ temporary function to handle rest:response elements
+ : and convert them to response:* function calls
+ : or simply pass on the return value.
+ : will be obsoleted by RESTXQ
+ : @param $r (element response{}, resource) or (resource) 
+ :)
+declare function api:rest-response(
+  $r as item()*
+  ) as item()* {
+  if ($r[1] instance of element(rest:response))
+  then (
+    let $response := $r[1]
+    for $element in $response/*
+    return
+      typeswitch($element)
+      case element(http:response)
+      return (
+        response:set-status-code(($element/@status/number(), 200)[1]),
+        for $header in $element/http:header
+        return response:set-header($header/@name, $header/@value)
+      )
+      case element(output:serialization-parameters)
+      return
+        for $parameter in $element/*
+        return
+          typeswitch($parameter)
+          case element(output:method) 
+          return util:declare-option("exist:serialize", concat("method=",$parameter/@value))
+          default return ()
+      default return ( (: don't know what to do :)),
+    subsequence($r, 2)
+    )
+  else $r
 };
