@@ -355,8 +355,6 @@ declare function t:run-testSuite(
   $run-password as xs:string?
   ) as element() {
 	let $copy := util:expand($suite)
-	let $as-user := ($copy/asUser/string(), $run-user, "guest")[1]
-	let $password := ($copy/password/string(), $run-password, "guest")[1]
 	let $if := t:if($copy/if) 
 	where $if 
 	return
@@ -364,11 +362,9 @@ declare function t:run-testSuite(
 			{$copy/suiteName}
 			{$copy/description}
 			{
-			  system:as-user($as-user, $password,          
-  				for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
-	  			return
-		  			t:run-testSet($set, $as-user, $password)
-        )
+			  for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
+        return
+          t:run-testSet($set, $run-user, $run-password)
 			}
 		</TestSuite>
 };
@@ -378,6 +374,52 @@ declare function t:run-testSuite(
   ) as element() {
   t:run-testSuite($suite, (), ())
 };
+
+declare function local:run-tests-helper(
+  $copy as element(TestSet),
+  $suite as element(TestSuite),
+  $run-user as xs:string?,
+  $run-password as xs:string?
+  ) {
+  let $suite-user := ($suite/asUser/string(), $run-user)[1]
+  let $suite-password := ($suite/password/string(), $run-password)[1]
+  let $test-user := ($copy/asUser/string(), $suite-user, $run-user)[1]
+  let $test-password := ($copy/password/string(), $suite-password, $run-password)[1]
+  return
+    util:expand(
+      <TestSet>{
+        $copy/testName,
+        $copy/description,
+        for $test at $p in $copy/test[empty(@ignore) or @ignore = "no"][t:if(if)]
+        let $null := (
+          if ($suite-user)
+          then
+            system:as-user($suite-user, $suite-password, t:setup($suite/setup))
+          else t:setup($suite/setup),
+          if ($test-user)
+          then 
+            system:as-user($test-user, $test-password, t:setup($copy/setup))
+          else t:setup($copy/setup)
+        )
+        let $result :=  
+          if ($test-user)
+          then system:as-user($test-user, $test-password, t:run-test($test, $p))
+          else t:run-test($test, $p)
+        let $null := (
+          if ($suite-user)
+          then
+            system:as-user($suite-user, $suite-password, t:tearDown($suite/tearDown))
+          else t:tearDown($suite/tearDown),
+          if ($test-user)
+          then 
+            system:as-user($test-user, $test-password, t:tearDown($copy/tearDown))
+          else t:tearDown($copy/tearDown)
+        )
+        return $result 
+      }</TestSet>
+    )
+};
+
 (:~ Front-end to run a single test set :)
 declare function t:run-testSet(
   $set as element(TestSet),
@@ -389,26 +431,10 @@ declare function t:run-testSet(
     	if ($suite)
     	then $set
     	else util:expand($set)
-    let $as-user := (($copy/asUser, $suite/asUser)/string(), $run-user, "guest")[1]
-    let $password := (($copy/password, $suite/password)/string(), $run-password, "guest")[1]
     let $if := t:if($copy/if)
     where $if
-    return 
-      system:as-user($as-user, $password,
-        util:expand(
-           <TestSet>
-           {$copy/testName}
-           {$copy/description}
-           {
-               for $test at $p in $copy/test[empty(@ignore) or @ignore = "no"][t:if(if)]
-               let $null := (t:setup($suite/setup), t:setup($copy/setup))
-               let $result :=  t:run-test($test, $p)
-               let $null := (t:tearDown($copy/tearDown), t:tearDown($suite/tearDown))
-               return $result 
-           }
-           </TestSet>
-        )
-      )
+    return
+      local:run-tests-helper($copy, $suite, $run-user, $run-password)
 };
 
 declare function t:run-testSet(
