@@ -93,32 +93,7 @@ declare function mirror:mirror-permissions(
   $source as xs:anyAtomicType,
   $dest as xs:anyAtomicType
   ) as empty-sequence() {
-  let $source := $source cast as xs:anyURI
-  let $dest := $dest cast as xs:anyURI
-  let $permissions := sm:get-permissions($source) 
-  let $owner := $permissions/*/@owner/string()
-  let $group := $permissions/*/@group/string()
-  let $mode := $permissions/*/@mode/string() 
-  return 
-    system:as-user("admin", $magic:password,
-    (
-      sm:chmod($dest, $mode),
-      sm:chgrp($dest, $group),
-      sm:chown($dest, $owner),
-      sm:clear-acl($dest),  (: clear ACE, so we can just copy everything :)
-      for 
-        $acl in $permissions/*/sm:acl,
-        $ace in $acl/sm:ace
-      let $who := $ace/@who/string()
-      let $allowed := $ace/@access_type = "ALLOWED"
-      let $mode := $ace/@mode/string()
-      order by $ace/@index/number()
-      return
-        if ($ace/@target="USER")
-        then sm:add-user-ace($dest, $who, $allowed, $mode)
-        else sm:add-group-ace($dest, $who, $allowed, $mode)
-    )
-  )
+  app:mirror-permissions($source, $dest)
 };
 
 (: determine if a path or original document is up to date 
