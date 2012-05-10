@@ -183,6 +183,7 @@ $(DBDIR)/code: code
 $(DBDIR)/schema:
 	mkdir -p $(DBDIR)/schema
 	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
+	cp schema/transliteration.rnc $(DBDIR)/schema
 
 IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 
