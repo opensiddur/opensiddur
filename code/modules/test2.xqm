@@ -62,13 +62,18 @@ xquery version "3.0";
  : * XPath tests and internal functions can be run using XQuery 3.0  
  :
  : * Many improvements to the html visualization in t:format-testResult()
+ :
+ : * Testing for XSLT in addition to XQuery:
+ : ** XSLT tests have xslt elements instead of code, which also accept @href
+ : ** node context can be set using the context element, which also accepts @href
+ : ** stylesheets and parameters can be included using xsl:include and xsl:param
+ : ** stylesheet-global parameters can be sent using parameters/param[@name,@value] elements
+ : *** parameters with the same name are passed at the greatest depth
  :  
  :)
 module namespace t="http://exist-db.org/xquery/testing/modified";
 
 import module namespace xdb="http://exist-db.org/xquery/xmldb";
-import module namespace xdiff="http://exist-db.org/xquery/xmldiff"
-at "java:org.exist.xquery.modules.xmldiff.XmlDiffModule";
 
 declare function t:setup-action($action) {
     typeswitch ($action)
@@ -172,22 +177,33 @@ declare function t:test($result as item()*) {
   default return exists($result)
 };
 
-(:~ run a single test and record the results of its assertions
- : @param $test Test to run
- : @param $count A number to assign to the test
- :)
-declare function t:run-test($test as element(test), $count as xs:integer) {
-	let $context := t:init-prolog($test)
-	let $null := 
-	   if ($test/@trace eq 'yes') then 
-	       (system:clear-trace(), system:enable-tracing(true(), false()))
-     else ()
-  let $highlight-option := concat("highlight-matches=",
-        if ($test/expected//@*[matches(., '^(\|{3}).*\1$')] and $test/expected//exist:match) then "both"
-        else if ($test/expected//@*[matches(., '^(\|{3}).*\1$')]) then "attributes"
-        else if ($test/expected//exist:match) then "elements"
-        else "none"        
-        )
+declare function t:run-test(
+  $test as element(test),
+  $count as xs:integer
+  ) {
+  if (exists($test/code))
+  then local:run-xquery-test($test, $count)
+  else if (exists($test/(xslt|context)))
+  then local:run-xslt-test($test, $count)
+  else ( (: skip tests that dont have any code to run :) )
+};
+
+declare function local:evaluate-assertions(
+  $test as element(test),
+  $output as item()*,
+  $count as xs:integer
+  ) as element(test) {
+  let $highlight-option := 
+    concat("highlight-matches=",
+      if ($test/expected//@*[matches(., '^(\|{3}).*\1$')] 
+        and $test/expected//exist:match) 
+      then "both"
+      else if ($test/expected//@*[matches(., '^(\|{3}).*\1$')]) 
+      then "attributes"
+      else if ($test/expected//exist:match) 
+      then "elements"
+      else "none"        
+    )
   let $serialize-options := 
     let $decls := ($test/../*[name() ne 'test']|$test/code)[matches(., 'declare[\- ]option(\((&#34;|&#39;)|\s+)exist:serialize(\2,)?\s+(&#34;|&#39;).*?\4[;)]')]
     let $ops1 := $decls/replace(., "declare[\- ]option(\((&#34;|&#39;)|\s+)exist:serialize(\2,)?\s+(&#34;|&#39;)(.*?)\4[;)]", "_|$5_")
@@ -197,110 +213,182 @@ declare function t:run-test($test as element(test), $count as xs:integer) {
       return tokenize(substring-after($b, '|'), '\s+')
     return if (count($ops2[matches(., 'highlight-matches')]))
       then string-join($ops2, ' ')
-      else string-join(($ops2, $highlight-option), ' ')      
+      else string-join(($ops2, $highlight-option), ' ')
+  let $expected :=
+    if ($test/@output eq 'text') 
+    then data($test/expected)
+    else if ($test/expected/@href)
+    then doc(resolve-uri($test/expected/@href, base-uri($test/expected)))
+    else $test/expected
+  let $expanded :=
+    if ($output instance of element(error)) 
+    then $output
+    else if ($test/@serialize) 
+    then
+      let $options := $test/@serialize
+      let $serialized :=
+        try {
+          for $x in $output
+          return
+            util:serialize($x, $options)
+        }
+        catch * {
+          <error>Serialization error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
+        }
+      return
+        if ($serialized instance of element(error)) 
+        then $serialized
+        else
+          normalize-space(string-join($serialized, ' '))
+    else if ($output instance of node()) 
+    then
+      util:expand($output, $serialize-options)          
+    else $output
+  let $OK := 
+    for $assert in $test/(error|xpath|expected|t:expand-class(class))
+    return (
+      if ($assert instance of element(error)) 
+      then
+        let $pass := 
+          $expanded instance of element(error) 
+          and contains($expanded, $assert)
+        return 
+          <error pass="{$pass}">{
+            $assert/@desc,
+            if (not($pass))
+            then $assert
+            else ()
+          }</error>
+      else if ($assert instance of element(xpath)) 
+      then
+        let $pass := t:test(t:xpath($output, $assert))
+        return
+          <xpath pass="{$pass}">{
+            $assert/@desc, 
+            if (not($pass)) 
+            then $assert 
+            else ()
+          }</xpath>
+      else if ($test/@output eq 'text') then 
+        let $asString :=
+          if ($test/@serialize) 
+          then $expanded
+          else
+            normalize-space(
+              string-join(
+                for $x in $output 
+                return string($x),
+                ' '
+              )
+            )
+        let $pass := $asString eq normalize-space($expected)
+        return 
+          <expected pass="{$pass}">{
+            $assert/@desc,
+            if (not($pass))
+            then $expected
+            else ()
+          }</expected>
+      else 
+        let $xn := t:normalize($expanded)
+        let $en := t:normalize($assert/node())
+        let $xp :=
+          if ($assert/@xpath) 
+          then t:xpath($xn, $assert/@xpath) 
+          else $xn
+        let $pass := t:deep-equal-wildcard($xp, $en)
+        return
+          <expected pass="{$pass}">{
+            $assert/(@desc, @xpath),
+            if (not($pass))
+            then $en
+            else ()
+          }</expected>
+    )
+  let $all-OK := empty($OK[@pass='false'])
+  return
+    <test n="{$count}" pass="{$all-OK}">{
+      attribute desc { $test/task },
+      $OK, 
+      if (not($all-OK)) 
+      then                
+        <result>{$expanded}</result>
+      else ()
+    }</test>
+};
+
+(:~ run a single test and record the results of its assertions
+ : @param $test Test to run
+ : @param $count A number to assign to the test
+ :)
+declare function local:run-xquery-test(
+  $test as element(test), 
+  $count as xs:integer
+  ) {
+	let $context := t:init-prolog($test)
+	let $null := 
+	   if ($test/@trace eq 'yes') then 
+	       (system:clear-trace(), system:enable-tracing(true(), false()))
+     else ()
   let $queryOutput :=
 	  try {
 	    let $full-code := concat($context, $test/code/string())
 	    return util:eval($full-code)
 	  }
 	  catch * {
-	    <error>Compilation error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
+	    <error>Evaluation error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
 	  }
-	let $output := if ($test/@trace eq 'yes') then system:trace() else $queryOutput
-  let $expanded :=
-        if ($output instance of element(error)) then
-            $output
-        else if ($test/@serialize) then
-            let $options := $test/@serialize
-            let $serialized :=
-                try {
-                    for $x in $output
-                    return
-                        util:serialize($x, $options)
-                }
-                catch * {
-                  <error>Serialization error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
-                }
-            return
-                if ($serialized instance of element(error)) then
-                    $serialized
-                else
-                    normalize-space(string-join($serialized, ' '))
-				else if ($output instance of node()) then
-        		util:expand($output, $serialize-options)        	
-				else
-						$output
-    let $expected :=
-        if ($test/@output eq 'text') then
-            data($test/expected)
-        else $test/expected
-    let $OK := 
-    	for $assert in $test/(error|xpath|expected|t:expand-class(class))
-    	return (
-        if ($assert instance of element(error)) then
-        		let $pass := $expanded instance of element(error) and contains($expanded, $assert)
-        		return 
-        			<error
-        				pass="{$pass}">
-        				{
-        				$assert/@desc,
-        				if (not($pass))
-        				then $assert
-        				else ()
-        				}
-        			</error>
-        else if ($assert instance of element(xpath)) then
-        		let $pass := t:test(t:xpath($output, $assert))
-        		return
-        			<xpath pass="{$pass}">
-        				{$assert/@desc, if (not($pass)) then $assert else ()}
-        			</xpath>
-        else if ($test/@output eq 'text') then 
-            let $asString :=
-                if ($test/@serialize) then
-                    $expanded
-                else
-                    normalize-space(string-join(for $x in $output return string($x),' '))
-            let $pass := $asString eq normalize-space($expected)
-            return 
-            	<expected pass="{$pass}">{
-            		$assert/@desc,
-            		if (not($pass))
-            		then 
-            			$expected
-            		else ()
-            	}</expected>
+	let $output := 
+	  if ($test/@trace eq 'yes') 
+	  then system:trace() 
+	  else $queryOutput
+  return 
+    local:evaluate-assertions($test, $output, $count)
+};
+
+declare function local:run-xslt-test(
+  $test as element(test),
+  $count as xs:integer
+  ) as element(test) {
+  let $output := 
+    try {
+      transform:transform(
+        let $context := 
+          $test/ancestor-or-self::*[context][1]/context
+        return
+          if ($context/@href)
+          then doc(resolve-uri($context/@href,base-uri($context)))
+          else $context/node(), 
+        if ($test/xslt/@href)
+        then doc(resolve-uri($test/xslt/@href, base-uri($test/xslt)))
         else 
-            let $xn := t:normalize($expanded)
-            let $en := t:normalize($assert/node())
-            let $xp :=
-            	if ($assert/@xpath)	then
-            		t:xpath($xn, $assert/@xpath) 
-            	else $xn
-            let $pass := t:deep-equal-wildcard($xp, $en)
-            return
-        	  	<expected pass="{$pass}">
-        	  			{
-            			$assert/@desc, $assert/@xpath,
-            			if (not($pass))
-            			then $en
-            			else ()
-            			}
-        	   	</expected>
-    )
-    let $all-OK := empty($OK[@pass='false'])
-    return
-        <test n="{$count}" pass="{$all-OK}">
-        {
-        		attribute desc { $test/task },
-        		$OK, 
-            if (not($all-OK)) then             		
-                <result>{$expanded}</result>
-            else 
-                ()
-                
-        }
-        </test>
+          <xsl:stylesheet version="2.0">
+            {
+              $test/ancestor-or-self::*/xsl:*,
+              $test/xslt/node()
+            }
+          </xsl:stylesheet>,
+        (: the parameters are not passed without util:expand().
+         : I don't know why. eXist 2.0.x r16344
+         :)
+        util:expand(
+          <parameters>
+            <param name="exist:stop-on-error" value="yes"/>
+            {
+              for $param in $test/ancestor-or-self::*/parameters/param
+              group $param as $p by $param/@name as $n
+              return
+                ($p/.)[last()]
+            }
+          </parameters>
+        )
+      )
+    }
+    catch * {
+      <error>Transform error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
+    }
+  return
+    local:evaluate-assertions($test, $output, $count)
 };
 
 (: expand abstract test class references :)
@@ -395,8 +483,8 @@ declare function t:run-testSuite(
 			{$copy/description}
 			{
 			  for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
-        return
-          t:run-testSet($set, $run-user, $run-password)
+			  return
+			    t:run-testSet($set, $run-user, $run-password)
 			}
 		</TestSuite>
 };
@@ -418,7 +506,7 @@ declare function local:run-tests-helper(
   let $test-user := ($copy/asUser/string(), $suite-user, $run-user)[1]
   let $test-password := ($copy/password/string(), $suite-password, $run-password)[1]
   return
-    util:expand(
+    util:expand( 
       <TestSet>{
         $copy/testName,
         $copy/description,
@@ -467,6 +555,7 @@ declare function t:run-testSet(
     where $if
     return
       local:run-tests-helper($copy, $suite, $run-user, $run-password)
+      
 };
 
 declare function t:run-testSet(
@@ -482,7 +571,7 @@ declare function local:pass-string($pass as xs:boolean) {
 };
 
 declare function local:result-summary-table(
-  $result as element(TestSet)+
+  $result as element(TestSet)*
   ) as element(table) {
   <table border="1">
     <tr>
@@ -657,7 +746,6 @@ declare function t:deep-equal-wildcard(
 			satisfies $result
 		)
 	return (
-		(:util:log-system-out(('d-e-w for node1=', $node1, ' node2 = ', $node2, ' result = ', $counts and $subordinates)),:)
 		$counts and $subordinates
 	)
 };
