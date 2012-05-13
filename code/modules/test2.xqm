@@ -17,6 +17,9 @@ xquery version "3.0";
  : * add a top-level TestSuite element to contain multiple TestSet elements
  :  and a function t:run-testSuite()
  : ** add setup and teardown for the entire suite
+ : ** each TestSuite or TestSet can have asUser/password elements, indicating
+ :  the priviliges that the tests should run under. Higher depth
+ :  asUser overrides lower depth, and blank asUser resets to unauthenticated 
  : 
  : * add a <TestClass xml:id="..."> element for tests with no code that can be 
  :  included into other TestSets with <class href=""/>
@@ -54,6 +57,10 @@ xquery version "3.0";
  : * add an @as parameter to the variable element to specify the variable's
  : type (I don't know if this is ever necessary for XQuery)
  : 
+ : * run multiple test suites using t:run-testSuites(), format results using t:format-testResults()
+ :
+ : * XPath tests and internal functions can be run using XQuery 3.0  
+ :
  : * Many improvements to the html visualization in t:format-testResult()
  :  
  :)
