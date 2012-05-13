@@ -2,7 +2,7 @@ xquery version "3.0";
 (: Testing module
  : Original author: Wolfgang Meier (eXist db)
  : 
- : Modified by Efraim Feinstein, 2011
+ : Modified by Efraim Feinstein, 2011-2012
  : 
  : Licensed under the GNU Lesser General Public License, version 2.1 or later
  :)
@@ -348,6 +348,31 @@ declare function t:xpath($output as item()*, $xpath as node()) {
     util:eval($code)
 };
 
+(:~ run a number of test suites and return a single element
+ : with all the results 
+ : @param $suites List of test suites, as paths, document-node()s or element(TestSuite)  
+ :)
+declare function t:run-testSuite(
+  $suites as item()+,
+  $run-user as xs:string?,
+  $run-password as xs:string?
+  ) as element() {
+  <TestSuites>{
+    for $suite in $suites
+    return
+      t:run-testSuite(
+        typeswitch($suite)
+        case xs:anyAtomicType
+        return doc($suite)/TestSuite
+        case document-node()
+        return $suite/TestSuite
+        default return $suite,
+        $run-user,
+        $run-password
+      )
+  }</TestSuites>
+};
+
 (:~ Front-end to run a test suite :)
 declare function t:run-testSuite(
   $suite as element(TestSuite),
@@ -449,6 +474,121 @@ declare function local:pass-string($pass as xs:boolean) {
 	else 'FAIL'
 };
 
+declare function local:result-summary-table(
+  $result as element(TestSet)+
+  ) as element(table) {
+  <table border="1">
+    <tr>
+      <th>Tests</th>
+      <th>Passed</th>
+      <th>Failed</th>
+    </tr>
+    <tr>
+      <td>{count($result//test/*[@pass])}</td>
+      <td>{
+        let $ct := count($result//test/*[@pass='true'])
+        return (
+          if ($ct)
+          then
+            attribute class {'PASS'}
+          else (),
+          $ct
+        )
+      }</td>
+      <td>{
+        let $ct := count($result//test/*[@pass='false'])
+        return (
+          if ($ct)
+          then
+            attribute class {'FAIL'}
+          else (),
+            $ct
+        )
+      }</td>
+    </tr>
+  </table>
+};
+
+declare function local:result-summaries(
+  $result as element()
+  ) {
+  <h1>Summary</h1>,
+  if ($result instance of element(TestSuites))
+  then ( 
+    <h2>All</h2>,
+    local:result-summary-table($result//TestSet)
+  )
+  else (),
+  for $testSuite in $result/(self::TestSuite|TestSuite|self::TestSet)
+  return (
+    element { 
+      if ($result instance of element(TestSuites))
+      then "h3"
+      else "h2"
+    }{
+      if ($testSuite instance of element(TestSuite))
+      then
+        <a href="#{encode-for-uri($result/suiteName)}">{$testSuite/suiteName/node()}</a>
+      else $testSuite/testName/node()
+    },
+    local:result-summary-table($testSuite/(self::TestSet|TestSet))   
+  )
+};
+
+declare function local:result-details(
+  $result as element()
+  ) {
+  <h1>Details</h1>,
+  for $suite in $result/(self::TestSet|TestSuite|self::TestSuite)
+  return (
+    if ($suite instance of element(TestSuite))
+    then (
+      <h2 id="{encode-for-uri($suite/suiteName)}">{$suite/suiteName/node()}</h2>,
+      <p>{$suite/description/node()}</p>
+    )
+    else (),
+    <table border="1">{
+      for $set in $suite//TestSet
+      return (
+        <tr>
+          <th>{$set/testName/node()}</th>
+          <th colspan="4">{$set/description/node()}</th>
+        </tr>,
+        for $test in $set//test
+        let $pass := local:pass-string(xs:boolean($test/@pass))
+        let $subtests := $test/(* except (code, task, result))
+        let $n-subtests := count($subtests)
+        return (
+          for $subtest at $pos in $subtests
+          let $subpass := local:pass-string(xs:boolean($subtest/@pass))
+          return 
+            <tr>{
+              if ($pos = 1)
+              then (
+                <td rowspan="{$n-subtests}">{string(($test/@desc, $test/@n)[1])}</td>,
+                <td rowspan="{$n-subtests}" class="{$pass}">{$pass}</td>
+              )
+              else (),
+              <td>{string($subtest/@desc)}</td>,
+              <td class="{$subpass}">{$subpass}</td>,
+              if ($pos = 1)
+              then 
+                <td rowspan="{$n-subtests}">{
+                  if ($test/@pass='false')
+                  then
+                    <pre>{
+                      util:serialize($test/result/node(), "indent='yes'")
+                    }</pre>
+                  else ()
+                }</td>
+              else ()
+            }</tr>
+        )
+      )
+    }</table>
+  )  
+};
+
 (:~ Format a test result as HTML :)
 declare function t:format-testResult($result as element()) {
 		(: This should be namespaced, but it isn't.
@@ -458,7 +598,14 @@ declare function t:format-testResult($result as element()) {
 		 :)
     <html>
     		<head>
-    			<title>{$result/(testName|suiteName)/node()}</title>
+    			<title>{
+    			  if ($result instance of element(TestSuite)
+    			    or $result instance of element(TestSet)
+    			    )
+    			  then
+    			    $result/(testName|suiteName)/node()
+    			  else "Test Results"
+    			}</title>
     			<style type="text/css">
     			.PASS {{
     				background-color:green;
@@ -469,89 +616,10 @@ declare function t:format-testResult($result as element()) {
     			}}
     			</style>
     		</head>
-        <body>
-          <h1>{$result/(testName|suiteName)/node()}</h1>
-          <p>{$result/description/p}</p>
-          <h2>Summary</h2>
-          <table border="1">
-          	<tr>
-          		<th>Tests</th>
-          		<th>Passed</th>
-          		<th>Failed</th>
-          	</tr>
-          	<tr>
-          		<td>{count($result//test/*[@pass])}</td>
-          		<td>{
-          			let $ct := count($result//test/*[@pass='true'])
-          			return (
-          				if ($ct)
-          				then
-          					attribute class {'PASS'}
-          				else (),
-          				$ct
-          			)
-          		}</td>
-          		<td>{
-          			let $ct := count($result//test/*[@pass='false'])
-          			return (
-          				if ($ct)
-          				then
-          					attribute class {'FAIL'}
-          				else (),
-          				$ct
-          			)
-          		}</td>
-          	</tr>
-          </table>
-          <h2>Details</h2>
-          <table border="1">
-          {
-          for $set in $result//TestSet
-          return (
-          	<tr>
-          		<th>{
-          			$set/testName/node()
-          		}</th>
-          		<th colspan="4">{
-          			$set/description/p
-          		}</th>
-          	</tr>,
-          	for $test in $set//test
-          	let $pass := local:pass-string(xs:boolean($test/@pass))
-          	let $subtests := $test/(* except (code, task, result))
-          	let $n-subtests := count($subtests)
-          	return (
-          		(:util:log-system-out(('subtests(', $n-subtests, ') = ', $subtests)),:)
-          		for $subtest at $pos in $subtests
-            	let $subpass := local:pass-string(xs:boolean($subtest/@pass))
-            	return 
-                <tr>{
-                	if ($pos = 1)
-                	then (
-                    <td rowspan="{$n-subtests}">{string(($test/@desc, $test/@n)[1])}</td>,
-                    <td rowspan="{$n-subtests}" class="{$pass}">{$pass}</td>
-                  )
-                  else (),
-            			<td>{string($subtest/@desc)}</td>,
-            			<td class="{$subpass}">{$subpass}</td>,
-            			if ($pos = 1)
-            			then 
-            				<td rowspan="{$n-subtests}">{
-            					if ($test/@pass='false')
-            					then
-            						<pre>{
-            							util:serialize($test/result/node(), "indent='yes'")
-            						}</pre>
-            					else ()
-            				}</td>
-            			else ()
-                }</tr>
-          	)
-					)
-
-          }
-          </table>
-        </body>
+        <body>{
+          local:result-summaries($result),
+          local:result-details($result)
+        }</body>
      </html>
 };
 
