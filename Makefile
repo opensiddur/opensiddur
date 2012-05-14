@@ -108,7 +108,7 @@ CP ?= /bin/cp
 JAVAOPTIONS ?=
 SAXONJAR ?= $(LIBDIR)/saxonhe-9.2.1.5.jar
 # CPSEP=classpath separator - : on Unix, ; on Windows
-JCLASSPATH ?= "$(RESOLVERPATH):$(SAXONJAR)"
+JCLASSPATH ?= "$(RESOLVERPATH):$(SAXONJAR):$(LIBDIR)"
 SAXONCLASS ?= net.sf.saxon.Transform
 XSLT ?= java $(JAVAOPTIONS) -cp "$(JCLASSPATH)" -Dxml.catalog.files=$(LIBDIR)/catalog.xml -Dxml.catalog.verbosity=1 $(SAXONCLASS) $(XSLTOPTIONS) 
 XSLTDOC ?= $(LIBDIR)/XSLTDoc/xsl/xsltdoc.xsl
@@ -156,7 +156,7 @@ depend: depend-clean $(CODEDIR)/depend.xsl2 $(ALL_DEPEND) code-depend text-depen
 depend-clean: 
 	rm -f Makefile.depend $(TEMPDIR)/dump.depend
 
-schema: odddoc
+schema: $(DBDIR)/schema odddoc transliteration-schema
 
 .PHONY: clean
 clean: xsltdoc-clean dist-clean depend-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist
@@ -183,13 +183,6 @@ $(DBDIR)/code: code
 $(DBDIR)/schema:
 	mkdir -p $(DBDIR)/schema
 	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
-	cp schema/transliteration.* $(DBDIR)/schema
-	cp -R schema/iso-schematron $(DBDIR)/schema
-	make $(DBDIR)/schema/transliteration.xsl2
-
-$(DBDIR)/schema/transliteration.xsl2: schema/transliteration.sch
-	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
-
 
 IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 

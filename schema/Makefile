@@ -3,7 +3,7 @@
 # Sets up dependencies for the XSLT files
 # Assumes that it will be included after the definitions in the top level Makefile
 #
-# Copyright 2008-2011 Efraim Feinstein
+# Copyright 2008-2012 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -25,7 +25,7 @@ JLPTEI_FILE=jlptei.xml
 odddoc: jlpteidoc 
 # trdoc removed
 
-schema-clean: odddoc-clean
+schema-clean: odddoc-clean transliteration-schema-clean
 
 odddoc-clean:
 	rm -fr $(TEIDOCDIR)
@@ -42,3 +42,10 @@ $(LIBDIR)/tei/P5/p5subset.xml:
 $(TEIDOCDIR)/jlptei.doc.html: p5subset $(wildcard $(ODDDIR)/*.xml) $(wildcard $(ODDDIR)/*.sch) $(wildcard $(ODDDIR)/*.xsl2) $(ODDDIR)/Makefile 
 	$(TEIROMA) $(ODDDIR)/$(JLPTEI_FILE) $(TEIDOCDIR)
 	
+.PHONY: transliteration-schema
+transliteration-schema: $(DBDIR)/schema $(DBDIR)/schema/transliteration.xsl2
+	cp schema/transliteration.* $(DBDIR)/schema
+
+$(DBDIR)/schema/transliteration.xsl2: schema/transliteration.sch
+	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
+
