@@ -1,84 +1,75 @@
-<!-- 
-	Transliteration table for "International Phonetic Alphabet for Hebrew" style.
-
-Contributors: Efraim Feinstein
-
-To the extent possible under law,  the contributors who associated  
-Creative Commons Zero with this work have waived all copyright 
-and related or neighboring rights to this work.
-
-A copy of the Creative Commons Zero public domain declaration
-can be found at http://www.creativecommons.org/publicdomain/zero/1.0
-						
-$Id: International_Phonetic_Alphabet-2005.tr.xml 709 2011-02-24 06:37:44Z efraim.feinstein $ 
--->
-<tr:table xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
-    <tr:title xml:lang="en">IPA</tr:title>
-    <tr:description xml:lang="en">An International Phoentic Alphabet transliteration system using a modern pronunciation</tr:description>
-    <tr:tr from="א" to="ʔ"/>
-    <tr:tr from="ב" to="v"/>
-    <tr:tr from="בּ" to="b"/>
-    <tr:tr from="ג" to="g"/>
-    <tr:tr from="גּ" to="g"/>
-    <tr:tr from="ד" to="d"/>
-    <tr:tr from="דּ" to="d"/>
-    <tr:tr from="ה" to="h"/>
-    <tr:tr from="הּ" to="h"/>
-    <tr:tr from="ו" to="v"/>
-    <tr:tr from="ז" to="z"/>
-    <tr:tr from="ח" to="ħ"/>
-    <tr:tr from="ט" to="t"/>
-    <tr:tr from="י" to="j"/>
-    <tr:tr from="ך" to="Χ"/>
-    <tr:tr from="כ" to="Χ"/>
-    <tr:tr from="ךּ" to="k"/>
-    <tr:tr from="כּ" to="k"/>
-    <tr:tr from="ל" to="l"/>
-    <tr:tr from="ם" to="m"/>
-    <tr:tr from="מ" to="m"/>
-    <tr:tr from="ן" to="n"/>
-    <tr:tr from="נ" to="n"/>
-    <tr:tr from="ס" to="s"/>
-    <tr:tr from="ע" to="ʕ"/>
-    <tr:tr from="פ" to="f"/>
-    <tr:tr from="ף" to="f"/>
-    <tr:tr from="פּ" to="p"/>
-    <tr:tr from="ףּ" to="p"/>
-    <tr:tr from="ץ" to="ts"/>
-    <tr:tr from="צ" to="ts"/>
-    <tr:tr from="ק" to="q"/>
-    <tr:tr from="ר" to="ʁ"/>
-    <tr:tr from="שׁ" to="ʃ"/>
-    <tr:tr from="שׂ" to="s"/>
-    <tr:tr from="ת" to="t"/>
-    <tr:tr from="תּ" to="t"/>
-    <tr:tr from="＀" to="ə"/>
-    <tr:tr from="！" to=""/>
-    <tr:tr from="ֱ" to="e"/>
-    <tr:tr from="ֲ" to="a"/>
-    <tr:tr from="ֳ" to="o"/>
-    <tr:tr from="ִ" to="i"/>
-    <tr:tr from="ִי" to="i"/>
-    <tr:tr from="ִי！" to="iy"/>
-    <tr:tr from="ֵ" to="ei"/>
-    <tr:tr from="ֵי" to="ei"/>
-    <tr:tr from="ֶ" to="e"/>
-    <tr:tr from="ֶי" to="ei"/>
-    <tr:tr from="ַ" to="a"/>
-    <tr:tr from="ַי" to="ai"/>
-    <tr:tr from="ָ" to="a"/>
-    <tr:tr from="ָי" to="ai"/>
-    <tr:tr from="ָה" to="a"/>
-    <tr:tr from="ׇ" to="o"/>
-    <tr:tr from="ָיו" to="aiv"/>
-    <tr:tr from="ֹ" to="o"/>
-    <tr:tr from="וֹ" to="o"/>
-    <tr:tr from="וֹי" to="oi"/>
-    <tr:tr from="ֺ" to="o"/>
-    <tr:tr from="ו" to="ao"/>
-    <tr:tr from="ֻ" to="u"/>
-    <tr:tr from="וּ" to="u"/>
-    <tr:tr from="יוּ" to="yu"/>
-    <tr:tr from="͏" to=""/>
-    <tr:tr from="־" to="–"/>
-</tr:table>
+<?xml version="1.0" encoding="UTF-8"?>
+<tr:schema xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
+   <tr:title xml:lang="en">IPA</tr:title>
+   <tr:description xml:lang="en">An International Phoentic Alphabet transliteration system using a modern pronunciation</tr:description>
+   <tr:table>
+      <tr:lang in="he" out="he-Latn"/>
+      <tr:lang in="arc" out="arc-Latn"/>
+      <tr:tr from="א" to="ʔ"/>
+      <tr:tr from="ב" to="v"/>
+      <tr:tr from="בּ" to="b"/>
+      <tr:tr from="ג" to="g"/>
+      <tr:tr from="גּ" to="g"/>
+      <tr:tr from="ד" to="d"/>
+      <tr:tr from="דּ" to="d"/>
+      <tr:tr from="ה" to="h"/>
+      <tr:tr from="הּ" to="h"/>
+      <tr:tr from="ו" to="v"/>
+      <tr:tr from="ז" to="z"/>
+      <tr:tr from="ח" to="ħ"/>
+      <tr:tr from="ט" to="t"/>
+      <tr:tr from="י" to="j"/>
+      <tr:tr from="ך" to="Χ"/>
+      <tr:tr from="כ" to="Χ"/>
+      <tr:tr from="ךּ" to="k"/>
+      <tr:tr from="כּ" to="k"/>
+      <tr:tr from="ל" to="l"/>
+      <tr:tr from="ם" to="m"/>
+      <tr:tr from="מ" to="m"/>
+      <tr:tr from="ן" to="n"/>
+      <tr:tr from="נ" to="n"/>
+      <tr:tr from="ס" to="s"/>
+      <tr:tr from="ע" to="ʕ"/>
+      <tr:tr from="פ" to="f"/>
+      <tr:tr from="ף" to="f"/>
+      <tr:tr from="פּ" to="p"/>
+      <tr:tr from="ףּ" to="p"/>
+      <tr:tr from="ץ" to="ts"/>
+      <tr:tr from="צ" to="ts"/>
+      <tr:tr from="ק" to="q"/>
+      <tr:tr from="ר" to="ʁ"/>
+      <tr:tr from="שׁ" to="ʃ"/>
+      <tr:tr from="שׂ" to="s"/>
+      <tr:tr from="ת" to="t"/>
+      <tr:tr from="תּ" to="t"/>
+      <tr:tr from="＀" to="ə"/>
+      <tr:tr from="！" to=""/>
+      <tr:tr from="ֱ" to="e"/>
+      <tr:tr from="ֲ" to="a"/>
+      <tr:tr from="ֳ" to="o"/>
+      <tr:tr from="ִ" to="i"/>
+      <tr:tr from="ִי" to="i"/>
+      <tr:tr from="ִי！" to="iy"/>
+      <tr:tr from="ֵ" to="ei"/>
+      <tr:tr from="ֵי" to="ei"/>
+      <tr:tr from="ֶ" to="e"/>
+      <tr:tr from="ֶי" to="ei"/>
+      <tr:tr from="ַ" to="a"/>
+      <tr:tr from="ַי" to="ai"/>
+      <tr:tr from="ָ" to="a"/>
+      <tr:tr from="ָי" to="ai"/>
+      <tr:tr from="ָה" to="a"/>
+      <tr:tr from="ׇ" to="o"/>
+      <tr:tr from="ָיו" to="aiv"/>
+      <tr:tr from="ֹ" to="o"/>
+      <tr:tr from="וֹ" to="o"/>
+      <tr:tr from="וֹי" to="oi"/>
+      <tr:tr from="ֺ" to="o"/>
+      <tr:tr from="ו" to="ao"/>
+      <tr:tr from="ֻ" to="u"/>
+      <tr:tr from="וּ" to="u"/>
+      <tr:tr from="יוּ" to="yu"/>
+      <tr:tr from="͏" to=""/>
+      <tr:tr from="־" to="–"/>
+   </tr:table>
+</tr:schema>

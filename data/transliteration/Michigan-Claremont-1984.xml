@@ -1,78 +1,69 @@
-<!-- 
-Transliteration table for Michigan-Claremont (originally Parunak-Whitaker) Code (1984).
-
-Contributors: Aharon Varady 
-Efraim Feinstein
-
-To the extent possible under law,  the contributors who associated  
-Creative Commons Zero with this work have waived all copyright 
-and related or neighboring rights to this work.
-
-A copy of the Creative Commons Zero public domain declaration
-can be found at http://www.creativecommons.org/publicdomain/zero/1.0
-
--->
-<tr:table xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
-    <tr:title xml:lang="en">Michigan-Claremont</tr:title>
-    <tr:description xml:lang="en">Michigan-Claremont Encoding</tr:description>
-    <tr:tr from="א" to=")" silent=")"/>
-    <tr:tr from="ב" to="B"/>
-    <tr:tr from="בּ" to="B"/>
-    <tr:tr from="ג" to="G"/>
-    <tr:tr from="גּ" to="G"/>
-    <tr:tr from="ד" to="D"/>
-    <tr:tr from="דּ" to="D"/>
-    <tr:tr from="ה" to="H"/>
-    <tr:tr from="הּ" to="H"/>
-    <tr:tr from="ו" to="W"/>
-    <tr:tr from="ז" to="Z"/>
-    <tr:tr from="ח" to="X"/>
-    <tr:tr from="ט" to="+"/>
-    <tr:tr from="י" to="Y"/>
-    <tr:tr from="ך" to="K"/>
-    <tr:tr from="כ" to="K"/>
-    <tr:tr from="ךּ" to="K"/>
-    <tr:tr from="כּ" to="K"/>
-    <tr:tr from="ל" to="L"/>
-    <tr:tr from="ם" to="M"/>
-    <tr:tr from="מ" to="M"/>
-    <tr:tr from="ן" to="N"/>
-    <tr:tr from="נ" to="N"/>
-    <tr:tr from="ס" to="S"/>
-    <tr:tr from="ע" to="(" silent="("/>
-    <tr:tr from="פ" to="P"/>
-    <tr:tr from="ף" to="P"/>
-    <tr:tr from="פּ" to="P"/>
-    <tr:tr from="ףּ" to="P"/>
-    <tr:tr from="ץ" to="C"/>
-    <tr:tr from="צ" to="C"/>
-    <tr:tr from="ק" to="Q"/>
-    <tr:tr from="ר" to="R"/>
-    <tr:tr from="שׁ" to="&amp;"/>
-    <tr:tr from="שׂ" to="&amp;"/>
-    <tr:tr from="ת" to="T"/>
-    <tr:tr from="תּ" to="T"/>
-    <tr:tr from="＀" to=":"/>
-    <tr:tr from="！" to=""/>
-    <tr:tr from="ֱ" to=":E"/>
-    <tr:tr from="ֲ" to=":A"/>
-    <tr:tr from="ֳ" to=":F"/>
-    <tr:tr from="ִ" to="I"/>
-    <tr:tr from="ִי" to="I"/>
-    <tr:tr from="ֵ" to="&#34;"/>
-    <tr:tr from="ֵי" to="&#34;"/>
-    <tr:tr from="ֶ" to="E"/>
-    <tr:tr from="ֶי" to="E"/>
-    <tr:tr from="ַ" to="A"/>
-    <tr:tr from="ָ" to="F"/>
-    <tr:tr from="ָה" to="F"/>
-    <tr:tr from="ֹ" to="O"/>
-    <tr:tr from="וֹ" to="OW"/>
-    <tr:tr from="ֺ" to="O"/>
-    <tr:tr from="ֻ" to="U"/>
-    <tr:tr from="וּ" to="W."/>
-    <tr:tr from="ׇ" to=""/>
-    <tr:tr from="ָיו" to="FYW"/>
-    <tr:tr from="͏" to=""/>
-    <tr:tr from="־" to="-"/>
-</tr:table>
+<?xml version="1.0" encoding="UTF-8"?>
+<tr:schema xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
+   <tr:title xml:lang="en">Michigan-Claremont</tr:title>
+   <tr:description xml:lang="en">Michigan-Claremont Encoding</tr:description>
+   <tr:table>
+      <tr:lang in="he" out="he-Latn"/>
+      <tr:lang in="arc" out="arc-Latn"/>
+      <tr:tr from="א" to=")" silent=")"/>
+      <tr:tr from="ב" to="B"/>
+      <tr:tr from="בּ" to="B"/>
+      <tr:tr from="ג" to="G"/>
+      <tr:tr from="גּ" to="G"/>
+      <tr:tr from="ד" to="D"/>
+      <tr:tr from="דּ" to="D"/>
+      <tr:tr from="ה" to="H"/>
+      <tr:tr from="הּ" to="H"/>
+      <tr:tr from="ו" to="W"/>
+      <tr:tr from="ז" to="Z"/>
+      <tr:tr from="ח" to="X"/>
+      <tr:tr from="ט" to="+"/>
+      <tr:tr from="י" to="Y"/>
+      <tr:tr from="ך" to="K"/>
+      <tr:tr from="כ" to="K"/>
+      <tr:tr from="ךּ" to="K"/>
+      <tr:tr from="כּ" to="K"/>
+      <tr:tr from="ל" to="L"/>
+      <tr:tr from="ם" to="M"/>
+      <tr:tr from="מ" to="M"/>
+      <tr:tr from="ן" to="N"/>
+      <tr:tr from="נ" to="N"/>
+      <tr:tr from="ס" to="S"/>
+      <tr:tr from="ע" to="(" silent="("/>
+      <tr:tr from="פ" to="P"/>
+      <tr:tr from="ף" to="P"/>
+      <tr:tr from="פּ" to="P"/>
+      <tr:tr from="ףּ" to="P"/>
+      <tr:tr from="ץ" to="C"/>
+      <tr:tr from="צ" to="C"/>
+      <tr:tr from="ק" to="Q"/>
+      <tr:tr from="ר" to="R"/>
+      <tr:tr from="שׁ" to="&amp;"/>
+      <tr:tr from="שׂ" to="&amp;"/>
+      <tr:tr from="ת" to="T"/>
+      <tr:tr from="תּ" to="T"/>
+      <tr:tr from="＀" to=":"/>
+      <tr:tr from="！" to=""/>
+      <tr:tr from="ֱ" to=":E"/>
+      <tr:tr from="ֲ" to=":A"/>
+      <tr:tr from="ֳ" to=":F"/>
+      <tr:tr from="ִ" to="I"/>
+      <tr:tr from="ִי" to="I"/>
+      <tr:tr from="ֵ" to="&#34;"/>
+      <tr:tr from="ֵי" to="&#34;"/>
+      <tr:tr from="ֶ" to="E"/>
+      <tr:tr from="ֶי" to="E"/>
+      <tr:tr from="ַ" to="A"/>
+      <tr:tr from="ָ" to="F"/>
+      <tr:tr from="ָה" to="F"/>
+      <tr:tr from="ֹ" to="O"/>
+      <tr:tr from="וֹ" to="OW"/>
+      <tr:tr from="ֺ" to="O"/>
+      <tr:tr from="ֻ" to="U"/>
+      <tr:tr from="וּ" to="W."/>
+      <tr:tr from="ׇ" to=""/>
+      <tr:tr from="ָיו" to="FYW"/>
+      <tr:tr from="͏" to=""/>
+      <tr:tr from="־" to="-"/>
+   </tr:table>
+</tr:schema>

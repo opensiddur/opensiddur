@@ -16,45 +16,76 @@
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <variable name="valid" as="document-node()"><![CDATA[document {
-    <tr:table>
+    <tr:schema>
       <tr:title xml:lang="en">Valid</tr:title>
       <tr:description xml:lang="en">A minimal valid transliteration table for testing</tr:description>
-      <tr:tr from="a" to="a"/>
-    </tr:table>
+      <tr:table>
+        <tr:lang in="en" out="en"/> 
+        <tr:tr from="a" to="a"/>
+      </tr:table>
+    </tr:schema>
   }]]></variable>
   <variable name="invalid" as="document-node()"><![CDATA[document {
     <tr:not-a-table/>
   }]]></variable>
+  <variable name="invalid-sch" as="document-node()"><![CDATA[
+  document {
+    <tr:schema>
+      <tr:title xml:lang="en">Invalid</tr:title>
+      <tr:description xml:lang="en">An invalid transliteration table for testing, invalid because it has two duplicate langs</tr:description>
+      <tr:table>
+        <tr:lang in="en" out="en"/> 
+        <tr:tr from="a" to="a"/>
+      </tr:table>
+      <tr:table>
+        <tr:lang in="en" out="he"/> 
+        <tr:tr from="a" to="a"/>
+      </tr:table>
+    </tr:schema>
+  }
+  ]]></variable>
   <setup>
     <create-collection parent="/data/transliteration" name="1900"/>
     <create-collection parent="/data/transliteration/1900" name="01"/>
     <store collection="/data/transliteration/1900/01" name="Test.xml">
-      <tr:table>
+      <tr:schema>
         <tr:title xml:lang="en">Test</tr:title>
         <tr:description xml:lang="en">A test</tr:description>
-        <tr:tr from="a" to="a"/>
-      </tr:table>
+        <tr:table>
+          <tr:lang in="en" out="en"/>
+          <tr:tr from="a" to="a"/>
+        </tr:table>
+      </tr:schema>
     </store>
     <store collection="/data/transliteration/1900/01" name="Test%202.xml">
-      <tr:table>
-        <tr:title xml:lang="en">Test 2</tr:title>
+      <tr:schema>
+       	<tr:title xml:lang="en">Test 2</tr:title>
         <tr:description xml:lang="en">Another test</tr:description>
-        <tr:tr from="b" to="b"/>
-      </tr:table>
+        <tr:table>
+          <tr:lang in="en" out="en"/>
+          <tr:tr from="b" to="b"/>
+        </tr:table>
+      </tr:schema>
     </store>
     <store collection="/data/transliteration/1900/01" name="Mivchan.xml">
-      <tr:table>
+      <tr:schema>
         <tr:title xml:lang="en">Mivchan</tr:title>
         <tr:description xml:lang="en">Test in Hebrew</tr:description>
-        <tr:tr from="c" to="c"/>
-      </tr:table>
+        <tr:table>
+          <tr:lang in="en" out="en"/>
+          <tr:tr from="c" to="c"/>
+        </tr:table>
+      </tr:schema>
     </store>  
     <store collection="/data/transliteration/1900/01" name="Garbage.xml">
-      <tr:table>
+      <tr:schema>
         <tr:title xml:lang="en">Garbage</tr:title>
         <tr:description xml:lang="en">Just some garbage</tr:description>
-        <tr:tr from="d" to="d"/>
-      </tr:table>
+        <tr:table>
+          <tr:lang in="en" out="en"/>
+          <tr:tr from="d" to="d"/>
+        </tr:table>
+      </tr:schema>
     </store>
   </setup>
   <tearDown>
@@ -90,7 +121,7 @@
       <code><![CDATA[
         tran:get("Test")
       ]]></code>
-      <xpath desc="returns a transliteration table">tr:table</xpath>
+      <xpath desc="returns a transliteration schema">tr:schema</xpath>
     </test>
     <test>
       <task>Get a non-existing resource</task>
@@ -178,7 +209,7 @@
     <tearDown>
       <code><![CDATA[
         sm:remove-ace(xs:anyURI("/data/transliteration"), 0),
-        let $created := collection("/data/transliteration")//tr:table[tr:title="Valid"]
+        let $created := collection("/data/transliteration")//tr:schema[tr:title="Valid"]
         where ($created)
         return
           let $month-collection := util:collection-name($created)
@@ -213,6 +244,13 @@
       <task>Post an invalid transliteration</task>
       <code><![CDATA[
       tran:post($invalid)
+      ]]></code>
+      <xpath desc="return status code is 400">self::rest:response/http:response/@status=400</xpath>
+    </test>
+    <test>
+      <task>Post an invalid transliteration that is invalid because of the Schematron</task>
+      <code><![CDATA[
+      tran:post($invalid-sch)
       ]]></code>
       <xpath desc="return status code is 400">self::rest:response/http:response/@status=400</xpath>
     </test>
@@ -255,6 +293,13 @@
       <xpath desc="return status code is 400">self::rest:response/http:response/@status=400</xpath>
     </test>
     <test>
+      <task>Put an invalid transliteration that is invalid because of the Schematron</task>
+      <code><![CDATA[
+      tran:put("Garbage", $invalid-sch)
+      ]]></code>
+      <xpath desc="return status code is 400">self::rest:response/http:response/@status=400</xpath>
+    </test>
+    <test>
       <task>Put valid data to an existing resource as an unauthorized user</task>
       <code><![CDATA[
       system:as-user("testuser2","testuser2",tran:put("Garbage", $valid))
@@ -271,7 +316,7 @@
       <code><![CDATA[
       tran:get("Test")
       ]]></code>
-      <xpath desc="returns a transliteration table">tr:table</xpath>
+      <xpath desc="returns a transliteration schema">tr:schema</xpath>
     </test>
     <test>
       <task>tran:list()</task>

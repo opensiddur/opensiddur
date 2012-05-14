@@ -175,7 +175,7 @@
                           <xsl:value-of select="string-join(
                             ('&aleph;',
                             if (regex-group(9)='&sheva;') then '&hatafpatah;' else '',
-                            '&dalet;&holam;&nun;&yod;')"/>
+                            '&dalet;&holam;&nun;&yod;'), '')"/>
                         </xsl:when>
 						<xsl:otherwise>
 							<!-- adonai -->
@@ -783,7 +783,7 @@
         <xsl:apply-templates mode="transliterate"
           select="$temp-input">
           <xsl:with-param name="table"
-            tunnel="yes" select="document(concat($transliteration-table,'.tr.xml'))/tr:table"
+            tunnel="yes" select="document(concat($transliteration-table,'.xml'))/tr:schema/tr:table[tr:lang/@in='he']"
             as="element(tr:table)" />
         </xsl:apply-templates>
       </xsl:variable>

@@ -1,82 +1,73 @@
-<!-- 
-Transliteration table for Strongs transliteration style.
-
-Contributors: Ze'ev Clementson 
-Efraim Feinstein
-
-To the extent possible under law,  the contributors who associated  
-Creative Commons Zero with this work have waived all copyright 
-and related or neighboring rights to this work.
-
-A copy of the Creative Commons Zero public domain declaration
-can be found at http://www.creativecommons.org/publicdomain/zero/1.0
-
--->
-<tr:table xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
-    <tr:title xml:lang="en">Strong's Dictionary</tr:title>
-    <tr:description xml:lang="en">The transliteration system used in Strong's Dictionary (1890)</tr:description>
-    <tr:option name="replace-tetragrammaton" value="off"/>
-    <tr:option name="suppress-hiriq-male-dagesh" value="on"/>
-    <tr:tr from="א" to="ʼ" silent="ʼ"/>
-    <tr:tr from="ב" to="b"/>
-    <tr:tr from="בּ" to="b"/>
-    <tr:tr from="ג" to="g"/>
-    <tr:tr from="גּ" to="g"/>
-    <tr:tr from="ד" to="d"/>
-    <tr:tr from="דּ" to="d"/>
-    <tr:tr from="ה" to="h"/>
-    <tr:tr from="הּ" to="hh"/>
-    <tr:tr from="ו" to="v"/>
-    <tr:tr from="ז" to="z"/>
-    <tr:tr from="ח" to="ch"/>
-    <tr:tr from="ט" to="ṭ"/>
-    <tr:tr from="י" to="y" double="no"/>
-    <tr:tr from="ך" to="k"/>
-    <tr:tr from="כ" to="k"/>
-    <tr:tr from="ךּ" to="k"/>
-    <tr:tr from="כּ" to="k"/>
-    <tr:tr from="ל" to="l"/>
-    <tr:tr from="ם" to="m"/>
-    <tr:tr from="מ" to="m"/>
-    <tr:tr from="ן" to="n"/>
-    <tr:tr from="נ" to="n"/>
-    <tr:tr from="ס" to="ç"/>
-    <tr:tr from="ע" to="ʻ"/>
-    <tr:tr from="פ" to="ph"/>
-    <tr:tr from="ף" to="ph"/>
-    <tr:tr from="פּ" to="p"/>
-    <tr:tr from="ףּ" to="p"/>
-    <tr:tr from="ץ" to="ts"/>
-    <tr:tr from="צ" to="ts"/>
-    <tr:tr from="ק" to="q"/>
-    <tr:tr from="ר" to="r"/>
-    <tr:tr from="ש" to="ˢ"/>
-    <tr:tr from="שׁ" to="sh"/>
-    <tr:tr from="שׂ" to="s"/>
-    <tr:tr from="ת" to="th"/>
-    <tr:tr from="תּ" to="t"/>
-    <tr:tr from="＀" to="ᵉ"/>
-    <tr:tr from="！" to=""/>
-    <tr:tr from="ֱ" to="ĕ"/>
-    <tr:tr from="ֲ" to="ă"/>
-    <tr:tr from="ֳ" to="ŏ"/>
-    <tr:tr from="ִ" to="i"/>
-    <tr:tr from="ִי" to="îy"/>
-    <tr:tr from="ִיּ" to="î"/>
-    <tr:tr from="ֵ" to="ê"/>
-    <tr:tr from="ֵי" to="êy"/>
-    <tr:tr from="ֶ" to="e"/>
-    <tr:tr from="ֶי" to="ey"/>
-    <tr:tr from="ַ" to="a"/>
-    <tr:tr from="ָ" to="â"/>
-    <tr:tr from="ָה" to="âh"/>
-    <tr:tr from="ֹ" to="ô"/>
-    <tr:tr from="וֹ" to="ôw"/>
-    <tr:tr from="ֺ" to="ô"/>
-    <tr:tr from="ֻ" to="u"/>
-    <tr:tr from="וּ" to="ûw"/>
-    <tr:tr from="ׇ" to="o"/>
-    <tr:tr from="ָיו" to="â"/>
-    <tr:tr from="͏" to=""/>
-    <tr:tr from="־" to="-"/>
-</tr:table>
+<?xml version="1.0" encoding="UTF-8"?>
+<tr:schema xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
+   <tr:title xml:lang="en">Strong's Dictionary</tr:title>
+   <tr:description xml:lang="en">The transliteration system used in Strong's Dictionary (1890)</tr:description>
+   <tr:table>
+      <tr:lang in="he" out="he-Latn"/>
+      <tr:lang in="arc" out="arc-Latn"/>
+      <tr:option name="replace-tetragrammaton" value="off"/>
+      <tr:option name="suppress-hiriq-male-dagesh" value="on"/>
+      <tr:tr from="א" to="ʼ" silent="ʼ"/>
+      <tr:tr from="ב" to="b"/>
+      <tr:tr from="בּ" to="b"/>
+      <tr:tr from="ג" to="g"/>
+      <tr:tr from="גּ" to="g"/>
+      <tr:tr from="ד" to="d"/>
+      <tr:tr from="דּ" to="d"/>
+      <tr:tr from="ה" to="h"/>
+      <tr:tr from="הּ" to="hh"/>
+      <tr:tr from="ו" to="v"/>
+      <tr:tr from="ז" to="z"/>
+      <tr:tr from="ח" to="ch"/>
+      <tr:tr from="ט" to="ṭ"/>
+      <tr:tr from="י" to="y" double="no"/>
+      <tr:tr from="ך" to="k"/>
+      <tr:tr from="כ" to="k"/>
+      <tr:tr from="ךּ" to="k"/>
+      <tr:tr from="כּ" to="k"/>
+      <tr:tr from="ל" to="l"/>
+      <tr:tr from="ם" to="m"/>
+      <tr:tr from="מ" to="m"/>
+      <tr:tr from="ן" to="n"/>
+      <tr:tr from="נ" to="n"/>
+      <tr:tr from="ס" to="ç"/>
+      <tr:tr from="ע" to="ʻ"/>
+      <tr:tr from="פ" to="ph"/>
+      <tr:tr from="ף" to="ph"/>
+      <tr:tr from="פּ" to="p"/>
+      <tr:tr from="ףּ" to="p"/>
+      <tr:tr from="ץ" to="ts"/>
+      <tr:tr from="צ" to="ts"/>
+      <tr:tr from="ק" to="q"/>
+      <tr:tr from="ר" to="r"/>
+      <tr:tr from="ש" to="ˢ"/>
+      <tr:tr from="שׁ" to="sh"/>
+      <tr:tr from="שׂ" to="s"/>
+      <tr:tr from="ת" to="th"/>
+      <tr:tr from="תּ" to="t"/>
+      <tr:tr from="＀" to="ᵉ"/>
+      <tr:tr from="！" to=""/>
+      <tr:tr from="ֱ" to="ĕ"/>
+      <tr:tr from="ֲ" to="ă"/>
+      <tr:tr from="ֳ" to="ŏ"/>
+      <tr:tr from="ִ" to="i"/>
+      <tr:tr from="ִי" to="îy"/>
+      <tr:tr from="ִיּ" to="î"/>
+      <tr:tr from="ֵ" to="ê"/>
+      <tr:tr from="ֵי" to="êy"/>
+      <tr:tr from="ֶ" to="e"/>
+      <tr:tr from="ֶי" to="ey"/>
+      <tr:tr from="ַ" to="a"/>
+      <tr:tr from="ָ" to="â"/>
+      <tr:tr from="ָה" to="âh"/>
+      <tr:tr from="ֹ" to="ô"/>
+      <tr:tr from="וֹ" to="ôw"/>
+      <tr:tr from="ֺ" to="ô"/>
+      <tr:tr from="ֻ" to="u"/>
+      <tr:tr from="וּ" to="ûw"/>
+      <tr:tr from="ׇ" to="o"/>
+      <tr:tr from="ָיו" to="â"/>
+      <tr:tr from="͏" to=""/>
+      <tr:tr from="־" to="-"/>
+   </tr:table>
+</tr:schema>

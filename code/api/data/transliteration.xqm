@@ -17,6 +17,8 @@ import module namespace app="http://jewishliturgy.org/modules/app"
   at "/code/modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "/code/api/modules/data.xqm";
+import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
+  at "/code/modules/jvalidate.xqm";
 
 import module namespace kwic="http://exist-db.org/xquery/kwic";
 
@@ -27,18 +29,25 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 declare variable $tran:data-type := "transliteration";
 declare variable $tran:schema := "/schema/transliteration.rnc";
+declare variable $tran:schematron := "/schema/transliteration.xsl2";
 declare variable $tran:path-base := concat($data:path-base, "/", $tran:data-type);
 
 declare function tran:validate(
   $tr as item()
   ) as xs:boolean {
-  validation:jing($tr, xs:anyURI($tran:schema))
+  validation:jing($tr, xs:anyURI($tran:schema)) and
+    jvalidate:validation-boolean(
+      jvalidate:validate-iso-schematron-svrl($tr, xs:anyURI($tran:schematron))
+    )
 };
 
 declare function tran:validate-report(
   $tr as item()
   ) as element() {
-  validation:jing-report($tr, xs:anyURI($tran:schema))
+  jvalidate:concatenate-reports((
+    validation:jing-report($tr, xs:anyURI($tran:schema)),
+    jvalidate:validate-iso-schematron-svrl($tr, doc($tran:schematron))
+  ))
 };
 
 (: error message when access is not allowed :)
@@ -152,7 +161,7 @@ declare function local:list(
   $start as xs:integer,
   $count as xs:integer
   ) {
-  let $all := collection($tran:path-base)/tr:table
+  let $all := collection($tran:path-base)/tr:schema
   return (
     <ul xmlns="http://www.w3.org/1999/xhtml" class="results">{
       for $table in subsequence($all, $start, $count) 

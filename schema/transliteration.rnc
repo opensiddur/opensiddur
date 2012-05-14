@@ -4,7 +4,7 @@
 
 default namespace = "http://jewishliturgy.org/ns/tr/1.0"
 
-start = Table
+start = Schema
 
 LangString = (
   attribute xml:lang { xsd:language },
@@ -35,13 +35,26 @@ Transliteration = element tr {
   attribute double { YesNo }? 
 }
 
-Table = element table {
+Schema = element schema {
   (
-    ## required title, may be translated into any language
-    ## required description; languages are expected to be translations of the same description
-    element title { LangString }
+   ## required title, may be translated into any language
+   ## required description; languages are expected to be translations of the same description
+   element title { LangString }
     & element description { LangString }
   )+,
+  Table+
+}
+
+Lang = element lang {
+  ## language to transliterate from
+  attribute in { xsd:language },
+  ## language to transliterate into
+  attribute out { xsd:language }
+}
+
+Table = element table {
+  ## language codes for which the table is valid
+  Lang+,
   Option*,
   ## transliterations codes
   Transliteration+
