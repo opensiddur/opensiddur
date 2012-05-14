@@ -17,9 +17,6 @@ xquery version "3.0";
  :)
 module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate";
 
-import module namespace mirror="http://jewishliturgy.org/modules/mirror"
-  at "xmldb:exist:///code/modules/mirror.xqm";
-
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace sch="http://purl.oclc.org/dsdl/schematron";
@@ -52,10 +49,19 @@ declare function jvalidate:validate-relaxng(
  : </report>
  :)
 declare function jvalidate:validate-iso-schematron-svrl(
-  $content as item(), $grammar as document-node()) 
+  $content as item(), $grammar as item()) 
   as element(report) {
+  let $grammar-doc :=
+    typeswitch($grammar)
+    case xs:anyAtomicType
+    return doc($grammar)
+    default
+    return $grammar
   let $result-transform :=
-    transform:transform($content, $grammar, ())
+    transform:transform($content, $grammar-doc, 
+      <parameters>
+        <param name="exist:stop-on-error" value="yes"/>
+      </parameters>)
   return (
     <report>
       <status>{
@@ -155,6 +161,6 @@ declare function jvalidate:concatenate-reports(
         then 'valid'
         else 'not available'
     }</status>
-    {$reports/*[not(name()='status')]}
+    {$reports/(* except status)}
   </report> 
 };
