@@ -37,7 +37,7 @@ return
       case "PUT"
       return tran:put($exist:resource, request:get-data())
       case "POST"
-      return tran:post($exist:resource, request:get-data())
+      return tran:post(request:get-data())
       case "DELETE"
       return tran:delete($exist:resource)
       default
