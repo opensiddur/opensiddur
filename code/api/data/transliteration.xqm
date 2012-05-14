@@ -221,7 +221,7 @@ declare
     $body as document-node()
   ) as item()+ {
   
-  let $paths := data:new-path-to-resource($tran:data-type, $body//tr:title)
+  let $paths := data:new-path-to-resource($tran:data-type, ($body//tr:title)[1])
   let $resource := $paths[2]
   let $collection := $paths[1]
   return 
