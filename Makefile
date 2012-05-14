@@ -183,7 +183,13 @@ $(DBDIR)/code: code
 $(DBDIR)/schema:
 	mkdir -p $(DBDIR)/schema
 	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
-	cp schema/transliteration.rnc $(DBDIR)/schema
+	cp schema/transliteration.* $(DBDIR)/schema
+	cp -R schema/iso-schematron $(DBDIR)/schema
+	make $(DBDIR)/schema/transliteration.xsl2
+
+$(DBDIR)/schema/transliteration.xsl2: schema/transliteration.sch
+	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
+
 
 IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 

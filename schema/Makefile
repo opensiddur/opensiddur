@@ -30,12 +30,6 @@ schema-clean: odddoc-clean
 odddoc-clean:
 	rm -fr $(TEIDOCDIR)
 
-.PHONY: trdoc 
-trdoc: $(TEIDOCDIR)/tr.doc.html
-
-$(TEIDOCDIR)/tr.doc.html: $(TRODD_DEPEND) $(ODDDIR)/Makefile 
-	$(TEIROMA) $(ODDDIR)/tr.odd $(TEIDOCDIR)
-
 .PHONY: jlpteidoc 
 jlpteidoc: $(TEIDOCDIR)/jlptei.doc.html
 
