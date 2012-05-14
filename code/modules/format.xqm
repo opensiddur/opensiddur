@@ -95,7 +95,7 @@ declare function format:transliterate(
         else (), 
         <param name="transliteration-tables" value="{
           string-join(
-            collection("/group")/tr:table/document-uri(root(.)),
+            collection("/data/transliteration")/tr:schema/document-uri(root(.)),
             " ")
         }"/>
       ), ()
