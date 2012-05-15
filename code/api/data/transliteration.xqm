@@ -108,10 +108,10 @@ declare
                type="application/opensearchdescription+xml" 
                href="/data/OpenSearchDescription?source={encode-for-uri($tran:path-base)}"
                title="Full text search" />
-        <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>,
-        <meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>,
-        <meta name="itemsPerPage" content="{$max-results}"/>,
-        <meta name="totalResults" content="{$total}"/>,
+        <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
+        <meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>
+        <meta name="itemsPerPage" content="{$max-results}"/>
+        <meta name="totalResults" content="{$total}"/>
       </head>
       <body>{
         $result-element
