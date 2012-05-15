@@ -481,27 +481,27 @@ declare function app:transform-xslt(
       xmlns:app="http://jewishliturgy.org/modules/app"
       version="2.0"
       exclude-result-prefixes="app">
-      {
-        if ($user)
-        then
-          <xsl:param name="uri-map" as="document-node()">
-            <xsl:document>
-              <uri-map xmlns="">{
-                for $document in collection(("/group","/code"))
-                  [namespace-uri(*)="http://www.tei-c.org/ns/1.0"]
-                  [not(contains(document-uri(.), "/output/"))]
-                let $doc-uri := document-uri($document)
-                return
-                  <map 
-                    from="{($document/*/@jx:document-uri, $doc-uri)[1]}" 
-                    to="xmldb:exist://{$user}:{$password}@{$doc-uri}">
-                    <cache type="fragmentation" to="xmldb:exist://{$user}:{$password}@{replace($doc-uri, '/db', '/db/cache')}"/>
-                  </map>
-              }</uri-map>              
-            </xsl:document>
-          </xsl:param>
-        else ()
-      }
+        
+      <xsl:param name="uri-map" as="document-node()">
+        <xsl:document>
+          <uri-map xmlns="">{
+            let $user-password :=
+              if ($user)
+              then concat($user, ":", $password, "@")
+              else ""
+            for $document in collection(("/data","/code"))
+              [namespace-uri(*)="http://www.tei-c.org/ns/1.0"]
+              [not(contains(document-uri(.), "/output/"))]
+            let $doc-uri := document-uri($document)
+            return
+              <map 
+                from="{($document/*/@jx:document-uri, $doc-uri)[1]}" 
+                to="xmldb:exist://{$user-password}{$doc-uri}">
+                <cache type="fragmentation" to="xmldb:exist://{$user-password}@{replace($doc-uri, '/db', '/db/cache')}"/>
+              </map>
+          }</uri-map>              
+        </xsl:document>
+      </xsl:param>
       <xsl:include href="{$xslt-uri-abs}"/>
       <xsl:template match="app:root">
       	<xsl:variable name="to-apply" as="document-node()">{
