@@ -160,43 +160,49 @@
     <xsl:param name="schema" as="element(tr:schema)?" tunnel="yes"/>
     <xsl:param name="alignment-element" as="xs:QName?" tunnel="yes"/>
     
-    <xsl:if test="exists($schema//tr:lang[@in=func:language(.)])">
-      <xsl:variable name="next" as="node()*">
-        <xsl:copy>
-          <xsl:copy-of select="@*"/>
-          <xsl:apply-templates/>
-        </xsl:copy>
-      </xsl:variable>
-      
-      <xsl:choose>
-        <!-- 
-          does a table exist?
-          is this the alignment element?
-          is this element an exception?
-        -->
-        <xsl:when test="
-          exists($schema) and 
-          local-name(.)=local-name-from-QName($alignment-element) and 
-          namespace-uri(.)=namespace-uri-from-QName($alignment-element)
-          and not(
-            some $ancestor in ancestor-or-self::* 
-            satisfies QName(namespace-uri($ancestor), local-name($ancestor))=$ancestor-exceptions
-            )">
-          <j:parallelGrp>
-            <j:original>
-              <xsl:sequence select="$next"/>
-            </j:original>
-            <xsl:call-template name="insert-transliteration">
-              <xsl:with-param name="to-transliterate" as="element()"
-                select="."/>
-            </xsl:call-template>
-          </j:parallelGrp>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:sequence select="$next"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:if>
+    <xsl:choose>
+      <!-- this is an odd way to express the condition, but tr:lang[@in=func:language(.)] returns nothing! -->
+      <xsl:when test="$schema//tr:lang/@in=func:language(.)">
+        <xsl:variable name="next" as="node()*">
+          <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:apply-templates/>
+          </xsl:copy>
+        </xsl:variable>
+        
+        <xsl:choose>
+          <!-- 
+            does a table exist?
+            is this the alignment element?
+            is this element an exception?
+          -->
+          <xsl:when test="
+            exists($schema) and 
+            local-name(.)=local-name-from-QName($alignment-element) and 
+            namespace-uri(.)=namespace-uri-from-QName($alignment-element)
+            and not(
+              some $ancestor in ancestor-or-self::* 
+              satisfies QName(namespace-uri($ancestor), local-name($ancestor))=$ancestor-exceptions
+              )">
+            <j:parallelGrp>
+              <j:original>
+                <xsl:sequence select="$next"/>
+              </j:original>
+              <xsl:call-template name="insert-transliteration">
+                <xsl:with-param name="to-transliterate" as="element()"
+                  select="."/>
+              </xsl:call-template>
+            </j:parallelGrp>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:sequence select="$next"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
     <xd:doc>
@@ -240,7 +246,7 @@
         <xsl:variable name="new-schema" as="xs:string?"
           select="jx:linked-relationship/
               tei:fs[@type=$transliteration-fs-type]/
-                tei:f[@name='Table']/(tei:symbol/@value, *)/string()"/>
+                tei:f[@name='Table']/(tei:symbol/@value, *)[1]/string()"/>
         <xsl:sequence select="(func:get-transliteration-schema($new-schema), $schema)[1]"/>
       </xsl:with-param>
       <xsl:with-param name="alignment-element" as="xs:QName" tunnel="yes">
@@ -248,14 +254,14 @@
           select="(
             jx:linked-relationship/
               tei:fs[@type=$transliteration-fs-type]/
-                tei:f[@name='Alignment-Namespace']/(tei:symbol/@value|*)/string(),
+                tei:f[@name='Alignment-Namespace']/(tei:symbol/@value, *)[1]/string(),
             namespace-uri-from-QName($alignment-element)  
                 )[1]"/>
         <xsl:variable name="new-local-name" as="xs:string?"
           select="(
             jx:linked-relationship/
               tei:fs[@type=$transliteration-fs-type]/
-                tei:f[@name='Alignment-Element']/(tei:symbol/@value|*)/string(),
+                tei:f[@name='Alignment-Element']/(tei:symbol/@value, *)[1]/string(),
             local-name-from-QName($alignment-element)
             )[1]"/>
         <xsl:sequence select="QName($new-namespace, $new-local-name)"/>
