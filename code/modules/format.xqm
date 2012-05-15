@@ -83,7 +83,7 @@ declare function format:transliterate(
   $user as xs:string?,
   $password as xs:string?
   ) as document-node() {
-  format:_wrap-document(
+  local:wrap-document(
     app:transform-xslt($uri-or-node, 
       app:concat-path($format:rest-path-to-xslt, 'translit/translit-main.xsl2'),
       (
