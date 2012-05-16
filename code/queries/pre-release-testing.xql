@@ -10,6 +10,7 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 let $tests-to-run :=
   <tests>
     <test module="/code/tests/api/data.t.xml" admin="1"/>
+    <test module="/code/tests/api/demo.t.xml"/>
     <test module="/code/tests/modules/mirror.t.xml" admin="1"/>
     <test module="/code/tests/api/data/transliteration.t.xml"/>
     <test module="/code/tests/transforms/translit/translit.t.xml"/>
