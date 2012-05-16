@@ -56,7 +56,17 @@ declare function local:transliterate(
     </jx:relationship>
   let $transliterated :=
     format:transliterate($data-with-selected-schema, $user, $password)
-  return $transliterated/*/j:parallelGrp/j:parallel/*
+  let $tr-element := $transliterated/*/j:parallelGrp/j:parallel/*
+  return 
+    element { 
+      QName(namespace-uri($tr-element), name($tr-element)) 
+    }{
+      $tr-element/(
+        @* except @xml:lang,
+        parent::j:parallel/@xml:lang,
+        node()
+      )
+    }
 };
 
 (:~ post arbitrary XML for transliteration by a given schema 
