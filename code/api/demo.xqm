@@ -87,23 +87,28 @@ declare
   %rest:consumes("text/plain")
   %rest:produces("text/plain")
   function demo:transliterate-text(
-    $body as xs:string,
+    $body as item(),
     $schema as xs:string
     ) as item()+ {
+    let $text :=
+      typeswitch($body)
+      case xs:base64Binary
+      return util:binary-to-string($body)
+      default return $body
     let $transliterated := 
       demo:transliterate-xml(
         document {
           <transliterated xml:lang="he">{
-            $body
+            $text
           }</transliterated>
         },$schema)
     return
-      if ($transliterated instance of element(error))
+      if ($transliterated[2] instance of element(error))
       then $transliterated
       else (
         <rest:response>
           <output:serialization-parameters>
-            <output method="text"/>
+            <output:method value="text"/>
           </output:serialization-parameters>
         </rest:response>,
         data($transliterated)
