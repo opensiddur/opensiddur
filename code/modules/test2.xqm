@@ -435,7 +435,7 @@ declare function t:xpath($output as item()*, $xpath as node()) {
   let $test-element := $xpath/ancestor::test
   let $code :=
    concat($prolog, 
-      if ($test-element/@output="text")
+      if ($test-element/@output=("text", "mixed"))
       then "("
       else " $output/(", 
       $expr, ")")
@@ -640,7 +640,7 @@ declare function local:result-details(
     if ($suite instance of element(TestSuite))
     then (
       <h2 id="{encode-for-uri($suite/suiteName)}">{$suite/suiteName/node()}</h2>,
-      {$suite/description/p}
+      $suite/description/p
     )
     else (),
     <table border="1">{
