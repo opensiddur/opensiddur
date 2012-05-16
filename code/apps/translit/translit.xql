@@ -13,6 +13,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace ev="http://www.w3.org/2001/xml-events"; 
 declare namespace xs="http://www.w3.org/2001/XMLSchema";
 declare namespace html="http://www.w3.org/1999/xhtml";
+declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 declare option exist:serialize "method=xhtml media-type=text/xml indent=no process-pi-xsl=no";
 
 
@@ -20,16 +21,20 @@ declare function local:translit-instance(
 	$instance-id as xs:string)
 	as element()+ {
 	<xf:instance id="{$instance-id}">
-		<transliterate xmlns="">
+		<transliterate xmlns="" xml:lang="he">
 		</transliterate>
 	</xf:instance>,
 	<xf:instance id="{$instance-id}-table">
 	  <table xmlns=""/>
 	</xf:instance>,
+	<xf:instance id="{$instance-id}-current-table">
+	  <tr:schema/>
+	</xf:instance>,
 	<xf:instance id="{$instance-id}-tables" xmlns="" 
 	  src="/data/transliteration">
 	</xf:instance>,
 	<xf:bind nodeset="instance('{$instance-id}')" type="xf:string" required="true()"/>,
+	<xf:bind nodeset="instance('{$instance-id}')/@xml:lang" type="xf:string" required="true()"/>,
 	<xf:bind nodeset="instance('{$instance-id}-table')" type="xf:string" required="true()"/>
 };
 
@@ -47,7 +52,23 @@ declare function local:translit-ui(
 					<xf:label ref="."/>
 					<xf:value ref="@href"/>
 				</xf:itemset>
+				<xf:action ev:event="xforms-value-changed">
+				  <xf:send submission="current-table" />
+				  <xf:setvalue 
+				    ref="instance('{$instance-id}')/@xml:lang" 
+				    value="instance('{$instance-id}-current-table')//tr:lang[1]/@in"
+				    if="not(instance('{$instance-id}-current-table')//tr:lang/@in=instance('{$instance-id}')/@xml:lang)"/>
+				</xf:action>
 			</xf:select1>
+			<!--
+			<xf:select1 ref="instance('{$instance-id}')/self::*/@xml:lang" incremental="true">
+			  <xf:label>Select an input language: </xf:label>
+			  <xf:itemset nodeset="instance('{$instance-id}-current-table')/tr:table/tr:lang">
+			    <xf:label ref="@in"/>
+			    <xf:value ref="@in"/>
+			  </xf:itemset>
+			</xf:select1>
+			-->
 			<br/>
 			<div class="textarea">
 				<xf:textarea ref="self::*" id="{$control-id}-textarea" incremental="true">
@@ -62,6 +83,7 @@ let $form :=
 <html xmlns="http://www.w3.org/1999/xhtml"
   xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns:tei="http://www.tei-c.org/ns/1.0"
+	xmlns:tr="http://jewishliturgy.org/ns/tr/1.0"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:xf="http://www.w3.org/2002/xforms">
 	<head>
@@ -71,6 +93,14 @@ let $form :=
 			<xf:instance id="transliteration-result" xmlns="">
 			  <result/>
 			</xf:instance>
+			<xf:submission 
+			  id="current-table"
+			  serialization="none"
+			  replace="instance"
+			  instance="translit-current-table"
+			  method="get">
+			  <xf:resource value="instance('translit-table')"/>
+			</xf:submission>
 			<xf:submission id="transliterate" 
 			  ref="instance('translit')" 
 				instance="transliteration-result" 
@@ -119,7 +149,6 @@ let $form :=
 		<xf:submit submission="transliterate">
 			<xf:label>Transliterate!</xf:label>
 		</xf:submit>
-		
 		<p>
 			<xf:output ref="instance('transliteration-result')/self::*[. != '']" 
 				id="control-result">
@@ -129,4 +158,4 @@ let $form :=
   </body>
 </html>
 return
-	($paths:xslt-pi, (:$paths:debug-pi,:) $form) 
+	($paths:xslt-pi(:, $paths:debug-pi:), $form) 
