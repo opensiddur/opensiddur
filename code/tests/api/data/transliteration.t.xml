@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TestSuite xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
   <suiteName>Transliteration API</suiteName>
-  <description>Test transliteration API function calls</description>
-  <author>Efraim Feinstein</author>
+  <description>
+    <p>Test transliteration API function calls</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein, 
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
   <asUser>testuser</asUser>
   <password>testuser</password>
   <imports>

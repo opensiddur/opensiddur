@@ -8,6 +8,8 @@
   <description>
     <p>Test the data API index</p>
     <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <setup/>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>

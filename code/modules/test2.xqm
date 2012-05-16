@@ -480,7 +480,7 @@ declare function t:run-testSuite(
 	return
 		<TestSuite>
 			{$copy/suiteName}
-			{$copy/description}
+			{$copy/description/p}
 			{
 			  for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
 			  return
@@ -509,7 +509,7 @@ declare function local:run-tests-helper(
     util:expand( 
       <TestSet>{
         $copy/testName,
-        $copy/description,
+        $copy/description/p,
         for $test at $p in $copy/test[empty(@ignore) or @ignore = "no"][t:if(if)]
         let $null := (
           if ($suite-user)
@@ -640,7 +640,7 @@ declare function local:result-details(
     if ($suite instance of element(TestSuite))
     then (
       <h2 id="{encode-for-uri($suite/suiteName)}">{$suite/suiteName/node()}</h2>,
-      <p>{$suite/description/node()}</p>
+      {$suite/description/p}
     )
     else (),
     <table border="1">{
@@ -648,7 +648,7 @@ declare function local:result-details(
       return (
         <tr>
           <th>{$set/testName/node()}</th>
-          <th colspan="4">{$set/description/node()}</th>
+          <th colspan="4">{$set/description/p/node()}</th>
         </tr>,
         for $test in $set//test
         let $pass := local:pass-string(xs:boolean($test/@pass))

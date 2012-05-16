@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 
-  tests for transliteration
-  
-  Open Siddur Project
-  Copyright 2011-2012 Efraim Feinstein
-  Licensed under the GNU Lesser General Public License, version 3 or later
- -->
 <TestSuite
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:tei="http://www.tei-c.org/ns/1.0"
@@ -14,7 +7,12 @@
   xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
   >
   <suiteName>Transliteration transform</suiteName>
-  <author>Efraim Feinstein</author>
+  <description>
+    <p>Tests of transliteration transform</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2011-2012 Efraim Feinstein
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
   <parameters>
     <param name="transliteration-tables" value="
       /data/transliteration/Academy_of_the_Hebrew_Language-2007.xml
