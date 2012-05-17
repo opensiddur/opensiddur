@@ -19,7 +19,7 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="pages">
+  <xsl:template match="bible">
     <!-- HTML5 DOCTYPE -->
     <xsl:text disable-output-escaping="yes">&lt;!DOCTYPE html&gt;&#xA;</xsl:text>
     <html>
@@ -44,7 +44,6 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
       </head>
       <body>
 	<div style="margin-bottom: 5px">
-	  Page number relative to this file only:
 	  <xsl:for-each select="page">
 	    <xsl:element name="a">
 	      <xsl:attribute name="href">
@@ -57,7 +56,7 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
 	  </xsl:for-each>
 	</div>
 
-	<xsl:apply-templates select="*"/>
+	<xsl:apply-templates select="* | text()"/>
       </body>
     </html>
   </xsl:template>

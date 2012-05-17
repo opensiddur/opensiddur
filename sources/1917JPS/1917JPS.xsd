@@ -12,7 +12,14 @@ TODO: front matter?
   <xs:documentation xml:lang="en">
 	bible is the root element.
   </xs:documentation>
-</xs:annotation><xs:element name="bible" />
+</xs:annotation>
+<xs:element name="bible">
+<xs:complexType mixed="true">
+<xs:sequence>
+<xs:any maxOccurs="unbounded" />	
+</xs:sequence>
+</xs:complexType>
+</xs:element>
 <!-- TODO: expect section title to occur more than once with xml:lang=he and en? -->
 <xs:element name="section-title" type="xs:string" /> 
 <!-- TODO: INFER: section -->
@@ -34,21 +41,24 @@ TODO: front matter?
     </xs:complexContent>
   </xs:complexType>
 </xs:element>
-<!-- inline -->
+<xs:element name="small-caps" type="xs:string" />
+<!-- TODO: put note inline with their reference -->
 <xs:element name="note">
   <xs:complexType>
-    <xs:attribute name="original-symbol" type="xs:string" />
+    <xs:attribute name="reference-mark" type="xs:string" />
   </xs:complexType>
 </xs:element>
-<!-- what was printed in the original, where it was printed -->
+<!-- YAGNI: these could be useful for tracing/debugging but we can add them in
+	if and when they're needed.
+<!- - what was printed in the original, where it was printed - ->
 <xs:element name="original-page-number" type="xs:string" />
-<!-- top of each page -->
+<!- - top of each page - ->
 <xs:element name="processed-page-start">
   <xs:complexType>
     <xs:attribute name="id" type="xs:integer" />
   </xs:complexType>
-</xs:element>
-<!-- xml:lang=he -->
+</xs:element>-->
+<!-- TODO: xml:lang=he -->
 <xs:element name="parashah-title" type="xs:string" />
 
 </xs:schema>

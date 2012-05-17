@@ -63,10 +63,12 @@ temp/join-pages.xml: $(scriptsdir)/join-pages.xsl2 \
 	../../lib/saxon -s temp/join-text.xml -o temp/join-pages.xml \
 		$(scriptsdir)/join-pages.xsl2
 
-# Step n: semi-final XML that should validate against custom XSD
+# Step 6: semi-final XML that should validate against custom XSD
 # TODO should be a step not just copying a file
-1917JPS.xml: temp/join-pages.xml
-	cp temp/join-pages.xml 1917JPS.xml
+1917JPS.xml: $(scriptsdir)/final.xsl2 \
+		temp/join-pages.xml 1917JPS.xsd
+	../../lib/saxon -s temp/join-pages.xml -o 1917JPS.xml \
+		$(scriptsdir)/final.xsl2 # optimistic :P
 	xmllint --noout 1917JPS.xml --schema 1917JPS.xsd
 
 # test-html: HTML we can proofread, not neccessarily final/supported/canonical structure
@@ -75,7 +77,7 @@ temp/join-pages.xml: $(scriptsdir)/join-pages.xsl2 \
 # TODO see TODO's in XSD
 test-html.html: $(scriptsdir)/test-html.xsl2 \
 		1917JPS.xml	
-	../../lib/saxon -s temp/join-text.xml -o test-html.html \
+	../../lib/saxon -s 1917JPS.xml -o tanakh-JPS-1917-alpha.html \
 		$(scriptsdir)/test-html.xsl2
 
 

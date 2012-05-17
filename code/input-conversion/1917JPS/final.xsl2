@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+final.xsl2 for the JPS 1917 PDF extract project for the Open Siddur Project.
+Copyright 2012 Marc Stober and licensed under the GNU LGPL.
+
+Output the final XML.
+-->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+<!--
+TODO: get this to pass XMLLINT schema validation!!!
+TODO: organize/document better
+TODO: YAGNI some things like original page numbers
+TODO: count results, make sure the structure is as expected
+TODO: fix HTML XSL
+-->
+
+<xsl:output method="xml" indent="yes"/>
+
+<xsl:template match="@* | node()">
+	<xsl:copy>
+		<xsl:apply-templates select="@* | node()"/>
+	</xsl:copy>
+</xsl:template>
+
+<xsl:template match="header">
+	<xsl:apply-templates/>
+</xsl:template>
+
+<!-- Output the content of column, but not the column element. -->
+<xsl:template match="column">
+	<xsl:apply-templates/>
+</xsl:template>
+
+<!-- Output normal text, but not the text element. 
+	TODO: do we also need to check it's not italic, Hebrew, etc.?
+-->
+<xsl:template match="text[not(@size)]">
+	<xsl:apply-templates/>
+</xsl:template>
+
+<!-- Suppress footnotes for now. TODO: inline them!!! -->
+<xsl:template match="footnotes">
+	<xsl:comment>
+	footnotes under construction!
+	</xsl:comment>
+</xsl:template>
+
+<!-- Suppress these empty elements seen near parashah title. -->
+<xsl:template match="text[@size='12.538' and normalize-space(.)='']">
+</xsl:template>
+
+<!-- Suppress these empty elements in header. -->
+<xsl:template match="header/text[@size='7.308' and normalize-space(.)='']">
+</xsl:template>
+
+<!-- Suppress book name which is repeated on header of each page. 
+	Not the Hebrew characters though which is parashah name. -->
+<xsl:template match="header/text[@size='18.216' and string-to-codepoints(.)[1] &lt; 255]">
+</xsl:template>
+
+<!-- Suppress anything in the footer (e.g., printed page number). -->
+<xsl:template match="footer">
+</xsl:template>
+
+<!-- Output parashah title in header. This is probably just for first parashah
+	of a book.  TODO: Should we tag this 'lang="he"' or something? -->
+<xsl:template match="header/text[@size='18.216' and string-to-codepoints(.)[1] > 255]">
+	<xsl:element name="parashah-title">
+		<xsl:value-of select="normalize-space(.)"/>
+	</xsl:element>
+</xsl:template>
+
+<!-- Output parashah title.
+	TODO: Should we tag this 'lang="he"' or something? -->
+<xsl:template match="text[@size='12.762' and string-to-codepoints(.)[1] > 255]">
+	<xsl:element name="parashah-title">
+		<xsl:value-of select="normalize-space(.)"/>
+	</xsl:element>
+</xsl:template>
+
+<!-- Chapter numbers. -->
+<xsl:template match="text[@size='25.961']">
+	<xsl:element name="chapter-number">
+		<xsl:value-of select="normalize-space(.)"/>
+	</xsl:element>
+</xsl:template>
+
+<!-- (Foot)notes. TODO: this is catching "OD" of "GOD" somewhere. -->
+<xsl:template match="text[@size='6.327']">
+	<xsl:choose>
+		<xsl:when test="normalize-space(.)=''">
+		</xsl:when>
+		<xsl:when test="string(number(normalize-space(.)))='NaN'">
+			<xsl:element name="note">
+				<xsl:attribute name="reference-mark">
+					<xsl:value-of select="normalize-space(.)" />
+				</xsl:attribute>
+			</xsl:element>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:element name="verse-number">
+				<xsl:value-of select="normalize-space(.)"/>
+			</xsl:element>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<!-- Book titles. -->
+<xsl:template match="text[@size='21.816']">
+	<xsl:element name="book-title">
+		<xsl:value-of select="normalize-space(.)"/>
+	</xsl:element>
+</xsl:template>
+
+<!-- Small caps (usually the "ord" of "Lord"
+	TODO: Join with the L (technically it can be inside the tag) -->
+<xsl:template match="text[@font='Times New Roman,Bold' and @size='6.215']">
+	<xsl:element name="small-caps">
+		<xsl:apply-templates/>
+	</xsl:element>
+</xsl:template>
+
+</xsl:stylesheet>
