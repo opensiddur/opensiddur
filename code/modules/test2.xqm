@@ -475,18 +475,30 @@ declare function t:run-testSuite(
   $run-password as xs:string?
   ) as element() {
 	let $copy := util:expand($suite)
-	let $if := t:if($copy/if) 
-	where $if 
+	let $if := t:if($copy/if)
 	return
 		<TestSuite>
 			{$copy/suiteName}
 			{$copy/description/p}
 			{
-			  for $set in $suite/TestSet[empty(@ignore) or @ignore = "no"]
+			  for $set in $suite/TestSet
 			  return
-			    t:run-testSet($set, $run-user, $run-password)
+			    if (not($if) or $set/(empty(@ignore) or @ignore = "no"))
+			    then t:run-testSet($set, $run-user, $run-password)
+			    else t:ignore-testSet($set)
 			}
 		</TestSuite>
+};
+
+declare function t:ignore-testSet(
+  $set as element(TestSet)
+  ) as element(TestSet) {
+  <TestSet pass="ignore">{
+    $set/testName,
+    $set/description/p,
+    for $test at $p in $set
+    return t:ignore-test($test, $p)
+  }</TestSet>
 };
 
 declare function t:run-testSuite(
@@ -500,7 +512,7 @@ declare function local:run-tests-helper(
   $suite as element(TestSuite),
   $run-user as xs:string?,
   $run-password as xs:string?
-  ) {
+  ) as element(TestSet) {
   let $suite-user := ($suite/asUser/string(), $run-user)[1]
   let $suite-password := ($suite/password/string(), $run-password)[1]
   let $test-user := ($copy/asUser/string(), $suite-user, $run-user)[1]
@@ -510,32 +522,36 @@ declare function local:run-tests-helper(
       <TestSet>{
         $copy/testName,
         $copy/description/p,
-        for $test at $p in $copy/test[empty(@ignore) or @ignore = "no"][t:if(if)]
-        let $null := (
-          if ($suite-user)
+        for $test at $p in $copy/test
+        return 
+          if ($test/((empty(@ignore) or @ignore = "no") and t:if(if)))
           then
-            system:as-user($suite-user, $suite-password, t:setup($suite/setup))
-          else t:setup($suite/setup),
-          if ($test-user)
-          then 
-            system:as-user($test-user, $test-password, t:setup($copy/setup))
-          else t:setup($copy/setup)
-        )
-        let $result :=  
-          if ($test-user)
-          then system:as-user($test-user, $test-password, t:run-test($test, $p))
-          else t:run-test($test, $p)
-        let $null := (
-          if ($suite-user)
-          then
-            system:as-user($suite-user, $suite-password, t:tearDown($suite/tearDown))
-          else t:tearDown($suite/tearDown),
-          if ($test-user)
-          then 
-            system:as-user($test-user, $test-password, t:tearDown($copy/tearDown))
-          else t:tearDown($copy/tearDown)
-        )
-        return $result 
+            let $null := (
+              if ($suite-user)
+              then
+                system:as-user($suite-user, $suite-password, t:setup($suite/setup))
+              else t:setup($suite/setup),
+              if ($test-user)
+              then 
+                system:as-user($test-user, $test-password, t:setup($copy/setup))
+              else t:setup($copy/setup)
+            )
+            let $result :=  
+              if ($test-user)
+              then system:as-user($test-user, $test-password, t:run-test($test, $p))
+              else t:run-test($test, $p)
+            let $null := (
+              if ($suite-user)
+              then
+                system:as-user($suite-user, $suite-password, t:tearDown($suite/tearDown))
+              else t:tearDown($suite/tearDown),
+              if ($test-user)
+              then 
+                system:as-user($test-user, $test-password, t:tearDown($copy/tearDown))
+              else t:tearDown($copy/tearDown)
+            )
+            return $result
+          else t:ignore-test($test, $p) 
       }</TestSet>
     )
 };
@@ -545,17 +561,31 @@ declare function t:run-testSet(
   $set as element(TestSet),
   $run-user as xs:string?,
   $run-password as xs:string?
-  ) {
+  ) as element(TestSet)? {
     let $suite := $set/parent::TestSuite
     let $copy := 
     	if ($suite)
     	then $set
     	else util:expand($set)
     let $if := t:if($copy/if)
-    where $if
     return
-      local:run-tests-helper($copy, $suite, $run-user, $run-password)
-      
+      if ($if)
+      then local:run-tests-helper($copy, $suite, $run-user, $run-password)
+      else t:ignore-testSet($copy)
+};
+
+declare function t:ignore-test(
+  $test as element(test),
+  $count as xs:integer
+  ) as element(test) {
+  <test n="{$count}" pass="ignore">{
+    attribute desc {$test/task},
+    for $condition in $test/(expected|xpath|error|t:expand-class(class))
+    return 
+      element { name($condition) }{
+        attribute pass { "ignore" }
+      }
+  }</test>
 };
 
 declare function t:run-testSet(
@@ -564,10 +594,16 @@ declare function t:run-testSet(
   t:run-testSet($set, (), ())
 };
 
-declare function local:pass-string($pass as xs:boolean) {
-	if ($pass)
-	then 'PASS'
-	else 'FAIL'
+declare function local:pass-string(
+  $pass as xs:string
+  ) {
+	switch ($pass)
+	case "true"
+	return "PASS"
+	case "false"
+	return "FAIL"
+	default
+	return "IGNORE"
 };
 
 declare function local:result-summary-table(
@@ -578,6 +614,7 @@ declare function local:result-summary-table(
       <th>Tests</th>
       <th>Passed</th>
       <th>Failed</th>
+      <th>Ignored</th>
     </tr>
     <tr>
       <td>{count($result//test/*[@pass])}</td>
@@ -597,6 +634,16 @@ declare function local:result-summary-table(
           if ($ct)
           then
             attribute class {'FAIL'}
+          else (),
+            $ct
+        )
+      }</td>
+      <td>{
+        let $ct := count($result//test/*[@pass='ignore'])
+        return (
+          if ($ct)
+          then
+            attribute class {'IGNORE'}
           else (),
             $ct
         )
@@ -624,7 +671,7 @@ declare function local:result-summaries(
     }{
       if ($testSuite instance of element(TestSuite))
       then
-        <a href="#{encode-for-uri($result/suiteName)}">{$testSuite/suiteName/node()}</a>
+        <a href="#{encode-for-uri($testSuite/suiteName)}">{$testSuite/suiteName/node()}</a>
       else $testSuite/testName/node()
     },
     local:result-summary-table($testSuite/(self::TestSet|TestSet))   
@@ -647,16 +694,26 @@ declare function local:result-details(
       for $set in $suite//TestSet
       return (
         <tr>
-          <th>{$set/testName/node()}</th>
-          <th colspan="4">{$set/description/p/node()}</th>
+          <th>{
+            if ($set/description)
+            then ()
+            else attribute colspan { 5 },
+            $set/testName/node()
+          }</th>
+          {
+          if ($set/description)
+          then
+            <th colspan="4">{$set/description/p/node()}</th>
+          else ()
+          }
         </tr>,
         for $test in $set//test
-        let $pass := local:pass-string(xs:boolean($test/@pass))
+        let $pass := local:pass-string($test/@pass)
         let $subtests := $test/(* except (code, task, result))
         let $n-subtests := count($subtests)
         return (
           for $subtest at $pos in $subtests
-          let $subpass := local:pass-string(xs:boolean($subtest/@pass))
+          let $subpass := local:pass-string($subtest/@pass)
           return 
             <tr>{
               if ($pos = 1)
@@ -709,6 +766,10 @@ declare function t:format-testResult($result as element()) {
     			
     			.FAIL {{
     				background-color:red;
+    			}}
+    			
+    			.IGNORE {{
+    			  background-color:darkgrey;
     			}}
     			</style>
     		</head>
