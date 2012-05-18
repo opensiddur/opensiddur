@@ -214,12 +214,6 @@ declare function local:evaluate-assertions(
     return if (count($ops2[matches(., 'highlight-matches')]))
       then string-join($ops2, ' ')
       else string-join(($ops2, $highlight-option), ' ')
-  let $expected :=
-    if ($test/@output eq 'text') 
-    then data($test/expected)
-    else if ($test/expected/@href)
-    then doc(resolve-uri($test/expected/@href, base-uri($test/expected)))
-    else $test/expected
   let $expanded :=
     if ($output instance of element(error)) 
     then $output
@@ -242,7 +236,14 @@ declare function local:evaluate-assertions(
           normalize-space(string-join($serialized, ' '))
     else if ($output instance of node()) 
     then
-      util:expand($output, $serialize-options)          
+      let $exp := util:expand($output, $serialize-options)
+      return
+        (: util:expand() kills document nodes :)
+        typeswitch($output)
+        case document-node() 
+        return document { $exp }
+        default
+        return $exp
     else $output
   let $OK := 
     for $assert in $test/(error|xpath|expected|t:expand-class(class))
@@ -269,41 +270,60 @@ declare function local:evaluate-assertions(
             then $assert 
             else ()
           }</xpath>
-      else if ($test/@output eq 'text') then 
-        let $asString :=
-          if ($test/@serialize) 
-          then $expanded
-          else
-            normalize-space(
-              string-join(
-                for $x in $output 
-                return string($x),
-                ' '
-              )
-            )
-        let $pass := $asString eq normalize-space($expected)
-        return 
-          <expected pass="{$pass}">{
-            $assert/@desc,
-            if (not($pass))
-            then $expected
-            else ()
-          }</expected>
-      else 
-        let $xn := t:normalize($expanded)
-        let $en := t:normalize($assert/node())
-        let $xp :=
-          if ($assert/@xpath) 
-          then t:xpath($xn, $assert/@xpath) 
-          else $xn
-        let $pass := t:deep-equal-wildcard($xp, $en)
+      else
+        (: $assert is expected :)
+        let $expected :=
+          if ($assert/@href)
+          then 
+            if ($test/@output eq "text")
+            then util:binary-doc(resolve-uri($assert/@href, base-uri($assert)))
+            else 
+              let $d := doc(resolve-uri($assert/@href, base-uri($assert)))
+              return
+                (: transform:transform() returns element()|node(), not document-node() :)
+                if ($test/(xslt|context))
+                then $d/*
+                else $d
+          else 
+            if ($test/@output eq "text") 
+            then data($assert)
+            else $assert/node()
         return
-          <expected pass="{$pass}">{
-            $assert/(@desc, @xpath),
-            if (not($pass))
-            then $en
-            else ()
-          }</expected>
+          if ($test/@output eq 'text') then 
+            let $asString :=
+              if ($test/@serialize) 
+              then $expanded
+              else
+                normalize-space(
+                  string-join(
+                    for $x in $output 
+                    return string($x),
+                    ' '
+                  )
+                )
+            let $pass := $asString eq normalize-space($expected)
+            return 
+              <expected pass="{$pass}">{
+                $assert/@desc,
+                if (not($pass))
+                then $expected
+                else ()
+              }</expected>
+          else
+            let $xn := t:normalize($expanded)
+            let $en := t:normalize($expected)
+            let $xp :=
+              if ($assert/@xpath) 
+              then t:xpath($xn, $assert/@xpath) 
+              else $xn
+            let $pass := t:deep-equal-wildcard($xp, $en)
+            return
+              <expected pass="{$pass}">{
+                $assert/(@desc, @xpath),
+                if (not($pass))
+                then $en
+                else ()
+              }</expected>
     )
   let $all-OK := empty($OK[@pass='false'])
   return
