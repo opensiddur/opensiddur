@@ -106,7 +106,7 @@
     <xd:short>Given a transliteration schema and language, return the right table</xd:short>
   </xd:doc>
   <xsl:function name="func:get-transliteration-table" as="element(tr:table)?">
-    <xsl:param name="schema" as="element(tr:schema)"/>
+    <xsl:param name="schema" as="element(tr:schema)?"/>
     <xsl:param name="lang" as="xs:string"/>
     
     <xsl:sequence select="$schema/tr:table[tr:lang/@in=$lang]"/>
@@ -128,7 +128,11 @@
     <xsl:param name="schema" as="element(tr:schema)?" tunnel="yes"/>
     <xsl:param name="to-transliterate" as="node()?"/>
     
-    <xsl:variable name="language" select="func:language(.)"/>
+    <xsl:variable name="language" as="xs:string" 
+      select="
+      if ($to-transliterate) 
+      then func:language($to-transliterate) 
+      else ''"/>
     <xsl:variable name="table" select="func:get-transliteration-table($schema, $language)"/>      
     <xsl:if test="$table and exists($to-transliterate)">
       <j:parallel type="transliteration" xml:lang="{$table/tr:lang[@in=$language]/@out}">
@@ -147,7 +151,7 @@
       <xsl:apply-templates/>
       <xsl:call-template name="insert-transliteration">
         <xsl:with-param name="to-transliterate" as="element()?"
-          select="(j:original|j:parallel)[some $lang in $schema//tr:lang[@in] satisfies lang($lang)]/node()"/>
+          select="(j:original|j:parallel)[some $lang in $schema//tr:lang/@in satisfies lang($lang)]/node()"/>
       </xsl:call-template>
     </xsl:copy>
   </xsl:template>
