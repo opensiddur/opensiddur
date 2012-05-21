@@ -1,0 +1,45 @@
+# Access rights XML
+# Open Siddur Project
+# Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+# Licensed under the GNU Lesser General Public License, version 3 or later
+default namespace  = "http://jewishliturgy.org/ns/access/1.0"
+
+start = Access
+
+# ThreeWay switch:
+# true, false, inherit. The latter indicates that the given exception should not interfere with
+# other defaults or exceptions
+ThreeWay = ( "true" | "false" | "inherit" )
+
+Permissions = (
+  attribute read { xsd:boolean },
+  attribute write { xsd:boolean }
+)
+
+Read = (
+  attribute read { xsd:boolean }
+)
+
+Write = (
+  attribute write { xsd:boolean }
+)
+
+Access = element access {
+  # default sets of permissions for owner/owner group/world
+  # no permissions for owner because you cannot make something read-only or unreadable for its owner
+  element owner { xsd:string }, 
+  element group { Write, xsd:string },
+  # default permissions to a user who is not the owner, not in the owning group, or not logged in
+  element world { Read, Write },
+  # user and group exceptions: which user/group is excepted and what the exceptions are.
+  # sharing is processed before denial
+  # for sharing, you may share read access read/write access
+  # for denial, you may deny write access or read/write access
+  # to deny read access, set @read="false"
+  (
+    element share-user { Write, xsd:string } |
+    element deny-user { Read, xsd:string } |
+    element share-group { Write, xsd:string } |
+    element deny-group { Read, xsd:string }
+  )*
+}

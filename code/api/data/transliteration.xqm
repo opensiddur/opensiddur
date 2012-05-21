@@ -11,6 +11,8 @@ xquery version "3.0";
  :)
 module namespace tran = 'http://jewishliturgy.org/api/transliteration';
 
+import module namespace acc="http://jewishliturgy.org/modules/access"
+  at "/code/api/modules/access.xqm";
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
@@ -26,6 +28,7 @@ declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace error="http://jewishliturgy.org/errors";
 
 declare variable $tran:data-type := "transliteration";
 declare variable $tran:schema := "/schema/transliteration.rnc";
@@ -281,4 +284,49 @@ declare
        : just keep that resource name and create it?
        :)
       api:rest-error(404, "Not found", $name)
+};
+
+declare 
+  %rest:GET
+  %rest:path("/data/transliteration/{$name}/access")
+  %rest:produces("application/xml")
+  function tran:get-access(
+    $name as xs:string
+  ) as item()+ {
+  let $doc := data:doc($tran:data-type, $name)
+  return
+   if ($doc)
+   then acc:get-access($doc)
+   else api:rest-error(404, "Not found", $name)
+};
+
+declare 
+  %rest:PUT("{$body}")
+  %rest:path("/data/transliteration/{$name}/access")
+  %rest:consumes("application/xml", "text/xml")
+  function tran:put-access(
+    $name as xs:string,
+    $body as document-node()
+  ) as item()+ {
+  let $doc := data:doc($tran:data-type, $name)
+  let $access := $body/*
+  return
+    if ($doc)
+    then 
+      try {
+        acc:set-access($doc, $access),
+        <rest:response>
+          <http:response status="204"/>
+        </rest:response>
+      }
+      catch error:VALIDATION {
+        api:rest-error(400, "Validation error in input", acc:validate-report($access))
+      }
+      catch error:UNAUTHORIZED {
+        api:rest-error(401, "Not authenticated")
+      }
+      catch error:FORBIDDEN {
+        api:rest-error(403, "Forbidden")
+      }
+    else api:rest-error(404, "Not found", $name)
 };
