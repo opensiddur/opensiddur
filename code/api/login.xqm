@@ -1,12 +1,12 @@
 xquery version "1.0";
-(: api login action
+(: api login
  : 
  : Open Siddur Project
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :)
-module namespace login="http://jewishliturgy.org/api/user/login";
+module namespace login="http://jewishliturgy.org/api/login";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
 	at "/code/api/modules/api.xqm";
@@ -15,143 +15,131 @@ import module namespace app="http://jewishliturgy.org/modules/app"
 import module namespace debug="http://jewishliturgy.org/transform/debug"
 	at "/code/modules/debug.xqm";
 	
-declare namespace err="http://jewishliturgy.org/errors";
+declare namespace rest="http://exquery.org/ns/rest/annotation/";
+declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace error="http://jewishliturgy.org/errors"; 
 
-declare default element namespace "http://www.w3.org/1999/xhtml"; 
-
-declare variable $login:allowed-methods := ("GET", "PUT", "DELETE");
-declare variable $login:accept-content-type := (
-  api:html-content-type(),
-  api:text-content-type()
-  );
-declare variable $login:request-content-type := (
-  api:xml-content-type(),
-  api:form-content-type(),
-  api:text-content-type()
-  );
-declare variable $login:test-source := "/code/tests/api/user/login.t.xml";
-
-declare function login:title(
-  $uri as xs:anyAtomicType
-  ) as xs:string {
-  "Session based login"
+(:~ GET is a query for who is logged in. 
+ : @return HTTP 200 with an XML entity with the currently logged in user 
+ :)
+declare 
+  %rest:GET
+  %rest:path("/login")
+  %rest:produces("application/xml", "text/xml")
+  function login:get-xml() {
+  let $user := app:auth-user()
+  return <login xmlns="">{$user}</login>
 };
 
-declare function login:allowed-methods(
-  $uri as xs:anyAtomicType
-  ) as xs:string* {
-  $login:allowed-methods
-};
-
-declare function login:accept-content-type(
-  $uri as xs:anyAtomicType
-  ) as xs:string* {
-  $login:accept-content-type
-};
-
-declare function login:request-content-type(
-  $uri as xs:anyAtomicType
-  ) as xs:string* {
-  $login:request-content-type
-};
-
-declare function login:list-entry(
-  $uri as xs:anyAtomicType
-  ) as element(li) {
-  (: this function probably does not have to change :)
-  api:list-item(
-    element span {login:title($uri)},
-    $uri,
-    login:allowed-methods($uri),
-    login:accept-content-type($uri),
-    login:request-content-type($uri),
-    ()
+(:~ GET HTML: usually, used as a who am I function, 
+ : but may also be used to log in by query params.
+ : Please do not use it that way, except for debugging
+ :)
+declare 
+  %rest:GET
+  %rest:path("/login")
+  %rest:query-param("user", "{$user}")
+  %rest:query-param("password", "{$password}")
+  %rest:produces("application/xhtml+xml", "text/html")
+  function login:get-html(
+    $user as xs:string?,
+    $password as xs:string?
+  ) as item()+ {
+  let $did-login :=
+    if ($user and $password)
+    then
+      login:post-form($user, $password)
+    else ()
+  return (
+    <rest:response>
+      <output:serialization-parameters>
+        <output:method value="html5"/>
+      </output:serialization-parameters>
+    </rest:response>,
+    <html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+        <title>Login: who am I?</title>
+      </head>
+      <body>
+        <div class="result">{app:auth-user()}</div>
+      </body>
+    </html>
   )
 };
 
-declare function local:disallowed() {
-  let $d := api:allowed-method($login:allowed-methods)
-  where not($d)
-  return api:error((), "Method not allowed")
+declare 
+  %rest:POST("{$body}")
+  %rest:path("/login")
+  %rest:consumes("application/xml", "text/xml")
+  %rest:produces("text/plain")
+  function login:post-xml(
+    $body as document-node()
+  ) as item()+ {
+  login:post-form($body//user, $body//password)
 };
 
-(:~ GET is usually a query for who is logged in. 
- : Returns HTTP 204 if nobody :)
-declare function login:get() {
-  let $test-result := api:tests($login:test-source)
-  let $accepted := api:get-accept-format($login:accept-content-type)
-  let $uri := request:get-uri()
-  return
-    if (not($accepted instance of element(api:content-type)))
-    then $accepted
-    else if ($test-result)
-    then $test-result
-    else 
-      let $user := app:auth-user()
-      let $format := api:simplify-format($accepted, "xhtml")
-      return (
-        api:serialize-as($format, $accepted),
-        if ($format = "txt")
-        then 
-          if ($user)
-          then $user
-          else response:set-status-code(204)
-        else if ($format = "xhtml")
-        then 
-          api:list(
-            element title { login:title($uri) },
-            element ul {
-              attribute class { "results" },
-              element li { $user }[$user]
-            },
-            count($user),
-            false(),
-            login:allowed-methods($uri),
-            login:accept-content-type($uri),
-            login:request-content-type($uri),
-            $login:test-source
-          )
-        else error(xs:QName("err:INTERNAL"), "An internal error must have occurred. You should never get here.") 
-      )
-};
-
-(:~ this is a request to log in :)
-declare function login:put() {
-  let $user-name := request:get-parameter("user-name", ())
-  let $password := string(api:get-parameter("password", "", true()))
-  return
-    if (xmldb:authenticate('/db', $user-name, $password))
+declare 
+  %rest:POST
+  %rest:path("/login")
+  %rest:form-param("user", "{$user}")
+  %rest:form-param("password", "{$password}")
+  %rest:consumes("application/x-www-url-formencoded")
+  %rest:produces("text/plain")
+  function login:post-form(
+    $user as xs:string?,
+    $password as xs:string?
+  ) as item()+ {
+  if (not($user) or not($password))
+  then 
+    api:rest-error(400, "User name and password are required")
+  else
+    if (xmldb:authenticate("/db", $user, $password))
     then (
       debug:debug($debug:info, "login",
-        ('Logging in ', $user-name, ':', $password)),
-      response:set-status-code(204),
-      app:login-credentials($user-name, $password)
+        ('Logging in ', $user, ':', $password)),
+      app:login-credentials($user, $password),
+      <rest:response>
+        <http:response status="204"/>
+      </rest:response>
     )
     else (
-      api:error(400,'Wrong username or password')
+      api:rest-error(400,"Wrong user name or password")
     )
 };
 
-declare function login:post() {
-  local:disallowed()
+(:~ log out :)
+declare function local:logout(
+  ) as element(rest:response) {
+  app:logout-credentials(),
+  <rest:response>
+    <http:response status="204"/>
+  </rest:response>
 };
 
 (:~ request to log out :)
-declare function login:delete() {
-  app:logout-credentials(),
-  response:set-status-code(204)
+declare 
+  %rest:DELETE
+  %rest:path("/login")
+  function login:delete(
+  ) as item()+ {
+  local:logout()
 };
 
-declare function login:go() {
-  let $method := api:get-method()
-  return
-    if ($method = "GET")
-    then login:get()
-    else if ($method = "PUT") 
-    then login:put()
-    else if ($method = "POST")
-    then login:post()
-    else if ($method = "DELETE")
-    then login:delete()
-    else local:disallowed()
+(:~ request to log out :)
+declare 
+  %rest:GET
+  %rest:path("/logout")
+  function login:get-logout(
+  ) as item()+ {
+  local:logout()
 };
+
+(:~ request to log out :)
+declare 
+  %rest:POST
+  %rest:path("/logout")
+  function login:post-logout(
+  ) as item()+ {
+  local:logout()
+};
+
