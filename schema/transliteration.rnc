@@ -3,7 +3,6 @@
 # Licensed under the GNU Lesser General Public License, version 3 or later
 
 default namespace = "http://jewishliturgy.org/ns/tr/1.0"
-namespace cc = "http://creativecommons.org/ns#"
 
 start = Schema
 
