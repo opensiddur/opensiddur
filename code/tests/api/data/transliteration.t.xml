@@ -107,27 +107,6 @@
   <tearDown>
     <remove-collection collection="/data/transliteration/1900"/>
   </tearDown>
-  <TestClass xml:id="SearchResults">
-    <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method/@value="html5"</xpath>
-    <xpath desc="reference to Open Search @profile">.//html:head[@profile="http://a9.com/-/spec/opensearch/1.1/"]</xpath>
-    <xpath desc="@startIndex is present">count(.//html:meta[@name='startIndex'])=1</xpath>
-    <xpath desc="@endIndex is present">count(.//html:meta[@name='endIndex'])=1</xpath>
-    <xpath desc="@totalResults is present">count(.//html:meta[@name='totalResults'])=1</xpath>
-    <xpath desc="@itemsPerPage is present">count(.//html:meta[@name='itemsPerPage'])=1</xpath>
-    <xpath desc="endIndex - startIndex + 1 = number of results">
-      let $start := number($output//html:meta[@name='startIndex']/@content)
-      let $end := number($output//html:meta[@name='endIndex']/@content)
-      let $to-count :=
-        if ($output//html:ul[@class="results"])
-        then $output//html:li[@class="result"]
-        else $output//html:li[@class="context"]
-      return ((if ($start) then 1 else 0) + $end - $start eq count($to-count)
-      )
-    </xpath>
-    <xpath desc="endIndex &lt;= number of results">
-      number(.//html:meta[@name='endIndex']/@content) &lt;= number(.//html:meta[@name='totalResults']/@content)
-    </xpath>
-  </TestClass>
   <TestSet>
     <testName>tran:get()</testName>
     <asUser>testuser</asUser>
@@ -155,7 +134,7 @@
         tran:list("", 1, 100)
       ]]></code>
       <xpath desc="returns at least 3 results">count(.//html:li[@class="result"])&gt;=3</xpath>
-      <class href="#SearchResults"/>
+      <class href="../common.t.xml#SearchResults"/>
     </test>
     <test>
       <task>List some resources</task>
@@ -163,7 +142,7 @@
         tran:list("", 1, 2)
       ]]></code>
       <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
-      <class href="#SearchResults"/>
+      <class href="../common.t.xml#SearchResults"/>
     </test>
     <test>
       <task>Respond to a query</task>
@@ -171,7 +150,7 @@
         tran:list("Test", 1, 100)
       ]]></code>
       <xpath desc="returns 3 results">count(.//html:ol[@class="results"]/html:li)=3</xpath>
-      <class href="#SearchResults"/>
+      <class href="../common.t.xml#SearchResults"/>
     </test>
   </TestSet>
   <TestSet>
@@ -340,7 +319,7 @@
       tran:list("", 1, 100)
       ]]></code>
       <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
-      <class href="#SearchResults"/>
+      <class href="../common.t.xml#SearchResults"/>
     </test>
     <test>
       <task>tran:post()</task>

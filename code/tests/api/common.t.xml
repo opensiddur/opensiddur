@@ -5,48 +5,45 @@
   xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
   xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
   xmlns:httpclient="http://exist-db.org/xquery/httpclient">
+  <description>
+    <p>Common test classes for RESTXQ functions in the Open Siddur API</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein, 
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
-  <namespace prefix="httpclient">http://exist-db.org/xquery/httpclient</namespace>
+  <namespace prefix="rest">http://exquery.org/ns/rest/annotation/</namespace>
+  <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
+  <!-- HTTP returns -->
   <TestClass xml:id="Unauthorized">
-    <xpath desc="returns status code 401">./@statusCode = 401</xpath>
+    <xpath desc="returns status code 401">self::rest:response/http:response/@status = 401</xpath>
   </TestClass>
   <TestClass xml:id="Forbidden">
-    <xpath desc="returns status code 403">./@statusCode = 403</xpath>
+    <xpath desc="returns status code 403">self::rest:response/http:response/@status = 403</xpath>
   </TestClass>
   <TestClass xml:id="NotFound">
-    <xpath desc="returns status code 404">./@statusCode = 404</xpath>
+    <xpath desc="returns status code 404">self::rest:response/http:response/@status = 404</xpath>
   </TestClass>
-  <TestClass xml:id="Testing">
-    <xpath desc="one test link is present">count(.//html:link[@rel='test'])=1</xpath>
-    <xpath desc="one test source link is present">count(.//html:link[@rel='test-source'])=1</xpath>
-    <xpath desc="test source link exists and is readable">doc-available(.//html:link[@rel='test-source']/@href)</xpath>
-  </TestClass>
-  <TestClass xml:id="SelfConsistentMenu">
-    <xpath desc="has exactly one common section">count(.//html:ul[@class="common"])=1</xpath>
-    <class href="#SelfConsistentApiList"/>
-  </TestClass>
-  <TestClass xml:id="SelfConsistentApiList">
-    <!-- tests for all api:list() derived results -->
-    <xpath desc="status code=200">./@statusCode = 200</xpath>
+  <!-- search and list APIs -->
+  <TestClass xml:id="SearchResults">
+    <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method/@value="html5"</xpath>
+    <xpath desc="reference to Open Search @profile">.//html:head[@profile="http://a9.com/-/spec/opensearch/1.1/"]</xpath>
     <xpath desc="@startIndex is present">count(.//html:meta[@name='startIndex'])=1</xpath>
     <xpath desc="@endIndex is present">count(.//html:meta[@name='endIndex'])=1</xpath>
     <xpath desc="@totalResults is present">count(.//html:meta[@name='totalResults'])=1</xpath>
     <xpath desc="@itemsPerPage is present">count(.//html:meta[@name='itemsPerPage'])=1</xpath>
-    <xpath desc="endIndex - startIndex = number of results">
+    <xpath desc="endIndex - startIndex + 1 = number of results">
       let $start := number($output//html:meta[@name='startIndex']/@content)
       let $end := number($output//html:meta[@name='endIndex']/@content)
-      return ((if ($start) then 1 else 0) + $end - $start eq count($output//html:ul[@class='results']/html:li)
+      let $to-count :=
+        if ($output//html:ul[@class="results"])
+        then $output//html:li[@class="result"]
+        else $output//html:li[@class="context"]
+      return ((if ($start) then 1 else 0) + $end - $start eq count($to-count)
       )
     </xpath>
     <xpath desc="endIndex &lt;= number of results">
       number(.//html:meta[@name='endIndex']/@content) &lt;= number(.//html:meta[@name='totalResults']/@content)
     </xpath>
-  </TestClass>
-  <TestClass xml:id="InvalidMethod">
-    <xpath desc="returns HTTP status 405">./@statusCode = 405</xpath>
-    <xpath desc="returns an Allow header">count(.//httpclient:header[@name="Allow"]) = 1</xpath>
-  </TestClass>
-  <TestClass xml:id="Unacceptable">
-    <xpath desc="returns HTTP status code 406">./@statusCode = 406</xpath>
   </TestClass>
 </TestClassSet>
