@@ -252,7 +252,13 @@ declare function local:evaluate-assertions(
       then
         let $pass := 
           $expanded instance of element(error) 
-          and contains($expanded, $assert)
+          and 
+            ( (: the assertion is that the err:* parameters
+               : in the assertion match those in the returned
+               : error :)
+              every $err-attribute in $assert/@* 
+              satisfies $expanded/@*[name()=$err-attribute/name()]=$err-attribute
+            )
         return 
           <error pass="{$pass}">{
             $assert/@desc,
@@ -356,7 +362,13 @@ declare function local:run-xquery-test(
 	    return util:eval($full-code)
 	  }
 	  catch * {
-	    <error>Evaluation error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
+	    <error 
+	      line-number="{$err:line-number}"
+	      column-number="{$err:column-number}"
+	      code="{$err:code}"
+	      description="{$err:description}"
+	      value="{$err:value}"
+	      >Evaluation error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
 	  }
 	let $output := 
 	  if ($test/@trace eq 'yes') 
@@ -405,7 +417,12 @@ declare function local:run-xslt-test(
       )
     }
     catch * {
-      <error>Transform error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
+      <error line-number="{$err:line-number}"
+        column-number="{$err:column-number}"
+        code="{$err:code}"
+        description="{$err:description}"
+        value="{$err:value}"
+        >Transform error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
     }
   return
     local:evaluate-assertions($test, $output, $count)
