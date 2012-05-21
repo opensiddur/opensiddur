@@ -23,6 +23,8 @@
     <tr:schema>
       <tr:title xml:lang="en">Valid</tr:title>
       <tr:description xml:lang="en">A minimal valid transliteration table for testing</tr:description>
+      <tr:copyright-license uri="http://creativecommons.org/publicdomain/zero/1.0" />
+      <tr:author xml:lang="en">Nobody</tr:author>
       <tr:table>
         <tr:lang in="en" out="en"/> 
         <tr:tr from="a" to="a"/>
@@ -37,6 +39,8 @@
     <tr:schema>
       <tr:title xml:lang="en">Invalid</tr:title>
       <tr:description xml:lang="en">An invalid transliteration table for testing, invalid because it has two duplicate langs</tr:description>
+      <tr:copyright-license uri="http://creativecommons.org/publicdomain/zero/1.0" />
+      <tr:author xml:lang="en">Nobody</tr:author>
       <tr:table>
         <tr:lang in="en" out="en"/> 
         <tr:tr from="a" to="a"/>
@@ -55,6 +59,8 @@
       <tr:schema>
         <tr:title xml:lang="en">Test</tr:title>
         <tr:description xml:lang="en">A test</tr:description>
+        <tr:copyright-license uri="http://creativecommons.org/publicdomain/zero/1.0" />
+        <tr:author xml:lang="en">Nobody</tr:author>
         <tr:table>
           <tr:lang in="en" out="en"/>
           <tr:tr from="a" to="a"/>
@@ -65,6 +71,8 @@
       <tr:schema>
        	<tr:title xml:lang="en">Test 2</tr:title>
         <tr:description xml:lang="en">Another test</tr:description>
+        <tr:copyright-license uri="http://creativecommons.org/publicdomain/zero/1.0" />
+        <tr:author xml:lang="en">Nobody</tr:author>
         <tr:table>
           <tr:lang in="en" out="en"/>
           <tr:tr from="b" to="b"/>
@@ -75,6 +83,8 @@
       <tr:schema>
         <tr:title xml:lang="en">Mivchan</tr:title>
         <tr:description xml:lang="en">Test in Hebrew</tr:description>
+        <tr:copyright-license uri="http://creativecommons.org/publicdomain/zero/1.0" />
+        <tr:author xml:lang="en">Nobody</tr:author>
         <tr:table>
           <tr:lang in="en" out="en"/>
           <tr:tr from="c" to="c"/>
@@ -85,6 +95,8 @@
       <tr:schema>
         <tr:title xml:lang="en">Garbage</tr:title>
         <tr:description xml:lang="en">Just some garbage</tr:description>
+        <tr:copyright-license uri="http://creativecommons.org/publicdomain/zero/1.0" />
+        <tr:author xml:lang="en">Nobody</tr:author>
         <tr:table>
           <tr:lang in="en" out="en"/>
           <tr:tr from="d" to="d"/>

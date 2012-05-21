@@ -2,6 +2,8 @@
 <tr:schema xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
    <tr:title xml:lang="en">Strong's Dictionary</tr:title>
    <tr:description xml:lang="en">The transliteration system used in Strong's Dictionary (1890)</tr:description>
+   <tr:copyright-license uri="http://creativecommons.org/publicdomain/zero/1.0"/>
+   <tr:author xml:lang="en">Efraim Feinstein</tr:author>
    <tr:table>
       <tr:lang in="he" out="he-Latn"/>
       <tr:lang in="arc" out="arc-Latn"/>

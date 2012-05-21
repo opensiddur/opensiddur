@@ -3,6 +3,7 @@
 # Licensed under the GNU Lesser General Public License, version 3 or later
 
 default namespace = "http://jewishliturgy.org/ns/tr/1.0"
+namespace cc = "http://creativecommons.org/ns#"
 
 start = Schema
 
@@ -42,6 +43,21 @@ Schema = element schema {
    element title { LangString }
     & element description { LangString }
   )+,
+  ## licensing information. A GRDDL transform is really required to make this into compliant ccREL
+  ## the schema will have to change in order to accomodate additional licenses
+  element copyright-license { 
+    attribute uri { ( 
+      "http://creativecommons.org/publicdomain/zero/1.0" | 
+      "http://creativecommons.org/licenses/by/3.0" | 
+      "http://creativecommons.org/licenses/by-sa/3.0" 
+     ) }
+  },
+  ## required author block
+  element author { 
+    # An author URI points to a contributor information page. It is optional
+    attribute uri { xsd:anyURI }?, 
+    LangString 
+  }+,
   Table+
 }
 
