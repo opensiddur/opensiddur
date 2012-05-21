@@ -8,69 +8,21 @@
   <description>
     <p>Test SOMETHING</p>
     <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <setup/>
+  <tearDown/>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
   <imports>
-    import module namespace apitest="http://jewishliturgy.org/modules/apitest"
-      at "xmldb:exist:///code/tests/api/apitest.xqm";
+    import module namespace {NS}="http://jewishliturgy.org/{MODULE}"
+      at "xmldb:exist:///code/{PATH}.xqm";
   </imports>
   <TestSet>
-    <testName>HTTP GET</testName>
-    <setup/>
-    <imports>
-    </imports>
-    <functions>
-    </functions>
-    <tearDown/>
-    <test>
-      <task>GET</task>
-      <code><![CDATA[
-        apitest:get("***", <header name="Accept" value="application/xhtml+xml"/>)
-      ]]></code>
-      <class href="common.t.xml#SelfConsistentMenu"/> 
-      <class href="common.t.xml#Testing"/> 
-    </test>
-  </TestSet>
-  <TestSet>
-    <testName>HTTP PUT</testName>
-    <setup/>
-    <imports>
-    </imports>
-    <functions>
-    </functions>
-    <tearDown/>
-    <test>
-      <task>PUT</task>
-      <code><![CDATA[
-        apitest:put("***", (), <x/>)
-      ]]></code>
-      <class href="common.t.xml#SelfConsistentMenu"/> 
-      <class href="common.t.xml#Testing"/> 
-    </test>
-  </TestSet>
-  <TestSet>
-    <testName>HTTP POST</testName>
-    <setup/>
-    <imports>
-    </imports>
-    <functions>
-    </functions>
-    <tearDown/>
-    <test>
-      <task>PUT</task>
-      <code><![CDATA[
-        apitest:post("***", (), <x/>)
-      ]]></code>
-      <class href="common.t.xml#SelfConsistentMenu"/> 
-      <class href="common.t.xml#Testing"/> 
-    </test>
-  </TestSet>
-  <TestSet>
-    <testName>HTTP DELETE</testName>
+    <testName>{NAME}</testName>
     <setup/>
     <imports>
     </imports>
@@ -81,9 +33,7 @@
       <task>PUT</task>
       <code><![CDATA[
         apitest:delete("***", ())
-      ]]></code>
-      <class href="common.t.xml#SelfConsistentMenu"/> 
-      <class href="common.t.xml#Testing"/> 
+      ]]></code> 
     </test>
   </TestSet>
 </TestSuite>
