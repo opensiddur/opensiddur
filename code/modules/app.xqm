@@ -554,15 +554,23 @@ declare function app:transform-xslt(
 declare function app:login-credentials(
 	$user as xs:string,
 	$password as xs:string
-	) as empty() {
-	session:set-attribute('app.user', $user),
-	session:set-attribute('app.password', $password)
+	) as empty-sequence() {
+	if (session:exists())
+	then (
+	  session:set-attribute('app.user', $user),
+	  session:set-attribute('app.password', $password)
+	)
+	else ()
 };
 
 (:~ remove login credentials from the session :)
 declare function app:logout-credentials(
-	) as empty() {
-	session:invalidate()
+	) as empty-sequence() {
+	if (session:exists())
+	then 
+	  let $guest-login := xmldb:login("/db", "guest", "guest")
+	  return session:invalidate()
+	else ()
 };
 
 (:~ pass login credentials from the session to an XQuery
