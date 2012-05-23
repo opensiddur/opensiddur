@@ -150,24 +150,12 @@ XSLTDOC_CFGFILE ?= XSLTDocConfig.xml
 $(TEMPDIR):
 	mkdir $(TEMPDIR)
 
-.PHONY: depend depend-clean
-depend: depend-clean $(CODEDIR)/depend.xsl2 $(ALL_DEPEND) code-depend text-depend odd-depend
-
-depend-clean: 
-	rm -f Makefile.depend $(TEMPDIR)/dump.depend
-
-schema: $(DBDIR)/schema odddoc transliteration-schema
-
+schema: $(DBDIR)/schema odddoc transliteration-schema contributor-schema
+	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
+	cp schema/build/contributor.rnc $(DBDIR)/schema
+	
 .PHONY: clean
 clean: xsltdoc-clean dist-clean depend-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist
-
-dist:
-	svnversion -n $(TOPDIR) | sed -e "s/:/-/g" > opensiddur-version
-	svn export $(TOPDIR) opensiddur-package
-	tar zcvf opensiddur-package-r`cat opensiddur-version`.tar.gz opensiddur-package
-	rm -fr opensiddur-package opensiddur-version
-
-dist-clean:
 
 $(DBDIR)/common: $(DBDIR)/code
 
@@ -182,7 +170,6 @@ $(DBDIR)/code: code
 
 $(DBDIR)/schema:
 	mkdir -p $(DBDIR)/schema
-	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
 
 IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 
@@ -322,7 +309,7 @@ db-sync:
 db: externals db-nonet
 
 # patch error status ignored because it returns 1 if patches are already applied
-db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common $(DBDIR)/schema db-tests
+db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common db-tests
 	mkdir -p $(DBDIR)/xforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources

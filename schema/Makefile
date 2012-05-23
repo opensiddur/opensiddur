@@ -19,6 +19,10 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/
 #
 
+# the TEI dependencies include everything 
+TEI_DEPENDENCIES:=$(wildcard $(LIBDIR)/tei/P5/Source/Specs/*.xml)
+TEI_ALL_ODD = $(LIBDIR)/tei/P5/Exemplars/tei_all.odd
+
 JLPTEI_FILE=jlptei.xml
 
 .PHONY: odddoc odddoc-clean schema-clean
@@ -49,3 +53,14 @@ transliteration-schema: $(DBDIR)/schema $(DBDIR)/schema/transliteration.xsl2
 $(DBDIR)/schema/transliteration.xsl2: schema/transliteration.sch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
+.PHONY: contributor-schema contributor-schema-clean
+contributor-schema: schema/build/contributor.rnc
+
+schema/build/contributor.rnc: schema/build schema/contributor.xml
+	$(TEIROMA) --nodtd --noxsd schema/contributor.xml schema/build
+
+contributor-schema-clean:
+	rm -fr schema/build
+
+schema/build:
+	mkdir -p schema/build

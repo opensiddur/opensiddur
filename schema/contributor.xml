@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI 
+  xmlns="http://www.tei-c.org/ns/1.0" 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+  xmlns:rng="http://relaxng.org/ns/structure/1.0"
+  xml:lang="en">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>Contributor XML</title>
+        <author>Laurent Romary</author>
+        <editor xml:id="sbauman.emt">Syd Bauman</editor>
+        <editor xml:id="LB">Lou Burnard</editor>
+        <editor xml:id="SR">Sebastian Rahtz</editor>
+        <editor xml:id="efraimdf">Efraim Feinstein</editor>
+      </titleStmt>
+      <publicationStmt>
+        <availability status="restricted">
+          <p>You may choose either license, at your option:</p>
+          <licence target="http://creativecommons.org/licenses/by/3.0"/>
+          <licence target="http://www.opensource.org/licenses/bsd-license.php">
+            <p>The BSD 2-clause license:</p>
+            <p>Copyright (c) 2012 Efraim Feinstein</p>
+            <p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
+            <p>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</p>
+            <p>Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</p>
+            <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+          </licence> 
+        </availability>
+      </publicationStmt>
+      <sourceDesc>
+        <p>Initially created on <date when="2006-10-12T05:24:41">Thursday 12th
+            October 2006</date> by the form at http://www.tei-c.org.uk/Roma/.</p>
+      </sourceDesc>
+    </fileDesc>
+    <revisionDesc>
+      <change when="2012-05-22" who="#efraimdf">Change TEI bare to contributor XML</change>
+      <change when="2011-03-26" who="#SR">rewrite as new-style ODD </change>
+      <change when="2007-08-12" who="#LB">Removed further elements added
+since this ODD was first created </change>
+      <change when="2007-04-09" who="#LB">Added prose and reorganized
+structure to make it more document-like; changed deletion of attribute
+decls into deletion of att.declaring class; add deletes for elements
+email and floatingText added to P5 since this ODD was first created;
+considered but did not implement removal of all irrelevant datatype specs...</change>
+      <change when="2006-10-14" who="#sbauman.emt"> Made valid: <list><item>removed empty <att>prefix</att> attribute</item><item>added required <att>type</att> attribute to
+          <gi>classSpec</gi>s</item></list><!--. <note>Sebastian had also made the above changes.</note> -->Also
+        removed extraneous <gi>altIdent</gi> elements, improved
+        <gi>sourceDesc</gi>, changed the <att>ident</att> of <gi>schemaSpec</gi>
+        to match the filename, and added this revision description. </change>
+    </revisionDesc>
+  </teiHeader>
+  <text>
+    <body>
+      <p>Contributor list XML, based on the TEI bare customization.</p>
+      <div>
+        <head>Basic document structure</head>
+        <p>A contributor document has a very simple form. The root element is
+        <gi>j:contributor</gi>. There is no TEI header. It contains, in order:</p>
+        <list>
+          <item>A required single <gi>idno</gi> element, the database identifier of the contributor</item>
+          <item>An optional <gi>name</gi> or <gi>orgName</gi> element, giving the real name 
+          (or pseudonym) of the contributor, or the contributing organization. The <gi>name</gi> element should contain name parts,
+          such as <gi>forename</gi> and <gi>surname</gi>.</item>
+          <item>Optional contact information, such as <gi>email</gi> address or postal <gi>address</gi>.</item>
+          <item>Optional organization <gi>affiliation</gi>, which may contain an <gi>orgName</gi> element as well.</item>
+        </list>
+        <specList>
+          <specDesc key="contributor"/>
+          <specDesc key="idno"/>
+          <specDesc key="name"/>
+          <specDesc key="roleName"/>
+          <specDesc key="forename"/>
+          <specDesc key="surname"/>
+          <specDesc key="genName"/>
+          <specDesc key="nameLink"/>
+          <specDesc key="orgName"/>
+          <specDesc key="address"/>
+          <specDesc key="addrLine"/>
+          <specDesc key="email"/>
+          <specDesc key="affiliation"/> 
+        </specList>
+      </div>  
+      <div>
+        <head>Class modifications</head>
+        <p>The class modifications are the same as those used in TEI bare. Only the
+        <att>xml:id</att>, <att>n</att>, and <att>xml:lang</att> attributes are allowed globally.
+        </p>
+        <specGrp xml:id="classmods">
+          <classSpec ident="att.global" mode="change" module="tei" type="atts">
+            <attList>
+              <attDef ident="xml:space" mode="delete"/>
+              <attDef ident="rend" mode="delete"/>
+              <attDef ident="rendition" mode="delete"/>
+              <attDef ident="xml:base" mode="delete"/>
+            </attList>
+          </classSpec>
+          <classSpec ident="att.divLike" mode="change" module="tei" type="atts">
+            <attList>
+              <attDef ident="org" mode="delete"/>
+              <attDef ident="sample" mode="delete"/>
+              <attDef ident="part" mode="delete"/>
+            </attList>
+          </classSpec>
+          <classSpec ident="att.declaring" mode="delete" module="tei" type="atts"/>
+        </specGrp>
+      </div>
+      <div>
+        <head>Formal declaration</head>
+        <schemaSpec ident="contributor" start="contributor" xml:lang="en">
+          <moduleRef key="core" include="address addrLine email name"/>
+          <moduleRef key="tei"/>
+          <moduleRef key="header" include="idno"/>
+          <moduleRef key="namesdates" include="affiliation forename genName nameLink orgName roleName surname"/>
+          
+          <!-- the contributor element -->
+          <elementSpec mode="add" ident="contributor"
+            ns="http://jewishliturgy.org/ns/jlptei/1.0"
+            module="opensiddur-contributor">
+            <equiv/>
+            <gloss>Top level structured element for contributor entries</gloss>
+            <classes>
+              <memberOf key="att.global" />
+            </classes>
+            <content>
+              <rng:ref name="idno"/>
+              <rng:ref name="model.nameLike.agent"/>
+              <rng:zeroOrMore>
+                <rng:ref name="model.addressLike"/> 
+              </rng:zeroOrMore>
+            </content>
+            <exemplum>
+              <p>Basic usage of the contributor element to identify a contributor and his contact information:</p>
+              <egXML>
+                <j:contributor>
+                  <tei:idno>efraimdf</tei:idno>
+                  <tei:name>Efraim Feinstein</tei:name>
+                  <tei:email>efraim@opensiddur.org</tei:email>
+                </j:contributor>
+              </egXML>
+            </exemplum>
+            <remarks>
+            </remarks>
+          </elementSpec>
+        
+          <specGrpRef target="#classmods"/>
+        </schemaSpec>
+      </div>
+    </body>
+  </text>
+</TEI>

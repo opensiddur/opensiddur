@@ -14,6 +14,9 @@ text/wlc/
 # generated documentation
 /doc/
 
+# generated schema
+schema/build
+
 # generated files:
 /code/common/params.xsl2
 /code/transforms/format/xhtml/muxhtml.xsl2
