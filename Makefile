@@ -99,7 +99,7 @@ EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
-EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-setup-2.0-tech-preview.jar
+EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1-dev.jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
 EXISTBACKUP ?= java -Dexist.home=$(EXIST_INSTALL_DIR) -jar $(EXIST_INSTALL_DIR)/start.jar org.exist.backup.Main 
 
@@ -133,9 +133,9 @@ TEIDIR = $(LIBDIR)/tei
 TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 
 EXISTSRCDIR = $(LIBDIR)/exist
-EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/stable/eXist-2.0.x
+EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 16356
+EXIST_REVISION ?= -r 16454
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -251,7 +251,7 @@ copy-files:
 	cp $(SETUPDIR)/hebrew.dtd $(EXIST_INSTALL_DIR)/webapp/WEB-INF/entities
 	@#then copy the code so eXist will know where the triggers and support modules are during restore, then copy everything else with system *last* so the triggers will not engage
 	@#finally, copy the transforms directory again so the tests that require the document URI trigger will run
-	for d in cache code data group schema xforms system code/transforms; do \
+	for d in code data user group schema xforms system code/transforms; do \
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/$$d/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"; \
 	done 
 
