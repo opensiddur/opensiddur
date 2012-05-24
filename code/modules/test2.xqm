@@ -113,7 +113,9 @@ declare function t:setup-action($action) {
               xdb:remove($action/@collection)
             else ()
         case element(remove-document) return
-            xdb:remove($action/@collection, $action/@name)
+          if (doc-available(concat($action/@collection, "/", $action/@name)))
+          then xdb:remove($action/@collection, $action/@name)
+          else ()
         default return
             ()
 };
@@ -374,10 +376,14 @@ declare function local:evaluate-assertions(
                 }</expected>
     }
     catch * {
-      local:error("assertion", 
-        $err:line-number, $err:column-number, 
-        $err:code, $err:description, $err:value, 
-        $assert)
+      element { name($assert) }{
+        attribute pass { false() },
+        $assert/(@desc, @xpath),
+        local:error("assertion", 
+          $err:line-number, $err:column-number, 
+          $err:code, $err:description, $err:value, 
+          $assert)
+      }
     }
   let $all-OK := empty($OK[@pass='false'])
   return
@@ -386,7 +392,11 @@ declare function local:evaluate-assertions(
       $OK, 
       if (not($all-OK)) 
       then                
-        <result>{$expanded}</result>
+        <result>{
+        if ($OK/error/@during = "assertion")
+        then $OK/error[@during="assertion"]
+        else $expanded
+        }</result>
       else ()
     }</test>
 };
