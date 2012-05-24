@@ -585,7 +585,7 @@ declare function t:ignore-testSet(
 
 declare function t:fail-testSet(
   $set as element(TestSet),
-  $error as element(error)
+  $error as element(error)+
   ) as element(TestSet) {
   <TestSet pass="false">{
     $set/testName,
@@ -598,13 +598,18 @@ declare function t:fail-testSet(
 declare function t:fail-test(
   $test as element(test),
   $p as xs:integer,
-  $error as element(error)
+  $error as element(error)+
   ) as element(test) {
   <test n="{$p}" pass="false">{
     attribute desc {$test/task},
-    <result>{
-      $error
-    }</result>
+    for $condition in $test/(expected|xpath|error|t:expand-class(class))
+    return 
+      element { name($condition) }{
+        $condition/@desc,
+        attribute pass { "false" },
+        $condition
+      },
+    <result>{$error}</result>
   }</test>
 };
 
@@ -694,8 +699,12 @@ declare function local:run-tests-helper(
                   $suite/tearDown)
               }            
             )
-            return 
-              ($setup, $teardown, $result)
+            return
+              if (exists($setup))
+              then t:fail-test($test,$p,$setup)
+              else if (exists($teardown))
+              then t:fail-test($test,$p,$teardown)
+              else $result
           else if ($if instance of element(error))
           then t:fail-test($test, $p, $if)
           else t:ignore-test($test, $p) 
