@@ -75,6 +75,28 @@ module namespace t="http://exist-db.org/xquery/testing/modified";
 
 import module namespace xdb="http://exist-db.org/xquery/xmldb";
 
+declare function local:error(
+  $activity as xs:string, 
+  $line as xs:string, 
+  $column as xs:string, 
+  $code as xs:string, 
+  $description as xs:string, 
+  $value as xs:string, 
+  $error-data as item()*
+  ) as element(error) {
+  <error 
+    pass = "false"
+    during="{$activity}"
+    line-number="{$line}"
+    column-number="{$column}"
+    code="{$code}"
+    description="{$description}"
+    >
+    <value>{$value}</value>
+    {$error-data}
+  </error>
+};
+
 declare function t:setup-action($action) {
     typeswitch ($action)
         case element(code) return
@@ -100,15 +122,29 @@ declare function t:setup-run($action as element(code)) {
     util:eval(concat(t:init-prolog($action), $action/string()))
 };
 
-(: return whether a test should run :)
-declare function t:if($condition as element(if)*) as xs:boolean {
-  empty($condition) or (
-  every $cond in $condition
-    satisfies (
-      not(normalize-space($cond)) or 
+(: return whether a test should run 
+ : false() = run, true() = do not run
+ : element(error) = do not run, the condition has an error
+ :)
+declare function t:if(
+  $condition as element(if)*
+  ) as item() {
+  try {
+    not(
+    empty($condition) or (
+    every $cond in $condition
+      satisfies (
+        not(normalize-space($cond)) or 
         boolean(util:eval(concat(t:init-prolog($cond), $cond/string())))
+      )
     )
-  )
+    )
+  }
+  catch * {
+    local:error("condition", $err:line-number, $err:column-number,
+      $err:code, $err:description, $err:value,
+      $condition)
+  }
 };
 
 declare function t:store($action as element(store)) {
@@ -128,16 +164,20 @@ declare function t:store-files($action as element(store-files)) {
         xdb:store-files-from-pattern($action/@collection, $action/@dir, $action/@pattern, $type)
 };
 
-declare function t:setup($setup as element(setup)?) {
-    for $action in $setup/*
-    return
-        t:setup-action($action)
+declare function t:setup(
+  $setup as element(setup)?
+  ) as empty-sequence() {
+  for $action in $setup/*
+  let $null := t:setup-action($action)
+  return ()
 };
 
-declare function t:tearDown($tearDown as element(tearDown)?) {
-    for $action in $tearDown/*
-    return
-        t:setup-action($action)
+declare function t:tearDown(
+  $tearDown as element(tearDown)?
+  ) as empty-sequence() {
+  for $action in $tearDown/*
+  let $null := t:setup-action($action)
+  return ()
 };
 
 declare function t:declare-variable($var as element(variable)) as item()? {
@@ -227,7 +267,8 @@ declare function local:evaluate-assertions(
             util:serialize($x, $options)
         }
         catch * {
-          <error>Serialization error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
+          local:error("serialization", $err:line-number, 
+            $err:column-number, $err:code, $err:description, $err:value, ())
         }
       return
         if ($serialized instance of element(error)) 
@@ -247,90 +288,97 @@ declare function local:evaluate-assertions(
     else $output
   let $OK := 
     for $assert in $test/(error|xpath|expected|t:expand-class(class))
-    return (
-      if ($assert instance of element(error)) 
-      then
-        let $pass := 
-          $expanded instance of element(error) 
-          and 
-            ( (: the assertion is that the err:* parameters
-               : in the assertion match those in the returned
-               : error :)
-              every $err-attribute in $assert/@* 
-              satisfies $expanded/@*[name()=$err-attribute/name()]=$err-attribute
-            )
-        return 
-          <error pass="{$pass}">{
-            $assert/@desc,
-            if (not($pass))
-            then $assert
-            else ()
-          }</error>
-      else if ($assert instance of element(xpath)) 
-      then
-        let $pass := t:test(t:xpath($output, $assert))
-        return
-          <xpath pass="{$pass}">{
-            $assert/@desc, 
-            if (not($pass)) 
-            then $assert 
-            else ()
-          }</xpath>
-      else
-        (: $assert is expected :)
-        let $expected :=
-          if ($assert/@href)
-          then 
-            if ($test/@output eq "text")
-            then util:binary-doc(resolve-uri($assert/@href, base-uri($assert)))
+    return 
+      try {
+        if ($assert instance of element(error)) 
+        then
+          let $pass := 
+            $expanded instance of element(error) 
+            and 
+              ( (: the assertion is that the err:* parameters
+                 : in the assertion match those in the returned
+                 : error :)
+                every $err-attribute in $assert/@* 
+                satisfies $expanded/@*[name()=$err-attribute/name()]=$err-attribute
+              )
+          return 
+            <error pass="{$pass}">{
+              $assert/@desc,
+              if (not($pass))
+              then $assert
+              else ()
+            }</error>
+        else if ($assert instance of element(xpath)) 
+        then
+          let $pass := t:test(t:xpath($output, $assert))
+          return
+            <xpath pass="{$pass}">{
+              $assert/@desc, 
+              if (not($pass)) 
+              then $assert 
+              else ()
+            }</xpath>
+        else
+          (: $assert is expected :)
+          let $expected :=
+            if ($assert/@href)
+            then 
+              if ($test/@output eq "text")
+              then util:binary-doc(resolve-uri($assert/@href, base-uri($assert)))
+              else 
+                let $d := doc(resolve-uri($assert/@href, base-uri($assert)))
+                return
+                  (: transform:transform() returns element()|node(), not document-node() :)
+                  if ($test/(xslt|context))
+                  then $d/*
+                  else $d
             else 
-              let $d := doc(resolve-uri($assert/@href, base-uri($assert)))
-              return
-                (: transform:transform() returns element()|node(), not document-node() :)
-                if ($test/(xslt|context))
-                then $d/*
-                else $d
-          else 
-            if ($test/@output eq "text") 
-            then data($assert)
-            else $assert/node()
-        return
-          if ($test/@output eq 'text') then 
-            let $asString :=
-              if ($test/@serialize) 
-              then $expanded
-              else
-                normalize-space(
-                  string-join(
-                    for $x in $output 
-                    return string($x),
-                    ' '
+              if ($test/@output eq "text") 
+              then data($assert)
+              else $assert/node()
+          return
+            if ($test/@output eq 'text') then 
+              let $asString :=
+                if ($test/@serialize) 
+                then $expanded
+                else
+                  normalize-space(
+                    string-join(
+                      for $x in $output 
+                      return string($x),
+                      ' '
+                    )
                   )
-                )
-            let $pass := $asString eq normalize-space($expected)
-            return 
-              <expected pass="{$pass}">{
-                $assert/@desc,
-                if (not($pass))
-                then $expected
-                else ()
-              }</expected>
-          else
-            let $xn := t:normalize($expanded)
-            let $en := t:normalize($expected)
-            let $xp :=
-              if ($assert/@xpath) 
-              then t:xpath($xn, $assert/@xpath) 
-              else $xn
-            let $pass := t:deep-equal-wildcard($xp, $en)
-            return
-              <expected pass="{$pass}">{
-                $assert/(@desc, @xpath),
-                if (not($pass))
-                then $en
-                else ()
-              }</expected>
-    )
+              let $pass := $asString eq normalize-space($expected)
+              return 
+                <expected pass="{$pass}">{
+                  $assert/@desc,
+                  if (not($pass))
+                  then $expected
+                  else ()
+                }</expected>
+            else
+              let $xn := t:normalize($expanded)
+              let $en := t:normalize($expected)
+              let $xp :=
+                if ($assert/@xpath) 
+                then t:xpath($xn, $assert/@xpath) 
+                else $xn
+              let $pass := t:deep-equal-wildcard($xp, $en)
+              return
+                <expected pass="{$pass}">{
+                  $assert/(@desc, @xpath),
+                  if (not($pass))
+                  then $en
+                  else ()
+                }</expected>
+    }
+    catch * {
+      local:error("assertion", 
+        $err:line-number, $err:column-number, 
+        $err:code, $err:description, $err:value, 
+        $assert)
+    }
   let $all-OK := empty($OK[@pass='false'])
   return
     <test n="{$count}" pass="{$all-OK}">{
@@ -356,19 +404,16 @@ declare function local:run-xquery-test(
 	   if ($test/@trace eq 'yes') then 
 	       (system:clear-trace(), system:enable-tracing(true(), false()))
      else ()
+  let $full-code := concat($context, $test/code/string())
   let $queryOutput :=
 	  try {
-	    let $full-code := concat($context, $test/code/string())
-	    return util:eval($full-code)
+	    util:eval($full-code)
 	  }
 	  catch * {
-	    <error 
-	      line-number="{$err:line-number}"
-	      column-number="{$err:column-number}"
-	      code="{$err:code}"
-	      description="{$err:description}"
-	      value="{$err:value}"
-	      >Evaluation error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
+	    local:error("evaluation", 
+	      $err:line-number, $err:column-number, 
+	      $err:code, $err:description, $err:value,
+	      $full-code)
 	  }
 	let $output := 
 	  if ($test/@trace eq 'yes') 
@@ -417,12 +462,10 @@ declare function local:run-xslt-test(
       )
     }
     catch * {
-      <error line-number="{$err:line-number}"
-        column-number="{$err:column-number}"
-        code="{$err:code}"
-        description="{$err:description}"
-        value="{$err:value}"
-        >Transform error ({$err:line-number}:{$err:column-number}:{$err:code}): {$err:description}: {$err:value}</error>
+      local:error("transform", 
+        $err:line-number, $err:column-number, 
+        $err:code, $err:description, $err:value, 
+        $test)
     }
   return
     local:evaluate-assertions($test, $output, $count)
@@ -522,6 +565,8 @@ declare function t:run-testSuite(
 			  return
 			    if (not($if) or $set/(empty(@ignore) or @ignore = "no"))
 			    then t:run-testSet($set, $run-user, $run-password)
+			    else if ($if instance of element(error))
+			    then t:fail-testSet($set, $if)
 			    else t:ignore-testSet($set)
 			}
 		</TestSuite>
@@ -533,10 +578,36 @@ declare function t:ignore-testSet(
   <TestSet pass="ignore">{
     $set/testName,
     $set/description/p,
-    for $test at $p in $set
+    for $test at $p in $set/test
     return t:ignore-test($test, $p)
   }</TestSet>
 };
+
+declare function t:fail-testSet(
+  $set as element(TestSet),
+  $error as element(error)
+  ) as element(TestSet) {
+  <TestSet pass="false">{
+    $set/testName,
+    $set/description/p,
+    for $test at $p in $set/test
+    return t:fail-test($test, $p, $error)
+  }</TestSet>
+};
+
+declare function t:fail-test(
+  $test as element(test),
+  $p as xs:integer,
+  $error as element(error)
+  ) as element(test) {
+  <test n="{$p}" pass="false">{
+    attribute desc {$test/task},
+    <result>{
+      $error
+    }</result>
+  }</test>
+};
+
 
 declare function t:run-testSuite(
   $suite as element(TestSuite)
@@ -560,34 +631,73 @@ declare function local:run-tests-helper(
         $copy/testName,
         $copy/description/p,
         for $test at $p in $copy/test
+        let $if := t:if($test/if)
         return 
-          if ($test/((empty(@ignore) or @ignore = "no") and t:if(if)))
+          if ($test/((empty(@ignore) or @ignore = "no") and not($if)))
           then
-            let $null := (
-              if ($suite-user)
-              then
-                system:as-user($suite-user, $suite-password, t:setup($suite/setup))
-              else t:setup($suite/setup),
-              if ($test-user)
-              then 
-                system:as-user($test-user, $test-password, t:setup($copy/setup))
-              else t:setup($copy/setup)
+            let $setup as element(error)? := ( 
+              try {
+                if ($suite-user)
+                then
+                  system:as-user($suite-user, $suite-password, t:setup($suite/setup))
+                else t:setup($suite/setup)
+              }
+              catch * {
+                local:error("setup", 
+                  $err:line-number, $err:column-number, 
+                  $err:code, $err:description, $err:value,
+                  $suite/setup)
+              },
+              try {
+                if ($test-user)
+                then 
+                  system:as-user($test-user, $test-password, t:setup($copy/setup))
+                else t:setup($copy/setup)
+              }
+              catch * {
+                local:error("setup", 
+                  $err:line-number, $err:column-number, 
+                  $err:code, $err:description, $err:value, 
+                  $copy/setup)
+              }
             )
-            let $result :=  
-              if ($test-user)
-              then system:as-user($test-user, $test-password, t:run-test($test, $p))
-              else t:run-test($test, $p)
-            let $null := (
-              if ($suite-user)
-              then
-                system:as-user($suite-user, $suite-password, t:tearDown($suite/tearDown))
-              else t:tearDown($suite/tearDown),
-              if ($test-user)
-              then 
-                system:as-user($test-user, $test-password, t:tearDown($copy/tearDown))
-              else t:tearDown($copy/tearDown)
+            let $result :=
+              if ($setup instance of element(error))
+              then ( (: setup failed, do nothing, but do try to tear down :) )
+              else 
+                  if ($test-user)
+                  then system:as-user($test-user, $test-password, t:run-test($test, $p))
+                  else t:run-test($test, $p)
+            let $teardown as element(error)? := (
+              try {
+                if ($test-user)
+                then 
+                  system:as-user($test-user, $test-password, t:tearDown($copy/tearDown))
+                else t:tearDown($copy/tearDown)
+              }
+              catch * {
+                local:error("tearDown", 
+                  $err:line-number, $err:column-number, 
+                  $err:code, $err:description, $err:value, 
+                  $copy/tearDown)
+              },
+              try {
+                if ($suite-user)
+                then
+                  system:as-user($suite-user, $suite-password, t:tearDown($suite/tearDown))
+                else t:tearDown($suite/tearDown)
+              }
+              catch * {
+                local:error("tearDown", 
+                  $err:line-number, $err:column-number, 
+                  $err:code, $err:description, $err:value, 
+                  $suite/tearDown)
+              }            
             )
-            return $result
+            return 
+              ($setup, $teardown, $result)
+          else if ($if instance of element(error))
+          then t:fail-test($test, $p, $if)
           else t:ignore-test($test, $p) 
       }</TestSet>
     )
@@ -606,8 +716,10 @@ declare function t:run-testSet(
     	else util:expand($set)
     let $if := t:if($copy/if)
     return
-      if ($if)
+      if (not($if))
       then local:run-tests-helper($copy, $suite, $run-user, $run-password)
+      else if ($if instance of element(error))
+      then t:fail-testSet($copy, $if)
       else t:ignore-testSet($copy)
 };
 
