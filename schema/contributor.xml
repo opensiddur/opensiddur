@@ -125,7 +125,9 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
             </classes>
             <content>
               <rng:ref name="idno"/>
-              <rng:ref name="model.nameLike.agent"/>
+              <rng:optional>
+                <rng:ref name="model.nameLike.agent"/>
+              </rng:optional>
               <rng:zeroOrMore>
                 <rng:ref name="model.addressLike"/> 
               </rng:zeroOrMore>
