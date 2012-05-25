@@ -650,7 +650,7 @@ declare function local:run-tests-helper(
         return 
           if ($test/((empty(@ignore) or @ignore = "no") and not($if)))
           then
-            let $setup as element(error)? := ( 
+            let $setup as element(error)* := ( 
               try {
                 if ($suite-user)
                 then
@@ -683,7 +683,7 @@ declare function local:run-tests-helper(
                   if ($test-user)
                   then system:as-user($test-user, $test-password, t:run-test($test, $p))
                   else t:run-test($test, $p)
-            let $teardown as element(error)? := (
+            let $teardown as element(error)* := (
               try {
                 if ($test-user)
                 then 
