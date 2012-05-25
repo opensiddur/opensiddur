@@ -15,6 +15,10 @@
   <namespace prefix="rest">http://exquery.org/ns/rest/annotation/</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   <!-- HTTP returns -->
+  <TestClass xml:id="Created">
+    <xpath desc="returns status code 201">self::rest:response/http:response/@status = 201</xpath>
+    <xpath desc="returns a Location header">exists(self::rest:response/http:response/http:header[@name="Location"][@value])</xpath>
+  </TestClass>
   <TestClass xml:id="NoData">
     <xpath desc="returns status code 204">self::rest:response/http:response/@status = 204</xpath>
   </TestClass>

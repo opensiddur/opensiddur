@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:http="http://expath.org/ns/http-client">
+  <suiteName>User API</suiteName>
+  <description>
+    <p>Test the user and contributor profile API</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <setup>
+    <store collection="/user" name="testuser.xml">
+      <j:contributor>
+        <tei:idno>testuser</tei:idno>
+        <tei:name>Spike Tester</tei:name>
+      </j:contributor>
+    </store>
+    <store collection="/user" name="notauser.xml">
+      <j:contributor>
+        <tei:idno>notauser</tei:idno>
+        <tei:name>Not a spike user</tei:name>
+      </j:contributor>
+    </store>
+    <store collection="/user" name="testuser2.xml">
+      <j:contributor>
+        <tei:idno>testuser2</tei:idno>
+      </j:contributor>
+    </store>
+    <code><![CDATA[
+      let $testuser := xs:anyURI("/user/testuser.xml")
+      let $testuser2 := xs:anyURI("/user/testuser2.xml")
+      let $notauser := xs:anyURI("/user/notauser.xml")
+      return
+      system:as-user("admin", $magic:password, (
+        sm:chown($testuser, "testuser"),
+        sm:chgrp($testuser, "testuser"),
+        sm:chmod($testuser, "rw-r--r--"),
+        sm:chown($notauser, "testuser2"),
+        sm:chgrp($notauser, "everyone"),
+        sm:chmod($notauser, "rw-rw-r--"),
+        sm:chown($testuser2, "testuser2"),
+        sm:chgrp($testuser2, "everyone"), (: there is no testuser2 group:)
+        sm:chmod($testuser2, "rw-r--r--")
+      ))
+    ]]></code>
+    <store collection="/user" name="TestProfile.xml">
+      <j:contributor>
+        <tei:idno>TestProfile</tei:idno>
+        <tei:name>A Tester</tei:name>
+      </j:contributor>
+    </store>
+  </setup>
+  <tearDown>
+    <remove-document collection="/user" name="TestProfile.xml"/>
+    <remove-document collection="/user" name="testuser.xml"/>
+    <remove-document collection="/user" name="not_a_real_contributors_profile.xml"/>
+    <remove-document collection="/user" name="notauser.xml"/>
+    <code><![CDATA[
+      system:as-user("admin", $magic:password, 
+        xmldb:remove("/user", "testuser2.xml"))
+    ]]></code>
+  </tearDown>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
+  <imports>
+    import module namespace user="http://jewishliturgy.org/api/user"
+      at "xmldb:exist:///code/api/user.xqm";
+    import module namespace magic="http://jewishliturgy.org/magic"
+      at "xmldb:exist:///code/magic/magic.xqm";
+  </imports>
+  <TestSet>
+    <testName>user:list()</testName>
+    <test>
+      <task>List all users</task>
+      <code><![CDATA[
+      user:list("", 1, 100)
+      ]]></code> 
+      <class href="common.t.xml#SearchResults"/>
+      <xpath desc="returns at least 4 results">count(.//html:*[@class="result"])&gt;=4</xpath>
+    </test>
+    <test>
+      <task>Query all users</task>
+      <code><![CDATA[
+      user:list("spike", 1, 100)
+      ]]></code> 
+      <class href="common.t.xml#SearchResults"/>
+      <xpath desc="returns at least 2 results">count(.//html:*[@class="result"])&gt;=2</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>user:get(): authenticated</testName>
+    <test>
+      <task>Get existing user profile</task>
+      <code><![CDATA[
+      user:get("testuser2")
+      ]]></code> 
+      <!-- a document-node() is returned... -->
+      <expected desc="profile is returned" xpath="*">
+        <j:contributor>
+          <tei:idno>testuser2</tei:idno>
+        </j:contributor>
+      </expected>
+    </test>
+    <test>
+      <task>Get non-existing user profile</task>
+      <code><![CDATA[
+      user:get("doesnotexist")
+      ]]></code> 
+      <class href="common.t.xml#NotFound"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>user:get(): unauthenticated</testName>
+    <test>
+      <task>Get existing user profile</task>
+      <code><![CDATA[
+      ]]></code> 
+    </test>
+    <test>
+      <task>Get non-existing user profile</task>
+      <code><![CDATA[
+      user:get("doesnotexist")
+      ]]></code> 
+      <class href="common.t.xml#NotFound"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>user:post-xml(): unauthenticated</testName>
+    <asUser/>
+    <password/>
+    <tearDown>
+      <!-- remove user, group, and profile -->
+      <code><![CDATA[
+      system:as-user("admin", $magic:password,(
+        if (xmldb:group-exists("testuser3"))
+        then 
+          try {
+            sm:delete-group("testuser3")
+          } 
+          catch * { 
+            util:log-system-out("WARNING: DELETING GROUPS IS BROKEN BEFORE r16453!") 
+          }
+        else (),
+        if (xmldb:exists-user("testuser3"))
+        then xmldb:delete-user("testuser3")
+        else (),
+        if (doc-available("/user/testuser3.xml"))
+        then xmldb:remove("/user", "testuser3.xml")
+        else ()
+      ))
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Create a new user</task>
+      <code><![CDATA[
+      user:post-xml(document {
+        <new>
+          <user>testuser3</user>
+          <password>testuser3</password>
+        </new>
+      })
+      ]]></code> 
+      <class href="common.t.xml#Created"/>
+      <xpath desc="user has been created">xmldb:exists-user("testuser3")</xpath>
+      <xpath desc="group has been created">system:as-user("admin", $magic:password, xmldb:group-exists("testuser3"))</xpath>
+      <xpath desc="profile has been created">doc-available("/user/testuser3.xml")</xpath>
+      <xpath desc="profile contains an idno equal to the user name">doc("/user/testuser3.xml")/j:contributor/tei:idno="testuser3"</xpath>
+      <xpath desc="user profile permissions are correct">
+      doc-available("/user/testuser3.xml") and
+      sm:get-permissions(xs:anyURI("/user/testuser3.xml"))/*/(
+        @owner = "testuser3" and @group="testuser3" and @mode="rw-r--r--"
+      )</xpath>
+    </test>
+    <test>
+      <task>Create a new user with blank username</task>
+      <code><![CDATA[
+      user:post-xml(document {
+        <new>
+          <password>testuser3</password>
+        </new>
+      })
+      ]]></code>
+      <class href="common.t.xml#BadRequest"/> 
+    </test>
+    <test>
+      <task>Create a new user with blank password</task>
+      <code><![CDATA[
+      user:post-xml(document {
+        <new>
+          <user>testuser3</user>
+          <password/>
+        </new>
+      })
+      ]]></code>
+      <class href="common.t.xml#BadRequest"/> 
+    </test>
+    <test>
+      <task>Create a new user when the user already exists</task>
+      <code><![CDATA[
+      user:post-xml(document {
+        <new>
+          <user>testuser</user>
+          <password>xxxxxx</password>
+        </new>
+      })
+      ]]></code>
+      <class href="common.t.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>Create a new user when no user exists, but a profile exists</task>
+      <code><![CDATA[
+      user:post-xml(document {
+        <new>
+          <user>TestProfile</user>
+          <password>xxxxxx</password>
+        </new>
+      })
+      ]]></code> 
+      <class href="common.t.xml#Forbidden"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>user:post-xml(): authenticated</testName>
+    <tearDown>
+      <!-- reset testuser2's password -->
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, 
+        xmldb:change-user("testuser2", "testuser2", (), ())
+      )
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Change a password</task>
+      <code><![CDATA[
+      system:as-user("testuser2", "testuser2", 
+        user:post-xml(document {
+          <change>
+            <user>testuser2</user>
+            <password>testusernewpassword</password>
+          </change>
+        })
+      )
+      ]]></code> 
+      <class href="common.t.xml#NoData"/>
+      <xpath desc="password is changed">xmldb:authenticate("/db", "testuser2", "testusernewpassword")</xpath>
+    </test>
+    <test>
+      <task>Change password of another user</task>
+      <code><![CDATA[
+      user:post-xml(document {
+        <change>
+          <user>testuser2</user>
+          <password>testuser</password>
+        </change>
+      })
+      ]]></code>
+      <class href="common.t.xml#Forbidden"/> 
+    </test>
+    <test>
+      <task>Missing username</task>
+      <code><![CDATA[
+      user:post-xml(document {
+        <change>
+          <password>testuser</password>
+        </change>
+      })
+      ]]></code>
+      <class href="common.t.xml#BadRequest"/>
+    </test>
+    <test>
+      <task>Missing password</task>
+      <code><![CDATA[
+      user:post-xml(document {
+        <change>
+          <user>testuser</user>
+        </change>
+      })
+      ]]></code>
+      <class href="common.t.xml#BadRequest"/>
+    </test>
+    <test>
+      <task>Attempt to change a username</task>
+      <code><![CDATA[
+      user:post-xml(document {
+        <change>
+          <user>testusernoexist</user>
+          <password>testuser</password>
+        </change>
+      })
+      ]]></code>
+      <!-- forbidden because it's also an attempt to change 
+      the password of another user
+       -->
+      <class href="common.t.xml#Forbidden"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>user:put() authenticated</testName>
+    <test>
+      <task>Edit your own profile</task>
+      <code><![CDATA[
+      user:put("testuser", document {
+        <j:contributor>
+          <tei:idno>testuser</tei:idno>
+          <tei:name>Test User</tei:name>
+        </j:contributor>
+      })
+      ]]></code>
+      <class href="common.t.xml#NoData"/>
+      <xpath desc="profile is edited">doc("/user/testuser.xml")/j:contributor/tei:name="Test User"</xpath>
+    </test>
+    <test>
+      <task>Edit your own profile, changing tei:idno</task>
+      <code><![CDATA[
+      user:put("testuser", document {
+        <j:contributor>
+          <tei:idno>testuserdifferent</tei:idno>
+          <tei:name>Test User</tei:name>
+        </j:contributor>
+      })
+      ]]></code>
+      <class href="common.t.xml#BadRequest"/>
+    </test>
+    <test>
+      <task>Edit your own profile, with invalid contributor data</task>
+      <code><![CDATA[
+      user:put("testuser", document {
+        <j:contributor>
+          <tei:idno>testuser</tei:idno>
+          <tei:not-allowed/>
+        </j:contributor>
+      })
+      ]]></code>
+      <class href="common.t.xml#BadRequest"/>
+    </test>
+    <test>
+      <task>Edit another user's profile</task>
+      <code><![CDATA[
+      user:put("testuser2", document {
+        <j:contributor>
+          <tei:idno>testuser2</tei:idno>
+          <tei:name>Test User</tei:name>
+        </j:contributor>
+      })
+      ]]></code>
+      <class href="common.t.xml#Forbidden"/>
+    </test>
+    <test>
+      <task>Create a non-user profile</task>
+      <code><![CDATA[
+      user:put("not_a_real_contributors_profile", document {
+        <j:contributor>
+          <tei:idno>not_a_real_contributors_profile</tei:idno>
+          <tei:name>Not Real</tei:name>
+        </j:contributor>
+      })
+      ]]></code>
+      <class href="common.t.xml#Created"/>
+      <xpath desc="profile created">doc-available("/user/not_a_real_contributors_profile.xml")</xpath>
+      <xpath desc="profile mode is correct">sm:get-permissions(xs:anyURI("/user/not_a_real_contributors_profile.xml"))/*/(
+        @owner="testuser" and @group="everyone" and @mode="rw-rw-r--"
+      )</xpath>
+    </test>
+    <test>
+      <task>Edit a non-user profile</task>
+      <code><![CDATA[
+      user:put("notauser", document {
+        <j:contributor>
+          <tei:idno>notauser</tei:idno>
+          <tei:name>Not A User</tei:name>
+        </j:contributor>
+      })
+      ]]></code>
+      <class href="common.t.xml#NoData"/>
+      <xpath desc="profile edited">doc("/user/notauser.xml")/j:contributor/tei:name="Not A User"</xpath>
+      <xpath desc="profile mode is correct">sm:get-permissions(xs:anyURI("/user/notauser.xml"))/*/(
+        @owner="testuser" and @group="everyone" and @mode="rw-rw-r--"
+      )</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>user:put() not authenticated</testName>
+    <asUser/>
+    <password/>
+    <setup>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, (
+      xmldb:store("/user","notauser.xml",
+        <j:contributor>
+          <tei:idno>notauser</tei:idno>
+        </j:contributor>
+      ),
+      let $uri := xs:anyURI("/user/notauser.xml")
+      return (
+        sm:chmod($uri, "rw-rw-r--"),
+        sm:chown($uri, "testuser"),
+        sm:chgrp($uri, "everyone")
+      )
+      ))
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password,
+        xmldb:remove("/user", "notauser.xml")
+      )
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Edit a user profile</task>
+      <code><![CDATA[
+      user:put("testuser", document {
+        <j:contributor>
+          <tei:idno>testuser</tei:idno>
+          <tei:name>Test User</tei:name>
+        </j:contributor>
+      })
+      ]]></code>
+      <class href="common.t.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>Edit a non-user profile</task>
+      <code><![CDATA[
+      user:put("nonuser", document {
+        <j:contributor>
+          <tei:idno>nonuser</tei:idno>
+          <tei:name>Is Not A User</tei:name>
+        </j:contributor>
+      })
+      ]]></code>
+      <class href="common.t.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>Create a profile</task>
+      <code><![CDATA[
+      user:put("there_is_no_user_with_that_name", document {
+        <j:contributor>
+          <tei:idno>there_is_no_user_with_that_name</tei:idno>
+          <tei:name>Is Not A User</tei:name>
+        </j:contributor>
+      })
+      ]]></code>
+      <class href="common.t.xml#Unauthorized"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>user:delete(): authenticated</testName>
+    <setup>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, (
+        let $u := xmldb:create-user("testuser3", "testuser3", "everyone", ())
+        let $g := try {
+          xmldb:create-group("testuser3", ("admin", "testuser3"))
+          } catch * { 
+          util:log-system-out("WARNING: CREATING AN EXISTING GROUP CAUSES AN EXCEPTION INSTEAD OF A RETURN OF FALSE") 
+          }
+        let $s := xmldb:store("/user", "testuser3.xml",
+          <j:contributor>
+            <tei:idno>testuser3</tei:idno>
+          </j:contributor>
+          )
+        let $uri := xs:anyURI("/user/testuser3.xml")
+        let $ch := (
+          sm:chown($uri, "testuser3"),
+          sm:chgrp($uri, "testuser3"),
+          sm:chmod($uri, "rw-r--r--")
+        )
+        return ()
+      ))
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, (
+        if (doc-available("/user/testuser3.xml"))
+        then xmldb:remove("/user", "testuser3.xml")
+        else (),
+        try { 
+          if (xmldb:group-exists("testuser3"))
+          then sm:delete-group("testuser3")
+          else ()
+        } 
+        catch * { () },
+        if (xmldb:exists-user("testuser3"))
+        then xmldb:delete-user("testuser3")
+        else ()
+      ))
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Delete your own profile</task>
+      <code><![CDATA[
+      system:as-user("testuser3","testuser3", (
+        user:delete("testuser3")
+      ))
+      ]]></code>
+      <xpath desc="user removed">not(xmldb:exists-user("testuser3"))</xpath>
+      <xpath desc="group removed">not(sm:get-groups()="testuser3")</xpath>
+      <xpath desc="profile removed">not(doc-available("/user/testuser3.xml"))</xpath>
+    </test>
+    <test>
+      <task>Delete another user's profile</task>
+      <code><![CDATA[
+      system:as-user("testuser","testuser", (
+        user:delete("testuser3")
+      ))
+      ]]></code>
+      <class href="common.t.xml#Forbidden"/>
+    </test>
+    <test>
+      <task>Delete a non-existent profile</task>
+      <code><![CDATA[
+      system:as-user("testuser","testuser", (
+        user:delete("doesnotexist")
+      ))
+      ]]></code>
+      <class href="common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>Delete a non-user profile</task>
+      <code><![CDATA[
+      system:as-user("testuser","testuser", (
+        user:delete("notauser")
+      ))
+      ]]></code>
+      <xpath desc="profile removed">not(doc-available("/user/notauser.xml"))</xpath>      
+    </test>
+    <test ignore="yes">
+      <task>Delete a profile that has a reference elsewhere</task>
+      <code><![CDATA[
+        user:delete("withreference")
+      ]]></code>
+      <class href="common.t.xml#BadRequest"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>user:delete(): not authenticated</testName>
+    <asUser/>
+    <password/>
+    <test>
+      <task>Delete a user profile</task>
+      <code><![CDATA[
+      user:delete("testuser")
+      ]]></code>
+      <class href="common.t.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>Delete a non-user profile</task>
+      <code><![CDATA[
+      user:delete("notauser")
+      ]]></code>
+      <class href="common.t.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>Delete a non-existent profile</task>
+      <code><![CDATA[
+      user:delete("doesnotexist")
+      ]]></code>
+      <class href="common.t.xml#NotFound"/>
+    </test>
+  </TestSet>
+</TestSuite>
