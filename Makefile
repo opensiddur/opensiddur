@@ -26,7 +26,6 @@
 # dist - make a .tar.gz for distribution
 #
 # db-install - install database to $(EXIST_INSTALL_DIR)
-# bf-install - install betterFORM extension over the database in $(EXIST_INSTALL_DIR)
 # db-uninstall - remove $(EXIST_INSTALL_DIR)
 # db-sync DBAPASS=<database password> - synchronize code, data, and common from the development working copy to a running database; 
 # db-syncclean - clean the __contents__.xml files left by syncing the database 
@@ -133,9 +132,9 @@ TEIDIR = $(LIBDIR)/tei
 TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 
 EXISTSRCDIR = $(LIBDIR)/exist
-EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk
+EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 16454
+EXIST_REVISION ?= -r 16470
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -176,8 +175,6 @@ IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 # build eXist (what dependencies should this have?)
 $(EXIST_INSTALL_JAR):
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
-	rm -f $(LIBDIR)/exist/extensions/indexes/lucene/lib/*2.9.2.jar
-	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/lib/lucene*2.9.3.jar $(LIBDIR)/exist/extensions/indexes/lucene/lib
 	cd $(LIBDIR)/exist && \
 		JAVA_HOME=$(JAVA_HOME) \
 		./build.sh svn-download
@@ -210,13 +207,15 @@ clean-hebmorph:
 build-hebmorph-lucene: build-hebmorph $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar 
 
 $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar:
+	cp $(LIBDIR)/exist/extensions/indexes/lucene/lucene*.jar $(LIBDIR)/hebmorph/java/lucene.hebrew/lib
 	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant jar
 
 clean-hebmorph-lucene:
 	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant clean
+	rm -f $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar 
 
 # Install a copy of the eXist database
-.PHONY: db-install db-install-nonet db-install-wlc bf-install db-uninstall db-sync db-syncclean installer patches lucene-install copy-files copy-libs setup-password
+.PHONY: db-install db-install-nonet db-install-wlc db-uninstall db-sync db-syncclean installer patches lucene-install copy-files copy-libs setup-password
 db-install: submodules svn-exist code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db setup-password copy-files copy-libs   
 
 #installer that does not rely on the presence of a network. 
@@ -230,11 +229,13 @@ copy-libs:
 	cp -r $(LIBDIR)/aloha/src/* $(EXIST_INSTALL_DIR)/webapp/aloha
 
 installer: $(EXIST_INSTALL_JAR)
-	java -jar $(EXIST_INSTALL_JAR) -p $(EXIST_INSTALL_DIR)
+	$(XSLT) -s $(SETUPDIR)/eXist-installer.tmpl.xml -o $(SETUPDIR)/eXist-installer.xml $(SETUPDIR)/setup-installer.xsl2 JAVA_HOME=$(JAVA_HOME) EXIST_INSTALL_DIR=$(EXIST_INSTALL_DIR) ADMINPASSWORD=$(ADMINPASSWORD)
+	java -jar $(EXIST_INSTALL_JAR) setup/eXist-installer.xml
+	rm -f $(SETUPDIR)/eXist-installer.xml
 
 patches:
 	$(XSLT) -s $(EXIST_INSTALL_DIR)/conf.xml -o $(EXIST_INSTALL_DIR)/conf.xml $(SETUPDIR)/setup-conf-xml.xsl2
-	-patch -Nd $(EXIST_INSTALL_DIR) < $(SETUPDIR)/mime-types.xml.patch
+	$(XSLT) -s $(EXIST_INSTALL_DIR)/mime-types.xml -o $(EXIST_INSTALL_DIR)/mime-types.xml $(SETUPDIR)/setup-mime-types.xsl2
 	-patch -Nd $(EXIST_INSTALL_DIR)/webapp/WEB-INF < $(SETUPDIR)/controller-config.xml.patch
 	-patch -Nd $(EXIST_INSTALL_DIR)/tools/jetty/etc < $(SETUPDIR)/jetty.xml.patch
 
@@ -262,7 +263,7 @@ $(SETUPDIR)/setup.xql:
 	@echo "Setting admin password to the value in the Makefile. You did change it Makefile.local, right?..." && \
 		cat $(SETUPDIR)/setup.tmpl.xql | sed "s/ADMINPASSWORD/$(ADMINPASSWORD)/g" > $(SETUPDIR)/setup.xql && \
 		echo "done."
-	$(EXISTCLIENT) -qls -u admin -F $(SETUPDIR)/setup.xql
+	$(EXISTCLIENT) -qls -u admin -P "$(ADMINPASSWORD)" -F $(SETUPDIR)/setup.xql
 	rm -f $(SETUPDIR)/setup.xql
 
 #$(EXIST_INSTALL_DIR)/EXIST.AUTOINSTALLED: 
@@ -276,15 +277,6 @@ db-install-wlc: ridx-disable tanach tanach2db ridx-enable
 tanach2db:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 774 -c /db/group/everyone -u admin -g everyone $(TEXTDIR)/wlc
 	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -u admin -p "$(ADMINPASSWORD)" -ouri=xmldb:exist://
-
-# Install a new copy of the database with betterFORM trunk
-bf-install: db-install
-  echo "WARNING: BETTERFORM EXTENSION IS BROKEN NOW!"
-	mkdir -p $(EXIST_INSTALL_DIR)/extensions/betterform
-	cp lib/betterform.zip $(EXIST_INSTALL_DIR)/extensions/betterform
-	cd $(EXIST_INSTALL_DIR)/extensions/betterform && unzip betterform.zip && ant install
-	cp $(SETUPDIR)/controller-config.xml.bf $(EXIST_INSTALL_DIR)/webapp/WEB-INF/controller-config.xml
-	touch $(EXIST_INSTALL_DIR)/BF.AUTOINSTALLED
 
 db-syncclean:
 	for f in `find . -name __contents__.xml`; do rm "$$f"; done

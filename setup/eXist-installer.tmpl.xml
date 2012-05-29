@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<AutomatedInstallation langpack="eng">
+<com.izforge.izpack.panels.HTMLInfoPanel id="start"/>
+<com.izforge.izpack.panels.JDKPathPanel id="UNKNOWN (com.izforge.izpack.panels.JDKPathPanel)">
+<JDKPath>/usr/lib/jvm/java-7-openjdk-amd64</JDKPath>
+</com.izforge.izpack.panels.JDKPathPanel>
+  <com.izforge.izpack.panels.TargetPanel id="UNKNOWN (com.izforge.izpack.panels.TargetPanel)">
+    <installpath>/usr/local/opensiddur</installpath>
+  </com.izforge.izpack.panels.TargetPanel>
+  <com.izforge.izpack.panels.UserInputPanel id="UserInputPanel.0">
+    <userInput>
+      <entry key="adminPasswd" value="xxx"/>
+      <entry key="dataDir" value="/usr/local/opensiddur/webapp/WEB-INF/data"/>
+    </userInput>
+  </com.izforge.izpack.panels.UserInputPanel>
+  <com.izforge.izpack.panels.PacksPanel id="UNKNOWN (com.izforge.izpack.panels.PacksPanel)">
+    <pack index="0" name="core" selected="true"/>
+    <pack index="1" name="sources" selected="false"/>
+    <pack index="2" name="javadoc" selected="false"/>
+  </com.izforge.izpack.panels.PacksPanel>
+  <com.izforge.izpack.panels.UserInputPanel id="UserInputPanel.1">
+    <userInput>
+      <entry key="apps.2" value="off"/>
+      <entry key="apps.1" value="on"/>
+    </userInput>
+  </com.izforge.izpack.panels.UserInputPanel>
+  <com.izforge.izpack.panels.InstallPanel id="UNKNOWN (com.izforge.izpack.panels.InstallPanel)"/>
+  <com.izforge.izpack.panels.ProcessPanel id="UNKNOWN (com.izforge.izpack.panels.ProcessPanel)"/>
+  <com.izforge.izpack.panels.ShortcutPanel id="UNKNOWN (com.izforge.izpack.panels.ShortcutPanel)"/>
+  <com.izforge.izpack.panels.HTMLInfoPanel id="info"/>
+  <com.izforge.izpack.panels.FinishPanel id="UNKNOWN (com.izforge.izpack.panels.FinishPanel)"/>
+</AutomatedInstallation>

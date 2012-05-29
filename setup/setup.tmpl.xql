@@ -22,18 +22,16 @@ declare function local:create-groups(
 };
 
 (
-	(: set the admin password :)
-	xmldb:change-user('admin', 'ADMINPASSWORD', (), ()),
   (: create userman user as equivalent of admin. userman is only required because
    : of a bug in eXist that prevents admin from deleting groups :)
   xmldb:create-user('userman', 'ADMINPASSWORD', 'dba', ()),
 	(: add a demo user :)
   local:create-groups("everyone", "admin"),
-	xmldb:create-user('demouser', 'resuomed', ('demouser','everyone'), '/group/demouser'),
+	xmldb:create-user('demouser', 'resuomed', ('demouser','everyone'), ()),
 	(: create two test user/groups and home collections where test files can be created and destroyed
   :)
-  xmldb:create-user('testuser','testuser', ('testuser','everyone'), '/group/testuser'),
-  xmldb:create-user('testuser2','testuser2', ('testuser2','everyone'), '/group/testuser2'),
+  xmldb:create-user('testuser','testuser', ('testuser','everyone'), ()),
+  xmldb:create-user('testuser2','testuser2', ('testuser2','everyone'), ()),
   (: replace the password in $magic:password :)
   xmldb:create-collection("/db", "code"),
   xmldb:create-collection("/db/code", "magic"),
