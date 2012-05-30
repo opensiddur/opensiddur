@@ -2,7 +2,7 @@ xquery version "1.0";
 (:~ general support functions for the REST API
  :
  : Open Siddur Project
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :) 
@@ -770,6 +770,15 @@ declare function api:rest-response(
   if ($r[1] instance of element(rest:response))
   then (
     let $response := $r[1]
+    let $serialization-default :=
+      (: prevent parsing errors, particularly for 204 responses :)
+      if (
+        empty($response/output:serialiation-parameters/output:method) and
+        $response instance of element(rest:response) and
+        empty($r[2])
+        )
+      then util:declare-option("exist:serialize", "method=text")
+      else ()
     for $element in $response/*
     return
       typeswitch($element)
