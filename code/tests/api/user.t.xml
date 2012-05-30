@@ -501,6 +501,7 @@
         user:delete("testuser3")
       ))
       ]]></code>
+      <class href="common.t.xml#NoData"/>
       <xpath desc="user removed">not(xmldb:exists-user("testuser3"))</xpath>
       <xpath desc="group removed">not(sm:get-groups()="testuser3")</xpath>
       <xpath desc="profile removed">not(doc-available("/user/testuser3.xml"))</xpath>
