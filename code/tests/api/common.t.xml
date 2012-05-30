@@ -21,6 +21,7 @@
   </TestClass>
   <TestClass xml:id="NoData">
     <xpath desc="returns status code 204">self::rest:response/http:response/@status = 204</xpath>
+    <xpath desc="serializes as text">self::rest:response/output:serialization-parameters/output:method/@value = "text"</xpath>
   </TestClass>
   <TestClass xml:id="BadRequest">
     <xpath desc="returns status code 400">self::rest:response/http:response/@status = 400</xpath>
