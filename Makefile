@@ -134,7 +134,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 16470
+EXIST_REVISION ?= -r 16504
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -245,16 +245,12 @@ $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/lucene.hebrew.jar:
 	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
 
 copy-files:
-	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 $(DBDIR)
+	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 -d 775 -q 755 $(DBDIR)
 	@echo "Copying files to database..."
 	@#copy the transliteration DTD first so eXist will know where they are during restore 
 	cp $(SETUPDIR)/opensiddur-catalog.xml $(EXIST_INSTALL_DIR)/webapp/WEB-INF
 	cp $(SETUPDIR)/hebrew.dtd $(EXIST_INSTALL_DIR)/webapp/WEB-INF/entities
-	@#then copy the code so eXist will know where the triggers and support modules are during restore, then copy everything else with system *last* so the triggers will not engage
-	@#finally, copy the transforms directory again so the tests that require the document URI trigger will run
-	for d in code data user group schema xforms system code/transforms; do \
-	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/$$d/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"; \
-	done 
+	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"
 
 .PHONY: setup-password
 setup-password: $(SETUPDIR)/setup.xql
