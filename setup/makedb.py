@@ -13,7 +13,7 @@
 # An override file can also be used to exclude files by regular expression
 #
 # Open Siddur Project
-# Copyright 2010-2011 Efraim Feinstein
+# Copyright 2010-2012 Efraim Feinstein
 # Licensed under the GNU Lesser General Public License, version 3 or later
 #
 import sys
@@ -68,7 +68,7 @@ def buildExcludeList(excludeFile):
   if excludeFile:
     ef = file(excludeFile,'r')
     for line in ef:
-      excludeStrings.append('(' + line + ')')
+      excludeStrings.append('(' + line.rstrip('\r\n') + ')')
     ef.close()
   excludeRE = re.compile('|'.join(excludeStrings))
   return excludeRE
@@ -167,7 +167,7 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
         props = incorporateOverrides(overrideXml, overrideIndex, thisDefault, fname)
       else:
         props = thisDefault
-      if (not excludeRE or not excludeRE.search(fileWithPath)) and props.include:    # exclude anything listed in the exclude file
+      if ((not excludeRE or not excludeRE.search(fileWithPath))) and props.include:    # exclude anything listed in the exclude file
         if os.path.isdir(fileWithPath):
           # add subcollection to contentsXml
           etree.SubElement(contentsXml, 'subcollection', {'filename':fname, 'name':fname})
@@ -271,7 +271,7 @@ def main():
 
   mimeDict = indexMimeTypes(existHome)
   excludeRE = buildExcludeList(excludeFile)
-
+  
   buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE)
 
 if __name__ == "__main__":
