@@ -99,6 +99,9 @@ declare
         ('Logging in ', $user, ':', $password)),
       app:login-credentials($user, $password),
       <rest:response>
+        <output:serialization-parameters>
+          <output:method value="text"/>
+        </output:serialization-parameters>
         <http:response status="204"/>
       </rest:response>
     )
@@ -112,6 +115,9 @@ declare function local:logout(
   ) as element(rest:response) {
   app:logout-credentials(),
   <rest:response>
+    <output:serialization-parameters>
+      <output:method value="text"/>
+    </output:serialization-parameters>
     <http:response status="204"/>
   </rest:response>
 };

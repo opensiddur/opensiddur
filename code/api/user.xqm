@@ -59,7 +59,7 @@ declare function local:query(
         let $api-name := replace(util:document-name($doc), "\.xml$", "")
         return
         <li class="result">
-          <a class="document" href="{$user:path}/{$api-name}">{
+          <a class="document" href="/api{$user:path}/{$api-name}">{
           local:result-title($hit)
           }</a>:
           <ol class="contexts">{
@@ -91,7 +91,7 @@ declare function local:list(
       let $api-name := replace(util:document-name($user), "\.xml$", "")
       return
         <li class="result">
-          <a class="document" href="{$user:path}/{$api-name}">{
+          <a class="document" href="/api{$user:path}/{$api-name}">{
             local:result-title($user)
           }</a>
         </li>
@@ -221,6 +221,9 @@ declare
          : this is a change password request
          :) 
         <rest:response>
+          <output:serialization-parameters>
+            <output:method value="text"/>
+          </output:serialization-parameters>
           {
           system:as-user("admin", $magic:password, 
             xmldb:change-user($name, $password, (), ())
@@ -264,10 +267,13 @@ declare
               if ($stored and $grouped)
               then 
                 <rest:response>
+                  <output:serialization-parameters>
+                    <output:method value="text"/>
+                  </output:serialization-parameters>
                   {
+                    sm:chmod($uri, "rw-r--r--"),
                     sm:chown($uri, $name),
-                    sm:chgrp($uri, $name),
-                    sm:chmod($uri, "rw-r--r--")
+                    sm:chgrp($uri, $name)
                   }
                   <http:response status="201">
                     <http:header name="Location" value="/api/user/{$name}"/>
@@ -355,6 +361,9 @@ declare
             sm:chmod(xs:anyURI($resource), if ($is-non-user-profile) then "rw-rw-r--" else "rw-r--r--")
           )),
           <rest:response>
+            <output:serialization-parameters>
+              <output:method value="text"/>
+            </output:serialization-parameters>
             {
               if ($resource-exists)
               then <http:response status="204"/>
