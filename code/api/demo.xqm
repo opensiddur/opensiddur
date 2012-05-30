@@ -69,12 +69,60 @@ declare function local:transliterate(
     }
 };
 
+declare 
+  %rest:GET
+  %rest:path("/api/demo")
+  %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
+  %output:method("html5")
+  function demo:list(
+  ) as item()+ {
+  <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+      <title>Demo API index</title>
+    </head>
+    <body>
+      <ul class="results">
+        {
+        (: TODO: replace request:get-uri() with rest:get-absolute-uri() :)
+        let $api-base := request:get-uri()
+        return
+          <li class="result">
+            <a class="discovery" href="{$api-base}/transliteration">Transliteration</a>
+          </li>
+        }
+      </ul>
+    </body>
+  </html>
+};
+
+declare 
+  %rest:GET
+  %rest:path("/api/demo/transliteration")
+  %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
+  %output:method("html5")
+  function demo:transliteration-list(
+  ) as item()+ {
+  <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+      <title>Transliteration demo API</title>
+    </head>
+    <body>
+      <p>This API supports HTTP POST only.</p>
+      <p>If you POST some data to be transliterated to 
+      /api/demo/<i>schema-name</i>, where you can choose a schema from
+      <a href="/api/data/transliteration">any transliteration schema</a>,
+      you will get back a transliterated version.</p>
+    </body>
+  </html>
+};
+
+
 (:~ post arbitrary XML for transliteration by a given schema 
  : @return XML of the same structure 
  :)
 declare  
   %rest:POST("{$body}")
-  %rest:path("/demo/transliteration/{$schema}")
+  %rest:path("/api/demo/transliteration/{$schema}")
   %rest:consumes("application/xml")
   %rest:produces("application/xml", "text/xml")
   function demo:transliterate-xml(
@@ -93,7 +141,7 @@ declare
 
 declare 
   %rest:POST("{$body}")
-  %rest:path("/demo/transliteration/{$schema}")
+  %rest:path("/api/demo/transliteration/{$schema}")
   %rest:consumes("text/plain")
   %rest:produces("text/plain")
   function demo:transliterate-text(

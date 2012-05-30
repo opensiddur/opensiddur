@@ -284,6 +284,8 @@ declare function api:simplify-format(
       then "css"
       else if ($fmt-string = ("text/plain"))
       then "txt"
+      else if ($fmt-string = ("application/x-www-form-urlencoded"))
+      then "form"
       else $default-format
       , 
     $format/api:param/@name/string()

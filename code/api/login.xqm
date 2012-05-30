@@ -24,7 +24,7 @@ declare namespace error="http://jewishliturgy.org/errors";
  :)
 declare 
   %rest:GET
-  %rest:path("/login")
+  %rest:path("/api/login")
   %rest:produces("application/xml", "text/xml")
   function login:get-xml() {
   let $user := app:auth-user()
@@ -37,7 +37,7 @@ declare
  :)
 declare 
   %rest:GET
-  %rest:path("/login")
+  %rest:path("/api/login")
   %rest:query-param("user", "{$user}")
   %rest:query-param("password", "{$password}")
   %rest:produces("application/xhtml+xml", "text/html")
@@ -69,7 +69,7 @@ declare
 
 declare 
   %rest:POST("{$body}")
-  %rest:path("/login")
+  %rest:path("/api/login")
   %rest:consumes("application/xml", "text/xml")
   %rest:produces("text/plain")
   function login:post-xml(
@@ -80,7 +80,7 @@ declare
 
 declare 
   %rest:POST
-  %rest:path("/login")
+  %rest:path("/api/login")
   %rest:form-param("user", "{$user}")
   %rest:form-param("password", "{$password}")
   %rest:consumes("application/x-www-url-formencoded")
@@ -119,7 +119,7 @@ declare function local:logout(
 (:~ request to log out :)
 declare 
   %rest:DELETE
-  %rest:path("/login")
+  %rest:path("/api/login")
   function login:delete(
   ) as item()+ {
   local:logout()
@@ -128,7 +128,7 @@ declare
 (:~ request to log out :)
 declare 
   %rest:GET
-  %rest:path("/logout")
+  %rest:path("/api/logout")
   function login:get-logout(
   ) as item()+ {
   local:logout()
@@ -137,7 +137,7 @@ declare
 (:~ request to log out :)
 declare 
   %rest:POST
-  %rest:path("/logout")
+  %rest:path("/api/logout")
   function login:post-logout(
   ) as item()+ {
   local:logout()

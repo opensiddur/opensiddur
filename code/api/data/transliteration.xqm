@@ -63,7 +63,7 @@ declare function local:no-access(
 
 declare 
   %rest:GET
-  %rest:path("/data/transliteration/{$name}")
+  %rest:path("/api/data/transliteration/{$name}")
   %rest:produces("application/xml")
   function tran:get(
     $name as xs:string
@@ -81,7 +81,7 @@ declare
  :)
 declare 
   %rest:GET
-  %rest:path("/data/transliteration")
+  %rest:path("/api/data/transliteration")
   %rest:query-param("q", "{$query}", "")
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$count}", 100)
@@ -109,7 +109,7 @@ declare
         <title>Transliteration API</title>
         <link rel="search"
                type="application/opensearchdescription+xml" 
-               href="/data/OpenSearchDescription?source={encode-for-uri($tran:path-base)}"
+               href="/api/data/OpenSearchDescription?source={encode-for-uri($tran:path-base)}"
                title="Full text search" />
         <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
         <meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>
@@ -141,7 +141,7 @@ declare function local:query(
         let $api-name := replace(util:document-name($doc), "\.xml$", "")
         return
         <li class="result">
-          <a class="document" href="{$tran:path-base}/{$api-name}">{$doc//tr:title/string()}</a>:
+          <a class="document" href="/api{$tran:path-base}/{$api-name}">{$doc//tr:title/string()}</a>:
           <ol class="contexts">{
             for $h in $hit
             order by ft:score($h) descending
@@ -171,7 +171,7 @@ declare function local:list(
       let $api-name := replace(util:document-name($table), "\.xml$", "")
       return
         <li class="result">
-          <a class="document" href="{$tran:path-base}/{$api-name}">{$table/tr:title/string()}</a>
+          <a class="document" href="/api{$tran:path-base}/{$api-name}">{$table/tr:title/string()}</a>
         </li>
     }</ul>,
     $start,
@@ -183,7 +183,7 @@ declare function local:list(
   
 declare 
   %rest:DELETE
-  %rest:path("/data/transliteration/{$name}")
+  %rest:path("/api/data/transliteration/{$name}")
   function tran:delete(
     $name as xs:string
   ) as item()+ {
@@ -218,7 +218,7 @@ declare
 
 declare
   %rest:POST("{$body}")
-  %rest:path("/data/transliteration")
+  %rest:path("/api/data/transliteration")
   %rest:consumes("application/xml", "text/xml")
   function tran:post(
     $body as document-node()
@@ -239,7 +239,7 @@ declare
             <http:response status="201">
               <http:header 
                 name="Location" 
-                value="{concat($tran:path-base, "/", substring-before($resource, ".xml"))}"/>
+                value="{concat("/api", $tran:path-base, "/", substring-before($resource, ".xml"))}"/>
             </http:response>
           </rest:response>
         else api:rest-error(500, "Cannot store the resource")
@@ -252,7 +252,7 @@ declare
 
 declare
   %rest:PUT("{$body}")
-  %rest:path("/data/transliteration/{$name}")
+  %rest:path("/api/data/transliteration/{$name}")
   %rest:consumes("application/xml", "text/xml")
   function tran:put(
     $name as xs:string,
@@ -286,9 +286,47 @@ declare
       api:rest-error(404, "Not found", $name)
 };
 
+declare
+  %rest:GET
+  %rest:path("/api/access/transliteration")
+  %rest:query-param("start", "{$start}", 1)
+  %rest:query-param("max-results", "{$count}", 100)
+  %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
+  %output:method("html5")
+  function tran:get-access-list(
+  $start as xs:integer,
+  $count as xs:integer
+  ) as item()+ {
+  let $list := local:list(1,100)
+  let $results-element := $list[1]
+  let $max-results := $list[3]
+  let $total := $list[4]
+  return
+    <html xmlns="http://www.w3.org/1999/xhtml">
+      <head profile="http://a9.com/-/spec/opensearch/1.1/">
+        <title>Transliteration Access API index</title>
+        <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
+        <meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>
+        <meta name="itemsPerPage" content="{$max-results}"/>
+        <meta name="totalResults" content="{$total}"/>
+      </head>
+      <body>
+        <ul class="results">{
+          for $li in $results-element/li/a
+          return
+            <li class="result">
+              <a href="{
+                replace($li/@href, "^/api/data", "/api/access")
+              }">{$li/string()}</a>
+            </li>
+        }</ul>
+      </body>
+    </html>
+};
+
 declare 
   %rest:GET
-  %rest:path("/data/transliteration/{$name}/access")
+  %rest:path("/api/access/transliteration/{$name}")
   %rest:produces("application/xml")
   function tran:get-access(
     $name as xs:string
@@ -302,7 +340,7 @@ declare
 
 declare 
   %rest:PUT("{$body}")
-  %rest:path("/data/transliteration/{$name}/access")
+  %rest:path("/api/access/transliteration/{$name}")
   %rest:consumes("application/xml", "text/xml")
   function tran:put-access(
     $name as xs:string,

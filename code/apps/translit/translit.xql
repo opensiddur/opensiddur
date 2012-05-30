@@ -31,7 +31,7 @@ declare function local:translit-instance(
 	  <tr:schema/>
 	</xf:instance>,
 	<xf:instance id="{$instance-id}-tables" xmlns="" 
-	  src="/data/transliteration">
+	  src="/api/data/transliteration">
 	</xf:instance>,
 	<xf:bind nodeset="instance('{$instance-id}')" type="xf:string" required="true()"/>,
 	<xf:bind nodeset="instance('{$instance-id}')/@xml:lang" type="xf:string" required="true()"/>,
@@ -106,7 +106,7 @@ let $form :=
 				instance="transliteration-result" 
 				replace="instance" 
 				method="post">
-				<xf:resource value="concat('/demo',substring-after(instance('translit-table'),'/data'))"/>
+				<xf:resource value="concat('/api/demo',substring-after(instance('translit-table'),'/api/data'))"/>
 				<xf:action ev:event="xforms-submit-error">
 					<xf:message level="modal">Transliteration error. Make sure all required fields are filled in.
 					Error code: <!--xf:output value="event('response-status-code')"/-->

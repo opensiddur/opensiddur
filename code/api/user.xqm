@@ -111,7 +111,7 @@ declare function local:list(
  :)
 declare 
   %rest:GET
-  %rest:path("/user")
+  %rest:path("/api/user")
   %rest:query-param("q", "{$query}", "")
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
@@ -141,7 +141,7 @@ declare
         <title>User and contributor API</title>
         <link rel="search"
                type="application/opensearchdescription+xml" 
-               href="/data/OpenSearchDescription?source={encode-for-uri($user:path)}"
+               href="/api/data/OpenSearchDescription?source={encode-for-uri($user:path)}"
                title="Full text search" />
         <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
         <meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>
@@ -161,7 +161,7 @@ declare
  :)
 declare
   %rest:GET
-  %rest:path("/user/{$name}")
+  %rest:path("/api/user/{$name}")
   %rest:produces("application/xml", "application/tei+xml", "text/xml")
   %output:method("xml")
   function user:get(
@@ -184,7 +184,7 @@ declare
  :)
 declare 
   %rest:POST("{$body}")
-  %rest:path("/user")
+  %rest:path("/api/user")
   %rest:consumes("application/xml", "text/xml")
   function user:post-xml(
     $body as document-node()
@@ -203,7 +203,7 @@ declare
  :)
 declare 
   %rest:POST
-  %rest:path("/user")
+  %rest:path("/api/user")
   %rest:form-param("user", "{$name}")
   %rest:form-param("password", "{$password}")
   function user:post-form(
@@ -270,7 +270,7 @@ declare
                     sm:chmod($uri, "rw-r--r--")
                   }
                   <http:response status="201">
-                    <http:header name="Location" value="/user/{$name}"/>
+                    <http:header name="Location" value="/api/user/{$name}"/>
                   </http:response>
                 </rest:response>
               else api:rest-error(500, "Internal error in creating a group or storing a document")
@@ -325,14 +325,14 @@ declare function user:validate-report(
  :)
 declare
   %rest:PUT("{$body}")
-  %rest:path("/user/{$name}")
+  %rest:path("/api/user/{$name}")
   %rest:consumes("application/tei+xml", "application/xml", "text/xml")
   function user:put(
     $name as xs:string,
     $body as document-node()
   ) as item()+ {
   let $user := app:auth-user()
-  let $resource := concat("/user/", encode-for-uri($name), ".xml")
+  let $resource := concat($user:path, "/", encode-for-uri($name), ".xml")
   let $resource-exists := doc-available($resource)
   let $is-non-user-profile := 
     not($user = $name) and 
@@ -360,7 +360,7 @@ declare
               then <http:response status="204"/>
               else 
                 <http:response status="201">
-                  <http:header name="Location" value="/user/{encode-for-uri($name)}"/>
+                  <http:header name="Location" value="/api/user/{encode-for-uri($name)}"/>
                 </http:response>
             }
           </rest:response>
@@ -380,7 +380,7 @@ declare
  :)
 declare
   %rest:DELETE
-  %rest:path("/user/{$name}")
+  %rest:path("/api/user/{$name}")
   function user:delete(
     $name as xs:string
   ) as item()+ {
