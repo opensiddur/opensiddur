@@ -56,7 +56,7 @@ declare function tran:validate-report(
 (: error message when access is not allowed :)
 declare function local:no-access(
   ) as item()+ {
-  if (sm:is-externally-authenticated())
+  if (app:auth-user())
   then api:rest-error(403, "Forbidden")
   else api:rest-error(401, "Not authenticated")
 };
@@ -207,6 +207,9 @@ declare
           (: TODO: check for references! :)
           xmldb:remove($collection, $resource),
           <rest:response>
+            <output:serialization-parameters>
+              <output:method value="text"/>
+            </output:serialization-parameters>
             <http:response status="204"/>
           </rest:response>
         )
@@ -297,7 +300,7 @@ declare
   $start as xs:integer,
   $count as xs:integer
   ) as item()+ {
-  let $list := local:list(1,100)
+  let $list := local:list($start, $count)
   let $results-element := $list[1]
   let $max-results := $list[3]
   let $total := $list[4]
@@ -354,6 +357,9 @@ declare
       try {
         acc:set-access($doc, $access),
         <rest:response>
+          <output:serialization-parameters>
+            <output:method value="text"/>
+          </output:serialization-parameters>
           <http:response status="204"/>
         </rest:response>
       }

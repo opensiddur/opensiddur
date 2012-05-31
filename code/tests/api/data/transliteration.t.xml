@@ -14,11 +14,14 @@
     at "xmldb:exist:///code/api/data/transliteration.xqm";
   import module namespace data="http://jewishliturgy.org/modules/data"
     at "xmldb:exist:///code/api/modules/data.xqm";
+  import module namespace magic="http://jewishliturgy.org/magic"
+    at "xmldb:exist:///code/magic/magic.xqm";
   </imports>
   <namespace prefix="tr">http://jewishliturgy.org/ns/tr/1.0</namespace>
   <namespace prefix="rest">http://exquery.org/ns/rest/annotation/</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
   <variable name="valid" as="document-node()"><![CDATA[document {
     <tr:schema>
       <tr:title xml:lang="en">Valid</tr:title>
@@ -103,6 +106,27 @@
         </tr:table>
       </tr:schema>
     </store>
+    <store collection="/data/transliteration/1900/01" name="NoWrite.xml">
+      <tr:schema>
+        <tr:title xml:lang="en">NoWrite</tr:title>
+        <tr:description xml:lang="en">No write access</tr:description>
+        <tr:copyright-license uri="http://creativecommons.org/publicdomain/zero/1.0" />
+        <tr:author xml:lang="en">Nobody</tr:author>
+        <tr:table>
+          <tr:lang in="en" out="en"/>
+          <tr:tr from="e" to="e"/>
+        </tr:table>
+      </tr:schema>
+    </store>
+    <code><![CDATA[
+      system:as-user("admin", $magic:password, (
+        let $uri := xs:anyURI("/data/transliteration/1900/01/NoWrite.xml")
+        return (
+          sm:chown($uri, "testuser2"),
+          sm:chgrp($uri, "everyone"),
+          sm:chmod($uri, "rw-r--r--")
+      )))
+    ]]></code>
   </setup>
   <tearDown>
     <remove-collection collection="/data/transliteration/1900"/>
@@ -326,22 +350,135 @@
       <code><![CDATA[
       tran:post($valid)
       ]]></code>
-      <xpath desc="return status code 401">self::rest:response/http:response/@status=401</xpath>
+      <class href="../common.t.xml#Unauthorized"/>
     </test>
     <test>
       <task>tran:delete()</task>
       <code><![CDATA[
         tran:delete("Garbage")
       ]]></code>
-      <xpath desc="return status code 401">
-      self::rest:response/http:response/@status=401</xpath>
+      <class href="../common.t.xml#Unauthorized"/>
     </test>
     <test>
       <task>tran:put()</task>
       <code><![CDATA[
       tran:put("Garbage", $valid)
       ]]></code>
-      <xpath desc="return status code 401">self::rest:response/http:response/@status=401</xpath>
+      <class href="../common.t.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>tran:get-access-list()</task>
+      <code><![CDATA[
+      tran:get-access-list(1, 100)
+      ]]></code>
+      <xpath desc="a list is returned">.//html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a</xpath>
+    </test>
+    <test>
+      <task>tran:get-access()</task>
+      <code><![CDATA[
+      tran:get-access("Garbage")
+      ]]></code>
+      <xpath desc="an access structure is returned">self::a:access</xpath>
+    </test>
+    <test>
+      <task>tran:put-access()</task>
+      <code><![CDATA[
+      tran:put-access("Garbage", document{
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="false">everyone</a:group>
+          <a:world read="false" write="false"/>
+        </a:access>
+        })
+      ]]></code>
+      <class href="../common.t.xml#Unauthorized"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>tran:get-access-list()</testName>
+    <test>
+      <task>List all resources</task>
+      <code><![CDATA[
+        tran:get-access-list(1, 100)
+      ]]></code>
+      <xpath desc="returns at least 3 results">count(.//html:li[@class="result"]/html:a[starts-with(@href, "/api/access")])&gt;=3</xpath>
+    </test>
+    <test>
+      <task>List some resources</task>
+      <code><![CDATA[
+        tran:get-access-list(1, 2)
+      ]]></code>
+      <xpath desc="returns 2 results">count(.//html:li[@class="result"]/html:a[starts-with(@href, "/api/access")])=2</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>tran:get-access()</testName>
+    <test>
+      <task>For an existing resource</task>
+      <code><![CDATA[
+      tran:get-access("Test")
+      ]]></code>
+      <xpath desc="returns an access structure">exists(./self::a:access)</xpath>
+    </test>
+    <test>
+      <task>For a nonexistent resource</task>
+      <code><![CDATA[
+      tran:get-access("DoesNotExist")
+      ]]></code>
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>tran:put-access()</testName>
+    <test>
+      <task>Set with a valid access structure</task>
+      <code><![CDATA[
+      tran:put-access("Test", document{
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world write="true" read="true"/>
+        </a:access>
+      })
+      ]]></code>
+      <class href="../common.t.xml#NoData"/>
+    </test>
+    <test>
+      <task>With an invalid access structure</task>
+      <code><![CDATA[
+      tran:put-access("Garbage", document{
+        <a:access>
+          <a:invalid/>
+        </a:access>
+      })
+      ]]></code>
+      <class href="../common.t.xml#BadRequest"/>
+    </test>
+    <test>
+      <task>For a resource with no write access</task>
+      <code><![CDATA[
+      tran:put-access("NoWrite", document{
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="false">testuser</a:group>
+          <a:world write="false" read="false"/>
+        </a:access>
+      })
+      ]]></code>
+      <class href="../common.t.xml#Forbidden"/>
+    </test>
+    <test>
+      <task>For a nonexistent resource</task>
+      <code><![CDATA[
+      tran:put-access("DoesNotExist", document{
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="false">testuser</a:group>
+          <a:world write="false" read="false"/>
+        </a:access>
+      })
+      ]]></code>
+      <class href="../common.t.xml#NotFound"/>
     </test>
   </TestSet>
 </TestSuite>
