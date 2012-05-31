@@ -10,8 +10,6 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 
 import module namespace index="http://jewishliturgy.org/api/index"
 	at "/code/api/index.xqm";
-import module namespace aindex="http://jewishliturgy.org/api/access/index"
-  at "/code/api/aindex.xqm";
 import module namespace dindex="http://jewishliturgy.org/api/data/index"
   at "/code/api/data/dindex.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
@@ -67,7 +65,9 @@ declare function local:do-data(
       return 
         if ($tokens[4])
         then
-          tran:get($tokens[4])
+          if ($tokens[5] = "access")
+          then tran:get-access($tokens[4])
+          else tran:get($tokens[4])
         else
           let $query := request:get-parameter("q", "")
           let $start := request:get-parameter("start", 1)
@@ -75,7 +75,10 @@ declare function local:do-data(
           return
             tran:list($query, $start, $max-results)
       case "PUT"
-      return tran:put($tokens[4], request:get-data())
+      return 
+        if ($tokens[5] = "access")
+        then tran:put-access($tokens[4], request:get-data())
+        else tran:put($tokens[4], request:get-data())
       case "POST"
       return tran:post(request:get-data())
       case "DELETE"
@@ -130,37 +133,6 @@ declare function local:do-demo(
     default
     return $local:disallowed
   else <exist:ignore/>
-};
-
-declare function local:do-access(
-  $tokens as xs:string*
-  ) {
-  if (not($tokens[3]))
-  then
-    aindex:list()
-  else
-    switch($tokens[3])
-    case "transliteration"
-    return 
-      if ($tokens[4])
-      then
-        switch (api:get-method())
-        case "GET"
-        return tran:get-access($tokens[4])
-        case "PUT"
-        return tran:put-access($tokens[4], request:get-data())
-        default return $local:disallowed
-      else 
-        switch (api:get-method())
-        case "GET"
-        return
-          tran:get-access-list(
-            request:get-parameter("start", 1),
-            request:get-parameter("max-results", 100)
-            )
-        default return $local:disallowed
-    default 
-    return <exist:ignore/> 
 };
 
 
@@ -290,8 +262,6 @@ return
       then local:do-index($path-tokens)
       else
         switch($which-api)
-        case "access"
-        return local:do-access($path-tokens)
         case "data"
         return local:do-data($path-tokens)
         case "demo"

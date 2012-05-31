@@ -158,6 +158,10 @@
         tran:list("", 1, 100)
       ]]></code>
       <xpath desc="returns at least 3 results">count(.//html:li[@class="result"])&gt;=3</xpath>
+      <xpath desc="results include a pointer to access API">
+        every $li in .//html:li[@class="result"] 
+        satisfies exists($li/html:a[@class="alt"][@property="access"])
+      </xpath>
       <class href="../common.t.xml#SearchResults"/>
     </test>
     <test>
@@ -367,13 +371,6 @@
       <class href="../common.t.xml#Unauthorized"/>
     </test>
     <test>
-      <task>tran:get-access-list()</task>
-      <code><![CDATA[
-      tran:get-access-list(1, 100)
-      ]]></code>
-      <xpath desc="a list is returned">.//html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a</xpath>
-    </test>
-    <test>
       <task>tran:get-access()</task>
       <code><![CDATA[
       tran:get-access("Garbage")
@@ -392,23 +389,6 @@
         })
       ]]></code>
       <class href="../common.t.xml#Unauthorized"/>
-    </test>
-  </TestSet>
-  <TestSet>
-    <testName>tran:get-access-list()</testName>
-    <test>
-      <task>List all resources</task>
-      <code><![CDATA[
-        tran:get-access-list(1, 100)
-      ]]></code>
-      <xpath desc="returns at least 3 results">count(.//html:li[@class="result"]/html:a[starts-with(@href, "/api/access")])&gt;=3</xpath>
-    </test>
-    <test>
-      <task>List some resources</task>
-      <code><![CDATA[
-        tran:get-access-list(1, 2)
-      ]]></code>
-      <xpath desc="returns 2 results">count(.//html:li[@class="result"]/html:a[starts-with(@href, "/api/access")])=2</xpath>
     </test>
   </TestSet>
   <TestSet>

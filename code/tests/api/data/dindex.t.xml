@@ -27,8 +27,7 @@
       dindex:list()
       ]]></code>
       <class href="../common.t.xml#SerializeHTML5"/>
-      <xpath desc="returns a results class">.//html:*[@class='results']</xpath>
-      <xpath desc="returns at least one result class">count(.//html:li[@class='result']) &gt;= 1</xpath>
+      <class href="../common.t.xml#DiscoveryAPI"/>
     </test>
   </TestSet>
   <TestSet>

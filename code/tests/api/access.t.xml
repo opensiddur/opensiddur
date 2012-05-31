@@ -12,8 +12,6 @@
     at "xmldb:exist:///code/magic/magic.xqm";
   import module namespace acc="http://jewishliturgy.org/modules/access"
     at "xmldb:exist:///code/api/modules/access.xqm";
-  import module namespace aindex="http://jewishliturgy.org/api/access/index"
-    at "xmldb:exist:///code/api/aindex.xqm";
   </imports>
   <asUser>testuser</asUser>
   <password>testuser</password>
@@ -439,16 +437,6 @@
       <expected desc="share-user" xpath="a:share-user"><a:share-user write="true">testuser2</a:share-user></expected> 
       <expected desc="deny-user" xpath="a:deny-user"><a:deny-user read="true">guest</a:deny-user></expected>
       <expected desc="deny-group" xpath="a:deny-group"><a:deny-group read="true">guest</a:deny-group></expected>
-    </test>
-  </TestSet>
-  <TestSet>
-    <testName>Access index API</testName>
-    <test>
-      <task>List available access APIs</task>
-      <code><![CDATA[
-        aindex:list()
-      ]]></code>
-      <xpath desc="returns an HTML list">self::html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a[@class="discovery"]</xpath>
     </test>
   </TestSet>
 </TestSuite>

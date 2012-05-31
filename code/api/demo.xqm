@@ -83,12 +83,12 @@ declare
       <title>Demo API index</title>
     </head>
     <body>
-      <ul class="results">
+      <ul class="apis">
         {
         (: TODO: replace request:get-uri() with rest:get-absolute-uri() :)
         let $api-base := request:get-uri()
         return
-          <li class="result">
+          <li class="api">
             <a class="discovery" href="{$api-base}/transliteration">Transliteration</a>
           </li>
         }
@@ -128,8 +128,8 @@ declare
         for $li in $list//li[@class="result"]
         return
           <li class="result">
-            <a href="{replace($li/a/@href, "/data/", "/demo/")}">{
-              $li/a/node()
+            <a class="document" href="{replace($li/a[@class="document"]/@href, "/data/", "/demo/")}">{
+              $li/a[@class="document"]/node()
             }</a>
           </li>
       }

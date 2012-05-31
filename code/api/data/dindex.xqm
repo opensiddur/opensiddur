@@ -32,8 +32,8 @@ declare
       <title>Open Siddur API Index</title>
     </head>
     <body>
-      <ul class="results">
-        <li class="result">
+      <ul class="apis">
+        <li class="api">
           {((: TODO: replace request:get-uri() with rest:get-absolute-uri() 
             :))}
           <a class="discovery" href="{request:get-uri()}/transliteration">Transliteration</a>

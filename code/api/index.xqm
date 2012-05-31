@@ -32,28 +32,25 @@ declare
       <title>Open Siddur API Index</title>
     </head>
     <body>
-      <ul class="results">
+      <ul class="apis">
         {
         (: TODO: replace request:get-uri() with rest:get-absolute-uri() 
               :)
         let $api-base := request:get-uri()
         return (
-          <li class="result">
-            <a class="discovery" href="{$api-base}/access">Access</a>
-          </li>,
-          <li class="result">
+          <li class="api">
             <a class="discovery" href="{$api-base}/data">Data</a>
           </li>,
-          <li class="result">
+          <li class="api">
             <a class="discovery" href="{$api-base}/demo">Demo</a>
           </li>,
-          <li class="result">
+          <li class="api">
             <a class="discovery" href="{$api-base}/login">Login</a>
           </li>,
-          <li class="result">
+          <li class="api">
             <a class="discovery" href="{$api-base}/logout">Logout</a>
           </li>,
-          <li class="result">
+          <li class="api">
             <a class="discovery" href="{$api-base}/user">User</a>
           </li>
         )

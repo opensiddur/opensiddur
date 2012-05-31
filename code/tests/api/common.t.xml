@@ -61,4 +61,8 @@
       number(.//html:meta[@name='endIndex']/@content) &lt;= number(.//html:meta[@name='totalResults']/@content)
     </xpath>
   </TestClass>
+  <!-- discovery APIs -->
+  <TestClass xml:id="DiscoveryAPI">
+    <xpath desc="contains a discovery API">.//html:html/html:body/*[@class="apis"]/html:li[@class="api"]/html:a[@class="discovery"]</xpath>
+  </TestClass>
 </TestClassSet>

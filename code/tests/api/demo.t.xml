@@ -62,7 +62,7 @@
       <code><![CDATA[
       demo:list()
       ]]></code>
-      <xpath desc="returns an HTML discovery list">self::html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a[@class="discovery"]</xpath>
+      <class href="common.t.xml#DiscoveryAPI"/>
     </test>
     <test>
       <task>demo:transliteration-list()</task>
