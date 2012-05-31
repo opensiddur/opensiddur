@@ -95,7 +95,11 @@ declare function local:do-demo(
   then
     switch (api:get-method())
     case "GET"
-    return demo:transliteration-list()
+    return demo:transliteration-list(
+      request:get-parameter("q", ""),
+      request:get-parameter("start", 1),
+      request:get-parameter("max-results", 100)
+      )
     case "POST"
     return 
       if ($tokens[4])

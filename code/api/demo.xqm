@@ -19,6 +19,8 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "xmldb:exist:///code/api/modules/data.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "xmldb:exist:///code/modules/format.xqm";
+import module namespace tran="http://jewishliturgy.org/api/transliteration"
+  at "xmldb:exist:///code/api/data/transliteration.xqm";
   
 declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
@@ -98,13 +100,22 @@ declare
 declare 
   %rest:GET
   %rest:path("/api/demo/transliteration")
+  %rest:query-param("q", "{$query}", "")
+  %rest:query-param("start", "{$start}", 1)
+  %rest:query-param("max-results", "{$count}", 100)  
   %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
   %output:method("html5")
   function demo:transliteration-list(
+    $query as xs:string,
+    $start as xs:integer,
+    $count as xs:integer
   ) as item()+ {
+  let $list := tran:list($query, $start, $count)
+  return
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
       <title>Transliteration demo API</title>
+      {$list//head/(* except title)}
     </head>
     <body>
       <p>This API supports HTTP POST only.</p>
@@ -112,6 +123,17 @@ declare
       /api/demo/<i>schema-name</i>, where you can choose a schema from
       <a href="/api/data/transliteration">any transliteration schema</a>,
       you will get back a transliterated version.</p>
+      <ul class="results">
+      {
+        for $li in $list//li[@class="result"]
+        return
+          <li class="result">
+            <a href="{replace($li/a/@href, "/data/", "/demo/")}">{
+              $li/a/node()
+            }</a>
+          </li>
+      }
+      </ul>
     </body>
   </html>
 };

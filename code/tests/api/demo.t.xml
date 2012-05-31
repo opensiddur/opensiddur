@@ -56,6 +56,23 @@
     <remove-collection collection="/data/transliteration/1900"/>
   </tearDown>
   <TestSet>
+    <testName>demo index APIs</testName>
+    <test>
+      <task>demo:list()</task>
+      <code><![CDATA[
+      demo:list()
+      ]]></code>
+      <xpath desc="returns an HTML discovery list">self::html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a[@class="discovery"]</xpath>
+    </test>
+    <test>
+      <task>demo:transliteration-list()</task>
+      <code><![CDATA[
+      demo:transliteration-list("", 1, 100)
+      ]]></code>
+      <xpath desc="returns an HTML list">self::html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a[contains(@href, "/demo/")]</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
     <testName>demo:transliterate-xml()</testName>
     <!-- the username/password will not be stored in the session,
     so go in as a guest -->
