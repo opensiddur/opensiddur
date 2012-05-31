@@ -18,6 +18,7 @@
   <asUser>testuser</asUser>
   <password>testuser</password>
   <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="rest">http://exquery.org/ns/rest/annotation/</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   
@@ -447,7 +448,7 @@
       <code><![CDATA[
         aindex:list()
       ]]></code>
-      <xpath desc="returns an HTML list">//html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a[@class="discovery"]</xpath>
+      <xpath desc="returns an HTML list">self::html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a[@class="discovery"]</xpath>
     </test>
   </TestSet>
 </TestSuite>
