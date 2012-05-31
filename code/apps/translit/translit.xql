@@ -48,7 +48,7 @@ declare function local:translit-ui(
 			  ref="instance('{$instance-id}-table')" 
 			  id="{$control-id}-select" incremental="true">
 				<xf:label>Select a transliteration table: </xf:label>
-				<xf:itemset nodeset="instance('{$instance-id}-tables')//*[@class='result']/html:a">
+				<xf:itemset nodeset="instance('{$instance-id}-tables')//*[@class='result']/html:a[@class='document']">
 					<xf:label ref="."/>
 					<xf:value ref="@href"/>
 				</xf:itemset>
