@@ -134,7 +134,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 16504
+EXIST_REVISION ?= -r 16505
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -152,6 +152,7 @@ $(TEMPDIR):
 schema: $(DBDIR)/schema odddoc transliteration-schema contributor-schema
 	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
+	cp schema/access.rnc $(DBDIR)/schema
 	
 .PHONY: clean
 clean: xsltdoc-clean dist-clean depend-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist
