@@ -192,7 +192,7 @@ declare function acc:set-access(
       error(xs:QName("error:VALIDATION"), 
         "The access description is invalid")
   else error(xs:QName(
-    if (sm:is-externally-authenticated())
+    if (app:auth-user())
     then "error:FORBIDDEN"
     else "error:UNAUTHORIZED"), "Access denied.")
 };
