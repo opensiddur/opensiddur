@@ -21,6 +21,7 @@ schema/build
 /code/common/params.xsl2
 /code/transforms/format/xhtml/muxhtml.xsl2
 /setup/setup.xql
+/setup/eXist-installer.xml
 
 # db directory except special
 db/*
