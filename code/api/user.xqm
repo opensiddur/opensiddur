@@ -250,6 +250,7 @@ declare
               (: TODO: remove this code when using eXist r16453+ :)
               try {
                 xmldb:create-group($name, ($name, "admin"))
+                or true()
               }
               catch * {
                 true(), 
@@ -279,7 +280,10 @@ declare
                     <http:header name="Location" value="/api/user/{$name}"/>
                   </http:response>
                 </rest:response>
-              else api:rest-error(500, "Internal error in creating a group or storing a document")
+              else 
+                api:rest-error(500, "Internal error in creating a group or storing a document",
+                  ("group creation: " || $grouped || " storage = " || $stored) 
+                )
           ))
         )
       else 
@@ -402,6 +406,9 @@ declare
     ($resource-exists and sm:has-access(xs:anyURI($resource), "w"))
   let $return-success :=
     <rest:response>
+      <output:serialization-parameters>
+        <output:method value="text"/>
+      </output:serialization-parameters>
       <http:response status="204"/>
     </rest:response>
   return 
@@ -420,7 +427,10 @@ declare
           $return-success
         }
         catch * {
-          api:rest-error(500, "Internal error: Cannot delete the user or group!")
+          api:rest-error(500, "Internal error: Cannot delete the user or group!", 
+            debug:print-exception("user", 
+              $err:line-number, $err:column-number,
+              $err:code, $err:value, $err:description))
         }
       ))
     )
