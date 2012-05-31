@@ -208,7 +208,7 @@ clean-hebmorph:
 build-hebmorph-lucene: build-hebmorph $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar 
 
 $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar:
-	cp $(LIBDIR)/exist/extensions/indexes/lucene/lucene*.jar $(LIBDIR)/hebmorph/java/lucene.hebrew/lib
+	#cp $(LIBDIR)/exist/extensions/indexes/lucene/lucene*.jar $(LIBDIR)/hebmorph/java/lucene.hebrew/lib
 	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant jar
 
 clean-hebmorph-lucene:
