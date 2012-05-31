@@ -90,9 +90,11 @@ declare function local:error(
     line-number="{$line}"
     column-number="{$column}"
     code="{$code}"
-    description="{$description}"
     >
     <value>{$value}</value>
+    <description><pre xmlns="http://www.w3.org/1999/xhtml">{
+      $description
+    }</pre></description>
     {$error-data}
   </error>
 };
