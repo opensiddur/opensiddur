@@ -155,7 +155,7 @@ schema: $(DBDIR)/schema odddoc transliteration-schema contributor-schema
 	cp schema/access.rnc $(DBDIR)/schema
 	
 .PHONY: clean
-clean: xsltdoc-clean dist-clean depend-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist
+clean: xsltdoc-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist
 
 $(DBDIR)/common: $(DBDIR)/code
 
