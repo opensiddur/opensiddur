@@ -3,7 +3,7 @@
 # Sets up dependencies for the XSLT files
 # Assumes that it will be included after the definitions in the top level Makefile
 #
-# Copyright 2008-2011 Efraim Feinstein
+# Copyright 2008-2012 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -19,26 +19,20 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/
 #
 
-JLPTEI_FILE=jlptei.xml
+# the TEI dependencies include everything 
+TEI_DEPENDENCIES:=$(wildcard $(LIBDIR)/tei/P5/Source/Specs/*.xml)
+TEI_ALL_ODD = $(LIBDIR)/tei/P5/Exemplars/tei_all.odd
 
-odd-depend: $(CODEDIR)/depend.xsl2 $(ALL_DEPEND) $(TEMPDIR)
-		echo JLPTEIODD_DEPEND=$(ODDDIR)/$(JLPTEI_FILE) `$(XSLT)  -s $(ODDDIR)/$(JLPTEI_FILE)  $(CODEDIR)/depend.xsl2 ` >> Makefile.depend 
-#		echo TRODD_DEPEND=`$(XSLT)  -s $(ODDDIR)/tr.odd  $(CODEDIR)/depend.xsl2 ` >> Makefile.depend 
+JLPTEI_FILE=jlptei.xml
 
 .PHONY: odddoc odddoc-clean schema-clean
 odddoc: jlpteidoc 
 # trdoc removed
 
-schema-clean: odddoc-clean
+schema-clean: odddoc-clean transliteration-schema-clean
 
 odddoc-clean:
 	rm -fr $(TEIDOCDIR)
-
-.PHONY: trdoc 
-trdoc: $(TEIDOCDIR)/tr.doc.html
-
-$(TEIDOCDIR)/tr.doc.html: $(TRODD_DEPEND) $(ODDDIR)/Makefile 
-	$(TEIROMA) $(ODDDIR)/tr.odd $(TEIDOCDIR)
 
 .PHONY: jlpteidoc 
 jlpteidoc: $(TEIDOCDIR)/jlptei.doc.html
@@ -49,6 +43,24 @@ p5subset: $(LIBDIR)/tei/P5/p5subset.xml
 $(LIBDIR)/tei/P5/p5subset.xml:
 	cd $(LIBDIR)/tei/P5 && make p5subset.xml 
 
-$(TEIDOCDIR)/jlptei.doc.html: p5subset $(JLPTEIODD_DEPEND) $(ODDDIR)/Makefile $(ODDDIR)/jlptei.xml
+$(TEIDOCDIR)/jlptei.doc.html: p5subset $(wildcard $(ODDDIR)/*.xml) $(wildcard $(ODDDIR)/*.sch) $(wildcard $(ODDDIR)/*.xsl2) $(ODDDIR)/Makefile 
 	$(TEIROMA) $(ODDDIR)/$(JLPTEI_FILE) $(TEIDOCDIR)
 	
+.PHONY: transliteration-schema
+transliteration-schema: $(DBDIR)/schema $(DBDIR)/schema/transliteration.xsl2
+	cp schema/transliteration.* $(DBDIR)/schema
+
+$(DBDIR)/schema/transliteration.xsl2: schema/transliteration.sch
+	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
+
+.PHONY: contributor-schema contributor-schema-clean
+contributor-schema: schema/build/contributor.rnc
+
+schema/build/contributor.rnc: schema/build schema/contributor.xml
+	$(TEIROMA) --nodtd --noxsd schema/contributor.xml schema/build
+
+contributor-schema-clean:
+	rm -fr schema/build
+
+schema/build:
+	mkdir -p schema/build

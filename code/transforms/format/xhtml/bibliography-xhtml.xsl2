@@ -13,14 +13,14 @@
   xmlns:xd="http://www.pnp-software.com/XSLTdoc"
   exclude-result-prefixes="#all"
   >
-  <xsl:import href="muxhtml.xsl2"/>
+  <xsl:import href="xhtml-generic.xsl2"/>
   <xsl:import href="../../../common/common.xsl2"/>
   <xsl:import href="../../intl-strings.xsl2"/>
   <xd:doc type="stylesheet">
     <xd:short>Render bibliography in XHTML</xd:short>
     <xd:detail>This code is heavily based on the TEI XSLT code in 
     common/core.xsl and xhtml/core.xsl</xd:detail>
-    <xd:copyright>Copyright 2010 Efraim Feinstein (LGPL 3+), 
+    <xd:copyright>Copyright 2010-2011 Efraim Feinstein (LGPL 3+), 
     Copyright 2008 TEI Consortium</xd:copyright>
     <xd:detail>
         <p>This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,6 @@
         <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
         </p>
       </xd:detail>
-      <xd:svnId>$Id: bibliography-xhtml.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
   </xd:doc>
   
   <xsl:param name="string-table" as="document-node()" 
@@ -50,22 +49,19 @@
     <xd:detail> </xd:detail>
   </xd:doc>
   <xsl:template match="tei:listBibl">
-    <xsl:for-each select="tei:biblStruct">
-      <xsl:sort select="lower-case(string-join(
-        (tei:*/tei:author/tei:surname,
-        tei:*[1]/tei:author/tei:orgName,
-        tei:*[1]/tei:author/tei:name,
-        tei:*[1]/tei:editor/tei:surname,
-        tei:*[1]/tei:editor/tei:name,
-        tei:*[1]/tei:title),' '))"/>
-      <xsl:sort select="tei:monogr/tei:imprint/tei:date"/>
-      <!-- anchor 
-        <xsl:call-template name="makeAnchor"/>
-        <xsl:apply-templates select="." mode="xref"/>
-      -->
-      <xsl:apply-templates select="." mode="bibl"/>
-      
-    </xsl:for-each>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates select="tei:biblStruct" mode="bibl">
+        <xsl:sort select="lower-case(string-join(
+          (tei:*/tei:author/tei:surname,
+          tei:*[1]/tei:author/tei:orgName,
+          tei:*[1]/tei:author/tei:name,
+          tei:*[1]/tei:editor/tei:surname,
+          tei:*[1]/tei:editor/tei:name,
+          tei:*[1]/tei:title),' '))"/>
+        <xsl:sort select="tei:monogr/tei:imprint/tei:date"/>
+      </xsl:apply-templates>
+    </div>
   </xsl:template>
   
   <xd:doc>
@@ -87,13 +83,11 @@
     <xd:detail> </xd:detail>
   </xd:doc>
   <xsl:template match="tei:edition" mode="bibl">
-    <div class="bibl-edition">
-      <xsl:call-template name="write-xml-lang"/>
-      <xsl:apply-templates mode="#current">
-        <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-      </xsl:apply-templates>
-      <xsl:text>. </xsl:text>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="#current"/>
     </div>
+    <xsl:text>. </xsl:text>
   </xsl:template>
 
 
@@ -102,11 +96,14 @@
     <xd:detail> </xd:detail>
   </xd:doc>
   <xsl:template match="tei:imprint" mode="bibl">
-    <xsl:apply-templates select="tei:date" mode="#current"/>
-    <xsl:apply-templates select="tei:pubPlace" mode="#current"/>
-    <xsl:apply-templates select="tei:publisher" mode="#current"/>
-    <xsl:apply-templates select="tei:distributor" mode="#current"/>
-    <xsl:apply-templates select="tei:biblScope" mode="#current"/>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates select="tei:date" mode="#current"/>
+      <xsl:apply-templates select="tei:pubPlace" mode="#current"/>
+      <xsl:apply-templates select="tei:publisher" mode="#current"/>
+      <xsl:apply-templates select="tei:distributor" mode="#current"/>
+      <xsl:apply-templates select="tei:biblScope" mode="#current"/>
+    </div>
   </xsl:template>
 
   <xd:doc>
@@ -119,11 +116,9 @@
       <xsl:variable name="n-following" as="xs:integer" 
           select="count(following-sibling::*
             [name()=current()/name()][not(@corresp)])"/>
-      <div class="bibl-{local-name()}">
-        <xsl:call-template name="write-xml-lang"/>
-        <xsl:apply-templates mode="#current" >
-          <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-        </xsl:apply-templates>
+      <div>
+        <xsl:call-template name="set-attributes"/>
+        <xsl:apply-templates mode="#current" />
       </div>
       <xsl:value-of select="
           if (self::tei:author and $n-following eq 0)
@@ -151,11 +146,9 @@
       <xsl:apply-templates select="../tei:nameLink" mode="use-bibl"/>
       <xsl:text> </xsl:text>
     </xsl:if>
-    <div class="bibl-surname">
-      <xsl:call-template name="write-xml-lang"/>
-      <xsl:apply-templates mode="#current">
-        <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-      </xsl:apply-templates>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="#current"/>
     </div>
   </xsl:template>
 
@@ -166,107 +159,90 @@
     <xsl:if test="preceding-sibling::tei:forename">
       <xsl:text> </xsl:text>
     </xsl:if>
-    <xsl:apply-templates mode="bibl"/>
+    <span>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="bibl"/>
+    </span>
   </xsl:template>
 
   <xsl:template  match="tei:nameLink" mode="use-bibl">
-    <xsl:apply-templates mode="bibl"/>
+    <span>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="bibl"/>
+    </span>
   </xsl:template>
 
   <!-- TODO: differentiate between monogr, analytic and series titles -->
   <xsl:template match="tei:title" mode="bibl">
-    <xsl:choose>
-      <xsl:when test="@level=('m','main') or not(@level)">
-        <div class="bibl-title-main">
-          <xsl:call-template name="write-xml-lang"/>
-          <xsl:apply-templates mode="#current">
-            <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-          </xsl:apply-templates>
-        </div>
-      </xsl:when>
-      <xsl:when test="@level=('s','sub')">
-        <div class="bibl-title-sub">
-          <xsl:call-template name="write-xml-lang"/>
-          <xsl:apply-templates mode="#current">
-            <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-          </xsl:apply-templates>
-          <xsl:if test="following-sibling::*">
-            <xsl:text> </xsl:text>
-          </xsl:if>
-        </div>
-      </xsl:when>
-      <xsl:otherwise>
-        <div class="bibl-title-other">
-          <xsl:call-template name="write-xml-lang"/>
-          <xsl:apply-templates mode="#current">
-            <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-          </xsl:apply-templates>
-        </div>
-      </xsl:otherwise>
-    </xsl:choose>
+    <div>
+      <xsl:call-template name="set-attributes">
+        <xsl:with-param name="additional-classes" 
+          select="concat('level-', 
+            if (@level = ('s','sub'))
+            then 'sub'
+            else if (@level = ('m', 'main') or not(@level))
+            then 'main'
+            else @level)"/>
+      </xsl:call-template>
+      <xsl:apply-templates mode="#current"/>
+    </div>
+    <xsl:if test="@level=('s','sub') and following-sibling::*">
+      <xsl:text> </xsl:text>
+    </xsl:if>
     <xsl:text>. </xsl:text>
   </xsl:template>
 
   <xsl:template match="tei:meeting" mode="bibl">
-    <div class="bibl-meeting">
-      <xsl:call-template name="write-xml-lang"/>
-      <xsl:text> (</xsl:text>
-        <xsl:apply-templates mode="#current">
-          <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-        </xsl:apply-templates>
-      <xsl:text>)</xsl:text>
-      <xsl:if test="following-sibling::*">
-        <xsl:text> </xsl:text>
-      </xsl:if>
+    <xsl:text> (</xsl:text>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="#current"/>
     </div>
+    <xsl:text>)</xsl:text>
+    <xsl:if test="following-sibling::*">
+      <xsl:text> </xsl:text>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="tei:date" mode="bibl">
-    <div class="bibl-date">
-      <xsl:call-template name="write-xml-lang"/>
-      <xsl:if test="@type='access'">
-        <xsl:text>Accessed </xsl:text>
-      </xsl:if>
-      <xsl:apply-templates mode="#current">
-        <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-      </xsl:apply-templates>
-      <xsl:if test="following-sibling::*">
-        <!-- if there are additional followers, separate them, otherwise,
-        the top level will -->
-        <xsl:text>. </xsl:text>
-      </xsl:if>
+    <xsl:if test="@type='access'">
+      <xsl:text>Accessed </xsl:text>
+    </xsl:if>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="#current"/>
     </div>
+    <xsl:if test="following-sibling::*">
+      <!-- if there are additional followers, separate them, otherwise,
+      the top level will -->
+      <xsl:text>. </xsl:text>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="tei:pubPlace" mode="bibl">
-    <div class="bibl-pubPlace">
-      <xsl:call-template name="write-xml-lang"/>
-      <xsl:apply-templates mode="#current">
-        <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-      </xsl:apply-templates>
-      
-      <xsl:choose>
-        <xsl:when test="following-sibling::tei:pubPlace">
-          <xsl:text>, </xsl:text>
-        </xsl:when>
-        <xsl:when test="../tei:publisher">
-          <xsl:text>: </xsl:text>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:text>. </xsl:text>
-        </xsl:otherwise>
-      </xsl:choose>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="#current"/>
     </div>
+    <xsl:choose>
+      <xsl:when test="following-sibling::tei:pubPlace">
+        <xsl:text>, </xsl:text>
+      </xsl:when>
+      <xsl:when test="../tei:publisher">
+        <xsl:text>: </xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>. </xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="tei:publisher" mode="bibl">
-    <div class="bibl-publisher">
-      <xsl:call-template name="write-xml-lang"/>
-      <xsl:apply-templates mode="#current">
-        <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-      </xsl:apply-templates>
-      <xsl:text>. </xsl:text>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="#current"/>
     </div>
+    <xsl:text>. </xsl:text>
   </xsl:template>
 
   <!-- details and notes -->
@@ -276,20 +252,24 @@
         <xsl:apply-templates mode="#current"/>
       </xsl:when>
       <xsl:when test="@type='vol'">
-        <div class="bibl-scope-vol">
-          <xsl:call-template name="write-xml-lang"/>
-          <xsl:apply-templates mode="#current">
-            <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-          </xsl:apply-templates>
+        <div>
+          <xsl:call-template name="set-attributes"/>
+          <xsl:apply-templates mode="#current"/>
         </div>
       </xsl:when>
       <xsl:when test="@type='chap'">
         <xsl:text>chapter </xsl:text>
-        <xsl:apply-templates mode="#current"/>
+        <div>
+          <xsl:call-template name="set-attributes"/>
+          <xsl:apply-templates mode="#current"/>
+        </div>
       </xsl:when>
       <xsl:when test="@type='issue'">
         <xsl:text> (</xsl:text>
-        <xsl:apply-templates mode="#current"/>
+        <div>
+          <xsl:call-template name="set-attributes"/>
+          <xsl:apply-templates mode="#current"/>
+        </div>
         <xsl:text>) </xsl:text>
       </xsl:when>
       <xsl:when test="@type='pp'">
@@ -307,7 +287,10 @@
             <xsl:text>p. </xsl:text>
           </xsl:otherwise>
         </xsl:choose>
-        <xsl:apply-templates mode="#current"/>
+        <div>
+          <xsl:call-template name="set-attributes"/>
+          <xsl:apply-templates mode="#current"/>
+        </div>
       </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates mode="#current"/>
@@ -334,36 +317,29 @@
 
   <xsl:template match="tei:idno" mode="bibl">
     <xsl:text> </xsl:text>
-    <xsl:apply-templates mode="#current"/>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="#current"/>
+    </div>
   </xsl:template>
 
   <xsl:template match="tei:idno[@type=('doi','isbn','ISBN')]" mode="bibl"/>
   
   <xsl:template match="tei:biblStruct" mode="bibl">
-    <div class="bibl-entry">
-      <xsl:call-template name="write-xml-lang"/>
+    <div>
+      <xsl:call-template name="set-attributes"/>
       <div class="bibl-authors">
-        <xsl:apply-templates select="tei:*/tei:author" mode="#current">
-          <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-        </xsl:apply-templates>
+        <xsl:apply-templates select="tei:*/tei:author" mode="#current"/>
       </div>
       <div class="bibl-editors">
-        <xsl:apply-templates select="tei:*/tei:editor" mode="#current">
-          <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-        </xsl:apply-templates>
+        <xsl:apply-templates select="tei:*/tei:editor" mode="#current"/>
       </div>
       <div class="bibl-titles">
-        <xsl:apply-templates select="(tei:analytic, tei:monogr, tei:series)/tei:title" mode="#current">
-          <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-        </xsl:apply-templates>
+        <xsl:apply-templates select="(tei:analytic, tei:monogr, tei:series)/tei:title" mode="#current"/>
       </div>
-      <xsl:apply-templates select="tei:*/(tei:edition, tei:imprint)" mode="#current">
-        <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-      </xsl:apply-templates>
+      <xsl:apply-templates select="tei:*/(tei:edition, tei:imprint)" mode="#current"/>
       <div class="bibl-notes">
-        <xsl:apply-templates select="tei:note" mode="#current">
-          <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-        </xsl:apply-templates>
+        <xsl:apply-templates select="tei:note" mode="#current"/>
       </div>
     </div>
   </xsl:template>
@@ -372,21 +348,17 @@
     <xd:short>Bibliographic note.  Applies templates in default mode.</xd:short>
   </xd:doc>
   <xsl:template match="tei:note" mode="bibl">
-    <div class="bibl-note">
-      <xsl:call-template name="write-xml-lang"/>
-      <xsl:apply-templates>
-        <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-      </xsl:apply-templates>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates/>
     </div>
   </xsl:template>
   
   <xsl:template match="tei:distributor" mode="bibl">
-    <div class="bibl-distributor">
-      <xsl:call-template name="write-xml-lang"/>
-      <xsl:text>Distributed by </xsl:text>
-      <xsl:apply-templates mode="#current">
-        <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-      </xsl:apply-templates>
+    <xsl:text>Distributed by </xsl:text>
+    <div>
+      <xsl:call-template name="set-attributes"/>
+      <xsl:apply-templates mode="#current"/>
       <xsl:text>.</xsl:text>
     </div>
   </xsl:template>
@@ -414,7 +386,6 @@
     </xsl:choose>
   </xsl:template>
 
-  
   <xsl:template match="jx:*" mode="bibl"/>
   
 </xsl:stylesheet>

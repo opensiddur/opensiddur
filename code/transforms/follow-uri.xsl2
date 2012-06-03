@@ -34,7 +34,6 @@
         <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
         </p>
       </xd:detail>
-      <xd:svnId>$Id: follow-uri.xsl2 757 2011-04-22 23:24:36Z efraim.feinstein $</xd:svnId>
   </xd:doc>
   
 	<xsl:param name="xpointer-grammar" as="document-node()">
@@ -45,9 +44,35 @@
 			</p:grammar>
 		</xsl:document>
 	</xsl:param>
+
+  <!-- keys that operate on the hidden uri-map parameter, which is a map of the form
+  <uri-map>
+    <map from="" to="">
+      <cache type="" to=""/>
+    </map>
+  </uri-map>
+   -->  
+  <xsl:key name="map-uri" match="map/@to" use="../@from" />
+  <xsl:key name="map-cached-uri" match="cache/@to" use="concat(../@type, ':', ../../@from)"/>
   
   <xd:doc>func:follow-cached-uri() $cache-type parameter for follow-uri mode for using the fragmentation cache</xd:doc>
-  <xsl:variable name="fragmentation-cache-type" as="xs:string" select="'format=fragmentation'"/>
+  <xsl:variable name="fragmentation-cache-type" as="xs:string" select="'fragmentation'"/>
+
+  <xd:doc>
+    <xd:short>Look up a document by internal URI</xd:short>
+  </xd:doc>
+  <xsl:function name="func:uri-map-lookup" as="xs:string">
+    <xsl:param name="uri" as="xs:string"/>
+    <xsl:param name="cache-type" as="xs:string"/>
+    <xsl:sequence select="
+      key(
+        if ($cache-type = $fragmentation-cache-type) 
+        then 'map-cached-uri' 
+        else 'map-uri', 
+        $uri,
+        $uri-map)/string()
+      "/>
+  </xsl:function>
 
   <xd:doc>
     <xd:short>Return the original document uri of a node, given the 
@@ -338,7 +363,7 @@
 
   <xd:doc>
     <xd:short>Extended func:follow-uri() to allow caching.</xd:short>
-    <xd:param name="cache-type">Additional query string (eg, format=fragmentation) to add to the base part of the URI. Empty for none.</xd:param>
+    <xd:param name="cache-type">Additional query string (eg, fragmentation) to add to the base part of the URI. Empty for none.</xd:param>
     <xd:detail>Uses the follow-uri template mode.</xd:detail>
   </xd:doc>
   <xsl:function name="func:follow-cached-uri" as="node()*">
@@ -350,24 +375,7 @@
     <xsl:variable name="full-uri" as="xs:anyURI"
       select="func:absolutize-uri($uri, $context)"/>
     <xsl:variable name="base-path" as="xs:anyURI" 
-      select="func:uri-base-path(
-        if ($cache-type=$fragmentation-cache-type)
-        then func:cached-document-path(string($full-uri))
-        else string($full-uri))"/>
-    <xsl:variable name="base-path-with-protocol" as="xs:anyURI"
-      select="xs:anyURI(
-      if (contains(substring-before(string($base-path),'/'), ':'))
-      then (: there's already a protocol :) $base-path
-      else (
-        (: add xmldb:exist protocol with user:password@ :) 
-        concat('xmldb:exist://', 
-          if ($user) 
-          then concat($user, ':', $password, '@')
-          else '',
-          string($base-path))
-      )
-      )"
-      />
+      select="func:uri-base-path(string($full-uri))"/>
     <xsl:variable name="fragment" as="xs:anyURI" 
       select="func:uri-fragment(string($full-uri))"/>      
 
@@ -376,12 +384,35 @@
         ' base-uri/document-uri($context) =', base-uri($context), ' ', document-uri(root($context)),
         ' full-uri =', $full-uri, 
         ' base-path =', $base-path,
-        ' base-path-with-protocol =', $base-path-with-protocol,
         ' fragment =', $fragment,
-        ' cache-type = ', $cache-type), 'func:follow-uri', $debug-detail+1)"/>    
+        ' mapped URI = ', if (contains(substring-before(string($base-path),'/'), ':'))
+        then (:it has a protocol, so it's already an absolute URI :)
+          $base-path
+        else if (empty($uri-map))
+        then 'EMPTY!'
+        else key(
+            if ($cache-type = $fragmentation-cache-type) 
+            then 'map-cached-uri' 
+            else 'map-uri', 
+            $base-path,
+            $uri-map)/string(),
+        ' cache-type = ', $cache-type), 'func:follow-uri', 
+        if (empty($uri-map))
+        then $debug-error
+        else $debug-detail+1)"/>    
     <!--xsl:message>func:follow-uri $uri = <xsl:value-of select="$uri"/> $parameters = <xsl:value-of select="$parameters"/></xsl:message-->
     <xsl:variable name="document" as="document-node()?"
-      select="doc($base-path-with-protocol)"/>
+      select="
+      doc(
+        if (contains(substring-before(string($base-path),'/'), ':'))
+        then (:it has a protocol, so it's already an absolute URI :)
+          $base-path
+        else if ($cache-type = $fragmentation-cache-type)
+        then
+          key('map-cached-uri', concat($cache-type, ':', $base-path), $uri-map)
+        else
+          key('map-uri', $base-path, $uri-map)
+      )"/>
       
     <xsl:variable name="pointer-destination" as="node()*">
       <xsl:apply-templates 
@@ -404,7 +435,7 @@
     <xd:short>Named template to handle the common processing 
     involved in following TEI links</xd:short>
     <xd:param name="steps">Specifies the maximum number of steps to evaluate.  Negative for infinity.</xd:param>
-    <xd:param name="cache-type">Specifies the cache type to use (eg, format=fragmentation).  Empty for none (default)</xd:param>
+    <xd:param name="cache-type">Specifies the cache type to use (eg, fragmentation).  Empty for none (default)</xd:param>
   </xd:doc>
   <xsl:template name="follow-tei-link" as="node()*">
     <xsl:param name="steps" tunnel="yes" as="xs:integer" select="-1"/>

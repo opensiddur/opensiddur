@@ -1,0 +1,28 @@
+Base 64 is a way of representing any data as text. The idea is simple:
+
+1) All data is binary, so treat it as bits
+
+2) Writing out each bit individually would be incredibly inefficient, so group them into sextuplets (6-bit numbers)
+
+3) Grouping 6 bits gives one "digit" in base 64
+
+4) Choose some arbitrary symbols to represent all 64 possibilities. For example, in hexadecimal we use "ABCDEF" as the extra symbols
+
+5) Since most data comes in 8-bit bytes, there may be 2 or 4 bits left over at the end. Just multiply by 10 or 100 to make 6 bits
+
+6) Write out your base 64 number, using your chosen symbols
+
+7) If you multiplied by 10 in step 5, put another (arbitrary) symbol at the end
+
+8) If you multiplied by 100 in step 5, put 2 such symbols at the end
+
+The symbols are indeed arbitrary, but a standardised set is used in the base 64 standards (in the same way that we standardise on "0123456789" in decimal).
+This simple library provides a "Base64" object with "encode" and "decode" functions. It's Public Domain, because I was so annoyed that I couldn't find
+such an obvious and useful bit of code under a permissive-enough license.
+
+Contributions are welcome. Note that I value simplicity over efficiency, so I may choose not to include patches that just increase the speed while making
+it harder to understand. With that said, the simplicity is already compromised a bit since I opted to make the encode/decode functions use a single pass
+(otherwise the RAM usage would be unacceptable). You're completely free to fork the code if you want to though.
+
+- Chris Warburton
+

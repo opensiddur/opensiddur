@@ -8,7 +8,7 @@ xquery version "3.0";
  : the linking elements that make the references
  :
  : Open Siddur Project
- : Copyright 2011 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
@@ -17,8 +17,6 @@ import module namespace app="http://jewishliturgy.org/modules/app"
   at "xmldb:exist:///code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "xmldb:exist:///code/modules/debug.xqm";
-import module namespace paths="http://jewishliturgy.org/modules/paths" 
-  at "xmldb:exist:///code/modules/paths.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
   at "xmldb:exist:///code/modules/follow-uri.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
@@ -29,6 +27,10 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 (: the default cache is under this directory :)
 declare variable $ridx:ridx-collection := "refindex";
+
+(: if this file exists, reference indexing should be skipped.
+ :)
+declare variable $ridx:disable-flag := "disabled.xml";
 
 (:~ given a collection, return its index :)
 declare function ridx:index-collection(
@@ -54,26 +56,27 @@ declare function local:make-mirror-collection-path(
     let $mirror-this-step := concat("/",string-join(subsequence($steps, 2, $step - 1),"/"))
     let $previous-step := concat('/', string-join(subsequence($steps, 1, $step - 1), '/'))
     let $new-collection := $steps[$step]
-    let $null := util:log-system-out(("step ", $step, ":", $this-step, " new-collection=",$new-collection, " from ", $previous-step))
-    let $owner := 
-      if ($step = 1)
-      then "admin"
-      else xmldb:get-owner($mirror-this-step)
-    let $group := 
-      if ($step = 1)
-      then "dba"
-      else xmldb:get-group($mirror-this-step)
-    let $mode := 
-      if ($step = 1)
-      then util:base-to-integer(0770, 8)
-      else xmldb:get-permissions($mirror-this-step)
+    let $null := 
+      debug:debug(
+        $debug:info,
+        "refindex",
+        (("step ", $step, ":", $this-step, " new-collection=",$new-collection, " from ", $previous-step))
+      )
     return (
-      if ($paths:debug)
-      then 
-        util:log-system-out(('creating new index collection: ', $this-step, ' from ', $previous-step, ' to ', $new-collection ,' owner/group/permissions=', $owner, '/',$group, '/',util:integer-to-base($mode,8)))
-      else (),
+      debug:debug(
+        $debug:info,
+        "refindex",
+        ('creating new index collection: ', 
+        $this-step, ' from ', 
+        $previous-step, ' to ', 
+        $new-collection)
+      ),
       if (xmldb:create-collection($previous-step, $new-collection))
-      then xmldb:set-collection-permissions($this-step, $owner, $group, $mode)
+      then 
+        app:mirror-permissions(
+          if ($step = 1)
+          then "/db"
+          else $mirror-this-step, $this-step)
       else error(xs:QName('err:CREATE'), concat('Cannot create index collection ', $this-step))
     )
 };
@@ -93,55 +96,66 @@ declare function ridx:reindex(
 declare function ridx:reindex(
   $doc-items as item()*
   ) as empty() {
-  for $doc-item in $doc-items
-  let $doc := 
-    typeswitch($doc-item)
-    case document-node() 
-      return $doc-item
-    default 
-      return doc($doc-item)
-  let $collection := replace(util:collection-name($doc), "^/db", "")
-  let $resource := util:document-name($doc)
-  let $make-mirror-collection :=
-   (: TODO: this should not have to be admin-ed. really, it should
-   be setuid! :)
-   try {
-    system:as-user("admin", $magic:password, 
-      local:make-mirror-collection-path($ridx:ridx-collection, $collection)
-    )
-   }
-   catch * {
-    (: TODO: this code is here to account for a bug where, in the
-     : restore process, the admin password is considered to be blank
-     : even though it had been set. It affects eXist r14669 under 
-     : circumstances that I can't figure out. Hopefully, it will not
-     : affect future versions, but if it does, we need this code
-     : to work around it. A warning will be displayed when this code
-     : executes. The warning is irrelevant to a user.
-     :)
-    debug:debug($debug:warn, "refindex", "The admin password is blank. This is a bug in eXist, I think."),
-    system:as-user("admin", "", 
-      local:make-mirror-collection-path($ridx:ridx-collection, $collection)
-    )
-   }
-  let $mirror-collection :=
-    app:concat-path(("/", $ridx:ridx-collection, $collection))
-  let $owner := xmldb:get-owner($collection, $resource)
-  let $group := xmldb:get-group($collection, $resource)
-  let $mode := xmldb:get-permissions($collection, $resource)
-  let $stored := 
-    if (xmldb:store($mirror-collection, $resource, 
-      element ridx:index {
-        ridx:make-index-entries($doc//@target|$doc//@targets)
-      }
-    ))
-    then 
-      xmldb:set-resource-permissions(
-        $mirror-collection, $resource,
-        $owner, $group, $mode
-      )
-    else ()
-  return () 
+  let $disabled := doc-available(concat("/", $ridx:ridx-collection, "/", $ridx:disable-flag))
+  where not($disabled)
+  return
+    for $doc-item in $doc-items
+    let $doc := 
+      typeswitch($doc-item)
+      case document-node() 
+        return 
+          $doc-item
+            [not(util:is-binary-doc(document-uri(.)))]
+      default 
+        return 
+          if (util:is-binary-doc($doc-item))
+          then ()
+          else doc($doc-item)
+    (: do not index binary documents :)
+    where exists($doc)
+    return
+      let $collection := replace(util:collection-name($doc), "^/db", "")
+      let $resource := util:document-name($doc)
+      let $make-mirror-collection :=
+       (: TODO: this should not have to be admin-ed. really, it should
+       be setuid! :)
+       try {
+        system:as-user("admin", $magic:password, 
+          local:make-mirror-collection-path($ridx:ridx-collection, $collection)
+        )
+       }
+       catch * {
+        (: TODO: this code is here to account for a bug where, in the
+         : restore process, the admin password is considered to be blank
+         : even though it had been set. It affects eXist r14669 under 
+         : circumstances that I can't figure out. Hopefully, it will not
+         : affect future versions, but if it does, we need this code
+         : to work around it. A warning will be displayed when this code
+         : executes. The warning is irrelevant to a user.
+         :)
+        debug:debug($debug:warn, "refindex", "The admin password is blank. This is a bug in eXist, I think."),
+        system:as-user("admin", "", 
+          local:make-mirror-collection-path($ridx:ridx-collection, $collection)
+        )
+       }
+      let $mirror-collection :=
+        app:concat-path(("/", $ridx:ridx-collection, $collection))
+      let $original-path := concat($collection, "/", $resource)
+      let $mirror-path := concat($mirror-collection, "/", $resource)
+      let $last-modified := xmldb:last-modified($collection, $resource)
+      let $idx-last-modified := xmldb:last-modified($mirror-collection, $resource)
+      where empty($last-modified) or empty($idx-last-modified) or ($last-modified > $idx-last-modified)
+      return
+        let $stored := 
+          if (xmldb:store($mirror-collection, $resource, 
+            element ridx:index {
+              ridx:make-index-entries($doc//@target|$doc//@targets)
+            }
+          ))
+          then
+            app:mirror-permissions($original-path, $mirror-path)
+          else ()
+        return () 
 };
 
 declare function ridx:make-index-entries(
@@ -155,7 +169,7 @@ declare function ridx:make-index-entries(
   let $returned := 
     if (matches($follow, "^http[s]?://"))
     then ()
-    else uri:fast-follow($follow, $element, uri:follow-steps($element))
+    else uri:fast-follow($follow, $element, uri:follow-steps($element), true())
   for $followed in $returned
   where $followed/@xml:id
   return
@@ -176,6 +190,50 @@ declare function ridx:lookup(
   $local-name as xs:string*
   ) as node()* {
   ridx:lookup($node,$context,$ns,$local-name,(),(),())
+};
+
+declare function ridx:lookup-document(
+  $docs as item()*
+  ) as node()* {
+  ridx:lookup-document($docs, false())
+};
+
+(:~ return all references to a document
+ : @param $accept-same if true(), include all references that
+ :  are in the same document. Default false()
+ :)
+declare function ridx:lookup-document(
+  $docs as item()*,
+  $accept-same as xs:boolean
+  ) as node()* {
+  for $doc in $docs
+  let $doc-uri :=
+    typeswitch ($doc)
+    case node() return document-uri(root($doc))
+    default return 
+      (: this code will normalize the URI to the same as the document-uri
+      function will return :)
+      document-uri(doc($doc))
+  let $mirror-uri :=
+      app:concat-path(("/", $ridx:ridx-collection, replace($doc-uri, "^/db", "")))
+  let $mirror-doc := doc($mirror-uri)
+  let $idx-collection := ridx:index-collection("/")
+  let $db-idx-collection := concat("^/db/", $ridx:ridx-collection)
+  for $entry in 
+    collection($idx-collection)//ridx:entry
+      [starts-with(@ref, $doc-uri)]
+      [$accept-same or not(root(.) is $mirror-doc)]
+  let $original-doc := doc(replace(document-uri(root($entry)), $db-idx-collection, ""))
+  return
+    try {
+      util:node-by-id($original-doc, $entry/@node)
+    }
+    catch * {
+      debug:debug($debug:info, 
+        "refindex", 
+        ("A query could not find a node in ", $original-doc, " - is the index expired?")
+      )
+    }    
 };
 
 (:~ Look up if the current node specifically or, including any
@@ -243,9 +301,49 @@ declare function ridx:lookup(
       try {
         util:node-by-id($original-doc, $entry/@node)
       }
-      catch * ($a, $b, $c) {
+      catch * {
         debug:debug($debug:warn,"refindex", ("A query for ", $node, " failed on util:node-by-id. ", " The entry was: ", $entry))(:,
         ridx:reindex(root($entry)),
         ridx:lookup($node, $context, $ns, $local-name, $type, $n, $without-ancestors):)
       }
+};
+
+(:~ disable the reference index: you must be admin! :)
+declare function ridx:disable(
+  ) as xs:boolean {
+  let $user := xmldb:get-current-user()
+  let $idx-collection := concat("/",$ridx:ridx-collection)
+  let $idx-flag := xs:anyURI(concat($idx-collection, "/", $ridx:disable-flag))
+  return
+    xmldb:is-admin-user($user)
+    and (
+      local:make-mirror-collection-path($ridx:ridx-collection, "/"),
+      if (xmldb:store(
+        $idx-collection,
+        $ridx:disable-flag,
+        <ridx:index-disabled/>
+        ))
+      then (
+        sm:chown($idx-flag, $user),
+        sm:chgrp($idx-flag, "dba"),
+        sm:chmod($idx-flag, "rwxrwxr--"), 
+        true()
+      )
+      else false()
+    )
+};
+
+(:~ re-enable the reference index: you must be admin to run! :)
+declare function ridx:enable(
+  ) as xs:boolean {
+  let $idx-collection := concat("/", $ridx:ridx-collection)
+  return
+    if (xmldb:is-admin-user(xmldb:get-current-user())
+      and doc-available(concat($idx-collection, "/", $ridx:disable-flag))
+      )
+    then (
+      xmldb:remove($idx-collection, $ridx:disable-flag),
+      true()
+    )
+    else false()
 };

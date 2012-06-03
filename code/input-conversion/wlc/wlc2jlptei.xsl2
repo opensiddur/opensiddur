@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xsl:stylesheet [
-<!ENTITY % hebrewent SYSTEM "../../../group/everyone/transliteration/hebrew.dtd">
+<!ENTITY % hebrewent PUBLIC "HEBREW" "hebrew.dtd">
 %hebrewent;
 ]>
 <!-- 
@@ -365,7 +365,7 @@ TODO:
         then func:make-word-xmlid(following-sibling::*[1])
         else func:debug(('note I do not know what to link it to', parent::*), 'x', $debug-error)"/>
     <tei:link type="note" targets="{string-join(
-      ($file,$extension,'#',$link-to-id, ' #note_',.),'')}"/>
+      ($file,'#',$link-to-id, ' #note_',.),'')}"/>
   </xsl:template>
 	
   <xsl:template match="text()" mode="link-notes"/>
@@ -395,7 +395,7 @@ TODO:
       select="document($input-file)"/>
     <xsl:variable name="bibl-content" as="element(tei:bibl)">
 			<tei:bibl xml:id="biblKimball2010">
-	      <tei:ptr target="../{$bibliography-file-name}{$extension}#Kimball2010" />
+	      <tei:ptr target="../{$bibliography-file-name}#Kimball2010" />
 			</tei:bibl>
     </xsl:variable>
     <xsl:variable name="license-content" as="element()+">
@@ -424,7 +424,7 @@ TODO:
     </xsl:variable>
     <xsl:variable name="respList-content" as="element(j:respList)">
       <j:respList>
-        <tei:respons j:role="transcriber" locus="value" target="#repository" resp="../{$contributors-file-name}{$extension}#Christopher.Kimball"/>
+        <tei:respons j:role="transcriber" locus="value" target="#repository" resp="../{$contributors-file-name}#Christopher.Kimball"/>
       </j:respList>
     </xsl:variable>
 		<xsl:variable name="links-content" as="element(j:links)">
@@ -466,6 +466,7 @@ TODO:
 
               <!-- books get referenced in the whole-tanach file -->
               <j:concurrent>
+              	<xsl:attribute name="xml:id" select="'concurrent'"/>
                 <xsl:variable name="selection" as="element(jx:tmp)">
                   <jx:tmp>
                     <xsl:for-each select="$tanach-as-xml//book">
@@ -473,18 +474,20 @@ TODO:
                         select="names/name" as="xs:string" />
                       <xsl:variable name="book-uri"
                         select="func:bookref-to-uri($book, ())" />
-                      <tei:ptr target="{$book-uri}{$extension}#main">
+                      <tei:ptr target="{$book-uri}#main">
 												<xsl:attribute name="xml:id" select="concat('se_',$book-uri)"/> 
                       </tei:ptr>
                     </xsl:for-each>
                   </jx:tmp>
                 </xsl:variable>
                 <j:selection>
+                  <xsl:attribute name="xml:id" select="'selection'"/>
                   <xsl:sequence select="$selection/*" />
                 </j:selection>
                 <j:view type="div">
+                  <xsl:attribute name="xml:id" select="'view_div'" />
                   <tei:div>
-										<xsl:attribute name="xml:id" select="'main'"/>
+					<xsl:attribute name="xml:id" select="'main'"/>
                     <tei:head xml:lang="he">תנ״ך</tei:head>
                     <tei:ab>
                       <tei:ptr xml:id="tanach"
@@ -495,6 +498,9 @@ TODO:
                   </tei:div>
                 </j:view>
               </j:concurrent>
+              <j:repository>
+                <xsl:attribute name="xml:id" select="'repository'"/>
+              </j:repository>
             </tei:body>
           </xsl:with-param>
           <xsl:with-param name="license" tunnel="yes"
@@ -529,6 +535,7 @@ TODO:
               as="element(tei:body)">
               <tei:body xml:lang="he">
                 <j:concurrent>
+                  <xsl:attribute name="xml:id" select="'concurrent'"/>
                   <xsl:variable name="selection" as="element(jx:tmp)">
                     <jx:tmp>
                       <xsl:for-each select="c">
@@ -536,16 +543,18 @@ TODO:
                           select="@n" />
                         <xsl:variable name="chap-uri"
                           select="func:bookref-to-uri($book, $chap)" />
-                        <tei:ptr target="{$chap-uri}{$extension}#main"> 
+                        <tei:ptr target="{$chap-uri}#main"> 
 													<xsl:attribute name="xml:id" select="concat('se_ch',$chap)"/>
 												</tei:ptr>
                       </xsl:for-each>
                     </jx:tmp>
                   </xsl:variable>
                   <j:selection>
+                    <xsl:attribute name="xml:id" select="'selection'"/>
                     <xsl:sequence select="$selection/*" />
                   </j:selection>
                   <j:view type="div">
+                    <xsl:attribute name="xml:id" select="'view_div'"/>
                     <tei:div xml:id="main">
                       <tei:head xml:lang="he">
                         <xsl:value-of select="$book-he" />
@@ -557,6 +566,9 @@ TODO:
                     </tei:div>
                   </j:view>
                 </j:concurrent>
+                <j:repository>
+                  <xsl:attribute name="xml:id" select="'repository'"/>
+                </j:repository>
               </tei:body>
             </xsl:with-param>
             <xsl:with-param name="license" tunnel="yes"
@@ -705,6 +717,7 @@ TODO:
                       select="$bodies/self::tei:seg"/>
                     
                   <j:concurrent>
+                    <xsl:attribute name="xml:id" select="'concurrent'"/>
                     <xsl:variable name="selection-content"
                       as="element(tei:ptr)+"
                       select="$bodies/self::tei:ptr" />
@@ -716,9 +729,11 @@ TODO:
                       select="$bodies/self::tei:lg" />
                     
                     <j:selection>
+                      <xsl:attribute name="xml:id" select="'selection'"/>
                       <xsl:sequence select="$selection-content"/>
                     </j:selection>
                     <j:view type="div">
+                      <xsl:attribute name="xml:id" select="'view_div'"/>
                       <tei:div xml:id="main">
                         <tei:head><xsl:value-of select="$book-chap-he"/></tei:head>
                         <tei:ab>
@@ -727,6 +742,7 @@ TODO:
                       </tei:div>
                     </j:view>
                     <j:view type="p">
+                      <xsl:attribute name="xml:id" select="'view_p'"/>
                       <xsl:for-each-group select="$repository-content"
                         group-ending-with="*[tei:pc=('&samekh;','&pe;')]">
                         <tei:p>
@@ -743,15 +759,18 @@ TODO:
                       </xsl:for-each-group>
                     </j:view>
                     <j:view type="verse">
+                      <xsl:attribute name="xml:id" select="'view_verse'"/>
                       <xsl:sequence select="$sentence-content"/>
                     </j:view>
                     <xsl:if test="$lg-content">
                       <j:view type="lg">
+                        <xsl:attribute name="xml:id" select="'view_lg'"/>
                         <xsl:sequence select="$lg-content"/>
                       </j:view>
                     </xsl:if>
                   </j:concurrent>
-                  <j:repository xml:id="repository">
+                  <j:repository>
+                    <xsl:attribute name="xml:id" select="'repository'"/>
                     <!-- TOFIX: func and tmp namespace nodes -->
                     <xsl:sequence select="$repository-content" />
                   </j:repository>
@@ -785,14 +804,18 @@ TODO:
           as="element(tei:body)">
           <tei:body xml:lang="en">
             <j:concurrent>
+              <xsl:attribute name="xml:id" select="'concurrent'"/>
               <j:selection>
+                <xsl:attribute name="xml:id" select="'selection'"/>
                 <xsl:apply-templates select="$tanach-as-xml//notes" mode="notes-selection"/>
               </j:selection>
               <j:view type="note">
+                <xsl:attribute name="xml:id" select="'view_note'"/>
                 <xsl:apply-templates select="$tanach-as-xml//notes" mode="notes-view"/>
               </j:view>
             </j:concurrent>
             <j:repository>
+              <xsl:attribute name="xml:id" select="'repository'"/>
               <xsl:apply-templates select="$tanach-as-xml//notes" mode="notes-repository"/>
             </j:repository>
           </tei:body>

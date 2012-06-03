@@ -14,15 +14,20 @@ text/wlc/
 # generated documentation
 /doc/
 
+# generated schema
+schema/build
+
 # generated files:
 /code/common/params.xsl2
 /code/transforms/format/xhtml/muxhtml.xsl2
 /setup/setup.xql
+/setup/eXist-installer.xml
 
 # db directory except special
 db/*
 !db/controller.xql
 !db/system/
+!db/demo/
 
 # contents list
 __contents__.xml

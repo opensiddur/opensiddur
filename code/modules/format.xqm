@@ -1,7 +1,7 @@
 (:~
  : XQuery functions to output a given XML file in a format.
  : 
- : Copyright 2011 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -9,9 +9,7 @@ module namespace format="http://jewishliturgy.org/modules/format";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace err="http://jewishliturgy.org/errors";
-
-import module namespace util="http://exist-db.org/xquery/util";
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
+declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
   at "xmldb:exist:///code/modules/app.xqm";
@@ -33,11 +31,12 @@ declare variable $format:compile-error-resource := "compile-error.xml";
 declare variable $format:queued := 0;
 declare variable $format:caching := 1;
 declare variable $format:data := 2;
-declare variable $format:list := 3;
-declare variable $format:format := 4;
+declare variable $format:transliterate := 3;
+declare variable $format:list := 4;
+declare variable $format:format := 5;
 
 
-declare function format:_wrap-document(
+declare function local:wrap-document(
 	$node as node()
 	) as document-node() {
 	if ($node instance of document-node())
@@ -56,7 +55,7 @@ declare function format:data-compile(
   $user as xs:string?,
   $password as xs:string?
 	) as document-node() {
-  format:_wrap-document(
+  local:wrap-document(
     let $uri-or-node :=
       if ($jlptei-uri-or-node instance of xs:string)
       then (
@@ -79,6 +78,32 @@ declare function format:data-compile(
   )
 };
 
+declare function format:transliterate(
+  $uri-or-node as item(),
+  $user as xs:string?,
+  $password as xs:string?
+  ) as document-node() {
+  local:wrap-document(
+    app:transform-xslt($uri-or-node, 
+      app:concat-path($format:rest-path-to-xslt, 'translit/translit-main.xsl2'),
+      (
+        if ($user)
+        then (
+          <param name="user" value="{$user}"/>,
+          <param name="password" value="{$password}"/>
+        )
+        else (), 
+        <param name="transliteration-tables" value="{
+          string-join(
+            collection("/data/transliteration")/tr:schema/document-uri(root(.)),
+            " ")
+        }"/>
+      ), ()
+    )
+  )
+};
+
+
 declare function format:list-compile(
 	$data-compiled-node as item()
 	) as document-node() {
@@ -90,7 +115,7 @@ declare function format:list-compile(
   $user as xs:string?,
   $password as xs:string?
 	) as document-node() {
-	format:_wrap-document(
+	local:wrap-document(
 		app:transform-xslt($data-compiled-node, 
 			app:concat-path($format:rest-path-to-xslt, 'list-compiler/list-compiler.xsl2'),
         if ($user)
@@ -115,7 +140,7 @@ declare function format:format-xhtml(
   $user as xs:string?,
   $password as xs:string?
 	) as document-node() {
-	format:_wrap-document(
+	local:wrap-document(
 		app:transform-xslt($list-compiled-node, 
 			app:concat-path($format:rest-path-to-xslt, 'format/xhtml/xhtml.xsl2'),
       (
@@ -137,6 +162,27 @@ declare function format:format-xhtml(
 	$list-compiled-node as item()
 	) as document-node() {
 	format:format-xhtml($list-compiled-node, (), (), ())
+};
+
+(:~ compile XHTML to intermediate TEI :)
+declare function format:reverse-xhtml(
+  $node as item(),
+  $user as xs:string?,
+  $password as xs:string?
+  ) as document-node() {
+  local:wrap-document(
+    app:transform-xslt($node, 
+      app:concat-path($format:rest-path-to-xslt, 'format/reverse-xhtml/reverse.xsl2'),
+      (
+        if ($user)
+        then (
+          <param name="user" value="{$user}"/>,
+          <param name="password" value="{$password}"/>
+        )
+        else ()
+      )
+      , ())
+  )
 };
 
 declare function format:compile(
@@ -173,13 +219,15 @@ declare function format:enqueue-compile(
   let $password := ($password, app:auth-password())[1]
   let $total-steps := 
     if ($final-format = "fragmentation")
-    then 1
+    then $format:caching
     else if ($final-format = "debug-data-compile")
-    then 2
+    then $format:data
+    else if ($final-format = "debug-data-translit")
+    then $format:transliterate
     else if ($final-format = "debug-list-compile")
-    then 3
+    then $format:list
     else if ($final-format = ("html","xhtml"))
-    then 4
+    then $format:format
     else 
       (: unknown format :)
       error(xs:QName("err:FORMAT"), concat("Unknown format: ", $final-format))
@@ -189,11 +237,13 @@ declare function format:enqueue-compile(
     return
       replace(
         $source-resource, "\.xml$", 
-        if ($i = 1)
+        if ($i = $format:caching)
         then ".frag.xml"
-        else if ($i = 2)
+        else if ($i = $format:data)
         then ".data.xml"
-        else if ($i = 3)
+        else if ($i = $format:transliterate)
+        then ".trans.xml"
+        else if ($i = $format:list)
         then ".list.xml"
         else ".xhtml"
       )
@@ -224,13 +274,13 @@ declare function format:enqueue-compile(
             </jobs:param>
             <jobs:param>
               <jobs:name>dest-resource</jobs:name>
-              <jobs:value>{$dest-resource[1]}</jobs:value>
+              <jobs:value>{$dest-resource[$format:caching]}</jobs:value>
             </jobs:param>
           </jobs:run>
           {$error-element, $priority-element}
         </jobs:job>, $user, $password)
     let $data-job := 
-      if ($total-steps >= 2)
+      if ($total-steps >= $format:data)
       then
         jobs:enqueue(
           <jobs:job>
@@ -250,7 +300,35 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-resource</jobs:name>
-                <jobs:value>{$dest-resource[2]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:data]}</jobs:value>
+              </jobs:param>
+            </jobs:run>
+            <jobs:depends>{string($frag-job)}</jobs:depends>
+            {$error-element, $priority-element}
+          </jobs:job>, $user, $password)
+      else ()  
+    let $translit-job := 
+      if ($total-steps >= $format:transliterate)
+      then
+        jobs:enqueue(
+          <jobs:job>
+            <jobs:run>
+              <jobs:query>/code/apps/jobs/queries/bg-compile-translit.xql</jobs:query>
+              <jobs:param>
+                <jobs:name>source-collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>source-resource</jobs:name>
+                <jobs:value>{$dest-resource[$format:transliterate - 1]}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-collection</jobs:name>
+                <jobs:value>{$dest-collection}</jobs:value>
+              </jobs:param>
+              <jobs:param>
+                <jobs:name>dest-resource</jobs:name>
+                <jobs:value>{$dest-resource[$format:transliterate]}</jobs:value>
               </jobs:param>
             </jobs:run>
             <jobs:depends>{string($frag-job)}</jobs:depends>
@@ -258,7 +336,7 @@ declare function format:enqueue-compile(
           </jobs:job>, $user, $password)
       else ()  
     let $list-job :=
-      if ($total-steps >= 3)
+      if ($total-steps >= $format:list)
       then
         jobs:enqueue(
           <jobs:job>
@@ -270,7 +348,7 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>source-resource</jobs:name>
-                <jobs:value>{$dest-resource[2]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:list - 1]}</jobs:value>
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-collection</jobs:name>
@@ -278,15 +356,15 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-resource</jobs:name>
-                <jobs:value>{$dest-resource[3]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:list]}</jobs:value>
               </jobs:param>
             </jobs:run>
-            <jobs:depends>{string($data-job)}</jobs:depends>
+            <jobs:depends>{string($translit-job)}</jobs:depends>
             {$error-element, $priority-element}
           </jobs:job>, $user, $password)
       else ()
     let $format-job :=
-      if ($total-steps >= 4)
+      if ($total-steps >= $format:format)
       then
         jobs:enqueue(
           <jobs:job>
@@ -298,7 +376,7 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>source-resource</jobs:name>
-                <jobs:value>{$dest-resource[3]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:format - 1]}</jobs:value>
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-collection</jobs:name>
@@ -306,7 +384,7 @@ declare function format:enqueue-compile(
               </jobs:param>
               <jobs:param>
                 <jobs:name>dest-resource</jobs:name>
-                <jobs:value>{$dest-resource[4]}</jobs:value>
+                <jobs:value>{$dest-resource[$format:format]}</jobs:value>
               </jobs:param>
               <jobs:param>
                 <jobs:name>style</jobs:name>
@@ -336,7 +414,7 @@ declare function format:enqueue-compile(
               </jobs:param>
             </jobs:run>
             <jobs:depends>{(
-              $frag-job, $data-job, $list-job, $format-job)[$dp1]/string()
+              $frag-job, $data-job, $translit-job, $list-job, $format-job)[$dp1]/string()
             }</jobs:depends>
             {$error-element, $priority-element}
           </jobs:job>, $user, $password
@@ -449,11 +527,7 @@ declare function format:new-status(
       </status>
     ))
     then
-      let $owner := xmldb:get-owner($collection)
-      let $group := xmldb:get-group($collection) 
-      let $mode := xmldb:get-permissions($collection) 
-      return
-        xmldb:set-resource-permissions($collection, $status-xml, $owner, $group, $mode)
+      app:mirror-permissions($collection, concat($collection, "/", $status-xml))
     else
       error(xs:QName("err:STORE"), concat("Cannot store status file ", $status-xml))
 };
@@ -485,10 +559,10 @@ declare function format:update-status(
   let $status-doc := doc(concat($collection, "/", format:status-xml($resource)))
   let $current := $status-doc//current
   let $job := $status-doc//job
-  return (
+  return (# exist:batch-transaction #) {
     update value $current with $new-stage,
     update value $job with $new-job
-  ) 
+  }
 };
 
 (:~ Complete the current processing stage. If the processing is entirely complete,
@@ -504,7 +578,7 @@ declare function format:complete-status(
   let $steps := $status-doc//steps
   let $job := $status-doc//job
   let $update-location := $current = $steps
-  return (
+  return (# exist:batch-transaction #) {
     update value $completed with string($current), 
     update value $current with "",
     update value $job with "",
@@ -512,5 +586,5 @@ declare function format:complete-status(
     then 
       update value $location with concat($collection, "/", $resource)
     else ()
-  )
+  }
 };

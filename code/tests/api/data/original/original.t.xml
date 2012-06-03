@@ -4,59 +4,123 @@
 	xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
 	xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
   xmlns:http="http://expath.org/ns/http-client">
-	<suiteName>Original data entry point</suiteName>
-	<description>
-		<p>Test the data index API</p>
-		<author>Efraim Feinstein</author>
-	</description>
-	<setup/>
+  <suiteName>Original data entry point</suiteName>
+  <description>
+  	<p>Test the data index API</p>
+  	<author>Efraim Feinstein</author>
+  </description>
+  <setup/>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
-	<imports>
-    import module namespace paths="http://jewishliturgy.org/modules/paths" 
-      at "xmldb:exist:///code/modules/paths.xqm";
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
+  <imports>
+    import module namespace httpclient="http://exist-db.org/xquery/httpclient";
     import module namespace apitest="http://jewishliturgy.org/modules/apitest"
       at "xmldb:exist:///code/tests/api/apitest.xqm";
-	</imports>
-	<TestSet>
-		<testName>GET</testName>
-		<setup/>
-		<imports>
-    </imports>
-		<functions>
-		</functions>
-		<tearDown/>
-		<test>
-			<task>GET with OK accept header</task>
-			<code><![CDATA[
-        apitest:get("/code/api/data/original", <header name="Accept" value="application/xhtml+xml"/>)
-			]]></code>
-      <class href="../search-results.t.xml#SelfConsistentMenu"/> 
+  </imports>
+  <TestSet>
+  	<testName>GET</testName>
+  	<setup/>
+  	<functions>
+  	</functions>
+  	<tearDown/>
+  	<test>
+  	  <task>GET with HTML accept header</task>
+  	  <code><![CDATA[
+          apitest:get("/code/api/data/original", <header name="Accept" value="application/xhtml+xml"/>)
+      ]]></code>
+      <class href="../../common.t.xml#SelfConsistentApiList"/> 
       <class href="../search-results.t.xml#SelfConsistentSearch"/> 
-      <class href="../search-results.t.xml#Testing"/> 
-		</test>
-		<test>
-			<task>PUT</task>
-			<code><![CDATA[
+      <class href="../../common.t.xml#Testing"/> 
+    </test>
+    <test>
+      <task>GET with XML accept header</task>
+      <code><![CDATA[
+      apitest:get("/code/api/data/original", 
+        <header name="Accept" value="application/xml"/>)
+      ]]></code>
+      <xpath desc="returns HTTP status code 200">./@statusCode = 200</xpath>
+      <xpath desc="returns search results division">exists(.//tei:div[@type="search-results"])</xpath>
+      <xpath desc="returns search information">exists(.//tei:div[@jx:start][@jx:max-results][@jx:n-results])</xpath> 
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>POST while not logged in</testName>
+    <test>
+      <task>POST XML while not logged in</task>
+      <code><![CDATA[ 
+      apitest:post("/code/api/data/original",
+        (), doc("/code/api/data/resources/template.xml"))
+      ]]></code>
+      <xpath desc="returns HTTP status code 401">./@statusCode = 401</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>POST while logged in</testName>
+    <asUser>testuser</asUser>
+    <password>testuser</password>
+    <setup>
+      <code><![CDATA[
+      apitest:login()
+      ]]></code>
+    </setup>
+    <tearDown>
+      <remove-collection collection="/group/testuser/original"/>
+      <code><![CDATA[
+      apitest:clear()
+      ]]></code>
+    </tearDown>
+    <variable name="title" as="xs:string">"Test Document"</variable>
+    <test>
+      <task>Create a non-TEI document</task>
+      <code><![CDATA[
+      apitest:post("/code/api/data/original", (),
+        <x />)
+      ]]></code>
+      <xpath desc="return error code 400">./@statusCode=400</xpath>
+    </test>
+    <test>
+      <task>Create a new document by title</task>
+      <code><![CDATA[
+      apitest:post("/code/api/data/original", (),
+        <tei:title xml:lang="en" type="main">{$title}</tei:title>)
+      ]]></code>
+      <xpath desc="Return status code 201">./@statusCode=201</xpath>
+      <xpath desc="Return the location of the created document in a Location header">starts-with(.//httpclient:headers/httpclient:header[@name="Location"]/@value, "/code/api/data/original")</xpath>
+      <xpath desc="A document is accessible">count(collection("/group/testuser/original")[tei:TEI])=1</xpath>
+      <xpath desc="The document has the specified title">collection("/group/testuser/original")[tei:TEI]//tei:title[@type="main"]=$title</xpath>
+    </test>
+    <test>
+      <task>Create two documents with the same title</task>
+      <code><![CDATA[
+      apitest:post("/code/api/data/original", (),
+        <tei:title xml:lang="en" type="main">{$title}</tei:title>),
+      apitest:post("/code/api/data/original", (),
+        <tei:title xml:lang="en" type="main">{$title}</tei:title>)
+      ]]></code>
+      <xpath desc="Return status code 201">./@statusCode=201</xpath>
+      <xpath desc="Two documents are accessible">count(collection("/group/testuser/original")[tei:TEI])=2</xpath>
+      <xpath desc="Both document titles are the same">every $t in collection("/group/testuser/original")[tei:TEI]//tei:title[@type="main"] satisfies $t = $title</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>PUT</testName>
+    <test>
+      <task>PUT</task>
+	  <code><![CDATA[
         apitest:put("/code/api/data", (), <x/>)
-			]]></code>
-      <class href="../search-results.t.xml#InvalidMethod"/> 
-		</test>
-    <!--
-		<test>
-			<task>POST</task>
-			<code><![CDATA[
-        apitest:post("/code/api/data", (), <x/>)
-			]]></code>
-      <class href="search-results.t.xml#InvalidMethod"/> 
-		</test>
-    -->
-		<test>
-			<task>DELETE</task>
-			<code><![CDATA[
+	  ]]></code>
+      <class href="../../common.t.xml#InvalidMethod"/> 
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>DELETE</testName>
+    <test>
+	  <task>DELETE</task>
+	  <code><![CDATA[
         apitest:delete("/code/api/data", ())
-			]]></code>
-      <class href="../search-results.t.xml#InvalidMethod"/> 
-		</test>
-    
+	  ]]></code>
+      <class href="../../common.t.xml#InvalidMethod"/> 
+	</test>    
   </TestSet>
 </TestSuite>

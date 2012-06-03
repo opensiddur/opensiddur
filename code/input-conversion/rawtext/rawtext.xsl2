@@ -57,7 +57,6 @@
       </ul>       
       </p>
     </xd:detail>
-    <xd:svnId>$Id: rawtext.xsl2 759 2011-04-24 03:29:43Z efraim.feinstein $</xd:svnId>
   </xd:doc>
   <!-- TODO:
     add a poetic mode
@@ -391,19 +390,21 @@ The previous match was:
               (func:debug(
               concat('Unknown or unsupported license type: ', $license-type),
               'Raw text converter', 
-              $debug-error), $cc0-license) "/> 
-    <result-document href="{$output-directory}/contributors.xml">
-      <tei:list type="contributors">
-        <xsl:for-each select="distinct-values(r:ContribCommand/r:Name)">
-          <tei:item>
-            <xsl:attribute name="xml:id" select="replace(normalize-space(.),'\s+','.')"/>
+              $debug-error), $cc0-license) "/>
+    <xsl:for-each select="distinct-values(r:ContribCommand/r:Name)">
+      <xsl:variable name="identifier" as="xs:string" select="replace(normalize-space(.),'\s+','_')"/> 
+      <result-document href="{$output-directory}/contributors/{$identifier}.xml">
+        <tei:div type="contributors">
+          <xsl:attribute name="xml:id" select="{$identifier}"/>
+          <tei:name>
             <tei:forename>???</tei:forename>
             <tei:surname>???</tei:surname>
-            <tei:email>???</tei:email>
-          </tei:item>
-        </xsl:for-each>
-      </tei:list>
-    </result-document> 
+          </tei:name>
+          <tei:email>???</tei:email>
+          <tei:affiliation>???</tei:affiliation>
+        </tei:div>
+      </result-document> 
+    </xsl:for-each>
     
     <xsl:if test="descendant::r:FileCommand">
       <!-- make the index file -->
@@ -417,7 +418,7 @@ The previous match was:
           <xsl:with-param name="bibl" tunnel="yes" as="element(tei:bibl)">
             <tei:bibl>
               <xsl:attribute name="xml:id" select="'bibl-local'"/>
-              <tei:ptr target="../bibliography/{$bibl-pointer}.xml"/>
+              <tei:ptr target="../sources/{$bibl-pointer}"/>
               <xsl:variable name="pages" as="xs:string*" 
                 select="(descendant::r:PageBreakCommand|descendant::r:FootnotePageBreakCommand)/r:PageNumber"/>
               <xsl:if test="exists($pages)">
@@ -433,13 +434,16 @@ The previous match was:
           <xsl:with-param name="body" as="element(tei:body)" tunnel="yes">
             <tei:body>
               <j:concurrent>
+              	<xsl:attribute name="xml:id" select="'concurrent'"/>
                 <xsl:variable name="selection-index" as="element(tei:ptr)+">
                   <xsl:apply-templates select="descendant::r:FileCommand" mode="index-selection"/>
                 </xsl:variable>
                 <j:selection>
+               	  <xsl:attribute name="xml:id" select="'selection'"/>
                   <xsl:sequence select="$selection-index"/>
                 </j:selection>
                 <j:view type="div">
+                  <xsl:attribute name="xml:id" select="'view_div'"/>
                   <tei:div>
                     <xsl:attribute name="xml:id" select="'main'"/>
                     <tei:ab>
@@ -450,6 +454,9 @@ The previous match was:
                   </tei:div>
                 </j:view>
               </j:concurrent>
+              <j:repository>
+                <xsl:attribute name="xml:id" select="'repository'"/>
+              </j:repository>
             </tei:body>
           </xsl:with-param>
         </xsl:apply-templates>
@@ -487,7 +494,7 @@ The previous match was:
         <xsl:variable name="bibl-content" as="element(tei:bibl)">
           <tei:bibl>
             <xsl:attribute name="xml:id" select="'bibl-local'"/>
-            <tei:ptr target="../bibliography/{$bibl-pointer}.xml"/>
+            <tei:ptr target="../sources/{$bibl-pointer}"/>
             <xsl:if test="not(empty($pages))">
               <tei:biblScope type="pp" from="{$pages[1]}" to="{$pages[last()]}"/>
             </xsl:if>
@@ -518,7 +525,7 @@ The previous match was:
               <xsl:with-param name="bibl" as="element(tei:bibl)"  tunnel="yes">
                 <tei:bibl>
                   <xsl:attribute name="xml:id">bibl-local</xsl:attribute>
-                  <tei:ptr target="../bibliography/{$bibl-pointer}.xml"/>
+                  <tei:ptr target="../sources/{$bibl-pointer}"/>
                   <xsl:for-each select="distinct-values($notes-pages)">
                     <tei:biblScope type="pp" from="{.}" to="{.}">
                       <xsl:attribute name="xml:id" select="concat('bibl_page_',.)"/>
@@ -695,9 +702,11 @@ The previous match was:
                     <xsl:apply-templates select="$repository-content" mode="selection"/>
                   </xsl:variable>
                   <j:selection>
+                  	<xsl:attribute name="xml:id" select="'selection'"/>
                     <xsl:sequence select="$selection-content"/>
                   </j:selection>
                   <j:view type="div">
+                  	<xsl:attribute name="xml:id" select="'view_div'"/>
                     <tei:div>
                       <xsl:attribute name="xml:id" select="'main'"/>
                       <xsl:for-each-group select="$grouped-segments" group-by="@section">
@@ -733,6 +742,7 @@ The previous match was:
                     </tei:div>
                   </j:view>
                   <j:view type="p">
+                  	<xsl:attribute name="xml:id" select="'view_p'"/>
                     <xsl:for-each-group select="$grouped-segments[@p]" 
                       group-by="xs:integer(@p)">
                       <xsl:sort select="xs:integer(current-grouping-key())" data-type="number" />
@@ -748,6 +758,7 @@ The previous match was:
                   </j:view>
                   <xsl:if test="$grouped-segments/@lg">
                     <j:view type="lg">
+                      <xsl:attribute name="xml:id" select="'view_lg'"/>
                       <xsl:for-each-group select="$grouped-segments[@lg]" group-by="@lg">
                         <tei:lg>
                           <xsl:attribute name="xml:id" select="concat('lg', current-grouping-key())"/>
@@ -767,6 +778,7 @@ The previous match was:
                   </xsl:if>
                   <xsl:if test="$grouped-segments/@verse">
                     <j:view type="verse">
+                      <xsl:attribute name="xml:id" select="'view_verse'"/>
                       <xsl:for-each-group select="$grouped-segments[@verse]" group-by="xs:integer(@chapter)">
                         <xsl:sort select="xs:integer(@chapter)" data-type="number" />
                         <xsl:for-each-group select="current-group()" group-by="xs:integer(@verse)">
@@ -793,6 +805,7 @@ The previous match was:
                   <!-- segments inside named content -->
                   <xsl:if test="$grouped-segments/@name">
                     <j:view type="ab">
+                      <xsl:attribute name="xml:id" select="'view_ab_named'"/>
                       <xsl:for-each-group select="$grouped-segments[@name]" group-by="@name">
                         <tei:ab>
                           <xsl:attribute name="xml:id" select="current-grouping-key()"/>
@@ -884,7 +897,7 @@ The previous match was:
           j:role="{$role}" 
           locus="value" 
           target="{string($target)}" 
-          resp="../contributors/{replace(normalize-space($name),'\s+','.')}.xml"/>
+          resp="../contributors/{replace(normalize-space($name),'\s+','-')}"/>
       <!-- /xsl:for-each-->
     </xsl:for-each-group>
   </xsl:template>
@@ -974,7 +987,7 @@ The previous match was:
     <xd:short>Make the targeted pointers for the index file</xd:short>
   </xd:doc>
   <xsl:template match="r:FileCommand" mode="index-selection">
-    <tei:ptr target="{concat(func:name-file(.),'.xml')}#main">
+    <tei:ptr target="{func:name-file(.)}#main">
       <xsl:attribute name="xml:id" select="concat('se_',string(count(preceding::r:FileCommand) + 1))"/>
     </tei:ptr>
   </xsl:template>
@@ -1421,10 +1434,10 @@ The previous match was:
   <xsl:template match="r:TranslitCommand[r:OriginalLanguage]" mode="make-conditional-references">
     <xsl:variable name="base-id" as="xs:string" select="concat('translit-',generate-id(.))"/>
     <!-- note: if this is a translation, conditionals are at ../../ -->
-    <tei:link type="association" targets="#{$base-id}-aswritten /group/core/conditionals/TransliterationChoice.xml#as-written-Y">
+    <tei:link type="association" targets="#{$base-id}-aswritten /group/core/conditionals/TransliterationChoice#as-written-Y">
       <xsl:attribute name="xml:id" select="concat($base-id, '-as-written-Y-link')"/>
     </tei:link>
-    <tei:link type="association" targets="#{$base-id}-custom /group/core/conditionals/TransliterationChoice.xml#as-custom-Y">
+    <tei:link type="association" targets="#{$base-id}-custom /group/core/conditionals/TransliterationChoice#as-custom-Y">
       <xsl:attribute name="xml:id" select="concat($base-id, '-as-custom-Y-link')"/>
     </tei:link>
   </xsl:template>
@@ -1630,7 +1643,7 @@ The previous match was:
     <xsl:variable name="page-file-element" as="element(r:FileCommand)?"
       select="$page-break/preceding::r:FileCommand[1]"/>
     <xsl:variable name="page-file" as="xs:string"
-      select="concat(func:name-file($page-file-element),'.xml')"/>
+      select="func:name-file($page-file-element)"/>
     <tei:ref target="{string-join((
       if ($current-file != $page-file)
       then $page-file 
@@ -1717,14 +1730,14 @@ The previous match was:
     <xsl:choose>
       <xsl:when test="$ref-to/self::r:VerseDivision">
         <tei:link type="note" targets="{string-join((
-          $base-file-name, '.xml#c', $ref-to/r:Chapter, '_v', $ref-to/r:Verse, 
+          $base-file-name, '#c', $ref-to/r:Chapter, '_v', $ref-to/r:Verse, 
           $target-to),'')}"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:for-each select="$repository//r:FootRefCommand
           [@from eq func:make-note-id(current())]/following-sibling::*[1]/@xml:id">
           <tei:link type="note" targets="{string-join((
-            $base-file-name, '.xml#', string(.), $target-to), '')}"/>
+            $base-file-name, '#', string(.), $target-to), '')}"/>
         </xsl:for-each>
       </xsl:otherwise>
     </xsl:choose>
@@ -1751,20 +1764,20 @@ The previous match was:
       <xsl:choose>
         <xsl:when test="$ref-to/self::r:VerseDivision">
           <xsl:attribute name="targets" select="string-join((
-            $base-file-name, '.xml#c', $ref-to/r:Chapter, '_v', $ref-to/r:Verse, 
+            $base-file-name, '#c', $ref-to/r:Chapter, '_v', $ref-to/r:Verse, 
             $target-to),'')"/>
         </xsl:when>
         <xsl:when test="$ref-to/self::r:SectionCommand">
           <xsl:variable name="start-point" as="element()" 
             select="(preceding::r:FileCommand[1], root(.)//*[1], .)[1]"/>
           <xsl:attribute name="targets" select="string-join((
-            $base-file-name, '.xml#section', 
+            $base-file-name, '#section', 
               string(count(preceding::r:SectionCommand[. >> $start-point]) + 1), 
             $target-to),'')"/>
         </xsl:when>
         <xsl:when test="$ref-to/self::r:ParagraphText">
           <xsl:attribute name="targets" select="string-join((
-            $base-file-name, '.xml#p', 
+            $base-file-name, '#p', 
               string(1 + func:count-preceding-blocks($ref-to)), 
             $target-to),'')"/>
         </xsl:when>
@@ -1772,7 +1785,7 @@ The previous match was:
           <!-- segmentedtext as a fallback.  If you get here, it's probably
           targetted wrong -->
           <xsl:attribute name="targets" select="string-join((
-            $base-file-name, '.xml#', func:segment-id($ref-to, 'se', ()), 
+            $base-file-name, '#', func:segment-id($ref-to, 'se', ()), 
             $target-to), '')"/>
           <xsl:sequence select="func:debug('A note is attached to a segment.  It will likely be unlinked.', 'r:NoteCommand',$debug-error)"/>
         </xsl:otherwise>

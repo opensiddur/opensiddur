@@ -30,7 +30,13 @@ declare function debug:debug(
 	let $xmsg :=
 		element { $level-strings[min(($level, count($level-strings)))] } {
 			element source { $source},
-			element message { $message }
+			element message { 
+			  for $m in $message
+			  return 
+			   if ($m instance of attribute())
+			   then concat("attribute(", $m/name(), ")=", $m/string())
+			   else $m
+			}
 		}
 	let $source-level := 
 	  (
@@ -79,3 +85,19 @@ declare function debug:list-attributes(
 	)
 };
 
+(:~ write an error message for a given exception :)
+declare function debug:print-exception(
+  $module as xs:string?, 
+  $line-number as xs:integer?,
+  $column-number as xs:integer?,
+  $code as xs:string?,
+  $value as xs:string?,
+  $description as xs:string?
+  ) as xs:string {
+  concat(
+    $module, ":", $line-number, ":", 
+    $column-number, ","[$code], $code, ":"[$value], $value, ": "[$description], 
+    $description,
+    ";"
+  )
+};

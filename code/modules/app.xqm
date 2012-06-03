@@ -5,23 +5,23 @@ xquery version "1.0";
  : mostly authentication issues.
  :
  : Open Siddur Project
- : Copyright 2010-2011 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2010-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace app="http://jewishliturgy.org/modules/app";
 
-import module namespace response="http://exist-db.org/xquery/response";
-import module namespace request="http://exist-db.org/xquery/request";
-import module namespace session="http://exist-db.org/xquery/session";
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
-import module namespace util="http://exist-db.org/xquery/util";
-
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "xmldb:exist:///code/modules/debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
 	at "xmldb:exist:///code/modules/paths.xqm";
+import module namespace magic="http://jewishliturgy.org/magic"
+  at "xmldb:exist:///code/magic/magic.xqm";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform";
 declare namespace err="http://jewishliturgy.org/errors";
+declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 
 (:~ return application version as a string :)
 declare function app:get-version(
@@ -62,23 +62,22 @@ declare function local:get-auth-string() as xs:string* {
     let $username := ($user-name-basic, $user-name-hdr, $user-name-attribute, $user-name-param)[1]
     let $password := ($password-basic, $password-hdr, $password-attribute, $password-param)[1]
     return (
-      if ($paths:debug)
-      then
-        util:log-system-out(
-          <authenticate>
-            <uri>{request:get-uri()}</uri>
-            <header>{$authorization, exists($authorization)}</header>
-            <attribute>{$user-name-attribute, exists($user-name-attribute)}</attribute>
-            <cookie>{$auth-cookie, exists($auth-cookie)}</cookie>
-            <hdr>{$user-name-hdr, $password-hdr, exists($user-name-hdr)}</hdr>
-            <user-param>{$user-name-param, $password-param, exists($user-name-param)}</user-param>
-            <return>
-              <user>{$username}</user>
-              <password>{$password}</password>
-            </return>
-          </authenticate>
-        )
-      else (),
+      debug:debug(
+        $debug:info,
+        "app",
+        <authenticate>
+          <uri>{request:get-uri()}</uri>
+          <header>{$authorization, exists($authorization)}</header>
+          <attribute>{$user-name-attribute, exists($user-name-attribute)}</attribute>
+          <cookie>{$auth-cookie, exists($auth-cookie)}</cookie>
+          <hdr>{$user-name-hdr, $password-hdr, exists($user-name-hdr)}</hdr>
+          <user-param>{$user-name-param, $password-param, exists($user-name-param)}</user-param>
+          <return>
+            <user>{$username}</user>
+            <password>{$password}</password>
+          </return>
+        </authenticate>
+      ),
       $username, $password)
   else ()
 };
@@ -127,21 +126,23 @@ declare function app:authenticate()
   let $password as xs:string? := $authorization[2]
   let $logged-in as xs:boolean := boolean(xmldb:get-current-user()[not(. = 'guest')])
   return (
-  	if ($paths:debug)
-  	then
-  		util:log-system-out(('authenticate() : get-auth-string is ', $authorization))
-  	else (), 
+  	debug:debug(
+  	  $debug:info, 
+  	  "app",
+  	  ('authenticate() : get-auth-string is ', $authorization)
+  	), 
   	$logged-in or (
     if ($user-name and $password)
     then (
     	xmldb:login('/db', $user-name, $password),
-    	if ($paths:debug)
-    	then
-    		util:log-system-out(('logging you in as :', $user-name))
-    	else ()
+    	debug:debug(
+    	  $debug:info,
+    	  "app",
+    		('logging you in as :', $user-name)
+    	)
     )
     else false() )
-    )
+  )
 };
 
 (:~ specify that authentication (aside from guest) is required
@@ -186,13 +187,14 @@ declare function app:context-resource()
  : @param $owner owner user of any new collections
  : @param $group owner group of any new collections
  : @param $mode permissions mode of any new collections
+ : @deprecated Replaced by app:make-collection-path(..., $permissions)
  :)
 declare function app:make-collection-path(
 	$path as xs:string, 
 	$origin as xs:string,
 	$owner as xs:string,
 	$group as xs:string,
-	$mode as xs:integer) 
+	$mode as xs:string) 
 	as empty() {
 	let $origin-sl := 
 		if (ends-with($origin, '/'))
@@ -226,7 +228,11 @@ declare function app:make-collection-path(
 						util:log-system-out(($origin-sl, $to-create, ' creating'))
 					else (),
 					if (xmldb:create-collection($origin-sl, $to-create))
-					then xmldb:set-collection-permissions($current-col, $owner, $group, $mode)
+					then (
+					  sm:chown(xs:anyURI($current-col), $owner),
+					  sm:chgrp(xs:anyURI($current-col), $group),
+					  sm:chmod(xs:anyURI($current-col), $mode)
+					)
 					else error(xs:QName('err:CREATE'), concat('Cannot create collection', $origin-sl, $to-create))
 				),
 				if ($second-part) 
@@ -235,6 +241,55 @@ declare function app:make-collection-path(
 				)
 		else ()
 };
+
+(:~ make a collection path that does not exist; (like mkdir -p)
+ : create new collections with the given mode, owner and group
+ : @param $path directory path
+ : @param $origin path begins at
+ : @param $permissions an sm:permissions document
+ :)
+declare function app:make-collection-path(
+  $path as xs:string, 
+  $origin as xs:string,
+  $permissions as document-node(element((:sm:permissions:)))
+  ) as empty-sequence() {
+  let $origin-sl := 
+    if (ends-with($origin, '/'))
+    then $origin
+    else concat($origin, '/')
+  let $path-no-sl :=
+    if (starts-with($path, '/'))
+    then substring($path, 2)
+    else $path
+  let $first-part := substring-before($path-no-sl, '/')
+  let $second-part := substring-after($path-no-sl, '/')
+  let $to-create := 
+    if ($first-part) 
+    then $first-part 
+    else $path-no-sl
+  return
+    if ($to-create)
+    then 
+      let $current-col := concat($origin-sl, $to-create)
+      return (
+        if (xmldb:collection-available($current-col))
+        then 
+          debug:debug($debug:detail, "app", ($current-col, ' already exists'))
+        else (
+          debug:debug($debug:detail, "app", ($origin-sl, $to-create, ' creating')),
+          let $path := xmldb:create-collection($origin-sl, $to-create)
+          return
+            if ($path)
+            then app:copy-permissions(xs:anyURI($path),$permissions)
+            else error(xs:QName('err:CREATE'), concat('Cannot create collection', $origin-sl, $to-create))
+        ),
+        if ($second-part) 
+        then app:make-collection-path($second-part, $current-col, $permissions)
+        else ()
+        )
+    else ()
+};
+
 
 (:~ obfuscate an email address if the user is not logged in
  : @param $address Address to obfuscate
@@ -411,18 +466,42 @@ declare function app:transform-xslt(
     else app:concat-path($paths:rest-prefix, $xslt-uri)
   let $user := (app:auth-user(), $parameters[@name='user']/@value/string())[1]
   let $password := (app:auth-password(), $parameters[@name='password']/@value)[1]
-  let $absolute-uri := 
-    concat('xmldb:exist://', 
-      if ($user)
-      then concat($user,':',$password,'@')
-      else '', 
-      $document-uri)
+  let $absolute-uri :=
+    if ($document-uri instance of xs:anyAtomicType)
+    then
+      concat('xmldb:exist://', 
+        if ($user)
+        then concat($user,':',$password,'@')
+        else '', 
+        $document-uri)
+    else ()
   let $xslt :=
     <xsl:stylesheet 
       xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
       xmlns:app="http://jewishliturgy.org/modules/app"
       version="2.0"
       exclude-result-prefixes="app">
+        
+      <xsl:param name="uri-map" as="document-node()">
+        <xsl:document>
+          <uri-map xmlns="">{
+            let $user-password :=
+              if ($user)
+              then concat($user, ":", $password, "@")
+              else ""
+            for $document in collection(("/data","/code"))
+              [namespace-uri(*)="http://www.tei-c.org/ns/1.0"]
+              [not(contains(document-uri(.), "/output/"))]
+            let $doc-uri := document-uri($document)
+            return
+              <map 
+                from="{($document/*/@jx:document-uri, $doc-uri)[1]}" 
+                to="xmldb:exist://{$user-password}{$doc-uri}">
+                <cache type="fragmentation" to="xmldb:exist://{$user-password}@{replace($doc-uri, '/db', '/db/cache')}"/>
+              </map>
+          }</uri-map>              
+        </xsl:document>
+      </xsl:param>
       <xsl:include href="{$xslt-uri-abs}"/>
       <xsl:template match="app:root">
       	<xsl:variable name="to-apply" as="document-node()">{
@@ -442,10 +521,14 @@ declare function app:transform-xslt(
       </xsl:template>
     </xsl:stylesheet>
   return (
-  	if ($paths:debug)
-  	then
-    	util:log-system-out(('Running XSLT (as ', $user,':',$password,'=',xmldb:get-current-user(),') ', $xslt-uri-abs, ' on ', if ($document-uri instance of node()) then 'node' else $absolute-uri))
-    else (),
+    debug:debug($debug:detail, 
+      "app", 
+      string-join(("Running XSLT (as ", $user, ":", $password, "=", 
+        xmldb:get-current-user(), ") ", 
+        $xslt-uri-abs, " on ", 
+        if ($document-uri instance of node()) 
+        then "node" 
+        else $absolute-uri), "")), 
     transform:transform(<app:root/>, $xslt, (
     	if ($parameters or $user) 
     	then 
@@ -471,15 +554,23 @@ declare function app:transform-xslt(
 declare function app:login-credentials(
 	$user as xs:string,
 	$password as xs:string
-	) as empty() {
-	session:set-attribute('app.user', $user),
-	session:set-attribute('app.password', $password)
+	) as empty-sequence() {
+	if (session:exists())
+	then (
+	  session:set-attribute('app.user', $user),
+	  session:set-attribute('app.password', $password)
+	)
+	else ()
 };
 
 (:~ remove login credentials from the session :)
 declare function app:logout-credentials(
-	) as empty() {
-	session:invalidate()
+	) as empty-sequence() {
+	if (session:exists())
+	then 
+	  let $guest-login := xmldb:login("/db", "guest", "guest")
+	  return session:invalidate()
+	else ()
 };
 
 (:~ pass login credentials from the session to an XQuery
@@ -591,4 +682,47 @@ declare function app:xpath(
     default return ()
   ), "/"
   )
+};
+
+(:~ copy permissions from $permissions to $dest :)
+declare function app:copy-permissions(
+  $dest as xs:anyAtomicType,
+  $permissions as document-node(element((:sm:permissions:)))
+  ) as empty-sequence() {
+  let $dest := $dest cast as xs:anyURI
+  let $owner := $permissions/*/@owner/string()
+  let $group := $permissions/*/@group/string()
+  let $mode := $permissions/*/@mode/string() 
+  return 
+    system:as-user("admin", $magic:password,
+    (
+      sm:chmod($dest, $mode),
+      sm:chgrp($dest, $group),
+      sm:chown($dest, $owner),
+      sm:clear-acl($dest),  (: clear ACE, so we can just copy everything :)
+      for 
+        $acl in $permissions/*/sm:acl,
+        $ace in $acl/sm:ace
+      let $who := $ace/@who/string()
+      let $allowed := $ace/@access_type = "ALLOWED"
+      let $mode := $ace/@mode/string()
+      order by $ace/@index/number()
+      return
+        if ($ace/@target="USER")
+        then sm:add-user-ace($dest, $who, $allowed, $mode)
+        else sm:add-group-ace($dest, $who, $allowed, $mode)
+    )
+  )
+};
+
+(:~ set the permissions of the path $dest to 
+ : be equivalent to the permissions of the path $source
+ :)
+declare function app:mirror-permissions(
+  $source as xs:anyAtomicType,
+  $dest as xs:anyAtomicType
+  ) as empty-sequence() {
+  let $source := $source cast as xs:anyURI
+  let $permissions := sm:get-permissions($source) 
+  return app:copy-permissions($dest, $permissions)
 };

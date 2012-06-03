@@ -10,11 +10,11 @@
   xmlns:xd="http://www.pnp-software.com/XSLTdoc"
   exclude-result-prefixes="#all">
   <xsl:import href="../../../common/common.xsl2"/>
-  <xsl:import href="muxhtml.xsl2"/>
+  <xsl:import href="xhtml-generic.xsl2"/>
 
   <xd:doc type="stylesheet">
     <xd:short>tei:ref and tei:ptr to xhtml</xd:short>
-    <xd:copyright>Copyright 2010 Efraim Feinstein
+    <xd:copyright>Copyright 2010-2011 Efraim Feinstein
     </xd:copyright>
     <xd:detail>
       <p>This program is free software: you can redistribute it
@@ -38,7 +38,6 @@
         .
       </p>
     </xd:detail>
-    <xd:svnId>$Id: ref.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
   </xd:doc>
   
   <xsl:strip-space elements="*"/>
@@ -46,18 +45,32 @@
   <xd:doc>References become hyperlinks</xd:doc>
   <xsl:template match="tei:ref[@target]">
     <a href="{@target}">
-      <xsl:call-template name="write-xml-lang"/>
+      <xsl:call-template name="set-attributes"/>
       <xsl:if test="@type=('license','attribution')">
         <xsl:attribute name="rel" select="@type"/>
       </xsl:if>
-      <xsl:apply-templates>
-        <xsl:with-param name="unhandled-lang" tunnel="yes" as="xs:string?" select="()"/>
-      </xsl:apply-templates>
+      <xsl:apply-templates/>
     </a>
   </xsl:template>  
   
   <xd:doc>URL and offline-resource pointers become hyperlinks</xd:doc>
   <xsl:template match="tei:ptr[@type=('url','offline-resource')]">
-    <a href="{@target}"><xsl:value-of select="@target"/></a>
+    <a href="{@target}">
+      <xsl:call-template name="set-attributes"/>
+      <xsl:value-of select="@target"/>
+    </a>
+  </xsl:template>
+  
+  <xd:doc>Pointers that have not been expanded</xd:doc>
+  <xsl:template match="tei:ptr[@target][not(*)]">
+    <div>
+      <xsl:variable name="absolute-target" as="xs:string" 
+        select="replace(resolve-uri(@target, base-uri(.)), '#', '/-id/')"/>
+      <xsl:call-template name="set-attributes">
+        <xsl:with-param name="additional-classes" as="xs:string"
+          select="'external'"/>
+      </xsl:call-template>
+      <a href="{$absolute-target}"><xsl:value-of select="$absolute-target"/></a>
+    </div>
   </xsl:template>
 </xsl:stylesheet>

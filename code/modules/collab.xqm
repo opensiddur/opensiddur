@@ -2,16 +2,11 @@ xquery version "1.0";
 (:~ collaboration groups functions
  : 
  : Open Siddur Project
- : Copyright 2011 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
- : $Id: collab.xqm 714 2011-03-13 21:56:57Z efraim.feinstein $
  :)
 module namespace collab="http://jewishliturgy.org/modules/collab";
-
-import module namespace request="http://exist-db.org/xquery/request";
-import module namespace util="http://exist-db.org/xquery/util";
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 
 import module namespace app="http://jewishliturgy.org/modules/app"
 	at "app.xqm";
@@ -212,8 +207,8 @@ declare function collab:get-group(
 declare function collab:get-mode(
 	$sharing as xs:string,
 	$group as xs:string?
-	) as xs:integer {
-	util:base-to-integer('0770', 8)
+	) as xs:string {
+	"rwxrwx---"
 };
 
 (:~ store a resource in the right collection with the right permissions, 
@@ -246,7 +241,7 @@ declare function collab:store-path(
 	let $resource := $path-tokens[last()]
 	let $user-owner := app:auth-user()
 	let $group-owner := $path-tokens[3]	(: ('', 'group|home', '') :)
-	let $mode := util:base-to-integer(0770, 8)
+	let $mode := "rwxrwx---"
 	return (
 		app:make-collection-path(
 			$collection, '/', $user-owner, $group-owner, $mode
@@ -254,12 +249,10 @@ declare function collab:store-path(
 		let $store := xmldb:store($collection, $resource, $data)
 		return
 			if ($store)
-			then ( 
-				xmldb:set-resource-permissions(
-					$collection, $resource, 
-					$user-owner, $group-owner, 
-					$mode
-				),
+			then (
+			  sm:chown(xs:anyURI($path), $user-owner),
+			  sm:chgrp(xs:anyURI($path), $group-owner),
+			  sm:chmod(xs:anyURI($path), $mode),
 				$store
 			)
 			else () 

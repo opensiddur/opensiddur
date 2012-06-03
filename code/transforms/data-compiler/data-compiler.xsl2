@@ -61,18 +61,21 @@
   </xsl:template>
 
   <xd:doc>
-    <xd:short>Resolve all pointers.</xd:short>
+    <xd:short>Resolve all unresolved pointers.</xd:short>
   </xd:doc>
-  <xsl:template match="tei:ptr[@target]" mode="data-compiler">
+  <xsl:template match="tei:ptr[@target][not(child::node())]" mode="data-compiler">
     <xsl:variable name="resolved-pointer" as="node()*">
       <xsl:apply-templates select="." mode="follow-uri">
         <xsl:with-param name="cache-type" as="xs:string" tunnel="yes" select="$fragmentation-cache-type"/>
       </xsl:apply-templates>
     </xsl:variable>
     
-    <xsl:apply-templates select="$resolved-pointer" mode="data-compiler-update-links">
-      <xsl:with-param name="from-context" as="element()" select="." tunnel="yes"/>
-    </xsl:apply-templates>
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates select="$resolved-pointer" mode="data-compiler-update-links">
+        <xsl:with-param name="from-context" as="element()" select="." tunnel="yes"/>
+      </xsl:apply-templates>
+    </xsl:copy>
   </xsl:template>
 
   <xd:doc>

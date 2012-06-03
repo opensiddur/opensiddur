@@ -18,20 +18,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/
 #
-# $Id: Makefile 687 2011-01-23 23:36:48Z efraim.feinstein $
 TRANSFORMS-DIR ?= $(CODEDIR)/transforms
 
 TRANSFORM-OUTPUTS = $(TEXTDIR)/Tanach.html
 
-transforms: $(TRANSFORMS-DIR)/format/xhtml/muxhtml.xsl2
-
-$(TRANSFORMS-DIR)/format/xhtml/muxhtml.xsl2: $(TRANSFORMS-DIR)/format/xhtml/muxhtml-generator.xsl2
-	$(XSLT) -it main -o $@ $(TRANSFORMS-DIR)/format/xhtml/muxhtml-generator.xsl2
-
-.PHONY: transforms-clean
-transforms-clean: 
-	rm -f $(TRANSFORMS-DIR)/format/xhtml/muxhtml.xsl2
-
-#$(TRANSFORM-OUTPUTS): $(TRANSFORMS-DIR)/transform.xsl2
-#  $(XSLT) -s $(TEXTDIR)/Tanach.xml -o $(TRANSFORM-OUTPUTS) $(TRANSFORMS-DIR)/transform.xsl2
-  
+transforms:
+	@echo

@@ -2,7 +2,7 @@ xquery version "1.0";
 (:~ general support functions for the REST API
  :
  : Open Siddur Project
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :) 
@@ -17,6 +17,10 @@ import module namespace t="http://exist-db.org/xquery/testing/modified"
   at "/code/modules/test2.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
+
+declare namespace http="http://expath.org/ns/http-client";
+declare namespace rest="http://exquery.org/ns/rest/annotation/";
+declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 declare variable $api:default-max-results := 50;
 
@@ -215,6 +219,12 @@ declare function api:get-accept-format(
   api:get-accept-format($accepted-formats, request:get-header('Accept'))
 };
 
+declare function api:get-request-format(
+  $accepted-formats as xs:string
+  ) {
+  api:get-accept-format($accepted-formats, request:get-header('Content-Type'))
+};
+
 (:~ perform content negotiation:
  : return the highest priority requested format of the data 
  : If none can be found acceptable, return error 406 and an error message
@@ -238,12 +248,48 @@ declare function api:get-accept-format(
       where 
         $request/api:major = ($accept/api:major, "*") and 
         $request/api:minor = ($accept/api:minor, "*") and
-        (every $param in $request/api:param satisfies $accept/api:param[@name=$param/@name]=string($param))
+        (: additional parameters - like charset - can be ignored, not
+         : actual requirements? - we just cannot contradict the request
+         :)
+        (every $param in $request/api:param satisfies 
+          not($accept/api:param[@name=$param/@name]!=string($param)))
       return $accept
   return
     if (empty($negotiated-ct))
     then api:error(406, "The requested format(s) cannot be served by this API call.", $accept-header)
     else $negotiated-ct[1]
+};
+
+(:~ simplify the format returned by api:get-accept-format()
+ : return: 'tei' (request is specifically for tei), 'xml' (request is for generic xml), 
+ :  'xhtml' (request is for xhtml), 'none' (content negotiation failed)
+ :  subsequent strings include any parameters
+ :)
+declare function api:simplify-format(
+  $format as element(),
+  $default-format as xs:string
+  ) as xs:string+ {
+  if ($format instance of element(api:error))
+  then 'none'
+  else (
+    let $fmt-string := concat($format/api:major, "/", $format/api:minor)
+    return 
+      if ($fmt-string = ("text/xml", "application/xml"))
+      then "xml"
+      else if ($fmt-string = ("application/xhtml+xml", "text/html"))
+      then "xhtml"
+      else if ($fmt-string = ("application/tei+xml"))
+      then "tei"
+      else if ($fmt-string = ("text/css"))
+      then "css"
+      else if ($fmt-string = ("text/plain"))
+      then "txt"
+      else if ($fmt-string = ("application/x-www-form-urlencoded"))
+      then "form"
+      else $default-format
+      , 
+    $format/api:param/@name/string()
+  )
 };
 
 declare function api:list(
@@ -275,7 +321,7 @@ declare function api:list(
  : @param $supported-methods List of HTTP methods that this URI will support (default GET)
  : @param $accept-content-types List of content types for the Accept header in GET (default application/xhtml+xml, text/html)
  : @param $request-content-types List of Content-Type header in PUT or POST request (no default)
- : @param $test-source Pointer to the test source if this API supports the ?_test= parameter
+ : @param $test-source URL(s) to the test source(s) if this API supports the ?_test= parameter
  :)
 declare function api:list(
 	$title as element(title),
@@ -285,7 +331,7 @@ declare function api:list(
 	$supported-methods as xs:string*,
 	$accept-content-types as xs:string*,
 	$request-content-types as xs:string*,
-  $test-source as xs:string?
+  $test-source as xs:string*
 	) as element(html) {
 	let $my-uri := request:get-uri()
 	let $params := (
@@ -304,13 +350,12 @@ declare function api:list(
 			<head>
 				<title>{string($title)}</title>
 				{
-        (: add a link to the tests, if available :)
-        if ($test-source)
-        then (
-          <link rel="test" href="{$my-uri}?_test=1"/>,
-          <link rel="test-source" href="{$test-source}"/>
-        )
-        else (),
+        (: add links to the tests, if available :)
+        for $source in $test-source
+        return (
+          <link rel="test" href="{$my-uri}?_test={$source}"/>,
+          <link rel="test-source" href="{$source}"/>
+        ),
 				(: add first, previous, next, and last links :)
 				if ($start > 1 and $n-results >= 1)
 				then (
@@ -465,7 +510,17 @@ declare function api:form-content-type(
 (:~ return the HTML content types for use in accept/request header :)
 declare function api:html-content-type(
   ) as xs:string+ {
-  ("application/xhtml+xml", "text/html")
+  api:html-content-type(())
+};
+
+
+(:~ return the HTML content types for use in accept/request header 
+ : if $reject-text is true, do not allow text/html
+ :)
+declare function api:html-content-type(
+  $reject-text as xs:boolean?
+  ) as xs:string+ {
+  ("application/xhtml+xml", ("text/html")[not($reject-text)])
 };
 
 declare function api:tei-content-type(
@@ -481,6 +536,55 @@ declare function api:tei-content-type(
     then concat("; type=", $element)
     else ""
   )
+};
+
+declare function api:xml-content-type(
+  ) as xs:string+ {
+  "text/xml", "application/xml"
+};
+
+declare function api:text-content-type(
+  ) as xs:string+ {
+  "text/plain"
+};
+
+(:~ output an API error and set the HTTP response code
+ : for RESTXQ 
+ : @param $status-code return status
+ : @param $message return message (text preferred, but may contain XML)
+ : @param $object (optional) error object
+ :)
+declare function api:rest-error(
+  $status-code as xs:integer?,
+  $message as item()*, 
+  $object as item()*
+  ) as item()+ {
+  <rest:response>
+    <output:serialization-parameters>
+      <output:method value="xml"/>
+    </output:serialization-parameters>
+    <http:response status="{$status-code}"/>
+  </rest:response>,
+  <error xmlns="">
+    <path>{
+      if (request:exists())
+      then request:get-uri()
+      else ()}</path>
+    <message>{$message}</message>
+    {
+      if (exists($object))
+      then
+        <object>{$object}</object>
+      else ()
+    }
+  </error>
+};
+
+declare function api:rest-error(
+  $status-code as xs:integer?,
+  $message as item()*
+  ) as item()+ {
+  api:rest-error($status-code, $message, ())
 };
 
 (:~ output an API error and set the HTTP response code 
@@ -532,33 +636,51 @@ declare function api:error-message(
 	api:error((), $message, $object)
 };
 
-(:~ dynamically declare serialization options as txt, tei, xml, xhtml, or html (xhtml w/o indent)
+declare function api:serialize-as(
+  $serialization as xs:string
+  ) {
+  api:serialize-as($serialization, ())
+};
+
+(:~ dynamically declare serialization options as none, txt, tei, xml, xhtml, or html (xhtml w/o indent)
  : @param $serialization type of serialization
+ : @param $accept-format result of api:get-accept-formats() - attempt to match content type to the requested one
  :)
 declare function api:serialize-as(
-	$serialization as xs:string
+	$serialization as xs:string,
+	$accept-format as element(api:content-type)?
 	) as empty() {
 	let $ser := lower-case($serialization)
+	let $accept-format-match := 
+    api:simplify-format($accept-format, "none")=$ser
+  let $media-type :=
+    if ($accept-format-match)
+    then concat($accept-format/api:major, "/", $accept-format/api:minor) 
+    else ()
 	let $options :=
-		if ($ser = ('txt', 'text'))
+		if ($ser = ('none', 'txt', 'text'))
 		then
-			'method=text media-type=text/plain'
+			concat('method=text media-type=', ($media-type, 'text/plain')[1])
 		else if ($ser = 'css')
 		then 
-			'method=text media-type=text/css'
+			concat('method=text media-type=', ($media-type, 'text/css')[1])
 		else if ($ser = ('xml','tei'))
 		then
-			'method=xml media-type=application/xml omit-xml-declaration=no indent=yes'
+			concat('method=xml omit-xml-declaration=no indent=yes media-type=', 
+			  ($media-type, 
+			  concat('application/', 'tei+'[$ser="tei"] ,'xml'))[1])
 		else if ($ser = 'xhtml')
 		then
-		  'method=xhtml media-type=text/html omit-xml-declaration=no indent=yes'
+		  concat('method=xhtml omit-xml-declaration=no indent=yes media-type=',
+		    ($media-type, 'text/html')[1])
 		 (:
         doctype-public="-//W3C//DTD&#160;XHTML&#160;1.1//EN"
         doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"'
         :)
     else if ($ser = 'html')
     then
-    	'method=xhtml media-type=text/html omit-xml-declaration=no indent=no'
+    	concat('method=xhtml omit-xml-declaration=no indent=no media-type=',
+    	  ($media-type, 'text/html')[1])
 		else
 			error(xs:QName('err:INTERNAL'),concat('Undefined serialization option: ', $serialization))
 	return
@@ -604,7 +726,7 @@ declare function api:get-parameter(
     request:get-parameter($param, ()),
     let $method := api:get-method()
     let $data := api:get-data()
-    where $method = "POST"
+    where $method = ("POST", "PUT")
     return
       if ($data instance of xs:string and $allow-one-parameter)
       then $data
@@ -625,8 +747,57 @@ declare function api:get-parameter(
 declare function api:tests(
   $test-source as xs:string
   ) as element()? {
-  if (api:get-method() = "GET" and request:get-parameter("_test", ()))
-  then
-    t:format-testResult(t:run-testSuite(doc($test-source)/*))
+  let $test-param := request:get-parameter("_test", ())
+  let $test-to-run := ($test-param[doc-available(.)], $test-source)[1]
+  return
+    if (api:get-method() = "GET" and $test-param)
+    then (
+      api:serialize-as("xhtml"),
+      t:format-testResult(t:run-testSuite(doc($test-to-run)/*))
+    )
   else ()
+};
+
+(:~ temporary function to handle rest:response elements
+ : and convert them to response:* function calls
+ : or simply pass on the return value.
+ : will be obsoleted by RESTXQ
+ : @param $r (element response{}, resource) or (resource) 
+ :)
+declare function api:rest-response(
+  $r as item()*
+  ) as item()* {
+  if ($r[1] instance of element(rest:response))
+  then (
+    let $response := $r[1]
+    let $serialization-default :=
+      (: prevent parsing errors, particularly for 204 responses :)
+      if (
+        empty($response/output:serialiation-parameters/output:method) and
+        $response instance of element(rest:response) and
+        empty($r[2])
+        )
+      then util:declare-option("exist:serialize", "method=text")
+      else ()
+    for $element in $response/*
+    return
+      typeswitch($element)
+      case element(http:response)
+      return (
+        response:set-status-code(($element/@status/number(), 200)[1]),
+        for $header in $element/http:header
+        return response:set-header($header/@name, $header/@value)
+      )
+      case element(output:serialization-parameters)
+      return
+        for $parameter in $element/*
+        return
+          typeswitch($parameter)
+          case element(output:method) 
+          return util:declare-option("exist:serialize", concat("method=",$parameter/@value))
+          default return ()
+      default return ( (: don't know what to do :)),
+    subsequence($r, 2)
+    )
+  else $r
 };

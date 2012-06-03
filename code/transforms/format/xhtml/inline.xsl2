@@ -37,30 +37,8 @@
         .
       </p>
     </xd:detail>
-    <xd:svnId>$Id: inline.xsl2 766 2011-04-28 02:42:20Z efraim.feinstein $</xd:svnId>
   </xd:doc>
-<!-- 
-  <xd:doc>
-    Determine if a text node should be added after a word.
-  </xd:doc>
-  <xsl:template match="tei:w" priority="10">
-    <span class="w">
-      <xsl:call-template name="write-xml-lang"/>
-      <xsl:apply-templates>
-        <xsl:with-param name="unhandled-lang" tunnel="yes" select="()"/>
-      </xsl:apply-templates>
-      <xsl:if test="not(following::*[self::tei:w|self::tei:pc][1]/self::tei:pc)">
-        <xsl:if test="not(normalize-space(string-join(text(),'')))">
-          <!- browsers will eat the &#x0a; unless I add another so this w is
-          not just filled with whitespace, so I'm using the zero-width space ->
-          <xsl:text>&#x200b;</xsl:text>
-        </xsl:if>
-        <xsl:text>&#x0a;</xsl:text>
-      </xsl:if>    
-    </span>
-  </xsl:template>
-  -->
-  
+
   <xd:doc>
     <xd:short>Browsers don't separate text nodes, so I have to</xd:short>
   </xd:doc>
@@ -119,7 +97,8 @@
     <xd:short>Chapter and verse labels require special handling as a workaround for a Firefox bug.</xd:short>
   </xd:doc>
   <xsl:template match="tei:label[@n=('chapter','verse')]" mode="verse-label">
-    <span class="label-{@n}">
+    <span>
+      <xsl:call-template name="set-attributes"/>
       <xsl:variable name="dir" as="xs:string"
         select="func:direction-by-lang(func:language(.))"/>
       <xsl:if test="$dir='rtl'">

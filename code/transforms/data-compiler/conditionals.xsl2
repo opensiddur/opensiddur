@@ -51,7 +51,6 @@
 				<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
 			</p>
 		</xd:detail>
-		<xd:svnId>$Id: conditionals.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
 	</xd:doc>
 
   <xd:doc>
@@ -263,7 +262,9 @@
     it's an identity transform</xd:short>
   </xd:doc>
   <xsl:template match="element()" mode="process-conditionals">
-    <xsl:call-template name="identity-in-mode"/>
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </xsl:copy>
   </xsl:template>
 
   <!-- standardize-features -->
@@ -276,7 +277,7 @@
 	</xd:doc>
 	<xsl:template match="tei:fs" mode="standardize-features">
 		<xsl:copy>
-			<xsl:copy-of select="@* except @feats"/>
+			<xsl:apply-templates select="@* except @feats" mode="#current"/>
   			<xsl:if test="@feats">
           <xsl:apply-templates select="for $feat in tokenize(@feats,'\s+') return func:follow-uri($feat, ., -1)" 
             mode="#current"/>
@@ -290,7 +291,7 @@
 	</xd:doc>
 	<xsl:template match="tei:fs" mode="set-features">
 		<xsl:copy>
-			<xsl:copy-of select="@* except @feats"/>
+			<xsl:apply-templates select="@* except @feats" mode="#current"/>
       <xsl:variable name="present-features" as="element(tei:f)*">
   			<xsl:if test="@feats">
           <xsl:apply-templates select="for $feat in tokenize(@feats,'\s+') return func:follow-uri($feat, ., -1)" 
@@ -314,7 +315,7 @@
 	</xd:doc>
 	<xsl:template match="tei:f" mode="standardize-features set-features">
 		<xsl:copy>
-      <xsl:copy-of select="@* except @fVal"/>
+      <xsl:apply-templates select="@* except @fVal" mode="#current"/>
 			<xsl:if test="@fVal">
 				<xsl:apply-templates 
           select="for $fVal in tokenize(@fVal, '\s+') return func:follow-uri($fVal, ., -1)" mode="#current"/>
@@ -362,7 +363,7 @@
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
-					<xsl:copy-of select="@*"/>
+					<xsl:apply-templates select="@*" mode="#current"/>
 					<xsl:sequence select="$contents"/>
 				</xsl:copy>
 			</xsl:otherwise>
@@ -445,7 +446,9 @@
     <xd:short>Default is identity template</xd:short>
   </xd:doc>
   <xsl:template match="*" mode="standardize-features set-features">
-    <xsl:call-template name="identity-in-mode"/>
+    <xsl:copy>
+      <xsl:apply-templates select="@*|node()" mode="#current"/>
+    </xsl:copy>
   </xsl:template>
 
 
@@ -556,7 +559,9 @@
     <!-- determines whether this element should be processed, 
     YES or MAYBE resolves to true(), NO to false().
     If the result is MAYBE, then, all MAYBE-valued conditionals need
-    their instructions inserted;
+    their instructions inserted; 
+    we also store the conditionals in jx:standardized-conditional so they
+    can be copied out later
      -->
     <xsl:variable name="conditional-results" as="element(jx:result)*">
       <xsl:for-each select="$association-links">
@@ -582,6 +587,9 @@
             <xsl:attribute name="instruction" select="$links[3]"/>
             <xsl:attribute name="xml:base" select="base-uri(.)"/>
           </xsl:if>
+          <jx:conditional>
+            <xsl:sequence select="$standardized-conditional"/>
+          </jx:conditional>
         </jx:result>
       </xsl:for-each>
     </xsl:variable>
@@ -631,7 +639,17 @@
           </xsl:if>
         </xsl:variable>
         <xsl:copy>
-          <xsl:copy-of select="@*"/>
+          <xsl:apply-templates select="@*" mode="#current"/>
+          
+          <xsl:variable name="associations" 
+            as="element(jx:conditional)*" 
+            select="$conditional-results/jx:conditional"/>
+          <xsl:if test="exists($associations)">
+            <jx:associate>
+              <xsl:sequence select="$associations/*"/>
+            </jx:associate>
+          </xsl:if>
+          
           <xsl:choose>
             <xsl:when test="exists($instruction)">
               <!-- add a tei:ab to wrap to the content to which the instruction applies -->
@@ -758,4 +776,19 @@
   </xd:doc>
   <xsl:template match="text()" mode="evaluate-conditionals"/>
 
+  <xd:doc>
+    <xd:short>Match @xml:id elements with high priority, 
+    convert @xml:id to @jx:id</xd:short>
+  </xd:doc>
+  <xsl:template match="@xml:id" mode="#all">
+    <xsl:attribute name="jx:id" select="."/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>The default operation for an attribute is identity</xd:short>
+  </xd:doc>
+  <xsl:template match="@*" mode="#all">
+    <xsl:copy/>
+  </xsl:template>
+  
 </xsl:stylesheet>

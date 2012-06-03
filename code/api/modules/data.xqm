@@ -1,8 +1,8 @@
-xquery version "1.0";
+xquery version "3.0";
 (:~ support functions for the REST API for data retrieval
  :
  : Open Siddur Project
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :) 
@@ -21,8 +21,11 @@ import module namespace resp="http://jewishliturgy.org/modules/resp"
   
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
-declare namespace err="http://jewishliturgy.org/errors";
+declare namespace error="http://jewishliturgy.org/errors";
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
+
+(:~ base of all data paths :)
+declare variable $data:path-base := "/data";
 
 (:~ convert a given path from an API path (may begin /code/api/data, /data or may be truncated) to a database path
  : works only to find the resource. 
@@ -35,7 +38,7 @@ declare function data:api-path-to-db(
 	let $share-type :=
 		if ($tok[2] = 'group' or count($tok)=1)
 		then 'group'
-		else error(xs:QName('err:INPUT'), concat('api-path-to-db: Input has an invalid share-type. input=', $api-path))
+		else error(xs:QName('error:INPUT'), concat('api-path-to-db: Input has an invalid share-type. input=', $api-path))
 	let $owner := $tok[3]
 	let $purpose := $tok[1]
 	let $resource :=
@@ -85,7 +88,7 @@ declare function data:db-path-to-api(
 	let $share-type := 
 		if ($tok[1] = 'group')
 		then 'group'
-		else error(xs:QName('err:INPUT'), concat('db-path-to-api: Input has an invalid share-type. input=', $db-path))
+		else error(xs:QName('error:INPUT'), concat('db-path-to-api: Input has an invalid share-type. input=', $db-path))
 	let $owner := $tok[2]
 	let $purpose := $tok[3]
 	let $resource-token :=
@@ -367,4 +370,76 @@ declare function data:forward-by-id(
 				(: don't know - use generic id processing :) 
 				'id'  
 		)
+};
+
+declare function local:resource-name-from-title-and-number(
+  $title as xs:string,
+  $number as xs:integer
+  ) as xs:string {
+  string-join(
+    (encode-for-uri($title), 
+    if ($number)
+    then ("-", string($number))
+    else (), ".xml"),
+    "")
+};
+
+declare function local:find-duplicate-number(
+  $type as xs:string,
+  $title as xs:string,
+  $n as xs:integer
+  ) as xs:integer {
+  if (exists(collection(concat($data:path-base, "/", $type))
+    [util:document-name(.)=
+      local:resource-name-from-title-and-number($title, $n)]
+    ))
+  then local:find-duplicate-number($type, $title, $n + 1)
+  else $n
+};
+
+(:~ make the path of a new resource
+ : @param $type The category of the resource (original|transliteration, eg)
+ : @param $title The resource's human-readable title
+ : @return (collection, resource)
+ :)
+declare function data:new-path-to-resource(
+  $type as xs:string,
+  $title as xs:string
+  ) as xs:string+ {
+  let $date := current-date()
+  let $resource-name := 
+    local:resource-name-from-title-and-number($title, 
+      local:find-duplicate-number($type, $title, 0))
+  return (
+    (: WARNING: the format-date() function works differently 
+     : from the XSLT spec!
+     : In the spec, the format string should be:
+     : [Y0001]/[M01]
+     :)
+    app:concat-path(($data:path-base, $type, xsl:format-date($date, "YYYY/MM"))), 
+    $resource-name
+  ) 
+};
+
+(:~ make the path of a new resource
+ : @param $type The category of the resource (original|transliteration, eg)
+ : @param $title The resource's human-readable title
+ :)
+declare function data:new-path(
+  $type as xs:string,
+  $title as xs:string
+  ) as xs:string {
+  let $new-paths := data:new-path-to-resource($type, $title)
+  return
+    string-join($new-paths, "/")
+};
+
+(:~ return a document from the collection hierarchy for $type 
+ : given a resource name $name (without extension) :)
+declare function data:doc(
+  $type as xs:string,
+  $name as xs:string
+  ) as document-node()? {
+  collection(app:concat-path($data:path-base, $type))
+    [replace(util:document-name(.), "\.([^.]+)$", "")=$name]
 };

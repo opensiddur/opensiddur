@@ -15,7 +15,7 @@
     <xd:short>intermediate-links mode: finds tei:ptr inside j:concurrent that would get "lost" if the links were followed.
     Insert them in the j:links section as tei:ptr's
     </xd:short>
-    <xd:copyright>Copyright 2010 Efraim Feinstein (LGPL 3+)</xd:copyright>
+    <xd:copyright>Copyright 2010-2011 Efraim Feinstein (LGPL 3+)</xd:copyright>
     <xd:detail>
         <p>This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU Lesser General Public License as published by
@@ -32,7 +32,6 @@
         <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
         </p>
       </xd:detail>
-      <xd:svnId>$Id: intermediate-links.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
   </xd:doc>
 
   <xd:doc>
@@ -44,7 +43,7 @@
       <xsl:copy-of select="@*"/>
       <xsl:choose>
         <xsl:when test="empty(j:links)">
-          <xsl:variable name="int-links" as="element(tei:ptr)*">
+          <xsl:variable name="int-links" as="element()*">
             <xsl:apply-templates select="//j:concurrent" mode="intermediate-links"/>
           </xsl:variable>
           <xsl:if test="exists($int-links)">
@@ -75,16 +74,50 @@
     <xd:short>Ignore text nodes inside the selection.</xd:short>
   </xd:doc>
   <xsl:template match="text()" mode="intermediate-links"/>
-
+  
   <xd:doc>
-    <xd:short>Find pointers not in the selection.  Copy them</xd:short>
+    <xd:short>Copy a tei:ptr for intermediate link</xd:short>
   </xd:doc>
-  <xsl:template match="tei:ptr[not(parent::j:selection)][@xml:id]" mode="intermediate-links">
+  <xsl:template name="copy-intermediate-tei-ptr">
     <tei:ptr jx:id="{@xml:id}">
       <xsl:if test="base-uri(.) ne (//j:links,//tei:TEI)[1]/base-uri()">
         <xsl:attribute name="xml:base" select="base-uri(.)"/>
       </xsl:if>
       <xsl:sequence select="@* except (@xml:id, @xml:base)"/>
     </tei:ptr>
+  </xsl:template>
+  
+  <xd:doc>
+  	<xd:short>views disappear in the concurrency process, make them 
+  	point the something resembling a view</xd:short>
+  </xd:doc>
+  <xsl:template match="j:view[@xml:id]|j:selection[@xml:id]" mode="intermediate-links">
+  	<tei:join jx:id="{@xml:id}" result="{name()}" 
+  		target="{string-join(for $x in */@xml:id return concat('#', $x),' ')}"
+  	  >
+  	  <xsl:if test="base-uri(.) ne (//j:links,//tei:TEI)[1]/base-uri()">
+        <xsl:attribute name="xml:base" select="base-uri(.)"/>
+      </xsl:if>
+	  <xsl:sequence select="@* except (@xml:id, @xml:base)"/>
+  	</tei:join>
+    <xsl:apply-templates select="self::j:view/*" mode="#current"/>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Only copy an intermediate pointer in the selection
+    if it's an internal pointer</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:ptr[parent::j:selection][@xml:id]">
+    <xsl:if test="every $target in tokenize(@target, '\s+') 
+      satisfies func:uri-base-path(func:absolutize-uri($target, .))=func:original-document-uri(.)">
+      <xsl:call-template name="copy-intermediate-tei-ptr"/>
+    </xsl:if>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Find pointers not in the selection.  Copy them</xd:short>
+  </xd:doc>
+  <xsl:template match="tei:ptr[not(parent::j:selection)][@xml:id]" mode="intermediate-links">
+    <xsl:call-template name="copy-intermediate-tei-ptr"/>
   </xsl:template>
 </xsl:stylesheet>

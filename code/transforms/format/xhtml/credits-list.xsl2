@@ -37,32 +37,25 @@
         .
       </p>
     </xd:detail>
-    <xd:svnId>$Id: credits-list.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
   </xd:doc>
-  
-  <xd:doc>
-    <xd:short>Catch tei:list from a contributor list</xd:short>
-  </xd:doc>
-  <xsl:template match="tei:list[@type='credits']">
-    <div class="list credits">
-      <xsl:apply-templates/>
-    </div>
-  </xsl:template>
   
   <xd:doc>
     <xd:short>Catch tei:item from a contributor list</xd:short>
   </xd:doc>
-  <xsl:template match="tei:list[@type='credits']/tei:item">
-    <div class="item credit">
+  <xsl:template match="tei:list[@type='credits']/tei:item" priority="10">
+    <div>
+      <xsl:call-template name="set-attributes"/>
       <xsl:apply-templates select="(tei:name, tei:orgName, tei:affiliation, (tei:ref|tei:ptr)[@type='url'])"/>
     </div>
   </xsl:template>
   
   
   <xsl:template match="tei:affiliation">
-    <div class="orgname">
+    <div>
+      <xsl:call-template name="set-attributes"/>
       <xsl:apply-templates select="tei:item/node()
-        | node() except tei:item"/></div>
+        | node() except tei:item"/>
+    </div>
   </xsl:template>
   
   <xd:doc>

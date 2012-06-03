@@ -13,7 +13,7 @@
 # An override file can also be used to exclude files by regular expression
 #
 # Open Siddur Project
-# Copyright 2010-2011 Efraim Feinstein
+# Copyright 2010-2012 Efraim Feinstein
 # Licensed under the GNU Lesser General Public License, version 3 or later
 #
 import sys
@@ -35,11 +35,17 @@ class Struct:
 class FileProperties:
   user = 'admin'
   group = 'dba'
-  permissions = '755'
+  permissions = '644'
   fileType = 'binary'
   mimeType = 'application/octet-stream'
   include = True
-  
+
+class CollectionProperties(FileProperties):
+  permissions = '755'
+
+class QueryProperties(FileProperties):
+  permissions = '755'
+  mimeType = 'application/xquery'
 
 # return a dictionary index of mime types by file extension
 def indexMimeTypes(existHome):
@@ -62,7 +68,7 @@ def buildExcludeList(excludeFile):
   if excludeFile:
     ef = file(excludeFile,'r')
     for line in ef:
-      excludeStrings.append('(' + line + ')')
+      excludeStrings.append('(' + line.rstrip('\r\n') + ')')
     ef.close()
   excludeRE = re.compile('|'.join(excludeStrings))
   return excludeRE
@@ -135,9 +141,9 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
   if hasOverrides:
     overrideXml = etree.parse(contentOverrideFile)
     overrideIndex = indexOverrides(overrideXml)
-    props = incorporateOverrides(overrideXml, overrideIndex, default, '')
+    props = incorporateOverrides(overrideXml, overrideIndex, default.collections, '')
   else:
-    props = default
+    props = default.collections
 
   if props.include:
     (directoryCtime, directoryMtime) = fileTimes(srcDirectory)
@@ -148,11 +154,20 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
 
     for fname in os.listdir(srcDirectory):
       fileWithPath = os.path.join(srcDirectory,fname)
+      (base, ext) = os.path.splitext(fname)
+      try:
+        if (not os.path.isdir(fileWithPath)) and (ext in [".xql", ".xq", ".xqy", ".xquery"]):
+          thisDefault = default.queries
+        else:
+          thisDefault = default.files
+      except:
+        thisDefault = default.files
+
       if hasOverrides:
-        props = incorporateOverrides(overrideXml, overrideIndex, default, fname)
+        props = incorporateOverrides(overrideXml, overrideIndex, thisDefault, fname)
       else:
-        props = default
-      if (not excludeRE or not excludeRE.search(fileWithPath)) and props.include:    # exclude anything listed in the exclude file
+        props = thisDefault
+      if ((not excludeRE or not excludeRE.search(fileWithPath))) and props.include:    # exclude anything listed in the exclude file
         if os.path.isdir(fileWithPath):
           # add subcollection to contentsXml
           etree.SubElement(contentsXml, 'subcollection', {'filename':fname, 'name':fname})
@@ -160,7 +175,6 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
           buildCollection(fileWithPath, os.path.join(destCollection, fname), default, mimeDict, excludeRE)
         else:
           (fCtime, fMtime) = fileTimes(fileWithPath)
-          (base, ext) = os.path.splitext(fname)
           try:
             mimeRecord = mimeDict[ext]
             fMime = mimeRecord.mimeType
@@ -191,7 +205,9 @@ def usage():
   print "Usage: ", sys.argv[0], " [options] directory"
   print "  -h, --home          eXist home directory (default $EXIST_HOME)"
   print "  -c, --collection    destination base collection in the database (default /db)"
-  print "  -p, --permissions    octal code for file permissions (default 755)"
+  print "  -p, --permissions    octal code for XML file permissions (default 644)"
+  print "  -q, --query-permissions octal code for query permissions (default 755)"
+  print "  -d, --collection-permissions octal code for default collection permissions (default 755)"
   print "  -u, --user          default user owner of files (default admin)"
   print "  -g, --group          default group owner of files (default dba)"
   print "  -x, --exclude        text file that contains a list of excluded files, 1 regular expression per line"
@@ -206,11 +222,14 @@ def main():
   if not existHome:
     existHome = '/usr/local/eXist'  # last chance backup
   destCollection = '/db'
-  default = FileProperties()
+  default = Struct()
+  default.files = FileProperties()
+  default.queries = QueryProperties()
+  default.collections = CollectionProperties()
   excludeFile = None
 
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "h:c:p:u:g:x:?", ["home=","collection=","permissions=","user=","group=","exclude=","help"])
+    opts, args = getopt.getopt(sys.argv[1:], "h:c:p:q:d:u:g:x:?", ["home=","collection=","permissions=","query-permissions=","collection-permissions=","user=","group=","exclude=","help"])
   except getopt.GetoptError, err:
     print str(err)
     usage()
@@ -225,11 +244,19 @@ def main():
     elif o in ("-c","--collection"):
       destCollection = a
     elif o in ("-p","--permissions"):
-      default.permissions = a
+      default.files.permissions = a
+    elif o in ("-q","--query-permissions"):
+      default.queries.permissions = a
+    elif o in ("-d","--collection-permissions"):
+      default.collections.permissions = a
     elif o in ("-u","--user"):
-      default.user = a
+      default.files.user = a
+      default.queries.user = a
+      default.collections.user = a
     elif o in ("-g","--group"):
-      default.group = a
+      default.files.group = a
+      default.queries.group = a
+      default.collections.group = a
     elif o in ("-x","--exclude"):
       excludeFile = a
     else:
@@ -244,7 +271,7 @@ def main():
 
   mimeDict = indexMimeTypes(existHome)
   excludeRE = buildExcludeList(excludeFile)
-
+  
   buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE)
 
 if __name__ == "__main__":

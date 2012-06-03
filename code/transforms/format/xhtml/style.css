@@ -1,6 +1,5 @@
 /* style.css 
  * CSS for the Open Siddur Project muXHTML
- * $Id: style.css 706 2011-02-21 01:18:10Z efraim.feinstein $
  */
 
 @font-face {
@@ -11,131 +10,134 @@
 	}
 
 :lang(he) {
-	direction:rtl;
 	font-family:'BHebrewSR','Ezra SIL', 'Ezra SIL SR', 'SBL Hebrew', 'Cardo', 'Arial Unicode MS', 'Lucida Grande', serif;
 }
 
-:lang(en) {
-	direction:ltr;	
+.jx-joined-concurrent {
+  display:inline;
 }
 
-.ab-verse {
+.tei-ptr {
+  display:inline;
+}
+
+.tei-ab .type-verse {
 	display:inline;
 }
 
-.bibl-entry {
+.tei-biblStruct {
 	display:block;
 }
 
-.bibl-entry * {
+.tei-biblStruct * {
 	display:inline;	
 }
 
-.bibl-titles {
+.tei-biblStruct .tei-title {
 	font-style:italic;	
 }
 
-.credit * {
+.type-credit * {
 	display:inline;
 }
 
-.divineName {
+.j-divineName {
 	display:inline;
 }
 
-.head {
+.tei-head {
 	font-size:200%;
 	font-weight:bold;
 	display:block;
 }
 
-.l {
+.tei-l {
 	display:block;
 	padding-top:0.25ex;
 	padding-bottom:0.25ex;
 }
 
-.label-chapter {
+.n-chapter {
 	display:none;
 }
 
-.label-verse {
+.n-verse {
 	display:inline;
 	vertical-align:super;
 	font-size:xx-small;	
 }
 
-.lg {
+.tei-lg {
 	display:block;
 	padding-top:0.5ex;
 	padding-bottom:0.5ex;
 }
 
-.name, .orgname {
+.tei-name, .tei-orgname {
 	display:inline;
 }
 
-.read {
+.j-read {
 	display:inline;
 }
 
-.p {
+.tei-p {
 	display:block;
 	padding-top:0.25ex;
 	padding-bottom:0.25ex;
 }
 
-.written {
+.j-written {
 	color:red;
 	display:inline;
 }
 
-.s {
+.tei-s {
 	display:inline;
 }
 
-.seg {
+.tei-seg {
 	display:inline;
 }
 
-.pc {
+.tei-pc {
 	margin:0;
 	padding:0;
 }
 
-.pe, .samekh {
+.tei-pc .type-pe, .tei-pc .type-samekh {
 	font-weight:bold;
 }
 
-.w {
+.tei-w {
   display:inline;
 }
 
 /* title */
-.title-page {
+.tei-titlePage {
   border:1px solid black;
   font-size:500%;
   text-align:center;
 }
 
-.title-part-main {
+.tei-title .type-main {
   font-weight:bold;
 }
 
-.title-part-sub {
+.tei-title .type-sub {
   font-weight:bold;
   font-size:70%;
 }
 
-.doc-author {
+.tei-docAuthor {
   font-size:50%;
 }
 
-.doc-date {
+.tei-docDate {
   font-size:25%;
 }
 
-.doc-imprint {
+.tei-imprint {
   font-size:25%;
   font-style:italic;
 }

@@ -2,8 +2,12 @@
 xmlns:jx="http://jewishliturgy.org/ns/jlp-processor">
   <jx:joined-concurrent>
     <tei:p jx:id="p1">
-      <tei:ptr jx:id="sA" target="#rA"/>
-      <tei:ptr jx:id="sB" target="#rB"/>  
+      <tei:ptr jx:id="sA" target="#rA">
+        <tei:seg jx:id="rA">A</tei:seg>
+      </tei:ptr>
+      <tei:ptr jx:id="sB" target="#rB">
+        <tei:seg jx:id="rB">B</tei:seg>
+      </tei:ptr>  
     </tei:p>
     <tei:ptr jx:id="sC" target="external-resource.xml#sA"/>
   </jx:joined-concurrent>

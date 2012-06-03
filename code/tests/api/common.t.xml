@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- tests that are common to many APIs -->
+<TestClassSet
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:httpclient="http://exist-db.org/xquery/httpclient">
+  <description>
+    <p>Common test classes for RESTXQ functions in the Open Siddur API</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein, 
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="rest">http://exquery.org/ns/rest/annotation/</namespace>
+  <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
+  <!-- HTTP returns -->
+  <TestClass xml:id="Created">
+    <xpath desc="returns status code 201">self::rest:response/http:response/@status = 201</xpath>
+    <xpath desc="returns a Location header">exists(self::rest:response/http:response/http:header[@name="Location"][@value])</xpath>
+  </TestClass>
+  <TestClass xml:id="NoData">
+    <xpath desc="returns status code 204">self::rest:response/http:response/@status = 204</xpath>
+    <xpath desc="serializes as text">self::rest:response/output:serialization-parameters/output:method/@value = "text"</xpath>
+  </TestClass>
+  <TestClass xml:id="BadRequest">
+    <xpath desc="returns status code 400">self::rest:response/http:response/@status = 400</xpath>
+  </TestClass>
+  <TestClass xml:id="Unauthorized">
+    <xpath desc="returns status code 401">self::rest:response/http:response/@status = 401</xpath>
+  </TestClass>
+  <TestClass xml:id="Forbidden">
+    <xpath desc="returns status code 403">self::rest:response/http:response/@status = 403</xpath>
+  </TestClass>
+  <TestClass xml:id="NotFound">
+    <xpath desc="returns status code 404">self::rest:response/http:response/@status = 404</xpath>
+  </TestClass>
+  <!-- serialization -->
+  <TestClass xml:id="SerializeHTML5">
+    <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method/@value="html5"</xpath>
+  </TestClass>
+  <!-- search and list APIs -->
+  <TestClass xml:id="SearchResults">
+    <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method/@value="html5"</xpath>
+    <xpath desc="reference to Open Search @profile">.//html:head[@profile="http://a9.com/-/spec/opensearch/1.1/"]</xpath>
+    <xpath desc="@startIndex is present">count(.//html:meta[@name='startIndex'])=1</xpath>
+    <xpath desc="@endIndex is present">count(.//html:meta[@name='endIndex'])=1</xpath>
+    <xpath desc="@totalResults is present">count(.//html:meta[@name='totalResults'])=1</xpath>
+    <xpath desc="@itemsPerPage is present">count(.//html:meta[@name='itemsPerPage'])=1</xpath>
+    <xpath desc="endIndex - startIndex + 1 = number of results">
+      let $start := number($output//html:meta[@name='startIndex']/@content)
+      let $end := number($output//html:meta[@name='endIndex']/@content)
+      let $to-count :=
+        if ($output//html:ul[@class="results"])
+        then $output//html:li[@class="result"]
+        else $output//html:li[@class="context"]
+      return ((if ($start) then 1 else 0) + $end - $start eq count($to-count)
+      )
+    </xpath>
+    <xpath desc="endIndex &lt;= number of results">
+      number(.//html:meta[@name='endIndex']/@content) &lt;= number(.//html:meta[@name='totalResults']/@content)
+    </xpath>
+  </TestClass>
+  <!-- discovery APIs -->
+  <TestClass xml:id="DiscoveryAPI">
+    <xpath desc="contains a discovery API">.//html:html/html:body/*[@class="apis"]/html:li[@class="api"]/html:a[@class="discovery"]</xpath>
+  </TestClass>
+</TestClassSet>

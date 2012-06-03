@@ -12,7 +12,7 @@
   <xsl:import href="../../../common/common.xsl2"/>
   <!-- xsl:include href="../copy-context.xsl2"/-->
   <xsl:include href="dict.xsl2"/>
-  <xsl:include href="muxhtml.xsl2"/>
+  <xsl:include href="xhtml-generic.xsl2"/>
   <xsl:include href="bibliography-xhtml.xsl2"/>
   <xsl:include href="inline.xsl2"/>
   <xsl:include href="credits-list.xsl2"/>

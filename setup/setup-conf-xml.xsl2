@@ -29,6 +29,10 @@
         <module class="org.exist.xquery.modules.scheduler.SchedulerModule"
           uri="http://exist-db.org/xquery/scheduler" />
       </xsl:if>
+      <xsl:if test="empty(module[@uri='http://exist-db.org/xquery/xmldiff'])">
+        <module class="org.exist.xquery.modules.xmldiff.XmlDiffModule"
+          uri="http://exist-db.org/xquery/xmldiff" />
+      </xsl:if>
     </xsl:copy>
   </xsl:template>
   
@@ -69,6 +73,15 @@
             <parameter name="max" value="2"/>
         </job>
       </xsl:if>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- add catalog for hebrew.dtd -->
+  <xsl:template match="entity-resolver">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <catalog uri="${{WEBAPP_HOME}}/WEB-INF/opensiddur-catalog.xml"/>
+      <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
 </xsl:stylesheet>  
