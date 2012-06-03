@@ -94,6 +94,7 @@ declare function local:list(
           <a class="document" href="/api{$user:path}/{$api-name}">{
             local:result-title($user)
           }</a>
+          <a class="alt" property="groups" href="/api{$user:path}/{$api-name}/groups">groups</a>
         </li>
     }</ul>,
     $start,
