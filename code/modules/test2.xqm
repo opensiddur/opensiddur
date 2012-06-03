@@ -753,7 +753,8 @@ declare function t:ignore-test(
     for $condition in $test/(expected|xpath|error|t:expand-class(class))
     return 
       element { name($condition) }{
-        attribute pass { "ignore" }
+        attribute pass { "ignore" },
+        $condition/@desc
       }
   }</test>
 };
