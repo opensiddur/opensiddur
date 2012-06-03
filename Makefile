@@ -153,9 +153,10 @@ schema: $(DBDIR)/schema odddoc transliteration-schema contributor-schema
 	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
 	cp schema/access.rnc $(DBDIR)/schema
+	cp schema/group.rnc $(DBDIR)/schema
 	
 .PHONY: clean
-clean: xsltdoc-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist
+clean: xsltdoc-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist setup-clean
 
 $(DBDIR)/common: $(DBDIR)/code
 
@@ -253,8 +254,11 @@ copy-files:
 	cp $(SETUPDIR)/hebrew.dtd $(EXIST_INSTALL_DIR)/webapp/WEB-INF/entities
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"
 
-.PHONY: setup-password
+.PHONY: setup-password setup-clean
 setup-password: $(SETUPDIR)/setup.xql
+
+setup-clean: 
+	rm -f $(SETUPDIR)/setup.xql
 
 $(SETUPDIR)/setup.xql:
 	@echo "Setting admin password to the value in the Makefile. You did change it Makefile.local, right?..." && \

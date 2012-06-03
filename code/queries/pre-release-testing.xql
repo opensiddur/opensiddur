@@ -15,6 +15,7 @@ let $tests-to-run :=
     <test module="/code/tests/api/access.t.xml" />
     <test module="/code/tests/api/login.t.xml"/>
     <test module="/code/tests/api/user.t.xml"/>
+    <test module="/code/tests/api/group.t.xml"/>
     <!--test module="/code/tests/modules/mirror.t.xml" admin="1"/-->
     <test module="/code/tests/api/data/dindex.t.xml"/>
     <test module="/code/tests/api/data/transliteration.t.xml"/>

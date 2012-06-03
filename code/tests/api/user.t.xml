@@ -84,6 +84,9 @@
       ]]></code> 
       <class href="common.t.xml#SearchResults"/>
       <xpath desc="returns at least 4 results">count(.//html:*[@class="result"])&gt;=4</xpath>
+      <xpath desc="groups view is presented as an alternate">
+        every $d in .//html:li[@class="result"]/html:a[@class=document]
+        satisfies exists($d/following-sibling::html:a[@class="alt"][@property="groups"])</xpath>
     </test>
     <test>
       <task>Query all users</task>

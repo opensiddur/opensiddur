@@ -36,13 +36,16 @@ declare
         {
         (: TODO: replace request:get-uri() with rest:get-absolute-uri() 
               :)
-        let $api-base := request:get-uri()
+        let $api-base := "/api"
         return (
           <li class="api">
             <a class="discovery" href="{$api-base}/data">Data</a>
           </li>,
           <li class="api">
             <a class="discovery" href="{$api-base}/demo">Demo</a>
+          </li>,
+          <li class="api">
+            <a class="discovery" href="{$api-base}/group">Group</a>
           </li>,
           <li class="api">
             <a class="discovery" href="{$api-base}/login">Login</a>
