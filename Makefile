@@ -153,6 +153,7 @@ schema: $(DBDIR)/schema odddoc transliteration-schema contributor-schema
 	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
 	cp schema/access.rnc $(DBDIR)/schema
+	cp schema/group.rnc $(DBDIR)/schema
 	
 .PHONY: clean
 clean: xsltdoc-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist

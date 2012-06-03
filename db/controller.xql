@@ -16,6 +16,8 @@ import module namespace tran="http://jewishliturgy.org/api/transliteration"
   at "/code/api/data/transliteration.xqm";
 import module namespace user="http://jewishliturgy.org/api/user"
   at "/code/api/user.xqm";
+import module namespace grp="http://jewishliturgy.org/api/group"
+  at "/code/api/group.xqm";
 import module namespace login="http://jewishliturgy.org/api/login"
   at "/code/api/login.xqm";
 import module namespace demo="http://jewishliturgy.org/api/demo"
@@ -135,6 +137,44 @@ declare function local:do-demo(
   else <exist:ignore/>
 };
 
+declare function local:do-group(
+  $tokens as xs:string*
+  ) {
+  if (not($tokens[3]))
+  then 
+    switch(api:get-method())
+    case "GET"
+    return 
+      grp:list(
+        request:get-parameter("start", 1),
+        request:get-parameter("max-results", 100)
+      )
+    default
+    return $local:disallowed
+  else
+    switch(api:get-method())
+    case "GET"
+    return 
+      let $f :=
+          api:simplify-format(
+            api:get-accept-format(
+              ("application/xhtml+xml", "text/html", "application/xml", "text/xml")
+            ),
+            "none"
+          )
+      return
+        if ($f = ("html", "xhtml"))
+        then grp:get-html($tokens[3])
+        else if ($f = "xml")
+        then grp:get-xml($tokens[3])
+        else api:rest-error(400, "Bad content type")
+    case "PUT"
+    return grp:put($tokens[3], request:get-data())
+    case "DELETE"
+    return grp:delete($tokens[3])
+    default
+    return $local:disallowed
+};
 
 declare function local:do-login(
   $tokens as xs:string*
@@ -144,22 +184,23 @@ declare function local:do-login(
     switch (api:get-method())
     case "GET"
     return
-      switch (
+      let $f :=
           api:simplify-format(
-            api:get-request-format(
+            api:get-accept-format(
               ("application/xhtml+xml", "text/html", "application/xml", "text/xml")
             ),
             "none"
           )
-        )
-      case ("html", "xhtml")
-      return login:get-html(
-        request:get-parameter("user", ()),
-        request:get-parameter("password", ())
-        )
-      case ("xml")
-      return login:get-xml()
-      default return api:rest-error(400, "Bad content type")
+      return
+        if ($f = ("html", "xhtml"))
+        then
+          login:get-html(
+            request:get-parameter("user", ()),
+            request:get-parameter("password", ())
+          )
+        else if ($f = "xml")
+        then login:get-xml()
+        else api:rest-error(400, "Bad content type")
     case "POST"
     return
       switch(
@@ -235,7 +276,10 @@ declare function local:do-user(
   else
     switch (api:get-method())
     case "GET"
-    return user:get($tokens[3])
+    return 
+      if ($tokens[4]="groups")
+      then grp:get-user-groups($tokens[3])
+      else user:get($tokens[3])
     case "PUT"
     return user:put($tokens[3], request:get-data())
     case "DELETE"
@@ -266,6 +310,8 @@ return
         return local:do-data($path-tokens)
         case "demo"
         return local:do-demo($path-tokens)
+        case "group"
+        return local:do-group($path-tokens)
         case "login"
         return local:do-login($path-tokens)
         case "logout"
