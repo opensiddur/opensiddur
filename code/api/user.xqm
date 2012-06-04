@@ -1,6 +1,12 @@
 xquery version "3.0";
-(:~ User management API
+(:~ User management API:
+ : The same API is used for both users (who have a login name
+ : and password) and contributors (who have a record, but cannot
+ : log in). Where the code references a non-login profile, it
+ : is for the latter. 
  :
+ : @author Efraim Feinstein
+ : 
  : Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
@@ -27,9 +33,9 @@ declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
 
-(: path to user profile data :)
+(:~ path to user profile data within the db :)
 declare variable $user:path := "/user";
-(: path to schema :)
+(:~ path to schema within the db :)
 declare variable $user:schema := "/schema/contributor.rnc";
 
 declare function local:result-title(
@@ -156,9 +162,10 @@ declare
 
 };
 
-(:~ Get a user profile
+(:~ Get a profile
  : @param $name Name of user to profile
- : @return The profile, if available. Otherwise, return error 404 (not found) 
+ : @return The profile, if available, as XML. 
+ : @error HTTP 404 Not found 
  :)
 declare
   %rest:GET
@@ -177,11 +184,10 @@ declare
 
 (:~ Create a new user or edit a user's password, using XML
  : @param $body The user XML, <new><user>{name}</user><password>{}</password></new>
- : @return  if available. Otherwise, return errors
- :  201 (created): A new user was created, a location link points to the profile
- :  400 (bad request): User or password missing  
- :  401 (not authorized): Attempt to change a password for a user and you are not authenticated, 
- :  403 (forbidden): Attempt to change a password for a user and you are authenticated as a different user 
+ : @return HTTP 201 (Created) a new user profile
+ : @error HTTP 400 (bad request): User or password missing  
+ : @error HTTP 401 (not authorized): Attempt to change a password for a user and you are not authenticated, 
+ : @error HTTP 403 (forbidden): Attempt to change a password for a user and you are authenticated as a different user 
  :)
 declare 
   %rest:POST("{$body}")
@@ -196,11 +202,7 @@ declare
 (:~ Create a new user or edit a user's password, using a web form
  : @param $name The user's name
  : @param $password The user's new password
- : @return  if available. Otherwise, return errors
- :  201 (created): A new user was created, a location link points to the profile 
- :  400 (bad request): User or password missing
- :  401 (not authorized): Attempt to change a password for a user and you are not authenticated, 
- :  403 (forbidden): Attempt to change a password for a user and you are authenticated as a different user 
+ : @see http://jewishliturgy.org/modules/user.xqm;post-xml 
  :)
 declare 
   %rest:POST
@@ -292,6 +294,11 @@ declare
         api:rest-error(403, "Attempt to change the password of a different user")
 }; 
 
+(:~ validate a user profile
+ : @param $doc The profile XML
+ : @param $name The name of the user who will own the profile
+ : @return true() for valid or false() for invalid
+ :)
 declare function user:validate(
   $doc as document-node(),
   $name as xs:string
@@ -301,6 +308,11 @@ declare function user:validate(
   )
 };
 
+(:~ validate a user profile
+ : @param $doc The profile XML
+ : @param $name The name of the user who will own the profile
+ : @return a report element, containing the status and messages
+ :)
 declare function user:validate-report(
   $doc as document-node(),
   $name as xs:string
@@ -327,12 +339,11 @@ declare function user:validate-report(
 (:~ Edit or create a user or contributor profile
  : @param $name The name to place the profile under
  : @param $body The user profile, which must validate against /schema/contributor.rnc
- : @return 
- :  201 (created): A new contributor profile, which is not associated with a user, has been created
- :  204 (no data): The profile was successfully edited 
- :  400 (bad request): The profile is invalid
- :  401 (not authorized): You are not authenticated, 
- :  403 (forbidden): You are authenticated as a different user
+ : @return HTTP 201 (created): A new contributor profile, which is not associated with a user, has been created
+ : @return HTTP 204 (no data): The profile was successfully edited 
+ : @error HTTP 400 (bad request): The profile is invalid
+ : @error HTTP 401 (not authorized): You are not authenticated, 
+ : @error HTTP 403 (forbidden): You are authenticated as a different user
  :)
 declare
   %rest:PUT("{$body}")
@@ -386,11 +397,10 @@ declare
 
 (:~ Delete a contributor or contributor profile
  : @param $name Profile to remove
- : @return 
- :  204 (no data): The profile was successfully deleted 
- :  400 (bad request): The profile is referenced elsewhere and cannot be deleted. A list of references is returned
- :  401 (not authorized): You are not authenticated 
- :  403 (forbidden): You are authenticated as a different user
+ : @return HTTP 204 (no data): The profile was successfully deleted 
+ : @error HTTP 400 (bad request): The profile is referenced elsewhere and cannot be deleted. A list of references is returned
+ : @error HTTP 401 (not authorized): You are not authenticated 
+ : @error HTTP 403 (forbidden): You are authenticated as a different user
  :)
 declare
   %rest:DELETE
