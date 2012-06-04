@@ -90,6 +90,10 @@ let $form :=
 		<title>Open Siddur Transliterator Demo</title>
    	<xf:model>
 			{local:translit-instance('translit')}
+      {((: force Firefox to include namespace nodes :))}
+      <xf:instance id="garbage">
+        <garbage html:g="1" tr:g="1" />
+      </xf:instance>
 			<xf:instance id="transliteration-result" xmlns="">
 			  <result/>
 			</xf:instance>
