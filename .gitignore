@@ -28,6 +28,7 @@ db/*
 !db/controller.xql
 !db/system/
 !db/demo/
+!db/user
 
 # contents list
 __contents__.xml
