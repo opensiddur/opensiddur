@@ -4,3 +4,6 @@
 [submodule "lib/aloha"]
 	path = lib/aloha
 	url = https://github.com/alohaeditor/Aloha-Editor.git
+[submodule "lib/xquerydoc"]
+	path = lib/xquerydoc
+	url = git://github.com/xquery/xquerydoc.git
