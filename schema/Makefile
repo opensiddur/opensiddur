@@ -44,7 +44,7 @@ $(LIBDIR)/tei/P5/p5subset.xml:
 	cd $(LIBDIR)/tei/P5 && make p5subset.xml 
 
 $(TEIDOCDIR)/jlptei.doc.html: p5subset $(wildcard $(ODDDIR)/*.xml) $(wildcard $(ODDDIR)/*.sch) $(wildcard $(ODDDIR)/*.xsl2) $(ODDDIR)/Makefile 
-	$(TEIROMA) $(ODDDIR)/$(JLPTEI_FILE) $(TEIDOCDIR)
+	$(TEIROMA) --nodtd --noxsd $(ODDDIR)/$(JLPTEI_FILE) $(TEIDOCDIR)
 	
 .PHONY: transliteration-schema
 transliteration-schema: $(DBDIR)/schema $(DBDIR)/schema/transliteration.xsl2
