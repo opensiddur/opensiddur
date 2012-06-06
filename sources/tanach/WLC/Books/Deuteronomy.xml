@@ -30,14 +30,14 @@
     </titleStmt>
     <editionStmt>
       <edition>Unicode/XML Westminster Leningrad Codex
-        <version>4.14</version>
-        <date>1 Jul 2010</date>
+        <version>4.16</version>
+        <date>30 Apr 2012</date>
       </edition>
       <respStmt>
-        <resp>Transcribed by WLC2XML of 6 Jun 2010 at 08 Jul 2010 @ 13:46.00. Build number: 21.1.</resp>
+        <resp>Transcribed by WLC2XML of 6 Jun 2010 at 05 Jun 2012 @ 21:41.43. Build number: 23.0.</resp>
       </respStmt>
     </editionStmt>
-    <extent>   516,963 bytes</extent>
+    <extent>   516,393 bytes</extent>
     <publicationStmt>
       <authority>Transcription permitted:
         <name>Kirk Lowery</name>
@@ -69,7 +69,7 @@
         <imprint>
           <publisher>Russian National Library (Saltykov-Shchedrin)</publisher>
           <pubPlace>St. Petersburg (Leningrad)</pubPlace>
-          <date>ca 1008</date>
+          <date>1008</date>
         </imprint>
         <idno>Firkovich B 19 A</idno>
       </biblItem>
@@ -77,10 +77,10 @@
         <title>Biblia Hebraica Stuttgartensia</title>
         <editor>Kittel, Rudolf, 1853-1929</editor>
         <editor>Alt, Albrecht, 1883-1956</editor>
-        <editor>Eissfeldt, Otto, 1887-</editor>
+        <editor>Eissfeldt, Otto, 1887-1973</editor>
         <editor>Kahle, Paul, 1875-1964</editor>
         <editor>Elliger, Karl, 1901-1977</editor>
-        <editor>Rudolph, Wilhelm, 1891-</editor>
+        <editor>Rudolph, Wilhelm, 1891-1987</editor>
         <edition>Fourth</edition>
         <imprint>
           <publisher>Deutsche Bibelstiftung</publisher>
@@ -94,10 +94,10 @@
         <title type="main">Biblia Hebraica Stuttgartensia [Electronic resource] : (Michigan-Claremont text)</title>
         <editor>Kittel, Rudolf, 1853-1929</editor>
         <editor>Alt, Albrecht, 1883-1956</editor>
-        <editor>Eissfeldt, Otto, 1887-</editor>
+        <editor>Eissfeldt, Otto, 1887-1973</editor>
         <editor>Kahle, Paul, 1875-1964</editor>
         <editor>Elliger, Karl, 1901-1977</editor>
-        <editor>Rudolph, Wilhelm, 1891-</editor>
+        <editor>Rudolph, Wilhelm, 1891-1987</editor>
         <respStmt>
           <resp>Creation of machine-readable version:</resp>
           <name>Whitaker, Richard E.</name>
@@ -129,13 +129,13 @@
   <encodingDesc>
   </encodingDesc>
   <profileDesc>
-    <creation>Input text file wlc414_ps.txt provided by the J. Alan Groves Center for Advanced 
-Biblical Research. The file has the MD5 hash: 4326 BC1C 5057 776F 5C6F 88DA BB98 6DF0 
-and was received on 1 Jul 2010. The WLC text file has been modified by the 
+    <creation>Input text file wlc416_ps.txt provided by the J. Alan Groves Center for Advanced 
+Biblical Research. The file has the MD5 hash: a941 88e1 3fc3 0b18 8bb4 9ac8 c24f 2946 
+and was received on 30 Apr 2012. The WLC text file has been modified by the 
 transcriber to move transcription notes closer to the relevant character in 
-exactly six (6) places. The modified file, wlc414_ps_td.txt, has the following 
-SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 . 
-      <date>08 Jul 2010</date>
+exactly six (6) places. The modified file, wlc_4.16_ps_td.txt, has the following 
+SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 . 
+      <date>05 Jun 2012</date>
     </creation>
     <langUsage>
       <language ident="HE">Hebrew</language>
@@ -1038,7 +1038,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>יְהוָ֜ה</w>
         <w>אֵלַ֗/י</w>
         <w>אֶל־</w>
-        <w>תָּ֙צַר֙<x>1</x></w>
+        <w>תָּ֙צַר֙<x>U</x></w>
         <w>אֶת־</w>
         <w>מוֹאָ֔ב</w>
         <w>וְ/אַל־</w>
@@ -1728,7 +1728,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>הַ/גִּלְעָד֙</w>
         <w>וְ/עָרָ֔י/ו</w>
         <w>נָתַ֕תִּי</w>
-        <w>לָ/רֻֽאוּבֵנִ֖י<x>1</x></w>
+        <w>לָ/רֻֽאוּבֵנִ֖י<x>U</x></w>
         <w>וְ/לַ/גָּדִֽי׃</w>
       </v>
       <v n="13">
@@ -1784,7 +1784,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>הַ/גִּלְעָֽד׃</w>
       </v>
       <v n="16">
-        <w>וְ/לָ/רֻאוּבֵנִ֨י<x>1</x></w>
+        <w>וְ/לָ/רֻאוּבֵנִ֨י<x>U</x></w>
         <w>וְ/לַ/גָּדִ֜י</w>
         <w>נָתַ֤תִּי</w>
         <w>מִן־</w>
@@ -2428,7 +2428,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       <v n="21">
         <w>וַֽ/יהוָ֥ה</w>
         <w>הִתְאַנֶּף־</w>
-        <w>בִּ֖/י<x>1</x></w>
+        <w>בִּ֖/י<x>U</x></w>
         <w>עַל־</w>
         <w>דִּבְרֵי/כֶ֑ם</w>
         <w>וַ/יִּשָּׁבַ֗ע</w>
@@ -2713,7 +2713,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>הָ/אֱלֹהִ֑ים</w>
         <w>אֵ֥ין</w>
         <w>ע֖וֹד</w>
-        <w>מִ/לְ/בַדּֽ/וֹ׃<x>1</x></w>
+        <w>מִ/לְ/בַדּֽ/וֹ׃<x>U</x></w>
       </v>
       <v n="36">
         <w>מִן־</w>
@@ -2852,7 +2852,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>בַּ/מִּדְבָּ֛ר</w>
         <w>בְּ/אֶ֥רֶץ</w>
         <w>הַ/מִּישֹׁ֖ר</w>
-        <w>לָ/רֻֽאוּבֵנִ֑י<x>1</x></w>
+        <w>לָ/רֻֽאוּבֵנִ֑י<x>U</x></w>
         <w>וְ/אֶת־</w>
         <w>רָאמֹ֤ת</w>
         <w>בַּ/גִּלְעָד֙</w>
@@ -3060,7 +3060,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>פָּנָֽ֗/יַ׃</w>
       </v>
       <v n="8">
-        <w>לֹֽ֣א־</w>
+        <w>לֹֽ֣א־</w>
         <w>תַעֲשֶׂ֥ה־</w>
         <w>לְ/ךָ֥֣</w>
         <w>פֶ֣֙סֶל֙ ׀</w>
@@ -3139,7 +3139,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>כַּ/אֲשֶׁ֥ר</w>
         <w>צִוְּ/ךָ֖֣ ׀</w>
         <w>יְהוָ֥֣ה</w>
-        <w>אֱלֹהֶֽ֗י/ךָ<x>2</x></w>
+        <w>אֱלֹהֶֽ֗י/ךָ<x>U</x></w>
       </v>
       <v n="13">
         <w>שֵׁ֤֣שֶׁת</w>
@@ -4749,7 +4749,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>יַכְנִיעֵ֖/ם</w>
         <w>לְ/פָנֶ֑י/ךָ</w>
         <w>וְ/הֽוֹרַשְׁתָּ֤/ם</w>
-        <w>וְ/הַֽאַבַדְתָּ/ם֙<x>1</x></w>
+        <w>וְ/הַֽאַבַדְתָּ/ם֙<x>U</x></w>
         <w>מַהֵ֔ר</w>
         <w>כַּ/אֲשֶׁ֛ר</w>
         <w>דִּבֶּ֥ר</w>
@@ -5528,7 +5528,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>מִ/כָּל־</w>
         <w>הָ/עַמִּ֖ים</w>
         <w>כַּ/יּ֥וֹם</w>
-        <w>הַ/זֶּה׃<x>2</x></w>
+        <w>הַ/זֶּה׃<x>U</x></w>
       </v>
       <v n="16">
         <w>וּ/מַלְתֶּ֕ם</w>
@@ -6256,12 +6256,12 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>וְ/תַ֖חַת</w>
         <w>כָּל־</w>
         <w>עֵ֥ץ</w>
-        <w>רַעֲנָן׃<x>1</x></w>
+        <w>רַעֲנָן׃<x>U</x></w>
       </v>
       <v n="3">
         <w>וְ/נִתַּצְתֶּ֣ם</w>
         <w>אֶת־</w>
-        <w>מִזְבּחֹתָ֗/ם<x>1</x></w>
+        <w>מִזְבּחֹתָ֗/ם<x>U</x></w>
         <w>וְ/שִׁבַּרְתֶּם֙</w>
         <w>אֶת־</w>
         <w>מַצֵּ֣בֹתָ֔/ם</w>
@@ -7066,7 +7066,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="15">
         <w>וְ/דָרַשְׁתָּ֧</w>
-        <w>וְ/חָקַרְתָּ֧<x>1</x></w>
+        <w>וְ/חָקַרְתָּ֧<x>U</x></w>
         <w>וְ/שָׁאַלְתָּ֖</w>
         <w>הֵיטֵ֑ב</w>
         <w>וְ/הִנֵּ֤ה</w>
@@ -7472,7 +7472,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>הַ/דֶּ֗רֶךְ</w>
         <w>כִּ֣י</w>
         <w>לֹ֣א</w>
-        <w>תוּכַ֘ל<x>1</x></w>
+        <w>תוּכַ֘ל<x>U</x></w>
         <w>שְׂאֵת/וֹ֒</w>
         <w>כִּֽי־</w>
         <w>יִרְחַ֤ק</w>
@@ -8521,7 +8521,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       <v n="8">
         <w>כִּ֣י</w>
         <w>יִפָּלֵא֩</w>
-        <w>מִמְּ/ךָ֨<x>c</x></w>
+        <w>מִמְּ/ךָ֨<x>C</x><x>c</x></w>
         <w>דָבָ֜ר</w>
         <w>לַ/מִּשְׁפָּ֗ט</w>
         <w>בֵּֽין־</w>
@@ -9333,7 +9333,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>בִּ/דְרָכָ֖י/ו</w>
         <w>כָּל־</w>
         <w>הַ/יָּמִ֑ים</w>
-        <w>וְ/יָסַפְתָּ֨<x>c</x></w>
+        <w>וְ/יָסַפְתָּ֨<x>C</x><x>c</x></w>
         <w>לְ/ךָ֥</w>
         <w>עוֹד֙</w>
         <w>שָׁלֹ֣שׁ</w>
@@ -10022,7 +10022,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="8">
         <w>כַּפֵּר֩</w>
-        <w>לְ/עַמְּ/ךָ֨<x>c</x></w>
+        <w>לְ/עַמְּ/ךָ֨<x>C</x><x>c</x></w>
         <w>יִשְׂרָאֵ֤ל</w>
         <w>אֲשֶׁר־</w>
         <w>פָּדִ֙יתָ֙</w>
@@ -11015,7 +11015,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>יָבֹ֖א</w>
         <w>אֶל־</w>
         <w>תּ֥וֹךְ</w>
-        <w>הַֽ/מַּחֲנֶה׃<x>1</x></w>
+        <w>הַֽ/מַּחֲנֶה׃<x>U</x></w>
       </v>
       <v n="13">
         <w>וְ/יָד֙</w>
@@ -11103,7 +11103,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>יִהְיֶ֥ה</w>
         <w>קָדֵ֖שׁ</w>
         <w>מִ/בְּנֵ֥י</w>
-        <w>יִשְׂרָאֵל׃<x>1</x></w>
+        <w>יִשְׂרָאֵל׃<x>U</x></w>
       </v>
       <v n="19">
         <w>לֹא־</w>
@@ -11416,7 +11416,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       <v n="10">
         <w>כִּֽי־</w>
         <w>תַשֶּׁ֥ה</w>
-        <w>בְ/רֵֽעֲ/ךָ<x>1</x></w>
+        <w>בְ/רֵֽעֲ/ךָ<x>U</x></w>
         <w>מַשַּׁ֣את</w>
         <w>מְא֑וּמָה</w>
         <w>לֹא־</w>
@@ -11892,7 +11892,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>בְּ/ךָ֙</w>
         <w>כָּל־</w>
         <w>הַ/נֶּחֱשָׁלִ֣ים</w>
-        <w>אַֽחַרֶ֔י/ךָ<x>1</x></w>
+        <w>אַֽחַרֶ֔י/ךָ<x>U</x></w>
         <w>וְ/אַתָּ֖ה</w>
         <w>עָיֵ֣ף</w>
         <w>וְ/יָגֵ֑עַ</w>
@@ -12459,7 +12459,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>אֱלֹהֶ֑י/ךָ</w>
         <w>וְ/עָשִׂ֤יתָ</w>
         <w>אֶת־</w>
-        <w>מִצְוֺתָ/ו֙<x>q</x></w>
+        <w>מִצְוֺתָ/ו֙<x>Q</x><x>q</x></w>
         <w>וְ/אֶת־</w>
         <w>חֻקָּ֔י/ו</w>
         <w>אֲשֶׁ֛ר</w>
@@ -12799,7 +12799,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>לָֽ/ךְ׃</w>
       </v>
       <v n="9">
-        <w>יְקִֽימְ/ךָ֨<x>c</x></w>
+        <w>יְקִֽימְ/ךָ֨<x>C</x><x>c</x></w>
         <w>יְהוָ֥ה</w>
         <w>ל/וֹ֙</w>
         <w>לְ/עַ֣ם</w>
@@ -14269,7 +14269,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>וַ/יַּֽעַבְדוּ֙</w>
         <w>אֱלֹהִ֣ים</w>
         <w>אֲחֵרִ֔ים</w>
-        <w>וַ/יִּֽשְׁתַּחֲוּ֖וּ<x>1</x></w>
+        <w>וַ/יִּֽשְׁתַּחֲוּ֖וּ<x>U</x></w>
         <w>לָ/הֶ֑ם</w>
         <w>אֱלֹהִים֙</w>
         <w>אֲשֶׁ֣ר</w>
@@ -14646,7 +14646,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>עֹבֵר֙</w>
         <w>אֶת־</w>
         <w>הַ/יַּרְדֵּ֔ן</w>
-        <w>לָ/בֹ֥א<x>1</x></w>
+        <w>לָ/בֹ֥א<x>U</x></w>
         <w>שָׁ֖מָּ/ה</w>
         <w>לְ/רִשְׁתָּֽ/הּ׃</w>
       </v>
@@ -14812,7 +14812,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>אֵלָ֜י/ו</w>
         <w>לְ/עֵינֵ֣י</w>
         <w>כָל־</w>
-        <w>יִשְׂרָאֵ֘ל<x>1</x></w>
+        <w>יִשְׂרָאֵ֘ל<x>U</x></w>
         <w>חֲזַ֣ק</w>
         <w>וֶ/אֱמָץ֒</w>
         <w>כִּ֣י</w>
@@ -15208,7 +15208,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>מֹשֶׁה֙</w>
         <w>אֶת־</w>
         <w>הַ/לְוִיִּ֔ם</w>
-        <w>נֹֽשְׂאֵ֛י<x>1</x></w>
+        <w>נֹ֥שְׂאֵ֛י<x>C</x><x>c</x></w>
         <w>אֲר֥וֹן</w>
         <w>בְּרִית־</w>
         <w>יְהוָ֖ה</w>
@@ -15475,7 +15475,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>יַרְכִּבֵ֙/הוּ֙</w>
         <w>עַל־</w>
         <k>במותי</k>
-        <q>בָּ֣מֳתֵי<x>9</x></q>
+        <q>בָּ֣מֳתֵי<x>y</x></q>
         <w>אָ֔רֶץ</w>
         <w>וַ/יֹּאכַ֖ל</w>
         <w>תְּנוּבֹ֣ת</w>
@@ -16671,121 +16671,106 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
   </note>
   <note>
     <code>2</code>
-    <gccode>2</gccode>
-    <note>We have added a sop pasuq where L and BHS omit it. (The added sof pasuq often is missing from the text.)</note>
-  </note>
-  <note>
-    <code>3</code>
-    <gccode>3</gccode>
-    <note>We read or understand L differently than BHS. Often this notation indicates a typographical error in BHS. </note>
-  </note>
-  <note>
-    <code>4</code>
     <gccode>4</gccode>
     <note>Puncta extraordinaria -- a \u05c4 is used to mark such marks in the text when they are above the line and a \u05c5 when they are below the line. </note>
   </note>
   <note>
-    <code>5</code>
+    <code>3</code>
     <gccode>5</gccode>
     <note>Large letter(s). Shown as large letters without a superscript note number. </note>
   </note>
   <note>
-    <code>6</code>
+    <code>4</code>
     <gccode>6</gccode>
     <note>Small letter(s). Shown as small letters without a superscript note number. </note>
   </note>
   <note>
-    <code>7</code>
+    <code>5</code>
     <gccode>7</gccode>
     <note>Suspended letter(s). Shown as suspended letters without a superscript note number. </note>
   </note>
   <note>
-    <code>8</code>
+    <code>6</code>
     <gccode>8</gccode>
     <note>Inverted nun in the text. </note>
   </note>
   <note>
-    <code>9</code>
-    <gccode>9</gccode>
-    <note>BHS has abandoned L and we concur. All of these occurrences are ketib/qere problems. </note>
-  </note>
-  <note>
-    <code>10</code>
+    <code>7</code>
     <gccode>a</gccode>
     <note>Adaptations to a Qere which L and BHS, by their design, do not indicate. </note>
   </note>
   <note>
-    <code>11</code>
+    <code>8</code>
     <gccode>c</gccode>
     <note>We read one or more accents in L differently than BHS. Often this notation indicates a typographical error in BHS. </note>
   </note>
   <note>
-    <code>12</code>
+    <code>9</code>
     <gccode>k</gccode>
     <note>We read one or more consonants in L differently from BHS. </note>
   </note>
   <note>
-    <code>13</code>
-    <gccode>m</gccode>
-    <note>Miscellaneous notes to the text and occasions where more than one bracket category applies. </note>
-  </note>
-  <note>
-    <code>14</code>
+    <code>10</code>
     <gccode>n</gccode>
     <note>Marks an anomalous form. </note>
   </note>
   <note>
-    <code>15</code>
+    <code>11</code>
     <gccode>p</gccode>
-    <note>We read punctuation (maqaf, dagesh or mapiq) in L differently from BHS. </note>
+    <note>We read punctuation in L differently from BHS. </note>
   </note>
   <note>
-    <code>16</code>
+    <code>12</code>
     <gccode>q</gccode>
     <note>We have abandoned or added a ketib/qere relative to BHS. In doing this we agree with L against BHS. </note>
   </note>
   <note>
-    <code>17</code>
+    <code>13</code>
     <gccode>v</gccode>
     <note>We read one or more vowels in L differently from BHS. </note>
   </note>
   <note>
-    <code>18</code>
+    <code>14</code>
     <gccode>y</gccode>
     <note>Yathir readings in L which we have designated as Qeres when both Dothan and BHS list a Qere. </note>
   </note>
   <note>
-    <code>19</code>
+    <code>15</code>
     <gccode>C</gccode>
     <note>We read one or more accents in L differently from BHQ. </note>
   </note>
   <note>
-    <code>20</code>
+    <code>16</code>
     <gccode>F</gccode>
     <note>Marks a consonant with an anomalous final form that is word-medial.</note>
   </note>
   <note>
-    <code>21</code>
+    <code>17</code>
     <gccode>K</gccode>
-    <note>We read one or more consonants in L differently from BHQ. (Currently unused.) </note>
+    <note>We read one or more consonants in L differently from BHQ. </note>
   </note>
   <note>
-    <code>22</code>
+    <code>18</code>
     <gccode>M</gccode>
     <note>Marks a word with a final consonant that is a medial (not a final) form. </note>
   </note>
   <note>
-    <code>23</code>
+    <code>19</code>
     <gccode>P</gccode>
-    <note>We read the punctuation (maqaf, dagesh or mapiq) in L differently from BHQ. </note>
+    <note>We read the punctuation in L differently from BHQ. </note>
   </note>
   <note>
-    <code>24</code>
+    <code>20</code>
     <gccode>Q</gccode>
     <note>Marks a place where we agree with BHQ against BHS in reading L. </note>
   </note>
   <note>
-    <code>25</code>
+    <code>21</code>
+    <gccode>U</gccode>
+    <note>We agree with both BHS 1997 and BHQ on an unexpected reading. </note>
+  </note>
+  <note>
+    <code>22</code>
     <gccode>V</gccode>
     <note>We read one or more vowels in L differently from BHQ. </note>
   </note>
