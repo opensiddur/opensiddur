@@ -89,7 +89,7 @@ TODO:
     Contributor list entry file name (base w/o extension)
   </xd:doc>
   <xsl:param name="contributors-file-name" as="xs:string" 
-    select="concat('contributors/', encode-for-uri('Westminster Leningrad Codex'))"/>
+    select="concat('user/', encode-for-uri('Christopher.Kimball'))"/>
 
   <xd:doc>
     Bibliography entry file name (base w/o extension)
@@ -386,9 +386,8 @@ TODO:
           target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
     </xsl:variable>
     <xsl:variable name="responsGrp-content" as="element(tei:respons)+">
-      <!-- TODO: correct link -->
       <tei:respons type="trc" locus="value"
-        target="#main" resp="../{$contributors-file-name}" />
+        target="#text" resp="/user/{$contributors-file-name}" />
     </xsl:variable>
     <xsl:variable name="links-content" as="element(j:links)?">
     </xsl:variable>
@@ -763,24 +762,18 @@ TODO:
     </xsl:result-document>
     <xsl:result-document
       href="{$result-directory}/{$contributors-file-name}{$extension}">
-      <tei:div type="contributors" xml:lang="en">
-        <tei:list>
-          <tei:item xml:id="Christopher.Kimball">
-            <tei:name>
-              <tei:forename>Christopher</tei:forename>
-              <tei:surname>Kimball</tei:surname>
-            </tei:name>
-            <tei:email>transcriber@tanach.us</tei:email>
-            <tei:affiliation>
-              <tei:ptr target="#WLC" />
-            </tei:affiliation>
-          </tei:item>
-          <tei:item xml:id="WLC">
-            <tei:orgName>Westminster Leningrad Codex</tei:orgName>
-            <tei:ptr type="url" target="http://tanach.us" />
-          </tei:item>
-        </tei:list>
-      </tei:div>
+      <j:contributor xml:lang="en">
+        <tei:idno>Christopher.Kimball</tei:idno>
+        <tei:name>
+          <tei:forename>Christopher</tei:forename>
+          <tei:surname>Kimball</tei:surname>
+        </tei:name>
+        <tei:email>transcriber@tanach.us</tei:email>
+        <tei:affiliation>
+          <tei:orgName>Westminster Leningrad Codex</tei:orgName>
+          <tei:ptr type="url" target="http://tanach.us" />
+        </tei:affiliation>
+      </j:contributor>
     </xsl:result-document>
     <xsl:result-document
       href="{$result-directory}/{$bibliography-file-name}{$extension}">
