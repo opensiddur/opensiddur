@@ -64,7 +64,8 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           (or pseudonym) of the contributor, or the contributing organization. The <gi>name</gi> element should contain name parts,
           such as <gi>forename</gi> and <gi>surname</gi>.</item>
           <item>Optional contact information, such as <gi>email</gi> address or postal <gi>address</gi>.</item>
-          <item>Optional organization <gi>affiliation</gi>, which may contain an <gi>orgName</gi> element as well.</item>
+          <item>Optional organization <gi>affiliation</gi>, which may contain an <gi>orgName</gi> or <gi>ptr</gi> element as well.</item>
+          <item>Optional website address or other URL, contained in a <gi>ptr</gi></item>
         </list>
         <specList>
           <specDesc key="contributor"/>
@@ -80,6 +81,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <specDesc key="addrLine"/>
           <specDesc key="email"/>
           <specDesc key="affiliation"/> 
+          <specDesc key="ptr"/> 
         </specList>
       </div>  
       <div>
@@ -104,16 +106,33 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
             </attList>
           </classSpec>
           <classSpec ident="att.declaring" mode="delete" module="tei" type="atts"/>
+          <classSpec ident="att.pointing" mode="change" module="tei" type="atts">
+            <attList>
+              <attDef ident="evaluate" mode="delete"/>
+            </attList>
+          </classSpec>
+          <classSpec ident="att.internetMedia" mode="delete" module="tei" type="atts"/>
+          <classSpec ident="att.typed" mode="change" module="tei" type="atts">
+            <attList>
+              <attDef ident="subtype" mode="delete"/>
+            </attList>
+          </classSpec>
         </specGrp>
       </div>
       <div>
         <head>Formal declaration</head>
         <schemaSpec ident="contributor" start="contributor" xml:lang="en">
-          <moduleRef key="core" include="address addrLine email name"/>
+          <moduleRef key="core" include="address addrLine email name ptr"/>
           <moduleRef key="tei"/>
           <moduleRef key="header" include="idno"/>
           <moduleRef key="namesdates" include="affiliation forename genName nameLink orgName roleName surname"/>
           
+          <elementSpec mode="change" ident="ptr" module="core">
+            <attList>
+              <attDef ident="cRef" mode="delete"/>
+            </attList>
+          </elementSpec>
+
           <!-- the contributor element -->
           <elementSpec mode="add" ident="contributor"
             ns="http://jewishliturgy.org/ns/jlptei/1.0"
@@ -129,7 +148,10 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
                 <rng:ref name="model.nameLike.agent"/>
               </rng:optional>
               <rng:zeroOrMore>
-                <rng:ref name="model.addressLike"/> 
+                <rng:choice>
+                  <rng:ref name="model.addressLike"/> 
+                  <rng:ref name="ptr"/>
+                </rng:choice>
               </rng:zeroOrMore>
             </content>
             <exemplum>
