@@ -10,7 +10,7 @@
   <xd:doc type="stylesheet">
     <xd:short>Fill JLPTEI template with the given parameters.
     </xd:short>
-    <xd:copyright>Copyright 2009-2010 Efraim Feinstein &lt;efraim.feinstein@gmail.com&gt;
+    <xd:copyright>Copyright 2009-2010,2012 Efraim Feinstein &lt;efraim.feinstein@gmail.com&gt;
     </xd:copyright>
     <xd:detail>
       <p>This program is free software: you can redistribute it
@@ -36,198 +36,72 @@
       </p>
     </xd:detail>
   </xd:doc>
-
+  
   <xd:doc>
-    Contents of the template
-	</xd:doc>
-  <xsl:variable name="template-uri" as="xs:string"
-    select="'./jlptei-template.xml'" />
-
-  <xd:doc>
-    Contents of the template
-	</xd:doc>
-  <xsl:variable name="template" as="document-node()">
+    <xd:short>Fill a template with information from the given parameters</xd:short>
+  </xd:doc>
+  <xsl:template name="fill-template">
+    <xsl:param name="xmllang" as="xs:string?"  select="'he'"/>
+    <xsl:param name="xmlbase" as="xs:anyURI?"  />
+    <xsl:param name="respons" as="element(tei:respons)+" />
+    <xsl:param name="title" as="element(tei:title)+"  />
+    <xsl:param name="license" as="element(tei:licence)+"  />
+    <xsl:param name="bibliography" as="element(tei:link)+" />
+    <!-- the body element may be (streamText,concurrent*)|parallelText -->
+    <xsl:param name="body" as="element()*" />
+    <xsl:param name="links" as="element(j:links)?" />
+    <xsl:param name="annotations" as="element(j:annotations)?"/>
+    <xsl:param name="sourceDocs" as="element(tei:link)*"/>
+    <xsl:param name="fsdDecl" as="element(tei:fsdDecl)?"  />
+    <xsl:param name="conditions" as="element(j:conditions)?" />
+    <xsl:param name="front" as="element(tei:front)?"/>
+    <xsl:param name="back" as="element(tei:back)?"/>
     <xsl:document>
-      <tei:TEI>
+      <tei:TEI xml:lang="{$xmllang}">
+        <xsl:if test="$xmlbase">
+          <xsl:attribute name="xml:base" select="$xmlbase"/>
+        </xsl:if>
         <tei:teiHeader>
           <tei:fileDesc>
             <tei:titleStmt>
-              <xsl:processing-instruction
-                name="fillin">title</xsl:processing-instruction>
-              <xsl:processing-instruction name="fillin">respList</xsl:processing-instruction>
+              <xsl:sequence select="$title"/>
+              <j:responsGrp>
+                <xsl:sequence select="$respons"/>
+              </j:responsGrp>
             </tei:titleStmt>
             <tei:publicationStmt>
               <tei:availability status="free">
-                <xsl:processing-instruction
-                    name="fillin">license</xsl:processing-instruction>
+                <xsl:sequence select="$license"/>
               </tei:availability>
+              <tei:distributor><tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref></tei:distributor>
+              <tei:date><xsl:sequence select="format-date(current-date(), '[Y04]-[M02]-[D02]')"/></tei:date>
             </tei:publicationStmt>
             <tei:sourceDesc>
-              <xsl:processing-instruction
-                name="fillin">bibliography</xsl:processing-instruction>
+              <xsl:sequence select="$bibliography"/>
             </tei:sourceDesc>
           </tei:fileDesc>
-          <tei:encodingDesc>
-            <tei:appInfo>
-              <tei:application ident="fill-template.xsl2"
-                version="1.0">
-              </tei:application>
-            </tei:appInfo>
-          </tei:encodingDesc>
+          <tei:revisionDesc>
+            <tei:change type="create" when="{current-date()}">Document created from template</tei:change>
+          </tei:revisionDesc>
         </tei:teiHeader>
-        <xsl:processing-instruction name="fillin">fsdDecl</xsl:processing-instruction>
-        <xsl:processing-instruction name="fillin">conditionGrp</xsl:processing-instruction>
-        <xsl:processing-instruction name="fillin">facsimile</xsl:processing-instruction>
-        <xsl:processing-instruction name="fillin">links</xsl:processing-instruction>
-        <tei:text>
-          <xsl:processing-instruction name="fillin">body</xsl:processing-instruction>
-        </tei:text>
+        <xsl:if test="exists($sourceDocs)">
+          <tei:sourceDoc>
+            <xsl:sequence select="$sourceDocs"/>
+          </tei:sourceDoc>
+        </xsl:if>
+        <xsl:sequence select="$fsdDecl"/>
+        <xsl:sequence select="$conditions"/>
+        <xsl:sequence select="$links"/>
+        <xsl:sequence select="$annotations"/>
+        <xsl:if test="exists($body)">
+          <tei:text>
+            <xsl:sequence select="$front"/>
+            <xsl:sequence select="$body"/>
+            <xsl:sequence select="$back"/>
+          </tei:text>
+        </xsl:if>
       </tei:TEI>
     </xsl:document>
-  </xsl:variable>
-
-  <xd:doc>
-    <xd:short>By default, copy the template, which should be what the
-      template is applied to.</xd:short>
-  </xd:doc>
-  <xsl:template match="*" mode="fill-template">
-    <xsl:param name="xmllang" as="xs:string?" tunnel="yes" />
-    <xsl:param name="xmlbase" as="xs:anyURI?" tunnel="yes" />
-    <xsl:param name="title" as="element(tei:title)+" tunnel="yes" />
-    <xsl:param name="license" as="element()+" tunnel="yes" />
-    <xsl:param name="bibl" as="element(tei:bibl)+" tunnel="yes" />
-    <xsl:param name="body" as="element(tei:body)" tunnel="yes" />
-    <xsl:param name="links" as="element(j:links)?" tunnel="yes" />
-    <xsl:param name="facsimile" as="element(tei:facsimile)?" tunnel="yes"/>
-    <xsl:param name="fsdDecl" as="element(tei:fsdDecl)?" tunnel="yes" />
-    <xsl:param name="conditionGrp" as="element(j:conditionGrp)?" tunnel="yes" />
-    <xsl:copy>
-      <xsl:copy-of select="@*" />
-      <xsl:apply-templates mode="#current" />
-    </xsl:copy>
-  </xsl:template>
-
-  <xsl:template match="tei:TEI" mode="fill-template">
-    <xsl:param name="xmlbase" as="xs:anyURI?" tunnel="yes" />
-    <xsl:param name="xmllang" as="xs:string" tunnel="yes" select="'he'"/>
-    <xsl:copy>
-      <xsl:copy-of select="@*" />
-	  <xsl:if test="$xmlbase">
-	   <xsl:attribute name="xml:base" select="$xmlbase" />
-      </xsl:if>
-      <xsl:attribute name="xml:lang" select="$xmllang"/>
-      <xsl:apply-templates mode="#current" />
-    </xsl:copy>
-  </xsl:template>
-
-  <!--
-    <xsl:template match="/" mode="fill-template"> <xsl:sequence
-    select="j:debug($template, 'template',$debug-info)"/>
-    <xsl:apply-templates mode="#current"/> </xsl:template>
-  -->
-
-  <xd:doc>
-    <xd:short>Process title fill-in</xd:short>
-  </xd:doc>
-  <xsl:template match="processing-instruction()[.='title']"
-    mode="fill-template">
-    <xsl:param name="title" as="element(tei:title)+" tunnel="yes" />
-    <xsl:sequence select="$title" />
-  </xsl:template>
-
-  <xd:doc>
-    <xd:short>Process fsdDecl fill-in</xd:short>
-  </xd:doc>
-  <xsl:template match="processing-instruction()[.='fsdDecl']"
-    mode="fill-template">
-    <xsl:param name="fsdDecl" as="element(tei:fsdDecl)?" tunnel="yes" />
-    <xsl:sequence select="$fsdDecl" />
-  </xsl:template>
-
-  <xd:doc>
-    <xd:short>Process conditionGrp fill-in</xd:short>
-  </xd:doc>
-  <xsl:template match="processing-instruction()[.='conditionGrp']"
-    mode="fill-template">
-    <xsl:param name="conditionGrp" as="element(j:conditionGrp)?" tunnel="yes" />
-    <xsl:sequence select="$conditionGrp" />
-  </xsl:template>
-
-  <xd:doc>
-    <xd:short>Process body fill-in</xd:short>
-  </xd:doc>
-  <xsl:template match="processing-instruction()[.='body']"
-    mode="fill-template">
-    <xsl:param name="body" as="element(tei:body)" tunnel="yes" />
-    <xsl:sequence select="$body" />
-  </xsl:template>
-
-  <xd:doc>
-    <xd:short>Process license pointer fill-in</xd:short>
-  </xd:doc>
-  <xsl:template match="processing-instruction()[.='license']"
-    mode="fill-template">
-    <xsl:param name="license" as="element()+" tunnel="yes" />
-    <xsl:sequence select="$license" />
-  </xsl:template>
-
-  <xd:doc>
-    <xd:short>Process facsimile fill-in</xd:short>
-  </xd:doc>
-  <xsl:template match="processing-instruction()[.='facsimile']"
-    mode="fill-template">
-    <xsl:param name="facsimile" as="element(tei:facsimile)?" tunnel="yes" />
-    <xsl:sequence select="$facsimile" />
-  </xsl:template>
-
-  <xd:doc>
-    <xd:short>Process source pointer fill-in</xd:short>
-  </xd:doc>
-  <xsl:template match="processing-instruction()[.='bibliography']"
-    mode="fill-template">
-    <xsl:param name="bibl" as="element(tei:bibl)+" tunnel="yes" />
-    <xsl:sequence select="$bibl" />
-  </xsl:template>
-
-  <xd:doc>
-    <xd:short>Process respList fill-in</xd:short>
-  </xd:doc>
-  <xsl:template match="processing-instruction()[.='respList']"
-    mode="fill-template">
-    <xsl:param name="respList" as="element(j:respList)?" tunnel="yes" />
-    <xsl:sequence select="$respList" />
-  </xsl:template>
-
-  <xd:doc>
-    <xd:short>Process links fill-in</xd:short>
-  </xd:doc>
-  <xsl:template match="processing-instruction()[.='links']"
-    mode="fill-template">
-    <xsl:param name="links" as="element(j:links)?" tunnel="yes" />
-    <xsl:sequence select="$links" />
-  </xsl:template>
-
-  <xsl:template name="test">
-    <xsl:apply-templates select="$template" mode="fill-template">
-      <xsl:with-param name="title" tunnel="yes"
-        as="element(tei:title)">
-        <tei:title />
-      </xsl:with-param>
-      <xsl:with-param name="body" tunnel="yes"
-        as="element(tei:body)">
-        <tei:body />
-      </xsl:with-param>
-      <xsl:with-param name="license" tunnel="yes"
-        as="element()+">
-        <tei:ptr type="license" />
-      </xsl:with-param>
-      <xsl:with-param name="bibl" tunnel="yes"
-        as="element(tei:bibl)">
-        <tei:bibl />
-      </xsl:with-param>
-      <xsl:with-param name="respList" tunnel="yes"
-        as="element(j:respList)?"/>
-    </xsl:apply-templates>
   </xsl:template>
 
 </xsl:stylesheet>

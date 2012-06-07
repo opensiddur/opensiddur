@@ -40,8 +40,8 @@ $(WLC-OUTPUT-DIR)/joined-wlc.xml: $(WLC-CONVERSION-DIR)/join-wlc.xsl2
 	$(XSLT) -it main $(WLC-CONVERSION-DIR)/join-wlc.xsl2 input-directory=$(TANACH-SOURCE-DIR) output-file=$(WLC-OUTPUT-DIR)/joined-wlc.xml
 
 $(WLC-OUTPUT-DIR)/Tanach.xml: $(WLC-CONVERSION-DIR)/wlc2jlptei.xsl2 $(WLC-OUTPUT-DIR)/joined-wlc.xml $(TANACH-SOURCE)
-	$(XSLT) -it main -o $(WLC-OUTPUT-DIR)/Tanach.catalog.xml $(WLC-CONVERSION-DIR)/wlc2jlptei.xsl2 input-file=`$(LIBDIR)/absolutize $(WLC-OUTPUT-DIR)/joined-wlc.xml` result-directory=`$(LIBDIR)/absolutize $(WLC-OUTPUT-DIR)`
-	rm -f $(WLC-OUTPUT-DIR)/joined-wlc.xml $(WLC-OUTPUT-DIR)/Tanach.catalog.xml
+	$(XSLT) -it main $(WLC-CONVERSION-DIR)/wlc2jlptei.xsl2 input-file=`$(LIBDIR)/absolutize $(WLC-OUTPUT-DIR)/joined-wlc.xml` result-directory=`$(LIBDIR)/absolutize $(WLC-OUTPUT-DIR)`
+	#rm -f $(WLC-OUTPUT-DIR)/joined-wlc.xml
 
 tanach-clean:
 	rm -fr $(WLC-OUTPUT-DIR)

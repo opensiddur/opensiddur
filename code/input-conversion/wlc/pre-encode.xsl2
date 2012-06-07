@@ -20,7 +20,7 @@
   	
   <xd:doc type="stylesheet">
     <xd:short>Perform pre-encoding operations</xd:short>
-    <xd:copyright>Copyright 2009 Efraim Feinstein
+    <xd:copyright>Copyright 2009,2012 Efraim Feinstein
     </xd:copyright>
     <xd:detail>
       <p>Pre-encoding includes:
@@ -56,12 +56,10 @@
         .
       </p>
     </xd:detail>
-    <xd:svnId>$Id: pre-encode.xsl2 709 2011-02-24 06:37:44Z efraim.feinstein $</xd:svnId>
   </xd:doc>
 
   <xsl:param name="input-filename" required="yes" as="xs:string" /> 
-  <xsl:param name="output-directory" required="yes" as="xs:string" />  
-
+  <xsl:param name="output-directory" required="yes" as="xs:string" />
 
   <xd:doc>
     <xd:short>Extract the arguments to an instruction of the form
@@ -270,42 +268,25 @@
         select="current-group()/self::tei:seg[@type='file']"/>
       <xsl:if test="string-length($file-name) &gt; 0">
         <xsl:result-document href="{concat($output-directory,$file-name)}">
-        
-      		<xsl:apply-templates select="$template" mode="fill-template">
-            <xsl:with-param name="title" as="element(tei:title)+" tunnel="yes">
+          <xsl:call-template name="fill-template">
+            <xsl:with-param name="title" as="element(tei:title)+">
               <tei:title xml:lang="{$lang-default}">
                 <xsl:sequence select="string(current-group()/
                   self::tei:seg[@type='title'])"/>
               </tei:title>
             </xsl:with-param>
-            <xsl:with-param name="license" as="element()+" tunnel="yes" >
-              <tei:p xml:lang="en">To the extent possible under law, 
-              the contributors who associated  
-              <ref type="license" target="licenses/cc0/1.0">Creative Commons Zero</ref> 
-              with this work have waived all copyright and related or neighboring rights to this work.  
-              A list of contributors is available at 
-              <ref type="attribution" target="http://jewishliturgy.org/base/text/contributors">http://jewishliturgy.org/base/text/contributors</ref>.
-              </tei:p>
-              <rdf:RDF>
-                <cc:License rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
-                  <cc:legalcode rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/legalcode"/>
-                  <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
-                  <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
-                </cc:License>
-              </rdf:RDF>
+            <xsl:with-param name="license" as="element(tei:licence)+">
+              <tei:licence target="http://creativecommons.org/publicdomain/cc0/1.0"/>
             </xsl:with-param>
-            <xsl:with-param name="bibl" as="element(tei:ptr)+" tunnel="yes" >
-              <tei:ptr type="bibl" 
-                target="bibliography.xml#Heidenheim.1822.Haggadah.LeilShimurim" />
+            <xsl:with-param name="bibliography" as="element(tei:ptr)+">
+              <tei:link type="bibl" target="#FILL-ME-IN /data/sources/FILL-ME-IN" />
             </xsl:with-param>
-            <xsl:with-param name="body" as="element(tei:body)" tunnel="yes">
-              <tei:body>
-                <j:raw xml:lang="{$lang-default}">
-                  <xsl:sequence select="current-group()/self::tei:seg[not(@type='file')]"/>
-                </j:raw>
+            <xsl:with-param name="body" as="element()" tunnel="yes">
+              <j:streamText xml:lang="{$lang-default}">
+                <xsl:sequence select="current-group()/self::tei:seg[not(@type='file')]"/>
+              </j:streamText>
               </tei:body>
             </xsl:with-param>
-          </xsl:apply-templates>
         </xsl:result-document>
       </xsl:if>
     </xsl:for-each-group>
