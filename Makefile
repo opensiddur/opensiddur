@@ -149,9 +149,10 @@ XSLTDOC_CFGFILE ?= XSLTDocConfig.xml
 $(TEMPDIR):
 	mkdir $(TEMPDIR)
 
-schema: $(DBDIR)/schema odddoc transliteration-schema contributor-schema
-	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
+schema: $(DBDIR)/schema odddoc transliteration-schema contributor-schema bibliography-schema
+	cp schema/build/jlptei.rnc $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
+	cp schema/build/bibliography.rnc $(DBDIR)/schema
 	cp schema/access.rnc $(DBDIR)/schema
 	cp schema/group.rnc $(DBDIR)/schema
 	

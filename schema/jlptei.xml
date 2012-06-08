@@ -165,11 +165,9 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               <attDef ident="sample" mode="delete"/>
             </attList>
           </classSpec>
-          <classSpec ident="att.declaring" mode="delete" module="tei" type="atts">
-            <attList>
-              <attDef ident="decls" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.canonical" mode="delete" module="tei" type="atts"/>
+          <classSpec ident="att.declaring" mode="delete" module="tei" type="atts"/>
+          <classSpec ident="att.datcat" mode="delete" module="tei" type="atts"/>
           <elementSpec ident="responsGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
             <desc>Group elements that declare responsibility over a portion of text.</desc>
             <classes>
@@ -182,25 +180,9 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               </rng:oneOrMore>
             </content>
           </elementSpec>
-          <classSpec ident="att.responsibility" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="cert" mode="delete"/>
-              <attDef ident="resp" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.damaged" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="hand" mode="delete"/>
-              <attDef ident="agent" mode="delete"/>
-              <attDef ident="degree" mode="delete"/>
-              <attDef ident="group" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.breaking" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="break" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.responsibility" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.damaged" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.breaking" module="tei" mode="delete" type="atts"/>
           <elementSpec ident="conditions" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
             <desc>Holds features and feature structures pertaining to the conditional system.</desc>
             <classes>
@@ -217,14 +199,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               </rng:oneOrMore>
             </content>
           </elementSpec>
-          <classSpec ident="att.transcriptional" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="hand" mode="delete"/>
-              <attDef ident="status" mode="delete"/>
-              <attDef ident="cause" mode="delete"/>
-              <attDef ident="seq" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.transcriptional" module="tei" mode="delete" type="atts"/>
           <elementSpec ident="links" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
             <desc>Holds standoff markup links </desc>
             <classes>
@@ -276,32 +251,9 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="macro.paraContent"/>
             </content>
           </elementSpec>
-          <classSpec ident="att.datable.custom" module="namesdates" mode="change" type="atts">
-            <attList>
-              <attDef ident="when-custom" mode="delete"/>
-              <attDef ident="notBefore-custom" mode="delete"/>
-              <attDef ident="notAfter-custom" mode="delete"/>
-              <attDef ident="from-custom" mode="delete"/>
-              <attDef ident="to-custom" mode="delete"/>
-              <attDef ident="datingPoint" mode="delete"/>
-              <attDef ident="datingMethod" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.datable.iso" module="namesdates" mode="change" type="atts">
-            <attList>
-              <attDef ident="when-iso" mode="delete"/>
-              <attDef ident="notBefore-iso" mode="delete"/>
-              <attDef ident="notAfter-iso" mode="delete"/>
-              <attDef ident="from-iso" mode="delete"/>
-              <attDef ident="to-iso" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.datable" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="calendar" mode="delete"/>
-              <attDef ident="period" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.datable.custom" module="namesdates" mode="delete" type="atts"/>
+          <classSpec ident="att.datable.iso" module="namesdates" mode="delete" type="atts"/>
+          <classSpec ident="att.datable" module="tei" mode="delete" type="atts"/>
           <classSpec ident="att.datable.w3c" module="tei" mode="change" type="atts">
             <attList>
               <attDef ident="notBefore" mode="delete"/>
@@ -310,42 +262,12 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               <attDef ident="to" mode="delete"/>
             </attList>
           </classSpec>
-          <classSpec ident="att.declarable" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="default" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.dimensions" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="unit" mode="delete"/>
-              <attDef ident="quantity" mode="delete"/>
-              <attDef ident="extent" mode="delete"/>
-              <attDef ident="precision" mode="delete"/>
-              <attDef ident="scope" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.duration.iso" module="namesdates" mode="change" type="atts">
-            <attList>
-              <attDef ident="dur-iso" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.duration.w3c" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="dur" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.editLike" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="evidence" mode="delete"/>
-              <attDef ident="source" mode="delete"/>
-              <attDef ident="instant" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.enjamb" module="verse" mode="change" type="atts">
-            <attList>
-              <attDef ident="enjamb" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.declarable" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.dimensions" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.duration.iso" module="namesdates" mode="delete" type="atts"/>
+          <classSpec ident="att.duration.w3c" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.editLike" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.enjamb" module="verse" mode="delete" type="atts"/>
           <elementSpec ident="read" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
             <desc>Indicates the portion of a text that is read in read-written (kri-ktiv) choice.</desc>
             <classes>
@@ -386,13 +308,13 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
                 </datatype>
                 <valList type="closed">
                   <valItem ident="aut"/>
-                  <valItem ident=" edt"/>
-                  <valItem ident=" fac"/>
-                  <valItem ident=" fnd"/>
-                  <valItem ident=" pfr"/>
-                  <valItem ident=" spn"/>
-                  <valItem ident=" trl"/>
-                  <valItem ident=" trc"/>
+                  <valItem ident="edt"/>
+                  <valItem ident="fac"/>
+                  <valItem ident="fnd"/>
+                  <valItem ident="pfr"/>
+                  <valItem ident="spn"/>
+                  <valItem ident="trl"/>
+                  <valItem ident="trc"/>
                 </valList>
               </attDef>
             </attList>
@@ -444,38 +366,15 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               </default:zeroOrMore>
             </content>
           </elementSpec>
-          <elementSpec ident="parallel" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>Represents a parallel text structure of the given type. @xml:base is recommended. May only contain pointers that point into an existing textStream.</desc>
-            <classes>
-              <memberOf key="att.global"/>
-              <memberOf key="att.typed"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:oneOrMore>
-                <rng:ref name="ptr"/>
-              </rng:oneOrMore>
-            </content>
-          </elementSpec>
-          <elementSpec ident="original" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>Contains an original text that is parallelized inside a parallelGrp. The pointers may only point inside a textStream. @xml:base is recommended.</desc>
-            <classes>
-              <memberOf key="att.global"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:oneOrMore>
-                <rng:ref name="ptr"/>
-              </rng:oneOrMore>
-            </content>
-          </elementSpec>
           <elementSpec ident="parallelGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>Groups units of parallel text.</desc>
+            <desc>A special type of <gi>linkGrp</gi> that groups units of parallel text by language. The <gi>ptr</gi> elements must have <att>targetLang</att> attributes</desc>
             <classes>
               <memberOf key="att.global"/>
             </classes>
             <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:ref name="original"/>
+              <rng:ref name="ptr"/>
               <rng:oneOrMore>
-                <rng:ref name="parallel"/>
+                <rng:ref name="ptr"/>
               </rng:oneOrMore>
             </content>
           </elementSpec>
@@ -490,12 +389,12 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
                 <defaultVal>other</defaultVal>
                 <valList type="open">
                   <valItem ident="seg"/>
-                  <valItem ident=" verse"/>
-                  <valItem ident=" chapter"/>
-                  <valItem ident=" p"/>
-                  <valItem ident=" lg"/>
-                  <valItem ident=" l"/>
-                  <valItem ident=" div"/>
+                  <valItem ident="verse"/>
+                  <valItem ident="chapter"/>
+                  <valItem ident="p"/>
+                  <valItem ident="lg"/>
+                  <valItem ident="l"/>
+                  <valItem ident="div"/>
                 </valList>
               </attDef>
             </attList>
@@ -533,8 +432,8 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               <memberOf key="att.typed"/>
               <memberOf key="att.declaring" mode="delete"/>
             </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:group xmlns="http://relaxng.org/ns/structure/1.0">
+            <content>
+              <rng:group xmlns:rng="http://relaxng.org/ns/structure/1.0">
                 <rng:optional>
                   <rng:ref name="front"/>
                 </rng:optional>
@@ -660,16 +559,9 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               </content>
             </content>
           </elementSpec>
-          <classSpec ident="att.msExcerpt" module="msdescription" mode="change" type="atts">
-            <attList>
-              <attDef ident="defective" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.global.change" module="transcr" mode="change" type="atts">
-            <attList>
-              <attDef ident="change" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.msExcerpt" module="msdescription" mode="delete" type="atts"/>
+          <classSpec ident="att.global.change" module="transcr" mode="delete" type="atts"/>
+          <!-- keeping @next, @prev -->
           <classSpec ident="att.global.linking" module="linking" mode="change" type="atts">
             <attList>
               <attDef ident="corresp" mode="delete"/>
@@ -680,93 +572,23 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               <attDef ident="select" mode="delete"/>
             </attList>
           </classSpec>
-          <classSpec ident="att.identified" module="tagdocs" mode="change" type="atts">
-            <attList>
-              <attDef ident="ident" mode="delete"/>
-              <attDef ident="predeclare" mode="delete"/>
-              <attDef ident="module" mode="delete"/>
-              <attDef ident="status" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.translatable" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="version" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.timed" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="start" mode="delete"/>
-              <attDef ident="end" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.textCritical" module="textcrit" mode="change" type="atts">
-            <attList>
-              <attDef ident="wit" mode="delete"/>
-              <attDef ident="type" mode="delete"/>
-              <attDef ident="cause" mode="delete"/>
-              <attDef ident="varSeq" mode="delete"/>
-              <attDef ident="hand" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.tableDecoration" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="role" mode="delete"/>
-              <attDef ident="rows" mode="delete"/>
-              <attDef ident="cols" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.spanning" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="spanTo" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.sourced" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="ed" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.sortable" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="sortKey" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.translatable" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.timed" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.textCritical" module="textcrit" mode="delete" type="atts"/>
+          <classSpec ident="att.tableDecoration" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.spanning" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.sourced" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.sortable" module="tei" mode="delete" type="atts"/>
           <classSpec ident="att.segLike" module="tei" mode="change" type="atts">
             <attList>
               <attDef ident="function" mode="delete"/>
             </attList>
           </classSpec>
-          <classSpec ident="att.interpLike" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="type" mode="delete"/>
-              <attDef ident="inst" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.measurement" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="unit" mode="delete"/>
-              <attDef ident="quantity" mode="delete"/>
-              <attDef ident="commodity" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.readFrom" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="source" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.rdgPart" module="textcrit" mode="change" type="atts">
-            <attList>
-              <attDef ident="wit" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.ranging" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="atLeast" mode="delete"/>
-              <attDef ident="atMost" mode="delete"/>
-              <attDef ident="min" mode="delete"/>
-              <attDef ident="max" mode="delete"/>
-              <attDef ident="confidence" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.interpLike" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.measurement" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.readFrom" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.rdgPart" module="textcrit" mode="delete" type="atts"/>
+          <classSpec ident="att.ranging" module="tei" mode="delete" type="atts"/>
           <elementSpec ident="teiHeader" module="header" mode="change">
             <attList>
               <attDef ident="type" mode="delete"/>
@@ -776,22 +598,9 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               <attDef ident="xml:space" mode="delete"/>
             </attList>
           </elementSpec>
-          <classSpec ident="att.naming" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="role" mode="delete"/>
-              <attDef ident="nymRef" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.placement" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="place" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.global.analytic" module="analysis" mode="change" type="atts">
-            <attList>
-              <attDef ident="ana" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.naming" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.placement" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.global.analytic" module="analysis" mode="delete" type="atts"/>
           <elementSpec ident="ab" module="linking" mode="change">
             <classes mode="replace">
               <memberOf key="model.pLike"/>
@@ -835,11 +644,7 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
             </classes>
           </elementSpec>
           <moduleRef key="transcr" except="addSpan am damage damageSpan delSpan ex facsimile fw handNotes handShift line listTranspose metamark mod redo restore retrace space subst substJoin supplied surface surfaceGrp surplus transpose undo zone"/>
-          <classSpec ident="att.global.facs" module="transcr" mode="change" type="atts">
-            <attList>
-              <attDef ident="facs" mode="delete"/>
-            </attList>
-          </classSpec>
+          <classSpec ident="att.global.facs" module="transcr" mode="delete" type="atts"/>
           <classSpec ident="att.pointing.group" module="tei" mode="change" type="atts">
             <attList>
               <attDef ident="domains" mode="delete"/>

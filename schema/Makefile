@@ -29,22 +29,22 @@ JLPTEI_FILE=jlptei.xml
 odddoc: jlpteidoc 
 # trdoc removed
 
-schema-clean: odddoc-clean transliteration-schema-clean
+schema-clean: odddoc-clean transliteration-schema-clean contributor-schema-clean
 
 odddoc-clean:
 	rm -fr $(TEIDOCDIR)
 
 .PHONY: jlpteidoc 
-jlpteidoc: $(TEIDOCDIR)/jlptei.doc.html
+jlpteidoc: schema/build/jlptei.doc.html
 
 .PHONY: p5subset
 p5subset: $(LIBDIR)/tei/P5/p5subset.xml
 
-$(LIBDIR)/tei/P5/p5subset.xml:
+$(LIBDIR)/tei/P5/p5subset.xml: $(wildcard $(ODDDIR)/*.xml) $(wildcard $(ODDDIR)/*.sch) $(wildcard $(ODDDIR)/*.xsl2) $(ODDDIR)/Makefile  
 	cd $(LIBDIR)/tei/P5 && make p5subset.xml 
 
-$(TEIDOCDIR)/jlptei.doc.html: p5subset $(wildcard $(ODDDIR)/*.xml) $(wildcard $(ODDDIR)/*.sch) $(wildcard $(ODDDIR)/*.xsl2) $(ODDDIR)/Makefile 
-	$(TEIROMA) --nodtd --noxsd $(ODDDIR)/$(JLPTEI_FILE) $(TEIDOCDIR)
+schema/build/jlptei.doc.html: p5subset schema/jlptei.xml
+	$(TEIROMA) --nodtd --noxsd schema/jlptei.xml schema/build
 	
 .PHONY: transliteration-schema
 transliteration-schema: $(DBDIR)/schema $(DBDIR)/schema/transliteration.xsl2
@@ -53,11 +53,16 @@ transliteration-schema: $(DBDIR)/schema $(DBDIR)/schema/transliteration.xsl2
 $(DBDIR)/schema/transliteration.xsl2: schema/transliteration.sch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
-.PHONY: contributor-schema contributor-schema-clean
+.PHONY: contributor-schema contributor-schema-clean bibliography-schema bibliography-schema-clean
 contributor-schema: schema/build/contributor.rnc
 
-schema/build/contributor.rnc: schema/build schema/contributor.xml
+bibliography-schema: schema/build/bibliography.rnc
+
+schema/build/contributor.rnc: p5subset schema/build schema/contributor.xml
 	$(TEIROMA) --nodtd --noxsd schema/contributor.xml schema/build
+
+schema/build/bibliography.rnc: p5subset schema/build schema/bibliography.xml
+	$(TEIROMA) --nodtd --noxsd schema/bibliography.xml schema/build
 
 contributor-schema-clean:
 	rm -fr schema/build
