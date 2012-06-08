@@ -92,12 +92,6 @@ TODO:
     select="concat('user/', encode-for-uri('Christopher.Kimball'))"/>
 
   <xd:doc>
-    Bibliography entry file name (base w/o extension)
-  </xd:doc>
-  <xsl:param name="bibliography-file-name" as="xs:string" 
-    select="concat('sources/',encode-for-uri('Westminster Leningrad Codex'))"/>
-
-  <xd:doc>
     extension of output files
 	</xd:doc>
   <xsl:param name="extension" as="xs:string" select="'.xml'" />
@@ -377,6 +371,9 @@ TODO:
   <xsl:template name="main">
     <xsl:variable name="tanach-as-xml" as="document-node()"
       select="document($input-file)" />
+    <xsl:variable name="bibliography-file-name" as="xs:string" 
+      select="concat('sources/',encode-for-uri($tanach-as-xml//fileDesc//title[@level='s' and @type='main']))"/>
+    
     <xsl:variable name="bibl-content" as="element(tei:link)">
       <!-- TODO: correct link -->
       <tei:link type="bibl" target="#main /data/{$bibliography-file-name}"/>
@@ -777,52 +774,48 @@ TODO:
     </xsl:result-document>
     <xsl:result-document
       href="{$result-directory}/{$bibliography-file-name}{$extension}">
-      <tei:div type="bibliography" xml:lang="en">
-        <tei:biblStruct xml:id="Kimball2010">
-          <tei:monogr>
-            <tei:title>
+      <tei:biblStruct>
+        <tei:monogr>
+          <tei:title>
+            <xsl:value-of
+              select="$tanach-as-xml//fileDesc//title[@level='s' and @type='main']" />
+          </tei:title>
+          <tei:edition>
+            <xsl:text>v.</xsl:text>
+            <xsl:value-of select="$tanach-as-xml//version/node()" />
+          </tei:edition>
+          <xsl:for-each
+            select="$tanach-as-xml//titleStmt//editor|
+            $tanach-as-xml//titleStmt//respStmt/name[not(@type)]">
+            <tei:editor>
+              <tei:name>
+                <xsl:value-of select="." />
+              </tei:name>
+            </tei:editor>
+          </xsl:for-each>
+          <tei:imprint>
+            <tei:publisher>J. Alan Groves Center for Advanced Biblical
+              Research</tei:publisher>
+            <tei:pubPlace>Glenside, PA</tei:pubPlace>
+            <tei:date>
+              <xsl:value-of select="$tanach-as-xml//edition/date/node()" />
+            </tei:date>
+            <tei:distributor>
               <xsl:value-of
-                select="$tanach-as-xml//fileDesc//title[@level='s' and @type='main']" />
-            </tei:title>
-            <tei:edition>
-              <xsl:text>v.</xsl:text>
-              <xsl:value-of select="$tanach-as-xml//version/node()" />
-            </tei:edition>
-            <xsl:for-each
-              select="$tanach-as-xml//titleStmt//editor|
-              $tanach-as-xml//titleStmt//respStmt/name[not(@type)]">
-              <tei:editor>
-                <tei:name>
-                  <xsl:value-of select="." />
-                </tei:name>
-              </tei:editor>
-            </xsl:for-each>
-            <tei:imprint>
-              <tei:publisher>J. Alan Groves Center for Advanced Biblical
-                Research</tei:publisher>
-              <tei:pubPlace>Glenside, PA</tei:pubPlace>
-              <tei:date>
-                <xsl:value-of select="$tanach-as-xml//edition/date/node()" />
-              </tei:date>
-              <tei:distributor>
-                <xsl:value-of
-                  select="$tanach-as-xml//distributor/name[not(@type)]" />
-                <tei:ref type="url"
-                  target="{$tanach-as-xml//distributor/name[@type='url']}">via web site</tei:ref>
-                <tei:date type="access">07-2010</tei:date>
-              </tei:distributor>
-            </tei:imprint>
-          </tei:monogr>
-          <tei:note type="copyright">
-            The transcriber has released the text "without restriction."
-            A copy of the license is in
-            our
+                select="$tanach-as-xml//distributor/name[not(@type)]" />
+              <tei:ref type="url"
+                target="{$tanach-as-xml//distributor/name[@type='url']}">via web site</tei:ref>
+              <tei:date type="access">06-07-2012</tei:date>
+            </tei:distributor>
+          </tei:imprint>
+        </tei:monogr>
+        <tei:note type="copyright">
+          The transcriber has released the text "without restriction."
+          A copy of the license is in our
             <tei:ref type="url"
-              target="http://jewishliturgy.googlecode.com/svn/sources/tanach/WLC/License.html">subversion repository</tei:ref>
-            .
-          </tei:note>
-        </tei:biblStruct>
-      </tei:div>
+              target="https://github.com/opensiddur/opensiddur/blob/master/sources/tanach/WLC/License.html">source code repository</tei:ref>.
+        </tei:note>
+      </tei:biblStruct>
     </xsl:result-document>
   </xsl:template>
 </xsl:stylesheet>
