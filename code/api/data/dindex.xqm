@@ -36,6 +36,7 @@ declare
         <li class="api">
           {((: TODO: replace request:get-uri() with rest:get-absolute-uri() 
             :))}
+          <a class="discovery" href="{request:get-uri()}/original">Original data</a>
           <a class="discovery" href="{request:get-uri()}/transliteration">Transliteration</a>
         </li>
       </ul>
