@@ -71,6 +71,8 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
         </p>
         <p>The only major change is the introduction of the <att>targetPattern</att> attribute in
         the <gi>relatedItem</gi> tag, allowing linking to page images.</p>
+        <p>If the source is not clearly a public domain book, a <gi>note</gi> where <att>type</att> has the value
+        "copyright" is recommended, where the copyright status of the work is explained in natural language.</p>
       </div>  
       <div>
         <head>Formal declaration</head>
