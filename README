@@ -4,14 +4,15 @@ The Open Siddur Project aims to produce a free software toolkit for making high-
 
 To accomplish it, we are to creating a collaborative publishing platform built around a social network of individuals passionate about the siddur, some wanting to craft their own siddur, others wanting to use it as an educational tool, or for sharing prayers, translations, commentaries, art, and layout templates for new siddurim. The mission of the Open Siddur Project is further described in our Mission Statement (http://opensiddur.org/development/mission/) and encompasses the values of pluralism (acceptance for the diversity of Jewish cultural expression), historical awareness (the text of the siddur is an aggregate of thousands of years of creatively inspired works), and individual freedom.
 
-The project is divided into three major parts:
+The coding project is divided into three major parts:
 * Schema: A defined XML format for storing liturgical materials, based on the Text Encoding Initiative (TEI) XML schema.
 * Back-end: A database and REST API for storing and accessing siddur data.
 * Front-end: The web-based editing application.
+Volunteer coders are always welcome. We are, in particular, looking for web/mobile user interface programmers.
 
-This site serves as the project's repository and issue tracker. 
+This site serves as the project's code repository, code documentation, and issue tracker.
 
-Current development progress is being tracked on our wiki at http://wiki.jewishliturgy.org. All useful documentation is kept on the wiki.
+Current development progress is being tracked on the github wiki and in the issue tracker. 
 
 Many of the texts that have been contributed to date are distributed at http://opensiddur.org
 
