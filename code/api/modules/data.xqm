@@ -46,31 +46,6 @@ declare function data:db-path-to-api(
 	 error(xs:QName("error:NOTIMPLEMENTED"), "Not implemented properly")
 };
 
-(:~ given an id, find which virtual resource to forward to :)
-declare function data:forward-by-id(
-	$purpose as xs:string,
-	$share-type as xs:string,
-	$owner as xs:string,
-	$resource as xs:string,
-	$id as xs:string) as xs:string? {
-	let $doc := data:doc($purpose, $share-type, $owner, $resource, (), ())
-	let $by-id := $doc/id($id)
-	return
-		(
-		if ($paths:debug)
-		then util:log-system-out(('data:forward-by-id(): $id = ', $id, ' $doc = ', document-uri($doc), ' $by-id =', $by-id))
-		else (),
-		if ($doc instance of element(error))
-		then ()
-		else 
-			if ($by-id/parent::j:selection)
-			then 'selection'
-			else
-				(: don't know - use generic id processing :) 
-				'id'  
-		)
-};
-
 declare function local:resource-name-from-title-and-number(
   $title as xs:string,
   $number as xs:integer
