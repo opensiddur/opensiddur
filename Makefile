@@ -149,15 +149,20 @@ XSLTDOC_CFGFILE ?= XSLTDocConfig.xml
 $(TEMPDIR):
 	mkdir $(TEMPDIR)
 
-schema: $(DBDIR)/schema odddoc transliteration-schema contributor-schema bibliography-schema
+.PHONY: schema schema-clean
+schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema
 	cp schema/build/jlptei.rnc $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
 	cp schema/build/bibliography.rnc $(DBDIR)/schema
+	cp schema/build/*.xsl2 $(DBDIR)/schema
 	cp schema/access.rnc $(DBDIR)/schema
 	cp schema/group.rnc $(DBDIR)/schema
-	
+
+schema-clean: schema-build-clean
+	rm -fr $(DBDIR)/schema
+
 .PHONY: clean
-clean: xsltdoc-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist setup-clean
+clean: xsltdoc-clean schema-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist setup-clean
 
 $(DBDIR)/common: $(DBDIR)/code
 

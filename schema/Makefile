@@ -23,19 +23,15 @@
 TEI_DEPENDENCIES:=$(wildcard $(LIBDIR)/tei/P5/Source/Specs/*.xml)
 TEI_ALL_ODD = $(LIBDIR)/tei/P5/Exemplars/tei_all.odd
 
-JLPTEI_FILE=jlptei.xml
+.PHONY: schema-build-clean
+schema-build-clean: 
+	rm -fr schema/build
 
-.PHONY: odddoc odddoc-clean schema-clean
-odddoc: jlpteidoc 
-# trdoc removed
+jlptei-schema-clean:
+	rm -fr schema/build/jlptei.*
 
-schema-clean: odddoc-clean transliteration-schema-clean contributor-schema-clean
-
-odddoc-clean:
-	rm -fr $(TEIDOCDIR)
-
-.PHONY: jlpteidoc 
-jlpteidoc: schema/build/jlptei.doc.html
+.PHONY: jlptei-schema 
+jlptei-schema: schema/build/jlptei.xsl2
 
 .PHONY: p5subset
 p5subset: $(LIBDIR)/tei/P5/p5subset.xml
@@ -43,29 +39,37 @@ p5subset: $(LIBDIR)/tei/P5/p5subset.xml
 $(LIBDIR)/tei/P5/p5subset.xml: $(wildcard $(ODDDIR)/*.xml) $(wildcard $(ODDDIR)/*.sch) $(wildcard $(ODDDIR)/*.xsl2) $(ODDDIR)/Makefile  
 	cd $(LIBDIR)/tei/P5 && make p5subset.xml 
 
-schema/build/jlptei.doc.html: p5subset schema/jlptei.xml
-	$(TEIROMA) --nodtd --noxsd schema/jlptei.xml schema/build
+schema/build/jlptei.doc.html: schema/build/jlptei.isosch
+schema/build/jlptei.isosch: p5subset schema/jlptei.xml
+	$(TEIROMA) --nodtd --noxsd --isoschematron schema/jlptei.xml schema/build
+schema/build/jlptei.xsl2: schema/build/jlptei.isosch
+	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 	
 .PHONY: transliteration-schema
-transliteration-schema: $(DBDIR)/schema $(DBDIR)/schema/transliteration.xsl2
-	cp schema/transliteration.* $(DBDIR)/schema
+transliteration-schema: schema/build/transliteration.xsl2
 
-$(DBDIR)/schema/transliteration.xsl2: schema/transliteration.sch
+schema/build/transliteration.xsl2: schema/transliteration.sch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
 .PHONY: contributor-schema contributor-schema-clean bibliography-schema bibliography-schema-clean
 contributor-schema: schema/build/contributor.rnc
 
-bibliography-schema: schema/build/bibliography.rnc
+bibliography-schema: schema/build/bibliography.xsl2
 
 schema/build/contributor.rnc: p5subset schema/build schema/contributor.xml
 	$(TEIROMA) --nodtd --noxsd schema/contributor.xml schema/build
 
+schema/build/bibliography.isosch: schema/build/bibliography.rnc
 schema/build/bibliography.rnc: p5subset schema/build schema/bibliography.xml
-	$(TEIROMA) --nodtd --noxsd schema/bibliography.xml schema/build
+	$(TEIROMA) --nodtd --noxsd --isoschematron schema/bibliography.xml schema/build
+schema/build/bibliography.xsl2: schema/build/bibliography.isosch
+	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
 contributor-schema-clean:
-	rm -fr schema/build
+	rm -fr schema/build/contributor.*
+
+bibliography-schema-clean:
+	rm -fr schema/build/bibliography.*
 
 schema/build:
 	mkdir -p schema/build
