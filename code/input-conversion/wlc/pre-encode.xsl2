@@ -285,8 +285,8 @@
               <j:streamText xml:lang="{$lang-default}">
                 <xsl:sequence select="current-group()/self::tei:seg[not(@type='file')]"/>
               </j:streamText>
-              </tei:body>
             </xsl:with-param>
+          </xsl:call-template>
         </xsl:result-document>
       </xsl:if>
     </xsl:for-each-group>

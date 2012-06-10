@@ -375,8 +375,7 @@ TODO:
       select="concat('sources/',encode-for-uri($tanach-as-xml//fileDesc//title[@level='s' and @type='main']))"/>
     
     <xsl:variable name="bibl-content" as="element(tei:link)">
-      <!-- TODO: correct link -->
-      <tei:link type="bibl" target="#main /data/{$bibliography-file-name}"/>
+      <tei:link type="bibl" target="#text /data/{$bibliography-file-name}"/>
     </xsl:variable>
     <xsl:variable name="license-content" as="element()+">
       <tei:licence 
@@ -805,7 +804,7 @@ TODO:
                 select="$tanach-as-xml//distributor/name[not(@type)]" />
               <tei:ref type="url"
                 target="{$tanach-as-xml//distributor/name[@type='url']}">via web site</tei:ref>
-              <tei:date type="access">06-07-2012</tei:date>
+              <tei:date type="access">2012-06-07</tei:date>
             </tei:distributor>
           </tei:imprint>
         </tei:monogr>
