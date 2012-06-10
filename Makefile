@@ -134,7 +134,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 16512
+EXIST_REVISION ?= -r 16634
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -176,7 +176,9 @@ $(DBDIR)/schema:
 IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 
 # build eXist (what dependencies should this have?)
-$(EXIST_INSTALL_JAR):
+# made dependent on the Makefile because that is where the revision is set.
+# It will cause too many remakes, but better than not remaking at all
+$(EXIST_INSTALL_JAR): Makefile
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
 	cd $(LIBDIR)/exist && \
 		JAVA_HOME=$(JAVA_HOME) \
