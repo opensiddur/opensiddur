@@ -384,7 +384,7 @@ TODO:
     </xsl:variable>
     <xsl:variable name="responsGrp-content" as="element(tei:respons)+">
       <tei:respons type="trc" locus="value"
-        target="#text" resp="/user/{$contributors-file-name}" />
+        target="#text" resp="/{$contributors-file-name}" />
     </xsl:variable>
     <xsl:variable name="links-content" as="element(j:links)?">
     </xsl:variable>
