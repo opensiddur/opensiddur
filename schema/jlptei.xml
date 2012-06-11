@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:lang="en">
+<TEI 
+  xmlns="http://www.tei-c.org/ns/1.0" 
+  xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+  xml:lang="en">
   <teiHeader>
     <fileDesc>
       <titleStmt>
@@ -135,12 +138,40 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               <attDef ident="version" mode="delete"/>
               <attDef ident="xml:lang" mode="change" usage="req">
                 <desc>indicates the default language of the text in the document. Required because it determines how the document will be indexed in the database. &#13;
-         </desc>
+                </desc>
                 <datatype minOccurs="1" maxOccurs="1">
                   <rng:text xmlns:rng="http://relaxng.org/ns/structure/1.0"/>
                 </datatype>
               </attDef>
             </attList>
+            <constraintSpec ident="TEI-j-1" scheme="isoschematron" mode="add">
+              <constraint>
+                <sch:ns prefix="j" uri="http://jewishliturgy.org/ns/jlptei/1.0"/>
+              </constraint>  
+            </constraintSpec>
+          </elementSpec>
+          <elementSpec ident="ptr" mode="change" module="core">
+            <!-- TODO: need an additional constraint where we test if all pointer targets exist -->
+            <constraintSpec scheme="isoschematron" ident="ptr-j-1">
+              <desc>Test that internal #range pointers point to a reasonable range</desc>
+              <constraint>
+                <sch:assert
+                  test="
+                  not(contains(@target, '#range')) or (
+                  for 
+                    $token in tokenize(@target, '\s+')[starts-with(., '#range')],
+                    $lptr in substring-after(substring-before($token, ','), '('),
+                    $rptr in substring-before(substring-after($token, ','), ')')
+                  return 
+                    exists(//id($lptr)) and
+                    exists(//id($rptr)) and
+                    //id($lptr) &lt;&lt; //id($rptr)
+                  )
+                    ">
+                  In a #range(lptr,rptr) XPath expression, the left pointer must precede the right pointer.  
+                </sch:assert>
+              </constraint>
+            </constraintSpec>
           </elementSpec>
           <elementSpec ident="sourceDesc" mode="change" module="header">
             <attList>
@@ -253,7 +284,12 @@ The Open Siddur intends to work within open standards whenever possible. In choo
           </elementSpec>
           <classSpec ident="att.datable.custom" module="namesdates" mode="delete" type="atts"/>
           <classSpec ident="att.datable.iso" module="namesdates" mode="delete" type="atts"/>
-          <classSpec ident="att.datable" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.datable" module="tei" mode="change" type="atts">
+            <attList>
+              <attDef ident="calendar" mode="delete"/>
+              <attDef ident="period" mode="delete"/>
+            </attList>
+          </classSpec>
           <classSpec ident="att.datable.w3c" module="tei" mode="change" type="atts">
             <attList>
               <attDef ident="notBefore" mode="delete"/>
@@ -367,7 +403,8 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
             </content>
           </elementSpec>
           <elementSpec ident="parallelGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>A special type of <gi>linkGrp</gi> that groups units of parallel text by language. The <gi>ptr</gi> elements must have <att>targetLang</att> attributes</desc>
+            <desc>A special type of <gi>linkGrp</gi> that groups units of parallel text by language. The <gi>ptr</gi> 
+            elements must have <att>xml:lang</att> attributes</desc>
             <classes>
               <memberOf key="att.global"/>
             </classes>
@@ -377,6 +414,11 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
                 <rng:ref name="ptr"/>
               </rng:oneOrMore>
             </content>
+            <constraintSpec ident="parallelGrp-1" scheme="isoschematron">
+              <constraint>
+                <sch:report test="tei:ptr[not(@xml:lang)]">Every tei:ptr inside a parallelGrp requires @xml:lang.</sch:report>
+              </constraint>
+            </constraintSpec>
           </elementSpec>
           <elementSpec ident="parallelText" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
             <desc>The main body element for a text that consists of a parallelization of multiple texts.  </desc>
@@ -519,15 +561,46 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
                 </datatype>
                 <valList type="open">
                   <valItem ident="p"/>
-                  <valItem ident=" s"/>
-                  <valItem ident=" l"/>
-                  <valItem ident=" lg"/>
-                  <valItem ident=" cit"/>
-                  <valItem ident=" choice"/>
-                  <valItem ident=" verse"/>
+                  <valItem ident="s"/>
+                  <valItem ident="l"/>
+                  <valItem ident="lg"/>
+                  <valItem ident="cit"/>
+                  <valItem ident="choice"/>
+                  <valItem ident="verse"/>
                 </valList>
               </attDef>
             </attList>
+            <constraintSpec ident="layer-1" scheme="isoschematron">
+              <constraint>
+                <sch:report 
+                  test="descendant::tei:ptr[substring-before(@target, '#') != '']">
+                  Only internal pointers are allowed inside concurrent structures
+                </sch:report>
+                <sch:assert
+                  test="
+                  for 
+                    $ptr in descendant::tei:ptr,
+                    $token in tokenize(@target,'\s+'),
+                    $id in (
+                      if (starts-with($token, '#range'))
+                      then
+                        tokenize(
+                          substring-before(
+                            substring-after(
+                              $token,
+                              '#range('
+                            ),
+                            ')'
+                          ),
+                          ','
+                        )[.]
+                      else substring-after($token, '#')
+                    )
+                  return //id($id)/ancestor::j:streamText">
+                  All pointers in layers must point into the text stream.  
+                </sch:assert>
+              </constraint>
+            </constraintSpec>
           </elementSpec>
           <elementSpec ident="concurrent" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
             <desc>A list of concurrent hierarchies of one or more layers.</desc>
@@ -546,18 +619,21 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               <memberOf key="att.global"/>
             </classes>
             <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-                <rng:group xmlns="http://relaxng.org/ns/structure/1.0">
-                  <rng:oneOrMore>
-                    <rng:choice>
-                      <rng:ref name="model.segLike"/>
-                      <rng:ref name="model.milestoneLike"/>
-                      <rng:ref name="ptr"/>
-                    </rng:choice>
-                  </rng:oneOrMore>
-                </rng:group>
-              </content>
+              <rng:group xmlns="http://relaxng.org/ns/structure/1.0">
+                <rng:oneOrMore>
+                  <rng:choice>
+                    <rng:ref name="model.segLike"/>
+                    <rng:ref name="model.milestoneLike"/>
+                    <rng:ref name="ptr"/>
+                  </rng:choice>
+                </rng:oneOrMore>
+              </rng:group>
             </content>
+            <constraintSpec ident="streamText-1" scheme="isoschematron">
+              <constraint>
+                <sch:report test="*[not(@xml:id)]">An @xml:id attribute is required on all elements in a text stream.</sch:report>
+              </constraint>
+            </constraintSpec>
           </elementSpec>
           <classSpec ident="att.msExcerpt" module="msdescription" mode="delete" type="atts"/>
           <classSpec ident="att.global.change" module="transcr" mode="delete" type="atts"/>
