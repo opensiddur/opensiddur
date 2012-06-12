@@ -190,15 +190,16 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
 
           # add resource to contentsXml
           # TODO: namedoctype, publicid, systemid
-          etree.SubElement(contentsXml, 'resource', {'filename':fname, 'name':fname, 
+          etree.SubElement(contentsXml, 'resource', {'filename':unicode(fname,'utf-8'), 
+            'name':unicode(fname,'utf-8'), 
             'owner':props.user, 'group':props.group, 'mode':props.permissions, 
             'mimetype':fMime, 'type':fType, 'created':fCtime, 'modified':fMtime})
 
     # write the contentsXml file
-    unindented = etree.tostring(contentsXml, encoding='utf-8')
+    unindented = etree.tostring(contentsXml)
     reparsed = minidom.parseString(unindented)
     outputFile = file(os.path.join(srcDirectory,'__contents__.xml'),'w')
-    outputFile.write(reparsed.toprettyxml(indent="  "))
+    outputFile.write(reparsed.toprettyxml(indent="  ").encode('utf-8'))
     outputFile.close()
 
 def usage():
