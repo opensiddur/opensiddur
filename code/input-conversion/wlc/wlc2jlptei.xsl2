@@ -185,7 +185,13 @@ TODO:
     <xsl:param name="chap" as="xs:string?" />
 
     <xsl:variable name="book-chap-en" select="string-join(($book, $chap), ' ')"/>
-    <xsl:sequence select="encode-for-uri(func:resolve-cRef('Biblical',$book-chap-en,'he'))"/>
+    <xsl:sequence select="
+      encode-for-uri(
+        replace(
+          func:resolve-cRef('Biblical',$book-chap-en,'he'),
+          '\p{M}', ''
+        ) 
+      )"/>
   </xsl:function>	
  
 	<xd:doc>
@@ -412,7 +418,7 @@ TODO:
                   select="func:bookref-to-uri($book, ())" />
                 <tei:ptr target="/data/original/{$book-uri}#main">
                   <xsl:attribute name="xml:id"
-                    select="concat('se_',$book-uri)" />
+                    select="concat('se_',translate($book, ' ', '_'))" />
                 </tei:ptr>
              </xsl:for-each>
             </tmp:books>

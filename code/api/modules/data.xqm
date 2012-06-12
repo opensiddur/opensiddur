@@ -51,11 +51,13 @@ declare function local:resource-name-from-title-and-number(
   $number as xs:integer
   ) as xs:string {
   string-join(
-    (encode-for-uri($title), 
-    if ($number)
-    then ("-", string($number))
-    else (), ".xml"),
-    "")
+    ( (: remove diacritics in resource names :)
+      encode-for-uri(replace($title, "\p{M}", "")), 
+      if ($number)
+      then ("-", string($number))
+      else (), ".xml"
+    ),
+  "")
 };
 
 declare function local:find-duplicate-number(
