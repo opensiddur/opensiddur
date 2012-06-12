@@ -802,7 +802,7 @@ declare function api:rest-response(
             if ($parameter/@value="text")
             then api:serialize-as("txt")
             else if ($parameter/@value=("xhtml", "html"))
-            then api:serialize-as($serialization,api:get-accept-format(api:html-content-type()))
+            then api:serialize-as($parameter/@value,api:get-accept-format(api:html-content-type()))
             else if ($parameter/@value="html5")
             then api:serialize-as("html5")
             else ()
