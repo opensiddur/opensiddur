@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: API module for functions for index URIs 
+(:~ API module for functions for index URIs 
  : 
  : Functions assume that the following has already been done:
  :  authentication,
@@ -15,7 +15,9 @@ declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 
-(:~ list all available data APIs :)
+(:~ List all available APIs 
+ : @return An HTML list
+ :)
 declare 
   %rest:GET
   %rest:path("/api")
