@@ -281,7 +281,8 @@ $(SETUPDIR)/setup.xql:
 
 # install the WLC files into $WLCDBDIR on the database and assure that they're
 # ready to be used (note: may overwrite existing files, use with caution)
-db-install-wlc: ridx-disable tanach tanach2db ridx-enable
+# reference index not being used yet, so ridx-disable/enable are disabled
+db-install-wlc: tanach tanach2db 
 
 .PHONY: tanach2db
 tanach2db:
