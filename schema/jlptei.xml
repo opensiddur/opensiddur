@@ -163,9 +163,9 @@ The Open Siddur intends to work within open standards whenever possible. In choo
                     $lptr in substring-after(substring-before($token, ','), '('),
                     $rptr in substring-before(substring-after($token, ','), ')')
                   return 
-                    exists(//id($lptr)) and
-                    exists(//id($rptr)) and
-                    //id($lptr) &lt;&lt; //id($rptr)
+                    exists(/id($lptr)) and
+                    exists(/id($rptr)) and
+                    /id($lptr) &lt;&lt; /id($rptr)
                   )
                     ">
                   In a #range(lptr,rptr) XPath expression, the left pointer must precede the right pointer.  

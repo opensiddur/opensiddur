@@ -5,7 +5,7 @@
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">Valid</tei:title>
+            <tei:title type="main" xml:lang="en">Existing</tei:title>
             <j:responsGrp>
                <tei:respons type="trc" locus="value" target="#text" resp="/user/testuser"/>
             </j:responsGrp>
@@ -23,6 +23,9 @@
             <tei:link type="bibl" target="#text /data/sources/Born%20Digital"/>
          </tei:sourceDesc>
       </tei:fileDesc>
+      <tei:revisionDesc>
+         <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
+      </tei:revisionDesc>
    </tei:teiHeader>
    <tei:text>
       <j:streamText xml:id="text">
@@ -34,13 +37,19 @@
             <tei:w xml:id="v1w5">segment</tei:w>
             <tei:pc xml:id="v1pc7">.</tei:pc>
          </tei:seg>
+         <tei:seg xml:id="v1_seg2">
+             <tei:w xml:id="v1w8">This</tei:w>
+             <tei:w xml:id="v1w9">is</tei:w>
+             <tei:w xml:id="v1w10">too</tei:w>
+             <tei:pc xml:id="v1pc11">.</tei:pc>
+         </tei:seg>
       </j:streamText>
       <j:concurrent xml:id="concurrent">
          <j:layer type="div" xml:id="layer_div">
             <tei:div xml:id="main">
                <tei:head>Valid data</tei:head>
                <tei:ab>
-                  <tei:ptr target="#v1_seg1"/>
+                  <tei:ptr target="#range(v1_seg1,v1_seg2)"/>
                </tei:ab>
             </tei:div>
          </j:layer>

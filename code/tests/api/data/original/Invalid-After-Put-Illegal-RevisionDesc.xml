@@ -5,7 +5,7 @@
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">Valid</tei:title>
+            <tei:title type="main" xml:lang="en">Existing</tei:title>
             <j:responsGrp>
                <tei:respons type="trc" locus="value" target="#text" resp="/user/testuser"/>
             </j:responsGrp>
@@ -23,6 +23,10 @@
             <tei:link type="bibl" target="#text /data/sources/Born%20Digital"/>
          </tei:sourceDesc>
       </tei:fileDesc>
+      <tei:revisionDesc>
+          <tei:change when="2000-01-01" who="/user/testuser" type="edited"/>
+         <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
+      </tei:revisionDesc>
    </tei:teiHeader>
    <tei:text>
       <j:streamText xml:id="text">

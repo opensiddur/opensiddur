@@ -26,6 +26,9 @@ import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "/code/modules/jvalidate.xqm";
 import module namespace user="http://jewishliturgy.org/api/user"
   at "/code/api/user.xqm";
+
+import module namespace magic="http://jewishliturgy.org/magic"
+  at "/code/magic/magic.xqm";
   
 import module namespace kwic="http://exist-db.org/xquery/kwic";
 
@@ -83,6 +86,11 @@ declare function orig:validate(
   validation:jing($doc, xs:anyURI($orig:schema)) and
     jvalidate:validation-boolean(
       jvalidate:validate-iso-schematron-svrl($doc, xs:anyURI($orig:schematron))
+    ) and (
+      empty($old-doc) or
+      jvalidate:validation-boolean(
+        orig:validate-changes($doc, $old-doc)
+      )
     )
 };
 
@@ -98,8 +106,66 @@ declare function orig:validate-report(
   ) as element() {
   jvalidate:concatenate-reports((
     validation:jing-report($doc, xs:anyURI($orig:schema)),
-    jvalidate:validate-iso-schematron-svrl($doc, doc($orig:schematron))
+    jvalidate:validate-iso-schematron-svrl($doc, doc($orig:schematron)),
+    if (exists($old-doc))
+    then orig:validate-changes($doc, $old-doc)
+    else ()
   ))
+};
+
+(:~ determine if all the changes between an old version and
+ : a new version of a document are legal
+ : @param $doc new document
+ : @param $old-doc old document
+ : @return a report element, indicating whether the changes are valid or invalid
+ :) 
+declare function orig:validate-changes(
+  $doc as document-node(),
+  $old-doc as document-node()
+  ) as element(report) {
+  let $messages := ( 
+    if (not(xmldiff:compare($doc//tei:revisionDesc, $old-doc//tei:revisionDesc)))
+    then <message>You may not alter the revision history</message>
+    else (),
+    let $authors := 
+      distinct-values(
+        $old-doc//tei:change/@who/substring-after(., "/user/")
+      )
+    let $can-change-license := 
+      (count($authors) = 1) and 
+      $authors = app:auth-user()
+    return
+      if (not(xmldiff:compare(
+        <x>{
+          $doc//tei:publicationStmt/
+            (* except (
+              if ($can-change-license) 
+              then () 
+              else tei:licence
+            ))
+        }</x>, 
+        <x>{
+          $old-doc//tei:publicationStmt/
+          (* except (
+            if ($can-change-license) 
+            then () 
+            else tei:licence
+          ))
+        }</x>)
+      ))
+      then <message>The information in the tei:publicationStmt is immutable and only the original author can change the text's license.</message>
+      else ()
+    )
+  let $is-valid := empty($messages)
+  return
+    <report>
+      <status>{
+        if ($is-valid)
+        then "valid"
+        else "invalid"
+      }</status>
+      {$messages}
+    </report>
 };
 
 (: error message when access is not allowed :)
@@ -307,22 +373,37 @@ declare
     )
   let $resource := $paths[2]
   let $collection := $paths[1]
+  let $user := app:auth-user()
   return 
     if (sm:has-access(xs:anyURI($orig:path-base), "w"))
     then 
       if (orig:validate($body, ()))
       then (
         app:make-collection-path($collection, "/", sm:get-permissions(xs:anyURI($orig:path-base))),
-        if (xmldb:store($collection, $resource, $body))
-        then 
-          <rest:response>
-            <http:response status="201">
-              <http:header 
-                name="Location" 
-                value="{concat("/api", $orig:path-base, "/", substring-before($resource, ".xml"))}"/>
-            </http:response>
-          </rest:response>
-        else api:rest-error(500, "Cannot store the resource")
+        let $db-path := xmldb:store($collection, $resource, $body)
+        return
+          if ($db-path)
+          then 
+            <rest:response>
+              <output:serialization-parameters>
+                <output:method value="text"/>
+              </output:serialization-parameters>
+              <http:response status="201">
+                {
+                  let $uri := xs:anyURI($db-path)
+                  let $change-record := orig:record-change(doc($db-path), "created")
+                  return system:as-user("admin", $magic:password, (
+                    sm:chown($uri, $user),
+                    sm:chgrp($uri, $user),
+                    sm:chmod($uri, "rw-rw-r--")
+                  ))
+                }
+                <http:header 
+                  name="Location" 
+                  value="{concat("/api", $orig:path-base, "/", substring-before($resource, ".xml"))}"/>
+              </http:response>
+            </rest:response>
+          else api:rest-error(500, "Cannot store the resource")
       )
       else
         api:rest-error(400, "Input document is not valid JLPTEI", orig:validate-report($body, ()))
@@ -341,14 +422,13 @@ declare
  :)
 declare
   %rest:PUT("{$body}")
-  %rest:path("/api/data/transliteration/{$name}")
+  %rest:path("/api/data/original/{$name}")
   %rest:consumes("application/xml", "text/xml")
   function orig:put(
     $name as xs:string,
     $body as document-node()
   ) as item()+ {
-  (:
-  let $doc := data:doc($tran:data-type, $name)
+  let $doc := data:doc($orig:data-type, $name)
   return
     if ($doc)
     then
@@ -358,23 +438,28 @@ declare
       return  
         if (sm:has-access(xs:anyURI($uri), "w"))
         then
-          if (tran:validate($body))
+          if (orig:validate($body, $doc))
           then
             if (xmldb:store($collection, $resource, $body))
             then 
               <rest:response>
+                {
+                  orig:record-change(doc($uri), "edited")
+                }
+                <output:serialization-parameters>
+                  <output:method value="text"/>
+                </output:serialization-parameters>
                 <http:response status="204"/>
               </rest:response>
             else api:rest-error(500, "Cannot store the resource")
-          else api:rest-error(400, "Input document is not a valid transliteration", tran:validate-report($body)) 
+          else api:rest-error(400, "Input document is not valid JLPTEI", orig:validate-report($body, $doc)) 
         else local:no-access()
     else 
-      ( : it is not clear that this is correct behavior for PUT.
+      (: it is not clear that this is correct behavior for PUT.
        : If the user gives the document a name, maybe it should
        : just keep that resource name and create it?
-       : )
+       :)
       api:rest-error(404, "Not found", $name)
-      :)()
 };
 
 (:~ Get access/sharing data for a document

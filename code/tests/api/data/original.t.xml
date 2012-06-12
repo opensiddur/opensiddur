@@ -179,6 +179,11 @@
       orig:post(doc("/code/tests/api/data/original/Valid.xml"))
       ]]></code>
       <class href="../common.t.xml#Created"/>
+      <expected 
+        desc="a change record has been added"
+        xpath="collection('/data/original/en')[descendant::tei:title[@type='main'][.='Valid']]//tei:revisionDesc/tei:change[1]">
+        <tei:change type="created" who="/user/testuser" when="..."/>
+      </expected>
     </test>
     <test>
       <task>Post an invalid resource</task>
@@ -192,18 +197,34 @@
     <testName>orig:put()</testName>
     <test>
       <task>Put a valid resource to an existing resource</task>
+      <code><![CDATA[
+      orig:put("Existing", doc("/code/tests/api/data/original/Existing-After-Put.xml"))
+      ]]></code>
+      <class href="../common.t.xml#NoData"/>
+      <expected 
+        desc="a change record has been added"
+        xpath="(collection('/data/original/en')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
+        <tei:change type="edited" who="/user/testuser" when="..."/>
+      </expected>
     </test>
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
+      <code><![CDATA[
+      orig:put("DoesNotExist", doc("/code/tests/api/data/original/Valid.xml"))
+      ]]></code>
     </test>
     <test>
       <task>Put an invalid resource</task>
+      <code><![CDATA[
+      orig:put("Existing", doc("/code/tests/api/data/original/Invalid.xml"))
+      ]]></code>
+      <class href="../common.t.xml#BadRequest"/>
     </test>
     <test>
       <task>Put a valid resource that is invalidated by an illegal change</task>
-    </test>
-    <test>
-      <task>Put to a nonexisting resource</task>
+      <code><![CDATA[
+      orig:put("Existing", doc("/code/tests/api/data/original/Invalid-After-Put-Illegal-RevisionDesc.xml"))
+      ]]></code>
     </test>
   </TestSet>
   <TestSet>
@@ -263,9 +284,17 @@
     </test>
     <test>
       <task>orig:put(): Put an existing resource</task>
+      <code><![CDATA[
+      orig:put("Existing", doc("/code/tests/api/data/original/Existing.xml"))
+      ]]></code>
+      <class href="../common.t.xml#Unauthorized"/>
     </test>
     <test>
       <task>orig:put(): Put a nonexisting resource</task>
+      <code><![CDATA[
+      orig:put("DoesNotExist", doc("/code/tests/api/data/original/Existing.xml"))
+      ]]></code>
+      <class href="../common.t.xml#NotFound"/>
     </test>
     <test>
       <task>orig:get-access()</task>
