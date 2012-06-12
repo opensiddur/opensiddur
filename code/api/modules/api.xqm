@@ -769,7 +769,6 @@ declare function api:tests(
 declare function api:rest-response(
   $r as item()*
   ) as item()* {
-  util:log-system-out("api:rest-response()"),
   if ($r[1] instance of element(rest:response))
   then (
     let $response := $r[1]
@@ -794,7 +793,6 @@ declare function api:rest-response(
       case element(output:serialization-parameters)
       return
         for $parameter in $element/*
-        let $null := util:log-system-out($parameter)
         return
           typeswitch($parameter)
           case element(output:method) 
