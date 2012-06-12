@@ -83,7 +83,7 @@ TODO:
     Notes file name (base of name without extension)
   </xd:doc>
   <xsl:param name="notes-file-name" as="xs:string"
-    select="concat('notes/he/', $date-dir, '/', encode-for-uri('Westminster Leningrad Codex'))"/>
+    select="concat('notes/he/', $date-dir, '/', encode-for-uri('Notes from the Westminster Leningrad Codex'))"/>
 
   <xd:doc>
     Contributor list entry file name (base w/o extension)
@@ -183,11 +183,9 @@ TODO:
   <xsl:function name="func:bookref-to-uri" as="xs:string">
     <xsl:param name="book" as="xs:string" />
     <xsl:param name="chap" as="xs:string?" />
-    <xsl:value-of
-      select="string-join((translate($book,' ','_'),
-			if (empty($chap)) then '' 
-				else format-number(number($chap), '000')
-				),'')" />
+
+    <xsl:variable name="book-chap-en" select="string-join(($book, $chap), ' ')"/>
+    <xsl:sequence select="encode-for-uri(func:resolve-cRef('Biblical',$book-chap-en,'he'))"/>
   </xsl:function>	
  
 	<xd:doc>
@@ -394,12 +392,12 @@ TODO:
 
     <xsl:sequence
       select="func:debug('writing Tanach.xml', 'tanach2jlptei', $debug-detail)" />
- 
+    <xsl:variable name="Tanach-title" as="xs:string">תנ״ך</xsl:variable>
     <xsl:result-document
-      href="{$result-directory}/{$result-subdirectory}/Tanach{$extension}">
+      href="{$result-directory}/{$result-subdirectory}/{encode-for-uri($Tanach-title)}{$extension}">
       <xsl:call-template name="fill-template">
         <xsl:with-param name="title" as="element(tei:title)+">
-          <tei:title type="main" xml:lang="he">תנ״ך</tei:title>
+          <tei:title type="main" xml:lang="he"><xsl:value-of select="$Tanach-title"/></tei:title>
           <tei:title type="alt" xml:lang="he-Latn">Tanach</tei:title>
           <tei:title type="alt" xml:lang="he-Latn">Tanakh</tei:title>
           <tei:title type="alt" xml:lang="en">Bible</tei:title>
@@ -529,12 +527,13 @@ TODO:
         <xsl:sequence
           select="func:debug(string-join(('writing',$book,$chap, 'emet-verse=', xs:string($emet-chapter)),' '), 'tanach2jlptei', $debug-detail)" />
         <xsl:variable name="chap-uri"
-          select="func:bookref-to-uri($book, $chap)" />
-        <xsl:variable name="chap-filename" select="concat($chap-uri,$extension)" />
+          select="func:bookref-to-uri($book-he, $chap)" />
         <xsl:variable name="book-chap-en"
           select="string-join(($book,$chap),' ')" />
         <xsl:variable name="book-chap-he"
           select="func:resolve-cRef('Biblical',$book-chap-en,'he')" />
+        <xsl:variable name="book-chap-uri" select="func:bookref-to-uri($book, $chap)"/>
+        <xsl:variable name="chap-filename" select="concat($book-chap-uri,$extension)" />
 
         <xsl:result-document
           href="{$result-directory}/{$result-subdirectory}/{$chap-filename}">
@@ -732,9 +731,7 @@ TODO:
       <xsl:call-template name="fill-template">
         <xsl:with-param name="title"
           as="element(tei:title)+">
-          <tei:title type="main" xml:lang="en">
-            Notes from the Westminster Leningrad Codex
-          </tei:title>
+          <tei:title type="main" xml:lang="en">Notes from the Westminster Leningrad Codex</tei:title>
         </xsl:with-param>
         <xsl:with-param name="respons" 
           as="element(tei:respons)+" select="$responsGrp-content" />

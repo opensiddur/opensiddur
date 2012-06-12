@@ -81,7 +81,7 @@
             </tei:sourceDesc>
           </tei:fileDesc>
           <tei:revisionDesc>
-            <tei:change type="create" when="{current-date()}">Document created from template</tei:change>
+            <tei:change type="created" when="{current-date()}">Document created from template</tei:change>
           </tei:revisionDesc>
         </tei:teiHeader>
         <xsl:if test="exists($sourceDocs)">
