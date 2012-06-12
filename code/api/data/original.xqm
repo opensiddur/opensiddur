@@ -358,6 +358,10 @@ declare
  : @error HTTP 400 Invalid JLPTEI XML
  : @error HTTP 401 Not authorized
  : @error HTTP 500 Storage error
+ :
+ : Other effects: 
+ : * A change record is added to the resource
+ : * The new resource is owned by the current user, group owner=current user, and mode is 664
  :)
 declare
   %rest:POST("{$body}")
@@ -419,6 +423,9 @@ declare
  : @error HTTP 403 Forbidden - the document can be found, but is not writable by you
  : @error HTTP 404 Not found
  : @error HTTP 500 Storage error
+ :
+ : A change record is added to the resource
+ : TODO: add xml:id to required places too
  :)
 declare
   %rest:PUT("{$body}")
