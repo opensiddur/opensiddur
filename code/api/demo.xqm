@@ -71,6 +71,9 @@ declare function local:transliterate(
     }
 };
 
+(:~ index function for the demo services 
+ : @return An HTML list of available demo service APIs
+ :)
 declare 
   %rest:GET
   %rest:path("/api/demo")
@@ -97,6 +100,12 @@ declare
   </html>
 };
 
+(:~ list all available transliteration demos
+ : @param $query Limit the search to a particular query
+ : @param $start Start the list at the given item number
+ : @param $max-results Show this many results 
+ : @return An HTML list of all transliteration demos that match the given query
+ :)
 declare 
   %rest:GET
   %rest:path("/api/demo/transliteration")
@@ -139,8 +148,10 @@ declare
 };
 
 
-(:~ post arbitrary XML for transliteration by a given schema 
- : @return XML of the same structure 
+(:~ post arbitrary XML for transliteration by a given schema
+ : @param $schema The schema to transliterate using 
+ : @return XML of the same structure, containing transliterated text. Use @xml:lang to specify which table should be used. 
+ : @error HTTP 404 Transliteration schema not found
  :)
 declare  
   %rest:POST("{$body}")
@@ -161,6 +172,11 @@ declare
       api:rest-error(404, "Schema cannot be found", $schema)
 };
 
+(:~ Transliterate plain text
+ : @param $body The text to transliterate, which is assumed to be Hebrew
+ : @return Transliterated plain text
+ : @error HTTP 404 Transliteration schema not found
+ :)
 declare 
   %rest:POST("{$body}")
   %rest:path("/api/demo/transliteration/{$schema}")

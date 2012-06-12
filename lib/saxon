@@ -25,9 +25,9 @@ esac
 SCRIPTPATH=$(dirname $(absolutize $0))
 RESOLVEROPTIONS="-x:org.apache.xml.resolver.tools.ResolvingXMLReader -y:org.apache.xml.resolver.tools.ResolvingXMLReader -r:org.apache.xml.resolver.tools.CatalogResolver"
 SAXONJAR=$SCRIPTPATH/saxonhe-9.2.1.5.jar
-COMMONDIR=$SCRIPTPATH/../common
+LIBDIR=$SCRIPTPATH/../lib
 RESOLVERPATH=$SCRIPTPATH/resolver-1.2.jar
-CLASSPATH="$SAXONJAR:$COMMONDIR:$RESOLVERPATH"
+CLASSPATH="$SAXONJAR:$LIBDIR:$RESOLVERPATH"
 
 if $CYGWIN; then
   CLASSPATH=`cygpath --path -m "$CLASSPATH"`

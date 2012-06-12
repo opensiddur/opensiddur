@@ -134,7 +134,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = https://exist.svn.sourceforge.net/svnroot/exist/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 16512
+EXIST_REVISION ?= -r 16647
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -149,14 +149,21 @@ XSLTDOC_CFGFILE ?= XSLTDocConfig.xml
 $(TEMPDIR):
 	mkdir $(TEMPDIR)
 
-schema: $(DBDIR)/schema odddoc transliteration-schema contributor-schema
-	cp -R $(TEIDOCDIR)/* $(DBDIR)/schema
+.PHONY: schema schema-clean
+schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema
+	cp schema/build/jlptei.rnc $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
+	cp schema/build/bibliography.rnc $(DBDIR)/schema
+	cp schema/build/*.xsl2 $(DBDIR)/schema
+	cp schema/transliteration.rnc $(DBDIR)/schema
 	cp schema/access.rnc $(DBDIR)/schema
 	cp schema/group.rnc $(DBDIR)/schema
-	
+
+schema-clean: schema-build-clean
+	rm -fr $(DBDIR)/schema
+
 .PHONY: clean
-clean: xsltdoc-clean odddoc-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist setup-clean
+clean: xsltdoc-clean schema-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist setup-clean
 
 $(DBDIR)/common: $(DBDIR)/code
 
@@ -175,7 +182,9 @@ $(DBDIR)/schema:
 IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 
 # build eXist (what dependencies should this have?)
-$(EXIST_INSTALL_JAR):
+# made dependent on the Makefile because that is where the revision is set.
+# It will cause too many remakes, but better than not remaking at all
+$(EXIST_INSTALL_JAR): Makefile
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
 	cd $(LIBDIR)/exist && \
 		JAVA_HOME=$(JAVA_HOME) \
@@ -272,7 +281,8 @@ $(SETUPDIR)/setup.xql:
 
 # install the WLC files into $WLCDBDIR on the database and assure that they're
 # ready to be used (note: may overwrite existing files, use with caution)
-db-install-wlc: ridx-disable tanach tanach2db ridx-enable
+# reference index not being used yet, so ridx-disable/enable are disabled
+db-install-wlc: tanach tanach2db 
 
 .PHONY: tanach2db
 tanach2db:

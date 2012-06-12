@@ -2,7 +2,9 @@ xquery version "3.0";
 (:~ Group management API
  :
  : Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
- : Licensed under the GNU Lesser General Public License, version 3 or later 
+ : Licensed under the GNU Lesser General Public License, version 3 or later
+ :
+ : @author Efraim Feinstein 
  :)
 module namespace grp = 'http://jewishliturgy.org/api/group';
 
@@ -24,7 +26,10 @@ declare namespace error="http://jewishliturgy.org/errors";
 
 declare variable $grp:path := "/group";
 
-(:~ List all groups or query existing groups 
+(:~ List all groups
+ : @param $start Begin listing at this item number
+ : @param $max-results End listing after this many results
+ : @return an HTML list of groups  
  :)
 declare 
   %rest:GET
@@ -67,10 +72,11 @@ declare
     </html>
 };
 
-(:~ list members of a group, in XML 
+(:~ list members of a group, in group XML
+ : @param $name Group name 
  : @return XML conforming to schema/group.rnc
- : If the group does not exist or is inaccessible, return 404
- : If not logged in, return 401
+ : @error HTTP 404 Not found If the group does not exist or is inaccessible
+ : @error HTTP 401 Unauthorized If not logged in
  :)
 declare 
   %rest:GET
@@ -102,9 +108,10 @@ declare
 };
 
 (:~ list members of a group, in HTML
+ : @param $name The name of the group to list
  : @return an HTML list of group members
- : If not logged in, return 401
- : If the group does not exist or is inaccessible, return 404
+ : @error HTTP 401 Unauthorized If not logged in
+ : @error HTTP 404 Not found If the group does not exist or is inaccessible
  :)
 declare 
   %rest:GET
@@ -139,9 +146,10 @@ declare
       </html>
 };
 
-(:~ return the group memberships of a given user.
- : 401 if not logged in
- : 404 if the user does not exist
+(:~ List the group memberships of a given user.
+ : @return An HTML list of group memberships
+ : @error HTTP 401 Unauthorized if not logged in
+ : @error HTTP 404 Not found If the user does not exist
  :)
 declare 
   %rest:GET
@@ -182,6 +190,12 @@ declare
   else api:rest-error(401, "Not authorized")
 };
 
+(:~ validate group XML
+ : @param $doc Document holding group XML 
+ : @param $group-name Group name of existing group this XML is intended to describe, empty for a new group
+ : @return A boolean
+ :)
+(: TODO: use document-node(element(g:group)) :)
 declare function grp:validate(
   $doc as document-node(),
   $group-name as xs:string?
@@ -199,9 +213,10 @@ declare function local:validate-existing-group(
     : existing group, it would go here:))
 };
 
-(:~ validate a group XML structure as the group with the
- : given $group-name. If the $group-name is empty, assume it
- : is for a new group. 
+(:~ validate a group XML structure 
+ : @param $doc Group XML 
+ : @param $group-name Name of existing group the XML is intending to change. If empty, assume it is for a new group.
+ : @return A validation report. report/status indicates validity, report/message indicates reasons for invalidity. 
  :)
 declare function grp:validate-report(
   $doc as document-node(),
@@ -232,17 +247,19 @@ declare function grp:validate-report(
   ))
 };
 
-(:~ create a group or change membership of a group
- : @return
- :  201 successful, new group created 
- :  204 successful, group edited
- :  400 if the input is invalid
- :  401 if not logged in
- :  403 if not a group manager
+(:~ Create a group or change membership of a group
+ : @param $name Name of group to create or edit
+ : @param $body Group XML, which describes the membership of the group
+ : @return HTTP 201 successful, new group created
+ : @return HTTP 204 successful, group edited
+ : @error HTTP 400 if the input is invalid
+ : @error HTTP 401 if not logged in
+ : @error HTTP 403 if not a group manager
  :
  : Notes: 
- :  When a group is created, the creating user is a manager, independent of the 
- :  admin cannot be removed as a 
+ :  When a group is created, the creating user is a manager, independent of the XML. 
+ :  admin cannot be removed as a group manager.
+ :  Because of a missing feature in eXist, group management cannot be changed after creation.
  :)
 declare
   %rest:PUT("{$body}")
@@ -349,11 +366,15 @@ declare
 };
 
 (:~ delete a group
- : @return
- :  204 if successful
- :  401 if not logged in
- :  403 if not a group manager
- :  404 if the group does not exist 
+ : @param $name Group to delete
+ : @return HTTP 204 if successful
+ : @error HTTP 401 if not logged in
+ : @error HTTP 403 if not a group manager
+ : @error HTTP 404 if the group does not exist
+ : 
+ : Notes: 
+ :   Resources owned by a deleted group become property of "everyone"
+ :   TODO: This code has some hacks to work around eXist deficiencies 
  :)
 declare
   %rest:DELETE

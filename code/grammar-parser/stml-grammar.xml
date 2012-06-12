@@ -58,7 +58,7 @@ $Id: stml-grammar.xml 749 2011-04-18 19:13:26Z efraim.feinstein $
   </term>
   <term name="RemarkCommand">
     <expAnon>rem\s+</expAnon>
-    <termRef name="UnsegmentedText"/>
+    <exp name="Comment">[^}]+</exp>    
   </term>
   <term name="ParagraphText">
     <oneOrMore>

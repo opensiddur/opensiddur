@@ -118,6 +118,8 @@ declare function t:setup-action($action) {
           if (doc-available(concat($action/@collection, "/", $action/@name)))
           then xdb:remove($action/@collection, $action/@name)
           else ()
+        case element(copy) return
+          t:copy($action)
         default return
             ()
 };
@@ -152,14 +154,16 @@ declare function t:if(
 };
 
 declare function t:store($action as element(store)) {
-    let $type := if ($action/@type) then $action/@type/string() else "application/xml"
-    let $data :=
-		if ($action/*) then
-			$action/*[1]
-		else
-			$action/string()
+  let $type := 
+    if ($action/@type) 
+    then $action/@type/string() 
+    else "application/xml"
+  let $data :=
+    if ($action/*) 
+    then $action/*[1]
+    else $action/string() 
 	return
-        xdb:store($action/@collection, $action/@name, $data, $type)
+	  xdb:store($action/@collection, $action/@name, $data, $type)
 };
 
 declare function t:store-files($action as element(store-files)) {
@@ -182,6 +186,22 @@ declare function t:tearDown(
   for $action in $tearDown/*
   let $null := t:setup-action($action)
   return ()
+};
+
+declare function t:copy(
+  $copy as element(copy)
+  ) as empty-sequence() {
+  if ($copy/@destination-name)
+  then
+    let $uri := concat($copy/@source, "/", $copy/@name)
+    let $null :=
+      xmldb:store($copy/@destination, $copy/@destination-name,
+        try { doc($uri) }
+        catch err:FODC0005 { util:binary-doc($uri) }
+        )
+    return ()
+  else
+    xmldb:copy($copy/@source, $copy/@destination, $copy/@name) 
 };
 
 declare function t:declare-variable($var as element(variable)) as item()? {

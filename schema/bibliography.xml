@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI 
+  xmlns="http://www.tei-c.org/ns/1.0" 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+  xmlns:rng="http://relaxng.org/ns/structure/1.0"
+  xmlns:s="http://purl.oclc.org/dsdl/schematron"
+  xml:lang="en">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>Bibliography XML</title>
+        <author>Laurent Romary</author>
+        <editor xml:id="sbauman.emt">Syd Bauman</editor>
+        <editor xml:id="LB">Lou Burnard</editor>
+        <editor xml:id="SR">Sebastian Rahtz</editor>
+        <editor xml:id="efraimdf">Efraim Feinstein</editor>
+      </titleStmt>
+      <publicationStmt>
+        <availability status="restricted">
+          <p>You may choose either license, at your option:</p>
+          <licence target="http://creativecommons.org/licenses/by/3.0"/>
+          <licence target="http://www.opensource.org/licenses/bsd-license.php">
+            <p>The BSD 2-clause license:</p>
+            <p>Copyright (c) 2012 Efraim Feinstein</p>
+            <p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
+            <p>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</p>
+            <p>Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</p>
+            <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+          </licence> 
+        </availability>
+      </publicationStmt>
+      <sourceDesc>
+        <p>Initially created on <date when="2006-10-12T05:24:41">Thursday 12th
+            October 2006</date> by the form at http://www.tei-c.org.uk/Roma/.</p>
+      </sourceDesc>
+    </fileDesc>
+    <revisionDesc>
+      <change when="2012-06-07" who="#efraimdf">Change contributor XML to bibliography XML</change>
+      <change when="2012-05-22" who="#efraimdf">Change TEI bare to contributor XML</change>
+      <change when="2011-03-26" who="#SR">rewrite as new-style ODD </change>
+      <change when="2007-08-12" who="#LB">Removed further elements added
+since this ODD was first created </change>
+      <change when="2007-04-09" who="#LB">Added prose and reorganized
+structure to make it more document-like; changed deletion of attribute
+decls into deletion of att.declaring class; add deletes for elements
+email and floatingText added to P5 since this ODD was first created;
+considered but did not implement removal of all irrelevant datatype specs...</change>
+      <change when="2006-10-14" who="#sbauman.emt"> Made valid: <list><item>removed empty <att>prefix</att> attribute</item><item>added required <att>type</att> attribute to
+          <gi>classSpec</gi>s</item></list><!--. <note>Sebastian had also made the above changes.</note> -->Also
+        removed extraneous <gi>altIdent</gi> elements, improved
+        <gi>sourceDesc</gi>, changed the <att>ident</att> of <gi>schemaSpec</gi>
+        to match the filename, and added this revision description. </change>
+    </revisionDesc>
+  </teiHeader>
+  <text>
+    <body>
+      <p>Bibliography XML</p>
+      <div>
+        <head>Basic document structure</head>
+        <p>A bibliographic document is intended to store information
+        about a single original source, which may be a book, a web 
+        document or site, or a book that is scanned and available on
+        the Internet. The root element is
+        <gi>tei:biblStruct</gi>. Bibliographic files are support files, not full
+        documents, so there is no TEI header.</p>
+        <p>Aside from that and a more limited element set (see below), the 
+        <gi>biblStruct</gi> concepts are identical to those presented
+        in the 
+        <ref target="http://www.tei-c.org/release/doc/tei-p5-doc/en/html/CO.html#COBICO">TEI Guidelines</ref>.
+        </p>
+        <p>The only major change is the introduction of the <att>targetPattern</att> attribute in
+        the <gi>relatedItem</gi> tag, allowing linking to page images.</p>
+        <p>If the source is not clearly a public domain book, a <gi>note</gi> where <att>type</att> has the value
+        "copyright" is recommended, where the copyright status of the work is explained in natural language.</p>
+      </div>  
+      <div>
+        <head>Formal declaration</head>
+        <schemaSpec ident="bibliography" start="biblStruct" xml:lang="en">
+          <moduleRef key="core" include="analytic author biblScope biblStruct date editor imprint monogr name note ptr pubPlace publisher ref relatedItem series textLang title"/>
+          <moduleRef key="tei"/>
+          <moduleRef key="header" include="distributor edition extent idno"/>
+          <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
+          
+          <elementSpec mode="change" ident="ptr" module="core">
+            <attList>
+              <attDef ident="cRef" mode="delete"/>
+            </attList>
+          </elementSpec>
+          <elementSpec mode="change" ident="ref" module="core">
+            <attList>
+              <attDef ident="cRef" mode="delete"/>
+            </attList>
+          </elementSpec>
+          <!-- add an attribute to tei:relatedItem -->
+          <elementSpec mode="change" ident="relatedItem" module="core">
+            <attList>
+              <attDef ident="type" mode="change">
+                <desc>Type of related item. One recommended value is scan, where
+                <att>target</att> references the entirety of the scan and 
+                <att>targetPattern</att> references images of individual pages.</desc>
+              </attDef>
+              <attDef ident="targetPattern" mode="add">
+                <desc>The related item's components can be found at a URL that matches the given pattern. 
+                {$page} can be used to replace a page number. If <att>target</att> is also
+                supplied, the pattern must refer to the same Internet resource.</desc>
+                <datatype minOccurs="1" maxOccurs="1">
+                  <rng:text xmlns:rng="http://relaxng.org/ns/structure/1.0"/>
+                </datatype>
+              </attDef>
+            </attList>
+          </elementSpec>
+          <!-- class modifications -->
+          <classSpec ident="att.global" mode="change" module="tei" type="atts">
+            <attList>
+              <attDef ident="xml:space" mode="delete"/>
+              <attDef ident="rend" mode="delete"/>
+              <attDef ident="rendition" mode="delete"/>
+              <attDef ident="xml:base" mode="delete"/>
+            </attList>
+          </classSpec>
+          <classSpec ident="att.canonical" mode="delete" module="tei" type="atts"/>
+          <classSpec ident="att.datable.custom" module="namesdates" mode="delete" type="atts"/>
+          <classSpec ident="att.datable.iso" module="namesdates" mode="delete" type="atts"/>
+          <classSpec ident="att.datable" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.datable.w3c" module="tei" mode="change" type="atts">
+            <attList>
+              <attDef ident="notBefore" mode="delete"/>
+              <attDef ident="notAfter" mode="delete"/>
+              <attDef ident="from" mode="delete"/>
+              <attDef ident="to" mode="delete"/>
+            </attList>
+          </classSpec>
+          <classSpec ident="att.divLike" mode="change" module="tei" type="atts">
+            <attList>
+              <attDef ident="org" mode="delete"/>
+              <attDef ident="sample" mode="delete"/>
+              <attDef ident="part" mode="delete"/>
+            </attList>
+          </classSpec>
+          <classSpec ident="att.declarable" mode="delete" module="tei" type="atts"/>
+          <classSpec ident="att.declaring" mode="delete" module="tei" type="atts"/>
+          <classSpec ident="att.dimensions" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.duration.iso" module="namesdates" mode="delete" type="atts"/>
+          <classSpec ident="att.duration.w3c" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.editLike" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.naming" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.placement" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.pointing" mode="change" module="tei" type="atts">
+            <attList>
+              <attDef ident="evaluate" mode="delete"/>
+            </attList>
+          </classSpec>
+          <classSpec ident="att.ranging" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.responsibility" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.internetMedia" mode="delete" module="tei" type="atts"/>
+          <classSpec ident="att.typed" mode="change" module="tei" type="atts">
+            <attList>
+              <attDef ident="subtype" mode="delete"/>
+            </attList>
+          </classSpec>
+          <classSpec ident="att.sortable" mode="delete" module="tei" type="atts"/>
+        </schemaSpec>
+      </div>
+    </body>
+  </text>
+</TEI>
