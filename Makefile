@@ -286,7 +286,7 @@ db-install-wlc: tanach tanach2db
 
 .PHONY: tanach2db
 tanach2db:
-	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 774 -c /db/group/everyone -u admin -g everyone $(TEXTDIR)/wlc
+	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 774 -d 775 -c /db/data -u admin -g everyone $(TEXTDIR)/wlc
 	$(EXISTBACKUP) -r `pwd`/$(WLC-OUTPUT-DIR)/__contents__.xml -u admin -p "$(ADMINPASSWORD)" -ouri=xmldb:exist://
 
 db-syncclean:
