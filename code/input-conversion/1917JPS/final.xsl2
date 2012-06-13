@@ -29,14 +29,24 @@ TODO: fix HTML XSL
 
 <!-- Output the content of column, but not the column element. -->
 <xsl:template match="column">
-	<xsl:apply-templates/>
+	<!-- only the elements, not the space (empty text nodes) between the elements -->
+	<xsl:apply-templates select="*"/>
 </xsl:template>
 
 <!-- Output normal text, but not the text element. 
 	TODO: do we also need to check it's not italic, Hebrew, etc.?
 -->
 <xsl:template match="text[not(@size)]">
-	<xsl:apply-templates/>
+	<xsl:choose>
+		<xsl:when test="following-sibling::text[1][@font='Times New Roman,Bold' and @size='6.215']">
+			<!-- If followed by small caps remove last character;
+				see small-caps element below. -->
+			<xsl:value-of select="substring(., 0, string-length())"/>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:apply-templates/>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- Suppress footnotes for now. TODO: inline them!!! -->
@@ -113,11 +123,13 @@ TODO: fix HTML XSL
 	</xsl:element>
 </xsl:template>
 
-<!-- Small caps (usually the "ord" of "Lord"
-	TODO: Join with the L (technically it can be inside the tag) -->
+<!-- Small caps (usually the "ord" of "Lord" -->
 <xsl:template match="text[@font='Times New Roman,Bold' and @size='6.215']">
 	<xsl:element name="small-caps">
-		<xsl:apply-templates/>
+		<!-- Take last character of previous text; probably first of word. -->
+		<xsl:value-of select="substring(preceding-sibling::text[1], string-length(preceding-sibling::text[1]))"/>
+		<!-- small caps actually lowercase with a style -->
+		<xsl:value-of select="lower-case(.)"/>
 	</xsl:element>
 </xsl:template>
 

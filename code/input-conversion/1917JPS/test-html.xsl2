@@ -31,16 +31,30 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
 	     See: http://developer.apple.com/library/IOs/#documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html  -->
 	<meta name = "viewport" content = "initial-scale = 1.0" />
 	<style type="text/css">
-	  <!-- todo more readable body size and line height? 
-	       see http://www.alistapart.com/articles/howtosizetextincss -->
+	  /* more readable body size and line height 
+	       see http://www.alistapart.com/articles/howtosizetextincss */
+	body { /*font-size: 16px;*/ line-height: 1.6; }
 	  h1 { margin: 5px 0; }
 	  .verse-number { 
 	    color: #BBB;
 	  }
-	/* improve readability with line height */
-	body { /*font-size: 16px;*/ line-height: 1.6; }
+	.small-caps { font-variant: small-caps; }
 	</style>
+<!-- Google Analytics -->
+<script type="text/javascript">
 
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32130708-1']);
+  _gaq.push(['_setDomainName', 'marcstober.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
       </head>
       <body>
 	<div style="margin-bottom: 5px">
@@ -143,8 +157,8 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
     <i><xsl:apply-templates select="node()" /></i>
   </xsl:template>
 
-  <xsl:template match="text[@size='6.215' and @font='Times New Roman,Bold']">
-    <span style="font-size: 80%"><xsl:apply-templates select="node()" /></span>
+  <xsl:template match="small-caps">
+    <span class="small-caps"><xsl:apply-templates select="node()" /></span>
   </xsl:template>
 
   <!-- TODO this mixes book headings, parsha headings, and subsequent page heading that also have book name -->
