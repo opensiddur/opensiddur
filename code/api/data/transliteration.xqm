@@ -129,7 +129,9 @@ declare function local:query(
     $count as xs:integer
   ) as item()+ {
   let $all-results := 
-      collection($tran:path-base)//(tr:title|tr:description)[ft:query(.,$query)]
+      for $doc in collection($tran:path-base)//(tr:title|tr:description)[ft:query(.,$query)]
+      order by $doc//tr:title ascending
+      return $doc
   let $listed-results := 
     <ol xmlns="http://www.w3.org/1999/xhtml" class="results">{
       for $result in  
@@ -164,7 +166,10 @@ declare function local:list(
   $start as xs:integer,
   $count as xs:integer
   ) {
-  let $all := collection($tran:path-base)/tr:schema
+  let $all := 
+    for $doc in collection($tran:path-base)/tr:schema
+    order by $doc//tr:title ascending
+    return $doc
   return (
     <ul xmlns="http://www.w3.org/1999/xhtml" class="results">{
       for $table in subsequence($all, $start, $count) 

@@ -253,7 +253,10 @@ declare function local:query(
     $count as xs:integer
   ) as item()+ {
   let $all-results := 
+    for $doc in
       collection($orig:path-base)//(tei:title|j:streamText)[ft:query(.,$query)]
+    order by $doc//tei:title[@type="main"] ascending
+    return $doc
   let $listed-results := 
     <ol xmlns="http://www.w3.org/1999/xhtml" class="results">{
       for $result in  
@@ -288,7 +291,10 @@ declare function local:list(
   $start as xs:integer,
   $count as xs:integer
   ) {
-  let $all := collection($orig:path-base)/tei:TEI
+  let $all := 
+    for $doc in collection($orig:path-base)/tei:TEI
+    order by $doc//tei:title[@type="main"] ascending
+    return $doc
   return (
     <ul xmlns="http://www.w3.org/1999/xhtml" class="results">{
       for $result in subsequence($all, $start, $count) 
