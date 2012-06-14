@@ -395,7 +395,7 @@ The previous match was:
       <xsl:variable name="identifier" as="xs:string" select="replace(normalize-space(.),'\s+','_')"/> 
       <result-document href="{$output-directory}/contributors/{$identifier}.xml">
         <tei:div type="contributors">
-          <xsl:attribute name="xml:id" select="{$identifier}"/>
+          <xsl:attribute name="xml:id" select="$identifier"/>
           <tei:name>
             <tei:forename>???</tei:forename>
             <tei:surname>???</tei:surname>

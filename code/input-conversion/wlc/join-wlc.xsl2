@@ -17,7 +17,7 @@
   <xd:doc type="stylesheet">
     <xd:short>Convert the WLC multi-file Tanach into a single XML file
       containing all the books</xd:short>
-    <xd:copyright>Copyright 2009 Efraim Feinstein
+    <xd:copyright>Copyright 2009,2012 Efraim Feinstein
     </xd:copyright>
     <xd:detail>
       <p>This program is free software: you can redistribute it
@@ -42,7 +42,6 @@
         .
       </p>
     </xd:detail>
-    <xd:svnId>$Id: join-wlc.xsl2 709 2011-02-24 06:37:44Z efraim.feinstein $</xd:svnId>
   </xd:doc>
   
   <xd:doc>

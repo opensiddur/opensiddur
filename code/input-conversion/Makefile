@@ -3,7 +3,7 @@
 # Should have 1 target for each type of input conversion.
 # Assumes that it will be included after the definitions in the top level Makefile
 #
-# Copyright 2008-2011 Efraim Feinstein
+# Copyright 2008-2012 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -18,7 +18,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/
 #
-# $Id: Makefile 780 2011-05-03 03:20:33Z efraim.feinstein $
 
 INPUT-CONVERSION-DIR ?= $(CODEDIR)/input-conversion
 WLC-CONVERSION-DIR ?= $(CODEDIR)/input-conversion/wlc
@@ -34,14 +33,15 @@ input-conversion: tanach strongs
 
 input-conversion-clean: tanach-clean strongs-clean
 
-tanach: $(WLC-OUTPUT-DIR)/Tanach.xml
+# note: the output file is phony because it goes into a YYYY/MM directory
+tanach: $(WLC-OUTPUT-DIR)/תנ״ך.xml
 
 $(WLC-OUTPUT-DIR)/joined-wlc.xml: $(WLC-CONVERSION-DIR)/join-wlc.xsl2
 	$(XSLT) -it main $(WLC-CONVERSION-DIR)/join-wlc.xsl2 input-directory=$(TANACH-SOURCE-DIR) output-file=$(WLC-OUTPUT-DIR)/joined-wlc.xml
 
-$(WLC-OUTPUT-DIR)/Tanach.xml: $(WLC-CONVERSION-DIR)/wlc2jlptei.xsl2 $(WLC-OUTPUT-DIR)/joined-wlc.xml $(TANACH-SOURCE)
-	$(XSLT) -it main -o $(WLC-OUTPUT-DIR)/Tanach.catalog.xml $(WLC-CONVERSION-DIR)/wlc2jlptei.xsl2 input-file=`$(LIBDIR)/absolutize $(WLC-OUTPUT-DIR)/joined-wlc.xml` result-directory=`$(LIBDIR)/absolutize $(WLC-OUTPUT-DIR)`
-	rm -f $(WLC-OUTPUT-DIR)/joined-wlc.xml $(WLC-OUTPUT-DIR)/Tanach.catalog.xml
+$(WLC-OUTPUT-DIR)/תנ״ך.xml: $(WLC-CONVERSION-DIR)/wlc2jlptei.xsl2 $(WLC-OUTPUT-DIR)/joined-wlc.xml $(TANACH-SOURCE)
+	$(XSLT) -it main $(WLC-CONVERSION-DIR)/wlc2jlptei.xsl2 input-file=`$(LIBDIR)/absolutize $(WLC-OUTPUT-DIR)/joined-wlc.xml` result-directory=`$(LIBDIR)/absolutize $(WLC-OUTPUT-DIR)`
+	rm -f $(WLC-OUTPUT-DIR)/joined-wlc.xml
 
 tanach-clean:
 	rm -fr $(WLC-OUTPUT-DIR)

@@ -30,14 +30,14 @@
     </titleStmt>
     <editionStmt>
       <edition>Unicode/XML Westminster Leningrad Codex
-        <version>4.14</version>
-        <date>1 Jul 2010</date>
+        <version>4.16</version>
+        <date>30 Apr 2012</date>
       </edition>
       <respStmt>
-        <resp>Transcribed by WLC2XML of 6 Jun 2010 at 08 Jul 2010 @ 13:46.02. Build number: 21.1.</resp>
+        <resp>Transcribed by WLC2XML of 6 Jun 2010 at 05 Jun 2012 @ 21:41.45. Build number: 23.0.</resp>
       </respStmt>
     </editionStmt>
-    <extent>   269,329 bytes</extent>
+    <extent>   268,779 bytes</extent>
     <publicationStmt>
       <authority>Transcription permitted:
         <name>Kirk Lowery</name>
@@ -69,7 +69,7 @@
         <imprint>
           <publisher>Russian National Library (Saltykov-Shchedrin)</publisher>
           <pubPlace>St. Petersburg (Leningrad)</pubPlace>
-          <date>ca 1008</date>
+          <date>1008</date>
         </imprint>
         <idno>Firkovich B 19 A</idno>
       </biblItem>
@@ -77,10 +77,10 @@
         <title>Biblia Hebraica Stuttgartensia</title>
         <editor>Kittel, Rudolf, 1853-1929</editor>
         <editor>Alt, Albrecht, 1883-1956</editor>
-        <editor>Eissfeldt, Otto, 1887-</editor>
+        <editor>Eissfeldt, Otto, 1887-1973</editor>
         <editor>Kahle, Paul, 1875-1964</editor>
         <editor>Elliger, Karl, 1901-1977</editor>
-        <editor>Rudolph, Wilhelm, 1891-</editor>
+        <editor>Rudolph, Wilhelm, 1891-1987</editor>
         <edition>Fourth</edition>
         <imprint>
           <publisher>Deutsche Bibelstiftung</publisher>
@@ -94,10 +94,10 @@
         <title type="main">Biblia Hebraica Stuttgartensia [Electronic resource] : (Michigan-Claremont text)</title>
         <editor>Kittel, Rudolf, 1853-1929</editor>
         <editor>Alt, Albrecht, 1883-1956</editor>
-        <editor>Eissfeldt, Otto, 1887-</editor>
+        <editor>Eissfeldt, Otto, 1887-1973</editor>
         <editor>Kahle, Paul, 1875-1964</editor>
         <editor>Elliger, Karl, 1901-1977</editor>
-        <editor>Rudolph, Wilhelm, 1891-</editor>
+        <editor>Rudolph, Wilhelm, 1891-1987</editor>
         <respStmt>
           <resp>Creation of machine-readable version:</resp>
           <name>Whitaker, Richard E.</name>
@@ -129,13 +129,13 @@
   <encodingDesc>
   </encodingDesc>
   <profileDesc>
-    <creation>Input text file wlc414_ps.txt provided by the J. Alan Groves Center for Advanced 
-Biblical Research. The file has the MD5 hash: 4326 BC1C 5057 776F 5C6F 88DA BB98 6DF0 
-and was received on 1 Jul 2010. The WLC text file has been modified by the 
+    <creation>Input text file wlc416_ps.txt provided by the J. Alan Groves Center for Advanced 
+Biblical Research. The file has the MD5 hash: a941 88e1 3fc3 0b18 8bb4 9ac8 c24f 2946 
+and was received on 30 Apr 2012. The WLC text file has been modified by the 
 transcriber to move transcription notes closer to the relevant character in 
-exactly six (6) places. The modified file, wlc414_ps_td.txt, has the following 
-SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 . 
-      <date>08 Jul 2010</date>
+exactly six (6) places. The modified file, wlc_4.16_ps_td.txt, has the following 
+SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 . 
+      <date>05 Jun 2012</date>
     </creation>
     <langUsage>
       <language ident="HE">Hebrew</language>
@@ -197,7 +197,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>לְ/הָבִ֣ין</w>
         <w>מָ֭שָׁל</w>
         <w>וּ/מְלִיצָ֑ה</w>
-        <w>דִּבְרֵ֥י<x>3</x></w>
+        <w>דִּבְרֵ֥י</w>
         <w>חֲ֝כָמִ֗ים</w>
         <w>וְ/חִידֹתָֽ/ם׃</w>
       </v>
@@ -302,7 +302,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>הָ/רָ֑שֶׁת</w>
         <w>בְּ֝/עֵינֵ֗י</w>
         <w>כָל־</w>
-        <w>בַּ֥עַל<x>1</x></w>
+        <w>בַּ֥עַל<x>U</x></w>
         <w>כָּנָֽף׃</w>
       </v>
       <v n="18">
@@ -914,7 +914,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>אַל־</w>
         <w>תֹּ֘אמַ֤ר</w>
         <k>ל/רעי/ך</k>
-        <q>לְ/רֵֽעֲ/ךָ֨ ׀<x>3</x></q>
+        <q>לְ/רֵֽעֲ/ךָ֨ ׀</q>
         <w>לֵ֣ךְ</w>
         <w>וָ֭/שׁוּב</w>
         <w>וּ/מָחָ֥ר</w>
@@ -1235,7 +1235,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>נֶגְדֶּֽ/ךָ׃</w>
       </v>
       <v n="26">
-        <w>פַּ֭לֵּס<x>3</x></w>
+        <w>פַּ֭לֵּס</w>
         <w>מַעְגַּ֣ל</w>
         <w>רַגְלֶ֑/ךָ</w>
         <w>וְֽ/כָל־</w>
@@ -1444,7 +1444,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>מְפַלֵּֽס׃</w>
       </v>
       <v n="22">
-        <w>עַֽווֹנוֹתָ֗י/ו<x>1</x></w>
+        <w>עַֽווֹנוֹתָ֗י/ו<x>U</x></w>
         <w>יִלְכְּדֻ/נ֥/וֹ</w>
         <w>אֶת־</w>
         <w>הָ/רָשָׁ֑ע</w>
@@ -1470,7 +1470,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>אִם־</w>
         <w>עָרַ֣בְתָּ</w>
         <w>לְ/רֵעֶ֑/ךָ</w>
-        <w>תָּקַ֖עְתָּ<x>3</x></w>
+        <w>תָּקַ֖עְתָּ</w>
         <w>לַ/זָּ֣ר</w>
         <w>כַּפֶּֽי/ךָ׃</w>
       </v>
@@ -1485,7 +1485,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       <v n="3">
         <w>עֲשֵׂ֨ה</w>
         <w>זֹ֥את</w>
-        <w>אֵפ֪וֹא ׀<x>3</x></w>
+        <w>אֵפ֪וֹא ׀</w>
         <w>בְּנִ֡/י</w>
         <w>וְֽ/הִנָּצֵ֗ל</w>
         <w>כִּ֘י</w>
@@ -1578,9 +1578,9 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="13">
         <w>קֹרֵ֣ץ</w>
-        <w>בְּ֭/עֵינָי/ו<x>q</x></w>
+        <w>בְּ֭/עֵינָ/ו<x>Q</x><x>q</x></w>
         <w>מֹלֵ֣ל</w>
-        <w>בְּ/רַגְלָ֑/ו<x>q</x></w>
+        <w>בְּ/רַגְלָ֑/ו<x>Q</x><x>q</x></w>
         <w>מֹ֝רֶ֗ה</w>
         <w>בְּ/אֶצְבְּעֹתָֽי/ו׃</w>
       </v>
@@ -1635,7 +1635,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>רַגְלַ֥יִם</w>
         <w>מְ֝מַהֲר֗וֹת</w>
         <w>לָ/ר֥וּץ</w>
-        <w>לָֽ/רָעָה׃<x>1</x></w>
+        <w>לָֽ/רָעָה׃<x>U</x></w>
       </v>
       <v n="19">
         <w>יָפִ֣יחַ</w>
@@ -1668,7 +1668,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>גַּרְגְּרֹתֶֽ/ךָ׃</w>
       </v>
       <v n="22">
-        <w>בְּ/הִתְהַלֶּכְ/ךָ֨ ׀<x>3</x></w>
+        <w>בְּ/הִתְהַלֶּכְ/ךָ֨ ׀<x>C</x></w>
         <w>תַּנְחֶ֬ה</w>
         <w>אֹתָ֗/ךְ</w>
         <w>בְּֽ֭/שָׁכְבְּ/ךָ</w>
@@ -1923,7 +1923,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="13">
         <w>וְ/הֶחֱזִ֣יקָה</w>
-        <w>בּ֭/וֹ<x>c</x></w>
+        <w>בּ֭/וֹ<x>C</x><x>c</x></w>
         <w>וְ/נָ֣שְׁקָה־</w>
         <w>לּ֑/וֹ</w>
         <w>הֵעֵ֥זָה</w>
@@ -2005,7 +2005,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>פִּ֫תְאֹ֥ם</w>
         <w>כְּ֭/שׁוֹר</w>
         <w>אֶל־</w>
-        <w>טָ֣בַח<x>1</x></w>
+        <w>טָ֣בַח<x>U</x></w>
         <w>יָב֑וֹא</w>
         <w>וּ֝/כְ/עֶ֗כֶס</w>
         <w>אֶל־</w>
@@ -2236,7 +2236,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>ט֣וֹב</w>
         <w>פִּ֭רְיִ/י</w>
         <w>מֵ/חָר֣וּץ</w>
-        <w>וּ/מִ/פָּ֑ז<x>3</x></w>
+        <w>וּ/מִ/פָּ֑ז</w>
         <w>וּ֝/תְבוּאָתִ֗/י</w>
         <w>מִ/כֶּ֥סֶף</w>
         <w>נִבְחָֽר׃</w>
@@ -2244,7 +2244,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       <v n="20">
         <w>בְּ/אֹֽרַח־</w>
         <w>צְדָקָ֥ה</w>
-        <w>אֲהַלֵּ֑ך<x>1</x></w>
+        <w>אֲהַלֵּ֑ך<x>U</x></w>
         <w>בְּ֝/ת֗וֹךְ</w>
         <w>נְתִיב֥וֹת</w>
         <w>מִשְׁפָּֽט׃</w>
@@ -2297,7 +2297,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>אֶ֣רֶץ</w>
         <w>וְ/חוּצ֑וֹת</w>
         <w>וְ֝/רֹ֗אשׁ</w>
-        <w>עָפְר֥וֹת</w>
+        <w>עָפְר֥וֹת<x>V</x></w>
         <w>תֵּבֵֽל׃</w>
       </v>
       <v n="27">
@@ -2317,7 +2317,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>מִ/מָּ֑עַל</w>
         <w>בַּ֝/עֲז֗וֹז</w>
         <w>עִינ֥וֹת</w>
-        <w>תְּהוֹם׃<x>1</x></w>
+        <w>תְּהוֹם׃<x>U</x></w>
       </v>
       <v n="29">
         <w>בְּ/שׂ֘וּמ֤/וֹ</w>
@@ -2662,7 +2662,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>יִוָּדֵֽעַ׃</w>
       </v>
       <v n="10">
-        <w>קֹ֣רֵֽץ<x>3</x></w>
+        <w>קֹ֣רֵֽץ<x>Q</x><x>c</x></w>
         <w>עַ֭יִן</w>
         <w>יִתֵּ֣ן</w>
         <w>עַצָּ֑בֶת</w>
@@ -2804,7 +2804,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="25">
         <w>כַּ/עֲב֣וֹר</w>
-        <w>ס֭וּפָה<x>3</x></w>
+        <w>ס֭וּפָה</w>
         <w>וְ/אֵ֣ין</w>
         <w>רָשָׁ֑ע</w>
         <w>וְ֝/צַדִּ֗יק</w>
@@ -2907,7 +2907,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       <v n="4">
         <w>לֹא־</w>
         <w>יוֹעִ֣יל</w>
-        <w>ה֭וֹן<x>3</x></w>
+        <w>ה֭וֹן</w>
         <w>בְּ/י֣וֹם</w>
         <w>עֶבְרָ֑ה</w>
         <w>וּ֝/צְדָקָ֗ה</w>
@@ -3118,7 +3118,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="27">
         <w>שֹׁ֣חֵֽר</w>
-        <w>ט֭וֹב<x>3</x></w>
+        <w>ט֭וֹב</w>
         <w>יְבַקֵּ֣שׁ</w>
         <w>רָצ֑וֹן</w>
         <w>וְ/דֹרֵ֖שׁ</w>
@@ -3150,7 +3150,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>עֵ֣ץ</w>
         <w>חַיִּ֑ים</w>
         <w>וְ/לֹקֵ֖חַ</w>
-        <w>נְפָשׂ֣וֹת<x>1</x></w>
+        <w>נְפָשׂ֣וֹת<x>U</x></w>
         <w>חָכָֽם׃</w>
       </v>
       <v n="31">
@@ -3168,7 +3168,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
     <c n="12">
       <v n="1">
         <w>אֹהֵ֣ב</w>
-        <w>מ֭וּסָר<x>c</x></w>
+        <w>מ֭וּסָר<x>Q</x><x>c</x></w>
         <w>אֹ֣הֵֽב</w>
         <w>דָּ֑עַת</w>
         <w>וְ/שֹׂנֵ֖א</w>
@@ -3326,7 +3326,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="18">
         <w>יֵ֣שׁ</w>
-        <w>בּ֭וֹטֶה<x>c</x></w>
+        <w>בּ֭וֹטֶה<x>C</x><x>c</x></w>
         <w>כְּ/מַדְקְר֣וֹת</w>
         <w>חָ֑רֶב</w>
         <w>וּ/לְשׁ֖וֹן</w>
@@ -3423,7 +3423,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>וְ/דֶ֖רֶךְ</w>
         <w>נְתִיבָ֣ה</w>
         <w>אַל־</w>
-        <w>מָֽוֶת׃<x>1</x></w>
+        <w>מָֽוֶת׃<x>U</x></w>
       </v>
       <vs>28</vs>
     </c>
@@ -3518,11 +3518,11 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>יִתֵּ֣ן</w>
         <w>מַצָּ֑ה</w>
         <w>וְ/אֶת־</w>
-        <w>נ֖וֹעָצִ֣ים<x>3</x></w>
+        <w>נ֖וֹעָצִ֣ים</w>
         <w>חָכְמָֽה׃</w>
       </v>
       <v n="11">
-        <w>ה֭וֹן<x>3</x></w>
+        <w>ה֭וֹן</w>
         <w>מֵ/הֶ֣בֶל</w>
         <w>יִמְעָ֑ט</w>
         <w>וְ/קֹבֵ֖ץ</w>
@@ -3561,7 +3561,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="15">
         <w>שֵֽׂכֶל־</w>
-        <w>ט֭וֹב<x>3</x></w>
+        <w>ט֭וֹב</w>
         <w>יִתֶּן־</w>
         <w>חֵ֑ן</w>
         <w>וְ/דֶ֖רֶךְ</w>
@@ -3607,7 +3607,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="20">
         <k>הלוך</k>
-        <q>הוֹלֵ֣ךְ<x>3</x></q>
+        <q>הוֹלֵ֣ךְ<x>Q</x><x>k</x></q>
         <w>אֶת־</w>
         <w>חֲכָמִ֣ים</w>
         <k>ו/חכם</k>
@@ -3751,7 +3751,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>רָצֽוֹן׃</w>
       </v>
       <v n="10">
-        <w>לֵ֗ב<x>3</x></w>
+        <w>לֵ֗ב</w>
         <w>י֭וֹדֵעַ</w>
         <w>מָרַּ֣ת</w>
         <w>נַפְשׁ֑/וֹ</w>
@@ -3783,7 +3783,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>בִּ/שְׂח֥וֹק</w>
         <w>יִכְאַב־</w>
         <w>לֵ֑ב</w>
-        <w>וְ/אַחֲרִיתָ֖/הּ<x>3</x></w>
+        <w>וְ/אַחֲרִיתָ֖/הּ<x>Q</x><x>c</x></w>
         <w>שִׂמְחָ֣ה</w>
         <w>תוּגָֽה׃</w>
       </v>
@@ -3945,7 +3945,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="31">
         <w>עֹ֣שֵֽׁק־</w>
-        <w>דָּ֭ל<x>1</x></w>
+        <w>דָּ֭ל<x>U</x></w>
         <w>חֵרֵ֣ף</w>
         <w>עֹשֵׂ֑/הוּ</w>
         <w>וּ֝/מְכַבְּד֗/וֹ</w>
@@ -4016,7 +4016,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>יְהוָ֑ה</w>
         <w>צֹ֝פ֗וֹת</w>
         <w>רָעִ֥ים</w>
-        <w>ו/טוֹבִֽים׃<x>1</x></w>
+        <w>ו/טוֹבִֽים׃<x>U</x></w>
       </v>
       <v n="4">
         <w>מַרְפֵּ֣א</w>
@@ -4162,7 +4162,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>חֵ֭מָה</w>
         <w>יְגָרֶ֣ה</w>
         <w>מָד֑וֹן</w>
-        <w>וְ/אֶ֥רֶך</w>
+        <w>וְ/אֶ֥רֶך<x>U</x></w>
         <w>אַ֝פַּ֗יִם</w>
         <w>יַשְׁקִ֥יט</w>
         <w>רִֽיב׃</w>
@@ -4193,8 +4193,8 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>לֵ֑ב</w>
         <w>וְ/אִ֥ישׁ</w>
         <w>תְּ֝בוּנָ֗ה</w>
-        <w>יְיַשֶּׁר־</w>
-        <w>לָֽכֶת׃</w>
+        <w>יְיַשֶׁר־</w>
+        <w>לָֽכֶת׃<x>Q</x><x>p</x></w>
       </v>
       <v n="22">
         <w>הָפֵ֣ר</w>
@@ -4282,7 +4282,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="31">
         <w>אֹ֗זֶן</w>
-        <w>שֹׁ֭מַעַת<x>c</x></w>
+        <w>שֹׁ֭מַעַת<x>Q</x><x>c</x></w>
         <w>תּוֹכַ֣חַת</w>
         <w>חַיִּ֑ים</w>
         <w>בְּ/קֶ֖רֶב</w>
@@ -4291,7 +4291,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="32">
         <w>פּוֹרֵ֣עַ</w>
-        <w>מ֭וּסָר<x>c</x></w>
+        <w>מ֭וּסָר<x>Q</x><x>c</x></w>
         <w>מוֹאֵ֣ס</w>
         <w>נַפְשׁ֑/וֹ</w>
         <w>וְ/שׁוֹמֵ֥עַ</w>
@@ -4338,7 +4338,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>מַחְשְׁבֹתֶֽי/ךָ׃</w>
       </v>
       <v n="4">
-        <w>כֹּ֤ל<x>3</x></w>
+        <w>כֹּ֤ל<x>C</x></w>
         <w>פָּעַ֣ל</w>
         <w>יְ֭הוָה</w>
         <w>לַֽ/מַּעֲנֵ֑/הוּ</w>
@@ -4775,7 +4775,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>מָד֑וֹן</w>
         <w>וְ/לִ/פְנֵ֥י</w>
         <w>הִ֝תְגַּלַּ֗ע</w>
-        <w>הָ/רִ֥יב<x>3</x></w>
+        <w>הָ/רִ֥יב</w>
         <w>נְטֽוֹשׁ׃</w>
       </v>
       <v n="15">
@@ -5009,7 +5009,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="10">
         <w>מִגְדַּל־</w>
-        <w>עֹ֭ז<x>3</x></w>
+        <w>עֹ֭ז</w>
         <w>שֵׁ֣ם</w>
         <w>יְהוָ֑ה</w>
         <w>בּֽ/וֹ־</w>
@@ -5187,7 +5187,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>רֵעִ֣ים</w>
         <w>רַבִּ֑ים</w>
         <w>וְ֝/דָ֗ל</w>
-        <w>מֵרֵ֥ע/הוּ<x>1</x></w>
+        <w>מֵרֵ֥ע/הוּ<x>U</x></w>
         <w>יִפָּרֵֽד׃</w>
       </v>
       <v n="5">
@@ -5262,7 +5262,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>אָ֭דָם</w>
         <w>הֶאֱרִ֣יךְ</w>
         <w>אַפּ֑/וֹ</w>
-        <w>וְ֝/תִפאַרְתּ֗/וֹ<x>1</x></w>
+        <w>וְ֝/תִפאַרְתּ֗/וֹ<x>U</x></w>
         <w>עֲבֹ֣ר</w>
         <w>עַל־</w>
         <w>פָּֽשַׁע׃</w>
@@ -5417,7 +5417,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="27">
         <w>חַֽדַל־</w>
-        <w>בְּ֭נִ/י<x>1</x></w>
+        <w>בְּ֭נִ/י<x>U</x></w>
         <w>לִ/שְׁמֹ֣עַ</w>
         <w>מוּסָ֑ר</w>
         <w>לִ֝/שְׁג֗וֹת</w>
@@ -5447,7 +5447,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
     <c n="20">
       <v n="1">
         <w>לֵ֣ץ</w>
-        <w>הַ֭/יַּין<x>1</x></w>
+        <w>הַ֭/יַּין<x>U</x></w>
         <w>הֹמֶ֣ה</w>
         <w>שֵׁכָ֑ר</w>
         <w>וְ/כָל־</w>
@@ -5555,7 +5555,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="12">
         <w>אֹ֣זֶן</w>
-        <w>שֹׁ֭מַעַת<x>3</x></w>
+        <w>שֹׁ֭מַעַת</w>
         <w>וְ/עַ֣יִן</w>
         <w>רֹאָ֑ה</w>
         <w>יְ֝הוָ֗ה</w>
@@ -5625,7 +5625,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="19">
         <w>גּֽוֹלֶה־</w>
-        <w>סּ֭וֹד<x>3</x></w>
+        <w>סּ֭וֹד</w>
         <w>הוֹלֵ֣ךְ</w>
         <w>רָכִ֑יל</w>
         <w>וּ/לְ/פֹתֶ֥ה</w>
@@ -5673,7 +5673,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>טֽוֹב׃</w>
       </v>
       <v n="24">
-        <w>מֵ/יְהוָ֥ה</w>
+        <w>מֵ/יהוָ֥ה<x>Q</x><x>n</x><x>v</x></w>
         <w>מִצְעֲדֵי־</w>
         <w>גָ֑בֶר</w>
         <w>וְ֝/אָדָ֗ם</w>
@@ -5840,7 +5840,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="11">
         <w>בַּ/עְנָשׁ־</w>
-        <w>לֵ֭ץ<x>1</x></w>
+        <w>לֵ֭ץ<x>U</x></w>
         <w>יֶחְכַּם־</w>
         <w>פֶּ֑תִי</w>
         <w>וּ/בְ/הַשְׂכִּ֥יל</w>
@@ -6234,12 +6234,12 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>לְ֭/ךָ</w>
         <k>שלשום</k>
         <q>שָׁלִישִׁ֑ים</q>
-        <w>בְּ/מ֖וֹעֵצֹ֣ת<x>3</x></w>
+        <w>בְּ/מ֖וֹעֵצֹ֣ת</w>
         <w>וָ/דָֽעַת׃</w>
       </v>
       <v n="21">
         <w>לְ/הוֹדִֽיעֲ/ךָ֗</w>
-        <w>קֹ֭שְׁטְ<x>3</x></w>
+        <w>קֹ֭שְׁטְ<x>C</x><x>c</x></w>
         <w>אִמְרֵ֣י</w>
         <w>אֱמֶ֑ת</w>
         <w>לְ/הָשִׁ֥יב</w>
@@ -6358,7 +6358,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="3">
         <w>אַל־</w>
-        <w>תִּ֭תְאָו<x>q</x></w>
+        <w>תִּ֭תְאָו<x>Q</x><x>q</x></w>
         <w>לְ/מַטְעַמּוֹתָ֑י/ו</w>
         <w>וְ֝/ה֗וּא</w>
         <w>לֶ֣חֶם</w>
@@ -6706,7 +6706,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="2">
         <w>כִּי־</w>
-        <w>שֹׁ֭ד<x>c</x></w>
+        <w>שֹׁ֭ד<x>C</x><x>c</x></w>
         <w>יֶהְגֶּ֣ה</w>
         <w>לִבָּ֑/ם</w>
         <w>וְ֝/עָמָ֗ל</w>
@@ -6842,7 +6842,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>צַדִּ֑יק</w>
         <w>אַֽל־</w>
         <w>תְּשַׁדֵּ֥ד</w>
-        <w>רִבְצֽ/וֹ׃</w>
+        <w>רִבְצ/וֹ׃<x>Q</x><x>p</x></w>
       </v>
       <v n="16">
         <w>כִּ֤י</w>
@@ -7574,7 +7574,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       <v n="25">
         <w>כִּֽי־</w>
         <w>יְחַנֵּ֣ן</w>
-        <w>ק֭וֹל/וֹ<x>3</x></w>
+        <w>ק֭וֹל/וֹ<x>Q</x><x>c</x></w>
         <w>אַל־</w>
         <w>תַּֽאֲמֶן־</w>
         <w>בּ֑/וֹ</w>
@@ -7656,7 +7656,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>קִנְאָֽה׃</w>
       </v>
       <v n="5">
-        <w>ט֭וֹבָה<x>c</x></w>
+        <w>ט֭וֹבָה<x>Q</x><x>c</x></w>
         <w>תּוֹכַ֣חַת</w>
         <w>מְגֻלָּ֑ה</w>
         <w>מֵֽ/אַהֲבָ֥ה</w>
@@ -7702,7 +7702,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>נָֽפֶשׁ׃</w>
       </v>
       <v n="10">
-        <w>רֵֽעֲ/ךָ֨<x>c</x></w>
+        <w>רֵֽעֲ/ךָ֨<x>C</x><x>c</x></w>
         <k>ו/רעה</k>
         <q>וְ/רֵ֪עַ</q>
         <w>אָבִ֡י/ךָ</w>
@@ -7962,7 +7962,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
       </v>
       <v n="8">
         <w>מַרְבֶּ֣ה</w>
-        <w>ה֭וֹנ/וֹ<x>3</x></w>
+        <w>ה֭וֹנ/וֹ</w>
         <w>בְּ/נֶ֣שֶׁךְ</w>
         <k>ו/ב/תרבית</k>
         <q>וְ/תַרְבִּ֑ית</q>
@@ -8057,7 +8057,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>אָ֭דָם</w>
         <w>עָשֻׁ֣ק</w>
         <w>בְּ/דַם־</w>
-        <w>נָ֑פֶשׁ</w>
+        <w>נָפֶשׁ<x>Q</x><x>c</x></w>
         <w>עַד־</w>
         <w>בּ֥וֹר</w>
         <w>יָ֝נ֗וּס</w>
@@ -8601,7 +8601,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>חֲרָב֣וֹת</w>
         <w>שִׁנָּי/ו֮</w>
         <w>וּֽ/מַאֲכָל֪וֹת</w>
-        <w>מְֽתַלְּעֹ֫תָ֥י/ו<x>3</x></w>
+        <w>מְֽתַלְּעֹ֫תָ֥י/ו<x>C</x></w>
         <w>לֶ/אֱכֹ֣ל</w>
         <w>עֲנִיִּ֣ים</w>
         <w>מֵ/אֶ֑רֶץ</w>
@@ -8610,7 +8610,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <pe/>
       </v>
       <v n="15">
-        <w>לַֽ/עֲלוּקָ֨ה ׀<x>1</x></w>
+        <w>לַֽ/עֲלוּקָ֨ה ׀</w>
         <w>שְׁתֵּ֥י</w>
         <w>בָנוֹת֮</w>
         <w>הַ֤ב ׀</w>
@@ -8937,7 +8937,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>רָ֑ע</w>
         <w>כֹּ֝֗ל</w>
         <w>יְמֵ֣י</w>
-        <w>חַיֶּֽי/ה׃<x>1</x></w>
+        <w>חַיֶּֽי/ה׃<x>U</x></w>
       </v>
       <v n="13">
         <w>דָּ֭רְשָׁה</w>
@@ -9076,7 +9076,7 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
         <w>בָ֭נֶי/הָ</w>
         <w>וַֽ/יְאַשְּׁר֑וּ/הָ</w>
         <w>בַּ֝עְלָ֗/הּ</w>
-        <w>וַֽ/יְהַֽלְלָֽ/הּ׃</w>
+        <w>וַֽ/יְהַֽלְלָ/הּ׃<x>Q</x><x>c</x><x>n</x></w>
       </v>
       <v n="29">
         <w>רַבּ֣וֹת</w>
@@ -9122,121 +9122,106 @@ SHA-1 hash: 1ABE 5B7A 2FB7 B002 D2CD 3E7A FFA4 6927 0A9C 1BF1 .
   </note>
   <note>
     <code>2</code>
-    <gccode>2</gccode>
-    <note>We have added a sop pasuq where L and BHS omit it. (The added sof pasuq often is missing from the text.)</note>
-  </note>
-  <note>
-    <code>3</code>
-    <gccode>3</gccode>
-    <note>We read or understand L differently than BHS. Often this notation indicates a typographical error in BHS. </note>
-  </note>
-  <note>
-    <code>4</code>
     <gccode>4</gccode>
     <note>Puncta extraordinaria -- a \u05c4 is used to mark such marks in the text when they are above the line and a \u05c5 when they are below the line. </note>
   </note>
   <note>
-    <code>5</code>
+    <code>3</code>
     <gccode>5</gccode>
     <note>Large letter(s). Shown as large letters without a superscript note number. </note>
   </note>
   <note>
-    <code>6</code>
+    <code>4</code>
     <gccode>6</gccode>
     <note>Small letter(s). Shown as small letters without a superscript note number. </note>
   </note>
   <note>
-    <code>7</code>
+    <code>5</code>
     <gccode>7</gccode>
     <note>Suspended letter(s). Shown as suspended letters without a superscript note number. </note>
   </note>
   <note>
-    <code>8</code>
+    <code>6</code>
     <gccode>8</gccode>
     <note>Inverted nun in the text. </note>
   </note>
   <note>
-    <code>9</code>
-    <gccode>9</gccode>
-    <note>BHS has abandoned L and we concur. All of these occurrences are ketib/qere problems. </note>
-  </note>
-  <note>
-    <code>10</code>
+    <code>7</code>
     <gccode>a</gccode>
     <note>Adaptations to a Qere which L and BHS, by their design, do not indicate. </note>
   </note>
   <note>
-    <code>11</code>
+    <code>8</code>
     <gccode>c</gccode>
     <note>We read one or more accents in L differently than BHS. Often this notation indicates a typographical error in BHS. </note>
   </note>
   <note>
-    <code>12</code>
+    <code>9</code>
     <gccode>k</gccode>
     <note>We read one or more consonants in L differently from BHS. </note>
   </note>
   <note>
-    <code>13</code>
-    <gccode>m</gccode>
-    <note>Miscellaneous notes to the text and occasions where more than one bracket category applies. </note>
-  </note>
-  <note>
-    <code>14</code>
+    <code>10</code>
     <gccode>n</gccode>
     <note>Marks an anomalous form. </note>
   </note>
   <note>
-    <code>15</code>
+    <code>11</code>
     <gccode>p</gccode>
-    <note>We read punctuation (maqaf, dagesh or mapiq) in L differently from BHS. </note>
+    <note>We read punctuation in L differently from BHS. </note>
   </note>
   <note>
-    <code>16</code>
+    <code>12</code>
     <gccode>q</gccode>
     <note>We have abandoned or added a ketib/qere relative to BHS. In doing this we agree with L against BHS. </note>
   </note>
   <note>
-    <code>17</code>
+    <code>13</code>
     <gccode>v</gccode>
     <note>We read one or more vowels in L differently from BHS. </note>
   </note>
   <note>
-    <code>18</code>
+    <code>14</code>
     <gccode>y</gccode>
     <note>Yathir readings in L which we have designated as Qeres when both Dothan and BHS list a Qere. </note>
   </note>
   <note>
-    <code>19</code>
+    <code>15</code>
     <gccode>C</gccode>
     <note>We read one or more accents in L differently from BHQ. </note>
   </note>
   <note>
-    <code>20</code>
+    <code>16</code>
     <gccode>F</gccode>
     <note>Marks a consonant with an anomalous final form that is word-medial.</note>
   </note>
   <note>
-    <code>21</code>
+    <code>17</code>
     <gccode>K</gccode>
-    <note>We read one or more consonants in L differently from BHQ. (Currently unused.) </note>
+    <note>We read one or more consonants in L differently from BHQ. </note>
   </note>
   <note>
-    <code>22</code>
+    <code>18</code>
     <gccode>M</gccode>
     <note>Marks a word with a final consonant that is a medial (not a final) form. </note>
   </note>
   <note>
-    <code>23</code>
+    <code>19</code>
     <gccode>P</gccode>
-    <note>We read the punctuation (maqaf, dagesh or mapiq) in L differently from BHQ. </note>
+    <note>We read the punctuation in L differently from BHQ. </note>
   </note>
   <note>
-    <code>24</code>
+    <code>20</code>
     <gccode>Q</gccode>
     <note>Marks a place where we agree with BHQ against BHS in reading L. </note>
   </note>
   <note>
-    <code>25</code>
+    <code>21</code>
+    <gccode>U</gccode>
+    <note>We agree with both BHS 1997 and BHQ on an unexpected reading. </note>
+  </note>
+  <note>
+    <code>22</code>
     <gccode>V</gccode>
     <note>We read one or more vowels in L differently from BHQ. </note>
   </note>

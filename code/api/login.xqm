@@ -1,5 +1,5 @@
 xquery version "1.0";
-(: api login
+(:~ api login
  : 
  : Open Siddur Project
  : Copyright 2011-2012 Efraim Feinstein <efraim@opensiddur.org>
@@ -19,7 +19,7 @@ declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors"; 
 
-(:~ GET is a query for who is logged in. 
+(:~ Query who is currently logged in. 
  : @return HTTP 200 with an XML entity with the currently logged in user 
  :)
 declare 
@@ -34,6 +34,9 @@ declare
 (:~ GET HTML: usually, used as a who am I function, 
  : but may also be used to log in by query params.
  : Please do not use it that way, except for debugging
+ : @param $user User to log in via HTTP GET
+ : @param $password Password of user to log in via HTTP GET
+ : @return Who am I as HTML
  :)
 declare 
   %rest:GET
@@ -67,6 +70,11 @@ declare
   )
 };
 
+(:~ Log in a user using XML parameters
+ : @param $body A document containing login/(user/string(), password/string())
+ : @return HTTP 204 Login successful
+ : @error HTTP 400 Wrong user name or password
+ :)
 declare 
   %rest:POST("{$body}")
   %rest:path("/api/login")
@@ -78,6 +86,12 @@ declare
   login:post-form($body//user, $body//password)
 };
 
+(:~ Log in a user using a form
+ : @param $user User name
+ : @param $password Password
+ : @return HTTP 204 Login successful
+ : @error HTTP 400 Wrong user name or password
+ :)
 declare 
   %rest:POST
   %rest:path("/api/login")
@@ -110,7 +124,9 @@ declare
     )
 };
 
-(:~ log out :)
+(:~ log out 
+ : @return HTTP 204 
+ :)
 declare function local:logout(
   ) as element(rest:response) {
   app:logout-credentials(),
@@ -122,7 +138,9 @@ declare function local:logout(
   </rest:response>
 };
 
-(:~ request to log out :)
+(:~ request to log out from session-based login
+ : @return HTTP 204 on success
+ :)
 declare 
   %rest:DELETE
   %rest:path("/api/login")
@@ -131,7 +149,9 @@ declare
   local:logout()
 };
 
-(:~ request to log out :)
+(:~ request to log out from session-based login
+ : @see login:delete
+ :)
 declare 
   %rest:GET
   %rest:path("/api/logout")
@@ -140,7 +160,9 @@ declare
   local:logout()
 };
 
-(:~ request to log out :)
+(:~ request to log out 
+ : @see login:delete
+ :)
 declare 
   %rest:POST
   %rest:path("/api/logout")

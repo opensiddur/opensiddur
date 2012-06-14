@@ -32,6 +32,36 @@ declare variable $user:path := "/user";
 (: path to schema :)
 declare variable $user:schema := "/schema/contributor.rnc";
 
+(:~ Get the API path for a given user or profile
+ : @param $name The user name
+ : @return the API URI that references a user of a given name or empty-sequence()
+ :)
+declare function user:api-path(
+  $name as xs:string
+  ) as xs:string? {
+  let $doc := collection($user:path)//tei:idno[.=$name]/root(.)
+  where $doc
+  return
+    concat("/api", $user:path, "/", 
+      encode-for-uri(
+        replace(util:document-name($doc), "\.xml$", "")
+      )
+    )
+};
+
+declare function user:db-path(
+  $name as xs:string
+  ) as xs:string? {
+  let $doc := collection($user:path)//tei:idno[.=$name]/root(.)
+  where $doc
+  return
+    concat($user:path, "/", 
+      encode-for-uri(
+        replace(util:document-name($doc), "\.xml$", "")
+      )
+    )
+};
+
 declare function local:result-title(
   $result as element(j:contributor)
   ) as xs:string {
@@ -278,7 +308,7 @@ declare
                     sm:chgrp($uri, $name)
                   }
                   <http:response status="201">
-                    <http:header name="Location" value="/api/user/{$name}"/>
+                    <http:header name="Location" value="/api/user/{encode-for-uri($name)}"/>
                   </http:response>
                 </rest:response>
               else 

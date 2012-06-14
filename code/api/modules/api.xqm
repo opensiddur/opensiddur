@@ -681,6 +681,8 @@ declare function api:serialize-as(
     then
     	concat('method=xhtml omit-xml-declaration=no indent=no media-type=',
     	  ($media-type, 'text/html')[1])
+    else if ($ser = 'html5')
+    then 'method=html5'
 		else
 			error(xs:QName('err:INTERNAL'),concat('Undefined serialization option: ', $serialization))
 	return
@@ -777,7 +779,7 @@ declare function api:rest-response(
         $response instance of element(rest:response) and
         empty($r[2])
         )
-      then util:declare-option("exist:serialize", "method=text")
+      then api:serialize-as("txt")
       else ()
     for $element in $response/*
     return
@@ -794,7 +796,14 @@ declare function api:rest-response(
         return
           typeswitch($parameter)
           case element(output:method) 
-          return util:declare-option("exist:serialize", concat("method=",$parameter/@value))
+          return 
+            if ($parameter/@value="text")
+            then api:serialize-as("txt")
+            else if ($parameter/@value=("xhtml", "html"))
+            then api:serialize-as($parameter/@value,api:get-accept-format(api:html-content-type()))
+            else if ($parameter/@value="html5")
+            then api:serialize-as("html5")
+            else ()
           default return ()
       default return ( (: don't know what to do :)),
     subsequence($r, 2)
