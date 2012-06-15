@@ -242,13 +242,12 @@ declare function grammar:number(
       	$context,
       	$string,
       	$string-position,
-      	element {
+      	(
       		if ($context/self::p:zeroOrOne or $context/self::p:zeroOrMore)
-          then 'r:empty' 
-          else 'r:no-match'
-        }{
-        	<r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
-        }
+          then <r:empty/> 
+          else <r:no-match/>,
+          <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+        )
       )
     )
     else if (empty($match) and $found-already > 0)
