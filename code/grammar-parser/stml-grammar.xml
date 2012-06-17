@@ -47,9 +47,11 @@ The structure of an STML document:
   <term name="IgnorableWhitespace">
     <!-- whitespace that is generally ignorable, not
     including newlines -->
-    <zeroOrOne>
-      <expAnon>[\t ]*</expAnon>
-    </zeroOrOne>
+    <choice>
+      <!-- XSLT cannot handle expAnon being empty -->
+      <empty/>
+      <expAnon>[\t ]+</expAnon>
+    </choice>
   </term>
   <term name="IgnorableLinespace">
     <!-- whitespace that is ignorable that includes newlines -->
@@ -344,7 +346,7 @@ The structure of an STML document:
     <expAnon>\{p\.\s+</expAnon>
     <exp name="BookPage">\S+</exp>
     <zeroOrOne>
-      <expAnon>\s*</expAnon>
+      <expAnon>\s+</expAnon>
       <exp name="ScanPage">\d+</exp>
     </zeroOrOne>
     <expAnon>\s*\}\s*</expAnon>
