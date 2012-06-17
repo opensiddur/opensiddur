@@ -3,167 +3,296 @@
 <!--
 This is a parser for a limited vocabulary of STML "Sacred Texts Markup Language"
 
-Copyright 2010 Efraim Feinstein <efraim.feinstein@gmail.com>
+Copyright 2010,2012 Efraim Feinstein <efraim@opensiddur.org>
 
 Part of the Open Siddur Project
 
-This file is released under the GNU Lesser General Public License, version 3, or later. 
- 
-$Id: stml-grammar.xml 749 2011-04-18 19:13:26Z efraim.feinstein $
+This file is released under the GNU Lesser General Public License, version 3, or later.
+
+The structure of an STML document:
+{stml "language"}
+{bibl 
+  {title ...}
+  {author ...}
+  {editor ...}
+  {publisher ...}
+  {pubPlace ...}
+  {date ...}
+  {page-images ...}
+}
+{contributor "handle"
+  {name ...}
+  {organization ...}
+  {email ...}
+  {website ...}
+  {appliesTo ...}
+}+
+{file "shortname" "human readable title"}
+
+{file "shortname2" "human readable title"}
+...
+{/file "shortname2"}
+...
+{/file "shortname"}
  -->
 <grammar xmlns="http://jewishliturgy.org/ns/parser">
-  <term name="AllContent">
-    <zeroOrOne>
-      <expAnon>\s+</expAnon>
-    </zeroOrOne>
-    <oneOrMore>
-      <choice>
-        <termRefAnon name="ExternalCommand"/><!--should be anon-->
-        <termRef name="ParagraphText"/>
-      </choice>
-    </oneOrMore>
-  </term>
-  <term name="ExternalCommand">
-    <choice>
-      <group>
-        <expAnon>\{</expAnon>
-        <choice>
-          <termRef name="PoetryMode"/>
-          <termRef name="ProseMode"/>
-          <termRef name="SectionCommand"/>
-          <termRef name="ContribCommand"/>
-          <termRef name="PageBreakCommand"/>
-          <termRef name="HebrewCommand"/>
-          <termRef name="FootNoteCommand"/>
-          <termRef name="InstructCommand"/>
-          <termRef name="NoteCommand"/>
-          <termRef name="TitleCommand"/>
-          <termRef name="FileCommand"/>
-          <termRef name="ParallelCommand"/>
-          <termRef name="IncludeBlockCommand"/>
-          <termRef name="BibleBlockCommand"/>
-          <termRef name="RemarkCommand"/>
-        </choice>
-        <expAnon>\s*\}\s*</expAnon>
-      </group>
-      <termRef name="HorizontalRuleCommand"/>
-    </choice>
+  <term name="STML">
+    <termRef name="STMLCommand"/>
     <zeroOrMore>
-      <termRefAnon name="EOL"/>
+      <termRef name="RemarkCommand"/>
+    </zeroOrMore>
+    <termRef name="BiblCommand"/>
+    <oneOrMore>
+      <zeroOrMore>
+        <termRef name="RemarkCommand"/>
+      </zeroOrMore>
+      <termRef name="ContributorCommand"/>
+    </oneOrMore>
+    <zeroOrMore>
+      <termRef name="RemarkCommand"/>
+    </zeroOrMore>
+    <termRefAnon name="FileContent"/>
+    <zeroOrMore>
+      <termRef name="RemarkCommand"/>
     </zeroOrMore>
   </term>
-  <term name="SectionCommand">
-    <expAnon>section\s+</expAnon>
-    <termRef name="FormattedText" alias="SectionName"/>
-  </term>
-  <term name="RemarkCommand">
-    <expAnon>rem\s+</expAnon>
-    <exp name="Comment">[^}]+</exp>    
-  </term>
-  <term name="ParagraphText">
-    <oneOrMore>
-      <choice>
-        <termRefAnon name="InParagraphCommand"/>
-        <termRef name="SegmentedText"/>
-      </choice>
-    </oneOrMore>
-    <choice>
-      <oneOrMore>
-        <termRef name="EOL"/>
-      </oneOrMore>
-      <empty/>
-    </choice>
-  </term>
-  <term name="PoetryMode">
-    <expAnon>poetry</expAnon>
-  </term>
-  <term name="ProseMode">
-    <expAnon>prose</expAnon>
-  </term>
-  <term name="InParagraphCommand">
-    <choice>
-      <termRef name="VerseDivision"/>
-      <termRefAnon name="SegmentLikeCommand"/>
-      <termRef name="SmallFontCommand"/>
-      <termRef name="BigFontCommand"/>
-      <termRef name="ItalicsCommand"/>
-      <termRef name="SmallCapsFontCommand"/>
-      <termRef name="IndentCommand"/>
-      <group>
-        <expAnon>\{</expAnon>
-        <choice>
-          <termRef name="HebrewCommand"/>
-          <termRef name="NamedCommand"/>
-          <termRef name="FootRefCommand"/>
-          <termRef name="PoetryMode"/>
-          <termRef name="ProseMode"/>
-          <termRef name="EmphasisCommand"/>
-        </choice>
-        <expAnon>\s*\}[ \t]*</expAnon>
-      </group>
-    </choice>
-  </term>
-  <!--  commands that replace segments -->
-  <term name="SegmentLikeCommand">
-    <expAnon>\{</expAnon>
-    <choice>
-      <termRef name="IncludeCommand"/>
-      <termRef name="BibleCommand"/>
-    </choice>
-    <expAnon>\s*\}</expAnon>
+  <term name="IgnorableWhitespace">
+    <!-- whitespace that is generally ignorable, not
+    including newlines -->
     <zeroOrOne>
-      <termRef name="EOL"/>
+      <expAnon>[\t ]*</expAnon>
     </zeroOrOne>
   </term>
-  <term name="NamedCommand">
-    <!-- name the contained segments -->
-    <expAnon>named\s+["]</expAnon>
-    <exp name="Id">[^"]+</exp>
+  <term name="IgnorableLinespace">
+    <!-- whitespace that is ignorable that includes newlines -->
+    <expAnon>\s*</expAnon>
+  </term>
+  <term name="STMLCommand">
+    <expAnon>\{stml\s+["]</expAnon>
+    <exp name="Language">[^"]+</exp>
     <expAnon>["]\s+</expAnon>
+    <exp name="DocType">(original|translation)</exp>
+    <zeroOrOne>
+      <expAnon>\s*["]</expAnon>
+      <exp name="Argument"></exp>
+      <expAnon>["]</expAnon>
+    </zeroOrOne>
+    <expAnon>\s*\}\s*</expAnon>
+  </term>
+<!-- 
+{bibl 
+  {title ...}
+  {author ...}
+  {editor ...}
+  {edition ...}
+  {publisher ...}
+  {place ...}
+  {date ...}
+  {page-images ...}
+}
+ -->
+  <term name="BiblCommand">
+    <expAnon>\{bibl\s+</expAnon>
+    <termRef name="TitleCommand"/>
     <oneOrMore>
-      <termRef name="SegmentedText"/>
+      <termRef name="AuthorEditorCommand"/>
     </oneOrMore>
-  </term>
-  <term name="InSegmentCommand">
-    <expAnon>\{</expAnon>
-    <choice>
-      <termRef name="InstructCommand"/>
-      <termRef name="NoteCommand"/>
-      <termRef name="HebrewCommand"/>
-      <termRef name="TranslitCommand"/>
-      <termRef name="DivineNameCommand"/>
-      <termRef name="FootRefCommand"/>
-      <termRef name="ContCommand"/>
-      <termRef name="SicCommand"/>
-      <termRef name="PageReferenceCommand"/>
-      <termRef name="ReferenceCommand"/>
-      <termRef name="FootnotePageBreakCommand"/>
-    </choice>
-    <expAnon>\s*\}[ \t]*</expAnon>  
-  </term>
-  <term name="Command">
-    <expAnon>\{</expAnon>
-    <exp name="CommandName">[^\s\.]+</exp>
-    <expAnon>\.?\s+</expAnon>
-    <termRefAnon name="AllContent"/>
-    <expAnon>\s*\}</expAnon>
+    <oneOrMore>
+      <termRef name="PubInfoCommand"/>
+    </oneOrMore>
+    <termRef name="PubDateCommand"/>
+    <oneOrMore>
+      <termRef name="PageRefCommand"/>
+    </oneOrMore>
+    <expAnon>\s*\}\s*</expAnon>
   </term>
   <term name="TitleCommand">
-    <expAnon>title\s+</expAnon>
-    <termRef name="UnsegmentedText" alias="Title"/>
+    <expAnon>\{title\s+["]</expAnon>
+    <exp name="Title">[^"]+</exp>
+    <expAnon>["]\s*\}\s*</expAnon>
+  </term>
+  <term name="AuthorEditorCommand">
+    <expAnon>\{</expAnon>
+    <exp name="Type">(author|editor)</exp>
+    <expAnon>\s+["]</expAnon>
+    <exp name="AuthEdit">[^"]+</exp>
+    <expAnon>["]\s*\}\s*</expAnon>
+  </term>
+  <term name="PubInfoCommand">
+    <expAnon>\{</expAnon>
+    <exp name="Type">(publisher|place|edition)</exp>
+    <expAnon>\s+["]</expAnon>
+    <exp name="Info">[^"]+</exp>
+    <expAnon>["]\s*\}\s*</expAnon>
+  </term>
+  <term name="PubDateCommand">
+    <expAnon>\{date\s+</expAnon>
+    <exp name="Date">\d+([-]\d+([-]\d+)?)?</exp>
+    <expAnon>\s*\}\s*</expAnon>
+  </term>
+  <term name="PageRefCommand">
+    <expAnon>\{</expAnon>
+    <exp name="Type">(page-images|page-ref)</exp>
+    <expAnon>\s+["]</expAnon>
+    <exp name="URL">[^"]+</exp>
+    <expAnon>["]\s*\}\s*</expAnon>
+  </term>
+<!-- 
+{contributor "Handle" 
+  {name "Full Name"}
+  {organization "Organization Name"}
+  {email "address"}
+  {website "url"}
+  {applies-to "FileShortName1" "FileShortName2"}
+}
+ -->  
+  <term name="ContributorCommand">
+    <expAnon>\{contributor\s+["]</expAnon>
+    <exp name="Handle">[^"]+</exp>
+    <expAnon>["]\s+</expAnon>
+    <zeroOrMore>
+      <termRef name="ContributorIDCommand"/>
+    </zeroOrMore>
+    <termRef name="AppliesToCommand"/>
+    <expAnon>\s*\}\s*</expAnon>
+  </term>
+  <term name="ContributorIDCommand">
+    <expAnon>\{</expAnon>
+    <exp name="Type">(name|organization|email|website)</exp>
+    <expAnon>\s+["]</expAnon>
+    <exp name="Argument">[^"]+</exp>
+    <expAnon>["]\s*\}\s*</expAnon>
+  </term>
+  <term name="AppliesToCommand">
+    <expAnon>\{applies-to</expAnon>
+    <oneOrMore>
+      <expAnon>\s+["]</expAnon>
+      <exp name="FileShortName">[^"]+</exp>
+      <expAnon>["]</expAnon>
+    </oneOrMore>
+    <expAnon>\s*\}\s*</expAnon>
+  </term>
+  <term name="FileContent">
+    <termRef name="FileCommand"/>
+    <oneOrMore>
+      <choice>
+        <!-- HorizontalRule and segment can both match to the same text
+        so ~hr has to come first  -->
+        <termRef name="HorizontalRuleCommand"/>
+        <termRef name="FileContent"/>
+        <termRef name="NamedCommand"/>
+        <termRef name="EndNamedCommand"/>
+        <termRef name="ParagraphBreak"/>
+        <termRef name="PageBreakCommand"/>
+        <termRef name="VerseDivision"/>
+        <termRef name="RemarkCommand"/>
+        <termRef name="InstructCommand"/>
+        <termRef name="EndInstructCommand"/>
+        <termRef name="NoteCommand"/>
+        <termRef name="EndNoteCommand"/>
+        <termRef name="PoetryMode"/>
+        <termRef name="EndPoetryMode"/>
+        <termRef name="SectionCommand"/>
+        <termRef name="IncludeBlockCommand"/>
+        <termRef name="HebrewCommand"/>
+        <termRef name="SegmentLike"/>
+        <termRef name="Pausal"/>
+        <termRef name="LineBreak"/>
+        <termRef name="FootNoteCommand"/>
+      </choice>
+    </oneOrMore>
+    <termRef name="EndFileCommand"/>
+  </term>
+  <term name="NoteContent">
+    <oneOrMore>
+      <choice>
+        <termRef name="ParagraphBreak"/>
+        <termRef name="LineBreak"/>
+        <termRef name="RemarkCommand"/>
+        <termRef name="SegmentLike"/>
+        <termRef name="FootnotePageBreakCommand"/>
+        <termRef name="Pausal"/>
+      </choice>
+    </oneOrMore>  
   </term>
   <term name="FileCommand">
-    <expAnon>file\s+["]</expAnon>
-    <exp name="Title">[^"]+</exp>
+    <expAnon>\{file\s+["]</expAnon>
+    <exp name="ShortName">[^"]+</exp>
     <expAnon>["]</expAnon>
     <zeroOrOne>
       <expAnon>\s+["]</expAnon>
-      <exp name="Filename">[^"]+</exp>
+      <exp name="Title">[^"]+</exp>
       <expAnon>["]</expAnon>
     </zeroOrOne>
+    <expAnon>\s*\}\s*</expAnon>
+  </term>
+  <term name="EndFileCommand">
+    <expAnon>\{/file\s+["]</expAnon>
+    <exp name="ShortName">[^"]+</exp>
+    <expAnon>["]\s*\}\s*</expAnon>
+  </term>
+  <term name="ParagraphBreak">
+    <expAnon>(\r?\n)(\r?\n)+</expAnon>
+  </term>
+  <term name="LineBreak">
+    <expAnon>(\r?\n)</expAnon>
+  </term>
+  <term name="NamedCommand">
+    <expAnon>\{named\s+["]</expAnon>
+    <exp name="Name">[^"]+</exp>
+    <expAnon>["]\s*\}\s*</expAnon>
+  </term>
+  <term name="EndNamedCommand">
+    <expAnon>\{/named\s+["]</expAnon>
+    <exp name="Name">[^"]+</exp>
+    <expAnon>["]\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
+  </term>
+  <term name="SectionCommand">
+    <expAnon>\{section\s+</expAnon>
+    <termRef name="SegmentLike" alias="SectionName"/>
+    <expAnon>\}\s*</expAnon>
+  </term>
+  <term name="RemarkCommand">
+    <expAnon>\{rem\s+</expAnon>
+    <exp name="Comment">[^}]+</exp>
+    <expAnon>\s*\}\s*</expAnon>    
+  </term>
+  <term name="PoetryMode">
+    <expAnon>\{poetry\}\s*</expAnon>
+  </term>
+  <term name="EndPoetryMode">
+    <expAnon>\{((prose)|(/poetry))\s*\}\s*</expAnon>
+  </term>
+  <!--  anything that can be in place of a segment -->
+  <term name="SegmentLike">
+    <choice>
+      <termRef name="IncludeCommand"/>
+      <termRef name="BibleCommand"/>
+      <termRefAnon name="SegmentContent"/>
+    </choice>
+  </term>
+  <term name="SegmentContent">
+    <zeroOrOne>
+      <termRef name="ContCommand"/>
+    </zeroOrOne>
+    <oneOrMore>
+      <choice>
+        <termRef name="TranslitCommand"/>
+        <termRef name="DivineNameCommand"/>
+        <termRef name="FootRefCommand"/>
+        <termRef name="SicCommand"/>
+        <termRef name="PageReferenceCommand"/>
+        <termRef name="ReferenceCommand"/>
+        <termRef name="Text"/>
+        <termRef name="EmphasisCommand"/>
+        <termRef name="BeginFormattingCommand"/>
+        <termRef name="EndFormattingCommand"/>
+      </choice>  
+    </oneOrMore>
   </term>
   <term name="TranslitCommand">
-    <expAnon>translit\s+</expAnon>
+    <expAnon>\{translit\s+</expAnon>
     <exp name="LangCode">\S+</exp>
     <expAnon>\s+["]</expAnon>
     <exp name="AsWritten">[^"]+</exp>
@@ -173,74 +302,41 @@ $Id: stml-grammar.xml 749 2011-04-18 19:13:26Z efraim.feinstein $
       <exp name="OriginalLanguage">[^"]+</exp>
       <expAnon>["]\s*</expAnon>
     </zeroOrOne>
+    <expAnon>\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="DivineNameCommand">
-    <expAnon>dn\s+</expAnon>
-    <termRef name="UnsegmentedText" alias="DivineName"/>
+    <expAnon>\{dn\s+</expAnon>
+    <termRef name="Text" alias="DivineName"/>
+    <expAnon>\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
-  <!-- {parallel "original base uri" "translation base uri" {parallelGroup}+} -->
-  <term name="ParallelCommand">
-    <expAnon>parallel\s+</expAnon>
-    <expAnon>["]</expAnon>
-    <exp name="OriginalBase">[^"]</exp>
-    <expAnon>["]\s+["]</expAnon>
-    <exp name="TranslationBase">[^"]</exp>
-    <expAnon>["]\s*</expAnon>
-    <oneOrMore>
-      <termRef name="ParallelGroup"/>
-    </oneOrMore>
-  </term>
-  <term name="ParallelGroup">
-    <expAnon>\{\s*</expAnon>
-    <oneOrMore>
-      <expAnon>["]</expAnon>
-      <exp name="Original">[^"]+</exp>
-      <expAnon>["]\s*</expAnon>
-    </oneOrMore>
-    <expAnon>\}\s*=\s*\{</expAnon>
-    <oneOrMore>
-      <expAnon>["]</expAnon>
-      <exp name="Parallel">[^"]+</exp>
-      <expAnon>["]\s*</expAnon>
-    </oneOrMore>
-    <expAnon>\}\s*</expAnon>
-  </term>
-  <term name="ContribCommand">
-    <expAnon>contrib\s+</expAnon>
-    <zeroOrOne>
-      <!-- note:encoder is not in contribtype because this is unencoded! -->
-      <exp name="Role">(scanner|author|transcriber|proofreader|editor|encoder)</exp>
-      <expAnon>\s+</expAnon>
-    </zeroOrOne>
-    <oneOrMore>
-      <expAnon>["]</expAnon>
-      <exp name="Name">[^"]+</exp>
-      <expAnon>["]\s*</expAnon>
-    </oneOrMore>
-  </term>
-  <!-- not an actual stml command.  Used to include a section by reference: -->
   <term name="IncludeCommand">
-    <expAnon>include\s+["]</expAnon>
-    <exp name="URI">[^"]+</exp>
-    <expAnon>["]</expAnon>
+    <expAnon>\{include\s+["]</expAnon>
+    <exp name="ShortName">[^"]+</exp>
+    <expAnon>["]\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="IncludeBlockCommand">
-    <expAnon>include\s?block\s+["]</expAnon>
-    <exp name="URI">[^"]+</exp>
-    <expAnon>["]</expAnon>
+    <expAnon>\{include\s?block\s+["]</expAnon>
+    <exp name="ShortName">[^"]+</exp>
+    <expAnon>["]\s*\}\s*</expAnon>
+    <!-- include block always results in a paragraph-like
+    entity, so all linespace is ignorable after it -->
   </term>
   <term name="BibleCommand">
-    <expAnon>bible\s+["]</expAnon>
+    <expAnon>\{bible\s+["]</expAnon>
     <exp name="bref">[^"]+</exp>
-    <expAnon>["]</expAnon>
+    <expAnon>["]\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="BibleBlockCommand">
-    <expAnon>bible\s?block\s+["]</expAnon>
+    <expAnon>\{bible\s?block\s+["]</expAnon>
     <exp name="bref">[^"]+</exp>
-    <expAnon>["]</expAnon>
+    <expAnon>["]\s*\}\s*</expAnon>
   </term>
   <term name="SicCommand">
-    <expAnon>sic\s+["]</expAnon>
+    <expAnon>\{sic\s+["]</expAnon>
     <zeroOrOne><!-- sic can correct nothing... -->
       <exp name="IncorrectText">[^"]+</exp>
     </zeroOrOne>
@@ -248,140 +344,115 @@ $Id: stml-grammar.xml 749 2011-04-18 19:13:26Z efraim.feinstein $
     <zeroOrOne><!-- or it can correct to nothing -->
       <exp name="CorrectedText">[^"]+</exp>
     </zeroOrOne>
-    <expAnon>["]</expAnon>
+    <expAnon>["]\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="PageBreakCommand">
-    <expAnon>p\.\s+</expAnon>
-    <exp name="PageNumber">[^}]+</exp>
+    <expAnon>\{p\.\s+</expAnon>
+    <exp name="BookPage">\S+</exp>
+    <zeroOrOne>
+      <expAnon>\s*</expAnon>
+      <exp name="ScanPage">\d+</exp>
+    </zeroOrOne>
+    <expAnon>\s*\}\s*</expAnon>
   </term>
   <!-- prr is just a number, pr contains the text "Page x" -->
   <term name="PageReferenceCommand">
+    <expAnon>\{</expAnon>
     <exp name="ReferenceType">pr[r]?</exp>
     <expAnon>\.\s+</expAnon>
-    <exp name="PageNumber">[^}]+</exp>
+    <exp name="PageNumber">\S+</exp>
+    <zeroOrOne>
+      <expAnon>\s+["]</expAnon>
+      <exp name="ShortName">[^"]+</exp>
+      <expAnon>["]</expAnon>
+    </zeroOrOne>
+    <expAnon>\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="ReferenceCommand">
-    <expAnon>ref\s+["]</expAnon>
+    <expAnon>\{ref\s+["]</expAnon>
     <exp name="Reference">[^"]+</exp>
-    <expAnon>["]\s+["]</expAnon>
-    <exp name="Text">[^"]+</exp>
-    <expAnon>["]\s*</expAnon>
+    <expAnon>["]\s+</expAnon>
+    <termRef name="SegmentContent"/>
+    <expAnon>\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="FootnotePageBreakCommand">
-    <expAnon>(f|footnote\s)p\.\s+</expAnon>
+    <expAnon>\{(f|footnote\s)p\.\s+</expAnon>
     <exp name="PageNumber">[^}]+</exp>
+    <expAnon>\}\s*</expAnon>
   </term>
   <term name="FootRefCommand">
-    <expAnon>fr\.\s+</expAnon>
+    <expAnon>\{fr\.\s+</expAnon>
     <exp name="Reference">[^}]+</exp>
+    <expAnon>\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="FootNoteCommand">
-    <expAnon>fn\.\s+</expAnon>
+    <expAnon>\{fn\.\s+</expAnon>
     <exp name="Number">[^.]+</exp>
-    <expAnon>.\s+</expAnon>
-    <oneOrMore>
-      <choice>
-        <termRef name="UnsegmentedText"/>
-        <termRef name="SegmentedText"/>
-        <termRef name="ParagraphText"/>
-      </choice>
-    </oneOrMore>
+    <expAnon>\.\s+</expAnon>
+    <termRef name="NoteContent"/>
+    <expAnon>\s*\}\s*</expAnon>
   </term>
   <term name="InstructCommand">
-    <expAnon>instruct\s+</expAnon>
-    <termRef name="UnsegmentedText"/>
+    <expAnon>\{instruct\s+["]</expAnon>
+    <exp name="ShortName">[^"]+</exp>
+    <expAnon>["]\s+</expAnon>
+    <oneOrMore>
+      <termRef name="NoteContent"/>
+    </oneOrMore>
+    <expAnon>\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
+  </term>
+  <term name="EndInstructCommand">
+    <expAnon>\{/instruct\s+["]</expAnon>
+    <exp name="ShortName">[^"]+</exp>
+    <expAnon>["]\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="NoteCommand">
-    <expAnon>note\s+</expAnon>
-    <oneOrMore>
-      <choice>
-        <termRef name="UnsegmentedText"/>
-        <termRef name="SegmentedText"/>
-        <termRef name="ParagraphText"/>
-      </choice>
-    </oneOrMore>
+    <expAnon>\{note\s+["]</expAnon>
+    <exp name="ShortName">[^"]+</exp>
+    <expAnon>["]\s+</expAnon>
+    <termRef name="NoteContent"/>
+    <expAnon>\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
+  </term>
+  <term name="EndNoteCommand">
+    <expAnon>\{/note\s+["]</expAnon>
+    <exp name="ShortName">[^"]+</exp>
+    <expAnon>["]\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="HebrewCommand">
-    <expAnon>(he|hbw|hb)\s+</expAnon>
-    <termRef name="TextualContent" alias="HebrewText" />
+    <expAnon>\{(he|hbw|hb)\s+</expAnon>
+    <oneOrMore>
+      <choice>
+        <termRef name="SegmentContent"/>
+        <termRef name="Pausal"/>
+      </choice>
+    </oneOrMore>
+    <expAnon>\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="ContCommand">
-    <expAnon>cont</expAnon>
-  </term>
-  <term name="SegmentedText">
-    <zeroOrOne>
-      <termRefAnon name="Pausal"/>
-    </zeroOrOne>
-    <termRefAnon name="Text"/>
-    <choice>
-      <group>
-        <termRefAnon name="Pausal"/>
-        <zeroOrOne>
-          <exp name="TextualContent">[']</exp>
-        </zeroOrOne>
-        <zeroOrOne>
-          <expAnon>[ \t]+</expAnon>
-        </zeroOrOne>
-      </group>
-      <termRef name="EOL"/>
-      <group>
-        <group>
-          <termRefAnon name="Pausal"/>
-          <zeroOrOne>
-            <exp name="TextualContent">[']</exp>
-          </zeroOrOne>
-          <zeroOrOne>
-            <expAnon>[ \t]+</expAnon>
-          </zeroOrOne>
-        </group>
-        <termRef name="EOL"/>
-        <zeroOrOne>
-          <end/>
-        </zeroOrOne>
-      </group>
-      <empty/>
-      <end/>
-    </choice>
+    <expAnon>\{cont\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="Text">
-    <oneOrMore>
-      <choice>
-        <termRef name="InSegmentCommand"/><!--anon-->
-        <termRef name="TextualContent"/>
-      </choice>
-    </oneOrMore>
-  </term>
-  <term name="UnsegmentedText">
-    <oneOrMore>
-      <choice>
-        <termRefAnon name="Text"/>
-        <termRefAnon name="Pausal"/>
-        <termRef name="EOL"/>
-      </choice>
-    </oneOrMore>
-  </term>
-  <term name="TextualContent">
     <choice>
       <termRef name="Escape"/>
-      <!-- expAnon>([-][^-])</expAnon-->  <!-- dash but not doubled -->
-      <group>
-        <oneOrMore>
-          <expAnon>[-]?[^-{}\r\n/:.;,\?&lt;&gt;$|~\\]+</expAnon>
-        </oneOrMore>
-      </group>
+      <expAnon>[-]?[^-{}!\r\n/:.;,\?&lt;&gt;$|~\\]+</expAnon>
     </choice>
   </term>
   <term name="Pausal">
     <oneOrMore>
       <!-- include an ellipsis as a pausal -->
-      <exp name="Pausal">([.]\s?[.]\s?[.])|[.;,:\?!]|([-][-])</exp>
+      <exp name="Type">([.]\s?[.]\s?[.])|[.;,:\?!]|([-][-])</exp>
     </oneOrMore>
-    <zeroOrOne>
-      <expAnon>[ ]</expAnon>
-    </zeroOrOne>
-  </term>
-  <term name="EOL">
-    <expAnon>\r?\n</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="VerseDivision">
     <expAnon>/</expAnon>
@@ -391,48 +462,23 @@ $Id: stml-grammar.xml 749 2011-04-18 19:13:26Z efraim.feinstein $
     <expAnon>\s+</expAnon>
   </term>
   <term name="Escape">
-    <expAnon>\\[\{\}/&lt;&gt;$~|]</expAnon>
+    <!-- . not acting as a pausal should be escaped -->
+    <expAnon>\\[\{\}/&lt;&gt;$~|.]</expAnon>
   </term>
-  <!--  formatting commands can occur at the paragraph or segment level -->
-  <term name="FormattedText">
-    <oneOrMore>
-      <choice>
-        <termRef name="SegmentedText"/>
-        <!-- termRef name="UnsegmentedText"/-->
-        <termRef name="ParagraphText"/>
-      </choice>
-    </oneOrMore>
+  <!--  formatting commands -->
+  <term name="BeginFormattingCommand">
+    <expAnon>[$&lt;~|]|([&lt;][Ii][&gt;])</expAnon>
   </term>
-  <term name="SmallFontCommand">
-    <expAnon>[$]</expAnon>
-    <termRefAnon name="FormattedText"/>
-    <expAnon>/[$]</expAnon>
-  </term>
-  <term name="SmallCapsFontCommand">
-    <expAnon>[&lt;]</expAnon>
-    <termRefAnon name="FormattedText"/>
-    <expAnon>[&gt;]</expAnon>
-  </term>
-  <term name="BigFontCommand">
-    <expAnon>[~]</expAnon>
-    <termRefAnon name="FormattedText"/>
-    <expAnon>/[~]</expAnon>
-  </term>
-  <term name="IndentCommand">
-    <expAnon>[|]</expAnon>
-    <termRefAnon name="FormattedText"/>
-    <expAnon>/[|]</expAnon>
-  </term>
-  <term name="ItalicsCommand">
-    <expAnon>[&lt;][iI][&gt;]</expAnon>
-    <termRefAnon name="FormattedText" />
-    <expAnon>[&lt;]/[Ii][&gt;]</expAnon>
+  <term name="EndFormattingCommand">
+    <expAnon>(/[$~|])|[&gt;]|([&lt;]/[Ii][&gt;])</expAnon>
   </term>
   <term name="EmphasisCommand">
-    <expAnon>emph\s+</expAnon>
-    <termRefAnon name="FormattedText"/>
+    <expAnon>\{emph\s+</expAnon>
+    <termRefAnon name="SegmentContent"/>
+    <expAnon>\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="HorizontalRuleCommand">
-    <expAnon>~hr</expAnon>
+    <expAnon>[~]hr\s+</expAnon>
   </term>
 </grammar>
