@@ -38,23 +38,11 @@ The structure of an STML document:
 <grammar xmlns="http://jewishliturgy.org/ns/parser">
   <term name="STML">
     <termRef name="STMLCommand"/>
-    <zeroOrMore>
-      <termRef name="RemarkCommand"/>
-    </zeroOrMore>
     <termRef name="BiblCommand"/>
     <oneOrMore>
-      <zeroOrMore>
-        <termRef name="RemarkCommand"/>
-      </zeroOrMore>
       <termRef name="ContributorCommand"/>
     </oneOrMore>
-    <zeroOrMore>
-      <termRef name="RemarkCommand"/>
-    </zeroOrMore>
     <termRefAnon name="FileContent"/>
-    <zeroOrMore>
-      <termRef name="RemarkCommand"/>
-    </zeroOrMore>
   </term>
   <term name="IgnorableWhitespace">
     <!-- whitespace that is generally ignorable, not
@@ -65,7 +53,12 @@ The structure of an STML document:
   </term>
   <term name="IgnorableLinespace">
     <!-- whitespace that is ignorable that includes newlines -->
-    <expAnon>\s*</expAnon>
+    <zeroOrOne>
+      <expAnon>\s*</expAnon>
+    </zeroOrOne>
+  </term>
+  <term name="ShortName">
+    <expAnon>[\i-[:"]][\c-[:"]]*</expAnon>
   </term>
   <term name="STMLCommand">
     <expAnon>\{stml\s+["]</expAnon>
@@ -167,7 +160,7 @@ The structure of an STML document:
     <expAnon>\{applies-to</expAnon>
     <oneOrMore>
       <expAnon>\s+["]</expAnon>
-      <exp name="FileShortName">[^"]+</exp>
+      <termRef name="ShortName"/>
       <expAnon>["]</expAnon>
     </oneOrMore>
     <expAnon>\s*\}\s*</expAnon>
@@ -199,6 +192,7 @@ The structure of an STML document:
         <termRef name="Pausal"/>
         <termRef name="LineBreak"/>
         <termRef name="FootNoteCommand"/>
+        <termRef name="ContCommand"/>
       </choice>
     </oneOrMore>
     <termRef name="EndFileCommand"/>
@@ -211,13 +205,14 @@ The structure of an STML document:
         <termRef name="RemarkCommand"/>
         <termRef name="SegmentLike"/>
         <termRef name="FootnotePageBreakCommand"/>
+        <termRef name="ContCommand"/>
         <termRef name="Pausal"/>
       </choice>
     </oneOrMore>  
   </term>
   <term name="FileCommand">
     <expAnon>\{file\s+["]</expAnon>
-    <exp name="ShortName">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]</expAnon>
     <zeroOrOne>
       <expAnon>\s+["]</expAnon>
@@ -228,7 +223,7 @@ The structure of an STML document:
   </term>
   <term name="EndFileCommand">
     <expAnon>\{/file\s+["]</expAnon>
-    <exp name="ShortName">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]\s*\}\s*</expAnon>
   </term>
   <term name="ParagraphBreak">
@@ -256,7 +251,8 @@ The structure of an STML document:
   <term name="RemarkCommand">
     <expAnon>\{rem\s+</expAnon>
     <exp name="Comment">[^}]+</exp>
-    <expAnon>\s*\}\s*</expAnon>    
+    <expAnon>\s*\}</expAnon>
+    <termRefAnon name="IgnorableWhitespace"/>    
   </term>
   <term name="PoetryMode">
     <expAnon>\{poetry\}\s*</expAnon>
@@ -273,9 +269,6 @@ The structure of an STML document:
     </choice>
   </term>
   <term name="SegmentContent">
-    <zeroOrOne>
-      <termRef name="ContCommand"/>
-    </zeroOrOne>
     <oneOrMore>
       <choice>
         <termRef name="TranslitCommand"/>
@@ -313,13 +306,13 @@ The structure of an STML document:
   </term>
   <term name="IncludeCommand">
     <expAnon>\{include\s+["]</expAnon>
-    <exp name="ShortName">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]\s*\}</expAnon>
     <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="IncludeBlockCommand">
     <expAnon>\{include\s?block\s+["]</expAnon>
-    <exp name="ShortName">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]\s*\}\s*</expAnon>
     <!-- include block always results in a paragraph-like
     entity, so all linespace is ignorable after it -->
@@ -364,7 +357,7 @@ The structure of an STML document:
     <exp name="PageNumber">\S+</exp>
     <zeroOrOne>
       <expAnon>\s+["]</expAnon>
-      <exp name="ShortName">[^"]+</exp>
+      <termRef name="ShortName"/>
       <expAnon>["]</expAnon>
     </zeroOrOne>
     <expAnon>\s*\}</expAnon>
@@ -398,7 +391,7 @@ The structure of an STML document:
   </term>
   <term name="InstructCommand">
     <expAnon>\{instruct\s+["]</expAnon>
-    <exp name="ShortName">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]\s+</expAnon>
     <oneOrMore>
       <termRef name="NoteContent"/>
@@ -408,13 +401,13 @@ The structure of an STML document:
   </term>
   <term name="EndInstructCommand">
     <expAnon>\{/instruct\s+["]</expAnon>
-    <exp name="ShortName">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]\s*\}</expAnon>
     <termRefAnon name="IgnorableWhitespace"/>
   </term>
   <term name="NoteCommand">
     <expAnon>\{note\s+["]</expAnon>
-    <exp name="ShortName">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]\s+</expAnon>
     <termRef name="NoteContent"/>
     <expAnon>\s*\}</expAnon>
@@ -422,7 +415,7 @@ The structure of an STML document:
   </term>
   <term name="EndNoteCommand">
     <expAnon>\{/note\s+["]</expAnon>
-    <exp name="ShortName">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]\s*\}</expAnon>
     <termRefAnon name="IgnorableWhitespace"/>
   </term>
