@@ -69,7 +69,7 @@ The structure of an STML document:
     <exp name="DocType">(original|translation)</exp>
     <zeroOrOne>
       <expAnon>\s*["]</expAnon>
-      <exp name="Argument"></exp>
+      <exp name="Argument">[^"]+</exp>
       <expAnon>["]</expAnon>
     </zeroOrOne>
     <expAnon>\s*\}\s*</expAnon>
