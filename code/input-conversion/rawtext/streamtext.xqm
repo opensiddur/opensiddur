@@ -47,6 +47,7 @@ declare function stxt:convert(
     case element(r:HorizontalRuleCommand) return stxt:end-p($n)
     case element(r:SectionCommand) return stxt:SectionCommand($n)
     case element(r:SectionName) return stxt:SectionName($n)
+    case element(r:VerseDivision) return stxt:VerseDivision($n)
     case text() return $n
     default return (
       util:log-system-out(("Not implemented in streamtext: ", name($n))),
@@ -241,6 +242,15 @@ declare function stxt:SectionName(
   $e as element(r:SectionName)
   ) {
   <tei:head>{stxt:convert($e/node())}</tei:head>
+};
+
+declare function stxt:VerseDivision(
+  $e as element(r:VerseDivision)
+  ) {
+  <tei:ab type="verse">
+    <tei:label n="chapter">{$e/r:Chapter/string()}</tei:label>
+    <tei:label n="verse">{$e/r:Verse/string()}</tei:label>
+  </tei:ab>
 };
 
 declare function stxt:Escape(

@@ -348,7 +348,7 @@ declare function stml:FileContent(
     <stml:file post-to="{$file-location}">
       <tei:TEI xml:lang="{stml:Language($e)}">{
         stml:header(
-          $e, 
+          $e/r:FileCommand, 
           <tei:title type="main">{
             $file-title
           }</tei:title>
@@ -400,19 +400,21 @@ declare function stml:responsibility(
 };
 
 declare function stml:annotations(
-  $e as element(r:FileCommand)
+  $e as element(r:FileContent)
   ) {
-  <stml:file post-to="{stml:annotation-location($e)}">
-    <tei:TEI xml:lang="{stml:Language($e)}">{
-      stml:header($e,
-        <tei:title type="main">{
-          concat("Notes for ", stml:convert($e/r:Title))
-        }</tei:title>
-      )
-    }</tei:TEI>
-    <j:annotations>
-    </j:annotations>
-  </stml:file>
+  let $file-command := $e/r:FileCommand
+  return
+    <stml:file post-to="{stml:annotation-location($file-command)}">
+      <tei:TEI xml:lang="{stml:Language($e)}">{
+        stml:header($file-command,
+          <tei:title type="main">{
+            concat("Notes for ", stml:convert($file-command/r:Title))
+          }</tei:title>
+        )
+      }</tei:TEI>
+      <j:annotations>
+      </j:annotations>
+    </stml:file>
 };
 
 (:~ generic pass-through :)
