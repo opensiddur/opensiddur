@@ -42,7 +42,7 @@ The structure of an STML document:
     <oneOrMore>
       <termRef name="ContributorCommand"/>
     </oneOrMore>
-    <termRefAnon name="FileContent"/>
+    <termRef name="FileContent"/>
   </term>
   <term name="IgnorableWhitespace">
     <!-- whitespace that is generally ignorable, not
@@ -63,8 +63,11 @@ The structure of an STML document:
     <expAnon>[\i-[:"]][\c-[:"]]*</expAnon>
   </term>
   <term name="STMLCommand">
-    <expAnon>\{stml\s+["]</expAnon>
+    <expAnon>\{stml\s+language\s+["]</expAnon>
     <exp name="Language">[^"]+</exp>
+    <expAnon>["]\s+</expAnon>
+    <expAnon>license\s+["]</expAnon>
+    <exp name="License">(cc-zero|cc-by-sa|cc-by)</exp>
     <expAnon>["]\s+</expAnon>
     <exp name="DocType">(original|translation)</exp>
     <zeroOrOne>
@@ -236,12 +239,12 @@ The structure of an STML document:
   </term>
   <term name="NamedCommand">
     <expAnon>\{named\s+["]</expAnon>
-    <exp name="Name">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]\s*\}\s*</expAnon>
   </term>
   <term name="EndNamedCommand">
     <expAnon>\{/named\s+["]</expAnon>
-    <exp name="Name">[^"]+</exp>
+    <termRef name="ShortName"/>
     <expAnon>["]\s*\}</expAnon>
     <termRefAnon name="IgnorableWhitespace"/>
   </term>
@@ -375,7 +378,7 @@ The structure of an STML document:
   </term>
   <term name="FootnotePageBreakCommand">
     <expAnon>\{(f|footnote\s)p\.\s+</expAnon>
-    <exp name="PageNumber">[^}]+</exp>
+    <exp name="BookPage">[^}]+</exp>
     <expAnon>\}\s*</expAnon>
   </term>
   <term name="FootRefCommand">
