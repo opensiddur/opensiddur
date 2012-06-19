@@ -404,7 +404,7 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
           </elementSpec>
           <elementSpec ident="parallelGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
             <desc>A special type of <gi>linkGrp</gi> that groups units of parallel text by language. The <gi>ptr</gi> 
-            elements must have <att>xml:lang</att> attributes</desc>
+            elements must have <att>targetLang</att> attributes</desc>
             <classes>
               <memberOf key="att.global"/>
             </classes>
@@ -416,7 +416,7 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
             </content>
             <constraintSpec ident="parallelGrp-1" scheme="isoschematron">
               <constraint>
-                <sch:report test="tei:ptr[not(@xml:lang)]">Every tei:ptr inside a parallelGrp requires @xml:lang.</sch:report>
+                <sch:report test="tei:ptr[not(@targetLang)]">Every tei:ptr inside a parallelGrp requires @xml:lang.</sch:report>
               </constraint>
             </constraintSpec>
           </elementSpec>
