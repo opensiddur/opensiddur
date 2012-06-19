@@ -465,7 +465,7 @@ The structure of an STML document:
   </term>
   <!--  formatting commands -->
   <term name="BeginFormattingCommand">
-    <expAnon>[$&lt;~|]|([&lt;][Ii][&gt;])</expAnon>
+    <expAnon>([&lt;][Ii][&gt;])|[$&lt;~|]</expAnon>
   </term>
   <term name="EndFormattingCommand">
     <expAnon>(/[$~|])|[&gt;]|([&lt;]/[Ii][&gt;])</expAnon>
