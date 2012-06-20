@@ -17,6 +17,9 @@ import module namespace name="http://jewishliturgy.org/modules/name"
   at "/code/modules/name.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "/code/api/modules/data.xqm";
+  
+import module namespace stxt="http://jewishliturgy.org/transform/streamtext"
+  at "streamtext.xqm";
 
 declare namespace p="http://jewishliturgy.org/ns/parser";
 declare namespace r="http://jewishliturgy.org/ns/parser-result";
@@ -54,7 +57,6 @@ declare function stml:convert(
   ) as item()* {
   for $n in $node
   return (
-    (:util:log-system-out(("Converting:", $n)),:)
     typeswitch($n)
     case document-node() return stml:convert($n/*)
     case element(r:STML) return stml:STML($n)
@@ -120,8 +122,11 @@ declare function stml:convert(
     case element(r:HebrewCommand) return stml:HebrewCommand($n)
     case element(r:FootRefCommand) return stml:FootRefCommand($n)
     case element(r:PageReferenceCommand) return stml:PageReferenceCommand($n)
-    (:case element(r:ContCommand) return stml:ContCommand($n):)
-    case text() return $n
+    case element(r:ContCommand) return ()
+    case text() return 
+      let $s := normalize-space($n)
+      where $s
+      return text { concat(" ", $s, " ") } 
     default return (
       util:log-system-out(("Not implemented:" ,name($n))),
       stml:convert($n/node())
@@ -385,7 +390,6 @@ declare function stml:file-path(
       
 };
 
-(: TODO: change this to catch r:FileContent :)
 (:~ file conversion :)
 declare function stml:FileContent(
   $e as element(r:FileContent)
@@ -395,12 +399,7 @@ declare function stml:FileContent(
   let $file-location := stml:file-location($file-command)
   let $ShortName := stml:convert($file-command/r:ShortName)
   let $file-title := stml:convert($file-command/r:Title)
-  return (
-    if ($e/parent::r:STML)
-    then () 
-    else 
-      (: this is a file-in-a-file, resulting in an inclusion :)
-      <tei:ptr j:type="external" target="{$file-path}"/>,
+  let $converted :=
     <stml:file post-to="{$file-location}">
       <tei:TEI xml:lang="{stml:Language($e)}">{
         stml:header(
@@ -409,29 +408,23 @@ declare function stml:FileContent(
             $file-title
           }</tei:title>
         ),
-        let $temp-text-stream :=
-          stml:convert($e/node())
-        return (
-          ((: construct page image links :)),
-          <tei:text>
-            <j:streamText xml:id="text">
-              {($temp-text-stream (:construct text stream:))}
-            </j:streamText>
-            <j:concurrent xml:id="concurrent">{
-            ((:construct hierarchy layers:
-            division,
-            paragraph,
-            sentence,
-            line group-line,
-            biblical verse,
-            named division (ab)
-            :))
-            }</j:concurrent>
-          </tei:text>
-        )
+        <tei:text>
+          <stml:temporary-stream>{
+            stml:convert($e/node())
+          }</stml:temporary-stream>
+        </tei:text>
       }</tei:TEI>
-    </stml:file>,
-    stml:annotations($e)
+    </stml:file>
+  return (
+    if ($e/parent::r:STML)
+    then 
+      stxt:assign-xmlids(
+        stxt:convert($converted), 1, 1
+      )
+    else 
+      (: this is a file-in-a-file, resulting in an inclusion :)
+      <tei:ptr j:type="external" target="{$file-path}"/>,
+    $converted
   ) 
 };
 
@@ -539,15 +532,19 @@ declare function stml:page-image-url(
 declare function stml:PageBreakCommand(
   $e as element(r:PageBreakCommand)
   ) {
-  <tei:pb ed="original" n="{stml:convert($e/r:BookPage)}"/>,
-  if (exists($e/r:ScanPage))
-  then
-    <tei:pb
-      ed="scan"
-      n="{stml:convert($e/r:ScanPage)}"
-      facs="{stml:page-image-url($e)}"
-      />
-  else ()
+  let $continued := stml:is-pagebreak-continued($e)
+  return (
+    <tei:pb j:continued="{$continued}" ed="original" n="{stml:convert($e/r:BookPage)}"/>,
+    if (exists($e/r:ScanPage))
+    then
+      <tei:pb
+        j:continued="{$continued}"
+        ed="scan"
+        n="{stml:convert($e/r:ScanPage)}"
+        facs="{stml:page-image-url($e)}"
+        />
+    else ()
+  )
 };
 
 declare function stml:FootnotePageBreakCommand(
@@ -733,9 +730,12 @@ declare function stml:IncludeCommand(
 declare function stml:SegmentContent(
   $e as element(r:SegmentContent)
   ) {
-  <tei:seg>{
-    stml:convert($e/node())
-  }</tei:seg>
+  let $text := stml:convert($e/node())
+  where exists($text) (: nonzero length :)
+  return
+    <tei:seg>{
+      $text
+    }</tei:seg>
 };
 
 declare function stml:HebrewCommand(
@@ -794,6 +794,21 @@ declare function stml:PageReferenceCommand(
         $e/r:PageNumber
       ), " ")
     }</tei:ref>
+};
+
+declare function stml:is-pagebreak-continued(
+  $e as element()
+  ) {
+  let $next-pb :=
+    $e/(
+      following-sibling::r:PageBreakCommand|
+      following-sibling::r:FootnotePageBreakCommand
+      )
+  return    
+    exists(
+      $e/following-sibling::r:ContCommand
+        [empty($next-pb) or (.<<$next-pb)]
+      )  
 };
 
 (:~ generic pass-through :)
