@@ -192,8 +192,7 @@ The structure of an STML document:
         <termRef name="EndPoetryMode"/>
         <termRef name="SectionCommand"/>
         <termRef name="IncludeBlockCommand"/>
-        <termRef name="HebrewCommand"/>
-        <termRef name="SegmentLike"/>
+        <termRefAnon name="SegmentLike"/>
         <termRef name="Pausal"/>
         <termRef name="LineBreak"/>
         <termRef name="FootNoteCommand"/>
@@ -208,7 +207,7 @@ The structure of an STML document:
         <termRef name="ParagraphBreak"/>
         <termRef name="LineBreak"/>
         <termRef name="RemarkCommand"/>
-        <termRef name="SegmentLike"/>
+        <termRefAnon name="SegmentLike"/>
         <termRef name="FootnotePageBreakCommand"/>
         <termRef name="ContCommand"/>
         <termRef name="Pausal"/>
@@ -250,7 +249,7 @@ The structure of an STML document:
   </term>
   <term name="SectionCommand">
     <expAnon>\{section\s+</expAnon>
-    <termRef name="SegmentLike" alias="SectionName"/>
+    <termRefAnon name="SegmentLike"/>
     <expAnon>\}\s*</expAnon>
   </term>
   <term name="RemarkCommand">
@@ -270,7 +269,8 @@ The structure of an STML document:
     <choice>
       <termRef name="IncludeCommand"/>
       <termRef name="BibleCommand"/>
-      <termRefAnon name="SegmentContent"/>
+      <termRef name="SegmentContent"/>
+      <termRef name="HebrewCommand"/>
     </choice>
   </term>
   <term name="SegmentContent">
