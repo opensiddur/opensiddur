@@ -270,11 +270,11 @@ declare function local:query(
         <li class="result">
           <a class="document" href="/api{$orig:path-base}/{$api-name}">{$doc//tei:titleStmt/tei:title[@type="main"]/string()}</a>:
           <ol class="contexts">{
-            for $h in $hit
-            order by ft:score($h) descending
+            for $p in 
+              kwic:summarize($hit, <config xmlns="" width="40" />)
             return
               <li class="context">{
-                kwic:summarize($h, <config xmlns="" width="40" />)
+                $p/*
               }</li>
           }</ol>
         </li>
