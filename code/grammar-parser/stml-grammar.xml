@@ -193,7 +193,6 @@ The structure of an STML document:
         <termRef name="SectionCommand"/>
         <termRef name="IncludeBlockCommand"/>
         <termRefAnon name="SegmentLike"/>
-        <termRef name="Pausal"/>
         <termRef name="LineBreak"/>
         <termRef name="FootNoteCommand"/>
         <termRef name="ContCommand"/>
@@ -210,7 +209,6 @@ The structure of an STML document:
         <termRefAnon name="SegmentLike"/>
         <termRef name="FootnotePageBreakCommand"/>
         <termRef name="ContCommand"/>
-        <termRef name="Pausal"/>
       </choice>
     </oneOrMore>  
   </term>
@@ -288,6 +286,9 @@ The structure of an STML document:
         <termRef name="EndFormattingCommand"/>
       </choice>  
     </oneOrMore>
+    <zeroOrOne>
+      <termRef name="Pausal"/>
+    </zeroOrOne>
   </term>
   <term name="TranslitCommand">
     <expAnon>\{translit\s+</expAnon>
@@ -427,10 +428,7 @@ The structure of an STML document:
   <term name="HebrewCommand">
     <expAnon>\{(he|hbw|hb)\s+</expAnon>
     <oneOrMore>
-      <choice>
-        <termRef name="SegmentContent"/>
-        <termRef name="Pausal"/>
-      </choice>
+      <termRef name="SegmentContent"/>
     </oneOrMore>
     <expAnon>\s*\}</expAnon>
     <termRefAnon name="IgnorableWhitespace"/>
