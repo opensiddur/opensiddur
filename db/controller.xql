@@ -52,16 +52,14 @@ declare function local:do-data(
   then
     switch (api:get-method())
       case "GET"
-      return
-        if ($tokens[4]="OpenSearchDescription")
-        then
-          dindex:open-search(request:get-parameter("source", ""))
-        else
-          dindex:list()
+      return dindex:list()
       default
       return $local:disallowed
   else
     switch($tokens[3])
+    case "OpenSearchDescription"
+    return
+      dindex:open-search(request:get-parameter("source", ""))
     case "original"
     return
       switch (api:get-method())
