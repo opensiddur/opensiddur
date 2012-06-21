@@ -41,15 +41,6 @@ declare function stxt:copy(
   }
 };
 
-(: extract a streamText from the result of stxt:convert() :)
-declare function stxt:extract-streamText(
-  $e as element(j:streamText)
-  ) {
-  element j:streamText {
-    $e/(@*|tei:seg|tei:anchor|tei:ptr)
-  }
-};
-
 declare function stxt:lb(
   $e as element(tei:lb)
   ) {
@@ -152,8 +143,11 @@ declare function stxt:assign-xmlids(
   case element(tei:pc) return stxt:assign-xmlids-w-level($n, $seg-ctr, $w-ctr)
   case element(stml:file) 
     return (
-      (: file level, reset all counters :)
-      stxt:assign-xmlids($n/*[1], 1, 1),
+      element stml:file {
+        $n/@*,
+        (: file level, reset all counters :)
+        stxt:assign-xmlids($n/node()[1], 1, 1)
+      },
       stxt:assign-xmlids($n/following-sibling::node()[1], $seg-ctr, $w-ctr)
     )
   default return (
@@ -162,7 +156,7 @@ declare function stxt:assign-xmlids(
       $n/@*,
       stxt:assign-xmlids($n/node()[1], $seg-ctr, $w-ctr)
     },
-    stxt:assign-xmlids($n/following-sibling::*[1], $seg-ctr, $w-ctr)
+    stxt:assign-xmlids($n/following-sibling::node()[1], $seg-ctr, $w-ctr)
     )
 };
 

@@ -20,6 +20,8 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   
 import module namespace stxt="http://jewishliturgy.org/transform/streamtext"
   at "streamtext.xqm";
+import module namespace hier="http://jewishliturgy.org/transform/hierarchies"
+  at "hierarchies.xqm";
 
 declare namespace p="http://jewishliturgy.org/ns/parser";
 declare namespace r="http://jewishliturgy.org/ns/parser-result";
@@ -123,10 +125,7 @@ declare function stml:convert(
     case element(r:FootRefCommand) return stml:FootRefCommand($n)
     case element(r:PageReferenceCommand) return stml:PageReferenceCommand($n)
     case element(r:ContCommand) return ()
-    case text() return 
-      let $s := normalize-space($n)
-      where $s
-      return text { concat(" ", $s, " ") } 
+    case text() return stml:text($n)
     default return (
       util:log-system-out(("Not implemented:" ,name($n))),
       stml:convert($n/node())
@@ -137,7 +136,7 @@ declare function stml:convert(
 declare function stml:STML(
   $e as element(r:STML)
   ) {
-  stml:convert($e/node())
+  stml:finalize(stml:convert($e/node()))
 };
 
 declare function stml:Language(
@@ -390,6 +389,23 @@ declare function stml:file-path(
       
 };
 
+declare function stml:finalize(
+  $converted as element(stml:file)+
+  ) {
+  let $st := stxt:convert($converted) 
+  let $support := subsequence($st, 1, count($st) - 1)
+  let $data := $st[last()]
+  let $with-ids :=
+    stxt:assign-xmlids(
+      $data, 1, 1
+    )
+  let $added-hierarchies := hier:add-hierarchies($with-ids, $support) 
+  return (
+    $support,
+    hier:separate-files($added-hierarchies)
+  ) 
+};
+
 (:~ file conversion :)
 declare function stml:FileContent(
   $e as element(r:FileContent)
@@ -417,14 +433,12 @@ declare function stml:FileContent(
     </stml:file>
   return (
     if ($e/parent::r:STML)
-    then 
-      stxt:assign-xmlids(
-        stxt:convert($converted), 1, 1
-      )
-    else 
+    then $converted
+    else (
       (: this is a file-in-a-file, resulting in an inclusion :)
       <tei:ptr j:type="external" target="{$file-path}"/>,
-    $converted
+      $converted
+    )
   ) 
 };
 
@@ -556,25 +570,25 @@ declare function stml:FootnotePageBreakCommand(
 declare function stml:NamedCommand(
   $e as element(r:NamedCommand)
   ) {
-  <tei:anchor n="NamedCommand" xml:id="{concat("start-",$e/r:ShortName)}"/>
+  <tei:anchor j:type="NamedCommand" xml:id="{concat("start-",$e/r:ShortName)}"/>
 };
 
 declare function stml:EndNamedCommand(
   $e as element(r:EndNamedCommand)
   ) {
-  <tei:anchor n="EndNamedCommand" xml:id="{concat("end-",$e/r:ShortName)}"/>
+  <tei:anchor j:type="EndNamedCommand" xml:id="{concat("end-",$e/r:ShortName)}"/>
 };
 
 declare function stml:EndNoteCommand(
   $e as element(r:EndNoteCommand)
   ) {
-  <tei:anchor n="EndNoteCommand" xml:id="{concat("end-",$e/r:ShortName)}"/>
+  <tei:anchor j:type="EndNoteCommand" xml:id="{concat("end-",$e/r:ShortName)}"/>
 };
 
 declare function stml:EndInstructCommand(
   $e as element(r:EndInstructCommand)
   ) {
-  <tei:anchor n="EndInstructCommand" xml:id="{concat("end-",$e/r:ShortName)}"/>
+  <tei:anchor j:type="EndInstructCommand" xml:id="{concat("end-",$e/r:ShortName)}"/>
 };
 
 (:~ find out what scan pages a (set of) node(s) is(are) on :)
@@ -618,7 +632,7 @@ declare function stml:note-like-commands(
   if ($e instance of element(r:FootNoteCommand))
   then ()
   else 
-    <tei:anchor n="{local-name($e)}" xml:id="{concat("start-", $e/r:ShortName)}"/>
+    <tei:anchor j:type="{local-name($e)}" xml:id="{concat("start-", $e/r:ShortName)}"/>
 };
 
 declare function stml:formatting-commands(
@@ -818,3 +832,14 @@ declare function stml:pass-through(
   stml:convert($e/node())
 };
 
+declare function stml:text(
+  $t as text()
+  ) {
+  let $s := normalize-space($t)
+  where $s
+  return text { 
+    if ($t/ancestor::r:SegmentContent)
+    then concat(" ", $s, " ")
+    else $s 
+  }
+};
