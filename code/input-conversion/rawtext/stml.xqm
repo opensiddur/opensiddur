@@ -343,9 +343,21 @@ declare function stml:source(
     <tei:link type="bibl" target="#text /data/sources/{$resource}"/>
 };
 
-(: write a header :)
 declare function stml:header(
   $e as element(r:FileCommand),
+  $title as element(tei:title)
+  ) {
+  stml:header(stml:license($e), 
+    stml:source($e),
+    stml:responsibility($e),
+    $title)
+};
+
+(: write a header :)
+declare function stml:header(
+  $license as element(tei:availability),
+  $source as element(tei:link)+,
+  $responsibility as element(j:responsGrp)*,
   $title as element(tei:title)
   ) {
   <tei:teiHeader>
@@ -353,17 +365,17 @@ declare function stml:header(
       <tei:titleStmt>
         {
           $title,
-          stml:responsibility($e)
+          $responsibility
         }
       </tei:titleStmt>
       <tei:publicationStmt>{
-        stml:license($e)
+        $license
         }
         <tei:distributor><tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref></tei:distributor>
         <tei:date>{year-from-date(current-date())}</tei:date>
       </tei:publicationStmt>
       <tei:sourceDesc>{
-        stml:source($e)
+        $source
       }</tei:sourceDesc>
     </tei:fileDesc>
     <tei:revisionDesc>
@@ -374,13 +386,17 @@ declare function stml:header(
 };
 
 declare function stml:file-path(
-  $e as element(r:FileCommand)
+  $e as element()
   ) {
+  let $file-command := $e/(
+    self::r:FileCommand, 
+    ancestor-or-self::r:FileContent[1]/r:FileCommand
+    )[1]
   let $resource :=
     substring-before(
       data:new-path-to-resource(
         "original", 
-        stml:convert($e/r:Title)
+        stml:convert($file-command/r:Title)
       )[2],
       ".xml"
     )
@@ -402,8 +418,11 @@ declare function stml:finalize(
   let $added-hierarchies := hier:add-hierarchies($with-ids, $support) 
   return (
     $support,
-    util:log-system-out($with-ids),
-    hier:separate-files($added-hierarchies)
+    util:log-system-out(("***", $with-ids,"^^^")),
+    hier:separate-files(($added-hierarchies,
+      for $file in $with-ids/descendant-or-self::stml:file
+      return stml:annotations($file, $support)
+    ))
   ) 
 };
 
@@ -417,7 +436,7 @@ declare function stml:FileContent(
   let $ShortName := stml:convert($file-command/r:ShortName)
   let $file-title := stml:convert($file-command/r:Title)
   let $converted :=
-    <stml:file post-to="{$file-location}">
+    <stml:file post-to="{$file-location}" path="{$file-path}">
       <tei:TEI xml:lang="{stml:Language($e)}">{
         stml:header(
           $e/r:FileCommand, 
@@ -463,22 +482,76 @@ declare function stml:responsibility(
     }</j:responsGrp>
 };
 
-declare function stml:annotations(
-  $e as element(r:FileContent)
+declare function stml:make-annotations(
+  $nodes as node()*
   ) {
-  let $file-command := $e/r:FileCommand
+  for $n in $nodes
   return
-    <stml:file post-to="{stml:annotation-location($file-command)}">
-      <tei:TEI xml:lang="{stml:Language($e)}">{
-        stml:header($file-command,
+    typeswitch($n)
+    case element(tei:note) return stml:annotate($n)
+    case element(j:instruct) return stml:annotate($n)
+    case element(stml:file) return ()
+    default return stml:make-annotations($n/node())
+};
+
+declare function stml:annotate(
+  $e as element()
+  ) {
+  let $base := $e/ancestor::stml:file[1]/@path/string()
+  let $name := $e/@xml:id/string()
+  let $targets :=
+    if ($e/../tei:anchor[@xml:id=("start-"||$name)])
+    then concat("range(start-", $name, ",end-", $name, ")")
+    else $e/../descendant::tei:ptr[@j:type="FootnoteReference"][@target=concat("#", $name)]/preceding::*[@xml:id][1]/@xml:id  
+  for $target in $targets
+  return ( 
+    <tei:link type="note" 
+      target="{$base}#{$target} #{$name}" />
+  ),
+  $e
+};
+
+(: extract annotations from an unsplit/uncleaned stml:file
+ : does not recurse through the files
+ :)
+declare function stml:annotations(
+  $e as element(stml:file),
+  $support as element(stml:file)+
+  ) {
+  let $header := $e/tei:TEI/tei:teiHeader
+  let $title := 
+    concat("Notes for ", $header/descendant::tei:title[@type="main"])
+  let $responsibility := $header/descendant::j:responsGrp
+  let $source := $header/descendant::tei:sourceDesc/*
+  let $license := $header/descendant::tei:availability
+  return
+    <stml:file post-to="{stml:annotation-location($e)}">
+      <tei:TEI>{
+        $e/tei:TEI/@xml:lang,
+        (: the header will be wrong because this is now
+        working on the processed TEI :)
+        stml:header($license,
+          $source,
+          $responsibility,
           <tei:title type="main">{
-            concat("Notes for ", stml:convert($file-command/r:Title))
+            $title
           }</tei:title>
         )
       }</tei:TEI>
-      <j:annotations>
-      </j:annotations>
-    </stml:file>
+      {
+        let $annotations := stml:make-annotations($e/node())
+        let $notes := $annotations/(self::* except self::tei:link)
+        return (
+          <j:links>{
+            $annotations/self::tei:link,
+            hier:page-links($notes, $support//tei:relatedItem[@type="scan"]/@targetPattern)/tei:link
+          }</j:links>,
+          <j:annotations xml:id="text">{
+            $notes
+          }</j:annotations>
+        )
+      }
+      </stml:file>
 };
 
 declare function stml:DivineNameCommand(

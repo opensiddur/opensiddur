@@ -44,6 +44,7 @@ declare function hier:remove-embedded-files(
     typeswitch($n)
     case element(stml:file) return ()
     case element(tei:milestone) return ()
+    case element(tei:pb) return ()
     case document-node() return 
       document {
         hier:remove-embedded-files($n/node())
@@ -58,11 +59,11 @@ declare function hier:remove-embedded-files(
 
 (:~ construct page links :)
 declare function hier:page-links(
-  $e as element(tei:TEI),
+  $streams as element()+,
   $page-images-url as xs:string
   ) {
   <j:links>{
-    let $stream := $e/tei:text/j:streamText
+    for $stream in $streams
     let $ids-by-page :=
       <pages>{
         for $seg in $stream/tei:seg[@j:pages]
@@ -133,7 +134,7 @@ declare function hier:TEI(
   element tei:TEI {
     $e/@*,
     $e/tei:teiHeader,
-    hier:page-links($e, $support//tei:relatedItem[@type="scan"]/@targetPattern),
+    hier:page-links($e/tei:text/j:streamText, $support//tei:relatedItem[@type="scan"]/@targetPattern),
     hier:add-hierarchies($e/(node() except tei:teiHeader), $support)
   }
 };
@@ -208,7 +209,6 @@ declare function hier:p(
       <tei:p xml:id="p_{$p-count + 1}" j:layer="p">{
         let $start := $e/following-sibling::tei:seg[1]
         let $end := $e/following-sibling::tei:seg[last()]
-        let $Null := util:log-system-out(("Inserting last p from ", $start/@xml:id/string(), " to ", $end/@xml:id/string()))
         return
           <tei:ptr target="#{hier:target($start,$end)}"/>
       }</tei:p>
