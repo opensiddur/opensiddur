@@ -81,15 +81,6 @@ declare function hier:page-links(
   }</j:links>
 };
 
-(:~ determine if we're in poetry mode
- :)
-declare function hier:poetry-mode(
-  $n as node()
-  ) {
-  $n/preceding::tei:milestone[@type="Begin-Poetry-Mode"][1] >>
-  $n/preceding::tei:milestone[@type="End-Poetry-Mode"][1] 
-};
-
 declare function hier:add-hierarchies(
   $nodes as node()*,
   $support as element(stml:file)+
@@ -105,6 +96,7 @@ declare function hier:add-hierarchies(
     case element(tei:div) return hier:div($n, $support)
     case element(tei:ab) return hier:ab($n, $support)
     case element(tei:p) return hier:p($n, $support)
+    case element(tei:lb) return hier:lb($n, $support)
     case element(tei:anchor) return hier:anchor($n, $support)
     case element(j:streamText) return hier:add-hierarchies($n/node(), $support)
     case document-node() return 
@@ -191,14 +183,17 @@ declare function hier:p(
   $support as element()+
   ) {
   let $p-count := count($e/preceding-sibling::tei:p) + 1
-  let $start := $e/(
-    preceding-sibling::tei:p[1]/following-sibling::tei:seg[1],
-    preceding-sibling::tei:seg[last()]
+  let $start-p := $e/(
+    preceding-sibling::tei:p[1],
+    preceding-sibling::*[last()]
   )[1]
+  let $start := $start-p/(self::tei:seg, following-sibling::tei:seg[1])
   let $end := $e/preceding-sibling::tei:seg[1]
   let $target := hier:target($start, $end)
   return (
-    if ($start and $end)
+    if ($start and $end and 
+      (($start is $end) or $start << $end)
+    )
     then
       <tei:p xml:id="p_{$p-count}" j:layer="p">
         <tei:ptr target="#{$target}"/>
@@ -213,6 +208,7 @@ declare function hier:p(
       <tei:p xml:id="p_{$p-count + 1}" j:layer="p">{
         let $start := $e/following-sibling::tei:seg[1]
         let $end := $e/following-sibling::tei:seg[last()]
+        let $Null := util:log-system-out(("Inserting last p from ", $start/@xml:id/string(), " to ", $end/@xml:id/string()))
         return
           <tei:ptr target="#{hier:target($start,$end)}"/>
       }</tei:p>
@@ -258,6 +254,57 @@ declare function hier:ab(
       }</tei:ab>
   else ()
 };
+
+(:~ line group/line hierarchy: after stxt transform,
+ : these should only exist in poetry mode
+ :)
+declare function hier:lb(
+  $e as element(tei:lb),
+  $support as element()+
+  ) {
+  (: is this lb the end of an lg? :)
+  let $end-of-lg :=
+    $e/(
+      following-sibling::tei:milestone[@type="End-Poetry-Mode"][1]|
+      following-sibling::tei:p[1]|
+      (
+        let $lst := (self::*,following-sibling::*)
+        return $lst[count($lst)] (: last() is *very* broken :)
+      )
+      )[1]
+  let $last-lb := $end-of-lg/(
+    self::tei:lb,
+    preceding-sibling::tei:lb[1]
+    )[1]
+  where ($e is $last-lb)
+  return
+    (: because of issues with last(), this code is terribly
+    inefficient :)
+    let $starts := 
+      ($e/preceding-sibling::*| $e)[1] |
+      $e/preceding-sibling::tei:milestone[@type="Begin-Poetry-Mode"][1]|
+      $e/preceding-sibling::tei:p[1]
+    let $start-of-lg := $starts[count($starts)] (: <-- these are in document order, so I want the last one :)
+    return
+      <tei:lg j:layer="lg">{
+        for $lb in (
+          $start-of-lg/following-sibling::tei:lb[. << $end-of-lg],
+          $end-of-lg/self::tei:lb
+        )
+        let $start-of-l := ($start-of-lg|$lb/preceding-sibling::tei:lb[1])[last()]
+        let $contained-segments := $start-of-l/following-sibling::tei:seg[. << $lb]
+        where exists($contained-segments)
+        return 
+          <tei:l>{
+            <tei:ptr target="#{
+              hier:target(
+                $contained-segments[1],
+                $contained-segments[count($contained-segments)])}"/>
+          }</tei:l>
+      }</tei:lg>
+};
+
+  
 
 declare function hier:split-layers(
   $layer-elements as element()+

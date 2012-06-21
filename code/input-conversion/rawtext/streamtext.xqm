@@ -66,8 +66,10 @@ declare function stxt:is-continuation-segment(
 declare function stxt:is-poetry-mode(
   $n as node()
   ) {
-  $n/preceding::tei:milestone[@type="Begin-Poetry-Mode"][1] >>
-  $n/preceding::tei:milestone[@type="End-Poetry-Mode"][1] 
+  $n/(
+    count(preceding::tei:milestone[@type="Begin-Poetry-Mode"]) >
+    count(preceding::tei:milestone[@type="End-Poetry-Mode"])
+    ) 
 };
 
 (: return whether a segment is continued to the next segment 

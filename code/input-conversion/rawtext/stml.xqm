@@ -402,6 +402,7 @@ declare function stml:finalize(
   let $added-hierarchies := hier:add-hierarchies($with-ids, $support) 
   return (
     $support,
+    util:log-system-out($with-ids),
     hier:separate-files($added-hierarchies)
   ) 
 };
