@@ -24,7 +24,9 @@ import module namespace login="http://jewishliturgy.org/api/login"
   at "/code/api/login.xqm";
 import module namespace demo="http://jewishliturgy.org/api/demo"
   at "/code/api/demo.xqm";
-
+import module namespace stdemo="http://jewishliturgy.org/api/demo/stml"
+  at "/code/api/demo/stml.xqm";
+  
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 
 declare variable $exist:path external;
@@ -123,6 +125,14 @@ declare function local:do-demo(
   if (not($tokens[3]))
   then
     demo:list()
+  else if ($tokens[3]="stml")
+  then
+    switch(api:get-method())
+    case "GET"
+    return stdemo:get()
+    case "POST"
+    return stdemo:post-text(util:binary-to-string(request:get-data()))
+    default return $local:disallowed
   else if ($tokens[3]="transliteration")
   then
     switch (api:get-method())

@@ -34,8 +34,10 @@ xquery version "1.0";
  :       instead of r:{term-name}, which can be cleaned from the result 
  :       by r:clean().
  :
+ :  r:no-match also includes the longest remainder where no match could be found 
+ :
  : Open Siddur Project
- : Copyright 2010-2011 Efraim Feinstein 
+ : Copyright 2010-2012 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -111,7 +113,9 @@ declare function local:chain-next(
     then (
     	(: no match to this.  no need to chain. :)
       debug:debug($debug:detail, $grammar:debug-id, 'chain next: CHAIN COMPLETE'),
-      <r:no-match/>,
+      <r:no-match>{
+        ($match/self::r:no-match/*, $remainder)[1]
+      }</r:no-match>,
       $remainder
     )
     else if ($context/parent::p:choice)
@@ -139,7 +143,7 @@ declare function local:chain-next(
       	then ($match, $remainder)
       	else if ($chain-result/self::r:no-match)
       	then (
-        	<r:no-match/>,
+        	$chain-result/self::r:no-match,
           <r:remainder expand="1" 
           	begin="{min(($match/@begin, $remainder/@begin))}" 
             end="{string-length($string)}"/>
@@ -242,13 +246,12 @@ declare function grammar:number(
       	$context,
       	$string,
       	$string-position,
-      	element {
+      	(
       		if ($context/self::p:zeroOrOne or $context/self::p:zeroOrMore)
-          then 'r:empty' 
-          else 'r:no-match'
-        }{
-        	<r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
-        }
+          then <r:empty/> 
+          else <r:no-match>{$remainder}</r:no-match>,
+          <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+        )
       )
     )
     else if (empty($match) and $found-already > 0)
@@ -323,7 +326,7 @@ declare function grammar:p-term(
   let $this-result as element()+ :=
   	if ($result/self::r:no-match)
   	then (
-    	<r:no-match/>,
+    	$result/self::r:no-match,
       <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
     )
     else (
@@ -369,7 +372,7 @@ declare function grammar:p-choice(
     	xs:integer(max($match-element//@end) - min($match-element//@begin))
   	return ($max-difference, 0)[1]
   let $no-result as element()+ := (
-  	<r:no-match/>,
+  	$result/self::r:choice-match/r:no-match[r:remainder/@begin=max(r:remainder/@begin)][1],
     <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
   )
   return (
@@ -441,14 +444,19 @@ declare function grammar:p-exp(
   let $regex := string($context)
   let $result as element()+ :=
   	if ($string-position > string-length($string))
-  	then (
-  		if (not($regex))
-  		then
-      	<r:empty/>
-      else
-        <r:no-match/>,
-      <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
-    )
+  	then 
+  	  let $remainder := 
+  	    <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+  	  return (
+    		if (not($regex))
+    		then
+        	<r:empty/>
+        else
+          <r:no-match>{
+            $remainder
+          }</r:no-match>,
+        $remainder
+      )
     else (
     	let $string-match as element()? :=
     		let $match as xs:string* := 
@@ -494,7 +502,13 @@ declare function grammar:p-end(
   )
   else (
   	debug:debug($debug:info, $grammar:debug-id, ('p:end: ', 'FAIL')),
-    <r:no-match/>,
-    <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+  	let $remainder :=
+  	  <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+  	return (
+  	  <r:no-match>{
+  	    $remainder
+  	  }</r:no-match>,
+  	  $remainder
+  	)
   )          
 };
