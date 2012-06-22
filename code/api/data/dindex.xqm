@@ -37,6 +37,9 @@ declare
           <a class="discovery" href="{request:get-uri()}/original">Original data</a>
         </li>
         <li class="api">
+          <a class="discovery" href="{request:get-uri()}/sources">Sources (Bibliographic data)</a>
+        </li>
+        <li class="api">
           {((: TODO: replace request:get-uri() with rest:get-absolute-uri() 
             :))}
           <a class="discovery" href="{request:get-uri()}/transliteration">Transliteration</a>

@@ -16,6 +16,8 @@ import module namespace tran="http://jewishliturgy.org/api/transliteration"
   at "/code/api/data/transliteration.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "/code/api/data/original.xqm";
+import module namespace src="http://jewishliturgy.org/api/data/sources"
+  at "/code/api/data/sources.xqm"; 
 import module namespace user="http://jewishliturgy.org/api/user"
   at "/code/api/user.xqm";
 import module namespace grp="http://jewishliturgy.org/api/group"
@@ -114,6 +116,29 @@ declare function local:do-data(
       return tran:post(request:get-data())
       case "DELETE"
       return tran:delete($tokens[4])
+      default
+      return $local:disallowed
+    case "sources"
+    return
+      switch (api:get-method())
+      case "GET"
+      return 
+        if ($tokens[4])
+        then
+          src:get($tokens[4])
+        else
+          let $query := request:get-parameter("q", "")
+          let $start := request:get-parameter("start", 1)
+          let $max-results := request:get-parameter("max-results", 100)
+          return
+            src:list($query, $start, $max-results)
+      case "PUT"
+      return 
+        src:put($tokens[4], request:get-data())
+      case "POST"
+      return src:post(request:get-data())
+      case "DELETE"
+      return src:delete($tokens[4])
       default
       return $local:disallowed
     default return <exist:ignore/>
