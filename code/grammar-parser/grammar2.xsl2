@@ -182,7 +182,9 @@
         not(self::p:zeroOrOne or self::p:zeroOrMore)">
         <!-- no match to this.  no need to chain. -->
         <xsl:sequence select="func:debug('CHAIN COMPLETE', 'chain-next', $debug-detail)"/>
-        <r:no-match/>
+        <r:no-match>
+          <xsl:sequence select="($match/self::r:no-match/*, $remainder)[1]"/>
+        </r:no-match>
         <xsl:sequence select="$remainder"/>
       </xsl:when>
       <xsl:when test="parent::p:choice">
@@ -204,7 +206,7 @@
             <xsl:sequence select="($match, $remainder)"/>
           </xsl:when>
           <xsl:when test="$chain-result/self::r:no-match">
-            <r:no-match/>
+            <xsl:sequence select="$chain-result/self::r:no-match"/>
             <r:remainder expand="1" 
               begin="{min(($match/@begin, $remainder/@begin))}" 
               end="{string-length($string)}">
@@ -264,9 +266,16 @@
           func:abbr-string(substring($string,$string-position))), 'zeroOrOne|zeroOrMore|oneOrMore', $debug-detail)"/>
         <xsl:call-template name="chain-next">
           <xsl:with-param name="previous-result" as="element()+">
-            <xsl:element name="{if (self::p:zeroOrOne or self::p:zeroOrMore)
-                then 'r:empty' 
-                else 'r:no-match'}"/>
+            <xsl:choose>
+              <xsl:when test="self::p:zeroOrOne or self::p:zeroOrMore">
+                <r:empty/>
+              </xsl:when>
+              <xsl:otherwise>
+                <r:no-match>
+                  <xsl:sequence select="$remainder"/>
+                </r:no-match>
+              </xsl:otherwise>
+            </xsl:choose>
             <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
           </xsl:with-param>
         </xsl:call-template>
@@ -329,7 +338,7 @@
       <xsl:choose>
         <xsl:when test="$result/self::r:no-match">
           <!-- xsl:message>DEBUG: NO MATCH for term <xsl:value-of select="@name"/></xsl:message-->
-          <r:no-match/>
+          <xsl:sequence select="$result/self::r:no-match"/>
           <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
         </xsl:when>
         <xsl:otherwise>
@@ -398,7 +407,7 @@
       </xsl:for-each>
     </xsl:variable>
     <xsl:variable name="no-result" as="element()+">
-      <r:no-match/>
+      <xsl:sequence select="$result/self::r:choice-match/r:no-match[r:remainder/@begin=max(r:remainder/@begin)][1]"/>
       <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
     </xsl:variable>
     <!-- xsl:sequence select="func:debug(
@@ -490,7 +499,9 @@
               <r:empty/>
             </xsl:when>
             <xsl:otherwise>
-              <r:no-match/>
+              <r:no-match>
+                <xsl:sequence select="$remainder"/>
+              </r:no-match>
             </xsl:otherwise>
           </xsl:choose>
           <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
@@ -546,7 +557,9 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:sequence select="func:debug('FAIL', 'p:end', $debug-info)"/>
-        <r:no-match/>
+        <r:no-match>
+          <xsl:sequence select="$remainder"/>
+        </r:no-match>
         <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>          
       </xsl:otherwise>
     </xsl:choose>
