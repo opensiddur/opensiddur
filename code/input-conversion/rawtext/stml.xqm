@@ -155,8 +155,8 @@ declare function stml:BiblCommand(
       <tei:monogr>
         { $e/stml:convert((
             r:TitleCommand, 
-            r:PubInfoCommand[r:Type="edition"], 
-            r:AuthorEditorCommand
+            r:AuthorEditorCommand,
+            r:PubInfoCommand[r:Type="edition"]
             ))
         }
         <tei:imprint>{
