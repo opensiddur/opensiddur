@@ -82,6 +82,15 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <moduleRef key="header" include="distributor edition extent idno"/>
           <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
           
+          <elementSpec mode="change" ident="biblStruct" module="core">
+            <constraintSpec ident="biblStruct-tei-1" scheme="isoschematron" mode="add">
+              <!-- this ns declaration is usually in tei:TEI -->
+              <constraint>
+                <s:ns prefix="tei" uri="http://www.tei-c.org/ns/1.0"/>
+              </constraint>  
+            </constraintSpec>
+          </elementSpec>
+          
           <elementSpec mode="change" ident="ptr" module="core">
             <attList>
               <attDef ident="cRef" mode="delete"/>
@@ -122,7 +131,12 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <classSpec ident="att.canonical" mode="delete" module="tei" type="atts"/>
           <classSpec ident="att.datable.custom" module="namesdates" mode="delete" type="atts"/>
           <classSpec ident="att.datable.iso" module="namesdates" mode="delete" type="atts"/>
-          <classSpec ident="att.datable" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.datable" module="tei" mode="change" type="atts">
+            <attList>
+              <attDef ident="calendar" mode="delete"/>
+              <attDef ident="period" mode="delete"/>
+            </attList>
+          </classSpec>
           <classSpec ident="att.datable.w3c" module="tei" mode="change" type="atts">
             <attList>
               <attDef ident="notBefore" mode="delete"/>

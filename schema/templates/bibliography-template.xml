@@ -15,7 +15,6 @@
       for multiple titles, use the type="main" attribute to designate the main
       title. Alternate titles MAY be designated with type="alt"
        --></title>
-    <edition><!-- an OPTIONAL edition number, such as 2 ed. --></edition>
     <!-- name examples:
     <name><roleName>Rabbi</roleName> <forename>Abraham</forename> <forename>Joshua</forename> <surname>Heschel</surname></name>
     <name><forename>Serah</forename> <nameLink>bat</nameLink> <surname>Asher</surname></name>
@@ -24,10 +23,11 @@
     <!-- if a work has more than one author, add additional author tags here -->
     <editor><name><!-- fill in --></name></editor>
     <!-- if a work has more than one editor, add additional editor tags here -->
+    <edition><!-- an OPTIONAL edition number, such as 2 ed. --></edition>
     <imprint>
       <publisher><!-- publisher, from the copyright page, REQUIRED --></publisher>
       <pubPlace><!-- publication place, from the copyright page, REQUIRED --></pubPlace>
-      <date when="YYYY"><!-- publication date, from the copyright page, REQUIRED --></date>
+      <date when="9999"><!-- publication date, from the copyright page, REQUIRED --></date>
       <distributor><!-- distributor, if different from the publisher, may include a link to a website, using
         <ref target="http://...">web site name</ref>       
        --></distributor>
