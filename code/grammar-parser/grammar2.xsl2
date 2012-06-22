@@ -557,10 +557,13 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:sequence select="func:debug('FAIL', 'p:end', $debug-info)"/>
+        <xsl:variable name="remainder" as="element(r:remainder)">
+          <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+        </xsl:variable>
         <r:no-match>
           <xsl:sequence select="$remainder"/>
         </r:no-match>
-        <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>          
+        <xsl:sequence select="$remainder"/>          
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
