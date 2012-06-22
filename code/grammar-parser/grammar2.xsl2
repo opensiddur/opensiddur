@@ -494,6 +494,9 @@
     <xsl:variable name="result" as="element()+">
       <xsl:choose>
         <xsl:when test="$string-position &gt; string-length($string)">
+          <xsl:variable name="remainder" as="element(r:remainder)">
+            <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+          </xsl:variable>
           <xsl:choose>
             <xsl:when test="not($regex)">
               <r:empty/>
@@ -504,7 +507,7 @@
               </r:no-match>
             </xsl:otherwise>
           </xsl:choose>
-          <r:remainder expand="1" begin="{$string-position}" end="{string-length($string)}"/>
+          <xsl:sequence select="$remainder"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:variable name="string-match" as="element()?">
