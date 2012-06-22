@@ -90,10 +90,14 @@ declare
         {
         (: TODO: replace request:get-uri() with rest:get-absolute-uri() :)
         let $api-base := request:get-uri()
-        return
+        return (
+          <li class="api">
+            <a class="discovery" href="{$api-base}/stml">STML</a>
+          </li>,
           <li class="api">
             <a class="discovery" href="{$api-base}/transliteration">Transliteration</a>
           </li>
+        )
         }
       </ul>
     </body>
