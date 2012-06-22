@@ -782,10 +782,6 @@ TODO:
             <xsl:value-of
               select="$tanach-as-xml//fileDesc//title[@level='s' and @type='main']" />
           </tei:title>
-          <tei:edition>
-            <xsl:text>v.</xsl:text>
-            <xsl:value-of select="$tanach-as-xml//version/node()" />
-          </tei:edition>
           <xsl:for-each
             select="$tanach-as-xml//titleStmt//editor|
             $tanach-as-xml//titleStmt//respStmt/name[not(@type)]">
@@ -795,6 +791,10 @@ TODO:
               </tei:name>
             </tei:editor>
           </xsl:for-each>
+          <tei:edition>
+            <xsl:text>v.</xsl:text>
+            <xsl:value-of select="$tanach-as-xml//version/node()" />
+          </tei:edition>
           <tei:imprint>
             <tei:publisher>J. Alan Groves Center for Advanced Biblical
               Research</tei:publisher>
