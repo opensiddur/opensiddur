@@ -49,10 +49,12 @@ declare
                   processData: false,
                   success: function(data, textStatus, jqXHR) {
                     $("#output").text(jqXHR.responseText); 
-                    $("#status").html("Done")
+                    $("#status").html("Done");
                   },
                   error: function(jqXHR, errorType, exceptionObject) {
                     alert("Submission error: " + errorType)
+                    $("#output").text(jqXHR.responseText);
+                    $("#status").html("Error");
                   }
                 });
       };
