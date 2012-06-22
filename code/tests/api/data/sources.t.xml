@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:a="http://jewishliturgy.org/ns/access/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:http="http://expath.org/ns/http-client">
+  <suiteName>Bibliographic data API</suiteName>
+  <description>
+    <p>Test the bibliographic data API</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <setup>
+    <!-- support files required for validity -->
+    <store collection="/user" name="testuser.xml">
+      <j:contributor>
+        <tei:idno>testuser</tei:idno>
+        <tei:name>Test User</tei:name>
+      </j:contributor>
+    </store>
+    <!-- existing resource with read/write access for testuser -->
+    <copy source="/code/tests/api/data/sources" name="Existing.xml" 
+      destination="/data/sources" />
+    <copy source="/code/tests/api/data/sources" name="Existing.xml" 
+      destination="/data/sources" destination-name="NoAccess.xml" />
+    <copy source="/code/tests/api/data/sources" name="Existing.xml" 
+      destination="/data/sources" destination-name="NoWriteAccess.xml" />
+    <code><![CDATA[
+      system:as-user("admin", $magic:password,
+        let $existing-uri := xs:anyURI("/data/sources/Existing.xml")
+        let $no-access-uri := xs:anyURI("/data/sources/NoAccess.xml")
+        let $no-write-access-uri := xs:anyURI("/data/sources/NoWriteAccess.xml")
+        return (
+          sm:chown($existing-uri, "testuser"),
+          sm:chgrp($existing-uri, "everyone"),
+          sm:chmod($existing-uri, "rw-rw-r--"),
+          sm:chown($no-access-uri, "testuser2"),
+          sm:chgrp($no-access-uri, "everyone"),
+          sm:chmod($no-access-uri, "rw-------"),
+          sm:chown($no-write-access-uri, "testuser2"),
+          sm:chgrp($no-write-access-uri, "everyone"),
+          sm:chmod($no-write-access-uri, "rw-r--r--")
+      ))
+    ]]></code>
+  </setup>
+  <tearDown>
+    <remove-document collection="/data/sources" name="Existing.xml"/>
+    <remove-document collection="/data/sources" name="NoAccess.xml"/>
+    <remove-document collection="/data/sources" name="NoWriteAccess.xml"/>
+  </tearDown>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <imports>
+    import module namespace src="http://jewishliturgy.org/api/data/sources"
+      at "xmldb:exist:///code/api/data/sources.xqm";
+    import module namespace magic="http://jewishliturgy.org/magic"
+      at "xmldb:exist:///code/magic/magic.xqm";
+  </imports>
+  <TestSet>
+    <testName>src:get()</testName>
+    <test>
+      <task>Get an existing resource</task>
+      <code><![CDATA[
+      src:get("Existing")
+      ]]></code> 
+      <xpath desc="Returns a bibliographic resource">exists(./tei:biblStruct)</xpath>
+    </test>
+    <test>
+      <task>Get a nonexisting resource</task>
+      <code><![CDATA[
+      src:get("DoesNotExist")
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>Get a resource with no read access</task>
+      <code><![CDATA[
+      src:get("NoAccess")
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+  </TestSet>
+  <!-- TODO: edit from here -->
+  <TestSet>
+    <testName>src:list()</testName>
+    <test>
+      <task>List all resources</task>
+      <code><![CDATA[
+        src:list("", 1, 100)
+      ]]></code>
+      <xpath desc="returns at least 1 result">count(.//html:li[@class="result"])&gt;=1</xpath>
+      <class href="../common.t.xml#SearchResults"/>
+    </test>
+    <test>
+      <task>List some resources</task>
+      <code><![CDATA[
+        src:list("", 1, 2)
+      ]]></code>
+      <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
+      <class href="../common.t.xml#SearchResults"/>
+    </test>
+    <test>
+      <task>Respond to a query</task>
+      <code><![CDATA[
+        src:list("Existing", 1, 100)
+      ]]></code>
+      <xpath desc="returns 1 results">count(.//html:ol[@class="results"]/html:li)=1</xpath>
+      <class href="../common.t.xml#SearchResults"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>src:delete()</testName>
+    <test>
+      <task>Remove an existing resource</task>
+      <code><![CDATA[
+      src:delete("Existing")
+      ]]></code>
+      <class href="../common.t.xml#NoData"/>
+    </test>
+    <test>
+      <task>Remove a nonexisting resource</task>
+      <code><![CDATA[
+      src:delete("DoesNotExist")
+      ]]></code>
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>Remove a resource without write access</task>
+      <code><![CDATA[
+      src:delete("NoWriteAccess")
+      ]]></code>
+      <class href="../common.t.xml#Forbidden"/>
+    </test>
+    <test ignore="yes">
+      <task>Remove a resource that has external references</task>
+      <code><![CDATA[
+      src:delete("ExternalReference")
+      ]]></code>
+      <class href="../common.t.xml#BadRequest"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>src:post()</testName>
+    <tearDown>
+      <code><![CDATA[
+      let $document := 
+        collection("/data/sources")//tei:title[.="Valid"]/root(.)
+      where exists($document)
+      return xmldb:remove(
+        util:collection-name($document),
+        util:document-name($document)
+        )
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Post a valid resource</task>
+      <code><![CDATA[
+      src:post(doc("/code/tests/api/data/sources/Valid.xml"))
+      ]]></code>
+      <class href="../common.t.xml#Created"/>
+    </test>
+    <test>
+      <task>Post an invalid resource</task>
+      <code><![CDATA[
+      src:post(document { <tei:biblStruct><tei:title>Invalid</tei:title></tei:biblStruct>} )
+      ]]></code>
+      <class href="../common.t.xml#BadRequest"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>src:put()</testName>
+    <test>
+      <task>Put a valid resource to an existing resource</task>
+      <code><![CDATA[
+      src:put("Existing", doc("/code/tests/api/data/sources/Existing-After-Put.xml"))
+      ]]></code>
+      <class href="../common.t.xml#NoData"/>
+      <xpath desc="The new document has been saved">collection('/data/sources')[descendant::tei:title[.='Existing']]//tei:date/@when=1920</xpath>
+    </test>
+    <test>
+      <task>Put a valid resource to a nonexisting resource</task>
+      <code><![CDATA[
+      src:put("DoesNotExist", doc("/code/tests/api/data/sources/Valid.xml"))
+      ]]></code>
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>Put an invalid resource</task>
+      <code><![CDATA[
+      src:put("Existing", document { <tei:biblStruct><tei:title>Invalid</tei:title></tei:biblStruct>})
+      ]]></code>
+      <class href="../common.t.xml#BadRequest"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Unauthenticated</testName>
+    <asUser/>
+    <password/>
+    <test>
+      <task>src:get(): Get an existing resource</task>
+      <code><![CDATA[
+      src:get("Existing")
+      ]]></code> 
+      <xpath desc="Returns a bibliography resource">exists(./tei:biblStruct)</xpath>
+    </test>
+    <test>
+      <task>src:get(): Get an existing resource with no read access</task>
+      <code><![CDATA[
+      src:get("NoAccess")
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>src:get(): Get a nonexisting resource</task>
+      <code><![CDATA[
+      src:get("DoesNotExist")
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>src:list(): Get a list of all resources</task>
+      <code><![CDATA[
+      src:list("", 1, 100)
+      ]]></code>
+      <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
+      <xpath desc="does not list resource with no read access">empty(.//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])</xpath>
+      <class href="../common.t.xml#SearchResults"/>
+    </test>
+    <test>
+      <task>src:delete(): Remove an existing resource</task>
+      <code><![CDATA[
+      src:delete("Existing")
+      ]]></code>
+      <class href="../common.t.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>src:delete(): Remove a nonexisting resource</task>
+      <code><![CDATA[
+      src:delete("DoesNotExist")
+      ]]></code>
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>src:post(): Post a resource</task>
+      <code><![CDATA[
+      src:post(doc("/code/tests/api/data/sources/Valid.xml"))
+      ]]></code>
+      <class href="../common.t.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>src:put(): Put an existing resource</task>
+      <code><![CDATA[
+      src:put("Existing", doc("/code/tests/api/data/sources/Valid.xml"))
+      ]]></code>
+      <class href="../common.t.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>src:put(): Put a nonexisting resource</task>
+      <code><![CDATA[
+      src:put("DoesNotExist", doc("/code/tests/api/data/sources/Valid.xml"))
+      ]]></code>
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+  </TestSet>
+</TestSuite>
