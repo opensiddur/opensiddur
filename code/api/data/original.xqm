@@ -123,6 +123,7 @@ declare function orig:validate-changes(
   $doc as document-node(),
   $old-doc as document-node()
   ) as element(report) {
+  (: TODO: check for missing externally referenced xml:id's :)
   let $messages := ( 
     if (not(xmldiff:compare($doc//tei:revisionDesc, $old-doc//tei:revisionDesc)))
     then <message>You may not alter the revision history</message>
