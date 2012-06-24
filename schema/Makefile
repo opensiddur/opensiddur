@@ -51,7 +51,9 @@ transliteration-schema: schema/build/transliteration.xsl2
 schema/build/transliteration.xsl2: schema/transliteration.sch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
-.PHONY: contributor-schema contributor-schema-clean bibliography-schema bibliography-schema-clean
+.PHONY: contributor-schema contributor-schema-clean bibliography-schema bibliography-schema-clean annotation-schema annotation-schema-clean
+annotation-schema: schema/build/annotation.xsl2
+
 contributor-schema: schema/build/contributor.rnc
 
 bibliography-schema: schema/build/bibliography.xsl2
@@ -65,11 +67,20 @@ schema/build/bibliography.rnc: p5subset schema/build schema/bibliography.xml
 schema/build/bibliography.xsl2: schema/build/bibliography.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
+schema/build/annotation.isosch: schema/build/annotation.rnc
+schema/build/annotation.rnc: p5subset schema/build schema/annotation.xml
+	$(TEIROMA) --nodtd --noxsd --isoschematron schema/annotation.xml schema/build
+schema/build/annotation.xsl2: schema/build/annotation.isosch
+	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
+
 contributor-schema-clean:
 	rm -fr schema/build/contributor.*
 
 bibliography-schema-clean:
 	rm -fr schema/build/bibliography.*
+
+annotation-schema-clean:
+	rm -fr schema/build/annotation.*
 
 schema/build:
 	mkdir -p schema/build

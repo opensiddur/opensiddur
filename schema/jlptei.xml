@@ -2,6 +2,7 @@
 <TEI 
   xmlns="http://www.tei-c.org/ns/1.0" 
   xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
   xml:lang="en">
   <teiHeader>
     <fileDesc>
@@ -117,194 +118,22 @@ The Open Siddur intends to work within open standards whenever possible. In choo
       </div>
       <div>
         <head>Formal declaration</head>
+        <!-- common declarations: -->
+        <xi:include href="common-schema.xml"/>
         <schemaSpec ident="jlptei" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
-          <moduleRef key="core" include="choice cit corr date divGen foreign head item l label lg list name note orig p ptr q quote ref reg sic title"/>
+          <moduleRef key="core" include="choice cit corr date divGen foreign head hi item l label lg list name note orig p ptr q quote ref reg sic title"/>
           <moduleRef key="tei"/>
           <moduleRef key="header" include="availability change distributor fileDesc licence publicationStmt revisionDesc sourceDesc teiHeader titleStmt"/>
           <moduleRef key="textstructure" include="TEI back body div docAuthor docDate docEdition docImprint docTitle front text titlePage titlePart"/>
-          <moduleRef key="analysis" except="cl interp interpGrp m span spanGrp"/>
-          <moduleRef key="certainty" except="certainty precision"/>
-          <moduleRef key="gaiji" except="char charDecl charName charProp glyph glyphName localName mapping unicodeName value"/>
+          <moduleRef key="analysis" include="c interp interpGrp pc phr s w"/>
+          <moduleRef key="certainty" include="respons"/>
+          <moduleRef key="gaiji" include="g"/>
           <moduleRef key="iso-fs" except=""/>
-          <moduleRef key="linking" except="alt altGrp join joinGrp timeline when"/>
-          <moduleRef key="namesdates" except="addName affiliation age birth bloc climate country death district education event faith floruit geo geogFeat geogName langKnowledge langKnown listEvent listNym listOrg listPerson listPlace listRelation location nationality nym occupation offset org persName person personGrp place placeName population region relation relationGrp residence settlement sex socecStatus state terrain trait"/>
-          <elementSpec ident="title" mode="change" module="core">
-            <attList>
-              <attDef ident="level" mode="delete"/>
-            </attList>
-          </elementSpec>
-          <elementSpec ident="TEI" mode="change" module="textstructure">
-            <attList>
-              <attDef ident="version" mode="delete"/>
-              <attDef ident="xml:lang" mode="change" usage="req">
-                <desc>indicates the default language of the text in the document. Required because it determines how the document will be indexed in the database. &#13;
-                </desc>
-                <datatype minOccurs="1" maxOccurs="1">
-                  <rng:text xmlns:rng="http://relaxng.org/ns/structure/1.0"/>
-                </datatype>
-              </attDef>
-            </attList>
-            <constraintSpec ident="TEI-j-1" scheme="isoschematron" mode="add">
-              <constraint>
-                <sch:ns prefix="j" uri="http://jewishliturgy.org/ns/jlptei/1.0"/>
-              </constraint>  
-            </constraintSpec>
-          </elementSpec>
-          <elementSpec ident="ptr" mode="change" module="core">
-            <!-- TODO: need an additional constraint where we test if all pointer targets exist -->
-            <constraintSpec scheme="isoschematron" ident="ptr-j-1">
-              <desc>Test that internal #range pointers point to a reasonable range</desc>
-              <constraint>
-                <sch:assert
-                  test="
-                  not(contains(@target, '#range')) or (
-                  for 
-                    $token in tokenize(@target, '\s+')[starts-with(., '#range')],
-                    $lptr in substring-after(substring-before($token, ','), '('),
-                    $rptr in substring-before(substring-after($token, ','), ')')
-                  return 
-                    exists(/id($lptr)) and
-                    exists(/id($rptr)) and
-                    /id($lptr) &lt;&lt; /id($rptr)
-                  )
-                    ">
-                  In a #range(lptr,rptr) XPath expression, the left pointer must precede the right pointer.  
-                </sch:assert>
-              </constraint>
-            </constraintSpec>
-          </elementSpec>
-          <elementSpec ident="sourceDesc" mode="change" module="header">
-            <attList>
-              <attDef ident="default" mode="delete"/>
-            </attList>
-            <content>
-              <rng:oneOrMore xmlns:rng="http://relaxng.org/ns/structure/1.0">
-                <rng:ref name="model.sourceDescPart"/>
-              </rng:oneOrMore>
-            </content>
-          </elementSpec>
-          <classSpec ident="att.global" mode="change" module="tei" type="atts">
-            <attList>
-              <attDef ident="xml:space" mode="delete"/>
-              <attDef ident="rend" mode="delete"/>
-              <attDef ident="rendition" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.divLike" mode="change" module="tei" type="atts">
-            <attList>
-              <attDef ident="org" mode="delete"/>
-              <attDef ident="sample" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.canonical" mode="delete" module="tei" type="atts"/>
-          <classSpec ident="att.declaring" mode="delete" module="tei" type="atts"/>
-          <classSpec ident="att.datcat" mode="delete" module="tei" type="atts"/>
-          <elementSpec ident="responsGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>Group elements that declare responsibility over a portion of text.</desc>
-            <classes>
-              <memberOf key="model.respLike"/>
-              <memberOf key="att.global"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:oneOrMore>
-                <rng:ref name="respons"/>
-              </rng:oneOrMore>
-            </content>
-          </elementSpec>
-          <classSpec ident="att.responsibility" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.damaged" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.breaking" module="tei" mode="delete" type="atts"/>
-          <elementSpec ident="conditions" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>Holds features and feature structures pertaining to the conditional system.</desc>
-            <classes>
-              <memberOf key="model.resourceLike"/>
-              <memberOf key="att.global"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:oneOrMore>
-                <rng:choice>
-                  <rng:ref name="fs"/>
-                  <rng:ref name="f"/>
-                  <rng:ref name="fvLib"/>
-                </rng:choice>
-              </rng:oneOrMore>
-            </content>
-          </elementSpec>
-          <classSpec ident="att.transcriptional" module="tei" mode="delete" type="atts"/>
-          <elementSpec ident="links" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>Holds standoff markup links </desc>
-            <classes>
-              <memberOf key="model.resourceLike"/>
-              <memberOf key="att.global"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:oneOrMore>
-                <rng:choice>
-                  <rng:ref name="link"/>
-                  <rng:ref name="linkGrp"/>
-                </rng:choice>
-              </rng:oneOrMore>
-            </content>
-          </elementSpec>
-          <elementSpec ident="annotations" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>A resource that holds annotations, such as notes or standoff annotations.</desc>
-            <classes>
-              <memberOf key="model.resourceLike"/>
-              <memberOf key="att.global"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:oneOrMore>
-                <rng:choice>
-                  <rng:ref name="note"/>
-                  <rng:ref name="fs"/>
-                </rng:choice>
-              </rng:oneOrMore>
-            </content>
-          </elementSpec>
-          <elementSpec ident="segGen" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>Generated segment.</desc>
-            <attList>
-              <attDef ident="type" mode="change" usage="req">
-                <desc>Type of segment generation that is required.</desc>
-                <datatype minOccurs="1" maxOccurs="1">
-                  <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
-                </datatype>
-                <valList type="closed">
-                  <valItem ident="transliteration"/>
-                </valList>
-              </attDef>
-            </attList>
-            <classes>
-              <memberOf key="model.segLike"/>
-              <memberOf key="att.global"/>
-            </classes>
-            <content>
-              <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="macro.paraContent"/>
-            </content>
-          </elementSpec>
-          <classSpec ident="att.datable.custom" module="namesdates" mode="delete" type="atts"/>
-          <classSpec ident="att.datable.iso" module="namesdates" mode="delete" type="atts"/>
-          <classSpec ident="att.datable" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="calendar" mode="delete"/>
-              <attDef ident="period" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.datable.w3c" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="notBefore" mode="delete"/>
-              <attDef ident="notAfter" mode="delete"/>
-              <attDef ident="from" mode="delete"/>
-              <attDef ident="to" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.declarable" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.dimensions" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.duration.iso" module="namesdates" mode="delete" type="atts"/>
-          <classSpec ident="att.duration.w3c" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.editLike" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.enjamb" module="verse" mode="delete" type="atts"/>
-          <elementSpec ident="read" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
+          <moduleRef key="linking" include="ab anchor link linkGrp seg"/>
+          <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
+          <moduleRef key="transcr" include="sourceDoc"/>
+          <specRefGrp target="#common-specs"/>
+          <elementSpec ident="read" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
             <desc>Indicates the portion of a text that is read in read-written (kri-ktiv) choice.</desc>
             <classes>
               <memberOf key="model.choicePart"/>
@@ -314,7 +143,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="macro.specialPara"/>
             </content>
           </elementSpec>
-          <elementSpec ident="written" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
+          <elementSpec ident="written" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
             <desc>Indicates the part of a text that is written </desc>
             <classes>
               <memberOf key="model.choicePart"/>
@@ -324,85 +153,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="macro.paraContent"/>
             </content>
           </elementSpec>
-          <elementSpec ident="option" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>Marks a section of text, which may be included, depending on the result of a conditional evaluation.</desc>
-            <classes>
-              <memberOf key="model.choicePart"/>
-              <memberOf key="att.global"/>
-            </classes>
-            <content>
-              <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="macro.paraContent"/>
-            </content>
-          </elementSpec>
-          <elementSpec ident="respons" module="certainty" mode="change">
-            <attList>
-              <attDef ident="type" mode="add" usage="req">
-                <desc>Responsibility type, indicated using one of the allowed MARC relator codes, as defined at http://www.loc.gov/marc/relators/relacode.html&#13;
-aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proofreader), spn, (sponsor), trl (translator), trc (transcriber)</desc>
-                <datatype minOccurs="1" maxOccurs="1">
-                  <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
-                </datatype>
-                <valList type="closed">
-                  <valItem ident="aut"/>
-                  <valItem ident="edt"/>
-                  <valItem ident="fac"/>
-                  <valItem ident="fnd"/>
-                  <valItem ident="pfr"/>
-                  <valItem ident="spn"/>
-                  <valItem ident="trl"/>
-                  <valItem ident="trc"/>
-                </valList>
-              </attDef>
-            </attList>
-            <classes mode="replace">
-              <memberOf key="model.certLike"/>
-              <memberOf key="att.global"/>
-              <memberOf key="att.scoping"/>
-              <memberOf key="model.global" mode="delete"/>
-              <memberOf key="model.global.meta" mode="delete"/>
-            </classes>
-          </elementSpec>
-          <elementSpec ident="divineName" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-            <desc>Contains a proper name for the Deity. </desc>
-            <classes>
-              <memberOf key="model.nameLike"/>
-              <memberOf key="att.global"/>
-              <memberOf key="att.typed"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:choice>
-                <rng:ref name="macro.phraseSeq"/>
-                <rng:group>
-                  <rng:ref name="reg"/>
-                  <rng:ref name="orig"/>
-                </rng:group>
-                <rng:group>
-                  <rng:ref name="orig"/>
-                  <rng:ref name="reg"/>
-                </rng:group>
-              </rng:choice>
-            </content>
-          </elementSpec>
-          <elementSpec ident="w" module="analysis" mode="change">
-            <content xmlns:default="http://relaxng.org/ns/structure/1.0">
-              <default:zeroOrMore xmlns="http://relaxng.org/ns/structure/1.0">
-                <default:choice>
-                  <default:text/>
-                  <default:ref name="model.gLike"/>
-                  <default:ref name="seg"/>
-                  <default:ref name="w"/>
-                  <default:ref name="m"/>
-                  <default:ref name="c"/>
-                  <default:ref name="model.global"/>
-                  <default:ref name="model.lPart"/>
-                  <default:ref name="model.hiLike"/>
-                  <default:ref name="model.pPart.edit"/>
-                  <default:ref name="divineName"/>
-                </default:choice>
-              </default:zeroOrMore>
-            </content>
-          </elementSpec>
-          <elementSpec ident="parallelGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
+          <elementSpec ident="parallelGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-parallel">
             <desc>A special type of <gi>linkGrp</gi> that groups units of parallel text by language. The <gi>ptr</gi> 
             elements must have <att>targetLang</att> attributes</desc>
             <classes>
@@ -420,7 +171,7 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               </constraint>
             </constraintSpec>
           </elementSpec>
-          <elementSpec ident="parallelText" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
+          <elementSpec ident="parallelText" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-parallel">
             <desc>The main body element for a text that consists of a parallelization of multiple texts.  </desc>
             <attList>
               <attDef ident="level" mode="add" usage="req">
@@ -495,7 +246,7 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               </rng:group>
             </content>
           </elementSpec>
-          <elementSpec ident="layer" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
+          <elementSpec ident="layer" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
             <desc>A hierarchic layer of text. @type should indicate what layer is being provided, and all the top level contained elements should be consistent with that type.</desc>
             <classes>
               <memberOf key="att.global"/>
@@ -602,7 +353,7 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               </constraint>
             </constraintSpec>
           </elementSpec>
-          <elementSpec ident="concurrent" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
+          <elementSpec ident="concurrent" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
             <desc>A list of concurrent hierarchies of one or more layers.</desc>
             <classes>
               <memberOf key="att.global"/>
@@ -613,7 +364,7 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               </rng:oneOrMore>
             </content>
           </elementSpec>
-          <elementSpec ident="streamText" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
+          <elementSpec ident="streamText" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
             <desc>A continuous stream of segmented text, suitable for concurrent hierarchies. Every element contained in a textStream must be able to be referenced by @xml:id or using a range XPointer.</desc>
             <classes>
               <memberOf key="att.global"/>
@@ -635,98 +386,6 @@ aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proo
               </constraint>
             </constraintSpec>
           </elementSpec>
-          <classSpec ident="att.msExcerpt" module="msdescription" mode="delete" type="atts"/>
-          <classSpec ident="att.global.change" module="transcr" mode="delete" type="atts"/>
-          <!-- keeping @next, @prev -->
-          <classSpec ident="att.global.linking" module="linking" mode="change" type="atts">
-            <attList>
-              <attDef ident="corresp" mode="delete"/>
-              <attDef ident="synch" mode="delete"/>
-              <attDef ident="sameAs" mode="delete"/>
-              <attDef ident="copyOf" mode="delete"/>
-              <attDef ident="exclude" mode="delete"/>
-              <attDef ident="select" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.translatable" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.timed" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.textCritical" module="textcrit" mode="delete" type="atts"/>
-          <classSpec ident="att.tableDecoration" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.spanning" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.sourced" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.sortable" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.segLike" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="function" mode="delete"/>
-            </attList>
-          </classSpec>
-          <classSpec ident="att.interpLike" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.measurement" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.readFrom" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.rdgPart" module="textcrit" mode="delete" type="atts"/>
-          <classSpec ident="att.ranging" module="tei" mode="delete" type="atts"/>
-          <elementSpec ident="teiHeader" module="header" mode="change">
-            <attList>
-              <attDef ident="type" mode="delete"/>
-              <attDef ident="n" mode="delete"/>
-              <attDef ident="rend" mode="delete"/>
-              <attDef ident="rendition" mode="delete"/>
-              <attDef ident="xml:space" mode="delete"/>
-            </attList>
-          </elementSpec>
-          <classSpec ident="att.naming" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.placement" module="tei" mode="delete" type="atts"/>
-          <classSpec ident="att.global.analytic" module="analysis" mode="delete" type="atts"/>
-          <elementSpec ident="ab" module="linking" mode="change">
-            <classes mode="replace">
-              <memberOf key="model.pLike"/>
-              <memberOf key="att.global"/>
-              <memberOf key="att.typed"/>
-              <memberOf key="att.declaring" mode="delete"/>
-            </classes>
-            <attList>
-              <attDef ident="part" mode="delete"/>
-            </attList>
-          </elementSpec>
-          <elementSpec ident="p" module="core" mode="change">
-            <classes mode="replace">
-              <memberOf key="model.pLike"/>
-              <memberOf key="att.declaring"/>
-              <memberOf key="att.global"/>
-              <memberOf key="model.availabilityPart" mode="delete"/>
-            </classes>
-          </elementSpec>
-          <elementSpec ident="link" module="linking" mode="change">
-            <attList>
-              <attDef ident="targets" mode="delete"/>
-            </attList>
-            <classes mode="replace">
-              <memberOf key="model.global"/>
-              <memberOf key="model.global.meta"/>
-              <memberOf key="model.sourceDescPart" mode="add"/>
-              <memberOf key="att.global"/>
-              <memberOf key="att.pointing"/>
-              <memberOf key="att.typed"/>
-            </classes>
-          </elementSpec>
-          <elementSpec ident="linkGrp" module="linking" mode="change">
-            <classes mode="replace">
-              <memberOf key="model.global"/>
-              <memberOf key="model.global.meta"/>
-              <memberOf key="model.sourceDescPart" mode="add"/>
-              <memberOf key="att.global"/>
-              <!--memberOf key="att.pointing"/-->
-              <memberOf key="att.pointing.group"/>
-            </classes>
-          </elementSpec>
-          <moduleRef key="transcr" except="addSpan am damage damageSpan delSpan ex facsimile fw handNotes handShift line listTranspose metamark mod redo restore retrace space subst substJoin supplied surface surfaceGrp surplus transpose undo zone"/>
-          <classSpec ident="att.global.facs" module="transcr" mode="delete" type="atts"/>
-          <classSpec ident="att.pointing.group" module="tei" mode="change" type="atts">
-            <attList>
-              <attDef ident="domains" mode="delete"/>
-              <attDef ident="targFunc" mode="delete"/>
-            </attList>
-          </classSpec>
         </schemaSpec>
       </div>
     </body>

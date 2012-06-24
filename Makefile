@@ -150,10 +150,11 @@ $(TEMPDIR):
 	mkdir $(TEMPDIR)
 
 .PHONY: schema schema-clean
-schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema
+schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema
 	cp schema/build/jlptei.rnc $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
 	cp schema/build/bibliography.rnc $(DBDIR)/schema
+	cp schema/build/annotation.rnc $(DBDIR)/schema
 	cp schema/build/*.xsl2 $(DBDIR)/schema
 	cp schema/transliteration.rnc $(DBDIR)/schema
 	cp schema/access.rnc $(DBDIR)/schema
