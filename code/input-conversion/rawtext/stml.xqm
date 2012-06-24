@@ -488,7 +488,6 @@ declare function stml:make-annotations(
   return
     typeswitch($n)
     case element(tei:note) return stml:annotate($n)
-    case element(j:instruct) return stml:annotate($n)
     case element(stml:file) return ()
     default return stml:make-annotations($n/node())
 };
@@ -694,12 +693,11 @@ declare function stml:note-id(
 declare function stml:note-like-commands(
   $e as element()
   ) {
-  element {
-    if ($e instance of element(r:InstructCommand))
-    then "j:instruct"
-    else "tei:note"
-  }{
+  element tei:note {
     attribute xml:id { stml:note-id($e) },
+    if ($e instance of element(r:InstructCommand))
+    then attribute type { "instruct" }
+    else (),
     stml:convert($e/r:NoteContent)
   },
   if ($e instance of element(r:FootNoteCommand))
