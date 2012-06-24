@@ -62,7 +62,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <moduleRef key="analysis" include="c interp interpGrp pc phr s w"/>
           <moduleRef key="certainty" include="respons"/>
           <moduleRef key="gaiji" include="g"/>
-          <moduleRef key="iso-fs" except="fsdDecl"/>
+          <moduleRef key="iso-fs" except="fsDecl fsDescr fDescr fDecl vAlt vColl vDefault vLabel vRange if iff then cond fsConstraints bicond"/>
           <moduleRef key="linking" include="ab anchor link linkGrp seg"/>
           <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
           <!-- import consolidated changes that are the same in all XML files
@@ -81,6 +81,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
                   <rng:ref name="interp"/>
                   <rng:ref name="note"/>
                   <rng:ref name="fs"/>
+                  <rng:ref name="fvLib"/>
                 </rng:choice>
               </rng:oneOrMore>
             </content>
