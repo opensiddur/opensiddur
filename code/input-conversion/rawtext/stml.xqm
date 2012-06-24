@@ -542,9 +542,9 @@ declare function stml:annotations(
         let $notes := $annotations/(self::* except self::tei:link)
         return (
           <j:links>{
-            $annotations/self::tei:link,
-            hier:page-links($notes, $support//tei:relatedItem[@type="scan"]/@targetPattern)/tei:link
+            $annotations/self::tei:link
           }</j:links>,
+          hier:page-links($notes, $support//tei:relatedItem[@type="scan"]/@targetPattern),
           <j:annotations xml:id="text">{
             $notes
           }</j:annotations>
@@ -577,9 +577,9 @@ declare function stml:TranslitCommand(
           </tei:reg>
         </tei:choice>
     else
-      <tei:seg xml:lang="{$lang}">{
+      <tei:foreign xml:lang="{$lang}">{
         stml:convert($e/r:AsWritten)
-      }</tei:seg>
+      }</tei:foreign>
 };
 
 declare function stml:SicCommand(

@@ -62,7 +62,7 @@ declare function hier:page-links(
   $streams as element()+,
   $page-images-url as xs:string
   ) {
-  <j:links>{
+  <tei:sourceDoc>{
     for $stream in $streams
     let $ids-by-page :=
       <pages>{
@@ -79,7 +79,7 @@ declare function hier:page-links(
     let $page-target := replace($page-images-url, "\{\$page\}", $page)
     return
       <tei:link type="facs" target="#{$local-target} {$page-target}"/>
-  }</j:links>
+  }</tei:sourceDoc>
 };
 
 declare function hier:add-hierarchies(
