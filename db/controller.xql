@@ -14,6 +14,8 @@ import module namespace dindex="http://jewishliturgy.org/api/data/index"
   at "/code/api/data/dindex.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
   at "/code/api/data/transliteration.xqm";
+import module namespace notes="http://jewishliturgy.org/api/data/notes"
+  at "/code/api/data/notes.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "/code/api/data/original.xqm";
 import module namespace src="http://jewishliturgy.org/api/data/sources"
@@ -89,6 +91,33 @@ declare function local:do-data(
       return orig:post(request:get-data())
       case "DELETE"
       return orig:delete($tokens[4])
+      default
+      return $local:disallowed
+    case "notes"
+    return
+      switch (api:get-method())
+      case "GET"
+      return 
+        if ($tokens[4])
+        then
+          if ($tokens[5] = "access")
+          then notes:get-access($tokens[4])
+          else notes:get($tokens[4])
+        else
+          let $query := request:get-parameter("q", "")
+          let $start := request:get-parameter("start", 1)
+          let $max-results := request:get-parameter("max-results", 100)
+          return
+            notes:list($query, $start, $max-results)
+      case "PUT"
+      return 
+        if ($tokens[5] = "access")
+        then notes:put-access($tokens[4], request:get-data())
+        else notes:put($tokens[4], request:get-data())
+      case "POST"
+      return notes:post(request:get-data())
+      case "DELETE"
+      return notes:delete($tokens[4])
       default
       return $local:disallowed
     case "transliteration"

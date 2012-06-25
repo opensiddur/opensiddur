@@ -740,7 +740,10 @@ TODO:
           <tei:title type="main" xml:lang="en">Notes from the Westminster Leningrad Codex</tei:title>
         </xsl:with-param>
         <xsl:with-param name="respons" 
-          as="element(tei:respons)+" select="$responsGrp-content" />
+          as="element(tei:respons)">
+          <tei:respons type="trc" locus="value"
+            target="#main" resp="/{$contributors-file-name}" />
+        </xsl:with-param>
         <xsl:with-param name="annotations"
           as="element(j:annotations)">
           <j:annotations>
@@ -750,7 +753,9 @@ TODO:
           </j:annotations>
         </xsl:with-param>
         <xsl:with-param name="license" as="element()+" select="$license-content" />
-        <xsl:with-param name="bibliography" as="element(tei:link)" select="$bibl-content" />
+        <xsl:with-param name="bibliography" as="element(tei:link)">
+          <tei:link type="bibl" target="#main /data/{$bibliography-file-name}"/>          
+        </xsl:with-param>
         <xsl:with-param name="links"  as="element(j:links)">
           <j:links>
             <xsl:apply-templates select="$tanach-as-xml//tanach"
