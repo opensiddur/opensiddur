@@ -34,6 +34,9 @@ declare
     <body>
       <ul class="apis">
         <li class="api">
+          <a class="discovery" href="{request:get-uri()}/notes">Annotation data</a>
+        </li>
+        <li class="api">
           <a class="discovery" href="{request:get-uri()}/original">Original data</a>
         </li>
         <li class="api">
