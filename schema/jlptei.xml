@@ -132,7 +132,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
           <moduleRef key="linking" include="ab anchor link linkGrp seg"/>
           <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
           <moduleRef key="transcr" include="sourceDoc"/>
-          <specRefGrp target="#common-specs"/>
+          <specGrpRef target="#common-specs"/>
           <elementSpec ident="read" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
             <desc>Indicates the portion of a text that is read in read-written (kri-ktiv) choice.</desc>
             <classes>
