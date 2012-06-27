@@ -322,7 +322,7 @@ declare function local:evaluate-assertions(
               ( (: the assertion is that the err:* parameters
                  : in the assertion match those in the returned
                  : error :)
-                every $err-attribute in $assert/@* 
+                every $err-attribute in $assert/(@* except @desc) 
                 satisfies $expanded/@*[name()=$err-attribute/name()]=$err-attribute
               )
           return 
