@@ -9,6 +9,7 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 
 let $tests-to-run :=
   <tests>
+    <test module="/code/tests/modules/mirror.t.xml"/>
     <test module="/code/tests/api/data.t.xml" admin="1"/>
     <test module="/code/tests/api/index.t.xml" />
     <test module="/code/tests/api/demo.t.xml"/>
@@ -16,7 +17,6 @@ let $tests-to-run :=
     <test module="/code/tests/api/login.t.xml"/>
     <test module="/code/tests/api/user.t.xml"/>
     <test module="/code/tests/api/group.t.xml"/>
-    <!--test module="/code/tests/modules/mirror.t.xml" admin="1"/-->
     <test module="/code/tests/api/data/dindex.t.xml"/>
     <test module="/code/tests/api/data/notes.t.xml"/>
     <test module="/code/tests/api/data/original.t.xml"/>
