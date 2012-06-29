@@ -34,7 +34,10 @@ declare variable $data:path-base := "/data";
 declare function data:api-path-to-db(
 	$api-path as xs:string 
 	) as xs:string {
-	error(xs:QName("error:NOTIMPLEMENTED"), "Not implemented properly")
+	error(
+	  xs:QName("error:NOTIMPLEMENTED"), 
+	  "Not implemented yet"
+	)
 };
 
 (:~ Convert a database path to a path in the API
@@ -118,4 +121,22 @@ declare function data:doc(
   ) as document-node()? {
   collection(app:concat-path($data:path-base, $type))
     [replace(util:document-name(.), "\.([^.]+)$", "")=$name]
+};
+
+(:~ get a document using an api path, with or without /api :)
+declare function data:doc(
+  $api-path as xs:string
+  ) as document-node()? {
+  let $path := replace($api-path, "^(/api)?/", "")
+  let $tokens := tokenize($path, "/")
+  let $resource-name := $tokens[last()] || ".xml"
+  return
+    if ($tokens[1] != "data")
+    then
+      error(
+        xs:QName("error:NOTIMPLEMENTED"), 
+        "Only implemented for the /data hierarchy"
+      )
+    else
+      collection("/data/" || $tokens[2])[util:document-name(.)=$resource-name]
 };
