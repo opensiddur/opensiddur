@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 test-html.xsl2 for the OpenSiddur project.
-Copyright 2011 Marc Stober and licensed under the GNU LGPL.
+Copyright 2011-2012 Marc Stober and licensed under the GNU LGPL.
 
 This outputs HTML for proofreading from an interim XML format.
 
@@ -11,11 +11,17 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
 
   <xsl:output method="html" indent="yes" />
 
-  <!-- default identity template -->
-  <!-- TODO still needed? -->
-  <xsl:template match="@* | text()">
+  <!-- default identity template, in case we need it again
+  <xsl:template match="@* | node()">
     <xsl:copy>
       <xsl:apply-templates select="@* | node()"/>
+    </xsl:copy>
+  </xsl:template-->
+
+  <!-- pick up an extra text nodes - 
+		what's left of identity template, not sure if this is needed --> 
+  <xsl:template match="text()">
+    <xsl:copy>
     </xsl:copy>
   </xsl:template>
 

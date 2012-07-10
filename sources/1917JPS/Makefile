@@ -10,11 +10,10 @@
 # TODO: "Spell check" against a dictionary?
 # TODO: Tidy?
 # TODO: Extract Toc outline?
-# TODO: join pages (XSD compliance)
 # TODO: other xmllint error about DTD?
 
 # for now we are just building the test HTML
-all: test-html.html # TODO Tanakh-JPS1917-canonical.xml
+all: 1917JPS.html
 
 scriptsdir = ../../code/input-conversion/1917JPS
 
@@ -75,9 +74,9 @@ temp/join-pages.xml: $(scriptsdir)/join-pages.xsl2 \
 # validate against schema
 # TODO make validation its own step (but what's the target?)
 # TODO see TODO's in XSD
-test-html.html: $(scriptsdir)/test-html.xsl2 \
+1917JPS.html: $(scriptsdir)/test-html.xsl2 \
 		1917JPS.xml	
-	../../lib/saxon -s 1917JPS.xml -o tanakh-JPS-1917-alpha.html \
+	../../lib/saxon -s 1917JPS.xml -o 1917JPS.html \
 		$(scriptsdir)/test-html.xsl2
 
 
@@ -105,8 +104,8 @@ test-html.html: $(scriptsdir)/test-html.xsl2 \
 
 .PHONY: clean
 clean:
-	rm Tanakh-JPS1917-pdf-pages.xml	
-	rm Tanakh-JPS1917-canonical.xml
+	rm 1917JPS.xml
+	rm 1917JPS.html
 	mkdir -p temp
 	rm -f temp/*
 	rmdir temp
