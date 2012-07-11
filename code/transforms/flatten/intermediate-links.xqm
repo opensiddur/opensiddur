@@ -20,7 +20,6 @@ declare function intl:intermediate-links(
   $nodes as node()*
   ) {
   for $n in $nodes 
-  let $null := util:log-system-out(("int-links:", name($n)))
   return 
     typeswitch($n)
     case text() return ()
@@ -44,7 +43,6 @@ declare function intl:tei-TEI(
     if (empty($e/j:links))
     then
       let $int-links := intl:intermediate-links($e/descendant::j:concurrent)
-      let $null := util:log-system-out(("intermediate-links from: ", $e/descendant::j:concurrent))
       where exists($int-links)
       return
         element j:links {
