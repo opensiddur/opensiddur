@@ -1,0 +1,19 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <tei:teiHeader/>
+  <tei:text>
+    <tei:body>
+      <tei:div>
+        <tei:ab xml:id="with-doc">
+          <tei:ptr xml:id="doc" target="cache-test.xml"/>
+        </tei:ab>
+        <tei:ab xml:id="with-jx-id">
+          <tei:ptr xml:id="by-jx-id" target="cache-test.xml#id1"/>
+        </tei:ab>
+        <tei:ab xml:id="with-xml-id">
+          <tei:ptr xml:id="by-xml-id" target="cache-test.xml#id2"/>
+        </tei:ab>
+      </tei:div>
+    </tei:body>
+  </tei:text>
+</tei:TEI>
+
