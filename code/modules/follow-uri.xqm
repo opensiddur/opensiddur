@@ -1,9 +1,14 @@
-xquery version "1.0";
+xquery version "3.0";
 (:~
  : follow-uri function and mode
+ : The follow-uri function will follow paths in the /api/* form, 
+ : /data/* form, and if neither can be found, will use 
+ : direct database resource paths as a fallback. The fast-* form
+ : will not use caching and assumes that only #range() XPointers
+ : or #id pointers are used. 
  :
  : Open Siddur Project
- : Copyright 2009-2011 Efraim Feinstein 
+ : Copyright 2009-2012 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -15,13 +20,14 @@ import module namespace grammar="http://jewishliturgy.org/transform/grammar"
 	at "/code/grammar-parser/grammar2.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
 	at "/code/modules/cache-controller.xqm";
-import module namespace nav="http://jewishliturgy.org/modules/nav"
-  at "/code/api/modules/nav.xqm";
+import module namespace data="http://jewishliturgy.org/modules/data"
+  at "/code/api/modules/data.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace p="http://jewishliturgy.org/ns/parser";
 declare namespace r="http://jewishliturgy.org/ns/parser-result";
+declare namespace error="http://jewishliturgy.org/errors";
 
 declare variable $uri:xpointer-grammar :=
 	document {
@@ -107,11 +113,12 @@ declare function uri:node-from-pointer(
   $fragment as xs:anyURI
   ) as node()* {
   debug:debug($debug:detail + 1,
-  	'func:node-from-pointer: document',
-  	$document), 
+  	"uri",
+  	('func:node-from-pointer: document: ', $document)
+  ), 
   debug:debug($debug:detail + 1, 
-    'func:node-from-pointer: fragment',
-    ($fragment)  
+    "uri",
+    ('func:node-from-pointer: fragment', $fragment)  
   ),
   if ($document)
   then
@@ -254,7 +261,14 @@ declare function uri:follow-cached-uri(
   let $fragment as xs:anyURI := 
   	uri:uri-fragment(string($full-uri))      
 	let $document as document-node()? := 
-	  let $doc := nav:api-path-to-sequence($base-path)
+	  let $doc :=
+      try {
+        data:doc($base-path)
+      }
+      catch error:NOTIMPLEMENTED {
+        (: the requested path is not in /data :)
+        doc($base-path)
+      }
 	  return
 	    if ($cache-type=$uri:fragmentation-cache-type)
 	    then doc(uri:cached-document-path(document-uri($doc)))
@@ -270,15 +284,16 @@ declare function uri:follow-cached-uri(
       $intermediate-ptrs)
 	return (
     debug:debug($debug:detail + 1, 
-    	'func:follow-uri',
+    	'uri',
     	('uri =', $uri,
         ' full-uri =', $full-uri, 
         ' base-path =', $base-path,
         ' fragment =', $fragment,
         ' cache-type = ', $cache-type)),
-    debug:debug($debug:detail, ($fragment, $steps, $pointer-destination), 
-      string-join(('func:follow-pointer(): $fragment, $steps, $pointer-destination for ', 
-        $base-path,'#',$fragment), '')),
+    debug:debug($debug:detail, "uri", 
+      (string-join(('func:follow-pointer(): $fragment, $steps, $pointer-destination for ', 
+        $base-path,'#',$fragment), ''),
+        $fragment, $steps, $pointer-destination)),
     $pointer-destination
   )
 };
@@ -308,7 +323,13 @@ declare function uri:fast-follow(
   let $fragment as xs:anyURI := 
     uri:uri-fragment(string($full-uri))
   let $document as document-node()? := 
-    nav:api-path-to-sequence($base-path)
+    try {
+      data:doc($base-path)
+    }
+    catch error:NOTIMPLEMENTED {
+      (: the requested path is not in /data :)
+      doc($base-path)
+    }
   let $pointer-destination as node()* :=
     if ($fragment) 
     then 
