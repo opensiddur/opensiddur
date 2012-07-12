@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  >
+  <suiteName>Flatten transform</suiteName>
+  <description>
+    <p>Tests of flatten transform</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
+  <imports>
+    import module namespace flatten="http://jewishliturgy.org/transform/flatten"
+      at "xmldb:exist:///code/transforms/flatten/flatten.xqm";
+  </imports>
+  <TestSet>
+    <testName>No concurrency</testName>
+    <test>
+      <task>acts as an identity transform</task>
+      <code><![CDATA[
+        flatten:flatten(doc("/code/tests/transforms/flatten/no-concurrency.xml"))
+      ]]></code>
+      <expected desc="acts as an identity transform" href="no-concurrency.xml"/>
+    </test>        
+  </TestSet>
+  <TestSet>
+    <testName>A layer with an id</testName>
+    <test>
+      <task>Flatten the layer</task>
+      <code><![CDATA[
+        flatten:flatten(doc("/code/tests/transforms/flatten/streamText-and-layer.xml")//j:layer)
+      ]]></code>
+      <expected desc="flat layer, xml:id becomes jx:id, layer id is listed on every layer component">
+        <jf:layer type="p" jf:id="...">
+          <tei:p jf:id="p1" jf:start="p1"/>
+          <tei:label n="test">test</tei:label>
+          <tei:s jf:id="s1" jf:start="s1"/>
+          <jf:placeholder jf:id="seg1" jf:stream="..."/>
+          <tei:s jf:end="s1" />
+          <tei:p jf:end="p1" />
+          <tei:p jf:start="..." />
+          <tei:s jf:start="..." />
+          <jf:placeholder jf:id="seg2" jf:stream="..."/>
+          <jf:placeholder jf:id="seg3" jf:stream="..."/>
+          <jf:placeholder jf:id="seg4" jf:stream="..."/>
+          <jf:placeholder jf:id="an5" jf:stream="..."/>
+          <tei:s jf:end="..." />
+          <tei:p jf:end="..." />
+        </jf:layer>
+      </expected>
+      <xpath desc="all jf:stream attributes are the same">every $stream in .//@jf:stream satisfies $stream=(.//@jf:stream)[1]</xpath>
+    </test>
+  </TestSet>
+</TestSuite>
