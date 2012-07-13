@@ -22,7 +22,11 @@ let $tests-to-run :=
     <test module="/code/tests/api/data/original.t.xml"/>
     <test module="/code/tests/api/data/sources.t.xml"/>
     <test module="/code/tests/api/data/transliteration.t.xml"/>
+    { ((: transforms :))}
     <test module="/code/tests/transforms/translit/translit.t.xml"/>
+    <test module="/code/tests/transforms/flatten/intermediate-links.t.xml"/>
+    <test module="/code/tests/transforms/flatten/resolve-internal.t.xml"/>
+    <test module="/code/tests/transforms/flatten/set-priorities.t.xml"/>
   </tests>
 return (
   api:serialize-as("xhtml"),
