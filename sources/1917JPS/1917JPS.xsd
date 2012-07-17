@@ -4,14 +4,13 @@
 TODO: tests to list sections, etc.?
 TODO: test that chapter/verse numbers in correct order and count
 TODO: also correct count of books and sections
-TODO: how to fail make for bad test?
 TODO: basic/default text element?
 TODO: front matter?
 -->
 <xs:annotation>
-  <xs:documentation xml:lang="en">
-	bible is the root element.
-  </xs:documentation>
+<xs:documentation xml:lang="en">
+bible is the root element.
+</xs:documentation>
 </xs:annotation>
 <xs:element name="bible">
 <xs:complexType mixed="true">
@@ -35,28 +34,32 @@ TODO: front matter?
 <!-- TODO: INFER: verse for verse number 1 -->
 <!-- TODO: P element in HTML? -->
 <xs:element name="paragraph-break">
-  <xs:complexType>
-    <xs:complexContent>
-      <xs:restriction base="xs:anyType"/>
-    </xs:complexContent>
-  </xs:complexType>
+<xs:complexType>
+<xs:complexContent>
+<xs:restriction base="xs:anyType"/>
+</xs:complexContent>
+</xs:complexType>
 </xs:element>
 <xs:element name="small-caps" type="xs:string" />
 <!-- TODO: put note inline with their reference -->
 <xs:element name="note">
-  <xs:complexType>
-    <xs:attribute name="reference-mark" type="xs:string" />
-  </xs:complexType>
+<xs:complexType mixed="true">
+<xs:sequence maxOccurs="unbounded">
+<xs:element name="text" />
+</xs:sequence>
+<xs:attribute name="mark" type="xs:string" />
+<xs:attribute name="id" type="xs:string" />
+</xs:complexType>
 </xs:element>
 <!-- YAGNI: these could be useful for tracing/debugging but we can add them in
-	if and when they're needed.
+if and when they're needed.
 <!- - what was printed in the original, where it was printed - ->
 <xs:element name="original-page-number" type="xs:string" />
 <!- - top of each page - ->
 <xs:element name="processed-page-start">
-  <xs:complexType>
-    <xs:attribute name="id" type="xs:integer" />
-  </xs:complexType>
+<xs:complexType>
+<xs:attribute name="id" type="xs:integer" />
+</xs:complexType>
 </xs:element>-->
 <!-- TODO: xml:lang=he -->
 <xs:element name="parashah-title" type="xs:string" />

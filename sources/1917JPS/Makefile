@@ -1,6 +1,6 @@
 # 1917 JPS project Makefile
 # for the OpenSiddur project
-# Copyright 2011 Marc Stober and licensed under the LGPL
+# Copyright 2011-2012 Marc Stober and licensed under the LGPL
 
 # Extracts text from public domain PDF format 1917 edition Tanakh
 # supplied by JPS into XML suitable for reuse.
@@ -30,13 +30,13 @@ temp/pdf2txt.xml: Makefile
 	mkdir -p temp
 	pdf2txt.py -n -m 1049 -p $(genesis),$(isaiah),$(psalm150) -o temp/pdf2txt.xml Tanakh-JPS1917.pdf
 
-# Step 1: Extracting layout coordinates...
+# Step 1: Extract layout coordinates
 temp/bbox2xywh.xml: $(scriptsdir)/bbox2xywh.xsl2 \
 		temp/pdf2txt.xml
 	../../lib/saxon -s temp/pdf2txt.xml -o temp/bbox2xywh.xml \
 		$(scriptsdir)/bbox2xywh.xsl2
 
-# Step 2: Grouping text into blocks...
+# Step 2: Group text into blocks
 # TODO: see TODO's in xslt
 # TODO: front matter tables, and other front matter
 temp/get-blocks.xml: $(scriptsdir)/get-blocks.xsl2 \
@@ -62,15 +62,20 @@ temp/join-pages.xml: $(scriptsdir)/join-pages.xsl2 \
 	../../lib/saxon -s temp/join-text.xml -o temp/join-pages.xml \
 		$(scriptsdir)/join-pages.xsl2
 
-# Step 6: semi-final XML that should validate against custom XSD
-# TODO should be a step not just copying a file
+# Step 6: Small caps
+temp/small-caps.xml: $(scriptsdir)/small-caps.xsl2 \
+		temp/join-pages.xml
+	../../lib/saxon -s temp/join-pages.xml -o temp/small-caps.xml \
+		$(scriptsdir)/small-caps.xsl2
+
+# Step 7: Final XML that should validate against custom XSD
 1917JPS.xml: $(scriptsdir)/final.xsl2 \
-		temp/join-pages.xml 1917JPS.xsd
-	../../lib/saxon -s temp/join-pages.xml -o 1917JPS.xml \
-		$(scriptsdir)/final.xsl2 # optimistic :P
+		temp/small-caps.xml 1917JPS.xsd
+	../../lib/saxon -s temp/small-caps.xml -o 1917JPS.xml \
+		$(scriptsdir)/final.xsl2
 	xmllint --noout 1917JPS.xml --schema 1917JPS.xsd
 
-# test-html: HTML we can proofread, not neccessarily final/supported/canonical structure
+# HTML we can proofread, not neccessarily final/supported/canonical structure
 # validate against schema
 # TODO make validation its own step (but what's the target?)
 # TODO see TODO's in XSD

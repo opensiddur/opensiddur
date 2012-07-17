@@ -29,43 +29,51 @@ TODO: fix HTML XSL
 
 <!-- Output the content of column, but not the column element. -->
 <xsl:template match="column">
-	<!-- only the elements, not the space (empty text nodes) between the elements -->
-	<xsl:apply-templates select="*"/>
+<!-- only the elements, not the space (empty text nodes) between the elements -->
+<xsl:apply-templates select="*"/>
 </xsl:template>
 
 <!-- Output normal text, but not the text element. 
-	TODO: do we also need to check it's not italic, Hebrew, etc.?
+TODO: do we also need to check it's not italic, Hebrew, etc.?
 -->
 <xsl:template match="text[not(@size)]">
 	<xsl:choose>
-		<xsl:when test="following-sibling::text[1][@font='Times New Roman,Bold' and @size='6.215']">
-			<!-- If followed by small caps remove last character;
-				see small-caps element below. -->
-			<xsl:value-of select="substring(., 0, string-length())"/>
-		</xsl:when>
-		<xsl:otherwise>
-			<xsl:apply-templates/>
-		</xsl:otherwise>
-	</xsl:choose>
+		<xsl:when test="following-sibling::*[1]/self::small-caps">
+<!-- If followed by small caps remove last character;
+see small-caps element below. -->
+<xsl:value-of select="substring(., 0, string-length())"/>
+</xsl:when>
+<xsl:otherwise>
+	<xsl:apply-templates/>
+</xsl:otherwise>
+</xsl:choose>
 </xsl:template>
 
-<!-- Suppress footnotes for now. TODO: inline them!!! -->
+<!-- Replace footnote reference with inline note. -->
+<xsl:template match="note[@ref]">
+	<xsl:variable name="ref">
+		<xsl:value-of select="@ref" />
+	</xsl:variable>
+	<xsl:apply-templates select="//footnotes/note[@id=$ref]" />
+</xsl:template>
+
+<xsl:template match="footnotes/note">
+	<!-- only the elements, not the space (empty text nodes) between the elements -->
+	<xsl:copy>
+		<xsl:apply-templates select="@* | *"/>
+	</xsl:copy>
+</xsl:template>
+
+<!-- Suppress footnotes as separate section (was at bottom of page). -->
 <xsl:template match="footnotes">
-	<xsl:comment>
-	footnotes under construction!
-	</xsl:comment>
 </xsl:template>
 
-<!-- Suppress these empty elements seen near parashah title. -->
-<xsl:template match="text[@size='12.538' and normalize-space(.)='']">
-</xsl:template>
-
-<!-- Suppress these empty elements in header. -->
-<xsl:template match="header/text[@size='7.308' and normalize-space(.)='']">
+<!-- Suppress these empty elements -->
+<xsl:template match="text[@size and normalize-space()='']">
 </xsl:template>
 
 <!-- Suppress book name which is repeated on header of each page. 
-	Not the Hebrew characters though which is parashah name. -->
+Not the Hebrew characters though which is parashah name. -->
 <xsl:template match="header/text[@size='18.216' and string-to-codepoints(.)[1] &lt; 255]">
 </xsl:template>
 
@@ -74,7 +82,7 @@ TODO: fix HTML XSL
 </xsl:template>
 
 <!-- Output parashah title in header. This is probably just for first parashah
-	of a book.  TODO: Should we tag this 'lang="he"' or something? -->
+of a book.  TODO: Should we tag this 'lang="he"' or something? -->
 <xsl:template match="header/text[@size='18.216' and string-to-codepoints(.)[1] > 255]">
 	<xsl:element name="parashah-title">
 		<xsl:value-of select="normalize-space(.)"/>
@@ -82,7 +90,7 @@ TODO: fix HTML XSL
 </xsl:template>
 
 <!-- Output parashah title.
-	TODO: Should we tag this 'lang="he"' or something? -->
+TODO: Should we tag this 'lang="he"' or something? -->
 <xsl:template match="text[@size='12.762' and string-to-codepoints(.)[1] > 255]">
 	<xsl:element name="parashah-title">
 		<xsl:value-of select="normalize-space(.)"/>
@@ -96,24 +104,11 @@ TODO: fix HTML XSL
 	</xsl:element>
 </xsl:template>
 
-<!-- (Foot)notes. TODO: this is catching "OD" of "GOD" somewhere. -->
-<xsl:template match="text[@size='6.327']">
-	<xsl:choose>
-		<xsl:when test="normalize-space(.)=''">
-		</xsl:when>
-		<xsl:when test="string(number(normalize-space(.)))='NaN'">
-			<xsl:element name="note">
-				<xsl:attribute name="reference-mark">
-					<xsl:value-of select="normalize-space(.)" />
-				</xsl:attribute>
-			</xsl:element>
-		</xsl:when>
-		<xsl:otherwise>
-			<xsl:element name="verse-number">
-				<xsl:value-of select="normalize-space(.)"/>
-			</xsl:element>
-		</xsl:otherwise>
-	</xsl:choose>
+<!-- Verse numbers. -->
+<xsl:template match="text[@size='6.327' and string(number(normalize-space(.)))!='NaN']">
+	<xsl:element name="verse-number">
+		<xsl:value-of select="normalize-space(.)"/>
+	</xsl:element>
 </xsl:template>
 
 <!-- Book titles. -->
@@ -123,14 +118,5 @@ TODO: fix HTML XSL
 	</xsl:element>
 </xsl:template>
 
-<!-- Small caps (usually the "ord" of "Lord" -->
-<xsl:template match="text[@font='Times New Roman,Bold' and @size='6.215']">
-	<xsl:element name="small-caps">
-		<!-- Take last character of previous text; probably first of word. -->
-		<xsl:value-of select="substring(preceding-sibling::text[1], string-length(preceding-sibling::text[1]))"/>
-		<!-- small caps actually lowercase with a style -->
-		<xsl:value-of select="lower-case(.)"/>
-	</xsl:element>
-</xsl:template>
 
 </xsl:stylesheet>
