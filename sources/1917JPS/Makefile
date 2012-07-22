@@ -1,11 +1,11 @@
 # 1917 JPS project Makefile
-# for the OpenSiddur project
+# for the Open Siddur project
 # Copyright 2011-2012 Marc Stober and licensed under the LGPL
 
 # Extracts text from public domain PDF format 1917 edition Tanakh
 # supplied by JPS into XML suitable for reuse.
 
-# If this Makefile changes, the whole thing will re-run?
+# Note: If Makefile changes, the whole thing will re-run.
  
 # TODO: "Spell check" against a dictionary?
 # TODO: Tidy?
