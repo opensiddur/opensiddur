@@ -8,16 +8,16 @@ TODO: basic/default text element?
 TODO: front matter?
 -->
 <xs:annotation>
-<xs:documentation xml:lang="en">
-bible is the root element.
-</xs:documentation>
+	<xs:documentation xml:lang="en">
+		bible is the root element.
+	</xs:documentation>
 </xs:annotation>
 <xs:element name="bible">
-<xs:complexType mixed="true">
-<xs:sequence>
-<xs:any maxOccurs="unbounded" />	
-</xs:sequence>
-</xs:complexType>
+	<xs:complexType mixed="true">
+		<xs:sequence>
+			<xs:any maxOccurs="unbounded" />	
+		</xs:sequence>
+	</xs:complexType>
 </xs:element>
 <!-- TODO: expect section title to occur more than once with xml:lang=he and en? -->
 <xs:element name="section-title" type="xs:string" /> 
@@ -32,24 +32,25 @@ bible is the root element.
 <!-- TODO: INFER: verse -->
 <!-- TODO: INFER: verse for verse 1 -->
 <!-- TODO: INFER: verse for verse number 1 -->
+<xs:element name="verse-letter" type="xs:string" />
 <!-- TODO: P element in HTML? -->
 <xs:element name="paragraph-break">
-<xs:complexType>
-<xs:complexContent>
-<xs:restriction base="xs:anyType"/>
-</xs:complexContent>
-</xs:complexType>
+	<xs:complexType>
+		<xs:complexContent>
+			<xs:restriction base="xs:anyType"/>
+		</xs:complexContent>
+	</xs:complexType>
 </xs:element>
 <xs:element name="small-caps" type="xs:string" />
 <!-- TODO: put note inline with their reference -->
 <xs:element name="note">
-<xs:complexType mixed="true">
-<xs:sequence maxOccurs="unbounded">
-<xs:element name="text" />
-</xs:sequence>
-<xs:attribute name="mark" type="xs:string" />
-<xs:attribute name="id" type="xs:string" />
-</xs:complexType>
+	<xs:complexType mixed="true">
+		<xs:sequence maxOccurs="unbounded">
+			<xs:element name="text" />
+		</xs:sequence>
+		<xs:attribute name="mark" type="xs:string" />
+		<xs:attribute name="id" type="xs:string" />
+	</xs:complexType>
 </xs:element>
 <!-- YAGNI: these could be useful for tracing/debugging but we can add them in
 if and when they're needed.
@@ -63,5 +64,6 @@ if and when they're needed.
 </xs:element>-->
 <!-- TODO: xml:lang=he -->
 <xs:element name="parashah-title" type="xs:string" />
+<xs:element name="extra-text" type="xs:string" />
 
 </xs:schema>

@@ -40,4 +40,11 @@ Separate out comment-delimited bbox attribute into separate
     </xsl:attribute>
   </xsl:template>
 
+	<!-- don't output the default font -->
+	<xsl:template match="@font">
+		<xsl:if test=". != 'Times New Roman'">
+			<xsl:copy/>
+		</xsl:if>
+	</xsl:template>
+
 </xsl:stylesheet>

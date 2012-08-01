@@ -21,6 +21,7 @@ scriptsdir = ../../code/input-conversion/1917JPS
 genesis = 16,17,18,19,20,21,22,23,24,25
 isaiah = 578,579,580,581,582
 psalm150 = 1064
+lamentations = 1180,1181,1182,1183,1184,1185,1186,1187,1188,1189
 
 # Step 0: Converting PDF to XML...
 # page 16=Genesis 1
@@ -28,7 +29,7 @@ psalm150 = 1064
 # TODO: separate files?
 temp/pdf2txt.xml: Makefile
 	mkdir -p temp
-	pdf2txt.py -n -m 1049 -p $(genesis),$(isaiah),$(psalm150) -o temp/pdf2txt.xml Tanakh-JPS1917.pdf
+	pdf2txt.py -n -p $(genesis),$(isaiah),$(psalm150),$(lamentations) -o temp/pdf2txt.xml Tanakh-JPS1917.pdf
 
 # Step 1: Extract layout coordinates
 temp/bbox2xywh.xml: $(scriptsdir)/bbox2xywh.xsl2 \
@@ -44,16 +45,28 @@ temp/get-blocks.xml: $(scriptsdir)/get-blocks.xsl2 \
 	../../lib/saxon -s temp/bbox2xywh.xml -o temp/get-blocks.xml \
 		$(scriptsdir)/get-blocks.xsl2
 
-# Step 3: Fixing chapter numbers and marking paragraphs...
-temp/fix-chapter-numbers.xml: $(scriptsdir)/fix-chapter-numbers.xsl2 \
+# Step 2.5: Fix Hebrew characters in wrong order
+temp/fix-hebrew.xml: $(scriptsdir)/fix-hebrew.xsl2 \
 		temp/get-blocks.xml
-	../../lib/saxon -s temp/get-blocks.xml -o temp/fix-chapter-numbers.xml \
+	../../lib/saxon -s temp/get-blocks.xml -o temp/fix-hebrew.xml \
+		$(scriptsdir)/fix-hebrew.xsl2
+
+# Step 3: Fix chapter numbers and mark paragraphs
+temp/fix-chapter-numbers.xml: $(scriptsdir)/fix-chapter-numbers.xsl2 \
+		temp/fix-hebrew.xml
+	../../lib/saxon -s temp/fix-hebrew.xml -o temp/fix-chapter-numbers.xml \
 		$(scriptsdir)/fix-chapter-numbers.xsl2
+
+# Step 3.5: Fix apostrophe-s and smart quote issues
+temp/fix-apostrophe-s.xml: $(scriptsdir)/fix-apostrophe-s.xsl2 \
+		temp/fix-chapter-numbers.xml
+	../../lib/saxon -s temp/fix-chapter-numbers.xml -o temp/fix-apostrophe-s.xml \
+		$(scriptsdir)/fix-apostrophe-s.xsl2
 
 # Step 4: Merge adjacent text elements
 temp/join-text.xml: $(scriptsdir)/join-text.xsl2 \
-		temp/fix-chapter-numbers.xml
-	../../lib/saxon -s temp/fix-chapter-numbers.xml -o temp/join-text.xml \
+		temp/fix-apostrophe-s.xml
+	../../lib/saxon -s temp/fix-apostrophe-s.xml -o temp/join-text.xml \
 		$(scriptsdir)/join-text.xsl2
 
 # Step 5: Flatten pages

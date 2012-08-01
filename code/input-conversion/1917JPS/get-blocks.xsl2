@@ -36,35 +36,6 @@ Split columns (in progress)
 		</xsl:copy>
 	</xsl:template>
 
-	<xsl:function name="my:is-hebrew">
-		<xsl:param name="text"/>
-		<!-- Note: not exact char codes but works -->
-		<xsl:value-of select="string-to-codepoints($text)[1] > 255 and 
-			string-to-codepoints($text)[1] &lt; 2000"/>
-	</xsl:function>
-
-	<!-- Fixes an issue where Hebrew characters appear out of order -->
-	<xsl:template match="text[my:is-hebrew(.) = 'true']"> 
-		<!-- debugging
-				<xsl:when test="my:is-hebrew(.) = 'true' and 
-					my:is-hebrew(following-sibling::text[1]) = 'true' and
-					(./@x &lt; following-sibling::text[1]/@x)">
-					<xsl:value-of select="."/>
-				</xsl:when>
-		 -->
-		<xsl:if test="my:is-hebrew(preceding-sibling::text[1]) = 'false'">
-			<xsl:copy>
-				<xsl:apply-templates select="*|@*|node()"/>
-			</xsl:copy>
-			<xsl:for-each select="following-sibling::text[my:is-hebrew(.) = 'true']">
-				<xsl:sort select="@x" order="descending"/>
-				<xsl:copy>
-					<xsl:apply-templates select="*|@*|node()"/>
-				</xsl:copy>
-			</xsl:for-each>
-		</xsl:if>
-	</xsl:template>
-
 	<xsl:template match="page">
 
 		<!-- select the vertical rect that divides columns -->

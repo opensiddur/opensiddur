@@ -7,50 +7,53 @@ Join adjacent single-character text elements
 with the same font and size. 
 -->
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
- xmlns:my="https://github.com/marcstober/opensiddur/blob/master/code/input-conversion/1917JPS/join-text.xsl2/my">
+	xmlns:my="https://github.com/marcstober/opensiddur/blob/master/code/input-conversion/1917JPS/my">
 
-  <xsl:output method="xml" indent="yes"/>
-  <xsl:strip-space elements="*" />
-  <xsl:preserve-space elements="text" />
+	<xsl:include href="functions.xsl2"/>
+	<xsl:output method="xml" indent="yes"/>
+	<xsl:strip-space elements="*" />
+	<xsl:preserve-space elements="text" />
 
-  <!-- default identity template -->
-  <xsl:template match="@* | node()">
-    <xsl:copy>
-      <xsl:apply-templates select="@* | node()"/>
-    </xsl:copy>
-  </xsl:template>
+	<!-- default identity template -->
+	<xsl:template match="@* | node()">
+		<xsl:copy>
+			<xsl:apply-templates select="@* | node()"/>
+		</xsl:copy>
+	</xsl:template>
 
-  <!-- function to decide if given text element should be joined with previous -->
-  <xsl:function name="my:is-same-text">
-    <xsl:param name="preceding" />
-    <xsl:param name="this" />
-    <!-- if not preceded by a text element with same font and size -->
-    <xsl:value-of select="($this/@font = $preceding/@font) and ($this/@size = $preceding/@size)"/>
-  </xsl:function>
+	<!-- function to decide if given text element should be joined with previous -->
+	<xsl:function name="my:is-same-text">
+		<xsl:param name="preceding" />
+		<xsl:param name="this" />
+		<!-- if not preceded by a text element with same font and size -->
+		<xsl:value-of select="(string($this/@font) = string($preceding/@font)) and 
+			($this/@size = $preceding/@size) and
+			(my:is-hebrew($this) = my:is-hebrew($preceding))"/>
+	</xsl:function>
 
-  <!-- for each text element -->
-  <xsl:template match="text">
-    <xsl:variable name="preceding" select="preceding-sibling::*[1][local-name() = 'text']" />
-    <xsl:if test="my:is-same-text($preceding, .) = 'false'">
-      <!-- start a new text element -->
-      <xsl:element name="text">
-	<!-- ** output content ** -->
-	<!-- don't output the default font -->
-	<xsl:if test="@font != 'Times New Roman'">
-	  <xsl:apply-templates select="@font" />
-	</xsl:if>
-	<!-- don't output the default font size -->
-	<xsl:if test="@size != '10.035'">
-	  <xsl:apply-templates select="@size" />
-	</xsl:if>
-	<xsl:variable name="font" select="@font" />
-	<xsl:variable name="size" select="@size" />
-	<xsl:call-template name="join-same">
-	  <xsl:with-param name="preceding" select="." />
-	</xsl:call-template>
-      </xsl:element>
-    </xsl:if>
-  </xsl:template>
+	<!-- for each text element -->
+	<xsl:template match="text">
+		<xsl:variable name="preceding" select="preceding-sibling::*[1][local-name() = 'text']" />
+		<xsl:if test="my:is-same-text($preceding, .) = 'false'">
+			<!-- start a new text element -->
+			<xsl:element name="text">
+				<!-- ** output content ** -->
+				<!-- If default font wasn't removed, still need it -->
+				<xsl:apply-templates select="@font" />
+				<!-- don't output the default font size -->
+				<xsl:if test="@size != '10.035'">
+					<xsl:apply-templates select="@size" />
+				</xsl:if>
+				<!-- keep y value to help find footnote marks in next step -->
+				<xsl:apply-templates select="@y" />
+				<xsl:variable name="font" select="@font" />
+				<xsl:variable name="size" select="@size" />
+				<xsl:call-template name="join-same">
+					<xsl:with-param name="preceding" select="." />
+				</xsl:call-template>
+			</xsl:element>
+		</xsl:if>
+	</xsl:template>
 
   <!-- called recursively to output adjacent elements -->
   <xsl:template name="join-same">
@@ -67,8 +70,8 @@ with the same font and size.
     </xsl:if>
   </xsl:template>
 
-  <!-- don't pass splitter or rect elements, or empty footnotes elements, 
-       any further down the pipeline -->
+	<!-- don't pass splitter or rect elements, or empty footnotes elements, 
+	   any further down the pipeline -->
   <xsl:template match="splitter | rect | footnotes[not(*)]">
   </xsl:template>
 

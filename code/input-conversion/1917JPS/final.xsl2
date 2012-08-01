@@ -5,8 +5,8 @@ Copyright 2012 Marc Stober and licensed under the GNU LGPL.
 
 Output the final XML.
 -->
-<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:my="https://github.com/marcstober/opensiddur/blob/master/code/input-conversion/1917JPS/my">
 <!--
 TODO: get this to pass XMLLINT schema validation!!!
 TODO: organize/document better
@@ -15,6 +15,7 @@ TODO: count results, make sure the structure is as expected
 TODO: fix HTML XSL
 -->
 
+<xsl:include href="functions.xsl2"/>
 <xsl:output method="xml" indent="yes"/>
 
 <xsl:template match="@* | node()">
@@ -36,7 +37,8 @@ TODO: fix HTML XSL
 <!-- Output normal text, but not the text element. 
 TODO: do we also need to check it's not italic, Hebrew, etc.?
 -->
-<xsl:template match="text[not(@size)]">
+<xsl:template match="text[not(@size) and 
+	not(string-length()=1 and my:is-hebrew(.) = 'true')]">
 	<xsl:choose>
 		<xsl:when test="following-sibling::*[1]/self::small-caps">
 <!-- If followed by small caps remove last character;
@@ -74,7 +76,9 @@ see small-caps element below. -->
 
 <!-- Suppress book name which is repeated on header of each page. 
 Not the Hebrew characters though which is parashah name. -->
-<xsl:template match="header/text[@size='18.216' and string-to-codepoints(.)[1] &lt; 255]">
+<xsl:template match="header/text[@size='18.216' and 
+	string-to-codepoints(.)[1] &lt; 255 and
+	normalize-space() !='']">
 </xsl:template>
 
 <!-- Suppress anything in the footer (e.g., printed page number). -->
@@ -118,5 +122,20 @@ TODO: Should we tag this 'lang="he"' or something? -->
 	</xsl:element>
 </xsl:template>
 
+<!-- Used for example in Lamentations. -->
+<xsl:template match="text[(@size='9.054' or @size='10.908' or string-length()=1) and
+	normalize-space() != '' and
+	my:is-hebrew(.) = 'true']">
+	<xsl:element name="verse-letter">
+		<xsl:value-of select="normalize-space(.)"/>
+	</xsl:element>
+</xsl:template>
+
+<!-- Used for example in Lamentations. -->
+<xsl:template match="text[@size='8.181']">
+	<xsl:element name="extra-text">
+		<xsl:value-of select="normalize-space(.)"/>
+	</xsl:element>
+</xsl:template>
 
 </xsl:stylesheet>

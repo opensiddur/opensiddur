@@ -3,7 +3,7 @@
 join-pages.xsl2 for the OpenSiddur project.
 Copyright 2012 Marc Stober and licensed under the GNU LGPL.
 
-Flatten page elements.
+Flatten page elements and recognize footnotes.
 -->
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"> 
 
@@ -28,10 +28,13 @@ Flatten page elements.
 		<xsl:apply-templates select="node()" />
 	</xsl:template>
 
-	<!-- Need to do something with footnotes while still have page context -->
+	<!-- Need to recognize footnotes while still have page context -->
 	<xsl:template match="column/text[@size='6.327' and 
 		string-length(normalize-space())=1 and 
-		string(number(normalize-space()))='NaN']">
+		string(number(normalize-space()))='NaN' and
+		abs(number(@y - preceding-sibling::text[1]/@y)) > 1.0]">
+		debugging: <xsl:value-of select="@y - preceding-sibling::text[1]/@y"/>
+		debugging: <xsl:value-of select="(@y - preceding-sibling::text[1]/@y) > 1.0"/>
 		<xsl:element name="note">
 			<xsl:attribute name="mark">
 				<xsl:value-of select="normalize-space()" />
