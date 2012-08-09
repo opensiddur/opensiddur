@@ -19,6 +19,33 @@ TODO: front matter?
 		</xs:sequence>
 	</xs:complexType>
 </xs:element>
+<xs:element name="section">
+	<!-- TODO what exactly should be allowed? -->
+	<xs:complexType mixed="true">
+		<xs:sequence>
+			<xs:any maxOccurs="unbounded" />	
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string" />
+	</xs:complexType>
+</xs:element>
+<xs:element name="subsection">
+	<!-- TODO what exactly should be allowed? -->
+	<xs:complexType mixed="true">
+		<xs:sequence>
+			<xs:any maxOccurs="unbounded" />	
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string" />
+	</xs:complexType>
+</xs:element>
+<xs:element name="book">
+	<!-- TODO what exactly should be allowed? -->
+	<xs:complexType mixed="true">
+		<xs:sequence>
+			<xs:any maxOccurs="unbounded" />	
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string" />
+	</xs:complexType>
+</xs:element>
 <!-- TODO: expect section title to occur more than once with xml:lang=he and en? -->
 <xs:element name="section-title" type="xs:string" /> 
 <!-- TODO: INFER: section -->
@@ -62,8 +89,13 @@ if and when they're needed.
 <xs:attribute name="id" type="xs:integer" />
 </xs:complexType>
 </xs:element>-->
+<!-- parashah-title should be used in Torah and hebrew-title in N"Kh,
+	but not enforced in this XSD. -->
 <!-- TODO: xml:lang=he -->
 <xs:element name="parashah-title" type="xs:string" />
+<xs:element name="hebrew-title" type="xs:string" />
+<!-- Used, for example, at the end of Lamentations where a verse is repeated, 
+	for text that is traditionally included but not "really" a verse. -->
 <xs:element name="extra-text" type="xs:string" />
 
 </xs:schema>

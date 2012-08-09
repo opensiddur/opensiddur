@@ -9,129 +9,205 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
 -->
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-  <xsl:output method="html" indent="yes" />
+	<xsl:output method="html" indent="yes" />
 
-  <!-- default identity template, in case we need it again
+	<!-- default identity template, in case we need it again
   <xsl:template match="@* | node()">
-    <xsl:copy>
-      <xsl:apply-templates select="@* | node()"/>
-    </xsl:copy>
+	<xsl:copy>
+	  <xsl:apply-templates select="@* | node()"/>
+	</xsl:copy>
   </xsl:template-->
 
   <!-- pick up an extra text nodes - 
 		what's left of identity template, not sure if this is needed --> 
   <xsl:template match="text()">
-    <xsl:copy>
-    </xsl:copy>
+	  <xsl:copy>
+	  </xsl:copy>
   </xsl:template>
 
   <xsl:template match="bible">
-    <!-- HTML5 DOCTYPE -->
-    <xsl:text disable-output-escaping="yes">&lt;!DOCTYPE html&gt;&#xA;</xsl:text>
-    <html>
-      <head>
-	<!-- make sure browsers see this as UTF-8 -->
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<!-- Make sure iPhone reflows the text to its screen size 
-	     (otherwise it defaults to a zoomed-out 980px viewport). 
-	     See: http://developer.apple.com/library/IOs/#documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html  -->
+	  <!-- HTML5 DOCTYPE -->
+	  <xsl:text disable-output-escaping="yes">&lt;!DOCTYPE html&gt;&#xA;</xsl:text>
+	  <html>
+		  <head>
+			  <!-- make sure browsers see this as UTF-8 -->
+			  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+			  <!-- Make sure iPhone reflows the text to its screen size 
+		 (otherwise it defaults to a zoomed-out 980px viewport). 
+		 See: http://developer.apple.com/library/IOs/#documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html  -->
 	<meta name = "viewport" content = "initial-scale = 1.0" />
+	<!-- TODO: separate stylesheet; non-mobile margins -->
 	<style type="text/css">
-	  /* more readable body size and line height 
-	       see http://www.alistapart.com/articles/howtosizetextincss */
-	body { /*font-size: 16px;*/ line-height: 1.6; }
-	  h1 { margin: 5px 0; }
-	  .verse-number { 
-	    color: #BBB;
-	  }
-	.small-caps { font-variant: small-caps; }
+		/* more readable body size and line height 
+		see http://www.alistapart.com/articles/howtosizetextincss */
+		body { /*font-size: 16px;*/ line-height: 1.6; }
+		@media all and (min-width: 800px) 
+		{
+			#container
+			{
+				width: 40em;
+				margin: auto;
+			}
+		}
+		h1, h2, h3 
+		{ 
+		text-align: center; 
+		color: #8F0700;
+		}
+		h1 
+		{
+		border: 3px double #8F0700;
+		}
+		h2 
+		{ 
+		font-size: 32px; 
+		border: 1px solid #8F0700;
+		}
+		h3 { font-size: 24px; }
+
+		.parashah-title
+		{
+			padding: 1em 2em;
+			color: #20909A;	
+		}
+		.verse-number 
+		{ 
+			color: #BBB;
+			font-size: 75%;
+			vertical-align: 10%;
+			margin-right: .25em;
+		}
+		.paragraph-break
+		{
+			color: #BBB;
+			font-size: 75%;
+		}
+		.small-caps { font-variant: small-caps; }
 	</style>
 <!-- Google Analytics -->
 <script type="text/javascript">
 
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-32130708-1']);
-  _gaq.push(['_setDomainName', 'marcstober.com']);
-  _gaq.push(['_trackPageview']);
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-32130708-1']);
+	_gaq.push(['_setDomainName', 'marcstober.com']);
+	_gaq.push(['_trackPageview']);
 
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+	(function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
 
 </script>
-      </head>
-      <body>
-	<div style="margin-bottom: 5px">
-	  <xsl:for-each select="page">
-	    <xsl:element name="a">
-	      <xsl:attribute name="href">
-		<xsl:text>#p</xsl:text>
-		<xsl:value-of select="@id" />
-	      </xsl:attribute>
-	      <xsl:value-of select="@id" />
-	    </xsl:element>
-	    <xsl:text> </xsl:text>
-	  </xsl:for-each>
-	</div>
+	  </head>
+	  <body>
+		  <div id="container">
+			  <!-- outline: This is intentionally similar to "The Order of the Books"
+				on page xvi of the 1919 printing. -->
+			<!-- TODO: fixed? -->
+			<ul>
+				<xsl:for-each select="section">
+					<li><a>
+							<xsl:attribute name="href">
+								<xsl:text>#</xsl:text>
+								<xsl:value-of select="@id" />
+							</xsl:attribute>
+							<xsl:value-of select="@id" />
+					</a></li>
+					<ul>
+						<xsl:for-each select="book|subsection">
+							<li>
+								<a>
+									<xsl:attribute name="href">
+										<xsl:text>#</xsl:text>
+										<xsl:value-of select="@id" />
+									</xsl:attribute>
+									<xsl:value-of select="@id" />
+								</a>
+							</li>
+							<ul>
+								<xsl:for-each select="book">
+									<li><a>
+											<xsl:attribute name="href">
+												<xsl:text>#</xsl:text>
+												<xsl:value-of select="@id" />
+											</xsl:attribute>
+											<xsl:value-of select="@id" />
+									</a></li>
+								</xsl:for-each>
+							</ul>
+						</xsl:for-each>
+					</ul>
+				</xsl:for-each>
+			</ul>
 
-	<xsl:apply-templates select="* | text()"/>
-      </body>
-    </html>
+			<xsl:apply-templates select="* | text()"/>
+		</div>
+	</body>
+</html>
   </xsl:template>
 
+  <!-- Temporary formatting for elements that don't have it yet -->
   <xsl:template match="*">
-    <div style="border: solid 2px #dcf; margin-bottom: 4px">
-      <div style="background-color: #dcf; padding-bottom: 4px">
-	<strong><xsl:value-of select="local-name()" /></strong>
-	<xsl:apply-templates select="@*" />
-      </div>
-      <div style="padding: 5px">
-	<xsl:apply-templates select="node()" />
-      </div>
-    </div>
+	  <div style="border: solid 1px #0ff; margin-bottom: 4px; font-family: sans-serif">
+		  <div style="background-color: #0ff; padding: 4px">
+			  <strong><xsl:value-of select="local-name()" /></strong>
+			  <xsl:apply-templates select="@*" />
+		  </div>
+		  <div style="padding: 5px">
+			  <xsl:apply-templates select="node()" />
+		  </div>
+	  </div>
   </xsl:template>
 
-  <xsl:template match="page">
-    <xsl:element name="a">
-      <xsl:attribute name="name">
-	<xsl:text>p</xsl:text>
-	<xsl:value-of select="@id" />
-      </xsl:attribute>
-    </xsl:element>
-    <hr />
-    <div style="max-width: 800px; margin: 0 auto">
-      <xsl:apply-templates select="header | column" />
-      <div style="border-top: solid 1px #8F0700; margin: 10px 0; padding: 5px 0">
-	<xsl:apply-templates select="column/footnotes" />
-      </div>
-      <xsl:apply-templates select="footer" />
-    </div>
+  <xsl:template match="section">
+	  <!-- TODO get the name from the text rather than from the outline -->
+	  <h1>
+		  <xsl:attribute name="id">
+			  <xsl:value-of select="@id"/>
+		  </xsl:attribute>
+		  <xsl:value-of select="@id"/>
+	  </h1>
+	  <xsl:apply-templates/>
   </xsl:template>
 
-
-  <xsl:template match="column">
-    <!-- suppress -->
-    <xsl:apply-templates select="node()[name() != 'footnotes']" />
+  <xsl:template match="book">
+	  <a>
+		  <xsl:attribute name="id">
+			  <xsl:value-of select="@id"/>
+		  </xsl:attribute>
+	  </a>
+	  <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="header | footer">
-    <div style="border: solid 1px #8F0700; margin: 10px 0; padding: 5px; text-align: center">
-      <xsl:apply-templates select="node()" />
-    </div>
+  <!-- TODO want book title separate for Torah? And this lower down? -->
+  <xsl:template match="parashah-title">
+	  <div class="parashah-title">
+		  <!-- unicode 261E TODO make sure this works everywhere -->
+		  ☞ A weekly reading, 
+		  <i>Parashat </i>
+		  <xsl:value-of select="."/>, begins here.
+	  </div>
   </xsl:template>
 
-  <xsl:template match="footnotes">
-      <xsl:apply-templates select="node()" />
+  <xsl:template match="book-title">
+	  <h2>
+		  <xsl:value-of select="."/>
+	  </h2>
   </xsl:template>
 
+  <!-- TODO (in XML, really) verse 1 -->
+  <xsl:template match="chapter-number">
+	  <h3>
+		  Chapter <xsl:value-of select="."/>
+	  </h3>
+  </xsl:template>
 
   <xsl:template match="@*">
-    <xsl:text> </xsl:text>
-    <xsl:value-of select="local-name()" />
-    <xsl:text>=</xsl:text>
-    <xsl:value-of select="." />  
+	  <xsl:text> </xsl:text>
+	  <xsl:value-of select="local-name()" />
+	  <xsl:text>=</xsl:text>
+	  <xsl:value-of select="." />  
   </xsl:template>
 
   <!-- supress empty text nodes -->
@@ -140,36 +216,26 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
   </xsl:template>
 
   <xsl:template match="paragraph-break">
-    <div style="color: #bbb"><xsl:text>&#182;</xsl:text></div>
+	  <div class="paragraph-break"><xsl:text>&#182;</xsl:text></div>
   </xsl:template>
 
   <!-- regular text -->
   <xsl:template match="text[not(@size) and not(@font)]">
-    <xsl:apply-templates select="node()" />
-  </xsl:template>
-
-  <!-- chapter-number -->
-  <xsl:template match="text[@size='25.961']">
-    <h2 style="color: #8F0700">Chapter <xsl:apply-templates select="node()" /></h2>
-    <span class="verse-number">1</span> <!-- insert first verse number -->
+	  <xsl:apply-templates select="node()" />
   </xsl:template>
 
   <!-- verse-number -->
-  <xsl:template match="text[@size='6.327']">
-    <span class="verse-number"><xsl:apply-templates select="node()" /></span>
+  <xsl:template match="verse-number">
+	  <span class="verse-number"><xsl:apply-templates select="node()" /></span>
   </xsl:template>
 
+  <!-- TODO working/needed? -->
   <xsl:template match="text[@size='10.046' and @font='Times New Roman,Italic']">
-    <i><xsl:apply-templates select="node()" /></i>
+	  <i><xsl:apply-templates select="node()" /></i>
   </xsl:template>
 
   <xsl:template match="small-caps">
-    <span class="small-caps"><xsl:apply-templates select="node()" /></span>
-  </xsl:template>
-
-  <!-- TODO this mixes book headings, parsha headings, and subsequent page heading that also have book name -->
-  <xsl:template match="text[(@size='18.216') or ( @size='21.816')]">
-    <h1 style="color: #8F0700"><xsl:apply-templates select="node()" /></h1>
+	  <span class="small-caps"><xsl:apply-templates select="node()" /></span>
   </xsl:template>
 
 </xsl:stylesheet>

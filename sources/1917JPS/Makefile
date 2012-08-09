@@ -5,12 +5,8 @@
 # Extracts text from public domain PDF format 1917 edition Tanakh
 # supplied by JPS into XML suitable for reuse.
 
-# Note: If Makefile changes, the whole thing will re-run.
- 
 # TODO: "Spell check" against a dictionary?
 # TODO: Tidy?
-# TODO: Extract Toc outline?
-# TODO: other xmllint error about DTD?
 
 # for now we are just building the test HTML
 all: 1917JPS.html
@@ -20,16 +16,19 @@ scriptsdir = ../../code/input-conversion/1917JPS
 # TODO this is a just a selection for this round of dev/test
 genesis = 16,17,18,19,20,21,22,23,24,25
 isaiah = 578,579,580,581,582
+# TODO Jonah doesn't include Jonah because it starts mid-page
+jonah = 886
 psalm150 = 1064
 lamentations = 1180,1181,1182,1183,1184,1185,1186,1187,1188,1189
+pages = $(genesis),$(isaiah),$(psalm150),$(lamentations)
 
-# Step 0: Converting PDF to XML...
+# Step 0: Convert PDF to XML
 # page 16=Genesis 1
 # TODO: all the books/pages - at least some more samples to start
 # TODO: separate files?
 temp/pdf2txt.xml: Makefile
 	mkdir -p temp
-	pdf2txt.py -n -p $(genesis),$(isaiah),$(psalm150),$(lamentations) -o temp/pdf2txt.xml Tanakh-JPS1917.pdf
+	pdf2txt.py -n -p $(pages) -o temp/pdf2txt.xml Tanakh-JPS1917.pdf
 
 # Step 1: Extract layout coordinates
 temp/bbox2xywh.xml: $(scriptsdir)/bbox2xywh.xsl2 \
@@ -69,10 +68,23 @@ temp/join-text.xml: $(scriptsdir)/join-text.xsl2 \
 	../../lib/saxon -s temp/fix-apostrophe-s.xml -o temp/join-text.xml \
 		$(scriptsdir)/join-text.xsl2
 
-# Step 5: Flatten pages
-temp/join-pages.xml: $(scriptsdir)/join-pages.xsl2 \
+# Step 4.4: Generate outline, custom based on selected pages
+# needs dependency on Makefile since that's how we select pages
+temp/outline.xsl2: Makefile $(scriptsdir)/outline.py \
+	$(scriptsdir)/outline.xsl2.template
+	$(scriptsdir)/outline.py $(pages) > temp/outline.xsl2
+
+# Step 4.5: Group pages using generated outline.
+# (Different than other steps, because the XSLT is generated.)
+temp/outline.xml: temp/outline.xsl2 \
 		temp/join-text.xml
-	../../lib/saxon -s temp/join-text.xml -o temp/join-pages.xml \
+	../../lib/saxon -s temp/join-text.xml -o temp/outline.xml \
+		temp/outline.xsl2
+
+# Step 5: Flatten pages (within sections)
+temp/join-pages.xml: $(scriptsdir)/join-pages.xsl2 \
+		temp/outline.xml
+	../../lib/saxon -s temp/outline.xml -o temp/join-pages.xml \
 		$(scriptsdir)/join-pages.xsl2
 
 # Step 6: Small caps

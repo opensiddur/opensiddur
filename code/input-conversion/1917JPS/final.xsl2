@@ -87,10 +87,20 @@ Not the Hebrew characters though which is parashah name. -->
 
 <!-- Output parashah title in header. This is probably just for first parashah
 of a book.  TODO: Should we tag this 'lang="he"' or something? -->
-<xsl:template match="header/text[@size='18.216' and string-to-codepoints(.)[1] > 255]">
-	<xsl:element name="parashah-title">
-		<xsl:value-of select="normalize-space(.)"/>
-	</xsl:element>
+<xsl:template match="header/text[@size = '18.216' 
+	and string-to-codepoints(.)[1] > 255]">
+	<xsl:choose>
+		<xsl:when test="ancestor::section[@id = 'THE LAW']">
+			<xsl:element name="parashah-title">
+				<xsl:value-of select="normalize-space(.)"/>
+			</xsl:element>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:element name="hebrew-title">
+				<xsl:value-of select="normalize-space(.)"/>
+			</xsl:element>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 <!-- Output parashah title.
