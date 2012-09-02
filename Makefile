@@ -132,7 +132,7 @@ TEIDIR = $(LIBDIR)/tei
 TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 
 EXISTSRCDIR = $(LIBDIR)/exist
-EXISTSRCREPO = https://svn.code.sf.net/p/exist/code/trunk/eXist
+EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
 EXIST_REVISION ?= -r 17050
 
