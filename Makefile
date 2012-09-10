@@ -134,7 +134,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 17050
+EXIST_REVISION ?= -r 17115
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -248,7 +248,7 @@ installer: $(EXIST_INSTALL_JAR)
 patches:
 	$(XSLT) -s $(EXIST_INSTALL_DIR)/conf.xml -o $(EXIST_INSTALL_DIR)/conf.xml $(SETUPDIR)/setup-conf-xml.xsl2
 	$(XSLT) -s $(EXIST_INSTALL_DIR)/mime-types.xml -o $(EXIST_INSTALL_DIR)/mime-types.xml $(SETUPDIR)/setup-mime-types.xsl2
-	-patch -Nd $(EXIST_INSTALL_DIR)/webapp/WEB-INF < $(SETUPDIR)/controller-config.xml.patch
+	$(XSLT) -s $(EXIST_INSTALL_DIR)/webapp/WEB-INF/controller-config.xml -o $(EXIST_INSTALL_DIR)/webapp/WEB-INF/controller-config.xml $(SETUPDIR)/setup-controller-config-xml.xsl2
 	-patch -Nd $(EXIST_INSTALL_DIR)/tools/jetty/etc < $(SETUPDIR)/jetty.xml.patch
 
 lucene-install: installer $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/lucene.hebrew.jar 

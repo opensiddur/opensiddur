@@ -1,0 +1,27 @@
+<!-- modify controller-config.xsl2 
+    Open Siddur Project
+    Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+    Licensed under the GNU Lesser General Public License, version 3 or later
+ -->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+    xmlns="http://exist.sourceforge.net/NS/exist"
+    xmlns:c="http://exist.sourceforge.net/NS/exist"
+    exclude-result-prefixes="c">
+    <xsl:output method="xml" indent="yes"/>
+    <xsl:template match="c:root[@pattern='/apps']">
+        <xsl:comment>Open Siddur Configuration</xsl:comment>
+        <root pattern="/exist/rest" path="xmldb:exist:///"/>
+        <root pattern="/exist/" path="/"/>
+        <root pattern="/lib/" path="/"/>
+        <root pattern="/db" path="xmldb:exist:///db"/>
+        <!-- this does not work: for now, need to access the api at /restxq/api -->
+     	<!--forward pattern="/.*" servlet="RestXqServlet"/-->
+    </xsl:template>
+
+    <xsl:template match="*|comment()" priority="-10">
+        <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
+</xsl:stylesheet>
