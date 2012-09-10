@@ -8,19 +8,18 @@ xquery version "3.0";
 module namespace stdemo="http://jewishliturgy.org/api/demo/stml";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "xmldb:exist:///code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "xmldb:exist:///code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "xmldb:exist:///code/modules/debug.xqm";
+  at "/db/code/modules/debug.xqm";
 import module namespace stml="http://jewishliturgy.org/transform/stml"
-  at "xmldb:exist:///code/input-conversion/rawtext/stml.xqm";
+  at "/db/code/input-conversion/rawtext/stml.xqm";
   
-declare namespace rest="http://exquery.org/ns/rest/annotation/";
-declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
+declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 (:~ @return an HTML page that allows POSTing to this URL  
  :)

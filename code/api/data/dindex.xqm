@@ -11,9 +11,8 @@ xquery version "3.0";
  :)
 module namespace dindex = 'http://jewishliturgy.org/api/data/index';
 
-declare namespace rest="http://exquery.org/ns/rest/annotation/";
-declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
+declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 (:~ list all available data APIs :)
 declare 
@@ -27,29 +26,31 @@ declare
       <output:method value="html5"/>
     </output:serialization-parameters>
   </rest:response>,
-  <html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-      <title>Open Siddur API Index</title>
-    </head>
-    <body>
-      <ul class="apis">
-        <li class="api">
-          <a class="discovery" href="{request:get-uri()}/notes">Annotation data</a>
-        </li>
-        <li class="api">
-          <a class="discovery" href="{request:get-uri()}/original">Original data</a>
-        </li>
-        <li class="api">
-          <a class="discovery" href="{request:get-uri()}/sources">Sources (Bibliographic data)</a>
-        </li>
-        <li class="api">
-          {((: TODO: replace request:get-uri() with rest:get-absolute-uri() 
-            :))}
-          <a class="discovery" href="{request:get-uri()}/transliteration">Transliteration</a>
-        </li>
-      </ul>
-    </body>
-  </html>
+  let $api-base := "data"
+  return
+    <html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+        <title>Open Siddur API Index</title>
+      </head>
+      <body>
+        <ul class="apis">
+          <li class="api">
+            <a class="discovery" href="{$api-base}/notes">Annotation data</a>
+          </li>
+          <li class="api">
+            <a class="discovery" href="{$api-base}/original">Original data</a>
+          </li>
+          <li class="api">
+            <a class="discovery" href="{$api-base}/sources">Sources (Bibliographic data)</a>
+          </li>
+          <li class="api">
+            {((: TODO: replace request:get-uri() with rest:get-absolute-uri() 
+              :))}
+            <a class="discovery" href="{$api-base}/transliteration">Transliteration</a>
+          </li>
+        </ul>
+      </body>
+    </html>
 };
 
 declare 

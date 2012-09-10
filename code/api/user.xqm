@@ -7,23 +7,22 @@ xquery version "3.0";
 module namespace user="http://jewishliturgy.org/api/user";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "/code/modules/debug.xqm";
+  at "/db/code/modules/debug.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
-  at "/code/modules/jvalidate.xqm";
+  at "/db/code/modules/jvalidate.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "/code/magic/magic.xqm";
+  at "/db/code/magic/magic.xqm";
 import module namespace name="http://jewishliturgy.org/modules/name"
-  at "/code/modules/name.xqm";
+  at "/db/code/modules/name.xqm";
 import module namespace kwic="http://exist-db.org/xquery/kwic";
   
 declare namespace html="http://www.w3.org/1999/xhtml";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
-declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
 

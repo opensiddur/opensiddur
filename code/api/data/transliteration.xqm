@@ -12,21 +12,20 @@ xquery version "3.0";
 module namespace tran = 'http://jewishliturgy.org/api/transliteration';
 
 import module namespace acc="http://jewishliturgy.org/modules/access"
-  at "/code/api/modules/access.xqm";
+  at "/db/code/api/modules/access.xqm";
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/code/api/modules/data.xqm";
+  at "/db/code/api/modules/data.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
-  at "/code/modules/jvalidate.xqm";
+  at "/db/code/modules/jvalidate.xqm";
 
 import module namespace kwic="http://exist-db.org/xquery/kwic";
 
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
-declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
 

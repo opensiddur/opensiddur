@@ -9,13 +9,12 @@ xquery version "1.0";
 module namespace login="http://jewishliturgy.org/api/login";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-	at "/code/api/modules/api.xqm";
+	at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-	at "/code/modules/app.xqm";
+	at "/db/code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-	at "/code/modules/debug.xqm";
+	at "/db/code/modules/debug.xqm";
 	
-declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors"; 
 
@@ -41,8 +40,8 @@ declare
 declare 
   %rest:GET
   %rest:path("/api/login")
-  %rest:query-param("user", "{$user}")
-  %rest:query-param("password", "{$password}")
+  %rest:query-param("user", "{$user}", "")
+  %rest:query-param("password", "{$password}", "")
   %rest:produces("application/xhtml+xml", "text/html")
   function login:get-html(
     $user as xs:string?,
