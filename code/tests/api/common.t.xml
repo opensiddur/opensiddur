@@ -12,7 +12,6 @@
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
-  <namespace prefix="rest">http://exquery.org/ns/rest/annotation/</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   <!-- HTTP returns -->
   <TestClass xml:id="Created">
