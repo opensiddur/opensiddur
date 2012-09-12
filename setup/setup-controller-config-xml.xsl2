@@ -18,6 +18,8 @@
 
     <xsl:template match="c:root[@pattern='.*']">
         <xsl:comment>Open Siddur Configuration: RESTXQ is the default path</xsl:comment>
+        <root pattern="/code" path="xmldb:exist:///db/code"/>
+        <root pattern="/apps" path="xmldb:exist:///db/code/apps"/>
         <root pattern=".*" path="/restxq"/>
     </xsl:template>
 
