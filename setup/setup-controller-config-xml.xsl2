@@ -14,8 +14,11 @@
         <root pattern="/exist/" path="/"/>
         <root pattern="/lib/" path="/"/>
         <root pattern="/db" path="xmldb:exist:///db"/>
-        <!-- this does not work: for now, need to access the api at /restxq/api -->
-     	<!--forward pattern="/.*" servlet="RestXqServlet"/-->
+    </xsl:template>
+
+    <xsl:template match="c:root[@pattern='.*']">
+        <xsl:comment>Open Siddur Configuration: RESTXQ is the default path</xsl:comment>
+        <root pattern=".*" path="/restxq"/>
     </xsl:template>
 
     <xsl:template match="*|comment()" priority="-10">
