@@ -10,21 +10,20 @@ module namespace src = 'http://jewishliturgy.org/api/data/sources';
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
-declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/code/api/modules/data.xqm";
+  at "/db/code/api/modules/data.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
-  at "/code/modules/jvalidate.xqm";
+  at "/db/code/modules/jvalidate.xqm";
 
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "/code/magic/magic.xqm";
+  at "/db/code/magic/magic.xqm";
   
 import module namespace kwic="http://exist-db.org/xquery/kwic";
 
@@ -98,7 +97,7 @@ declare
   %rest:path("/api/data/sources")
   %rest:query-param("q", "{$query}", "")
   %rest:query-param("start", "{$start}", 1)
-  %rest:query-param("max-results", "{$max-results}", 100)
+  %rest:query-param("max-results", "{$count}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
   %output:method("html5")  
   function src:list(

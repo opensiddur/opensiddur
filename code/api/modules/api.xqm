@@ -8,18 +8,14 @@ xquery version "1.0";
  :) 
 module namespace api="http://jewishliturgy.org/modules/api";
 
-import module namespace response="http://exist-db.org/xquery/response";
-import module namespace request="http://exist-db.org/xquery/request";
-
 import module namespace app="http://jewishliturgy.org/modules/app"
-	at "/code/modules/app.xqm";
+	at "/db/code/modules/app.xqm";
 import module namespace t="http://exist-db.org/xquery/testing/modified"
-  at "/code/modules/test2.xqm";
+  at "/db/code/modules/test2.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 
 declare namespace http="http://expath.org/ns/http-client";
-declare namespace rest="http://exquery.org/ns/rest/annotation/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 declare variable $api:default-max-results := 50;

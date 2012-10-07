@@ -12,22 +12,21 @@ xquery version "3.0";
 module namespace demo="http://jewishliturgy.org/api/demo";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "xmldb:exist:///code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "xmldb:exist:///code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "xmldb:exist:///code/api/modules/data.xqm";
+  at "/db/code/api/modules/data.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
-  at "xmldb:exist:///code/modules/format.xqm";
+  at "/db/code/modules/format.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
-  at "xmldb:exist:///code/api/data/transliteration.xqm";
+  at "/db/code/api/data/transliteration.xqm";
   
-declare namespace rest="http://exquery.org/ns/rest/annotation/";
-declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
+declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 (:~ transliterate the given data, which is wrapped in XML :)
 declare function local:transliterate(
@@ -89,7 +88,7 @@ declare
       <ul class="apis">
         {
         (: TODO: replace request:get-uri() with rest:get-absolute-uri() :)
-        let $api-base := request:get-uri()
+        let $api-base := "demo"
         return (
           <li class="api">
             <a class="discovery" href="{$api-base}/stml">STML</a>

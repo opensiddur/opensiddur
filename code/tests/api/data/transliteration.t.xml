@@ -18,7 +18,6 @@
     at "xmldb:exist:///code/magic/magic.xqm";
   </imports>
   <namespace prefix="tr">http://jewishliturgy.org/ns/tr/1.0</namespace>
-  <namespace prefix="rest">http://exquery.org/ns/rest/annotation/</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>

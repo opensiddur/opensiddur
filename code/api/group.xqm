@@ -9,20 +9,19 @@ xquery version "3.0";
 module namespace grp = 'http://jewishliturgy.org/api/group';
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "/code/modules/debug.xqm";
+  at "/db/code/modules/debug.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
-  at "/code/modules/jvalidate.xqm";
+  at "/db/code/modules/jvalidate.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "/code/magic/magic.xqm";
+  at "/db/code/magic/magic.xqm";
   
 declare namespace g="http://jewishliturgy.org/ns/group/1.0";
-declare namespace rest="http://exquery.org/ns/rest/annotation/";
-declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
+declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 declare variable $grp:path := "/group";
 
@@ -33,7 +32,7 @@ declare variable $grp:path := "/group";
  :)
 declare 
   %rest:GET
-  %rest:path("/group")
+  %rest:path("/api/group")
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
@@ -63,7 +62,7 @@ declare
           let $api-name := encode-for-uri($group)
           return
             <li class="result">
-              <a class="document" href="/api{$grp:path}/{$api-name}">{
+              <a class="document" href="group/{$api-name}">{
                 $group
               }</a>
             </li>
@@ -80,7 +79,7 @@ declare
  :)
 declare 
   %rest:GET
-  %rest:path("/group/{$name}")
+  %rest:path("/api/group/{$name}")
   %rest:produces("application/xml", "text/xml")
   function grp:get-xml(
     $name as xs:string
@@ -115,7 +114,7 @@ declare
  :)
 declare 
   %rest:GET
-  %rest:path("/group/{$name}")
+  %rest:path("/api/group/{$name}")
   %rest:produces("application/xhtml+xml", "text/html")
   function grp:get-html(
     $name as xs:string
@@ -134,7 +133,7 @@ declare
             for $member in $group/g:member
             return
               <li class="result">
-                <a class="document" href="/api/user/{encode-for-uri($member)}">{
+                <a class="document" href="user/{encode-for-uri($member)}">{
                   if (xs:boolean($member/@manager))
                   then attribute property { "manager" }
                   else (),
@@ -153,7 +152,7 @@ declare
  :)
 declare 
   %rest:GET
-  %rest:path("/user/{$user}/groups")
+  %rest:path("/api/user/{$user}/groups")
   %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
   function grp:get-user-groups(
     $user as xs:string
@@ -176,7 +175,7 @@ declare
             order by $group
             return
               <li class="result">
-                <a class="document" href="/api/group/{encode-for-uri($group)}">{
+                <a class="document" href="group/{encode-for-uri($group)}">{
                   if (sm:get-group-managers($group) = $user)
                   then attribute property { "manager" }
                   else (),
@@ -263,7 +262,7 @@ declare function grp:validate-report(
  :)
 declare
   %rest:PUT("{$body}")
-  %rest:path("/group/{$name}")
+  %rest:path("/api/group/{$name}")
   %rest:consumes("application/xml", "text/xml")
   function grp:put(
     $name as xs:string,
@@ -357,6 +356,7 @@ declare
                         <output:method value="text"/>
                       </output:serialization-parameters>
                       <http:response status="201">
+                        {((: TODO: this is wrong! It needs to be an absolute URI and it needs to reference /restxq? :))}
                         <http:header name="Location" value="/api/group/{$name}"/>
                       </http:response>
                     </rest:response>
@@ -378,7 +378,7 @@ declare
  :)
 declare
   %rest:DELETE
-  %rest:path("/group/{$name}")
+  %rest:path("/api/group/{$name}")
   function grp:delete(
     $name as xs:string
   ) as item()+ {

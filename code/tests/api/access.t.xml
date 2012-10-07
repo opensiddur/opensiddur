@@ -17,7 +17,6 @@
   <password>testuser</password>
   <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
-  <namespace prefix="rest">http://exquery.org/ns/rest/annotation/</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   
   <variable name="resource">"/db/data/tests/Test1.xml"</variable>
