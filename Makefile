@@ -134,7 +134,7 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 17127
+EXIST_REVISION ?= -r 17248
 
 all:  code input-conversion xsltdoc odddoc lib
 
