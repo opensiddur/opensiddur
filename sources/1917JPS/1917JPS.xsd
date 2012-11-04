@@ -72,7 +72,7 @@ TODO: front matter?
 <!-- TODO: put note inline with their reference -->
 <xs:element name="note">
 	<xs:complexType mixed="true">
-		<xs:sequence maxOccurs="unbounded">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="text" />
 		</xs:sequence>
 		<xs:attribute name="mark" type="xs:string" />
