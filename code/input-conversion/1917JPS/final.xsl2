@@ -38,7 +38,7 @@ TODO: fix HTML XSL
 TODO: do we also need to check it's not italic, Hebrew, etc.?
 -->
 <xsl:template match="text[not(@size) and 
-	not(string-length()=1 and my:is-hebrew(.) = 'true')]">
+	not(string-length(normalize-space())=1 and my:is-hebrew(.) = 'true')]">
 	<xsl:choose>
 		<xsl:when test="following-sibling::*[1]/self::small-caps">
 <!-- If followed by small caps remove last character;
@@ -60,10 +60,10 @@ see small-caps element below. -->
 </xsl:template>
 
 <xsl:template match="footnotes/note">
-	<!-- only the elements, not the space (empty text nodes) between the elements -->
-	<xsl:copy>
-		<xsl:apply-templates select="@* | *"/>
-	</xsl:copy>
+<!-- only the elements, not the space (empty text nodes) between the elements -->
+<xsl:copy>
+	<xsl:apply-templates select="@* | *"/>
+</xsl:copy>
 </xsl:template>
 
 <!-- Suppress footnotes as separate section (was at bottom of page). -->
@@ -104,8 +104,11 @@ of a book.  TODO: Should we tag this 'lang="he"' or something? -->
 </xsl:template>
 
 <!-- Output parashah title.
+Variation in font size in PDF not in original printed book. 
 TODO: Should we tag this 'lang="he"' or something? -->
-<xsl:template match="text[@size='12.762' and string-to-codepoints(.)[1] > 255]">
+<xsl:template match="text[
+	(@size='12.762' or @size='12.538' or @size='17.896') and 
+	string-to-codepoints(.)[1] > 255]">
 	<xsl:element name="parashah-title">
 		<xsl:value-of select="normalize-space(.)"/>
 	</xsl:element>
@@ -133,9 +136,9 @@ TODO: Should we tag this 'lang="he"' or something? -->
 </xsl:template>
 
 <!-- Used for example in Lamentations. -->
-<xsl:template match="text[(@size='9.054' or @size='10.908' or string-length()=1) and
+<xsl:template match="text[(@size='9.054' or @size='10.908' or string-length(normalize-space())=1) and
 	normalize-space() != '' and
-	my:is-hebrew(.) = 'true']">
+	my:is-hebrew-char(.) = 'true']">
 	<xsl:element name="verse-letter">
 		<xsl:value-of select="normalize-space(.)"/>
 	</xsl:element>

@@ -13,9 +13,25 @@ Copyright 2012 Marc Stober and licensed under the GNU LGPL.
 
 	<xsl:function name="my:is-hebrew">
 		<xsl:param name="text"/>
+		<xsl:choose>
+			<!-- space is considered Hebrew if preceding char is -->
+			<xsl:when test="$text = ' '">
+				<xsl:value-of select="my:is-hebrew($text/preceding-sibling::*[1])"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<!-- not exact char codes but works -->
+				<xsl:value-of select="string-to-codepoints($text)[1] > 255 and 
+					string-to-codepoints($text)[1] &lt; 2000"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:function>
+
+	<!-- Like above but only looks at single char, does not consider
+		space between Hebrew words to be Hebrew. -->
+	<xsl:function name="my:is-hebrew-char">
+		<xsl:param name="text"/>
 		<!-- not exact char codes but works -->
 		<xsl:value-of select="string-to-codepoints($text)[1] > 255 and 
 			string-to-codepoints($text)[1] &lt; 2000"/>
 	</xsl:function>
-
 </xsl:stylesheet>

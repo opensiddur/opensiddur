@@ -14,13 +14,14 @@ all: 1917JPS.html
 scriptsdir = ../../code/input-conversion/1917JPS
 
 # TODO this is a just a selection for this round of dev/test
-genesis = 16,17,18,19,20,21,22,23,24,25
+genesis = 16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90
 isaiah = 578,579,580,581,582
 # TODO Jonah doesn't include Jonah because it starts mid-page
 jonah = 886
 psalm150 = 1064
 lamentations = 1180,1181,1182,1183,1184,1185,1186,1187,1188,1189
 pages = $(genesis),$(isaiah),$(psalm150),$(lamentations)
+#pages = 42,$(lamentations) # debugging
 
 # Step 0: Convert PDF to XML
 # page 16=Genesis 1
@@ -46,7 +47,7 @@ temp/get-blocks.xml: $(scriptsdir)/get-blocks.xsl2 \
 
 # Step 2.5: Fix Hebrew characters in wrong order
 temp/fix-hebrew.xml: $(scriptsdir)/fix-hebrew.xsl2 \
-		temp/get-blocks.xml
+		temp/get-blocks.xml $(scriptsdir)/functions.xsl2
 	../../lib/saxon -s temp/get-blocks.xml -o temp/fix-hebrew.xml \
 		$(scriptsdir)/fix-hebrew.xsl2
 
@@ -64,7 +65,7 @@ temp/fix-apostrophe-s.xml: $(scriptsdir)/fix-apostrophe-s.xsl2 \
 
 # Step 4: Merge adjacent text elements
 temp/join-text.xml: $(scriptsdir)/join-text.xsl2 \
-		temp/fix-apostrophe-s.xml
+		temp/fix-apostrophe-s.xml $(scriptsdir)/functions.xsl2
 	../../lib/saxon -s temp/fix-apostrophe-s.xml -o temp/join-text.xml \
 		$(scriptsdir)/join-text.xsl2
 
@@ -95,7 +96,7 @@ temp/small-caps.xml: $(scriptsdir)/small-caps.xsl2 \
 
 # Step 7: Final XML that should validate against custom XSD
 1917JPS.xml: $(scriptsdir)/final.xsl2 \
-		temp/small-caps.xml 1917JPS.xsd
+		temp/small-caps.xml 1917JPS.xsd $(scriptsdir)/functions.xsl2
 	../../lib/saxon -s temp/small-caps.xml -o 1917JPS.xml \
 		$(scriptsdir)/final.xsl2
 	xmllint --noout 1917JPS.xml --schema 1917JPS.xsd
