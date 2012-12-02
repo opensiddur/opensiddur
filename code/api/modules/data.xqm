@@ -23,7 +23,7 @@ declare namespace error="http://jewishliturgy.org/errors";
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 
 (:~ base of all data paths :)
-declare variable $data:path-base := "/data";
+declare variable $data:path-base := "/db/data";
 
 (:~ convert a given path from an API path (may begin /code/api/data, /data or may be truncated) to a database path
  : works only to find the resource. 
@@ -127,7 +127,7 @@ declare function data:doc(
   ) as document-node()? {
   let $path := replace($api-path, "^(/api)?/", "")
   let $tokens := tokenize($path, "/")
-  let $resource-name := $tokens[last()] || ".xml"
+  let $resource-name := $tokens[count($tokens)] || ".xml"
   return
     if ($tokens[1] != "data")
     then
@@ -136,5 +136,5 @@ declare function data:doc(
         "Only implemented for the /data hierarchy"
       )
     else
-      collection("/data/" || $tokens[2])[util:document-name(.)=$resource-name]
+      collection($data:path-base || "/" || $tokens[2])[util:document-name(.)=$resource-name]
 };
