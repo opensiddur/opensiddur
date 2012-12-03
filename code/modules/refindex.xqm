@@ -14,13 +14,13 @@ xquery version "3.0";
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "xmldb:exist:///code/modules/debug.xqm";
+  at "xmldb:exist:///db/code/modules/debug.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror"
-  at "xmldb:exist:///code/modules/mirror.xqm";
+  at "xmldb:exist:///db/code/modules/mirror.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
-  at "xmldb:exist:///code/modules/follow-uri.xqm";
+  at "xmldb:exist:///db/code/modules/follow-uri.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "xmldb:exist:///code/magic/magic.xqm";
+  at "xmldb:exist:///db/code/magic/magic.xqm";
 
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -162,7 +162,7 @@ declare function ridx:query(
  : @param $source-nodes The nodes doing the targetting
  : @param $query-node The node that is being referenced
  : @param $position Limit results to the position in the link. Otherwise, do not limit.
- : @param $include-ancestors If set, then include in the search the node's ancestors
+ : @param $include-ancestors If set, then include in the search the node's ancestors (default true())
  :)
 declare function ridx:query(
   $source-nodes as node()*,
@@ -184,16 +184,34 @@ declare function ridx:query(
     if ($source-node instance of document-node())
     then ()
     else util:node-id($source-node)
-  for $entry in 
+  let $null := util:log-system-out(
+    ("$query=", $query, ", $source-node=", $source-node,
+    ", $source-document=", $source-document, 
+    ", $query-document=", $query-document,
+    ", $query-id=", $query-id,
+    ", $position=", $position,
+    " ***possible entries=", 
     collection($ridx:ridx-path)/
       ridx:index[@document=$source-document]/
         ridx:entry
-          [@target-doc=$query-document]
-          [@target-node=$query-id]
-          [empty($source-node) or @source-node=$source-node-id]
-          [empty($position) or @position=$position]
-  return
-    util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
+    )
+  )
+  let $nodes :=
+    for $entry in 
+      collection($ridx:ridx-path)/
+        ridx:index[@document=$source-document]/
+          ridx:entry
+            [@target-doc=$query-document]
+            [@target-node=$query-id]
+            [empty($source-node) or @source-node=$source-node-id]
+            [empty($position) or @position=$position]
+    let $null := util:log-system-out(
+      ("$entry=", $entry)
+    )
+    return
+      util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
+  return 
+    $nodes | () (: remove duplicates :)
 };
 
 declare function ridx:query-all(
@@ -228,14 +246,17 @@ declare function ridx:query-all(
     )
   let $query-document := document-uri(root($query))
   let $query-id := util:node-id($query)
-  for $entry in 
-    collection($ridx:ridx-path)//
-      ridx:entry
-        [@target-doc=$query-document]
-        [@target-node=$query-id]
-        [empty($position) or @position=$position]
+  let $nodes :=
+    for $entry in 
+      collection($ridx:ridx-path)//
+        ridx:entry
+          [@target-doc=$query-document]
+          [@target-node=$query-id]
+          [empty($position) or @position=$position]
+    return
+      util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
   return
-    util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
+    $nodes | ()
 };
 
 
@@ -245,10 +266,11 @@ declare function ridx:query-document(
   ridx:query-document($docs, false())
 };
 
-(:~ return all references to a document
+(:~ @return all references to a document
  : @param $docs The documents, as URIs or document-node()
- : @param $accept-same if true(), include all references that
- :  are in the same document. Default false()
+ : @param $accept-same if true(), include only references that
+ :  are in the same document. Otherwise, return all references.
+ :  Default false()
  :)
 declare function ridx:query-document(
   $docs as item()*,
@@ -270,17 +292,20 @@ declare function ridx:query-document(
     else 
       collection($ridx:ridx-path)//
         ridx:entry[@target-doc=$target-document-uri]
-  for $entry in $entries
+  let $nodes :=
+    for $entry in $entries
+    return
+      try {
+        util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
+      }
+      catch * {
+        debug:debug($debug:info, 
+          "refindex", 
+          ("A query could not find a node from ", $entry, " - is the index expired?")
+        )
+      }  
   return
-    try {
-      util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
-    }
-    catch * {
-      debug:debug($debug:info, 
-        "refindex", 
-        ("A query could not find a node from ", $entry, " - is the index expired?")
-      )
-    }    
+    $nodes | () (: avoid duplicates :)
 };
 
 (:~ disable the reference index: you must be admin! :)
@@ -291,7 +316,7 @@ declare function ridx:disable(
   return
     xmldb:is-admin-user($user)
     and (
-      local:make-index-collection("/"),
+      local:make-index-collection($ridx:indexed-base-path),
       if (xmldb:store(
         $ridx:ridx-path,
         $ridx:disable-flag,
@@ -300,7 +325,7 @@ declare function ridx:disable(
       then (
         sm:chown($idx-flag, $user),
         sm:chgrp($idx-flag, "dba"),
-        sm:chmod($idx-flag, "rwxrwxr--"), 
+        sm:chmod($idx-flag, "rw-rw-r--"), 
         true()
       )
       else false()
@@ -311,10 +336,10 @@ declare function ridx:disable(
 declare function ridx:enable(
   ) as xs:boolean {
   if (xmldb:is-admin-user(xmldb:get-current-user())
-    and doc-available(concat($ridx:idx-path, "/", $ridx:disable-flag))
+    and doc-available(concat($ridx:ridx-path, "/", $ridx:disable-flag))
     )
   then (
-    xmldb:remove($ridx:idx-path, $ridx:disable-flag),
+    xmldb:remove($ridx:ridx-path, $ridx:disable-flag),
     true()
   )
   else false()

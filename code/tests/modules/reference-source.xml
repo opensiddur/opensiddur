@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI 
   xmlns:tei="http://www.tei-c.org/ns/1.0"
-  xmlns:j="http://www.jewishliturgy.org/ns/jlptei/1.0">
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
   <j:links>
     <tei:link type="note" target="#segA /data/tests/reference-target#note"/>
   </j:links>
   <tei:text>
+    <tei:seg xml:id="outside">outside</tei:seg>
     <j:textStream>
       <tei:seg xml:id="segA">local target A</tei:seg>
       <tei:seg xml:id="segB">local target B</tei:seg>
+      <tei:seg xml:id="segBC">local target BC</tei:seg>
       <tei:seg xml:id="segC">local target C</tei:seg>
-      <tei:ptr target="/data/text/reference-target#seg1"/>
-      <tei:ptr target="/data/text/reference-target#range(seg2,seg3)"/>
-      <tei:ptr target="#segA"/>
-      <tei:ptr target="#range(segB,segC)"/>
+      <tei:seg xml:id="ancestor">
+        <tei:w xml:id="child">child of a local target</tei:w>
+      </tei:seg>
+      <tei:ptr xml:id="external" target="/data/tests/reference-target#seg1"/>
+      <tei:ptr xml:id="external_range" target="/data/tests/reference-target#range(seg2,seg4)"/>
+      <tei:ptr xml:id="ptr_to_seg" target="#segA"/>
+      <tei:ptr xml:id="ptr_to_range" target="#range(segB,segC)"/>
+      <tei:ptr target="#outside"/>
+      <tei:ptr xml:id="ptr_to_ancestor" target="#ancestor"/>
     </j:textStream>
   </tei:text>
 </tei:TEI>
