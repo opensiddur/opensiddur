@@ -153,73 +153,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="macro.paraContent"/>
             </content>
           </elementSpec>
-          <elementSpec ident="parallelGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-parallel">
-            <desc>A special type of <gi>linkGrp</gi> that groups units of parallel text by language. The <gi>ptr</gi> 
-            elements must have <att>targetLang</att> attributes</desc>
-            <classes>
-              <memberOf key="att.global"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:ref name="ptr"/>
-              <rng:oneOrMore>
-                <rng:ref name="ptr"/>
-              </rng:oneOrMore>
-            </content>
-            <constraintSpec ident="parallelGrp-1" scheme="isoschematron">
-              <constraint>
-                <sch:report test="tei:ptr[not(@targetLang)]">Every tei:ptr inside a parallelGrp requires @xml:lang.</sch:report>
-              </constraint>
-            </constraintSpec>
-          </elementSpec>
-          <elementSpec ident="parallelText" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-parallel">
-            <desc>The main body element for a text that consists of a parallelization of multiple texts.  </desc>
-            <attList>
-              <attDef ident="level" mode="add" usage="req">
-                <desc>The segmentation level at which the parallelization is done, for example, segment, verse, paragraph, line-group, line, etc. Use one of the recommended values unless none of them makes sense.</desc>
-                <datatype minOccurs="1" maxOccurs="1">
-                  <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
-                </datatype>
-                <defaultVal>other</defaultVal>
-                <valList type="open">
-                  <valItem ident="seg"/>
-                  <valItem ident="verse"/>
-                  <valItem ident="chapter"/>
-                  <valItem ident="p"/>
-                  <valItem ident="lg"/>
-                  <valItem ident="l"/>
-                  <valItem ident="div"/>
-                </valList>
-              </attDef>
-            </attList>
-            <classes>
-              <memberOf key="att.global"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:oneOrMore>
-                <rng:ref name="parallelGrp"/>
-              </rng:oneOrMore>
-            </content>
-          </elementSpec>
           <elementSpec ident="text" module="textstructure" mode="change">
-            <content xmlns="http://relaxng.org/ns/structure/1.0">
-              <optional>
-                <ref name="front"/>
-              </optional>
-              <choice>
-                <ref name="parallelText"/>
-                <group>
-                  <ref name="textStream"/>
-                  <optional>
-                    <oneOrMore>
-                      <ref name="concurrent"/>
-                    </oneOrMore>
-                  </optional>
-                </group>
-              </choice>
-              <optional>
-                <ref name="back"/>
-              </optional>
-            </content>
             <classes mode="replace">
               <memberOf key="att.global"/>
               <memberOf key="att.typed"/>
@@ -232,7 +166,6 @@ The Open Siddur intends to work within open standards whenever possible. In choo
                 </rng:optional>
                 <rng:choice>
                   <rng:ref name="body"/>
-                  <rng:ref name="parallelText"/>
                   <rng:group>
                     <rng:ref name="streamText"/>
                     <rng:zeroOrMore>

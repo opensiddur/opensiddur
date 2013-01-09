@@ -3,7 +3,7 @@
 # Sets up dependencies for the XSLT files
 # Assumes that it will be included after the definitions in the top level Makefile
 #
-# Copyright 2008-2012 Efraim Feinstein
+# Copyright 2008-2013 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -51,12 +51,14 @@ transliteration-schema: schema/build/transliteration.xsl2
 schema/build/transliteration.xsl2: schema/transliteration.sch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
-.PHONY: contributor-schema contributor-schema-clean bibliography-schema bibliography-schema-clean annotation-schema annotation-schema-clean
+.PHONY: contributor-schema contributor-schema-clean bibliography-schema bibliography-schema-clean annotation-schema annotation-schema-clean linkage-schema linkage-schema-clean
 annotation-schema: schema/build/annotation.xsl2
 
 contributor-schema: schema/build/contributor.rnc
 
 bibliography-schema: schema/build/bibliography.xsl2
+
+linkage-schema: schema/build/linkage.xsl2
 
 schema/build/contributor.rnc: p5subset schema/build schema/contributor.xml
 	$(TEIROMA) --nodtd --noxsd schema/contributor.xml schema/build
@@ -72,6 +74,15 @@ schema/build/annotation.rnc: p5subset schema/build schema/annotation.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/annotation.xml schema/build
 schema/build/annotation.xsl2: schema/build/annotation.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
+
+schema/build/linkage.isosch: schema/build/linkage.rnc
+schema/build/linkage.rnc: p5subset schema/build schema/linkage.xml
+	$(TEIROMA) --nodtd --noxsd --isoschematron schema/linkage.xml schema/build
+schema/build/linkage.xsl2: schema/build/linkage.isosch
+	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
+
+linkage-schema-clean:
+	rm -fr schema/build/linkage.* 
 
 contributor-schema-clean:
 	rm -fr schema/build/contributor.*

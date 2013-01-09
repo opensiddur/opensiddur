@@ -1,0 +1,2 @@
+#!/bin/sh
+echo This is not a real XeLaTeX. It is a placeholder because XeLaTeX is required by the TEI software, even though we do not use the functionality.
