@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:a="http://jewishliturgy.org/ns/access/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:http="http://expath.org/ns/http-client">
+  <suiteName>Translation data API</suiteName>
+  <description>
+    <p>Test translation data API</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012-2013 Efraim Feinstein,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <imports>
+    import module namespace xlat="http://jewishliturgy.org/api/data/translation"
+      at "xmldb:exist:///code/api/data/translation.xqm";
+    import module namespace magic="http://jewishliturgy.org/magic"
+      at "xmldb:exist:///code/magic/magic.xqm";
+  </imports>
+  <setup>
+    <create-collection parent="/db/data/translation" name="x-test"/>
+  </setup>
+  <tearDown>
+    <remove-collection collection="/db/data/translation/x-test"/>
+  </tearDown>  
+  <TestSet>
+    <testName>xlat:get-lang-list()</testName>
+    <test>
+      <task>No query</task>
+      <code><![CDATA[
+      xlat:get-lang-list("", 0, 0)
+      ]]></code> 
+      <xpath desc="Returns an HTML list of languages">count(.//html:ul[@class="apis"]/html:li[@class="api"]) &gt;= 1</xpath>
+      <xpath desc="The test language is included">exists(.//html:a[@class="discovery"][.='x-test'])</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>xlat:get-xlat-list()</testName>
+    <setup>
+      <create-collection parent="/db/data/translation/x-test" name="translation-without-description"/>
+      <create-collection parent="/db/data/translation/x-test" name="translation-with-description"/>
+      <create-collection parent="/db/data/translation/x-test" name="translation-with-description-and-lang"/>
+      <copy 
+        source="/db/code/tests/api/data/translation/" 
+        destination="/db/data/translation/x-test/translation-with-description" 
+        name="en-description.xml" 
+        destination-name="introduction.xml"/>
+      <copy 
+        source="/db/code/tests/api/data/translation/" 
+        destination="/db/data/translation/x-test/translation-with-description-and-lang" 
+        name="he-description.xml" 
+        destination-name="introduction.xml"/>
+    </setup>
+    <test>
+      <task>No query</task>
+      <code><![CDATA[
+      xlat:get-xlat-list("x-test","", 0, 0)
+      ]]></code> 
+      <xpath desc="Returns an HTML list of translations">count(.//html:ul[@class="apis"]/html:li[@class="api"]) &gt;= 3</xpath>
+      <xpath desc="A translation without a description is included">exists(.//html:a[@class="discovery"][.='translation-without-description'])</xpath>
+      <xpath desc="A translation with a description is referenced by title">exists(.//html:a[@class="discovery"][@href='x-test/translation-with-description'][.='Title'])</xpath>
+      <xpath desc="A translation with a description is referenced by title and has language attributes">exists(.//html:a[@class="discovery"][@href='x-test/translation-with-description-and-lang'][.='כותרת'][@xml:lang="he"][@lang="he"])</xpath>
+    </test>
+  </TestSet>
+</TestSuite>
