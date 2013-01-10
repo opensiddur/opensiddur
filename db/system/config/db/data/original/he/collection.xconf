@@ -11,6 +11,8 @@
             <inline qname="j:divineName"/>
 
             <text qname="tei:title"/>
+            <text qname="tei:front"/>
+            <text qname="tei:back"/>
             <text qname="j:streamText"/>
             <text qname="tei:seg"/>
         </lucene>

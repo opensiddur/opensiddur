@@ -254,7 +254,7 @@ declare function local:query(
   ) as item()+ {
   let $all-results := 
     for $doc in
-      collection($orig:path-base)//(tei:title|j:streamText)[ft:query(.,$query)]
+      collection($orig:path-base)//(tei:title|tei:front|tei:back|j:streamText)[ft:query(.,$query)]
     order by $doc//tei:title[@type="main"] ascending
     return $doc
   let $listed-results := 
