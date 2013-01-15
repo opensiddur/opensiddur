@@ -152,6 +152,7 @@ $(TEMPDIR):
 .PHONY: schema schema-clean
 schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema
 	cp schema/build/jlptei.rnc $(DBDIR)/schema
+	cp schema/build/linkage.rnc $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
 	cp schema/build/bibliography.rnc $(DBDIR)/schema
 	cp schema/build/annotation.rnc $(DBDIR)/schema
