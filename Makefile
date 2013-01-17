@@ -123,7 +123,7 @@ XSPECREPO = http://xspec.googlecode.com/svn/trunk/
 
 XSLTFORMSDIR = $(LIBDIR)/xsltforms
 XSLTFORMSREPO = https://xsltforms.svn.sourceforge.net/svnroot/xsltforms
-XSLTFORMS_REVISION ?= -r 544
+XSLTFORMS_REVISION ?= -r 565
 
 XSLTDOCDIR = $(LIBDIR)/XSLTDoc
 XSLTDOCREPO = https://xsltdoc.svn.sourceforge.net/svnroot/xsltdoc/trunk/xsltdoc
