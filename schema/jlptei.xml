@@ -256,31 +256,38 @@ The Open Siddur intends to work within open standards whenever possible. In choo
             </attList>
             <constraintSpec ident="layer-1" scheme="isoschematron">
               <constraint>
-                <sch:report 
-                  test="descendant::tei:ptr[substring-before(@target, '#') != '']">
-                  Only internal pointers are allowed inside concurrent structures
-                </sch:report>
                 <sch:assert
                   test="
-                  for 
-                    $ptr in descendant::tei:ptr,
-                    $token in tokenize(@target,'\s+'),
-                    $id in (
-                      if (starts-with($token, '#range'))
-                      then
-                        tokenize(
-                          substring-before(
-                            substring-after(
-                              $token,
-                              '#range('
+                  every $result in (
+                    for $ptr in descendant::tei:ptr,
+                      $token in tokenize($ptr/@target,'\s+')
+                      return not(substring-before($token, '#'))
+                  ) satisfies $result">
+                  Only internal pointers are allowed inside concurrent structures
+                </sch:assert>
+                <sch:assert
+                  test="
+                  every $result in (
+                    for 
+                      $ptr in descendant::tei:ptr,
+                      $token in tokenize($ptr/@target,'\s+'),
+                      $id in (
+                        if (starts-with($token, '#range('))
+                        then
+                          tokenize(
+                            substring-before(
+                              substring-after(
+                                $token,
+                                '#range('
+                              ),
+                              ')'
                             ),
-                            ')'
-                          ),
-                          ','
-                        )[.]
-                      else substring-after($token, '#')
-                    )
-                  return //id($id)/ancestor::j:streamText">
+                            ','
+                          )[.]
+                        else substring-after($token, '#')
+                      )
+                    return exists(/id($id)/ancestor::j:streamText)
+                  ) satisfies $result">
                   All pointers in layers must point into the text stream.  
                 </sch:assert>
               </constraint>
