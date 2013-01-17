@@ -130,6 +130,7 @@ XSLTDOCREPO = https://xsltdoc.svn.sourceforge.net/svnroot/xsltdoc/trunk/xsltdoc
 
 TEIDIR = $(LIBDIR)/tei
 TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
+TEI_REVISION ?= -r 11425
 
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
@@ -357,7 +358,7 @@ $(XSLTDOCDIR):
 	svn co $(XSLTDOCREPO) $(XSLTDOCDIR)
 
 svn-tei: $(TEIDIR)
-	svn update $(TEIDIR)
+	svn update $(TEI_REVISION) $(TEIDIR)
 
 $(TEIDIR):
 	svn co $(TEIREPO) $(TEIDIR)
