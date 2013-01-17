@@ -1,28 +1,29 @@
 xquery version "3.0";
 (: run all pre-release tests :)
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "xmldb:exist:///code/magic/magic.xqm";
+  at "xmldb:exist:///db/code/magic/magic.xqm";
 import module namespace t="http://exist-db.org/xquery/testing/modified"
-  at "xmldb:exist:///code/modules/test2.xqm";
+  at "xmldb:exist:///db/code/modules/test2.xqm";
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/code/api/modules/api.xqm";
+  at "xmldb:exist:///db/code/api/modules/api.xqm";
 
 let $tests-to-run :=
   <tests>
-    <test module="/code/tests/modules/mirror.t.xml"/>
-    <test module="/code/tests/api/data.t.xml" admin="1"/>
-    <test module="/code/tests/api/index.t.xml" />
-    <test module="/code/tests/api/demo.t.xml"/>
-    <test module="/code/tests/api/access.t.xml" />
-    <test module="/code/tests/api/login.t.xml"/>
-    <test module="/code/tests/api/user.t.xml"/>
-    <test module="/code/tests/api/group.t.xml"/>
-    <test module="/code/tests/api/data/dindex.t.xml"/>
-    <test module="/code/tests/api/data/notes.t.xml"/>
-    <test module="/code/tests/api/data/original.t.xml"/>
-    <test module="/code/tests/api/data/sources.t.xml"/>
-    <test module="/code/tests/api/data/transliteration.t.xml"/>
-    <test module="/code/tests/transforms/translit/translit.t.xml"/>
+    <test module="/db/code/tests/modules/mirror.t.xml"/>
+    <test module="/db/code/tests/api/data.t.xml" admin="1"/>
+    <test module="/db/code/tests/api/index.t.xml" />
+    <test module="/db/code/tests/api/demo.t.xml"/>
+    <test module="/db/code/tests/api/access.t.xml" />
+    <test module="/db/code/tests/api/login.t.xml"/>
+    <test module="/db/code/tests/api/user.t.xml"/>
+    <test module="/db/code/tests/api/group.t.xml"/>
+    <test module="/db/code/tests/api/data/dindex.t.xml"/>
+    <test module="/db/code/tests/api/data/linkage.t.xml"/>
+    <test module="/db/code/tests/api/data/notes.t.xml"/>
+    <test module="/db/code/tests/api/data/original.t.xml"/>
+    <test module="/db/code/tests/api/data/sources.t.xml"/>
+    <test module="/db/code/tests/api/data/transliteration.t.xml"/>
+    <test module="/db/code/tests/transforms/translit/translit.t.xml"/>
   </tests>
 return (
   api:serialize-as("xhtml"),
