@@ -52,18 +52,42 @@ schemas, not as an independent unit
       <constraint>
         <sch:assert
           test="
-          not(contains(@target, '#range')) or (
-          for 
-            $token in tokenize(@target, '\s+')[starts-with(., '#range')],
-            $lptr in substring-after(substring-before($token, ','), '('),
-            $rptr in substring-before(substring-after($token, ','), ')')
-          return 
-            exists(/id($lptr)) and
-            exists(/id($rptr)) and
-            /id($lptr) &lt;&lt; /id($rptr)
+          @xml:base or not(contains(@target, '#range')) or 
+          (
+          every $result in (
+            for 
+              $token in tokenize(@target, '\s+')[starts-with(., '#range(')],
+              $lptr in substring-after(substring-before($token, ','), '('),
+              $rptr in substring-before(substring-after($token, ','), ')')
+            return 
+              exists(/id($lptr)) and
+              exists(/id($rptr)) and
+              /id($lptr) &lt;&lt; /id($rptr)
+          ) satisfies $result
           )
             ">
           In a #range(lptr,rptr) XPath expression, the left pointer must precede the right pointer.  
+        </sch:assert>
+      </constraint>
+    </constraintSpec>
+    <constraintSpec scheme="isoschematron" ident="ptr-j-2">
+      <desc>Test that internal shorthand pointers point to an existing target</desc>
+      <constraint>
+        <sch:assert
+          test="
+          @xml:base or (
+          every $ptr-result in (
+            for 
+              $token in tokenize(@target, '\s+')
+                [not(starts-with(., '#range('))]
+                [starts-with(.,'#')],
+              $ptr in substring-after($token, '#')
+            return 
+              exists(/id($ptr))
+          ) satisfies $ptr-result
+          )
+            ">
+          In a local shorthand pointer, the target node must exist.  
         </sch:assert>
       </constraint>
     </constraintSpec>

@@ -90,7 +90,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
             </content>
             <constraintSpec ident="parallelGrp-1" scheme="isoschematron">
               <constraint>
-                <sch:report test="tei:ptr[not(@targetLang)]">Every tei:ptr inside a parallelGrp requires @xml:lang.</sch:report>
+                <sch:assert test="empty(tei:ptr[not(@targetLang)])">Every tei:ptr inside a parallelGrp requires @targetLang.</sch:assert>
               </constraint>
             </constraintSpec>
           </elementSpec>
