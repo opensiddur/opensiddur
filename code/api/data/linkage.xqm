@@ -36,8 +36,9 @@ import module namespace magic="http://jewishliturgy.org/magic"
 import module namespace kwic="http://exist-db.org/xquery/kwic";
 
 declare variable $lnk:data-type := "linkage";
-declare variable $lnk:schema := "/schema/linkage.rnc";
-declare variable $lnk:schematron := "/schema/linkage.xsl2";
+declare variable $lnk:no-lang := "none";  (: no language :)
+declare variable $lnk:schema := "/db/schema/linkage.rnc";
+declare variable $lnk:schematron := "/db/schema/linkage.xsl2";
 declare variable $lnk:path-base := concat($data:path-base, "/", $lnk:data-type);
 
 (:~ @return the documents that are linked by $doc :)
@@ -76,7 +77,7 @@ declare function lnk:validate(
  : @param $doc The document to be validated
  : @param $old-doc The document it is replacing, if any
  : @return true() if valid, false() if not
- : @see orig:validate
+ : @see lnk:validate
  :) 
 declare function lnk:validate-report(
   $doc as item(),
@@ -126,7 +127,9 @@ declare
   ) as item()+ {
   let $doc := data:doc($lnk:data-type, $name)
   return
-    $doc or api:rest-error(404, "Not found", $name)
+    if ($doc)
+    then $doc
+    else api:rest-error(404, "Not found", $name)
 };
 
 
@@ -169,7 +172,7 @@ declare
         <title>Linkage data API</title>
         <link rel="search"
                type="application/opensearchdescription+xml" 
-               href="/api/data/OpenSearchDescription?source={encode-for-uri($orig:path-base)}"
+               href="/api/data/OpenSearchDescription?source={encode-for-uri($lnk:path-base)}"
                title="Full text search" />
         <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
         <meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>
@@ -314,16 +317,18 @@ declare
   ) as item()+ {
   let $paths := 
     data:new-path-to-resource(
-      concat($lnk:data-type, "/", $body/tei:TEI/@xml:lang), 
+      concat($lnk:data-type, "/", 
+        ($body/tei:TEI/@xml:lang/string()[.], $lnk:no-lang)[1]
+        ), 
       $body//tei:title[@type="main" or not(@type)][1]
     )
   let $resource := $paths[2]
   let $collection := $paths[1]
   let $user := app:auth-user()
   return 
-    if (sm:has-access(xs:anyURI($orig:path-base), "w"))
+    if (sm:has-access(xs:anyURI($lnk:path-base), "w"))
     then 
-      if (orig:validate($body, ()))
+      if (lnk:validate($body, ()))
       then (
         app:make-collection-path($collection, "/", sm:get-permissions(xs:anyURI($lnk:path-base))),
         let $db-path := xmldb:store($collection, $resource, $body)
@@ -387,7 +392,7 @@ declare
       return  
         if (sm:has-access(xs:anyURI($uri), "w"))
         then
-          if (orig:validate($body, $doc))
+          if (lnk:validate($body, $doc))
           then
             if (xmldb:store($collection, $resource, $body))
             then 
