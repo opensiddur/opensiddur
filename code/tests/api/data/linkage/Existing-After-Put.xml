@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+         xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+         xml:lang="">
+   <tei:teiHeader>
+      <tei:fileDesc>
+         <tei:titleStmt>
+            <tei:title type="main" xml:lang="en">Existing</tei:title>
+            <j:responsGrp>
+               <tei:respons type="trc" locus="value" target="#parallel" resp="/user/testuser"/>
+            </j:responsGrp>
+         </tei:titleStmt>
+         <tei:publicationStmt>
+            <tei:availability status="free">
+               <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+            </tei:availability>
+            <tei:distributor>
+               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+            </tei:distributor>
+            <tei:date>2012-06-08</tei:date>
+         </tei:publicationStmt>
+         <tei:sourceDesc>
+            <tei:link type="bibl" target="#text /data/sources/Born%20Digital"/>
+         </tei:sourceDesc>
+      </tei:fileDesc>
+      <tei:revisionDesc>
+         <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
+      </tei:revisionDesc>
+   </tei:teiHeader>
+   <tei:text>
+      <tei:front>
+        <tei:div>
+          <tei:p>Query result</tei:p>
+        </tei:div>
+      </tei:front>
+      <j:parallelText xml:id="parallel">
+         <j:parallelGrp>
+            <tei:ptr targetLang="he" xml:base="/data/original/A-he" target="#v1_seg1 #v1_seg2"/>
+            <tei:ptr targetLang="en" xml:base="/data/original/B-en" target="#v1_seg1 #v1_seg2"/>
+         </j:parallelGrp>
+         <j:parallelGrp>
+            <tei:ptr targetLang="he" xml:base="/data/original/A-he" target="#range(v2_seg1,v2_seg5)"/>
+            <tei:ptr targetLang="en" xml:base="/data/original/B-en" target="#range(v2_seg1,v2_seg5)"/>
+         </j:parallelGrp>
+      </j:parallelText>
+   </tei:text>
+</tei:TEI>  
