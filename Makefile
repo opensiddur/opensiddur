@@ -98,7 +98,7 @@ EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
-EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1-dev.jar
+EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.0RC2-rev$(EXIST_REV).jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
 EXISTBACKUP ?= java -Dexist.home=$(EXIST_INSTALL_DIR) -jar $(EXIST_INSTALL_DIR)/start.jar org.exist.backup.Main 
 
@@ -135,7 +135,8 @@ TEI_REVISION ?= -r 11440
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REVISION ?= -r 17127
+EXIST_REV ?= 18067
+EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -243,9 +244,7 @@ copy-libs:
 	cp -r $(LIBDIR)/aloha/src/* $(EXIST_INSTALL_DIR)/webapp/aloha
 
 installer: $(EXIST_INSTALL_JAR)
-	$(XSLT) -s $(SETUPDIR)/eXist-installer.tmpl.xml -o $(SETUPDIR)/eXist-installer.xml $(SETUPDIR)/setup-installer.xsl2 JAVA_HOME=$(JAVA_HOME) EXIST_INSTALL_DIR=$(EXIST_INSTALL_DIR) ADMINPASSWORD=$(ADMINPASSWORD)
-	java -jar $(EXIST_INSTALL_JAR) setup/eXist-installer.xml
-	rm -f $(SETUPDIR)/eXist-installer.xml
+	expect $(SETUPDIR)/install.exp "$(EXIST_INSTALL_JAR)" "$(EXIST_INSTALL_DIR)" "$(ADMINPASSWORD)"
 
 patches:
 	$(XSLT) -s $(EXIST_INSTALL_DIR)/conf.xml -o $(EXIST_INSTALL_DIR)/conf.xml $(SETUPDIR)/setup-conf-xml.xsl2
