@@ -38,6 +38,9 @@ declare
             <a class="discovery" href="{$api-base}/notes">Annotation data</a>
           </li>
           <li class="api">
+            <a class="discovery" href="{$api-base}/linkage">Linkage data</a>
+          </li>
+          <li class="api">
             <a class="discovery" href="{$api-base}/original">Original data</a>
           </li>
           <li class="api">
