@@ -5,7 +5,7 @@ xquery version "3.0";
  :  authentication,
  :  content negotiation
  : 
- : Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
  : Open Siddur Project
  : Licensed Under the GNU Lesser General Public License, version 3 or later
  :)
@@ -59,7 +59,7 @@ declare
   %rest:query-param("source", "{$source}", "")
   %rest:produces("application/opensearchdescription+xml","application/xml","text/xml")
   function dindex:open-search(
-  $source as xs:string
+  $source as xs:string*
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
