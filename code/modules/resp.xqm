@@ -223,10 +223,11 @@ declare function local:collapse-ranges(
       [@target] (: reject uncollapsable @match responsibilities :)
     return (
       for $respons-locus in $all-respons
-      group $respons-locus as $l-respons by $respons-locus/@locus as $locus
+      let $locus := $respons-locus/@locus
+      group by $locus
       return 
         let $all-targets := (
-          for $respons in $l-respons
+          for $respons in $respons-locus
           return uri:follow-tei-link($respons, 1)
           ) | ((: sort into document order:))
         let $new-ranges := 

@@ -44,13 +44,13 @@ declare
   %rest:query-param("password", "{$password}", "")
   %rest:produces("application/xhtml+xml", "text/html")
   function login:get-html(
-    $user as xs:string?,
-    $password as xs:string?
+    $user as xs:string*,
+    $password as xs:string*
   ) as item()+ {
   let $did-login :=
     if ($user and $password)
     then
-      login:post-form($user, $password)
+      login:post-form($user[1], $password[1])
     else ()
   return (
     <rest:response>
@@ -99,28 +99,31 @@ declare
   %rest:consumes("application/x-www-url-formencoded")
   %rest:produces("text/plain")
   function login:post-form(
-    $user as xs:string?,
-    $password as xs:string?
+    $user as xs:string*,
+    $password as xs:string*
   ) as item()+ {
-  if (not($user) or not($password))
-  then 
-    api:rest-error(400, "User name and password are required")
-  else
-    if (xmldb:authenticate("/db", $user, $password))
-    then (
-      debug:debug($debug:info, "login",
-        ('Logging in ', $user, ':', $password)),
-      app:login-credentials($user, $password),
-      <rest:response>
-        <output:serialization-parameters>
-          <output:method value="text"/>
-        </output:serialization-parameters>
-        <http:response status="204"/>
-      </rest:response>
-    )
-    else (
-      api:rest-error(400,"Wrong user name or password")
-    )
+  let $user := $user[1]
+  let $password := $password[1]
+  return
+    if (empty($user) or empty($password))
+    then 
+      api:rest-error(400, "User name and password are required")
+    else
+      if (xmldb:authenticate("/db", $user, $password))
+      then (
+        debug:debug($debug:info, "login",
+          ('Logging in ', $user, ':', $password)),
+        app:login-credentials($user, $password),
+        <rest:response>
+          <output:serialization-parameters>
+            <output:method value="text"/>
+          </output:serialization-parameters>
+          <http:response status="204"/>
+        </rest:response>
+      )
+      else (
+        api:rest-error(400,"Wrong user name or password")
+      )
 };
 
 (:~ log out 

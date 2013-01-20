@@ -485,9 +485,10 @@ declare function local:run-xslt-test(
             <param name="exist:stop-on-error" value="yes"/>
             {
               for $param in $test/ancestor-or-self::*/parameters/param
-              group $param as $p by $param/@name as $n
+              let $n := $param/@name
+              group by $n
               return
-                ($p/.)[last()]
+                ($param/.)[last()]
             }
           </parameters>
         )

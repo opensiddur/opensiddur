@@ -86,17 +86,20 @@ declare
   %rest:query-param("max-results", "{$count}", 100)
   %rest:produces("application/xhtml+xml")
   function tran:list(
-    $query as xs:string?,
-    $start as xs:integer,
-    $count as xs:integer
+    $query as xs:string*,
+    $start as xs:integer*,
+    $count as xs:integer*
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
       <output:method value="html5"/>
     </output:serialization-parameters>
   </rest:response>,
+  let $query := string-join($query, " ")
+  let $start := $start[1]
+  let $count := $count[1]
   let $results as item()+ :=
-    if ($query)
+    if (exists($query))
     then local:query($query, $start, $count)
     else local:list($start, $count)
   let $result-element := $results[1]
@@ -123,12 +126,14 @@ declare
 
 (: @return (list, start, count, n-results) :) 
 declare function local:query(
-    $query as xs:string,
+    $query as xs:string+,
     $start as xs:integer,
     $count as xs:integer
   ) as item()+ {
+  let $query := string-join($query, " ")
   let $all-results := 
-      for $doc in collection($tran:path-base)//(tr:title|tr:description)[ft:query(.,$query)]
+      for $doc in collection($tran:path-base)//(tr:title|tr:description)
+        [ft:query(.,$query)]
       order by $doc//tr:title ascending
       return $doc
   let $listed-results := 
@@ -136,15 +141,15 @@ declare function local:query(
       for $result in  
         subsequence($all-results, $start, $count)
       let $document := root($result)
-      group $result as $hit by $document as $doc
-      order by max(for $h in $hit return ft:score($h))
+      group by $document
+      order by max(for $r in $result return ft:score($r))
       return
         let $api-name := replace(util:document-name($doc), "\.xml$", "")
         return
         <li class="result">
-          <a class="document" href="/api{$tran:path-base}/{$api-name}">{$doc//tr:title/string()}</a>:
+          <a class="document" href="/api{$tran:path-base}/{$api-name}">{$document//tr:title/string()}</a>:
           <ol class="contexts">{
-            for $h in $hit
+            for $h in $result
             order by ft:score($h) descending
             return
               <li class="context">{
@@ -184,7 +189,6 @@ declare function local:list(
     count($all)
   )
 };
-  
   
 declare 
   %rest:DELETE
@@ -231,7 +235,6 @@ declare
   function tran:post(
     $body as document-node()
   ) as item()+ {
-  
   let $paths := data:new-path-to-resource($tran:data-type, ($body//tr:title)[1])
   let $resource := $paths[2]
   let $collection := $paths[1]

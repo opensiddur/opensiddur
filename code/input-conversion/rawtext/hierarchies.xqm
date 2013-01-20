@@ -310,7 +310,8 @@ declare function hier:split-layers(
   $layer-elements as element()+
   ) {
   for $element in $layer-elements
-  group $element as $e by $element/@j:layer as $layer-type
+  let $layer-type := $element/@j:layer
+  group by $layer-type
   return
     if ($layer-type)
     then
@@ -318,7 +319,7 @@ declare function hier:split-layers(
         if (contains($layer-type, "-"))
         then substring-before($layer-type, "-")
         else $layer-type}">{
-        $e
+        $element
       }</j:layer>
     else ()
 };

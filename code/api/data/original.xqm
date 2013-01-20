@@ -262,14 +262,15 @@ declare function local:query(
       for $result in  
         subsequence($all-results, $start, $count)
       let $document := root($result)
-      group $result as $hit by $document as $doc
-      order by max(for $h in $hit return ft:score($h))
+      group by $document
+      order by max(for $r in $result return ft:score($r))
       return
-        let $api-name := replace(util:document-name($doc), "\.xml$", "")
+        let $api-name := replace(util:document-name($document), "\.xml$", "")
         return
         <li class="result">
-          <a class="document" href="/api{$orig:path-base}/{$api-name}">{$doc//tei:titleStmt/tei:title[@type="main"]/string()}</a>:
+          <a class="document" href="/api{$orig:path-base}/{$api-name}">{$document//tei:titleStmt/tei:title[@type="main"]/string()}</a>:
           <ol class="contexts">{
+            for $hit in $result
             for $p in 
               kwic:summarize($hit, <config xmlns="" width="40" />)
             return
