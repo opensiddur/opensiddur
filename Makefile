@@ -135,7 +135,7 @@ TEI_REVISION ?= -r 11440
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REV ?= 18071
+EXIST_REV ?= 18073
 EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
@@ -364,7 +364,6 @@ $(TEIDIR):
 
 svn-exist: $(EXISTSRCDIR)
 	svn update $(EXIST_REVISION) $(EXISTSRCDIR)
-	cp $(LIBDIR)/exist/bin/functions.d/eXist-settings.sh $(LIBDIR)/exist/installer/scripts/eXist-settings.sh
 
 $(EXISTSRCDIR):
 	svn co $(EXIST_REVISION) $(EXISTSRCREPO) $(EXISTSRCDIR)
