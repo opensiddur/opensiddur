@@ -1,7 +1,7 @@
 xquery version "3.0";
 (:~ Group management API
  :
- : Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  : @author Efraim Feinstein 
@@ -38,9 +38,11 @@ declare
   %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
   %output:method("html5")
   function grp:list(
-    $start as xs:integer,
-    $max-results as xs:integer
+    $start as xs:integer*,
+    $max-results as xs:integer*
   ) as item()+ {
+  let $start := $start[1]
+  let $max-results := $max-results[1]
   let $all := 
     (: for some reason, eXist considers group existence to be a secret.
      : I think it should be public.
