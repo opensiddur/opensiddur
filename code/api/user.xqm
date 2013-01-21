@@ -1,7 +1,7 @@
 xquery version "3.0";
 (:~ User management API
  :
- : Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace user="http://jewishliturgy.org/api/user";
@@ -27,9 +27,9 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
 
 (: path to user profile data :)
-declare variable $user:path := "/user";
+declare variable $user:path := "/db/user";
 (: path to schema :)
-declare variable $user:schema := "/schema/contributor.rnc";
+declare variable $user:schema := "/db/schema/contributor.rnc";
 
 (:~ Get the API path for a given user or profile
  : @param $name The user name
@@ -61,7 +61,9 @@ declare function user:db-path(
     )
 };
 
-declare function local:result-title(
+declare 
+  %private 
+  function user:result-title(
   $result as element(j:contributor)
   ) as xs:string {
   if (exists($result/tei:name))
@@ -70,36 +72,39 @@ declare function local:result-title(
 };
 
 (: @return (list, start, count, n-results) :) 
-declare function local:query(
+declare 
+  %private 
+  function user:do-query(
     $query as xs:string,
     $start as xs:integer,
     $count as xs:integer
   ) as item()+ {
   let $all-results := 
       collection($user:path)/j:contributor[ft:query(.,$query)]
+  let $list-of-results :=
+    for $result in  
+      subsequence($all-results, $start, $count)
+    group by $document := document-uri(root($result))
+    order by max(for $r in $result return ft:score($r))
+    return
+      let $api-name := replace(util:document-name(doc($document)), "\.xml$", "")
+      return
+      <li xmlns="http://www.w3.org/1999/xhtml" class="result">
+        <a class="document" href="/api{$user:path}/{$api-name}">{
+        user:result-title(doc($document)/j:contributor)
+        }</a>:
+        <ol class="contexts">{
+          for $h in $result
+          order by ft:score($h) descending
+          return
+            <li class="context">{
+              kwic:summarize($h, <config xmlns="" width="40" />)
+            }</li>
+        }</ol>
+      </li>
   let $listed-results := 
     <ol xmlns="http://www.w3.org/1999/xhtml" class="results">{
-      for $result in  
-        subsequence($all-results, $start, $count)
-      let $document := root($result)
-      group $result as $hit by $document as $doc
-      order by max(for $h in $hit return ft:score($h))
-      return
-        let $api-name := replace(util:document-name($doc), "\.xml$", "")
-        return
-        <li class="result">
-          <a class="document" href="/api{$user:path}/{$api-name}">{
-          local:result-title($hit)
-          }</a>:
-          <ol class="contexts">{
-            for $h in $hit
-            order by ft:score($h) descending
-            return
-              <li class="context">{
-                kwic:summarize($h, <config xmlns="" width="40" />)
-              }</li>
-          }</ol>
-        </li>
+      $list-of-results
     }</ol>
   return (
     $listed-results,
@@ -109,7 +114,9 @@ declare function local:query(
   )
 };
 
-declare function local:list(
+declare
+  %private 
+  function user:do-list(
   $start as xs:integer,
   $count as xs:integer
   ) {
@@ -121,7 +128,7 @@ declare function local:list(
       return
         <li class="result">
           <a class="document" href="/api{$user:path}/{$api-name}">{
-            local:result-title($user)
+            user:result-title($user)
           }</a>
           <a class="alt" property="groups" href="/api{$user:path}/{$api-name}/groups">groups</a>
         </li>
@@ -134,7 +141,7 @@ declare function local:list(
 
 
 (:~ List or query users and contributors
- : @param $query text of the query, empty string for all
+ : @param $q text of the query, empty string for all
  : @param $start first user to list
  : @param $max-results number of users to list 
  : @return a list of users whose full names or user names match the query 
@@ -142,25 +149,28 @@ declare function local:list(
 declare 
   %rest:GET
   %rest:path("/api/user")
-  %rest:query-param("q", "{$query}", "")
+  %rest:query-param("q", "{$q}", "")
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
   %output:method("html5")
   function user:list(
-    $query as xs:string,
-    $start as xs:integer,
-    $max-results as xs:integer
+    $q as xs:string*,
+    $start as xs:integer*,
+    $max-results as xs:integer*
     ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
       <output:method value="html5"/>
     </output:serialization-parameters>
   </rest:response>,
+  let $query := string-join($q[.], " ")
+  let $start := $start[1]
+  let $max-results := $max-results[1]
   let $results as item()+ := 
     if ($query) 
-    then local:query($query, $start, $max-results)
-    else local:list($start, $max-results)
+    then user:do-query($query, $start, $max-results)
+    else user:do-list($start, $max-results)
   let $result-element := $results[1]
   let $start := $results[2] 
   let $count := $results[3]
@@ -223,7 +233,7 @@ declare
 };
 
 (:~ Create a new user or edit a user's password, using a web form
- : @param $name The user's name
+ : @param $user The user's name
  : @param $password The user's new password
  : @return  if available. Otherwise, return errors
  :  201 (created): A new user was created, a location link points to the profile 
@@ -234,91 +244,94 @@ declare
 declare 
   %rest:POST
   %rest:path("/api/user")
-  %rest:form-param("user", "{$name}")
+  %rest:form-param("user", "{$user}")
   %rest:form-param("password", "{$password}")
   function user:post-form(
-    $name as xs:string?,
-    $password as xs:string?
+    $user as xs:string*,
+    $password as xs:string*
   ) as item()+ {
-  if (not($name) or not($password))
-  then api:rest-error(400, "Missing user or password")
-  else
-    let $user := app:auth-user()
-    return
-      if ($user = $name)
-      then
-        (: logged in as the user of the request.
-         : this is a change password request
-         :) 
-        <rest:response>
-          <output:serialization-parameters>
-            <output:method value="text"/>
-          </output:serialization-parameters>
-          {
-          system:as-user("admin", $magic:password, 
-            xmldb:change-user($name, $password, (), ())
-          )
-          }
-          <http:response status="204"/>
-        </rest:response>
-      else if (not($user))
-      then
-        (: not authenticated, this is a new user request :)
-        if (xmldb:exists-user($name))
-        then 
-          (: user already exists, need to be authenticated to change the password :)
-          api:rest-error(401, "Not authorized")
-        else if (collection($user:path)//tei:idno=$name)
-        then 
-          (: profile already exists, but is not a user. No authorization will help :)
-          api:rest-error(403, "Forbidden")
-        else ( 
-          (: the user can be created :)
-          system:as-user("admin", $magic:password, (
-            let $null := xmldb:create-user($name, $password, "everyone", ())
-            let $grouped :=
-              (: TODO: remove this code when using eXist r16453+ :)
-              try {
-                xmldb:create-group($name, ($name, "admin"))
-                or true()
-              }
-              catch * {
-                true(), 
-                debug:debug($debug:warn, "api", "While creating a user, the group already existed and passed me an NPE")
-              }
-            let $stored := 
-              xmldb:store($user:path, 
-                concat(encode-for-uri($name), ".xml"),
-                <j:contributor>
-                  <tei:idno>{$name}</tei:idno>
-                </j:contributor>
-              )
-            let $uri := xs:anyURI($stored)
-            return
-              if ($stored and $grouped)
-              then 
-                <rest:response>
-                  <output:serialization-parameters>
-                    <output:method value="text"/>
-                  </output:serialization-parameters>
-                  {
-                    sm:chmod($uri, "rw-r--r--"),
-                    sm:chown($uri, $name),
-                    sm:chgrp($uri, $name)
-                  }
-                  <http:response status="201">
-                    <http:header name="Location" value="/api/user/{encode-for-uri($name)}"/>
-                  </http:response>
-                </rest:response>
-              else 
-                api:rest-error(500, "Internal error in creating a group or storing a document",
-                  ("group creation: " || $grouped || " storage = " || $stored) 
+  let $name := $user[1]
+  let $password := $password[1] 
+  return
+    if (not($name) or not($password))
+    then api:rest-error(400, "Missing user or password")
+    else
+      let $user := app:auth-user()
+      return
+        if ($user = $name)
+        then
+          (: logged in as the user of the request.
+           : this is a change password request
+           :) 
+          <rest:response>
+            <output:serialization-parameters>
+              <output:method value="text"/>
+            </output:serialization-parameters>
+            {
+            system:as-user("admin", $magic:password, 
+              xmldb:change-user($name, $password, (), ())
+            )
+            }
+            <http:response status="204"/>
+          </rest:response>
+        else if (not($user))
+        then
+          (: not authenticated, this is a new user request :)
+          if (xmldb:exists-user($name))
+          then 
+            (: user already exists, need to be authenticated to change the password :)
+            api:rest-error(401, "Not authorized")
+          else if (collection($user:path)//tei:idno=$name)
+          then 
+            (: profile already exists, but is not a user. No authorization will help :)
+            api:rest-error(403, "Forbidden")
+          else ( 
+            (: the user can be created :)
+            system:as-user("admin", $magic:password, (
+              let $null := xmldb:create-user($name, $password, "everyone", ())
+              let $grouped :=
+                (: TODO: remove this code when using eXist r16453+ :)
+                try {
+                  xmldb:create-group($name, ($name, "admin"))
+                  or true()
+                }
+                catch * {
+                  true(), 
+                  debug:debug($debug:warn, "api", "While creating a user, the group already existed and passed me an NPE")
+                }
+              let $stored := 
+                xmldb:store($user:path, 
+                  concat(encode-for-uri($name), ".xml"),
+                  <j:contributor>
+                    <tei:idno>{$name}</tei:idno>
+                  </j:contributor>
                 )
-          ))
-        )
-      else 
-        (: authenticated as a user who is not the one we're changing :)
-        api:rest-error(403, "Attempt to change the password of a different user")
+              let $uri := xs:anyURI($stored)
+              return
+                if ($stored and $grouped)
+                then 
+                  <rest:response>
+                    <output:serialization-parameters>
+                      <output:method value="text"/>
+                    </output:serialization-parameters>
+                    {
+                      sm:chmod($uri, "rw-r--r--"),
+                      sm:chown($uri, $name),
+                      sm:chgrp($uri, $name)
+                    }
+                    <http:response status="201">
+                      <http:header name="Location" value="/api/user/{encode-for-uri($name)}"/>
+                    </http:response>
+                  </rest:response>
+                else 
+                  api:rest-error(500, "Internal error in creating a group or storing a document",
+                    ("group creation: " || $grouped || " storage = " || $stored) 
+                  )
+            ))
+          )
+        else 
+          (: authenticated as a user who is not the one we're changing :)
+          api:rest-error(403, "Attempt to change the password of a different user")
 }; 
 
 declare function user:validate(

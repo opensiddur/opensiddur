@@ -13,28 +13,15 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 
-import module namespace acc="http://jewishliturgy.org/modules/access"
-  at "/db/code/api/modules/access.xqm";
-import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
-import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/db/code/modules/app.xqm";
+import module namespace crest="http://jewishliturgy.org/modules/common-rest"
+  at "/db/code/api/modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "/db/code/api/modules/data.xqm";
-import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
-  at "/db/code/modules/jvalidate.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "/db/code/api/data/original.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
   at "/db/code/modules/follow-uri.xqm";
-import module namespace user="http://jewishliturgy.org/api/user"
-  at "/db/code/api/user.xqm";
-
-import module namespace magic="http://jewishliturgy.org/magic"
-  at "/db/code/magic/magic.xqm";
   
-import module namespace kwic="http://exist-db.org/xquery/kwic";
-
 declare variable $lnk:data-type := "linkage";
 declare variable $lnk:no-lang := "none";  (: no language :)
 declare variable $lnk:schema := "/db/schema/linkage.rnc";
@@ -62,15 +49,11 @@ declare function lnk:validate(
   $doc as item(),
   $old-doc as document-node()?
   ) as xs:boolean {
-  validation:jing($doc, xs:anyURI($lnk:schema)) and
-    jvalidate:validation-boolean(
-      jvalidate:validate-iso-schematron-svrl($doc, xs:anyURI($lnk:schematron))
-    ) and (
-      empty($old-doc) or
-      jvalidate:validation-boolean(
-        lnk:validate-changes($doc, $old-doc)
-      )
-    )
+  crest:validate(
+    $doc, $old-doc, 
+    xs:anyURI($lnk:schema), xs:anyURI($lnk:schematron),
+    if (exists($old-doc)) then orig:validate-changes#2 else ()
+  )
 };
 
 (:~ validate, returning a validation report 
@@ -83,35 +66,11 @@ declare function lnk:validate-report(
   $doc as item(),
   $old-doc as document-node()?
   ) as element() {
-  jvalidate:concatenate-reports((
-    validation:jing-report($doc, xs:anyURI($lnk:schema)),
-    jvalidate:validate-iso-schematron-svrl($doc, doc($lnk:schematron)),
-    if (exists($old-doc))
-    then lnk:validate-changes($doc, $old-doc)
-    else ()
-  ))
-};
-
-(:~ determine if all the changes between an old version and
- : a new version of a document are legal
- : @param $doc new document
- : @param $old-doc old document
- : @return a report element, indicating whether the changes are valid or invalid
- :) 
-declare function lnk:validate-changes(
-  $doc as document-node(),
-  $old-doc as document-node()
-  ) as element(report) {
-  (: TODO: any lnk specific changes should go here :)
-  orig:validate-changes($doc, $old-doc)
-};
-
-(: error message when access is not allowed :)
-declare function local:no-access(
-  ) as item()+ {
-  if (app:auth-user())
-  then api:rest-error(403, "Forbidden")
-  else api:rest-error(401, "Not authenticated")
+  crest:validate-report(
+    $doc, $old-doc, 
+    xs:anyURI($lnk:schema), xs:anyURI($lnk:schematron),
+    if (exists($old-doc)) then orig:validate-changes#2 else ()
+  )
 };
 
 (:~ Get an XML linkage document by name
@@ -125,17 +84,13 @@ declare
   function lnk:get(
     $name as xs:string
   ) as item()+ {
-  let $doc := data:doc($lnk:data-type, $name)
-  return
-    if ($doc)
-    then $doc
-    else api:rest-error(404, "Not found", $name)
+  crest:get($lnk:data-type, $name)
 };
 
 
 (:~ List or full-text query linkage data. Note that querying
  : linkage data is not super-useful.
- : @param $query text of the query, empty string for all
+ : @param $q text of the query, empty string for all
  : @param $start first document to list
  : @param $max-results number of documents to list 
  : @return a list of documents that match the search. If the documents match a query, return the context.
@@ -144,112 +99,39 @@ declare
 declare 
   %rest:GET
   %rest:path("/api/data/linkage")
-  %rest:query-param("q", "{$query}", "")
+  %rest:query-param("q", "{$q}", "")
   %rest:query-param("start", "{$start}", 1)
-  %rest:query-param("max-results", "{$count}", 100)
+  %rest:query-param("max-results", "{$max-results}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
   %output:method("html5")  
   function lnk:list(
-    $query as xs:string?,
-    $start as xs:integer,
-    $count as xs:integer
+    $q as xs:string*,
+    $start as xs:integer*,
+    $max-results as xs:integer*
   ) as item()+ {
-  <rest:response>
-    <output:serialization-parameters>
-      <output:method value="html5"/>
-    </output:serialization-parameters>
-  </rest:response>,
-  let $results as item()+ :=
-    if ($query)
-    then local:query($query, $start, $count)
-    else local:list($start, $count)
-  let $result-element := $results[1]
-  let $max-results := $results[3]
-  let $total := $results[4]
-  return
-    <html xmlns="http://www.w3.org/1999/xhtml">
-      <head profile="http://a9.com/-/spec/opensearch/1.1/">
-        <title>Linkage data API</title>
-        <link rel="search"
-               type="application/opensearchdescription+xml" 
-               href="/api/data/OpenSearchDescription?source={encode-for-uri($lnk:path-base)}"
-               title="Full text search" />
-        <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
-        <meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>
-        <meta name="itemsPerPage" content="{$max-results}"/>
-        <meta name="totalResults" content="{$total}"/>
-      </head>
-      <body>{
-        $result-element
-      }</body>
-    </html>
+  crest:list($q, $start, $max-results,
+    "Linkage data API", $lnk:path-base,
+    lnk:query-function#1, lnk:list-function#0,
+    true(), ()
+  )
 };
 
 (: @return (list, start, count, n-results) :) 
-declare function local:query(
-    $query as xs:string,
-    $start as xs:integer,
-    $count as xs:integer
-  ) as item()+ {
-  let $all-results := 
-    for $doc in
+declare function lnk:query-function(
+    $query as xs:string
+  ) as element()* {
+  for $doc in
       collection($lnk:path-base)//(tei:title|tei:front|tei:back)[ft:query(.,$query)]
-    order by $doc//tei:title[@type="main"] ascending
-    return $doc
-  let $listed-results := 
-    <ol xmlns="http://www.w3.org/1999/xhtml" class="results">{
-      for $result in  
-        subsequence($all-results, $start, $count)
-      let $document := root($result)
-      group $result as $hit by $document as $doc
-      order by max(for $h in $hit return ft:score($h))
-      return
-        let $api-name := replace(util:document-name($doc), "\.xml$", "")
-        return
-        <li class="result">
-          <a class="document" href="/api{$lnk:path-base}/{$api-name}">{$doc//tei:titleStmt/tei:title[@type="main"]/string()}</a>:
-          <ol class="contexts">{
-            for $p in 
-              kwic:summarize($hit, <config xmlns="" width="40" />)
-            return
-              <li class="context">{
-                $p/*
-              }</li>
-          }</ol>
-        </li>
-    }</ol>
-  return (
-    $listed-results,
-    $start,
-    $count, 
-    count($all-results)
-  )
+  order by $doc//tei:title[@type="main"] ascending
+  return $doc
 };
 
-declare function local:list(
-  $start as xs:integer,
-  $count as xs:integer
-  ) {
-  let $all := 
-    for $doc in collection($lnk:path-base)/tei:TEI
-    order by $doc//tei:title[@type="main"] ascending
-    return $doc
-  return (
-    <ul xmlns="http://www.w3.org/1999/xhtml" class="results">{
-      for $result in subsequence($all, $start, $count) 
-      let $api-name := replace(util:document-name($result), "\.xml$", "")
-      return
-        <li class="result">
-          <a class="document" href="/api{$lnk:path-base}/{$api-name}">{$result//tei:titleStmt/tei:title[@type="main"]/string()}</a>
-          <a class="alt" property="access" href="/api{$lnk:path-base}/{$api-name}/access">access</a>
-        </li>
-    }</ul>,
-    $start,
-    $count,
-    count($all)
-  )
+declare function lnk:list-function(
+  ) as element()* {
+  for $doc in collection($lnk:path-base)/tei:TEI
+  order by $doc//tei:title[@type="main"] ascending
+  return $doc
 };
-  
 
 (:~ Delete a linkage text
  : @param $name The name of the text
@@ -265,36 +147,7 @@ declare
   function lnk:delete(
     $name as xs:string
   ) as item()+ {
-  let $doc := data:doc($lnk:data-type, $name)
-  return
-    if ($doc)
-    then
-      let $path := document-uri($doc) cast as xs:anyURI
-      let $collection := util:collection-name($doc)
-      let $resource := util:document-name($doc)
-      return
-        if (
-          (: for deletion, 
-          eXist requires write access to the collection.
-          We need to require write access to the path
-          :)
-          sm:has-access(xs:anyURI($collection), "w") and 
-          sm:has-access($path, "w")
-          )
-        then (
-          (: TODO: check for references! :)
-          xmldb:remove($collection, $resource),
-          <rest:response>
-            <output:serialization-parameters>
-              <output:method value="text"/>
-            </output:serialization-parameters>
-            <http:response status="204"/>
-          </rest:response>
-        )
-        else
-          local:no-access()
-    else
-      api:rest-error(404, "Not found", $name)
+  crest:delete($lnk:data-type, $name)
 };
 
 (:~ Post a new linkage document 
@@ -315,50 +168,16 @@ declare
   function lnk:post(
     $body as document-node()
   ) as item()+ {
-  let $paths := 
-    data:new-path-to-resource(
-      concat($lnk:data-type, "/", 
+  crest:post(
+    concat($lnk:data-type, "/", 
         ($body/tei:TEI/@xml:lang/string()[.], $lnk:no-lang)[1]
-        ), 
-      $body//tei:title[@type="main" or not(@type)][1]
-    )
-  let $resource := $paths[2]
-  let $collection := $paths[1]
-  let $user := app:auth-user()
-  return 
-    if (sm:has-access(xs:anyURI($lnk:path-base), "w"))
-    then 
-      if (lnk:validate($body, ()))
-      then (
-        app:make-collection-path($collection, "/", sm:get-permissions(xs:anyURI($lnk:path-base))),
-        let $db-path := xmldb:store($collection, $resource, $body)
-        return
-          if ($db-path)
-          then 
-            <rest:response>
-              <output:serialization-parameters>
-                <output:method value="text"/>
-              </output:serialization-parameters>
-              <http:response status="201">
-                {
-                  let $uri := xs:anyURI($db-path)
-                  let $change-record := orig:record-change(doc($db-path), "created")
-                  return system:as-user("admin", $magic:password, (
-                    sm:chown($uri, $user),
-                    sm:chgrp($uri, $user),
-                    sm:chmod($uri, "rw-rw-r--")
-                  ))
-                }
-                <http:header 
-                  name="Location" 
-                  value="{concat("/api", $lnk:path-base, "/", substring-before($resource, ".xml"))}"/>
-              </http:response>
-            </rest:response>
-          else api:rest-error(500, "Cannot store the resource")
-      )
-      else
-        api:rest-error(400, "Input document is not valid linkage XML", lnk:validate-report($body, ()))
-    else local:no-access()
+        ),
+    $lnk:path-base,
+    $body,
+    lnk:validate#2,
+    lnk:validate-report#2,
+    ()
+  )
 };
 
 (:~ Edit/replace a linkage document in the database
@@ -382,38 +201,11 @@ declare
     $name as xs:string,
     $body as document-node()
   ) as item()+ {
-  let $doc := data:doc($lnk:data-type, $name)
-  return
-    if ($doc)
-    then
-      let $resource := util:document-name($doc)
-      let $collection := util:collection-name($doc)
-      let $uri := document-uri($doc)
-      return  
-        if (sm:has-access(xs:anyURI($uri), "w"))
-        then
-          if (lnk:validate($body, $doc))
-          then
-            if (xmldb:store($collection, $resource, $body))
-            then 
-              <rest:response>
-                {
-                  orig:record-change(doc($uri), "edited")
-                }
-                <output:serialization-parameters>
-                  <output:method value="text"/>
-                </output:serialization-parameters>
-                <http:response status="204"/>
-              </rest:response>
-            else api:rest-error(500, "Cannot store the resource")
-          else api:rest-error(400, "Input document is not a valid linkage document", lnk:validate-report($body, $doc)) 
-        else local:no-access()
-    else 
-      (: it is not clear that this is correct behavior for PUT.
-       : If the user gives the document a name, maybe it should
-       : just keep that resource name and create it?
-       :)
-      api:rest-error(404, "Not found", $name)
+  crest:put(
+    $lnk:data-type, $name, $body,
+    lnk:validate#2,
+    lnk:validate-report#2
+  )
 };
 
 (:~ Get access/sharing data for a document
@@ -428,11 +220,7 @@ declare
   function lnk:get-access(
     $name as xs:string
   ) as item()+ {
-  let $doc := data:doc($lnk:data-type, $name)
-  return
-   if ($doc)
-   then acc:get-access($doc)
-   else api:rest-error(404, "Not found", $name)
+  crest:get-access($lnk:data-type, $name)
 };
 
 (:~ Set access/sharing data for a document
@@ -455,28 +243,5 @@ declare
   (: TODO: a linkage document cannot have looser read access
    : restrictions than any of the documents it links
    :)
-  let $doc := data:doc($lnk:data-type, $name)
-  let $access := $body/*
-  return
-    if ($doc)
-    then 
-      try {
-        acc:set-access($doc, $access),
-        <rest:response>
-          <output:serialization-parameters>
-            <output:method value="text"/>
-          </output:serialization-parameters>
-          <http:response status="204"/>
-        </rest:response>
-      }
-      catch error:VALIDATION {
-        api:rest-error(400, "Validation error in input", acc:validate-report($access))
-      }
-      catch error:UNAUTHORIZED {
-        api:rest-error(401, "Not authenticated")
-      }
-      catch error:FORBIDDEN {
-        api:rest-error(403, "Forbidden")
-      }
-    else api:rest-error(404, "Not found", $name)
+  crest:put-access($lnk:data-type, $name, $body)
 };

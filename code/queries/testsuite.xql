@@ -22,7 +22,9 @@ let $results := test2:run-testSuite(doc($suite)//TestSuite, $user, $password)
 return
 	if ($format = 'html')
 	then (
-		api:serialize-as('xhtml'),
+		api:serialize-as(
+		  'xhtml', 
+		  api:get-accept-format(("text/html","application/xhtml+xml"))),
 		test2:format-testResult($results)
 	)
 	else $results

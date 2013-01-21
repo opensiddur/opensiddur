@@ -26,7 +26,7 @@ let $tests-to-run :=
     <test module="/db/code/tests/transforms/translit/translit.t.xml"/>
   </tests>
 return (
-  api:serialize-as("xhtml"),
+  api:serialize-as("xhtml", api:get-accept-format(("text/html","application/xhtml+xml"))),
   t:format-testResult(
     <TestSuites>{
       for $test in $tests-to-run/test

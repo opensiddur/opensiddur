@@ -210,13 +210,13 @@ declare function local:parse-content-types(
 };
 
 declare function api:get-accept-format(
-  $accepted-formats as xs:string
+  $accepted-formats as xs:string*
   ) {
   api:get-accept-format($accepted-formats, request:get-header('Accept'))
 };
 
 declare function api:get-request-format(
-  $accepted-formats as xs:string
+  $accepted-formats as xs:string*
   ) {
   api:get-accept-format($accepted-formats, request:get-header('Content-Type'))
 };
@@ -645,7 +645,7 @@ declare function api:serialize-as(
 declare function api:serialize-as(
 	$serialization as xs:string,
 	$accept-format as element(api:content-type)?
-	) as empty() {
+	) as empty-sequence() {
 	let $ser := lower-case($serialization)
 	let $accept-format-match := 
     api:simplify-format($accept-format, "none")=$ser

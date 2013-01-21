@@ -112,17 +112,20 @@ declare
 declare 
   %rest:GET
   %rest:path("/api/demo/transliteration")
-  %rest:query-param("q", "{$query}", "")
+  %rest:query-param("q", "{$q}", "")
   %rest:query-param("start", "{$start}", 1)
-  %rest:query-param("max-results", "{$count}", 100)  
+  %rest:query-param("max-results", "{$max-results}", 100)  
   %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
   %output:method("html5")
   function demo:transliteration-list(
-    $query as xs:string,
-    $start as xs:integer,
-    $count as xs:integer
+    $q as xs:string*,
+    $start as xs:integer*,
+    $max-results as xs:integer*
   ) as item()+ {
-  let $list := tran:list($query, $start, $count)
+  let $q := string-join(($q[.]), " ")
+  let $start := $start[1]
+  let $count := $max-results[1]
+  let $list := tran:list($q, $start, $count)
   return
   <html xmlns="http://www.w3.org/1999/xhtml">
     <head>

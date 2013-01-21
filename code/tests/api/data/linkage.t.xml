@@ -147,7 +147,7 @@
       <code><![CDATA[
         lnk:list("Query", 1, 100)
       ]]></code>
-      <xpath desc="returns 1 results">count(.//html:ol[@class="results"]/html:li)=1</xpath>
+      <xpath desc="returns 2 results (Existing and NoWriteAccess)">count(.//html:ol[@class="results"]/html:li)=2</xpath>
       <class href="../common.t.xml#SearchResults"/>
     </test>
   </TestSet>
