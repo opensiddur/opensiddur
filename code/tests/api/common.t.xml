@@ -41,11 +41,12 @@
   <!-- search and list APIs -->
   <TestClass xml:id="SearchResults">
     <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method/@value="html5"</xpath>
-    <xpath desc="reference to Open Search @profile">.//html:head[@profile="http://a9.com/-/spec/opensearch/1.1/"]</xpath>
+    <xpath desc="reference to Open Search @profile removed for html5 compliance">empty(.//html:head/@profile)</xpath>
     <xpath desc="@startIndex is present">count(.//html:meta[@name='startIndex'])=1</xpath>
-    <xpath desc="@endIndex is present">count(.//html:meta[@name='endIndex'])=1</xpath>
+    <xpath desc="@endIndex has been removed">count(.//html:meta[@name='endIndex'])=0</xpath>
     <xpath desc="@totalResults is present">count(.//html:meta[@name='totalResults'])=1</xpath>
     <xpath desc="@itemsPerPage is present">count(.//html:meta[@name='itemsPerPage'])=1</xpath>
+    <!-- 
     <xpath desc="endIndex - startIndex + 1 = number of results">
       let $start := number($output//html:meta[@name='startIndex']/@content)
       let $end := number($output//html:meta[@name='endIndex']/@content)
@@ -59,6 +60,7 @@
     <xpath desc="endIndex &lt;= number of results">
       number(.//html:meta[@name='endIndex']/@content) &lt;= number(.//html:meta[@name='totalResults']/@content)
     </xpath>
+    -->
   </TestClass>
   <!-- discovery APIs -->
   <TestClass xml:id="DiscoveryAPI">
