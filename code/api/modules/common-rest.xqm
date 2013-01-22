@@ -190,14 +190,14 @@ declare function crest:list(
   let $total := $results[4]
   return
     <html xmlns="http://www.w3.org/1999/xhtml">
-      <head profile="http://a9.com/-/spec/opensearch/1.1/">
+      <head> {((: profile="http://a9.com/-/spec/opensearch/1.1/" is deprecated in html5 :))}
         <title>{$title}</title>
         <link rel="search"
                type="application/opensearchdescription+xml" 
                href="/api/data/OpenSearchDescription?source={$path-base}"
                title="Full text search" />
         <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
-        <meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>
+        {((:<meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>:)) (: endIndex is not in the Open Search spec and is illegal in meta tags in html5 :)}
         <meta name="itemsPerPage" content="{$max-results}"/>
         <meta name="totalResults" content="{$total}"/>
       </head>
