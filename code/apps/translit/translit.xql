@@ -1,12 +1,12 @@
 xquery version "1.0";
 (: translit.xql
  : Transliteration demo front-end
- : Copyright 2010,2012 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2010,2012-2013 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 
 import module namespace paths="http://jewishliturgy.org/modules/paths"
-	at "/code/modules/paths.xqm";
+	at "/db/code/modules/paths.xqm";
 
 declare namespace xf="http://www.w3.org/2002/xforms";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -31,8 +31,32 @@ declare function local:translit-instance(
 	  <tr:schema/>
 	</xf:instance>,
 	<xf:instance id="{$instance-id}-tables" xmlns="" 
-	  src="/api/data/transliteration">
+	  >
+	  <html xmlns="http://www.w3.org/1999/xhtml">
+	    <head/>
+	    <body/>
+	  </html>
 	</xf:instance>,
+	<xf:submission id="{$instance-id}-load-tables"
+	  method="get"
+	  resource="/api/data/transliteration"
+	  instance="{$instance-id}-tables"
+	  replace="instance"
+	  validate="false"
+	  >
+	  <xf:header>
+	    <xf:name>Accept</xf:name>
+	    <xf:value>application/xml</xf:value>
+	  </xf:header>
+	  <xf:action ev:event="xforms-submit-error">
+      <xf:message level="modal">Cannot load transliteration table list.
+      Error type: <xf:output value="event('error-type')"/>
+      Error code: <xf:output value="event('response-status-code')"/>
+      Error message: <xf:output value="event('response-body')"/>
+      </xf:message>
+    </xf:action>
+	</xf:submission>,
+	<xf:send ev:event="xforms-ready" submission="{$instance-id}-load-tables"/>,
 	<xf:bind nodeset="instance('{$instance-id}')" type="xf:string" required="true()"/>,
 	<xf:bind nodeset="instance('{$instance-id}')/@xml:lang" type="xf:string" required="true()"/>,
 	<xf:bind nodeset="instance('{$instance-id}-table')" type="xf:string" required="true()"/>
@@ -103,6 +127,11 @@ let $form :=
 			  replace="instance"
 			  instance="translit-current-table"
 			  method="get">
+			  <!-- bug workaround for eXist r18076 -->
+			  <xf:header>
+			    <xf:name>Accept</xf:name>
+			    <xf:value>application/xhtml+xml</xf:value>
+			  </xf:header>
 			  <xf:resource value="instance('translit-table')"/>
 			</xf:submission>
 			<xf:submission id="transliterate" 
@@ -110,11 +139,16 @@ let $form :=
 				instance="transliteration-result" 
 				replace="instance" 
 				method="post">
+				<!-- required to work around a bug in eXist ~r18076 -->
+				<xf:header combine="replace"> 
+				  <xf:name>Accept</xf:name>
+				  <xf:value>application/xml</xf:value> 
+				</xf:header> 
 				<xf:resource value="concat('/api/demo',substring-after(instance('translit-table'),'/api/data'))"/>
 				<xf:action ev:event="xforms-submit-error">
 					<xf:message level="modal">Transliteration error. Make sure all required fields are filled in.
-					Error code: <!--xf:output value="event('response-status-code')"/-->
-					Error message: <!--<xf:output value="event('response-body')/*/message"/>-->
+					Error code: <xf:output value="event('response-status-code')"/>
+					Error message: <xf:output value="event('response-body')"/>
 					</xf:message>
 				</xf:action>
 			</xf:submission>
@@ -162,4 +196,4 @@ let $form :=
   </body>
 </html>
 return
-	($paths:xslt-pi(:, $paths:debug-pi:), $form) 
+	($paths:xslt-pi,(: $paths:debug-pi,:) $form) 
