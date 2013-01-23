@@ -6,17 +6,17 @@ xquery version "3.0";
  : Pass 2: create finalized headers and file outlines, convert grammar parser XML to (invalid) TEI
  :
  : @author Efraim Feinstein
- : Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace stml="http://jewishliturgy.org/transform/stml";
 
 import module namespace grammar="http://jewishliturgy.org/transform/grammar"
-  at "/code/grammar-parser/grammar2.xqm";
+  at "/db/code/grammar-parser/grammar2.xqm";
 import module namespace name="http://jewishliturgy.org/modules/name"
-  at "/code/modules/name.xqm";
+  at "/db/code/modules/name.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/code/api/modules/data.xqm";
+  at "/db/code/api/modules/data.xqm";
   
 import module namespace stxt="http://jewishliturgy.org/transform/streamtext"
   at "streamtext.xqm";
