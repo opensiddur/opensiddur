@@ -208,6 +208,10 @@
         xpath="(collection('/db/data/original/en')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
         <tei:change type="edited" who="/user/testuser" when="..."/>
       </expected>
+      <xpath desc="There are 2 change records total">count(collection('/db/data/original/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change)=2</xpath>
+      <xpath desc="The first shows type='edited'">collection('/db/data/original/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change[1]/@type="edited"</xpath>
+      <xpath desc="The first shows who=testuser">collection('/db/data/original/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change[1]/@who="/user/testuser"</xpath>
+      <xpath desc="The first shows when">exists(collection('/db/data/original/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change[1]/@when)</xpath>
     </test>
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
