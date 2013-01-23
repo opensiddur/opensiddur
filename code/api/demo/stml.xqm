@@ -14,7 +14,7 @@ import module namespace app="http://jewishliturgy.org/modules/app"
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "/db/code/modules/debug.xqm";
 import module namespace stml="http://jewishliturgy.org/transform/stml"
-  at "/db/code/input-conversion/rawtext/stml.xqm";
+  at "xmldb:exist:///db/code/input-conversion/rawtext/stml.xqm";
   
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
