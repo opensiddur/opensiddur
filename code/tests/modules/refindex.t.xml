@@ -1,6 +1,7 @@
 <TestSuite
   xmlns:tei="http://www.tei-c.org/ns/1.0"
   xmlns:xxml="http://www.w3.org/1998/xml/namespace/alias">
+  <suiteName>Reference index module</suiteName>
   <description>
     <p>Tests for the reference index implementation</p>
     <author>Efraim Feinstein</author>
