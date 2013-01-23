@@ -15,32 +15,32 @@
   <password>testuser</password>
   <setup>
     <!-- put all tests into en/1900/01 -->
-    <create-collection parent="/data/original/en" name="1900" />
-    <create-collection parent="/data/original/en/1900" name="01"/>
+    <create-collection parent="/db/data/original/en" name="1900" />
+    <create-collection parent="/db/data/original/en/1900" name="01"/>
     <!-- support files required for validity -->
-    <store collection="/user" name="testuser.xml">
+    <store collection="/db/user" name="testuser.xml">
       <j:contributor>
         <tei:idno>testuser</tei:idno>
         <tei:name>Test User</tei:name>
       </j:contributor>
     </store>
     <!-- existing resource with read/write access for testuser -->
-    <copy source="/code/tests/api/data/original" name="Existing.xml" 
-      destination="/data/original/en/1900/01" />
-    <copy source="/code/tests/api/data/original" name="Existing.xml" 
-      destination="/data/original/en/1900/01" destination-name="NoAccess.xml" />
-    <copy source="/code/tests/api/data/original" name="Existing.xml" 
-      destination="/data/original/en/1900/01" destination-name="NoWriteAccess.xml" />
+    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+      destination="/db/data/original/en/1900/01" />
+    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+      destination="/db/data/original/en/1900/01" destination-name="NoAccess.xml" />
+    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+      destination="/db/data/original/en/1900/01" destination-name="NoWriteAccess.xml" />
     <!-- query result -->
-    <copy source="/code/tests/api/data/original" name="QueryResult.xml"
-      destination="/data/original/en/1900/01"/>
+    <copy source="/db/code/tests/api/data/original" name="QueryResult.xml"
+      destination="/db/data/original/en/1900/01"/>
     <!-- existing, valid resource with no read access -->
     <code><![CDATA[
       system:as-user("admin", $magic:password,
-        let $collections := ("/data/original/en/1900", "/data/original/en/1900/01") 
-        let $existing-uri := xs:anyURI("/data/original/en/1900/01/Existing.xml")
-        let $no-access-uri := xs:anyURI("/data/original/en/1900/01/NoAccess.xml")
-        let $no-write-access-uri := xs:anyURI("/data/original/en/1900/01/NoWriteAccess.xml")
+        let $collections := ("/db/data/original/en/1900", "/db/data/original/en/1900/01") 
+        let $existing-uri := xs:anyURI("/db/data/original/en/1900/01/Existing.xml")
+        let $no-access-uri := xs:anyURI("/db/data/original/en/1900/01/NoAccess.xml")
+        let $no-write-access-uri := xs:anyURI("/db/data/original/en/1900/01/NoWriteAccess.xml")
         return (
           for $collection in $collections
           let $c-uri := xs:anyURI($collection)
@@ -167,7 +167,7 @@
     <tearDown>
       <code><![CDATA[
       let $document := 
-        collection("/data/original")//tei:titleStmt/tei:title[@type="main"][.="Valid"]/root(.)
+        collection("/db/data/original")//tei:titleStmt/tei:title[@type="main"][.="Valid"]/root(.)
       where exists($document)
       return xmldb:remove(
         util:collection-name($document),
@@ -178,7 +178,7 @@
     <test>
       <task>Post a valid resource</task>
       <code><![CDATA[
-      orig:post(doc("/code/tests/api/data/original/Valid.xml"))
+      orig:post(doc("/db/code/tests/api/data/original/Valid.xml"))
       ]]></code>
       <class href="../common.t.xml#Created"/>
       <expected 
@@ -190,7 +190,7 @@
     <test>
       <task>Post an invalid resource</task>
       <code><![CDATA[
-      orig:post(doc("/code/tests/api/data/original/Invalid.xml"))
+      orig:post(doc("/db/code/tests/api/data/original/Invalid.xml"))
       ]]></code>
       <class href="../common.t.xml#BadRequest"/>
     </test>
@@ -200,12 +200,12 @@
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
-      orig:put("Existing", doc("/code/tests/api/data/original/Existing-After-Put.xml"))
+      orig:put("Existing", doc("/db/code/tests/api/data/original/Existing-After-Put.xml"))
       ]]></code>
       <class href="../common.t.xml#NoData"/>
       <expected 
         desc="a change record has been added"
-        xpath="(collection('/db/data/original/en')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
+        xpath="(collection('/db/data/original/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change)[1]">
         <tei:change type="edited" who="/user/testuser" when="..."/>
       </expected>
       <xpath desc="There are 2 change records total">count(collection('/db/data/original/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change)=2</xpath>
@@ -216,20 +216,20 @@
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      orig:put("DoesNotExist", doc("/code/tests/api/data/original/Valid.xml"))
+      orig:put("DoesNotExist", doc("/db/code/tests/api/data/original/Valid.xml"))
       ]]></code>
     </test>
     <test>
       <task>Put an invalid resource</task>
       <code><![CDATA[
-      orig:put("Existing", doc("/code/tests/api/data/original/Invalid.xml"))
+      orig:put("Existing", doc("/db/code/tests/api/data/original/Invalid.xml"))
       ]]></code>
       <class href="../common.t.xml#BadRequest"/>
     </test>
     <test>
       <task>Put a valid resource that is invalidated by an illegal change</task>
       <code><![CDATA[
-      orig:put("Existing", doc("/code/tests/api/data/original/Invalid-After-Put-Illegal-RevisionDesc.xml"))
+      orig:put("Existing", doc("/db/code/tests/api/data/original/Invalid-After-Put-Illegal-RevisionDesc.xml"))
       ]]></code>
     </test>
   </TestSet>
@@ -284,21 +284,21 @@
     <test>
       <task>orig:post(): Post a resource</task>
       <code><![CDATA[
-      orig:post(doc("/code/tests/api/data/original/Valid.xml"))
+      orig:post(doc("/db/code/tests/api/data/original/Valid.xml"))
       ]]></code>
       <class href="../common.t.xml#Unauthorized"/>
     </test>
     <test>
       <task>orig:put(): Put an existing resource</task>
       <code><![CDATA[
-      orig:put("Existing", doc("/code/tests/api/data/original/Existing.xml"))
+      orig:put("Existing", doc("/db/code/tests/api/data/original/Existing.xml"))
       ]]></code>
       <class href="../common.t.xml#Unauthorized"/>
     </test>
     <test>
       <task>orig:put(): Put a nonexisting resource</task>
       <code><![CDATA[
-      orig:put("DoesNotExist", doc("/code/tests/api/data/original/Existing.xml"))
+      orig:put("DoesNotExist", doc("/db/code/tests/api/data/original/Existing.xml"))
       ]]></code>
       <class href="../common.t.xml#NotFound"/>
     </test>
@@ -396,7 +396,7 @@
   <TestSet>
     <testName>crest:record-change()</testName>
     <setup>
-      <store collection="/data/tests" name="With-RevisionDesc-And-Change.xml">
+      <store collection="/db/data/tests" name="With-RevisionDesc-And-Change.xml">
         <tei:TEI>
           <tei:teiHeader>
             <tei:revisionDesc>
@@ -405,14 +405,14 @@
           </tei:teiHeader>
         </tei:TEI>
       </store>
-      <store collection="/data/tests" name="With-Empty-RevisionDesc.xml">
+      <store collection="/db/data/tests" name="With-Empty-RevisionDesc.xml">
         <tei:TEI>
           <tei:teiHeader>
             <tei:revisionDesc/>
           </tei:teiHeader>
         </tei:TEI>
       </store>
-      <store collection="/data/tests" name="With-No-RevisionDesc.xml">
+      <store collection="/db/data/tests" name="With-No-RevisionDesc.xml">
         <tei:TEI>
           <tei:teiHeader>
             <tei:publicationStmt/>
@@ -421,17 +421,17 @@
       </store>
     </setup>
     <tearDown>
-      <remove-document collection="/data/tests" name="With-RevisionDesc-And-Change.xml"/>
-      <remove-document collection="/data/tests" name="With-Empty-RevisionDesc.xml"/>
-      <remove-document collection="/data/tests" name="With-No-RevisionDesc.xml"/>
+      <remove-document collection="/db/data/tests" name="With-RevisionDesc-And-Change.xml"/>
+      <remove-document collection="/db/data/tests" name="With-Empty-RevisionDesc.xml"/>
+      <remove-document collection="/db/data/tests" name="With-No-RevisionDesc.xml"/>
     </tearDown>
     <test>
       <task>add an edit record with revisionDesc and existing change</task>
       <code><![CDATA[
-      crest:record-change(doc("/data/tests/With-RevisionDesc-And-Change.xml"), "edited")
+      crest:record-change(doc("/db/data/tests/With-RevisionDesc-And-Change.xml"), "edited")
       ]]></code>
       <expected 
-        xpath="doc('/data/tests/With-RevisionDesc-And-Change.xml')//tei:revisionDesc/tei:change[1]" 
+        xpath="doc('/db/data/tests/With-RevisionDesc-And-Change.xml')//tei:revisionDesc/tei:change[1]" 
         desc="change is recorded">
         <tei:change who="/user/testuser" when="..." type="edited"/>
       </expected>
@@ -439,10 +439,10 @@
     <test>
       <task>add an edit record with empty revisionDesc</task>
       <code><![CDATA[
-      crest:record-change(doc("/data/tests/With-Empty-RevisionDesc.xml"), "edited")
+      crest:record-change(doc("/db/data/tests/With-Empty-RevisionDesc.xml"), "edited")
       ]]></code>
       <expected 
-        xpath="doc('/data/tests/With-Empty-RevisionDesc.xml')//tei:revisionDesc" 
+        xpath="doc('/db/data/tests/With-Empty-RevisionDesc.xml')//tei:revisionDesc" 
         desc="change is recorded in a new revisionDesc">
         <tei:revisionDesc>
           <tei:change who="/user/testuser" when="..." type="edited"/>
@@ -452,10 +452,10 @@
     <test>
       <task>add an edit record with no revisionDesc</task>
       <code><![CDATA[
-      crest:record-change(doc("/data/tests/With-No-RevisionDesc.xml"), "created")
+      crest:record-change(doc("/db/data/tests/With-No-RevisionDesc.xml"), "created")
       ]]></code>
       <expected 
-        xpath="doc('/data/tests/With-No-RevisionDesc.xml')//tei:revisionDesc" 
+        xpath="doc('/db/data/tests/With-No-RevisionDesc.xml')//tei:revisionDesc" 
         desc="change is recorded in a new revisionDesc">
         <tei:revisionDesc>
           <tei:change who="/user/testuser" when="..." type="created"/>
