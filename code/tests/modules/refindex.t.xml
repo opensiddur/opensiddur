@@ -1,0 +1,594 @@
+<TestSuite
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:xxml="http://www.w3.org/1998/xml/namespace/alias">
+  <description>
+    <p>Tests for the reference index implementation</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein,
+    Open Siddur Project,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <imports>
+  import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+    at "xmldb:exist:///db/code/modules/refindex.xqm";
+  import module namespace mirror="http://jewishliturgy.org/modules/mirror"
+    at "xmldb:exist:///db/code/modules/mirror.xqm";
+  import module namespace magic="http://jewishliturgy.org/magic"
+    at "xmldb:exist:///db/code/magic/magic.xqm";
+  </imports>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <setup>
+    <code><![CDATA[
+    if (xmldb:collection-available($ridx:ridx-path))
+    then ()
+    else system:as-user("admin", $magic:password, (
+      let $create := mirror:create($ridx:ridx-path, "/data")
+      let $stored := xmldb:store($ridx:ridx-path, "created-by-test.xml", <created/>)
+      return ()
+    ))
+    ]]></code>
+    <copy source="/db/code/tests/modules" 
+      name="reference-target.xml" 
+      destination="/db/data/tests"/>
+    <copy source="/db/code/tests/modules" 
+      name="reference-source.xml" 
+      destination="/db/data/tests"/>
+  </setup>
+  <tearDown>
+    <remove-document collection="/db/data/tests" name="reference-target.xml"/>
+    <remove-document collection="/db/data/tests" name="reference-source.xml"/>
+    <remove-document collection="/db/refindex/tests" name="reference-target.xml"/>
+    <remove-document collection="/db/refindex/tests" name="reference-source.xml"/>
+    <code><![CDATA[
+    if (doc-available($ridx:ridx-path || "/created-by-test.xml"))
+    then system:as-user("admin", $magic:password, xmldb:remove($ridx:ridx-path))
+    else ()
+    ]]></code>
+  </tearDown>
+  
+  <TestSet>
+    <testName>With a disabled index...</testName>
+    <setup>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, (
+        if (doc-available($ridx:ridx-path || "/" || $ridx:disable-flag))
+        then xmldb:store($ridx:ridx-path, "test-already-disabled.xml", 
+          doc($ridx:ridx-path || "/" || $ridx:disable-flag))
+        else (),
+        xmldb:store($ridx:ridx-path, $ridx:disable-flag, <disabled/>)
+      ))
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, (
+        if (doc-available($ridx:ridx-path || "/test-already-disabled.xml"))
+        then xmldb:store($ridx:ridx-path, $ridx:disable-flag, 
+          doc($ridx:ridx-path || "/test-already-disabled.xml"))
+        else 
+          try {
+            xmldb:remove($ridx:ridx-path, $ridx:disable-flag)
+          }
+          catch * { () }
+      ))
+      ]]></code>
+    </tearDown>
+    <test output="text">
+      <task>ridx:is-enabled()</task>
+      <code><![CDATA[
+      ridx:is-enabled()
+      ]]></code>
+      <expected desc="returns false">false</expected>
+    </test>
+    <test output="text">
+      <task>ridx:enable()</task>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, ridx:enable())
+      ]]></code>
+      <expected desc="returns true()">true</expected>
+      <xpath desc="disable flag removed">not(doc-available($ridx:ridx-path || "/" || $ridx:disable-flag))</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>With an enabled index...</testName>
+    <setup>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, (
+      if (doc-available($ridx:ridx-path || "/" || $ridx:disable-flag))
+      then (
+        xmldb:store($ridx:ridx-path, "test-was-disabled.xml", 
+          doc($ridx:ridx-path || "/" || $ridx:disable-flag)),
+        xmldb:remove($ridx:ridx-path, $ridx:disable-flag)
+      )
+      else ()
+      ))
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, (
+      if (doc-available($ridx:ridx-path || "/test-was-disabled.xml"))
+      then (
+        xmldb:store($ridx:ridx-path, $ridx:disable-flag, 
+          doc($ridx:ridx-path || "/test-was-disabled.xml")),
+        xmldb:remove($ridx:ridx-path, "test-was-disabled.xml")
+      )
+      else 
+        try {
+          xmldb:remove($ridx:ridx-path, $ridx:disable-flag)
+        }
+        catch * { () }
+      ))
+      ]]></code>
+    </tearDown>
+    <test output="text">
+      <task>ridx:disable()</task>
+      <code><![CDATA[
+      system:as-user("admin", $magic:password, ridx:disable())
+      ]]></code>
+      <expected desc="returns true()">true</expected>
+      <xpath desc="disable flag is set">doc-available(concat($ridx:ridx-path, "/", $ridx:disable-flag))</xpath>
+    </test>
+    <test output="text">
+      <task>ridx:is-enabled()</task>
+      <code><![CDATA[
+      ridx:is-enabled()
+      ]]></code>
+      <expected desc="returns true">true</expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>ridx:reindex()</testName>
+    <test>
+      <task>index a source document</task>
+      <code><![CDATA[
+      ridx:reindex("/data/tests", "reference-source.xml")
+      ]]></code>
+      <xpath desc="reference document created">doc-available("/refindex/tests/reference-source.xml")</xpath>      
+    </test>
+    <test>
+      <task>index the target document</task>
+      <code><![CDATA[
+      ridx:reindex("/data/tests", "reference-target.xml")
+      ]]></code>
+      <xpath desc="target document exists in reference index">doc-available("/refindex/tests/reference-target.xml")</xpath>
+      <xpath desc="target document in reference index is empty">empty(doc("/refindex/tests/reference-target.xml")/*/*)</xpath>
+    </test>
+  </TestSet>
+  <!-- 
+  <TestSet>
+    <testName>ridx:query()#2 (all positions)</testName>
+    <setup>
+      <!- note: this is not a good test because it is 
+      dependent on ridx:reindex() working  ->
+      <code><![CDATA[
+      ridx:reindex(collection("/data/tests"))
+      ]]></code>
+    </setup>
+    
+  </TestSet>
+  -->
+  <TestSet>
+    <testName>ridx:query()#3 ($position, $include-ancestors=true())</testName>
+    <setup>
+      <code><![CDATA[
+      ridx:reindex(collection("/db/data/tests"))
+      ]]></code>
+    </setup>
+    <test>
+      <task>position=1, where the query is in position 1</task>
+      <code><![CDATA[
+      ridx:query(
+        doc("/db/data/tests/reference-source.xml")//tei:link,
+        doc("/db/data/tests/reference-source.xml")/id("segA"), 
+        1
+      )
+      ]]></code>
+      <xpath desc="the link is returned">util:log-system-out(("$$$1:",$output)), self::tei:link[@type="note"]</xpath>
+    </test>
+    <test>
+      <task>position=2, where the query is in position 2</task>
+      <code><![CDATA[
+      ridx:query(
+        doc("/db/data/tests/reference-source.xml")//tei:link,
+        doc("/db/data/tests/reference-target.xml")/id("note"), 
+        2
+      )
+      ]]></code>
+      <xpath desc="the link is returned">self::tei:link[@type="note"]</xpath>
+    </test>
+    <test output="text">
+      <task>position=1, where the query is in position 2</task>
+      <code><![CDATA[
+      ridx:query(
+        doc("/db/data/tests/reference-source.xml")//tei:link,
+        doc("/db/data/tests/reference-target.xml")/id("note"), 
+        1
+      )
+      ]]></code>
+      <xpath desc="return is empty">not($output)</xpath>
+    </test>
+    <test output="text">
+      <task>position=2, where the query is in position 1</task>
+      <code><![CDATA[
+      ridx:query(
+        doc("/db/data/tests/reference-source.xml")//tei:link,
+        doc("/db/data/tests/reference-source.xml")/id("segA"), 
+        2
+      )
+      ]]></code>
+      <xpath desc="return is empty">not($output)</xpath>
+    </test>
+    <test>
+      <task>Query for a reference through an ancestor</task>
+      <code><![CDATA[
+      ridx:query(
+        doc("/db/data/tests/reference-source.xml")//tei:ptr,
+        doc("/db/data/tests/reference-source.xml")/id("child"),
+        ()
+      )
+      ]]></code>
+      <xpath desc="returns 1 result">count($output)=1</xpath>
+      <xpath desc="result is a ptr to the ancestor">self::tei:ptr[@xml:id="ptr_to_ancestor"]</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>ridx:query()#4 ($include-ancestors=false())</testName>
+    <setup>
+      <code><![CDATA[
+      ridx:reindex(collection("/db/data/tests"))
+      ]]></code>
+    </setup>
+    <test>
+      <task>Query for all references</task>
+      <code><![CDATA[
+      ridx:query(
+          doc("/db/data/tests/reference-source.xml")//j:textStream/tei:ptr,
+          doc("/db/data/tests/reference-source.xml")//j:textStream/tei:seg, 
+          (), 
+          false()
+      )
+      ]]></code>
+      <xpath desc="there are 3 results">util:log-system-out(("$$$",count($output)," results=", $output)),count($output)=3</xpath>
+      <xpath desc="all results are tei:ptr">count($output/self::tei:ptr)=3</xpath>
+    </test>
+    <test>
+      <task>Query for a shorthand pointer reference</task>
+      <code><![CDATA[
+      ridx:query(
+          doc("/db/data/tests/reference-source.xml")//tei:ptr,
+          doc("/db/data/tests/reference-source.xml")/id("segA"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="ptr_to_seg"]</xpath>
+    </test>
+    <test>
+      <task>Query where result is beginning of a range</task>
+      <code><![CDATA[
+      ridx:query(
+          doc("/db/data/tests/reference-source.xml")//tei:ptr,
+          doc("/db/data/tests/reference-source.xml")/id("segB"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="ptr_to_range"]</xpath>
+    </test>    
+    <test>
+      <task>Query where result is inside a range, any position, no ancestors</task>
+      <code><![CDATA[
+      ridx:query(
+          doc("/db/data/tests/reference-source.xml")//tei:ptr,
+          doc("/db/data/tests/reference-source.xml")/id("segBC"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="ptr_to_range"]</xpath>
+    </test>
+    <test>
+      <task>Query where results are at the end of a range, any position, no ancestors</task>
+      <code><![CDATA[
+      ridx:query(
+          doc("/db/data/tests/reference-source.xml")//tei:ptr,
+          doc("/db/data/tests/reference-source.xml")/id("segC"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="ptr_to_range"]</xpath>
+    </test>
+    <test output="text">
+      <task>Query for child where only the ancestors are targeted</task>
+      <code><![CDATA[
+      ridx:query(
+          doc("/db/data/tests/reference-source.xml")//tei:ptr,
+          doc("/db/data/tests/reference-source.xml")/id("child"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there are no results">not($output)</xpath>
+    </test>
+    <test>
+      <task>Query for an external target</task>
+      <code><![CDATA[
+      ridx:query(
+          doc("/db/data/tests/reference-source.xml")//tei:ptr,
+          doc("/db/data/tests/reference-target.xml")/id("seg1"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="external"]</xpath>
+    </test>
+    <test>
+      <task>Query for an external target inside a range</task>
+      <code><![CDATA[
+      ridx:query(
+          doc("/db/data/tests/reference-source.xml")//tei:ptr,
+          doc("/db/data/tests/reference-target.xml")/id("seg3"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="external_range"]</xpath>
+    </test>
+    <test>
+      <task>Query for an external target from a link</task>
+      <code><![CDATA[
+      ridx:query(
+          doc("/db/data/tests/reference-source.xml")//tei:link,
+          doc("/db/data/tests/reference-target.xml")/id("note"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:link">$output/self::tei:link[@type="note"]</xpath>
+    </test>
+    <test output="text">
+      <task>Query for a reference through an ancestor</task>
+      <code><![CDATA[
+      ridx:query(
+        doc("/db/data/tests/reference-source.xml")//tei:ptr,
+        doc("/db/data/tests/reference-source.xml")/id("child"),
+        (), false()
+      )
+      ]]></code>
+      <xpath desc="returns no results">not($output)</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>ridx:query-all()#1 ($include-ancestors=true())</testName>
+    <setup>
+      <code><![CDATA[
+      ridx:reindex(collection("/db/data/tests"))
+      ]]></code>
+    </setup>
+    <test>
+      <task>Query for a reference through an ancestor</task>
+      <code><![CDATA[
+      ridx:query-all(
+        doc("/db/data/tests/reference-source.xml")/id("child")
+      )
+      ]]></code>
+      <xpath desc="returns 1 result">count($output)=1</xpath>
+      <xpath desc="result is a ptr to the ancestor">self::tei:ptr[@xml:id="ptr_to_ancestor"]</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>ridx:query-all()#2 ($position)</testName>
+    <setup>
+      <!-- note: this is not a good test because it is 
+      dependent on ridx:reindex() working  -->
+      <code><![CDATA[
+      ridx:reindex(collection("/db/data/tests"))
+      ]]></code>
+    </setup>
+    <test>
+      <task>position=1, where the query is in position 1</task>
+      <code><![CDATA[
+      ridx:query-all(
+        doc("/db/data/tests/reference-source.xml")/id("segA"), 
+        1
+      )
+      ]]></code>
+      <xpath desc="the link is returned">self::tei:link[@type="note"]</xpath>
+    </test>
+    <test>
+      <task>position=2, where the query is in position 2</task>
+      <code><![CDATA[
+      ridx:query-all(
+        doc("/db/data/tests/reference-target.xml")/id("note"), 
+        2
+      )
+      ]]></code>
+      <xpath desc="the link is returned">self::tei:link[@type="note"]</xpath>
+    </test>
+    <test output="text">
+      <task>position=1, where the query is in position 2</task>
+      <code><![CDATA[
+      ridx:query-all(
+        doc("/db/data/tests/reference-target.xml")/id("note"), 
+        1
+      )
+      ]]></code>
+      <xpath desc="return is empty">not($output)</xpath>
+    </test>
+    <test output="text">
+      <task>position=2, where the query is in position 1</task>
+      <code><![CDATA[
+      ridx:query-all(
+        doc("/db/data/tests/reference-source.xml")/id("segA"), 
+        2
+      )
+      ]]></code>
+      <xpath desc="return is empty">not($output)</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>ridx:query-all()#3 ($include-ancestors=false())</testName>
+    <setup>
+      <!-- note: this is not a good test because it is 
+      dependent on ridx:reindex() working  -->
+      <code><![CDATA[
+      ridx:reindex(collection("/db/data/tests"))
+      ]]></code>
+    </setup>
+    <test>
+      <task>Query for any reference, any position, no ancestors</task>
+      <code><![CDATA[
+      ridx:query-all(
+          doc("/db/data/tests/reference-source.xml")/id("segA"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there are 2 results">count($output)=2</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="ptr_to_seg"]</xpath>
+      <xpath desc="one result is is a link">$output/self::tei:link[@type="note"]</xpath>
+    </test>
+    <test>
+      <task>Query where results include the beginning of a range, any position, no ancestors</task>
+      <code><![CDATA[
+      ridx:query-all(
+          doc("/db/data/tests/reference-source.xml")/id("segB"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="ptr_to_range"]</xpath>
+    </test>
+    <test>
+      <task>Query where result is inside a range, any position, no ancestors</task>
+      <code><![CDATA[
+      ridx:query-all(
+          doc("/db/data/tests/reference-source.xml")/id("segBC"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="ptr_to_range"]</xpath>
+    </test>
+    <test>
+      <task>Query where results are at the end of a range, any position, no ancestors</task>
+      <code><![CDATA[
+      ridx:query-all(
+          doc("/db/data/tests/reference-source.xml")/id("segC"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="ptr_to_range"]</xpath>
+    </test>
+    <test output="text">
+      <task>Query for child where only the ancestors are targeted</task>
+      <code><![CDATA[
+      ridx:query-all(
+          doc("/db/data/tests/reference-source.xml")/id("child"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there are no results">not($output)</xpath>
+    </test>
+    <test>
+      <task>Query for an external target</task>
+      <code><![CDATA[
+      ridx:query-all(
+          doc("/db/data/tests/reference-target.xml")/id("seg1"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="external"]</xpath>
+    </test>
+    <test>
+      <task>Query for an external target inside a range</task>
+      <code><![CDATA[
+      ridx:query-all(
+          doc("/db/data/tests/reference-target.xml")/id("seg3"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:ptr">$output/self::tei:ptr[@xml:id="external_range"]</xpath>
+    </test>
+    <test>
+      <task>Query for an external target from a link</task>
+      <code><![CDATA[
+      ridx:query-all(
+          doc("/db/data/tests/reference-target.xml")/id("note"), 
+          (), false()
+      )
+      ]]></code>
+      <xpath desc="there is 1 result">count($output)=1</xpath>
+      <xpath desc="one result is a tei:link">$output/self::tei:link[@type="note"]</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>ridx:query-document()#1 ($accept-same=false())</testName>
+    <setup>
+      <!-- note: this is not a good test because it is 
+      dependent on ridx:reindex() working  -->
+      <code><![CDATA[
+      ridx:reindex(collection("/db/data/tests"))
+      ]]></code>
+    </setup>
+    <test output="text">
+      <task>Document with only internal references</task>
+      <code><![CDATA[
+      ridx:query-document(
+        doc("/db/data/tests/reference-source.xml")
+      )
+      ]]></code>
+      <xpath desc="returns 5 results">count($output)=5</xpath>
+      <xpath desc="one result is a link">count($output/self::tei:link)=1</xpath>
+      <xpath desc="the rest are ptr">count($output/self::tei:ptr)=4</xpath>
+    </test>
+    <test>
+      <task>Document with external references</task>
+      <code><![CDATA[
+      ridx:query-document(doc("/db/data/tests/reference-target.xml"))
+      ]]></code>
+      <xpath desc="returns 3 references">count($output)=3</xpath>
+      <xpath desc="1 reference is a link">self::tei:link[@type="note"]</xpath>
+      <xpath desc="1 reference comes from a #fragment type pointer">self::tei:ptr[@xml:id="external"]</xpath>
+      <xpath desc="1 reference comes from a range pointer">self::tei:ptr[@xml:id="external_range"]</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>ridx:query-document()#2 ($accept-same=true())</testName>
+    <setup>
+      <!-- note: this is not a good test because it is 
+      dependent on ridx:reindex() working  -->
+      <code><![CDATA[
+      ridx:reindex(collection("/db/data/tests"))
+      ]]></code>
+    </setup>
+    <test>
+      <task>Document with internal references</task>
+      <code><![CDATA[
+      ridx:query-document(
+        doc("/db/data/tests/reference-source.xml"),
+        true()
+      )
+      ]]></code>
+      <xpath desc="returns 5 results">util:log-system-out(("1:query-document:", $output)),count($output)=5</xpath>
+      <xpath desc="one result is a link">count($output/self::tei:link)=1</xpath>
+      <xpath desc="the rest are ptr">count($output/self::tei:ptr)=4</xpath>
+    </test>
+    <test output="text">
+      <task>Document with no internal references</task>
+      <code><![CDATA[
+      ridx:query-document(
+        doc("/db/data/tests/reference-target.xml"),
+        true()
+      )
+      ]]></code>
+      <xpath desc="No results">not($output)</xpath>
+    </test>
+  </TestSet>
+</TestSuite>

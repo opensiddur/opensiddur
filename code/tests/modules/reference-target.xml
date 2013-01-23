@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <tei:text>
+    <tei:seg xml:id="seg1">segment 1</tei:seg>
+    <tei:seg xml:id="seg2">segment 2</tei:seg>
+    <tei:seg xml:id="seg3">segment 3</tei:seg>
+    <tei:seg xml:id="seg4">segment 4</tei:seg>
+    <tei:note xml:id="note">Note.</tei:note>
+  </tei:text>
+</tei:TEI>

@@ -10,6 +10,8 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 let $tests-to-run :=
   <tests>
     <test module="/db/code/tests/modules/mirror.t.xml"/>
+    <test module="/db/code/tests/modules/follow-uri.t.xml"/>
+    <test module="/db/code/tests/modules/refindex.t.xml"/>
     <test module="/db/code/tests/api/data.t.xml" admin="1"/>
     <test module="/db/code/tests/api/index.t.xml" />
     <test module="/db/code/tests/api/demo.t.xml"/>
@@ -24,6 +26,12 @@ let $tests-to-run :=
     <test module="/db/code/tests/api/data/sources.t.xml"/>
     <test module="/db/code/tests/api/data/transliteration.t.xml"/>
     <test module="/db/code/tests/transforms/translit/translit.t.xml"/>
+    { ((: transforms :))}
+    <!-- 
+    <test module="/code/tests/transforms/flatten/intermediate-links.t.xml"/>
+    <test module="/code/tests/transforms/flatten/resolve-internal.t.xml"/>
+    <test module="/code/tests/transforms/flatten/set-priorities.t.xml"/>
+    -->
   </tests>
 return (
   api:serialize-as("xhtml", api:get-accept-format(("text/html","application/xhtml+xml"))),

@@ -9,12 +9,8 @@
     <p>Test the data module</p>
     <author>Efraim Feinstein</author>
   </description>
-  <setup>
-    <create-collection parent="/data" name="test"/>
-  </setup>
-  <tearDown>
-    <remove-collection collection="/data/test"/>
-  </tearDown>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
   <imports>
     import module namespace data="http://jewishliturgy.org/modules/data"
       at "xmldb:exist:///code/api/modules/data.xqm";
@@ -26,42 +22,77 @@
     <test output="text">
       <task>No other resource with the same title</task>
       <code><![CDATA[
-        data:new-path("test", "Test Title")
+        data:new-path("tests", "Test Title")
       ]]></code>
-      <xpath desc="Return a URL encoded title with no number">$output=concat("/data/test/", $year, "/", $month, "/Test%20Title.xml")</xpath> 
+      <xpath desc="Return a URL encoded title with no number">$output=concat("/data/tests/", $year, "/", $month, "/Test%20Title.xml")</xpath> 
     </test>
   </TestSet>
   <TestSet>
     <testName>data:new-path(): one resource with the same title</testName>
     <setup>
-      <store collection="/data/test" name="/Test%20Title.xml">
+      <store collection="/data/tests" name="Test%20Title.xml">
         <test/>
       </store>
     </setup>
+    <tearDown>
+      <remove-document collection="/data/tests" name="Test%20Title.xml"/>
+    </tearDown>
     <test output="text">
       <task>One other resource with the same title</task>
       <code><![CDATA[
-        data:new-path("test", "Test Title")
+        data:new-path("tests", "Test Title")
       ]]></code>
-      <xpath desc="Return a URL encoded title with a number 1">$output=concat("/data/test/", $year, "/", $month, "/Test%20Title-1.xml")</xpath> 
+      <xpath desc="Return a URL encoded title with a number 1">$output=concat("/data/tests/", $year, "/", $month, "/Test%20Title-1.xml")</xpath> 
     </test>
   </TestSet>
   <TestSet>
     <testName>data:new-path(): two resources with the same title</testName>
     <setup>
-      <store collection="/data/test" name="Test%20Title.xml">
+      <store collection="/data/tests" name="Test%20Title.xml">
         <test>1</test>
       </store>
-      <store collection="/data/test" name="Test%20Title-1.xml">
+      <store collection="/data/tests" name="Test%20Title-1.xml">
         <test>2</test>
       </store>
     </setup>
+    <tearDown>
+      <remove-document collection="/data/tests" name="Test%20Title.xml"/>
+      <remove-document  collection="/data/tests" name="Test%20Title-1.xml"/>
+    </tearDown>    
     <test output="text">
       <task>Two other resource with the same title</task>
       <code><![CDATA[
-        data:new-path("test", "Test Title")
+        data:new-path("tests", "Test Title")
       ]]></code>
-      <xpath desc="Return a URL encoded title with a number 2">$output=concat("/data/test/", $year, "/", $month, "/Test%20Title-2.xml")</xpath> 
+      <xpath desc="Return a URL encoded title with a number 2">$output=concat("/data/tests/", $year, "/", $month, "/Test%20Title-2.xml")</xpath> 
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>data:doc(), 1 parameter</testName>
+    <setup>
+      <create-collection parent="/data/tests" name="doctest"/>
+      <store collection="/data/tests/doctest" name="TestTitle.xml">
+        <test>1</test>
+      </store>
+    </setup>
+    <tearDown>
+      <remove-collection collection="/data/tests/doctest"/>
+    </tearDown>
+    <test>
+      <task>Document that does exist</task>
+      <code><![CDATA[
+      data:doc("/data/tests/TestTitle")
+      ]]></code>
+      <expected desc="returns the document" xpath="*">
+        <test>1</test>
+      </expected>
+    </test>
+    <test output="text">
+      <task>Document that does not exist</task>
+      <code><![CDATA[
+      data:doc("/data/tests/DoesNotExist")
+      ]]></code>
+      <xpath desc="returns an empty sequence">not($output)</xpath>
     </test>
   </TestSet>
 </TestSuite>

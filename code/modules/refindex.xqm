@@ -13,10 +13,10 @@ xquery version "3.0";
  :)
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
 
-import module namespace app="http://jewishliturgy.org/modules/app"
-  at "xmldb:exist:///db/code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "xmldb:exist:///db/code/modules/debug.xqm";
+import module namespace mirror="http://jewishliturgy.org/modules/mirror"
+  at "xmldb:exist:///db/code/modules/mirror.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
   at "xmldb:exist:///db/code/modules/follow-uri.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
@@ -27,6 +27,8 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 (: the default cache is under this directory :)
 declare variable $ridx:ridx-collection := "refindex";
+declare variable $ridx:ridx-path := concat("/db/", $ridx:ridx-collection);
+declare variable $ridx:indexed-base-path := "/db/data";
 
 (: if this file exists, reference indexing should be skipped.
  :)
@@ -36,49 +38,7 @@ declare variable $ridx:disable-flag := "disabled.xml";
 declare function ridx:index-collection(
   $collection as xs:string
   ) as xs:string {
-  app:concat-path(("/", $ridx:ridx-collection, $collection))
-};
-
-(:~ make an index collection path that mirrors the same path in 
- : the normal /db hierarchy 
- : @param $path-base the constant base at the start of the path
- : @param $path the path to mirror
- :)
-declare function local:make-mirror-collection-path(
-  $path-base as xs:string,
-  $path as xs:string
-  ) as empty() {
-  let $steps := tokenize(replace($path, '^(/db)?/', concat($path-base,"/")), '/')[.]
-  for $step in 1 to count($steps)
-  let $this-step := concat('/', string-join(subsequence($steps, 1, $step), '/'))
-  where not(xmldb:collection-available($this-step))
-  return
-    let $mirror-this-step := concat("/",string-join(subsequence($steps, 2, $step - 1),"/"))
-    let $previous-step := concat('/', string-join(subsequence($steps, 1, $step - 1), '/'))
-    let $new-collection := $steps[$step]
-    let $null := 
-      debug:debug(
-        $debug:info,
-        "refindex",
-        (("step ", $step, ":", $this-step, " new-collection=",$new-collection, " from ", $previous-step))
-      )
-    return (
-      debug:debug(
-        $debug:info,
-        "refindex",
-        ('creating new index collection: ', 
-        $this-step, ' from ', 
-        $previous-step, ' to ', 
-        $new-collection)
-      ),
-      if (xmldb:create-collection($previous-step, $new-collection))
-      then 
-        app:mirror-permissions(
-          if ($step = 1)
-          then "/db"
-          else $mirror-this-step, $this-step)
-      else error(xs:QName('error:CREATE'), concat('Cannot create index collection ', $this-step))
-    )
+  mirror:mirror-path($ridx:ridx-path, $collection)
 };
 
 (:~ index or reindex a document given its location by collection
@@ -87,7 +47,25 @@ declare function ridx:reindex(
   $collection as xs:string,
   $resource as xs:string
   ) {
-  ridx:reindex(doc(app:concat-path($collection, $resource)))
+  ridx:reindex(doc(concat($collection, "/", $resource)))
+};
+
+declare function ridx:is-enabled(
+  ) as xs:boolean {
+  not(doc-available(concat($ridx:ridx-path, "/", $ridx:disable-flag)))
+};
+
+declare function local:make-index-collection(
+  $collection as xs:string
+  ) as empty-sequence() {
+  system:as-user("admin", $magic:password, (
+    if (not(xmldb:collection-available($ridx:ridx-path)))
+    then
+      mirror:create($ridx:ridx-path, $ridx:indexed-base-path)
+    else (),
+    mirror:make-collection-path($ridx:ridx-path, $collection)
+    )
+  )
 };
 
 (:~ index or reindex a document from the given document node
@@ -95,9 +73,9 @@ declare function ridx:reindex(
  :)
 declare function ridx:reindex(
   $doc-items as item()*
-  ) as empty() {
-  let $disabled := doc-available(concat("/", $ridx:ridx-collection, "/", $ridx:disable-flag))
-  where not($disabled)
+  ) as empty-sequence() {
+  let $enabled := ridx:is-enabled()
+  where $enabled
   return
     for $doc-item in $doc-items
     let $doc := 
@@ -106,6 +84,7 @@ declare function ridx:reindex(
         return 
           $doc-item
             [not(util:is-binary-doc(document-uri(.)))]
+      case node() return $doc-item
       default 
         return 
           if (util:is-binary-doc($doc-item))
@@ -114,219 +93,239 @@ declare function ridx:reindex(
     (: do not index binary documents :)
     where exists($doc)
     return
-      let $collection := replace(util:collection-name($doc), "^/db", "")
+      let $doc-uri := document-uri(root($doc))
+      let $collection := replace(util:collection-name(root($doc)), "^/db", "")
       let $resource := util:document-name($doc)
       let $make-mirror-collection :=
-       (: TODO: this should not have to be admin-ed. really, it should
-       be setuid! :)
-       try {
-        system:as-user("admin", $magic:password, 
-          local:make-mirror-collection-path($ridx:ridx-collection, $collection)
-        )
-       }
-       catch * {
-        (: TODO: this code is here to account for a bug where, in the
-         : restore process, the admin password is considered to be blank
-         : even though it had been set. It affects eXist r14669 under 
-         : circumstances that I can't figure out. Hopefully, it will not
-         : affect future versions, but if it does, we need this code
-         : to work around it. A warning will be displayed when this code
-         : executes. The warning is irrelevant to a user.
-         :)
-        debug:debug($debug:warn, "refindex", "The admin password is blank. This is a bug in eXist, I think."),
-        system:as-user("admin", "", 
-          local:make-mirror-collection-path($ridx:ridx-collection, $collection)
-        )
-       }
-      let $mirror-collection :=
-        app:concat-path(("/", $ridx:ridx-collection, $collection))
-      let $original-path := concat($collection, "/", $resource)
-      let $mirror-path := concat($mirror-collection, "/", $resource)
-      let $last-modified := xmldb:last-modified($collection, $resource)
-      let $idx-last-modified := xmldb:last-modified($mirror-collection, $resource)
-      where empty($last-modified) or empty($idx-last-modified) or ($last-modified > $idx-last-modified)
+        local:make-index-collection($collection)
+      where not(mirror:is-up-to-date($ridx:ridx-path, $doc-uri))
       return
-        let $stored := 
-          if (xmldb:store($mirror-collection, $resource, 
-            element ridx:index {
-              ridx:make-index-entries($doc//@target|$doc//@targets)
-            }
-          ))
-          then
-            app:mirror-permissions($original-path, $mirror-path)
-          else ()
-        return () 
+        if (mirror:store($ridx:ridx-path, $collection, $resource, 
+          element ridx:index {
+            attribute document { $doc-uri },
+            ridx:make-index-entries($doc//@target|$doc//@targets)
+          }
+        ))
+        then ()
+        else debug:debug($debug:warn, "refindex", 
+          concat("Could not store index for ", $collection, "/", $resource))
 };
 
-declare function ridx:make-index-entries(
+declare function ridx:remove(
+  $collection as xs:string,
+  $resource as xs:string
+  ) as empty-sequence() {
+  mirror:remove($ridx:ridx-path, $collection, $resource)
+};
+
+declare %private function ridx:make-index-entries(
   $reference-attributes as attribute()*
-  ) as element()* {
+  ) as element(ridx:entry)* {
   for $rattr in $reference-attributes
   let $element := $rattr/parent::element()
-  let $ptr-node-id := util:node-id($element)
-  let $type := ($element, $element/(ancestor::tei:linkGrp|ancestor::tei:joinGrp)[1])[1]/@type/string()
-  for $follow at $n in tokenize($rattr/string(), "\s+")
+  let $source-node-id := util:node-id($element)
+  for $follow at $position in tokenize($rattr/string(), "\s+")
   let $returned := 
     if (matches($follow, "^http[s]?://"))
     then ()
     else uri:fast-follow($follow, $element, uri:follow-steps($element), true())
   for $followed in $returned
-  where $followed/@xml:id
+  let $target-document := document-uri(root($followed))
+  let $target-node-id := util:node-id($followed)
   return
     element ridx:entry {
-      attribute ref { uri:absolutize-uri(concat("#", $followed/@xml:id/string()), $followed) },
-      attribute ns { namespace-uri($element) },
-      attribute local-name { local-name($element) },
-      attribute n { $n },
-      attribute type { $type },
-      attribute node { $ptr-node-id }
+      attribute source-node { $source-node-id },
+      attribute target-doc { $target-document },
+      attribute target-node { $target-node-id },
+      attribute position { $position }
     }
 };
 
-declare function ridx:lookup(
-  $node as node(),
-  $context as document-node()*,
-  $ns as xs:string*,
-  $local-name as xs:string*
-  ) as node()* {
-  ridx:lookup($node,$context,$ns,$local-name,(),(),())
+declare function ridx:query(
+  $source-nodes as node()*,
+  $query-node as node()
+  ) {
+  ridx:query($source-nodes, $query-node, (), true())
 };
 
-declare function ridx:lookup-document(
+declare function ridx:query(
+  $source-nodes as node()*,
+  $query-node as node(),
+  $position as xs:integer
+  ) {
+  ridx:query($source-nodes, $query-node, $position, true())
+};
+
+
+(:~ find instances where $source-nodes reference $query-node
+ : in position $position
+ : @param $source-nodes The nodes doing the targetting
+ : @param $query-node The node that is being referenced
+ : @param $position Limit results to the position in the link. Otherwise, do not limit.
+ : @param $include-ancestors If set, then include in the search the node's ancestors (default true())
+ :)
+declare function ridx:query(
+  $source-nodes as node()*,
+  $query-nodes as node()*,
+  $position as xs:integer*,
+  $include-ancestors as xs:boolean?
+  ) as node()* {
+  for $query in
+    (
+    if ($include-ancestors)
+    then $query-nodes/ancestor-or-self::node()
+    else $query-nodes
+    )
+  let $query-document := document-uri(root($query))
+  let $query-id := util:node-id($query)
+  for $source-node in $source-nodes
+  let $source-document := document-uri(root($source-node))
+  let $source-node-id := 
+    if ($source-node instance of document-node())
+    then ()
+    else util:node-id($source-node)
+  let $null := util:log-system-out(
+    ("$query=", $query, ", $source-node=", $source-node,
+    ", $source-document=", $source-document, 
+    ", $query-document=", $query-document,
+    ", $query-id=", $query-id,
+    ", $position=", $position,
+    " ***possible entries=", 
+    collection($ridx:ridx-path)/
+      ridx:index[@document=$source-document]/
+        ridx:entry
+    )
+  )
+  let $nodes :=
+    for $entry in 
+      collection($ridx:ridx-path)/
+        ridx:index[@document=$source-document]/
+          ridx:entry
+            [@target-doc=$query-document]
+            [@target-node=$query-id]
+            [empty($source-node) or @source-node=$source-node-id]
+            [empty($position) or @position=$position]
+    let $null := util:log-system-out(
+      ("$entry=", $entry)
+    )
+    return
+      util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
+  return 
+    $nodes | () (: remove duplicates :)
+};
+
+declare function ridx:query-all(
+  $query-nodes as node()*
+  ) {
+  ridx:query-all($query-nodes, (), true())
+};
+
+declare function ridx:query-all(
+  $query-nodes as node()*,
+  $position as xs:integer*
+  ) {
+  ridx:query-all($query-nodes, $position, true())
+};
+
+(:~ find all instances in the index where there are references to
+ : $query-node in position $position
+ : @param $query-node The node that is being referenced
+ : @param $position Limit results to the position in the link. Otherwise, do not limit.
+ : @param $include-ancestors If set, then include in the search the node's ancestors
+ :)
+declare function ridx:query-all(
+  $query-nodes as node()*,
+  $position as xs:integer*,
+  $include-ancestors as xs:boolean?
+  ) as node()* {
+  for $query in
+    (
+    if ($include-ancestors)
+    then $query-nodes/ancestor-or-self::node()
+    else $query-nodes
+    )
+  let $query-document := document-uri(root($query))
+  let $query-id := util:node-id($query)
+  let $nodes :=
+    for $entry in 
+      collection($ridx:ridx-path)//
+        ridx:entry
+          [@target-doc=$query-document]
+          [@target-node=$query-id]
+          [empty($position) or @position=$position]
+    return
+      util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
+  return
+    $nodes | ()
+};
+
+
+declare function ridx:query-document(
   $docs as item()*
   ) as node()* {
-  ridx:lookup-document($docs, false())
+  ridx:query-document($docs, false())
 };
 
-(:~ return all references to a document
- : @param $accept-same if true(), include all references that
- :  are in the same document. Default false()
+(:~ @return all references to a document
+ : @param $docs The documents, as URIs or document-node()
+ : @param $accept-same if true(), include only references that
+ :  are in the same document. Otherwise, return all references.
+ :  Default false()
  :)
-declare function ridx:lookup-document(
+declare function ridx:query-document(
   $docs as item()*,
   $accept-same as xs:boolean
   ) as node()* {
   for $doc in $docs
-  let $doc-uri :=
-    typeswitch ($doc)
-    case node() return document-uri(root($doc))
-    default return 
-      (: this code will normalize the URI to the same as the document-uri
-      function will return :)
-      document-uri(doc($doc))
-  let $mirror-uri :=
-      app:concat-path(("/", $ridx:ridx-collection, replace($doc-uri, "^/db", "")))
-  let $mirror-doc := doc($mirror-uri)
-  let $idx-collection := ridx:index-collection("/")
-  let $db-idx-collection := concat("^/db/", $ridx:ridx-collection)
-  for $entry in 
-    collection($idx-collection)//ridx:entry
-      [starts-with(@ref, $doc-uri)]
-      [$accept-same or not(root(.) is $mirror-doc)]
-  let $original-doc := doc(replace(document-uri(root($entry)), $db-idx-collection, ""))
-  return
-    try {
-      util:node-by-id($original-doc, $entry/@node)
-    }
-    catch * {
-      debug:debug($debug:info, 
-        "refindex", 
-        ("A query could not find a node in ", $original-doc, " - is the index expired?")
-      )
-    }    
-};
-
-(:~ Look up if the current node specifically or, including any
- : of its ancestors (default true() unless $without-ancestors is set)
- : is referenced in a reference of type $ns:$local-name/@type, 
- : in the $n-th position
- : If any of the optional parameters are not found, do not limit
- : based on them.
- : The search is performed for nodes only within $context, which may be 
- : a collection or a document-node()
- :)
-declare function ridx:lookup(
-  $node as node(),
-  $context as document-node()*,
-  $ns as xs:string*,
-  $local-name as xs:string*,
-  $type as xs:string*,
-  $n as xs:integer*,
-  $without-ancestors as xs:boolean?
-  ) as node()* {
-  let $defaulted-context :=
-    if (exists($context))
-    then 
-      for $c in $context
-      return 
-        doc(
-          replace(document-uri($c), "^(/db)?/", 
-            concat("/", $ridx:ridx-collection, "/")
-          )
-        )
-    else collection(concat("/db/", $ridx:ridx-collection))
+  let $target-document-uri :=
+    document-uri(
+      typeswitch ($doc)
+      case node() return root($doc)
+      default return doc($doc)
+    )
+  let $entries :=
+    if ($accept-same)
+    then
+      collection($ridx:ridx-path)/
+        ridx:index[@document=$target-document-uri]/
+        ridx:entry[@target-doc=$target-document-uri]
+    else 
+      collection($ridx:ridx-path)//
+        ridx:entry[@target-doc=$target-document-uri]
   let $nodes :=
-    if ($without-ancestors) 
-    then $node[@xml:id]
-    else $node/ancestor-or-self::*[@xml:id]
-  where exists($nodes)
-  return
-    let $uris := 
-      for $nd in $nodes
-      return 
-        uri:absolutize-uri(
-          concat("#", $nd/@xml:id/string()), $nd
-        )
-    for $entry in $defaulted-context//ridx:entry
-        [@ref=$uris]
-        [
-          if (exists($ns))
-          then @ns=$ns
-          else true()
-        ]
-        [
-          if (exists($local-name))
-          then @local-name=$local-name
-          else true() 
-        ]
-        [
-          if (exists($n))
-          then @n=$n
-          else true()
-        ]
-    let $original-doc := doc(
-        replace(document-uri(root($entry)), concat("/", $ridx:ridx-collection), "")
-      )
-    return 
+    for $entry in $entries
+    return
       try {
-        util:node-by-id($original-doc, $entry/@node)
+        util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
       }
       catch * {
-        debug:debug($debug:warn,"refindex", ("A query for ", $node, " failed on util:node-by-id. ", " The entry was: ", $entry))(:,
-        ridx:reindex(root($entry)),
-        ridx:lookup($node, $context, $ns, $local-name, $type, $n, $without-ancestors):)
-      }
+        debug:debug($debug:info, 
+          "refindex", 
+          ("A query could not find a node from ", $entry, " - is the index expired?")
+        )
+      }  
+  return
+    $nodes | () (: avoid duplicates :)
 };
 
 (:~ disable the reference index: you must be admin! :)
 declare function ridx:disable(
   ) as xs:boolean {
   let $user := xmldb:get-current-user()
-  let $idx-collection := concat("/",$ridx:ridx-collection)
-  let $idx-flag := xs:anyURI(concat($idx-collection, "/", $ridx:disable-flag))
+  let $idx-flag := xs:anyURI(concat($ridx:ridx-path, "/", $ridx:disable-flag))
   return
     xmldb:is-admin-user($user)
     and (
-      local:make-mirror-collection-path($ridx:ridx-collection, "/"),
+      local:make-index-collection($ridx:indexed-base-path),
       if (xmldb:store(
-        $idx-collection,
+        $ridx:ridx-path,
         $ridx:disable-flag,
         <ridx:index-disabled/>
         ))
       then (
         sm:chown($idx-flag, $user),
         sm:chgrp($idx-flag, "dba"),
-        sm:chmod($idx-flag, "rwxrwxr--"), 
+        sm:chmod($idx-flag, "rw-rw-r--"), 
         true()
       )
       else false()
@@ -336,14 +335,12 @@ declare function ridx:disable(
 (:~ re-enable the reference index: you must be admin to run! :)
 declare function ridx:enable(
   ) as xs:boolean {
-  let $idx-collection := concat("/", $ridx:ridx-collection)
-  return
-    if (xmldb:is-admin-user(xmldb:get-current-user())
-      and doc-available(concat($idx-collection, "/", $ridx:disable-flag))
-      )
-    then (
-      xmldb:remove($idx-collection, $ridx:disable-flag),
-      true()
+  if (xmldb:is-admin-user(xmldb:get-current-user())
+    and doc-available(concat($ridx:ridx-path, "/", $ridx:disable-flag))
     )
-    else false()
+  then (
+    xmldb:remove($ridx:ridx-path, $ridx:disable-flag),
+    true()
+  )
+  else false()
 };
