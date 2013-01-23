@@ -14,7 +14,7 @@ import module namespace session="http://exist-db.org/xquery/session";
 import module namespace util="http://exist-db.org/xquery/util";
 
 import module namespace api="http://jewishliturgy.org/modules/api" 
-	at "/code/api/modules/api.xqm";
+	at "/db/code/api/modules/api.xqm";
 
 declare variable $scache:prefix := 'cache.';
 

@@ -15,17 +15,17 @@ xquery version "3.0";
 module namespace jcache="http://jewishliturgy.org/modules/cache";
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
-	at "xmldb:exist:///code/modules/app.xqm";
+	at "xmldb:exist:///db/code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug" 
-	at "xmldb:exist:///code/modules/debug.xqm";
+	at "xmldb:exist:///db/code/modules/debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
-  at "xmldb:exist:///code/modules/paths.xqm";	
+  at "xmldb:exist:///db/code/modules/paths.xqm";	
 import module namespace nav="http://jewishliturgy.org/modules/nav"
-  at "xmldb:exist:///code/api/modules/nav.xqm";
+  at "xmldb:exist:///db/code/api/modules/nav.xqm";
 
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
-declare namespace err="http://jewishliturgy.org/errors";
+declare namespace error="http://jewishliturgy.org/errors";
 
 (: the default cache is under this directory :)
 declare variable $jcache:cache-collection := 'cache';
@@ -57,7 +57,7 @@ declare function local:set-flag(
         concat($collection, "/", $resource), 
         concat($in-progress-collection, "/", $in-progress-resource)
       )
-    else error(xs:QName('err:STORE'), concat('Cannot store progress indicator ', $in-progress-path))
+    else error(xs:QName('error:STORE'), concat('Cannot store progress indicator ', $in-progress-path))
 };
 
 (:~ remove in-progress flag for the given collection and resource :)
@@ -135,7 +135,7 @@ declare function local:make-cache-collection-path(
       if (xmldb:create-collection($cache-previous-step, $new-collection))
 			then 
 			  app:mirror-permissions($this-step, $cache-this-step)
-  		else error(xs:QName('err:CREATE'), concat('Cannot create cache collection ', $this-step))
+  		else error(xs:QName('error:CREATE'), concat('Cannot create cache collection ', $this-step))
     )
 };
 
@@ -196,7 +196,7 @@ declare function local:commit-cache(
       		error(
             if ($err:code castable as xs:QName) 
             then $err:code cast as xs:QName
-            else xs:QName("err:TRANSFORM"), $err:description, $err:value
+            else xs:QName("error:TRANSFORM"), $err:description, $err:value
           )
       	}
     return (
@@ -206,7 +206,7 @@ declare function local:commit-cache(
       )
       else (
         local:remove-flag($collection, $resource),
-        error(xs:QName('err:STORE'), concat('Cannot store resource ', $collection, $resource, ' in cache ', $cache)) 
+        error(xs:QName('error:STORE'), concat('Cannot store resource ', $collection, $resource, ' in cache ', $cache)) 
       )
     ),
     local:remove-flag($collection, $resource)

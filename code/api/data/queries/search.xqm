@@ -7,7 +7,7 @@
 module namespace search = 'http://jewishliturgy.org/api/data/search';
 
 import module namespace api="http://jewishliturgy.org/modules/api" 
-  at "/code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "nav.xqm";
 import module namespace navdoc="http://jewishliturgy.org/api/data/navdoc"
@@ -17,7 +17,7 @@ import module namespace navel="http://jewishliturgy.org/api/data/navel"
 import module namespace navat="http://jewishliturgy.org/api/data/navat"
   at "navat.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
-  at "/code/api/data/original/original.xqm";
+  at "/db/code/api/data/original/original.xqm";
 import module namespace kwic="http://exist-db.org/xquery/kwic";
   
 declare default element namespace "http://www.w3.org/1999/xhtml"; 

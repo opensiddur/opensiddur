@@ -9,11 +9,11 @@
 module namespace expanded = 'http://jewishliturgy.org/api/data/expanded';
 
 import module namespace api="http://jewishliturgy.org/modules/api" 
-  at "/code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "nav.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
-  at "/code/modules/follow-uri.xqm";
+  at "/db/code/modules/follow-uri.xqm";
   
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 declare namespace tei="http://www.tei-c.org/ns/1.0";

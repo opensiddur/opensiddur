@@ -12,7 +12,7 @@ xquery version "1.0";
 module namespace admin="http://jewishliturgy.org/modules/admin";
 
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "xmldb:exist:///code/magic/magic.xqm";
+  at "xmldb:exist:///db/code/magic/magic.xqm";
 
 (: This is fscked up insecure! :)
 declare variable $admin:admin-user as xs:string := 'userman';

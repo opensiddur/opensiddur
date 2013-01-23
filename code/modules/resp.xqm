@@ -8,15 +8,15 @@ xquery version "3.0";
 module namespace resp = "http://jewishliturgy.org/modules/resp";
 
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "xmldb:exist:///code/modules/app.xqm";
+  at "xmldb:exist:///db/code/modules/app.xqm";
 import module namespace ridx="http://jewishliturgy.org/modules/refindex"
-  at "xmldb:exist:///code/modules/refindex.xqm";
+  at "xmldb:exist:///db/code/modules/refindex.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
-  at "xmldb:exist:///code/modules/follow-uri.xqm";
+  at "xmldb:exist:///db/code/modules/follow-uri.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
-declare namespace err="http://jewishliturgy.org/errors";
+declare namespace error="http://jewishliturgy.org/errors";
 
 declare variable $resp:tei-ns := "http://www.tei-c.org/ns/1.0";
 declare variable $resp:valid-responsibility-types :=
@@ -128,7 +128,7 @@ declare function local:make-public-profile(
             sm:chgrp(xs:anyURI($pc), $group),
             sm:chmod(xs:anyURI($pc), "rwxrwxr-x")
           )
-          else error(xs:QName('err:CREATE'), concat("Cannot create collection", $group-collection, "/", $group-profile-collection)),
+          else error(xs:QName('error:CREATE'), concat("Cannot create collection", $group-collection, "/", $group-profile-collection)),
         $pc
       )
     let $resource-name := concat($identifier, ".xml")
@@ -147,7 +147,7 @@ declare function local:make-public-profile(
         sm:chmod(xs:anyURI($resource-path), "rwxrwx---")
       )
       else
-        error(xs:QName("err:CREATE"), concat("Cannot create public profile for ", $identifier)),
+        error(xs:QName("error:CREATE"), concat("Cannot create public profile for ", $identifier)),
       local:public-profile-by-id($node, $identifier)
     )
 };
@@ -262,7 +262,7 @@ declare function local:get-public-profile(
       return
         if ($new)
         then $new
-        else error(xs:QName("err:NOPROFILE"), 
+        else error(xs:QName("error:NOPROFILE"), 
           concat("The user ", $identifier, " has no profile and there is no way to make one. Upload a profile manually"))
 };
   
@@ -280,11 +280,11 @@ declare function resp:add(
   (: does the element have @xml:id? if not, error :)
   if (not($node/@xml:id))
   then
-    error(xs:QName("err:INPUT"), "The node must have an @xml:id attribute.")
+    error(xs:QName("error:INPUT"), "The node must have an @xml:id attribute.")
   else if (not($resp-type=$resp:valid-responsibility-types))
   then
     (: is the resp-type valid? if not, error :)
-    error(xs:QName("err:INPUT"), concat(
+    error(xs:QName("error:INPUT"), concat(
       "The responsibility type must be selected from: ",
       string-join($resp:valid-responsibility-types, ",")))
   else 
@@ -312,7 +312,7 @@ declare function resp:add-attribute(
   if (not($resp-type=$resp:valid-responsibility-types))
   then
     (: is the resp-type valid? if not, error :)
-    error(xs:QName("err:INPUT"), concat(
+    error(xs:QName("error:INPUT"), concat(
       "The responsibility type must be selected from: ",
       string-join($resp:valid-responsibility-types, ",")))
   else 

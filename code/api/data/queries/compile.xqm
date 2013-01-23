@@ -19,17 +19,17 @@ xquery version "1.0";
 module namespace compile="http://jewishliturgy.org/api/data/compile";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-	at "/code/api/modules/api.xqm";
+	at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-	at "/code/modules/app.xqm";
+	at "/db/code/modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-	at "/code/api/modules/data.xqm";
+	at "/db/code/api/modules/data.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
-	at "/code/modules/format.xqm";
+	at "/db/code/modules/format.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
-	at "/code/modules/cache-controller.xqm";
+	at "/db/code/modules/cache-controller.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
-  at "/code/api/modules/nav.xqm";
+  at "/db/code/api/modules/nav.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml";
 declare namespace tei="http://www.tei-c.org/ns/1.0";

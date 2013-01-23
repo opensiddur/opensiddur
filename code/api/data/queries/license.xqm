@@ -8,15 +8,15 @@ xquery version "1.0";
 module namespace lic="http://jewishliturgy.org/api/data/license";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-	at "/code/api/modules/api.xqm";
+	at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
-	at "/code/api/modules/nav.xqm";
+	at "/db/code/api/modules/nav.xqm";
 import module namespace resp="http://jewishliturgy.org/modules/resp"
-  at "/code/modules/resp.xqm";
+  at "/db/code/modules/resp.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "/code/modules/debug.xqm";
+  at "/db/code/modules/debug.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml";
 declare namespace tei="http://www.tei-c.org/ns/1.0";

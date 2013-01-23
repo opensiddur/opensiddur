@@ -14,15 +14,15 @@ xquery version "3.0";
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
 
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "xmldb:exist:///code/modules/app.xqm";
+  at "xmldb:exist:///db/code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "xmldb:exist:///code/modules/debug.xqm";
+  at "xmldb:exist:///db/code/modules/debug.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
-  at "xmldb:exist:///code/modules/follow-uri.xqm";
+  at "xmldb:exist:///db/code/modules/follow-uri.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "xmldb:exist:///code/magic/magic.xqm";
+  at "xmldb:exist:///db/code/magic/magic.xqm";
 
-declare namespace err="http://jewishliturgy.org/errors";
+declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 (: the default cache is under this directory :)
@@ -77,7 +77,7 @@ declare function local:make-mirror-collection-path(
           if ($step = 1)
           then "/db"
           else $mirror-this-step, $this-step)
-      else error(xs:QName('err:CREATE'), concat('Cannot create index collection ', $this-step))
+      else error(xs:QName('error:CREATE'), concat('Cannot create index collection ', $this-step))
     )
 };
 

@@ -7,13 +7,13 @@
 module namespace navat = 'http://jewishliturgy.org/api/data/navat';
 
 import module namespace api="http://jewishliturgy.org/modules/api" 
-  at "/code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "nav.xqm";
 import module namespace resp="http://jewishliturgy.org/modules/resp"
-  at "/code/modules/resp.xqm";
+  at "/db/code/modules/resp.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 declare namespace tei="http://www.tei-c.org/ns/1.0";

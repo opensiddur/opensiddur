@@ -8,13 +8,13 @@ xquery version "1.0";
 module namespace icompile="http://jewishliturgy.org/modules/icompile";
 
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
-  at "/code/modules/format.xqm";
+  at "/db/code/modules/format.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
-  at "/code/modules/cache-controller.xqm";
+  at "/db/code/modules/cache-controller.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
-  at "/code/modules/follow-uri.xqm";
+  at "/db/code/modules/follow-uri.xqm";
 
 declare namespace err="http://jewishliturgy.org/errors";
 declare namespace tei="http://www.tei-c.org/ns/1.0";

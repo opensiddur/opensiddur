@@ -11,15 +11,15 @@ xquery version "1.0";
 module namespace app="http://jewishliturgy.org/modules/app";
 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "xmldb:exist:///code/modules/debug.xqm";
+  at "xmldb:exist:///db/code/modules/debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
-	at "xmldb:exist:///code/modules/paths.xqm";
+	at "xmldb:exist:///db/code/modules/paths.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "xmldb:exist:///code/magic/magic.xqm";
+  at "xmldb:exist:///db/code/magic/magic.xqm";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform";
-declare namespace err="http://jewishliturgy.org/errors";
+declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 
@@ -233,7 +233,7 @@ declare function app:make-collection-path(
 					  sm:chgrp(xs:anyURI($current-col), $group),
 					  sm:chmod(xs:anyURI($current-col), $mode)
 					)
-					else error(xs:QName('err:CREATE'), concat('Cannot create collection', $origin-sl, $to-create))
+					else error(xs:QName('error:CREATE'), concat('Cannot create collection', $origin-sl, $to-create))
 				),
 				if ($second-part) 
 				then app:make-collection-path($second-part, $current-col, $owner, $group, $mode)
@@ -281,7 +281,7 @@ declare function app:make-collection-path(
           return
             if ($path)
             then app:copy-permissions(xs:anyURI($path),$permissions)
-            else error(xs:QName('err:CREATE'), concat('Cannot create collection', $origin-sl, $to-create))
+            else error(xs:QName('error:CREATE'), concat('Cannot create collection', $origin-sl, $to-create))
         ),
         if ($second-part) 
         then app:make-collection-path($second-part, $current-col, $permissions)

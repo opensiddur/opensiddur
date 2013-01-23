@@ -10,17 +10,17 @@
 module namespace combine = 'http://jewishliturgy.org/api/data/combine';
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
-  at "/code/modules/app.xqm";
+  at "/db/code/modules/app.xqm";
 import module namespace api="http://jewishliturgy.org/modules/api" 
-  at "/code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
-  at "/code/modules/format.xqm";
+  at "/db/code/modules/format.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
-  at "/code/modules/cache-controller.xqm";
+  at "/db/code/modules/cache-controller.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
   at "nav.xqm";
 import module namespace reverse="http://jewishliturgy.org/modules/reverse"
-  at "/code/transforms/reverse-to-db/reverse.xqm";
+  at "/db/code/transforms/reverse-to-db/reverse.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 declare namespace tei="http://www.tei-c.org/ns/1.0";

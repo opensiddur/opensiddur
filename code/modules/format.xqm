@@ -12,13 +12,13 @@ declare namespace err="http://jewishliturgy.org/errors";
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
-  at "xmldb:exist:///code/modules/app.xqm";
+  at "xmldb:exist:///db/code/modules/app.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache" 
-  at "xmldb:exist:///code/modules/cache-controller.xqm";
+  at "xmldb:exist:///db/code/modules/cache-controller.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
-  at "xmldb:exist:///code/modules/paths.xqm";
+  at "xmldb:exist:///db/code/modules/paths.xqm";
 import module namespace jobs="http://jewishliturgy.org/apps/jobs"
-  at "xmldb:exist:///code/apps/jobs/modules/jobs.xqm";
+  at "xmldb:exist:///db/code/apps/jobs/modules/jobs.xqm";
 
 declare variable $format:temp-dir := '.format';
 declare variable $format:path-to-xslt := '/db/code/transforms';

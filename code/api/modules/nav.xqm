@@ -8,9 +8,9 @@ module namespace nav = 'http://jewishliturgy.org/modules/nav';
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "xmldb:exist:///code/modules/app.xqm";
+  at "xmldb:exist:///db/code/modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "xmldb:exist:///code/modules/debug.xqm";
+  at "xmldb:exist:///db/code/modules/debug.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml";
 

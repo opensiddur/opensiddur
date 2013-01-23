@@ -7,11 +7,11 @@
 module namespace navdoc = 'http://jewishliturgy.org/api/data/navdoc';
 
 import module namespace api="http://jewishliturgy.org/modules/api" 
-  at "/code/api/modules/api.xqm";
+  at "/db/code/api/modules/api.xqm";
 import module namespace ridx="http://jewishliturgy.org/modules/refindex"
-  at "/code/modules/refindex.xqm";
+  at "/db/code/modules/refindex.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
-  at "/code/api/modules/nav.xqm";
+  at "/db/code/api/modules/nav.xqm";
 import module namespace navel="http://jewishliturgy.org/api/data/navel"
   at "navel.xqm";
 import module namespace navat="http://jewishliturgy.org/api/data/navat"
