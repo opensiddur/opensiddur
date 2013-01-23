@@ -51,10 +51,9 @@ declare
   let $total := count($all)
   return 
     <html xmlns="http://www.w3.org/1999/xhtml">
-      <head profile="http://a9.com/-/spec/opensearch/1.1/">
+      <head>
         <title>Group API index</title>
         <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
-        <meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>
         <meta name="itemsPerPage" content="{$max-results}"/>
         <meta name="totalResults" content="{$total}"/>
       </head>
