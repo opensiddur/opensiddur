@@ -28,11 +28,19 @@ declare variable $mirror:configuration := "mirror-conf.xml";
  : @param $mirror-path Full path to the new mirror collection
  : @param $original-path Full path to the collection that is to be mirrored
  : @return empty-sequence()
+ : @error error:INPUT one of the the original or mirror paths is not absolute
  :)
 declare function mirror:create(
   $mirror-path as xs:string,
   $original-path as xs:string
   ) as empty-sequence() {
+  let $check := 
+    if (starts-with($mirror-path, "/db"))
+    then
+        if (starts-with($original-path, "/db"))
+        then true()
+        else error(xs:QName("error:INPUT"), "original-path must be absolute")
+    else error(xs:QName("error:INPUT"), "mirror-path must be absolute")
   let $create := 
     app:make-collection-path(
       $mirror-path, "/", sm:get-permissions($original-path)
@@ -40,7 +48,9 @@ declare function mirror:create(
   let $uri := xs:anyURI(
     xmldb:store($mirror-path, $mirror:configuration,
     <mirror:configuration>
-      <mirror:of>{replace($original-path, "^/db", "")}</mirror:of>
+      <mirror:of>{
+        $original-path
+      }</mirror:of>
     </mirror:configuration>)
     )
   return
@@ -74,7 +84,9 @@ declare function local:base-path(
   local:config($mirror-path)/mirror:configuration/mirror:of/string()
 };
 
-(:~ @param $path The relative (not beginning with /) or absolute (beginning with /) path of the desired collection  
+(:~
+ : @param $mirror-path The absolute path to the mirror 
+ : @param $path The relative (not beginning with /db) or absolute (beginning with /db) path of the desired collection  
  : @return the mirror path 
  : @error error:NOT_A_MIRROR The collection $mirror-path is not a mirror collection
  : @error error:NOT_MIRRORED The collection $path is not a subcollection of the original path and is not mirrored in this mirror collection
@@ -83,12 +95,14 @@ declare function mirror:mirror-path(
   $mirror-path as xs:string,
   $path as xs:string
   ) as xs:string {
-  let $mirror-no-db := replace($mirror-path, "^/db", "")
-  let $path-no-db := replace($path, "^/db", "")
+  let $check :=
+    if (starts-with($mirror-path, "/db"))
+    then true()
+    else error(xs:QName("error:INPUT"), "mirror-path is not absolute")
   let $base-path := local:base-path($mirror-path)
   return
-    if (starts-with($path-no-db, $base-path))
-    then replace($path-no-db, "^" || $base-path, $mirror-no-db)
+    if (starts-with($path, $base-path))
+    then replace($path, "^" || $base-path, $mirror-path)
     else if (starts-with($path, "/"))
     then 
       error(
@@ -97,10 +111,13 @@ declare function mirror:mirror-path(
       ) 
     else 
       (: relative path :)
-      app:concat-path($mirror-no-db, $path)
+      app:concat-path($mirror-path, $path)
 };
 
 (:~ turn a path from relative to a mirror to one relative the original path
+ : @param $mirror-path The absolute path to the mirror
+ : @param $mirrored-path The absolute path to the mirrored location
+ : @error error:INPUT One of the parameters is not an absolute path
  : @error error:NOT_A_MIRROR The collection $mirror-path is not a mirror collection
  : @error error:NOT_MIRRORED The collection $path is not a subcollection of the original path and is not mirrored in this mirror collection
  :)
@@ -108,12 +125,17 @@ declare function mirror:unmirror-path(
   $mirror-path as xs:string,
   $mirrored-path as xs:string
   ) as xs:string {
-  let $mirror-no-db := replace($mirror-path, "^/db", "")
+  let $check :=
+    if (starts-with($mirror-path, "/db"))
+    then
+        if (starts-with($mirrored-path, "/db"))
+        then true()
+        else error(xs:QName("error:INPUT"), "The mirrored path is not absolute")
+    else error(xs:QName("error:INPUT"), "The mirror-path is not absolute")
   let $base-path := local:base-path($mirror-path)
-  let $mirrored-path-no-db := replace($mirrored-path, "^/db", "")
   return
-    if (starts-with($mirrored-path-no-db, $mirror-no-db))
-    then replace($mirrored-path-no-db, "^" || $mirror-no-db, $base-path)
+    if (starts-with($mirrored-path, $mirror-path)) 
+    then replace($mirrored-path, "^" || $mirror-path, $base-path)
     else 
       error(
         xs:QName("error:NOT_MIRRORED"), 
@@ -204,9 +226,8 @@ declare function mirror:is-up-to-date(
   let $mirror-last-modified := xmldb:last-modified($mirror-collection, $resource) 
   return
     (
-      if (exists($up-to-date-function))
-      then boolean($up-to-date-function($mirror-path, $original))
-      else true()
+      empty($up-to-date-function)
+      or $up-to-date-function($mirror-path, $original)
     ) and
     not(
       empty($last-modified) or 

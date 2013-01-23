@@ -18,7 +18,7 @@
     <create-collection parent="/db/data/tests" name="mirror"/>
     <store collection="/db/data/tests/mirror" name="mirror-conf.xml">
       <mirror:configuration>
-        <mirror:of>/data/tests</mirror:of>
+        <mirror:of>/db/data/tests</mirror:of>
       </mirror:configuration>
     </store>
   </setup>
@@ -27,10 +27,10 @@
   </tearDown>
   <imports>
     import module namespace mirror="http://jewishliturgy.org/modules/mirror"
-      at "xmldb:exist:///code/modules/mirror.xqm";
+      at "xmldb:exist:///db/code/modules/mirror.xqm";
   </imports>
-  <variable name="original-collection">'/data/tests'</variable>
-  <variable name="mirror-collection">'/data/tests/mirror'</variable>
+  <variable name="original-collection">'/db/data/tests'</variable>
+  <variable name="mirror-collection">'/db/data/tests/mirror'</variable>
   <functions><![CDATA[
     declare function local:same-permissions(
       $a as xs:string,
@@ -44,7 +44,7 @@
   <TestSet>
     <testName>mirror:create()</testName>
     <tearDown>
-      <remove-collection collection="/data/tests/new-mirror"/>
+      <remove-collection collection="/db/data/tests/new-mirror"/>
     </tearDown>
     <test output="text">
       <task>Create a new mirror collection</task>
@@ -53,7 +53,7 @@
       ]]></code>
       <xpath desc="mirror collection created">xmldb:collection-available("/db/data/tests/new-mirror")</xpath>
       <xpath desc="mirror configuration exists">doc-available("/db/data/tests/new-mirror/" || $mirror:configuration)</xpath>
-      <xpath desc="mirror configuration is correct">doc('/db/data/tests/new-mirror/' || $mirror:configuration)/mirror:configuration/mirror:of = "/data/tests"</xpath>
+      <xpath desc="mirror configuration is correct">doc('/db/data/tests/new-mirror/' || $mirror:configuration)/mirror:configuration/mirror:of = "/db/data/tests"</xpath>
       <xpath desc="mirror collection permissions are the same as the original collection">local:same-permissions("/db/data/tests/new-mirror", $original-collection)</xpath>
     </test>
   </TestSet>
@@ -62,30 +62,30 @@
     <test output="text">
       <task>Returns the path concatenated</task>
       <code><![CDATA[
-        mirror:mirror-path("/data/tests/mirror", "/data/tests/original/path")
+        mirror:mirror-path("/db/data/tests/mirror", "/db/data/tests/original/path")
       ]]></code>
-      <expected>/data/tests/mirror/original/path</expected> 
+      <expected>/db/data/tests/mirror/original/path</expected> 
     </test>
     <test output="text">
       <task>Handles relative paths in second parameter</task>
       <code><![CDATA[
-        mirror:mirror-path("/data/tests/mirror", "original/path")
+        mirror:mirror-path("/db/data/tests/mirror", "original/path")
       ]]></code>
-      <expected>/data/tests/mirror/original/path</expected>
+      <expected>/db/data/tests/mirror/original/path</expected>
     </test>
     <test output="text">
-      <task>Handles /db prefixes in first parameter</task>
+      <task>No /db prefix in second parameter</task>
       <code><![CDATA[
         mirror:mirror-path("/db/data/tests/mirror", "/data/tests")
       ]]></code>
-      <expected>/data/tests/mirror</expected>
+      <error desc="returns error:NOT_MIRRORED" code="error:NOT_MIRRORED"/>
     </test>
     <test output="text">
-      <task>Handles /db in second parameter</task>
+      <task>No /db in first parameter</task>
       <code><![CDATA[
         mirror:mirror-path("/data/tests/mirror", "/db/data/tests")
       ]]></code>
-      <expected>/data/tests/mirror</expected>
+      <error desc="returns error:INPUT" code="error:INPUT"/>
     </test>
     <test output="text">
       <task>If mirror collection is not a mirror</task>
@@ -109,42 +109,42 @@
       <code><![CDATA[
         mirror:unmirror-path("/db/data/tests/mirror", "/db/data/tests/mirror")
       ]]></code>
-      <expected>/data/tests</expected> 
+      <expected>/db/data/tests</expected> 
     </test>
     <test output="text">
       <task>/db in first parameter</task>
       <code><![CDATA[
         mirror:unmirror-path("/db/data/tests/mirror", "/data/tests/mirror")
       ]]></code>
-      <expected>/data/tests</expected> 
+      <error desc="reports error:INPUT" code="error:INPUT"/>      
     </test>
     <test output="text">
       <task>/db in second parameter</task>
       <code><![CDATA[
-        mirror:unmirror-path("/data/tests/mirror", "/data/tests/mirror")
+        mirror:unmirror-path("/data/tests/mirror", "/db/data/tests/mirror")
       ]]></code>
-      <expected>/data/tests</expected> 
+      <error desc="reports error:INPUT" code="error:INPUT"/>      
     </test>
     <test output="text">
       <task>mirror with further collections</task>
       <code><![CDATA[
-        mirror:unmirror-path("/data/tests/mirror", "/data/tests/mirror/one/two")
+        mirror:unmirror-path("/db/data/tests/mirror", "/db/data/tests/mirror/one/two")
       ]]></code>
-      <expected>/data/tests/one/two</expected> 
+      <expected>/db/data/tests/one/two</expected> 
     </test>
   </TestSet>
   <TestSet>
     <testName>mirror:make-collection-path()</testName>
     <setup>
-      <create-collection parent="/data/tests" name="one"/>
-      <create-collection parent="/data/tests/one" name="two"/>
-      <create-collection parent="/data/tests/one/two" name="three"/>
-      <create-collection parent="/data/tests/one/two/three" name="four"/>
+      <create-collection parent="/db/data/tests" name="one"/>
+      <create-collection parent="/db/data/tests/one" name="two"/>
+      <create-collection parent="/db/data/tests/one/two" name="three"/>
+      <create-collection parent="/db/data/tests/one/two/three" name="four"/>
       <code><![CDATA[
-        let $one := xs:anyURI("/data/tests/one")
-        let $two := xs:anyURI("/data/tests/one/two")
-        let $three := xs:anyURI("/data/tests/one/two/three")
-        let $four := xs:anyURI("/data/tests/one/two/three/four")
+        let $one := xs:anyURI("/db/data/tests/one")
+        let $two := xs:anyURI("/db/data/tests/one/two")
+        let $three := xs:anyURI("/db/data/tests/one/two/three")
+        let $four := xs:anyURI("/db/data/tests/one/two/three/four")
         return (
           sm:chown($one, "testuser"),
           sm:chgrp($one, "everyone"),
@@ -157,47 +157,47 @@
       ]]></code>
     </setup>
     <tearDown>
-      <remove-collection collection="/data/tests/one"/>
+      <remove-collection collection="/db/data/tests/one"/>
     </tearDown>
     <test>
       <task>Make a collection hierarchy</task>
       <code><![CDATA[
-        mirror:make-collection-path("/data/tests/mirror","/data/tests/one/two/three/four")
+        mirror:make-collection-path("/db/data/tests/mirror","/db/data/tests/one/two/three/four")
       ]]></code>
-      <xpath desc="mirror collection 'one' created">xmldb:collection-available("/data/tests/mirror/one")</xpath>
-      <xpath desc="mirror collection 'two' created">xmldb:collection-available("/data/tests/mirror/one/two")</xpath>
-      <xpath desc="mirror collection 'three' created">xmldb:collection-available("/data/tests/mirror/one/two/three")</xpath>
-      <xpath desc="mirror collection 'four' created">xmldb:collection-available("/data/tests/mirror/one/two/three/four")</xpath>
-      <xpath desc="mirror collection 'one' has same permissions as /db/data/tests/one (changed owner/group/mode)">local:same-permissions("/data/tests/mirror/one","/data/tests/one")</xpath>
-      <xpath desc="mirror collection 'two' has same permissions as /db/data/tests/one/two (allowed user ACE)">local:same-permissions("/data/tests/mirror/one/two","/data/tests/one/two")</xpath>
-      <xpath desc="mirror collection 'three' has same permissions as /db/data/tests/one/two/three (allowed group ACE)">local:same-permissions("/data/tests/mirror/one/two/three","/data/tests/one/two/three")</xpath>
-      <xpath desc="mirror collection 'four' has same permissions as /db/data/tests/one/two/three/four (allowed user ACE, disallowed group ACE)">local:same-permissions("/data/tests/mirror/one/two/three/four","/data/tests/one/two/three/four")</xpath>
+      <xpath desc="mirror collection 'one' created">xmldb:collection-available("/db/data/tests/mirror/one")</xpath>
+      <xpath desc="mirror collection 'two' created">xmldb:collection-available("/db/data/tests/mirror/one/two")</xpath>
+      <xpath desc="mirror collection 'three' created">xmldb:collection-available("/db/data/tests/mirror/one/two/three")</xpath>
+      <xpath desc="mirror collection 'four' created">xmldb:collection-available("/db/data/tests/mirror/one/two/three/four")</xpath>
+      <xpath desc="mirror collection 'one' has same permissions as /db/data/tests/one (changed owner/group/mode)">local:same-permissions("/db/data/tests/mirror/one","/db/data/tests/one")</xpath>
+      <xpath desc="mirror collection 'two' has same permissions as /db/data/tests/one/two (allowed user ACE)">local:same-permissions("/db/data/tests/mirror/one/two","/db/data/tests/one/two")</xpath>
+      <xpath desc="mirror collection 'three' has same permissions as /db/data/tests/one/two/three (allowed group ACE)">local:same-permissions("/db/data/tests/mirror/one/two/three","/db/data/tests/one/two/three")</xpath>
+      <xpath desc="mirror collection 'four' has same permissions as /db/data/tests/one/two/three/four (allowed user ACE, disallowed group ACE)">local:same-permissions("/db/data/tests/mirror/one/two/three/four","/db/data/tests/one/two/three/four")</xpath>
     </test>
   </TestSet>
   <TestSet>
     <testName>mirror:is-up-to-date() where resource is newer</testName>
     <setup>
-      <store collection="/data/tests" name="test.xml">
+      <store collection="/db/data/tests" name="test.xml">
         <test/>
       </store>
-      <store collection="/data/tests/mirror" name="test.xml">
+      <store collection="/db/data/tests/mirror" name="test.xml">
         <mirror/>
       </store>
     </setup>
     <tearDown>
-      <remove-document collection="/data/tests" name="test.xml"/>
+      <remove-document collection="/db/data/tests" name="test.xml"/>
     </tearDown>
     <test output="text">
       <task>with no function</task>
       <code output="text"><![CDATA[
-        mirror:is-up-to-date($mirror-collection, "/data/tests/test.xml")
+        mirror:is-up-to-date($mirror-collection, "/db/data/tests/test.xml")
       ]]></code>
       <expected desc="returns true">true</expected>
     </test>
     <test output="text">
       <task>with an additional function that returns true()</task>
       <code output="text"><![CDATA[
-        mirror:is-up-to-date($mirror-collection, "/data/tests/test.xml", 
+        mirror:is-up-to-date($mirror-collection, "/db/data/tests/test.xml", 
           function($m, $t) as xs:boolean { true() })
       ]]></code>
       <expected desc="returns true">true</expected>
@@ -205,7 +205,7 @@
     <test output="text">
       <task>with an additional function that returns false()</task>
       <code output="text"><![CDATA[
-        mirror:is-up-to-date($mirror-collection, "/data/tests/test.xml", 
+        mirror:is-up-to-date($mirror-collection, "/db/data/tests/test.xml", 
           function($m, $t) as xs:boolean { false() })
       ]]></code>
       <expected desc="returns false">false</expected>
@@ -214,27 +214,27 @@
   <TestSet>
     <testName>mirror:is-up-to-date() where resource is older</testName>
     <setup>
-      <store collection="/data/tests/mirror" name="test.xml">
+      <store collection="/db/data/tests/mirror" name="test.xml">
         <mirror/>
       </store>
-      <store collection="/data/tests" name="test.xml">
+      <store collection="/db/data/tests" name="test.xml">
         <test/>
       </store>
     </setup>
     <tearDown>
-      <remove-document collection="/data/tests" name="test.xml"/>
+      <remove-document collection="/db/data/tests" name="test.xml"/>
     </tearDown>
     <test output="text">
       <task>without an additional function</task>
       <code output="text"><![CDATA[
-        mirror:is-up-to-date($mirror-collection, "/data/tests/test.xml")
+        mirror:is-up-to-date($mirror-collection, "/db/data/tests/test.xml")
       ]]></code>
       <expected desc="returns false">false</expected>
     </test>
     <test output="text">
       <task>with an additional function that returns true()</task>
       <code output="text"><![CDATA[
-        mirror:is-up-to-date($mirror-collection, "/data/tests/test.xml", 
+        mirror:is-up-to-date($mirror-collection, "/db/data/tests/test.xml", 
           function($m, $t) as xs:boolean { true() })
       ]]></code>
       <expected desc="returns false">false</expected>
@@ -243,46 +243,46 @@
   <TestSet>
     <testName>mirror:store()</testName>
     <setup>
-      <create-collection parent="/data/tests" name="one"/>
-      <store collection="/data/tests/one" name="test.xml">
+      <create-collection parent="/db/data/tests" name="one"/>
+      <store collection="/db/data/tests/one" name="test.xml">
         <test/>
       </store>
     </setup>
     <tearDown>
-      <remove-collection collection="/data/tests/one" />
+      <remove-collection collection="/db/data/tests/one" />
     </tearDown>
     <test output="text">
       <task>Store a resource</task>
       <code><![CDATA[
-        mirror:store($mirror-collection, "/data/tests/one", "test.xml", <mirror/>)
+        mirror:store($mirror-collection, "/db/data/tests/one", "test.xml", <mirror/>)
       ]]></code>
-      <expected desc="returns path of mirror document">/data/tests/mirror/one/test.xml</expected>
-      <xpath desc="mirror collection created">xmldb:collection-available("/data/tests/mirror/one")</xpath>
-      <xpath desc="mirror resource created">doc-available("/data/tests/mirror/one/test.xml")</xpath>
-      <xpath desc="mirror resource has same permissions as original">local:same-permissions("/data/tests/one/test.xml", "/data/tests/mirror/one/test.xml")</xpath>
+      <expected desc="returns path of mirror document">/db/data/tests/mirror/one/test.xml</expected>
+      <xpath desc="mirror collection created">xmldb:collection-available("/db/data/tests/mirror/one")</xpath>
+      <xpath desc="mirror resource created">doc-available("/db/data/tests/mirror/one/test.xml")</xpath>
+      <xpath desc="mirror resource has same permissions as original">local:same-permissions("/db/data/tests/one/test.xml", "/db/data/tests/mirror/one/test.xml")</xpath>
     </test>
   </TestSet>
   <TestSet>
     <testName>mirror:remove()</testName>
     <setup>
-      <create-collection parent="/data/tests/mirror" name="one"/>
-      <store collection="/data/tests/mirror/one" name="test.xml">
+      <create-collection parent="/db/data/tests/mirror" name="one"/>
+      <store collection="/db/data/tests/mirror/one" name="test.xml">
         <test/>
       </store>
     </setup>
     <test output="text">
       <task>Remove a resource</task>
       <code><![CDATA[
-        mirror:remove($mirror-collection, "/data/tests/one", "test.xml")
+        mirror:remove($mirror-collection, "/db/data/tests/one", "test.xml")
       ]]></code>
-      <xpath desc="resource removed">not(doc-available("/data/tests/mirror/one/test.xml"))</xpath>
+      <xpath desc="resource removed">not(doc-available("/db/data/tests/mirror/one/test.xml"))</xpath>
     </test>
     <test output="text">
       <task>Remove a collection</task>
       <code><![CDATA[
-        mirror:remove($mirror-collection, "/data/tests/one")
+        mirror:remove($mirror-collection, "/db/data/tests/one")
       ]]></code>
-      <xpath desc="collection removed">not(xmldb:collection-available("/data/tests/mirror/one"))</xpath>
+      <xpath desc="collection removed">not(xmldb:collection-available("/db/data/tests/mirror/one"))</xpath>
     </test>
   </TestSet>
 </TestSuite>
