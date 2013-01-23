@@ -151,7 +151,7 @@ declare function ridx:query(
 declare function ridx:query(
   $source-nodes as node()*,
   $query-node as node(),
-  $position as xs:integer
+  $position as xs:integer*
   ) {
   ridx:query($source-nodes, $query-node, $position, true())
 };
