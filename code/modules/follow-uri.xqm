@@ -3,20 +3,20 @@ xquery version "1.0";
  : follow-uri function and mode
  :
  : Open Siddur Project
- : Copyright 2009-2011 Efraim Feinstein 
+ : Copyright 2009-2013 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
 module namespace uri="http://jewishliturgy.org/transform/uri";
 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-	at "/code/modules/debug.xqm"; 
+	at "/db/code/modules/debug.xqm"; 
 import module namespace grammar="http://jewishliturgy.org/transform/grammar"
-	at "/code/grammar-parser/grammar2.xqm";
+	at "/db/code/grammar-parser/grammar2.xqm";
 import module namespace jcache="http://jewishliturgy.org/modules/cache"
-	at "/code/modules/cache-controller.xqm";
+	at "/db/code/modules/cache-controller.xqm";
 import module namespace nav="http://jewishliturgy.org/modules/nav"
-  at "/code/api/modules/nav.xqm";
+  at "/db/code/api/modules/nav.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";

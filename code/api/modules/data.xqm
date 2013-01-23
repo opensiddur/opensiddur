@@ -8,16 +8,8 @@ xquery version "3.0";
  :) 
 module namespace data="http://jewishliturgy.org/modules/data";
 
-import module namespace xmldb="http://exist-db.org/xquery/xmldb";
-
-import module namespace api="http://jewishliturgy.org/modules/api"
-	at "/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-	at "/code/modules/app.xqm";
-import module namespace paths="http://jewishliturgy.org/modules/paths"
-	at "/code/modules/paths.xqm";
-import module namespace resp="http://jewishliturgy.org/modules/resp"
-  at "/code/modules/resp.xqm";
+	at "/db/code/modules/app.xqm";
   
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
