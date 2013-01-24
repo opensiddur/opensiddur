@@ -13,7 +13,7 @@
 # An override file can also be used to exclude files by regular expression
 #
 # Open Siddur Project
-# Copyright 2010-2012 Efraim Feinstein
+# Copyright 2010-2013 Efraim Feinstein
 # Licensed under the GNU Lesser General Public License, version 3 or later
 #
 import sys
@@ -150,6 +150,9 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
     # using xmlns attribute to avoid auto-prefixing
     contentsXml = etree.Element('collection', {'name':destCollection, 'version':'1',   
       'mode':props.permissions, 'owner':props.user, 'group':props.group, 'created':directoryCtime, 'xmlns':exNS})
+    # add acl entry (or lack thereof)
+    etree.SubElement(contentsXml, "acl", {"entries":"0", "version":"1" })
+
     contentsXmlTree = etree.ElementTree(contentsXml)
 
     for fname in os.listdir(srcDirectory):
@@ -190,10 +193,11 @@ def buildCollection(srcDirectory, destCollection, default, mimeDict, excludeRE):
 
           # add resource to contentsXml
           # TODO: namedoctype, publicid, systemid
-          etree.SubElement(contentsXml, 'resource', {'filename':unicode(fname,'utf-8'), 
+          resourceElement = etree.SubElement(contentsXml, 'resource', {'filename':unicode(fname,'utf-8'), 
             'name':unicode(fname,'utf-8'), 
             'owner':props.user, 'group':props.group, 'mode':props.permissions, 
             'mimetype':fMime, 'type':fType, 'created':fCtime, 'modified':fMtime})
+          etree.SubElement(resourceElement, "acl", {"entries":"0", "version":"1" })
 
     # write the contentsXml file
     unindented = etree.tostring(contentsXml)
