@@ -33,7 +33,7 @@ $(DOCDIR):
 #	mkdir -p $(CODEDOCDIR)
 
 .PHONY: code
-code: transforms params.xsl2 
+code: transforms  
 .PHONY: params.xsl2
 params.xsl2: $(CODEDIR)/common/params.xsl2
 

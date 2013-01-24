@@ -8,13 +8,13 @@
 module namespace format="http://jewishliturgy.org/modules/format";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
-declare namespace err="http://jewishliturgy.org/errors";
+declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
   at "xmldb:exist:///db/code/modules/app.xqm";
-import module namespace jcache="http://jewishliturgy.org/modules/cache" 
-  at "xmldb:exist:///db/code/modules/cache-controller.xqm";
+import module namespace mirror="http://jewishliturgy.org/modules/mirror" 
+  at "xmldb:exist:///db/code/modules/mirror.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
   at "xmldb:exist:///db/code/modules/paths.xqm";
 import module namespace jobs="http://jewishliturgy.org/apps/jobs"
@@ -43,7 +43,7 @@ declare function local:wrap-document(
 	then $node
 	else document {$node}
 };
-
+(:
 declare function format:data-compile(
 	$jlptei-uri-or-node as item()	
 	) as document-node() {
@@ -60,7 +60,7 @@ declare function format:data-compile(
       if ($jlptei-uri-or-node instance of xs:string)
       then (
         jcache:cache-all($jlptei-uri-or-node, $user, $password),
-        jcache:cached-document-path($jlptei-uri-or-node) (:concat($jlptei-uri-or-node,	'?format=fragmentation'):)
+        jcache:cached-document-path($jlptei-uri-or-node) (-concat($jlptei-uri-or-node,	'?format=fragmentation')-)
       )
       else (
         jcache:cache-all(document-uri(root($jlptei-uri-or-node)), $user, $password),
@@ -77,6 +77,7 @@ declare function format:data-compile(
         else (), ())
   )
 };
+:)
 
 declare function format:transliterate(
   $uri-or-node as item(),
@@ -184,7 +185,7 @@ declare function format:reverse-xhtml(
       , ())
   )
 };
-
+(:
 declare function format:compile(
 	$jlptei-uri as xs:string,
 	$final-format as xs:string
@@ -203,7 +204,7 @@ declare function format:enqueue-compile(
     $dest-collection, $final-format,
     $style-href, (), ())
 };
-
+:)
 
 (:~ set up a compile operation in the job queue :)
 declare function format:enqueue-compile(
@@ -230,7 +231,7 @@ declare function format:enqueue-compile(
     then $format:format
     else 
       (: unknown format :)
-      error(xs:QName("err:FORMAT"), concat("Unknown format: ", $final-format))
+      error(xs:QName("error:FORMAT"), concat("Unknown format: ", $final-format))
   let $dest-resource :=
     (: make a list of resource names for each step in the transformation :)
     for $i in (1 to $total-steps)
@@ -288,7 +289,7 @@ declare function format:enqueue-compile(
               <jobs:query>/code/apps/jobs/queries/bg-compile-data.xql</jobs:query>
               <jobs:param>
                 <jobs:name>source-collection</jobs:name>
-                <jobs:value>{jcache:cached-document-path($source-collection)}</jobs:value>
+                <jobs:value>{((: TODO:FIX jcache:cached-document-path($source-collection):))}</jobs:value>
               </jobs:param>
               <jobs:param>
                 <jobs:name>source-resource</jobs:name>
@@ -431,7 +432,7 @@ declare function format:enqueue-compile(
     )
   )
 };
-
+(:
 declare function format:compile(
 	$jlptei-uri as xs:string,
 	$final-format as xs:string,
@@ -451,9 +452,9 @@ declare function format:compile(
 					return
 						if ($final-format = ('html','xhtml'))
 						then $html-compiled
-						else error(xs:QName('err:UNKNOWN'), concat('Unknown format ', $final-format))
+						else error(xs:QName('error:UNKNOWN'), concat('Unknown format ', $final-format))
 };
-
+:)
 (:~ Equivalent of the main query.  
  : Accepts the controller's exist:* external variables as parameters 
  : request parameters format and clear may also be used 
@@ -482,7 +483,7 @@ declare function format:format-query(
   let $output-resource := tokenize($output,'/')[last()] 
   where (app:require-authentication())
   return
-  	if (xmldb:store($output-collection, $output-resource, format:compile($document-path, $format)) )
+  	if (xmldb:store($output-collection, $output-resource, <format/>(:format:compile($document-path, $format):)) )
   	then (
   		if ($format = ('html', 'xhtml'))
   		then xmldb:copy(app:concat-path($format:path-to-xslt, 'format/xhtml'), $output-collection, 'style.css')
@@ -494,7 +495,7 @@ declare function format:format-query(
   		</exist:dispatch>
   	)
   	else
-  		error(xs:QName('err:STORE'), concat('Could not store ', $document-path))
+  		error(xs:QName('error:STORE'), concat('Could not store ', $document-path))
 };
 
 declare function format:status-xml(
@@ -529,7 +530,7 @@ declare function format:new-status(
     then
       app:mirror-permissions($collection, concat($collection, "/", $status-xml))
     else
-      error(xs:QName("err:STORE"), concat("Cannot store status file ", $status-xml))
+      error(xs:QName("error:STORE"), concat("Cannot store status file ", $status-xml))
 };
 
 (:~ return the status document,

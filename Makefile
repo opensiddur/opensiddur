@@ -320,9 +320,9 @@ db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common db-tests
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources
 	rsync $(RSYNC_EXCLUDE) -a --delete data $(DBDIR)
 	cp $(CODEDIR)/common/params.xsl2 $(DBDIR)/code/common	
-	-patch -p1 -Nr - < $(SETUPDIR)/generate-common-tests.xsl.patch
-	-patch -p1 -Nr - < $(SETUPDIR)/generate-tests-utils.xsl.patch
-	-patch -p1 -Nr - < $(SETUPDIR)/generate-xspec-tests.xsl.patch
+	#-patch -p1 -Nr - < $(SETUPDIR)/generate-common-tests.xsl.patch
+	#-patch -p1 -Nr - < $(SETUPDIR)/generate-tests-utils.xsl.patch
+	#-patch -p1 -Nr - < $(SETUPDIR)/generate-xspec-tests.xsl.patch
 
 db-clean:
 	rm -fr $(DBDIR)/schema $(DBDIR)/code $(DBDIR)/data $(DBDIR)/common $(DBDIR)/cache

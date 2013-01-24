@@ -18,8 +18,8 @@ import module namespace debug="http://jewishliturgy.org/transform/debug"
 	at "/db/code/modules/debug.xqm"; 
 import module namespace grammar="http://jewishliturgy.org/transform/grammar"
 	at "/db/code/grammar-parser/grammar2.xqm";
-import module namespace jcache="http://jewishliturgy.org/modules/cache"
-    at "/db/code/modules/cache-controller.xqm";
+import module namespace mirror="http://jewishliturgy.org/modules/mirror"
+    at "/db/code/modules/mirror.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "/db/code/api/modules/data.xqm";
 
@@ -228,14 +228,6 @@ declare function uri:follow-uri(
   uri:follow-cached-uri($uri, $context, $steps, ())
 };
 
-(:~ Given the full path to a document, return its cached version path
- :)
-declare function uri:cached-document-path(
-	$path as xs:string
-	) as xs:string {
-	jcache:cached-document-path($path)
-};
-
 declare function uri:follow-cached-uri(
   $uri as xs:string,
   $context as node(),
@@ -271,7 +263,7 @@ declare function uri:follow-cached-uri(
       }
 	  return
 	    if ($cache-type=$uri:fragmentation-cache-type)
-	    then doc(uri:cached-document-path(document-uri($doc)))
+	    then mirror:doc($cache-type, document-uri($doc))
 	    else $doc
 	let $pointer-destination as node()* :=
 		uri:follow(

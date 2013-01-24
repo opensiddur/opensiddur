@@ -80,8 +80,8 @@ declare function local:error(
   $line as xs:string?, 
   $column as xs:string?, 
   $code as xs:string?, 
-  $description as xs:string?, 
-  $value as xs:string?, 
+  $description as xs:string*, 
+  $value as xs:string*, 
   $error-data as item()*
   ) as element(error) {
   <error 
