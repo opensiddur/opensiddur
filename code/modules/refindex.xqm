@@ -8,7 +8,7 @@ xquery version "3.0";
  : the linking elements that make the references
  :
  : Open Siddur Project
- : Copyright 2011-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2013 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
@@ -94,7 +94,7 @@ declare function ridx:reindex(
     where exists($doc)
     return
       let $doc-uri := document-uri(root($doc))
-      let $collection := replace(util:collection-name(root($doc)), "^/db", "")
+      let $collection := util:collection-name(root($doc))
       let $resource := util:document-name($doc)
       let $make-mirror-collection :=
         local:make-index-collection($collection)
@@ -184,7 +184,7 @@ declare function ridx:query(
     if ($source-node instance of document-node())
     then ()
     else util:node-id($source-node)
-  let $null := util:log-system-out(
+  let $null := debug:debug($debug:detail, "refindex", 
     ("$query=", $query, ", $source-node=", $source-node,
     ", $source-document=", $source-document, 
     ", $query-document=", $query-document,
@@ -205,11 +205,13 @@ declare function ridx:query(
             [@target-node=$query-id]
             [empty($source-node) or @source-node=$source-node-id]
             [empty($position) or @position=$position]
-    let $null := util:log-system-out(
+    let $null := debug:debug($debug:detail, "refindex",
       ("$entry=", $entry)
     )
+    group by $document-uri := root($entry)/*/@document,
+        $entry-source-node := $entry/@source-node
     return
-      util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
+      util:node-by-id(doc($document-uri), $entry-source-node)
   return 
     $nodes | () (: remove duplicates :)
 };
