@@ -31,36 +31,6 @@ declare variable $user:path := "/db/user";
 (: path to schema :)
 declare variable $user:schema := "/db/schema/contributor.rnc";
 
-(:~ Get the API path for a given user or profile
- : @param $name The user name
- : @return the API URI that references a user of a given name or empty-sequence()
- :)
-declare function user:api-path(
-  $name as xs:string
-  ) as xs:string? {
-  let $doc := collection($user:path)//tei:idno[.=$name]/root(.)
-  where $doc
-  return
-    concat("/api", $user:path, "/", 
-      encode-for-uri(
-        replace(util:document-name($doc), "\.xml$", "")
-      )
-    )
-};
-
-declare function user:db-path(
-  $name as xs:string
-  ) as xs:string? {
-  let $doc := collection($user:path)//tei:idno[.=$name]/root(.)
-  where $doc
-  return
-    concat($user:path, "/", 
-      encode-for-uri(
-        replace(util:document-name($doc), "\.xml$", "")
-      )
-    )
-};
-
 declare 
   %private 
   function user:result-title(

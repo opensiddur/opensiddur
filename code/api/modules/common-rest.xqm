@@ -18,8 +18,6 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "/db/code/api/modules/data.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "/db/code/modules/jvalidate.xqm";
-import module namespace user="http://jewishliturgy.org/api/user"
-  at "/db/code/api/user.xqm";
 
 import module namespace magic="http://jewishliturgy.org/magic"
   at "/db/code/magic/magic.xqm";
@@ -52,7 +50,7 @@ declare function crest:record-change(
   $change-type as xs:string
   ) as empty-sequence() {
   let $who := app:auth-user()
-  let $who-uri := substring-after(user:db-path($who), "/db")
+  let $who-uri := substring-after(data:user-api-path($who), "/api")
   let $revisionDesc := $doc//tei:revisionDesc
   let $change :=
     <tei:change 
