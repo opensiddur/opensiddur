@@ -74,7 +74,7 @@
                 <xsl:sequence select="$license"/>
               </tei:availability>
               <tei:distributor><tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref></tei:distributor>
-              <tei:date><xsl:sequence select="format-date(current-date(), '[Y04]-[M02]-[D02]')"/></tei:date>
+              <tei:date><xsl:sequence select="format-date(current-date(), '[Y]-[M02]-[D02]')"/></tei:date>
             </tei:publicationStmt>
             <tei:sourceDesc>
               <xsl:sequence select="$bibliography"/>
