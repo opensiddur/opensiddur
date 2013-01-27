@@ -11,7 +11,6 @@ module namespace orig = 'http://jewishliturgy.org/api/data/original';
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
-declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 
 import module namespace app="http://jewishliturgy.org/modules/app"
   at "/db/code/modules/app.xqm";
@@ -24,6 +23,7 @@ declare variable $orig:data-type := "original";
 declare variable $orig:schema := "/schema/jlptei.rnc";
 declare variable $orig:schematron := "/schema/jlptei.xsl2";
 declare variable $orig:path-base := concat($data:path-base, "/", $orig:data-type);
+declare variable $orig:api-path-base := concat("/api/data/", $orig:data-type);  
 
 (:~ validate 
  : @param $doc The document to be validated
@@ -150,7 +150,7 @@ declare
     $max-results as xs:integer*
   ) as item()+ {
   crest:list($q, $start, $max-results,
-    "Original data API", $orig:path-base,
+    "Original data API", $orig:api-path-base,
     orig:query-function#1, orig:list-function#0,
     true(), ()
   )
@@ -212,6 +212,7 @@ declare
   crest:post(
     concat($orig:data-type, "/", $body/tei:TEI/@xml:lang),
     $orig:path-base,
+    $orig:api-path-base,
     $body,
     orig:validate#2,
     orig:validate-report#2,

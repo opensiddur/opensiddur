@@ -152,7 +152,7 @@ declare function crest:get(
  : @param $query text of the query, empty string for all
  : @param $start first document to list
  : @param $max-results number of documents to list 
- : @param $path-base base path of the data type
+ : @param $path-base API base path of the data type (/api/...)
  : @param $query-function function that performs a query for a string
  : @param $list-function function that lists all resources for the data type
  : @param $supports-access whether the data type supports GET and PUT for access control
@@ -236,7 +236,7 @@ declare function crest:do-query(
         let $api-name := replace(util:document-name($doc), "\.xml$", "")
         return
           <li xmlns="http://www.w3.org/1999/xhtml" class="result">
-            <a class="document" href="/api{$path-base}/{$api-name}">{$title-function($doc)}</a>:
+            <a class="document" href="{$path-base}/{$api-name}">{$title-function($doc)}</a>:
             <ol class="contexts">{
               for $hit in $result
               for $p in 
@@ -278,10 +278,10 @@ declare function crest:do-list(
       let $api-name := replace(util:document-name($result), "\.xml$", "")
       return
         <li class="result">
-          <a class="document" href="/api{$path-base}/{$api-name}">{$title-function(root($result))}</a>
+          <a class="document" href="{$path-base}/{$api-name}">{$title-function(root($result))}</a>
           {
             if ($supports-access)
-            then <a class="alt" property="access" href="/api{$path-base}/{$api-name}/access">access</a>
+            then <a class="alt" property="access" href="{$path-base}/{$api-name}/access">access</a>
             else ()
           }
         </li>
@@ -339,7 +339,8 @@ declare function crest:delete(
 
 (:~ Post a new document 
  : @param $data-path document data type and additional database path
- : @param $path-base base path for document type
+ : @param $path-base base path for document type in the db
+ : @param $api-path-base Base path of the API (/api/...)
  : @param $body The document
  : @param $validation-function-boolean function used to validate that returns a boolean
  : @param $validation-function-report function used to validate that returns a full report
@@ -356,6 +357,7 @@ declare function crest:delete(
 declare function crest:post(
     $data-path as xs:string,
     $path-base as xs:string,
+    $api-path-base as xs:string,
     $body as document-node(),
     $validation-function-boolean as 
       function(item(), document-node()?) as xs:boolean,
@@ -399,7 +401,7 @@ declare function crest:post(
                 }
                 <http:header 
                   name="Location" 
-                  value="{concat("/api", $path-base, "/", substring-before($resource, ".xml"))}"/>
+                  value="{concat($api-path-base, "/", substring-before($resource, ".xml"))}"/>
               </http:response>
             </rest:response>
           else api:rest-error(500, "Cannot store the resource")

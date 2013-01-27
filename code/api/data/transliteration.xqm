@@ -25,6 +25,7 @@ declare variable $tran:data-type := "transliteration";
 declare variable $tran:schema := "/db/schema/transliteration.rnc";
 declare variable $tran:schematron := "/db/schema/transliteration.xsl2";
 declare variable $tran:path-base := concat($data:path-base, "/", $tran:data-type);
+declare variable $tran:api-path-base := concat("/api/data/", $tran:data-type);
 
 declare function tran:validate(
   $tr as item(),
@@ -72,7 +73,7 @@ declare
     $max-results as xs:integer*
   ) as item()+ {
   crest:list($q, $start, $max-results,
-    "Transliteration API", $tran:path-base,
+    "Transliteration API", $tran:api-path-base,
     tran:query-function#1, tran:list-function#0,
     true(), tran:title-function#1
   )
@@ -120,6 +121,7 @@ declare
   crest:post(
     $tran:data-type,
     $tran:path-base,
+    $tran:api-path-base,
     $body,
     tran:validate#2,
     tran:validate-report#2,

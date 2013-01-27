@@ -11,7 +11,6 @@ module namespace lnk = 'http://jewishliturgy.org/api/data/linkage';
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
-declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "/db/code/api/modules/common-rest.xqm";
@@ -27,6 +26,7 @@ declare variable $lnk:no-lang := "none";  (: no language :)
 declare variable $lnk:schema := "/db/schema/linkage.rnc";
 declare variable $lnk:schematron := "/db/schema/linkage.xsl2";
 declare variable $lnk:path-base := concat($data:path-base, "/", $lnk:data-type);
+declare variable $lnk:api-path-base := concat("/api/data/", $lnk:data-type);
 
 (:~ @return the documents that are linked by $doc :)
 declare function lnk:get-linked-documents(
@@ -110,7 +110,7 @@ declare
     $max-results as xs:integer*
   ) as item()+ {
   crest:list($q, $start, $max-results,
-    "Linkage data API", $lnk:path-base,
+    "Linkage data API", $lnk:api-path-base,
     lnk:query-function#1, lnk:list-function#0,
     true(), ()
   )
@@ -173,6 +173,7 @@ declare
         ($body/tei:TEI/@xml:lang/string()[.], $lnk:no-lang)[1]
         ),
     $lnk:path-base,
+    $lnk:api-path-base,
     $body,
     lnk:validate#2,
     lnk:validate-report#2,

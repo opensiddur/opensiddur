@@ -13,7 +13,6 @@ module namespace notes = 'http://jewishliturgy.org/api/data/notes';
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
-declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "/db/code/api/modules/common-rest.xqm";
@@ -26,6 +25,7 @@ declare variable $notes:data-type := "notes";
 declare variable $notes:schema := "/db/schema/annotation.rnc";
 declare variable $notes:schematron := "/db/schema/annotation.xsl2";
 declare variable $notes:path-base := concat($data:path-base, "/", $notes:data-type);
+declare variable $notes:api-path-base := concat("/api/data/", $notes:data-type);
 
 (:~ validate 
  : @param $doc The document to be validated
@@ -96,7 +96,7 @@ declare
   crest:list(
     $q, $start, $max-results,
     "Annotation data API",
-    $notes:path-base,
+    $notes:api-path-base,
     notes:query-function#1,
     notes:list-function#0,
     true(), ()
@@ -158,6 +158,7 @@ declare
   crest:post(
     concat($notes:data-type, "/", $body/tei:TEI/@xml:lang), 
     $notes:path-base,
+    $notes:api-path-base,
     $body,
     notes:validate#2,
     notes:validate-report#2,
