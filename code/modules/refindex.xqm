@@ -208,12 +208,15 @@ declare function ridx:query(
     let $null := debug:debug($debug:detail, "refindex",
       ("$entry=", $entry)
     )
-    group by $document-uri := root($entry)/*/@document,
-        $entry-source-node := $entry/@source-node
-    return
+    group by 
+      $document-uri := string(root($entry)/*/@document),
+      $entry-source-node := string($entry/@source-node)
+    return (
+      util:log-system-out(("^^^ document-uri=", $document-uri, " entry-source-node=", $entry-source-node)),
       util:node-by-id(doc($document-uri), $entry-source-node)
+    )
   return 
-    $nodes | () (: remove duplicates :)
+    $nodes
 };
 
 declare function ridx:query-all(
@@ -255,10 +258,13 @@ declare function ridx:query-all(
           [@target-doc=$query-document]
           [@target-node=$query-id]
           [empty($position) or @position=$position]
+    group by 
+      $document-uri := root($entry)/*/@document/string(),
+      $source-node := $entry/@source-node/string()
     return
-      util:node-by-id(doc(root($entry)/*/@document), $entry/@source-node)
+      util:node-by-id(doc($document-uri), $source-node)
   return
-    $nodes | ()
+    $nodes
 };
 
 
