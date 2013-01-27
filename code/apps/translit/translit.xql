@@ -31,12 +31,12 @@ declare function local:translit-instance(
 	  <tr:schema/>
 	</xf:instance>,
 	<xf:instance id="{$instance-id}-tables" xmlns="" 
-	  >
+	  src="/api/data/transliteration">
 	  <html xmlns="http://www.w3.org/1999/xhtml">
 	    <head/>
 	    <body/>
 	  </html>
-	</xf:instance>,
+	</xf:instance>,(:
 	<xf:submission id="{$instance-id}-load-tables"
 	  method="get"
 	  resource="/api/data/transliteration"
@@ -56,7 +56,7 @@ declare function local:translit-instance(
       </xf:message>
     </xf:action>
 	</xf:submission>,
-	<xf:send ev:event="xforms-ready" submission="{$instance-id}-load-tables"/>,
+	<xf:send ev:event="xforms-ready" submission="{$instance-id}-load-tables"/>,:)
 	<xf:bind nodeset="instance('{$instance-id}')" type="xf:string" required="true()"/>,
 	<xf:bind nodeset="instance('{$instance-id}')/@xml:lang" type="xf:string" required="true()"/>,
 	<xf:bind nodeset="instance('{$instance-id}-table')" type="xf:string" required="true()"/>
@@ -127,11 +127,6 @@ let $form :=
 			  replace="instance"
 			  instance="translit-current-table"
 			  method="get">
-			  <!-- bug workaround for eXist r18076 -->
-			  <xf:header>
-			    <xf:name>Accept</xf:name>
-			    <xf:value>application/xhtml+xml</xf:value>
-			  </xf:header>
 			  <xf:resource value="instance('translit-table')"/>
 			</xf:submission>
 			<xf:submission id="transliterate" 
@@ -139,11 +134,6 @@ let $form :=
 				instance="transliteration-result" 
 				replace="instance" 
 				method="post">
-				<!-- required to work around a bug in eXist ~r18076 -->
-				<xf:header combine="replace"> 
-				  <xf:name>Accept</xf:name>
-				  <xf:value>application/xml</xf:value> 
-				</xf:header> 
 				<xf:resource value="concat('/api/demo',substring-after(instance('translit-table'),'/api/data'))"/>
 				<xf:action ev:event="xforms-submit-error">
 					<xf:message level="modal">Transliteration error. Make sure all required fields are filled in.
