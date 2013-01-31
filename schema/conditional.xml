@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI 
+  xmlns="http://www.tei-c.org/ns/1.0" 
+  xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:rng="http://relaxng.org/ns/structure/1.0"
+  xml:lang="en">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>Conditional XML</title>
+        <editor xml:id="EDF">Efraim Feinstein</editor>
+        <editor xml:id="sbauman.emt">Syd Bauman</editor>
+        <editor xml:id="LB">Lou Burnard</editor>
+        <editor xml:id="SR">Sebastian Rahtz</editor>
+      </titleStmt>
+      <publicationStmt>
+        <availability status="restricted">
+          <licence target="http://www.creativecommons.org/licenses/by-sa/3.0"/>
+        </availability>
+      </publicationStmt>
+      <notesStmt>
+        <note type="ns">http://jewishliturgy.org/ns/jlptei/1.0</note>
+      </notesStmt>
+      <sourceDesc>
+        <p>Initially created on <date when="2006-10-12T05:24:41">Thursday 12th
+            October 2006</date> by the form at
+        http://www.tei-c.org.uk/Roma/.</p>
+      </sourceDesc>
+    </fileDesc>
+    <revisionDesc>
+      <change when="2013-01-29" who="#EDF">Modify for conditional schema</change>
+      <change when="2012-05-06" who="#EDF">Change bare TEI ODD to JLPTEI</change>
+      <change when="2011-03-26" who="#SR">rewrite as new-style ODD </change>
+      <change when="2007-08-12" who="#LB">Removed further elements added
+since this ODD was first created </change>
+      <change when="2007-04-09" who="#LB">Added prose and reorganized
+structure to make it more document-like; changed deletion of attribute
+decls into deletion of att.declaring class; add deletes for elements
+email and floatingText added to P5 since this ODD was first created;
+considered but did not implement removal of all irrelevant datatype specs...</change>
+      <change when="2006-10-14" who="#sbauman.emt"> Made valid: <list><item>removed empty <att>prefix</att> attribute</item><item>added required <att>type</att> attribute to
+          <gi>classSpec</gi>s</item></list><!--. <note>Sebastian had also made the above changes.</note> -->Also
+        removed extraneous <gi>altIdent</gi> elements, improved
+        <gi>sourceDesc</gi>, changed the <att>ident</att> of <gi>schemaSpec</gi>
+        to match the filename, and added this revision description. </change>
+    </revisionDesc>
+  </teiHeader>
+  <text>
+    <front>
+      <divGen type="toc"/>
+      <div>
+        <head>The conditional system</head>
+        <p>The conditional system involves 3 parts:</p>
+        <list>
+          <item>Conditional type declarations, which define what conditions
+          are used, and provide natural-language descriptions of them.
+          Conditional types are declared in separate files in <gi>fsdDecl</gi>
+          blocks.</item>
+          <item>Conditional associations, declared inside <gi>conditions</gi> blocks,
+          which specify under what conditions a given text should be included.</item>
+          <item>Conditional settings, declared inside <gi>conditions</gi> blocks,
+          which specify what conditions should be applied if any 
+          conditional associations are encountered.</item>
+        </list>
+        <p>Conditional settings are linked to text using <gi>link</gi>, where <att>type</att>="set".
+        Conditional associations are linked to text using <gi>link</gi>, where <att>type</att>="associate".</p>
+      </div>
+      <div>
+        <head>Declaring conditionals</head>
+        <p>Special values for conditionals types: <gi>switch</gi></p>
+      </div>
+    </front>
+    <body>
+      <div>
+        <head>Formal declaration</head>
+        <!-- common declarations: -->
+        <xi:include href="common-schema.xml"/>
+        <xi:include href="conditional-common.xml"/>
+        <schemaSpec ident="conditional" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
+          <moduleRef key="core" include="date ptr ref title"/>
+          <moduleRef key="tei"/>
+          <moduleRef key="header" include="availability change distributor fileDesc licence publicationStmt revisionDesc sourceDesc teiHeader titleStmt"/>
+          <moduleRef key="textstructure" include="TEI"/>
+          <moduleRef key="certainty" include="respons"/>
+          <moduleRef key="iso-fs" except="fsdLink vAlt vColl vLabel"/>
+          <moduleRef key="linking" include="link linkGrp"/>
+          <specGrpRef target="#common-specs"/>
+          <specGrpRef target="#conditional-specs"/>
+          
+          <!-- declarations -->
+          <elementSpec ident="fDecl" module="iso-fs" mode="change">
+            <contains>
+              <rng:optional>
+                <rng:ref name="fDescr"/>
+              </rng:optional>
+              <rng:choice>
+                <rng:ref name="vRange"/>
+                <rng:ref name="vSwitch"/>
+              </rng:choice>
+              <rng:optional>
+                <rng:ref name="vDefault"/>
+              </rng:optional>
+            </contains>
+          </elementSpec>
+          <elementSpec ident="vSwitch" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+            <desc>Declares a feature as a switch</desc>
+            <content>
+              <rng:empty/>
+            </content>
+            <attList>
+              <attDef usage="req" ident="type">
+                <desc>Type of switch</desc>
+                <valList type="closed">
+                  <valItem ident="yes-no">
+                    <gloss>Two-way yes|no switch</gloss>
+                  </valItem>
+                  <valItem ident="yes-no-maybe">
+                    <gloss>Three-way yes|no|maybe switch</gloss>
+                  </valItem>
+                  <valItem ident="on-off">
+                    <gloss>Two-way on|off switch</gloss>
+                  </valItem>
+                </valList>
+              </attDef>
+            </attList>
+          </elementSpec>
+          
+          
+        </schemaSpec>
+      </div>
+    </body>
+  </text>
+</TEI>

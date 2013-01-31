@@ -2,7 +2,7 @@
 #
 # Sets up rules for building, and includes Makefiles from all targets
 #
-# Copyright 2008-2012 Efraim Feinstein
+# Copyright 2008-2013 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -152,12 +152,13 @@ $(TEMPDIR):
 	mkdir $(TEMPDIR)
 
 .PHONY: schema schema-clean
-schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema linkage-schema
+schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema linkage-schema conditional-schema
 	cp schema/build/jlptei.rnc $(DBDIR)/schema
 	cp schema/build/linkage.rnc $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
 	cp schema/build/bibliography.rnc $(DBDIR)/schema
 	cp schema/build/annotation.rnc $(DBDIR)/schema
+	cp schema/build/conditional.rnc $(DBDIR)/schema
 	cp schema/build/*.xsl2 $(DBDIR)/schema
 	cp schema/transliteration.rnc $(DBDIR)/schema
 	cp schema/access.rnc $(DBDIR)/schema
