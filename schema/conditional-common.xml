@@ -15,13 +15,6 @@ into a complete schema
     <desc>groups elements that function as evaluable conditionals</desc>``
   </classSpec>
   
-  <macroSpec ident="macro.conditionContent" module="opensiddur">
-    <desc>elements that may appear in conditions</desc>
-    <content>
-      <rng:ref name="model.conditionContent"/>
-    </content>
-  </macroSpec>
-  
   <elementSpec ident="fs" module="iso-fs" mode="change">
     <classes mode="change">
       <memberOf key="model.conditionContent"/>
@@ -134,7 +127,7 @@ into a complete schema
     </classes>
     <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
       <rng:oneOrMore>
-        <rng:ref name="macro.conditionContent"/>
+        <rng:ref name="model.conditionContent"/>
       </rng:oneOrMore>
     </content>
   </elementSpec>
@@ -149,7 +142,7 @@ into a complete schema
     </classes>
     <content>
       <rng:oneOrMore>
-        <rng:ref name="macro.conditionContent"/>
+        <rng:ref name="model.conditionContent"/>
       </rng:oneOrMore>
     </content>
   </elementSpec>
@@ -164,7 +157,7 @@ into a complete schema
     </classes>
     <content>
       <rng:oneOrMore>
-        <rng:ref name="macro.conditionContent"/>
+        <rng:ref name="model.conditionContent"/>
       </rng:oneOrMore>
     </content>
   </elementSpec>
@@ -177,7 +170,7 @@ into a complete schema
     </classes>
     <content>
       <rng:oneOrMore>
-        <rng:ref name="macro.conditionContent"/>
+        <rng:ref name="model.conditionContent"/>
       </rng:oneOrMore>
     </content>
   </elementSpec>
