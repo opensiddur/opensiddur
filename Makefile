@@ -144,7 +144,6 @@ include $(TEXTDIR)/Makefile
 include $(CODEDIR)/Makefile
 include $(ODDDIR)/Makefile
 include $(LIBDIR)/Makefile
-include tests/Makefile
 
 XSLTDOC_CFGFILE ?= XSLTDocConfig.xml
 
