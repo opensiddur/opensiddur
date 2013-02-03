@@ -29,22 +29,6 @@ schemas, not as an independent unit
       </constraint>  
     </constraintSpec>
   </elementSpec>
-  <elementSpec ident="conditions" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
-    <desc>Holds features and feature structures pertaining to the conditional system.</desc>
-    <classes>
-      <memberOf key="model.resourceLike"/>
-      <memberOf key="att.global"/>
-    </classes>
-    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-      <rng:oneOrMore>
-        <rng:choice>
-          <rng:ref name="fs"/>
-          <rng:ref name="f"/>
-          <rng:ref name="fvLib"/>
-        </rng:choice>
-      </rng:oneOrMore>
-    </content>
-  </elementSpec>
   <elementSpec ident="ptr" mode="change" module="core">
     <!-- TODO: need an additional constraint where we test if all pointer targets exist -->
     <constraintSpec scheme="isoschematron" ident="ptr-j-1">
@@ -285,6 +269,7 @@ schemas, not as an independent unit
       <attDef ident="xml:space" mode="delete"/>
       <attDef ident="rend" mode="delete"/>
       <attDef ident="rendition" mode="delete"/>
+      <attDef ident="style" mode="delete"/>
     </attList>
   </classSpec>
   <classSpec ident="att.divLike" mode="change" module="tei" type="atts">

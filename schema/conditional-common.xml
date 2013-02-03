@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- common schema elements for file types that are allowed 
+to have conditionals
+
+This is not intended to be its own schema - it should be XIncluded
+into a complete schema
+ -->
+<specGrp 
+  xml:id="conditional-specs"
+  xmlns="http://www.tei-c.org/ns/1.0"
+  xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+  xmlns:rng="http://relaxng.org/ns/structure/1.0"
+  xml:lang="en">
+  <classSpec type="model" ident="model.conditionContent" module="opensiddur">
+    <desc>groups elements that function as evaluable conditionals</desc>``
+  </classSpec>
+  
+  <elementSpec ident="fs" module="iso-fs" mode="change">
+    <classes mode="change">
+      <memberOf key="model.conditionContent"/>
+    </classes>
+  </elementSpec>
+  
+  <elementSpec ident="condition" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
+    <desc>Holds a single condition</desc>
+    <classes>
+      <memberOf key="att.global"/>
+    </classes>
+    <attList>
+      <attDef ident="xml:id" mode="change" usage="req">
+        <desc>Required unique identifier</desc>
+      </attDef>
+    </attList>
+    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
+      <rng:ref name="model.conditionContent"/>
+    </content>
+  </elementSpec>
+  
+  <elementSpec ident="conditions" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
+    <desc>Holds statements of conditions that can be evaluated by the conditional system.</desc>
+    <classes>
+      <memberOf key="model.resourceLike"/>
+      <memberOf key="att.global"/>
+    </classes>
+    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
+      <rng:oneOrMore>
+        <rng:ref name="condition"/>
+      </rng:oneOrMore>
+    </content>
+  </elementSpec>
+  <elementSpec ident="settings" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
+    <desc>Holds feature structures that are evaluated as settings</desc>
+    <classes>
+      <memberOf key="model.resourceLike"/>
+      <memberOf key="att.global"/>
+    </classes>
+    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
+      <rng:oneOrMore>
+        <rng:ref name="fs"/>
+      </rng:oneOrMore>
+    </content>
+    <constraintSpec ident="settings-1" scheme="isoschematron">
+      <constraint>
+        <sch:assert test="@xml:id or (every $t in tei:fs satisfies exists($t/@xml:id))">
+          Either the settings block has @xml:id or
+          @xml:id is required to reference settings feature structures inside a settings block 
+        </sch:assert>
+      </constraint>
+    </constraintSpec>
+  </elementSpec>
+  
+  <elementSpec ident="yes" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+    <desc>Conditional value "yes"</desc>
+    <classes>
+      <memberOf key="model.featureVal.simple"/>
+    </classes>
+    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+      <rng:empty/>
+    </contains>
+  </elementSpec>
+  <elementSpec ident="no" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+    <desc>Conditional value "no"</desc>
+    <classes>
+      <memberOf key="model.featureVal.simple"/>
+    </classes>
+    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+      <rng:empty/>
+    </contains>
+  </elementSpec>
+  <elementSpec ident="maybe" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+    <desc>Conditional value "maybe". Indicates that if a text is included, it should be
+    included with associated instructional text and/or formatting features that indicate 
+    a condition.</desc>
+    <classes>
+      <memberOf key="model.featureVal.simple"/>
+    </classes>
+    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+      <rng:empty/>
+    </contains>
+  </elementSpec>
+  <elementSpec ident="on" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+    <desc>Conditional value "on"</desc>
+    <classes>
+      <memberOf key="model.featureVal.simple"/>
+    </classes>
+    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+      <rng:empty/>
+    </contains>
+  </elementSpec>
+  <elementSpec ident="off" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+    <desc>Conditional value "off"</desc>
+    <classes>
+      <memberOf key="model.featureVal.simple"/>
+    </classes>
+    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+      <rng:empty/>
+    </contains>
+  </elementSpec>
+  <elementSpec ident="any" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+    <desc>Indicates that the conditional should evaluate to yes or maybe if any of the subordinate feature values do.
+    If any of the conditions evaluate to yes, any evaluates to yes.
+    If any of the conditions evaluate to maybe and none evaluate to yes, any evaluates to maybe.
+    If all of the conditions evaluate to no, any evaluates to no.
+    </desc>
+    <classes>
+      <memberOf key="model.conditionContent"/>
+    </classes>
+    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
+      <rng:oneOrMore>
+        <rng:ref name="model.conditionContent"/>
+      </rng:oneOrMore>
+    </content>
+  </elementSpec>
+  <elementSpec ident="all" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+    <desc>Indicates that the conditional should evaluate to YES/MAYBE if all of the subordinate feature values are.
+    If any of the conditions evaluate to no, all evaluates to no.
+    If all of the conditions evaluate to yes or maybe, all evaluates to maybe.
+    If all of the conditions evaluate to yes, all evaluates to yes.
+    </desc>
+    <classes>
+      <memberOf key="model.conditionContent"/>
+    </classes>
+    <content>
+      <rng:oneOrMore>
+        <rng:ref name="model.conditionContent"/>
+      </rng:oneOrMore>
+    </content>
+  </elementSpec>
+  <elementSpec ident="oneOf" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+    <desc>Indicates that the conditional should evaluate to YES/MAYBE if exactly one of the subordinate feature values do.
+    If one of the conditions evaluates to yes and all others evaluate to no, oneOf evaluates to yes.
+    If one of the conditions evaluates to maybe and all others evaluate to no, oneOf evaluates to maybe.
+    If all of the conditions evaluate to no, oneOf evaluates to no.
+    </desc>
+    <classes>
+      <memberOf key="model.conditionContent"/>
+    </classes>
+    <content>
+      <rng:oneOrMore>
+        <rng:ref name="model.conditionContent"/>
+      </rng:oneOrMore>
+    </content>
+  </elementSpec>
+  <elementSpec ident="not" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
+    <desc>Indicates that the conditional should evaluate to the negation of its content.
+    not yes is no. not no is yes. not maybe is maybe.
+    </desc>
+    <classes>
+      <memberOf key="model.conditionContent"/>
+    </classes>
+    <content>
+      <rng:oneOrMore>
+        <rng:ref name="model.conditionContent"/>
+      </rng:oneOrMore>
+    </content>
+  </elementSpec>
+</specGrp>
