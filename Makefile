@@ -135,7 +135,7 @@ TEI_REVISION ?= -r 11440
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REV ?= 18081
+EXIST_REV ?= 18095
 EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
@@ -314,7 +314,7 @@ db-sync:
 db: externals db-nonet
 
 # patch error status ignored because it returns 1 if patches are already applied
-db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common db-tests
+db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common 
 	mkdir -p $(DBDIR)/xforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources
