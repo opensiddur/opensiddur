@@ -156,7 +156,7 @@ declare
   function cnd:post(
     $body as document-node()
   ) as item()+ {
-  cnd:post(
+  crest:post(
     $cnd:data-type,
     $cnd:path-base,
     $cnd:api-path-base,
