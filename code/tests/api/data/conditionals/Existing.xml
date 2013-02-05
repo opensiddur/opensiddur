@@ -5,7 +5,7 @@
   <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">Valid</tei:title>
+            <tei:title type="main" xml:lang="en">Existing</tei:title>
          </tei:titleStmt>
          <tei:publicationStmt>
             <tei:availability status="free">
@@ -22,6 +22,13 @@
       </tei:fileDesc>
   </tei:teiHeader>
   <tei:fsdDecl>
+    <tei:fsDecl type="Search-Result">
+      <tei:fsDescr>Result of a query</tei:fsDescr>
+      <tei:fDecl name="Query-result">
+        <tei:fDescr>For testing the search function</tei:fDescr>
+        <tei:vSwitch type="on-off"/>
+      </tei:fDecl>
+    </tei:fsDecl>
     <tei:fsDecl type="Holidays">
       <tei:fsDescr>Describes conditionals for some holidays</tei:fsDescr>
       <tei:fDecl name="Shabbat">
@@ -58,41 +65,37 @@
           </tei:if>
         </tei:vDefault>
       </tei:fDecl>
-      <tei:fDecl name="Query-Result">
-        <tei:fDescr>Query result</tei:fDescr>
-        <tei:vSwitch type="on-off"/>
-      </tei:fDecl>
     </tei:fsDecl> 
     <tei:fsDecl type="On-Off-Switches">
       <tei:fsDescr>Demo an on-off switch</tei:fsDescr>
-      <tei:fDecl type="Use-dingbat">
+      <tei:fDecl name="Use-dingbat">
         <tei:fDescr>Whether to use a dingbat to indicate where the reader starts</tei:fDescr>
-        <tei:vSwitch type="on-off"/>
+        <j:vSwitch type="on-off"/>
       </tei:fDecl>
     </tei:fsDecl>
   </tei:fsdDecl>
   <j:settings>
-    <tei:fs name="Holidays" xml:id="is-shabbat">
+    <tei:fs type="Holidays" xml:id="is-shabbat">
       <tei:f name="Shabbat">
         <j:yes/>
       </tei:f>
     </tei:fs>
-    <tei:fs name="Holidays" xml:id="not-passover">
+    <tei:fs type="Holidays" xml:id="not-passover">
       <tei:f name="Passover">
         <j:no/>
       </tei:f>
     </tei:fs>
-    <tei:fs name="Holidays" xml:id="may-be-festival">
+    <tei:fs type="Holidays" xml:id="may-be-festival">
       <tei:f name="Festival">
         <j:maybe/>
       </tei:f>
     </tei:fs>
-    <tei:fs name="On-Off-Switches" xml:id="dingbat-on">
+    <tei:fs type="On-Off-Switches" xml:id="dingbat-on">
       <tei:f name="Use-dingbat">
         <j:on/>
       </tei:f>
     </tei:fs>
-    <tei:fs name="On-Off-Switches" xml:id="dingbat-off">
+    <tei:fs type="On-Off-Switches" xml:id="dingbat-off">
       <tei:f name="Use-dingbat">
         <j:off/>
       </tei:f>

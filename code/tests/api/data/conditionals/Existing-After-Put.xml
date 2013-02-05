@@ -5,7 +5,7 @@
   <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">Valid</tei:title>
+            <tei:title type="main" xml:lang="en">Existing</tei:title>
          </tei:titleStmt>
          <tei:publicationStmt>
             <tei:availability status="free">
@@ -47,70 +47,62 @@
         <!-- example conditional default -->
         <tei:vDefault>
           <tei:if>
-            <tei:f name="Passover">
-              <j:yes/>
-            </tei:f>
+            <j:any>
+              <tei:f name="Passover">
+                <j:yes/>
+              </tei:f>
+              <tei:f name="Shavuot">
+                <j:yes/>
+              </tei:f>
+            </j:any>
             <tei:then/>
             <j:yes/>
           </tei:if>
           <tei:if>
-            <tei:f name="Shavuot">
-              <j:yes/>
-            </tei:f>
-            <tei:then/>
-            <j:yes/>
-          </tei:if>
-          <tei:if>
-            <tei:f name="Passover">
-              <j:maybe/>
-            </tei:f>
+            <j:any>
+              <tei:f name="Passover">
+                <j:maybe/>
+              </tei:f>
+              <tei:f name="Shavuot">
+                <j:maybe/>
+              </tei:f>
+            </j:any>
             <tei:then/>
               <j:maybe/>
-          </tei:if>
-          <tei:if>
-            <tei:f name="Shavuot">
-              <j:maybe/>
-            </tei:f>
-            <tei:then/>
-            <j:maybe/>
           </tei:if>
         </tei:vDefault>
-      </tei:fDecl>
-      <tei:fDecl name="Query-Result">
-        <tei:fDescr>Query result</tei:fDescr>
-        <tei:vSwitch type="on-off"/>
       </tei:fDecl>
     </tei:fsDecl> 
     <tei:fsDecl type="On-Off-Switches">
       <tei:fsDescr>Demo an on-off switch</tei:fsDescr>
-      <tei:fDecl type="Use-dingbat">
+      <tei:fDecl name="Use-dingbat">
         <tei:fDescr>Whether to use a dingbat to indicate where the reader starts</tei:fDescr>
-        <tei:vSwitch type="on-off"/>
+        <j:vSwitch type="on-off"/>
       </tei:fDecl>
     </tei:fsDecl>
   </tei:fsdDecl>
   <j:settings>
-    <tei:fs name="Holidays" xml:id="is-shabbat">
+    <tei:fs type="Holidays" xml:id="is-shabbat">
       <tei:f name="Shabbat">
         <j:yes/>
       </tei:f>
     </tei:fs>
-    <tei:fs name="Holidays" xml:id="not-passover">
+    <tei:fs type="Holidays" xml:id="not-passover">
       <tei:f name="Passover">
         <j:no/>
       </tei:f>
     </tei:fs>
-    <tei:fs name="Holidays" xml:id="may-be-festival">
+    <tei:fs type="Holidays" xml:id="may-be-festival">
       <tei:f name="Festival">
         <j:maybe/>
       </tei:f>
     </tei:fs>
-    <tei:fs name="On-Off-Switches" xml:id="dingbat-on">
+    <tei:fs type="On-Off-Switches" xml:id="dingbat-on">
       <tei:f name="Use-dingbat">
         <j:on/>
       </tei:f>
     </tei:fs>
-    <tei:fs name="On-Off-Switches" xml:id="dingbat-off">
+    <tei:fs type="On-Off-Switches" xml:id="dingbat-off">
       <tei:f name="Use-dingbat">
         <j:off/>
       </tei:f>

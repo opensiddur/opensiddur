@@ -175,9 +175,8 @@
     <testName>cnd:post()</testName>
     <tearDown>
       <code><![CDATA[
-      let $document := 
+      for $document in 
         collection("/db/data/conditionals")//tei:titleStmt/tei:title[@type="main"][.="Valid"]/root(.)
-      where exists($document)
       return xmldb:remove(
         util:collection-name($document),
         util:document-name($document)
