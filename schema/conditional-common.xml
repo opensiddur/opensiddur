@@ -72,49 +72,49 @@ into a complete schema
   <elementSpec ident="yes" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
     <desc>Conditional value "yes"</desc>
     <classes>
-      <memberOf key="model.featureVal.simple"/>
+      <memberOf key="model.featureVal.single"/>
     </classes>
-    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
       <rng:empty/>
-    </contains>
+    </content>
   </elementSpec>
   <elementSpec ident="no" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
     <desc>Conditional value "no"</desc>
     <classes>
-      <memberOf key="model.featureVal.simple"/>
+      <memberOf key="model.featureVal.single"/>
     </classes>
-    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
       <rng:empty/>
-    </contains>
+    </content>
   </elementSpec>
   <elementSpec ident="maybe" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
     <desc>Conditional value "maybe". Indicates that if a text is included, it should be
     included with associated instructional text and/or formatting features that indicate 
     a condition.</desc>
     <classes>
-      <memberOf key="model.featureVal.simple"/>
+      <memberOf key="model.featureVal.single"/>
     </classes>
-    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
       <rng:empty/>
-    </contains>
+    </content>
   </elementSpec>
   <elementSpec ident="on" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
     <desc>Conditional value "on"</desc>
     <classes>
-      <memberOf key="model.featureVal.simple"/>
+      <memberOf key="model.featureVal.single"/>
     </classes>
-    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
       <rng:empty/>
-    </contains>
+    </content>
   </elementSpec>
   <elementSpec ident="off" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
     <desc>Conditional value "off"</desc>
     <classes>
-      <memberOf key="model.featureVal.simple"/>
+      <memberOf key="model.featureVal.single"/>
     </classes>
-    <contains xmlns:rng="http://relaxng.org/ns/structure/1.0">
+    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
       <rng:empty/>
-    </contains>
+    </content>
   </elementSpec>
   <elementSpec ident="any" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
     <desc>Indicates that the conditional should evaluate to yes or maybe if any of the subordinate feature values do.

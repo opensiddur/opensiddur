@@ -90,7 +90,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           
           <!-- declarations -->
           <elementSpec ident="fDecl" module="iso-fs" mode="change">
-            <contains>
+            <content>
               <rng:optional>
                 <rng:ref name="fDescr"/>
               </rng:optional>
@@ -101,7 +101,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
               <rng:optional>
                 <rng:ref name="vDefault"/>
               </rng:optional>
-            </contains>
+            </content>
           </elementSpec>
           <elementSpec ident="vSwitch" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
             <desc>Declares a feature as a switch</desc>
