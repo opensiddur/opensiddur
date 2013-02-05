@@ -25,6 +25,37 @@ declare variable $cnd:schematron := "/db/schema/conditional.xsl2";
 declare variable $cnd:path-base := concat($data:path-base, "/", $cnd:data-type);
 declare variable $cnd:api-path-base := concat("/api/data/", $cnd:data-type);
 
+(:~ special validation for conditionals
+ : @param $doc The document to be validated
+ : @param $old-doc The document it is replacing, if any
+ : @return A report element, indicating validity
+ :)
+declare function cnd:validate-conditionals(
+  $doc as item(),
+  $old-doc as document-node()?
+  ) as element() {
+  let $types-declared := $doc//tei:fsDecl/@type/string()
+  let $messages := 
+    for $fs-declaration in 
+      collection($cnd:path-base)[not(. is $old-doc)]//
+        tei:fsDecl[@type=$types-declared] 
+    return
+      <message>Type '{$fs-declaration/@type/string()}' is already declared in {crest:tei-title-function(root($fs-declaration))}
+      $old-doc={exists($old-doc)}={document-uri($old-doc)}
+      root($fs-declaration)={document-uri(root($fs-declaration))}
+      </message>
+  let $is-valid := empty($messages)
+  return
+    <report>
+      <status>{
+        if ($is-valid)
+        then "valid"
+        else "invalid"
+      }</status>
+      {$messages}
+    </report>
+};
+
 (:~ validate 
  : @param $doc The document to be validated
  : @param $old-doc The document it is replacing, if any
@@ -38,7 +69,10 @@ declare function cnd:validate(
   crest:validate(
     $doc, $old-doc, 
     xs:anyURI($cnd:schema), xs:anyURI($cnd:schematron),
+    (
+    cnd:validate-conditionals#2,
     if (exists($old-doc)) then orig:validate-changes#2 else ()
+    )
   )
 };
 
@@ -55,7 +89,10 @@ declare function cnd:validate-report(
   crest:validate-report(
     $doc, $old-doc, 
     xs:anyURI($cnd:schema), xs:anyURI($cnd:schematron),
+    (
+    cnd:validate-conditionals#2,
     if (exists($old-doc)) then orig:validate-changes#2 else ()
+    )
   )
 };
 

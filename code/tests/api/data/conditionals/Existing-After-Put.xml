@@ -21,8 +21,8 @@
          </tei:sourceDesc>
       </tei:fileDesc>
   </tei:teiHeader>
-  <tei:fsdDecl>
-    <tei:fsDecl type="Holidays">
+  <tei:fsdDecl xml:id="conditionals">
+    <tei:fsDecl type="Holidays-2">
       <tei:fsDescr>Describes conditionals for some holidays</tei:fsDescr>
       <tei:fDecl name="Shabbat">
         <tei:fDescr>On Shabbat</tei:fDescr>
@@ -73,7 +73,7 @@
         </tei:vDefault>
       </tei:fDecl>
     </tei:fsDecl> 
-    <tei:fsDecl type="On-Off-Switches">
+    <tei:fsDecl type="On-Off-Switches-2">
       <tei:fsDescr>Demo an on-off switch</tei:fsDescr>
       <tei:fDecl name="Use-dingbat">
         <tei:fDescr>Whether to use a dingbat to indicate where the reader starts</tei:fDescr>
@@ -82,27 +82,27 @@
     </tei:fsDecl>
   </tei:fsdDecl>
   <j:settings>
-    <tei:fs type="Holidays" xml:id="is-shabbat">
+    <tei:fs type="Holidays-2" xml:id="is-shabbat">
       <tei:f name="Shabbat">
         <j:yes/>
       </tei:f>
     </tei:fs>
-    <tei:fs type="Holidays" xml:id="not-passover">
+    <tei:fs type="Holidays-2" xml:id="not-passover">
       <tei:f name="Passover">
         <j:no/>
       </tei:f>
     </tei:fs>
-    <tei:fs type="Holidays" xml:id="may-be-festival">
+    <tei:fs type="Holidays-2" xml:id="may-be-festival">
       <tei:f name="Festival">
         <j:maybe/>
       </tei:f>
     </tei:fs>
-    <tei:fs type="On-Off-Switches" xml:id="dingbat-on">
+    <tei:fs type="On-Off-Switches-2" xml:id="dingbat-on">
       <tei:f name="Use-dingbat">
         <j:on/>
       </tei:f>
     </tei:fs>
-    <tei:fs type="On-Off-Switches" xml:id="dingbat-off">
+    <tei:fs type="On-Off-Switches-2" xml:id="dingbat-off">
       <tei:f name="Use-dingbat">
         <j:off/>
       </tei:f>
@@ -111,7 +111,7 @@
   <j:conditions>
     <!-- basic yes condition -->
     <j:condition xml:id="is-passover">
-      <tei:fs type="Holidays">
+      <tei:fs type="Holidays-2">
         <tei:f name="Passover">
           <j:yes/>
         </tei:f>
@@ -120,12 +120,12 @@
     <!-- j:all -->
     <j:condition xml:id="is-passover-not-shabbat">
       <j:all>
-        <tei:fs type="Holidays">
+        <tei:fs type="Holidays-2">
           <tei:f name="Passover">
             <j:yes/>
           </tei:f>
         </tei:fs>
-        <tei:fs type="Holidays">
+        <tei:fs type="Holidays-2">
           <tei:f name="Shabbat">
             <j:no/>
           </tei:f>
@@ -135,12 +135,12 @@
     <!-- j:any -->
     <j:condition xml:id="is-festival-or-shabbat">
       <j:any>
-        <tei:fs type="Holidays">
+        <tei:fs type="Holidays-2">
           <tei:f name="Festival">
             <j:yes/>
           </tei:f>
         </tei:fs>
-        <tei:fs type="Holidays">
+        <tei:fs type="Holidays-2">
           <tei:f name="Shabbat">
             <j:yes/>
           </tei:f>
@@ -150,12 +150,12 @@
     <!-- j:oneOf -->
     <j:condition xml:id="is-one-of-shabbat-festival">
       <j:oneOf>
-        <tei:fs type="Holidays">
+        <tei:fs type="Holidays-2">
           <tei:f name="Festival">
             <j:yes/>
           </tei:f>
         </tei:fs>
-        <tei:fs type="Holidays">
+        <tei:fs type="Holidays-2">
           <tei:f name="Shabbat">
             <j:yes/>
           </tei:f>
@@ -165,7 +165,7 @@
     <!-- j:not -->
     <j:condition xml:id="is-not-shabbat">
       <j:not>
-        <tei:fs type="Holidays">
+        <tei:fs type="Holidays-2">
           <tei:f name="Shabbat">
             <j:yes/>
           </tei:f>

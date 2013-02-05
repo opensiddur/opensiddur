@@ -32,8 +32,8 @@
     
     <copy source="/db/code/tests/api/data/conditionals" name="Existing.xml" 
       destination="/db/data/conditionals/1900/01" destination-name="NoAccess.xml" />
-    <copy source="/db/code/tests/api/data/conditionals" name="Existing.xml" 
-      destination="/db/data/conditionals/1900/01" destination-name="NoWriteAccess.xml" />
+    <copy source="/db/code/tests/api/data/conditionals" name="NoWriteAccess.xml" 
+      destination="/db/data/conditionals/1900/01" />
     <!-- existing, valid resource with no read access -->
     <code><![CDATA[
       system:as-user("admin", $magic:password,
@@ -136,7 +136,7 @@
       <code><![CDATA[
         cnd:list("Query", 1, 100)
       ]]></code>
-      <xpath desc="returns 2 results (Existing and NoWriteAccess)">count(.//html:ol[@class="results"]/html:li)=2</xpath>
+      <xpath desc="returns 1 result (Existing)">count(.//html:ol[@class="results"]/html:li)=1</xpath>
       <class href="../common.t.xml#SearchResults"/>
     </test>
   </TestSet>

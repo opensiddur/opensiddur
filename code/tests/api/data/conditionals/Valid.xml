@@ -21,7 +21,7 @@
          </tei:sourceDesc>
       </tei:fileDesc>
   </tei:teiHeader>
-  <tei:fsdDecl>
+  <tei:fsdDecl xml:id="conditionals">
     <tei:fsDecl type="Holidays">
       <tei:fsDescr>Describes conditionals for some holidays</tei:fsDescr>
       <tei:fDecl name="Shabbat">
