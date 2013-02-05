@@ -88,9 +88,45 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <specGrpRef target="#common-specs"/>
           <specGrpRef target="#conditional-specs"/>
           
+          <!-- allow tei:f to appear inside j:any, etc.
+           but only inside declarations
+           -->
+          <elementSpec ident="f" module="iso-fs" mode="change">
+            <classes mode="change">
+              <memberOf key="model.conditionContent"/>
+            </classes>
+            <constraintSpec ident="f-inside-conditionContent" scheme="isoschematron">
+              <constraint>
+                <sch:assert test="
+                  empty(parent::j:any|parent::j:all|parent|j:oneOf|j:not)
+                  or exists(ancestor::tei:fsDecl)">tei:f may only appear in an evaluated condition in a declaration</sch:assert>
+              </constraint>
+            </constraintSpec>
+          </elementSpec>
+          
+          <!-- allow tei:if to contain complex conditions -->
+          <elementSpec ident="if" module="iso-fs" mode="change">
+            <content mode="change">
+              <rng:group>
+                <rng:choice>
+                  <rng:ref name="fs"/>
+                  <rng:ref name="f"/>
+                  <rng:ref name="any"/>
+                  <rng:ref name="all"/>
+                  <rng:ref name="oneOf"/>
+                  <rng:ref name="not"/>
+                </rng:choice>
+                <rng:ref name="then"/>
+                <rng:group>
+                 <rng:ref name="model.featureVal"/>
+                </rng:group>
+              </rng:group>
+            </content>
+          </elementSpec>
+          
           <!-- declarations -->
           <elementSpec ident="fDecl" module="iso-fs" mode="change">
-            <contains>
+            <content>
               <rng:optional>
                 <rng:ref name="fDescr"/>
               </rng:optional>
@@ -101,7 +137,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
               <rng:optional>
                 <rng:ref name="vDefault"/>
               </rng:optional>
-            </contains>
+            </content>
           </elementSpec>
           <elementSpec ident="vSwitch" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
             <desc>Declares a feature as a switch</desc>
