@@ -25,6 +25,38 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 declare variable $grp:path := "/group";
 
+(:~ @return the group managers of a given group.
+ : eXist considers this a secret, but it's public in Open Siddur
+ :)
+declare function grp:get-group-managers(
+    $group as xs:string
+  ) as xs:string* {
+  system:as-user("admin", $magic:password, 
+    sm:get-group-managers($group)
+  )
+};
+
+(:~ @return the members of a given group
+ : eXist considers group membership a secret. We do not
+ :)
+declare function grp:get-group-members(
+    $group as xs:string
+  ) as xs:string* {
+  system:as-user("admin", $magic:password,
+    sm:get-group-members($group)
+  )
+};
+
+(:~ @return a list of groups
+ : eXist considers group existence a secret. We do not
+ :)
+declare function grp:get-groups(
+  ) as xs:string* {
+  system:as-user("admin", $magic:password,
+    sm:get-groups()
+  )
+};
+
 (:~ List all groups
  : @param $start Begin listing at this item number
  : @param $max-results End listing after this many results
@@ -47,7 +79,7 @@ declare
     (: for some reason, eXist considers group existence to be a secret.
      : I think it should be public.
      :)
-    system:as-user("admin", $magic:password, sm:get-groups())
+    grp:get-groups()
   let $total := count($all)
   return 
     <html xmlns="http://www.w3.org/1999/xhtml">
@@ -87,10 +119,10 @@ declare
   ) as item()+ {
   if (app:auth-user())
   then
-    if (sm:get-groups() = $name)
+    if (grp:get-groups() = $name)
     then
-      let $members := sm:get-group-members($name)
-      let $managers := sm:get-group-managers($name)
+      let $members := grp:get-group-members($name)
+      let $managers := grp:get-group-managers($name)
       return
         <g:group>{
           for $member in $members
@@ -171,13 +203,13 @@ declare
             (: TODO: this code is here because eXist r16512 returns deleted groups
              : until db restart
              :)
-            let $all-groups := sm:get-groups()
+            let $all-groups := grp:get-groups()
             for $group in distinct-values(xmldb:get-user-groups($user))[.=$all-groups]
             order by $group
             return
               <li class="result">
                 <a class="document" href="group/{encode-for-uri($group)}">{
-                  if (sm:get-group-managers($group) = $user)
+                  if (grp:get-group-managers($group) = $user)
                   then attribute property { "manager" }
                   else (),
                   $group
@@ -273,20 +305,20 @@ declare
   return
     if ($user)
     then
-      let $group-exists := sm:get-groups()=$name
+      let $group-exists := grp:get-groups()=$name
       return
         if (grp:validate($body, $name[$group-exists]))
         then
           if ($group-exists)
           then
             (: group exists, this is an edit :)
-            let $old-managers := sm:get-group-managers($name)
+            let $old-managers := grp:get-group-managers($name)
             return
               if ($old-managers=$user)
               then
                 let $all-new-members := $body//g:member
                 let $all-new-managers := $body//g:member[xs:boolean(@manager)]
-                let $old-members := sm:get-group-members($name)
+                let $old-members := grp:get-group-members($name)
                 let $members-to-add := $all-new-members[not(.=$old-members)]
                 let $members-to-remove := $old-members[not(.=$all-new-members)][not(.="admin")]
                 let $managers-to-add := $all-new-managers[not(.=$old-managers)]
@@ -387,9 +419,9 @@ declare
   return
     if ($user)
     then
-      if (sm:get-groups()=$name)
+      if (grp:get-groups()=$name)
       then
-        if (sm:get-group-managers($name)=$user)
+        if (grp:get-group-managers($name)=$user)
         then
           <rest:response>
             <output:serialization-parameters>
@@ -397,7 +429,7 @@ declare
             </output:serialization-parameters>
             {
               (: members are not removed automatically from a deleted group :)
-              let $all-group-members := sm:get-group-members($name)
+              let $all-group-members := grp:get-group-members($name)
               return system:as-user("admin", $magic:password, ( 
                 for $member in $all-group-members
                 let $removed := xmldb:remove-user-from-group($member, $name)

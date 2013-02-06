@@ -9,7 +9,7 @@
   <description>
     <p>Test the sharing group API</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012 Efraim Feinstein,
+    <copyright>Copyright 2012-2013 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <asUser>testuser</asUser>
@@ -39,12 +39,18 @@
           xmldb:delete-user("testuser" || $i),
           sm:delete-group("testuser" || $i)
         ),
-        let $r1 := xmldb:remove-user-from-group("admin", "grouptests")
-        let $r2 := xmldb:remove-user-from-group("admin", "grouptests2")
-        return (
-          sm:delete-group("grouptests"),
+        if (xmldb:group-exists("grouptests"))
+        then (
+          xmldb:remove-user-from-group("admin", "grouptests"),
+          sm:delete-group("grouptests")
+        )
+        else (),
+        if (xmldb:group-exists("grouptests2"))
+        then (
+          xmldb:remove-user-from-group("admin", "grouptests2"),
           sm:delete-group("grouptests2")
         )
+        else ()
       ))
     ]]></code>
   </tearDown>
@@ -174,13 +180,13 @@
       grp:put("grouptestsnew", $valid)
       ]]></code>
       <class href="common.t.xml#Created"/>
-      <xpath desc="group has been created">sm:get-groups()="grouptestsnew"</xpath>
+      <xpath desc="group has been created">grp:get-groups()="grouptestsnew"</xpath>
       <xpath desc="group managers are as specified">
-        every $m in $valid//g:member[xs:boolean(@manager)] satisfies sm:get-group-managers("grouptestsnew")=$m</xpath>
+        every $m in $valid//g:member[xs:boolean(@manager)] satisfies grp:get-group-managers("grouptestsnew")=$m</xpath>
       <xpath desc="group members are as specified">
-        every $m in $valid//g:member satisfies sm:get-group-members("grouptestsnew")=$m
+        every $m in $valid//g:member satisfies grp:get-group-members("grouptestsnew")=$m
       </xpath>
-      <xpath desc="admin is a group manager">sm:get-group-managers("grouptestsnew")="admin"</xpath>
+      <xpath desc="admin is a group manager">grp:get-group-managers("grouptestsnew")="admin"</xpath>
     </test>
     <test>
       <task>For an existing group, addition of a member</task>
@@ -193,7 +199,7 @@
       })
       ]]></code>
       <class href="common.t.xml#NoData"/>
-      <xpath desc="the new user has been added to the group">sm:get-group-members("grouptests")="testuser6"</xpath>
+      <xpath desc="the new user has been added to the group">grp:get-group-members("grouptests")="testuser6"</xpath>
     </test>
     <test>
       <task>For an existing group, removal of a member</task>
@@ -205,7 +211,7 @@
       })
       ]]></code>
       <class href="common.t.xml#NoData"/>
-      <xpath desc="the member has been removed">not(sm:get-group-members("grouptests")="testuser5")</xpath>
+      <xpath desc="the member has been removed">not(grp:get-group-members("grouptests")="testuser5")</xpath>
     </test>
     <test ignore="yes">
       <task>For an existing group, addition of a manager</task>
@@ -218,7 +224,7 @@
       })
       ]]></code>
       <class href="common.t.xml#NoData"/>
-      <xpath desc="the member is now a manager">sm:get-group-managers("grouptests")="testuser5"</xpath>
+      <xpath desc="the member is now a manager">grp:get-group-managers("grouptests")="testuser5"</xpath>
     </test>
     <test ignore="yes">
       <task>For an existing group, removal of a manager</task>
@@ -231,8 +237,8 @@
       })
       ]]></code>
       <class href="common.t.xml#NoData"/>
-      <xpath desc="the member is no longer a manager">not(sm:get-group-managers("grouptests")="testuser")</xpath>
-      <xpath desc="the member is still a member">sm:get-group-members("grouptests")="testuser"</xpath>
+      <xpath desc="the member is no longer a manager">not(grp:get-group-managers("grouptests")="testuser")</xpath>
+      <xpath desc="the member is still a member">grp:get-group-members("grouptests")="testuser"</xpath>
     </test>
     <test>
       <task>For an existing group, removal of admin</task>
@@ -240,7 +246,7 @@
       grp:put("grouptests", $valid)
       ]]></code>
       <class href="common.t.xml#NoData"/>
-      <xpath desc="admin is still a group manager">sm:get-group-managers("grouptests")="admin"</xpath>
+      <xpath desc="admin is still a group manager">grp:get-group-managers("grouptests")="admin"</xpath>
     </test>
     <test>
       <task>With invalid group XML</task>
@@ -265,7 +271,7 @@
       grp:delete("grouptests")
       ]]></code>
       <class href="common.t.xml#NoData"/>
-      <xpath desc="group is deleted">not(sm:get-groups()="grouptests")</xpath>
+      <xpath desc="group is deleted">not(grp:get-groups()="grouptests")</xpath>
       <xpath desc="user is not a member of the group">not(xmldb:get-user-groups("testuser")="grouptests")</xpath>
     </test>
     <test>
