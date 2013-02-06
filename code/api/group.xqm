@@ -53,7 +53,7 @@ declare function grp:get-group-members(
 declare function grp:get-groups(
   ) as xs:string* {
   system:as-user("admin", $magic:password,
-    sm:get-groups()
+    sm:list-groups()
   )
 };
 
