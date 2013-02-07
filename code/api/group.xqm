@@ -436,7 +436,7 @@ declare
                 where not($removed)
                 return debug:debug($debug:warn, "group", 
                   ("Could not remove ", $member, " from ", $name)),
-                sm:delete-group($name)
+                sm:remove-group($name)
               ))
             }
             <http:response status="204"/>
