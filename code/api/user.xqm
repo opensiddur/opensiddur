@@ -436,7 +436,7 @@ declare
       system:as-user("admin", $magic:password, (
         try {
           xmldb:delete-user($name),
-          sm:delete-group($name, "everyone"),
+          sm:remove-group($name), (: TODO: successor group is guest! until remove-group#2 exists@ :)
           $return-success
         }
         catch * {
