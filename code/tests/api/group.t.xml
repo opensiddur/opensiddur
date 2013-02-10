@@ -21,10 +21,10 @@
         let $new-group := xmldb:create-group("grouptests", ("testuser", "admin"))
         let $new-group2 := xmldb:create-group("grouptests2", "admin")
         for $i in 3 to 7
-        let $user := xmldb:create-user(
+        let $user := sm:create-account(
           "testuser" || $i, "testuser" || $i, 
-          ("everyone", "grouptests"[$i <= 5]), ())
-        let $group := xmldb:create-group("testuser" || $i, ("testuser" || $i, "admin"))
+          ("everyone", "grouptests"[$i <= 5])
+        )
         return ()
       ))
     ]]></code>

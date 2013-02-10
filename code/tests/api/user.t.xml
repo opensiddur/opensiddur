@@ -464,12 +464,7 @@
     <setup>
       <code><![CDATA[
       system:as-user("admin", $magic:password, (
-        let $u := xmldb:create-user("testuser3", "testuser3", "everyone", ())
-        let $g := try {
-          xmldb:create-group("testuser3", ("admin", "testuser3"))
-          } catch * { 
-          util:log-system-out("WARNING: CREATING AN EXISTING GROUP CAUSES AN EXCEPTION INSTEAD OF A RETURN OF FALSE") 
-          }
+        let $u := sm:create-account("testuser3", "testuser3", "everyone")
         let $s := xmldb:store("/user", "testuser3.xml",
           <j:contributor>
             <tei:idno>testuser3</tei:idno>

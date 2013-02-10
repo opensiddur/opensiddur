@@ -258,17 +258,7 @@ declare
           else ( 
             (: the user can be created :)
             system:as-user("admin", $magic:password, (
-              let $null := xmldb:create-user($name, $password, "everyone", ())
-              let $grouped :=
-                (: TODO: remove this code when using eXist r16453+ :)
-                try {
-                  xmldb:create-group($name, ($name, "admin"))
-                  or true()
-                }
-                catch * {
-                  true(), 
-                  debug:debug($debug:warn, "api", "While creating a user, the group already existed and passed me an NPE")
-                }
+              let $null := sm:create-account($name, $password, "everyone")
               let $stored := 
                 xmldb:store($user:path, 
                   concat(encode-for-uri($name), ".xml"),
@@ -278,7 +268,7 @@ declare
                 )
               let $uri := xs:anyURI($stored)
               return
-                if ($stored and $grouped)
+                if ($stored)
                 then 
                   <rest:response>
                     <output:serialization-parameters>
@@ -294,8 +284,8 @@ declare
                     </http:response>
                   </rest:response>
                 else 
-                  api:rest-error(500, "Internal error in creating a group or storing a document",
-                    ("group creation: " || $grouped || " storage = " || $stored) 
+                  api:rest-error(500, "Internal error in storing a document",
+                    (" storage = " || $stored) 
                   )
             ))
           )
