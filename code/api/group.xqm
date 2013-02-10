@@ -329,9 +329,7 @@ declare
                   where not($added)
                   return $member,
                   for $member in $members-to-remove
-                  let $removed := xmldb:remove-user-from-group($member, $name)
-                  where not($removed)
-                  return $member
+                  return sm:remove-group-member($name, $member)
                 )
                 let $warnings :=
                   let $managers-to-change := ($managers-to-add, $managers-to-remove)
@@ -432,10 +430,7 @@ declare
               let $all-group-members := grp:get-group-members($name)
               return system:as-user("admin", $magic:password, ( 
                 for $member in $all-group-members
-                let $removed := xmldb:remove-user-from-group($member, $name)
-                where not($removed)
-                return debug:debug($debug:warn, "group", 
-                  ("Could not remove ", $member, " from ", $name)),
+                return sm:remove-group-member($name, $member),
                 sm:remove-group($name)
               ))
             }

@@ -32,22 +32,22 @@
   <tearDown>
     <code><![CDATA[
       system:as-user("admin", $magic:password, (
-        xmldb:remove-user-from-group("testuser", "grouptests"),
         for $i in 3 to 7
-        let $r := xmldb:remove-user-from-group("admin", "testuser" || $i)
+        let $r := sm:remove-group-member("testuser" || $i, "admin")
         return (
           xmldb:delete-user("testuser" || $i),
           sm:remove-group("testuser" || $i)
         ),
         if (sm:group-exists("grouptests"))
         then (
-          xmldb:remove-user-from-group("admin", "grouptests"),
+          sm:remove-group-member("grouptests", "testuser"),
+          sm:remove-group-member("grouptests", "admin"),
           sm:remove-group("grouptests")
         )
         else (),
         if (sm:group-exists("grouptests2"))
         then (
-          xmldb:remove-user-from-group("admin", "grouptests2"),
+          sm:remove-group-member("grouptests2", "admin"),
           sm:remove-group("grouptests2")
         )
         else ()
@@ -166,7 +166,7 @@
           if (sm:get-groups()="grouptestsnew")
           then (
             for $user in sm:get-group-members("grouptestsnew")
-            let $removed := xmldb:remove-user-from-group($user, "grouptestsnew")
+            let $removed := sm:remove-group-member("grouptestsnew", $user)
             return (),
             sm:remove-group("grouptestsnew")
             )
