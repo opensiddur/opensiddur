@@ -35,7 +35,7 @@
         for $i in 3 to 7
         let $r := sm:remove-group-member("testuser" || $i, "admin")
         return (
-          xmldb:delete-user("testuser" || $i),
+          sm:remove-account("testuser" || $i),
           sm:remove-group("testuser" || $i)
         ),
         if (sm:group-exists("grouptests"))

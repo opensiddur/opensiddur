@@ -425,7 +425,7 @@ declare
       xmldb:remove($user:path, $resource-name),
       system:as-user("admin", $magic:password, (
         try {
-          xmldb:delete-user($name),
+          sm:remove-account($name),
           sm:remove-group($name), (: TODO: successor group is guest! until remove-group#2 exists@ :)
           $return-success
         }

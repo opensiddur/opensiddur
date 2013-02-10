@@ -158,7 +158,7 @@
           }
         else (),
         if (sm:user-exists("testuser3"))
-        then xmldb:delete-user("testuser3")
+        then sm:remove-account("testuser3")
         else (),
         if (doc-available("/user/testuser3.xml"))
         then xmldb:remove("/user", "testuser3.xml")
@@ -493,7 +493,7 @@
         } 
         catch * { () },
         if (sm:user-exists("testuser3"))
-        then xmldb:delete-user("testuser3")
+        then sm:remove-account("testuser3")
         else ()
       ))
       ]]></code>
