@@ -241,7 +241,7 @@
       <!-- reset testuser2's password -->
       <code><![CDATA[
       system:as-user("admin", $magic:password, 
-        xmldb:change-user("testuser2", "testuser2", (), ())
+        sm:passwd("testuser2", "testuser2")
       )
       ]]></code>
     </tearDown>

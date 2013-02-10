@@ -239,7 +239,7 @@ declare
             </output:serialization-parameters>
             {
             system:as-user("admin", $magic:password, 
-              xmldb:change-user($name, $password, (), ())
+              sm:passwd($name, $password)
             )
             }
             <http:response status="204"/>
