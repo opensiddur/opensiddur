@@ -146,16 +146,16 @@ declare
       let $managers := grp:get-group-managers($name)
       return
         <g:group>{
-          for $manager in $managers
-          order by $manager ascending
-          return
-            <g:member manager="true">{
-              $manager
-            }</g:member>,
           for $member in $members
+          let $manager := 
+            if ($member=$managers)
+            then
+              attribute manager {true()}
+            else ()
           order by $member ascending
           return
             <g:member>{
+              $manager,
               $member
             }</g:member>
         }</g:group>
@@ -224,34 +224,18 @@ declare
         </head>
         <body>
           <ul class="results">{
-            (: TODO: this code is here because eXist r16512 returns deleted groups
-             : until db restart
-             
-            let $all-groups := grp:get-groups()
-            
-            for $group in distinct-values(grp:get-user-group-memberships($user))[.=$all-groups]
-            order by $group
-            return
-              <li class="result">
-                <a class="document" href="group/{encode-for-uri($group)}">{
-                  $group
-                }</a>
-              </li>
-            :)
-            for $managership in grp:get-user-group-managerships($user)
-            order by $managership
-            return 
-              <li class="result">
-                <a class="document" property="manager" href="group/{encode-for-uri($managership)}">
-                  { $managership }
-                </a>
-              </li>,
+            let $managerships := grp:get-user-group-managerships($user) 
             for $membership in grp:get-user-group-memberships($user)
+            let $managership :=
+              if ($managerships=$membership)
+              then
+                attribute property {"manager"}
+              else ()
             order by $membership
             return 
               <li class="result">
                 <a class="document" href="group/{encode-for-uri($membership)}">
-                  { $membership }
+                  { $managership, $membership }
                 </a>
               </li>
           }</ul>
@@ -355,11 +339,11 @@ declare
             return
               if ($old-managers=$user)
               then
-                let $all-new-members := $body//g:member[not(xs:boolean(@manager))]
+                let $all-new-members := $body//g:member
                 let $all-new-managers := $body//g:member[xs:boolean(@manager)]
                 let $old-members := grp:get-group-members($name)
                 let $members-to-add := $all-new-members[not(.=$old-members)]
-                let $members-to-remove := $old-members[not(.=$all-new-members)][not(.="admin")]
+                let $members-to-remove := $old-members[not(.=$all-new-members)]
                 let $managers-to-add := $all-new-managers[not(.=$old-managers)]
                 let $managers-to-remove := $old-managers[not(.=$all-new-managers)][not(.="admin")]
                 let $errors := (
@@ -367,26 +351,6 @@ declare
                   w/o admin access (it does not). Admin access is required to
                   ensure it works as an atomic operation if a user removes
                   his own managership :)
-                  for $manager in $managers-to-add
-                  return
-                    try {
-                      system:as-user("admin", $magic:password,
-                        sm:add-group-manager($name, $manager)
-                      )
-                    }
-                    catch * {
-                      "Adding manager: " || $manager
-                    },
-                  for $manager in $managers-to-remove
-                  return
-                    try {
-                      system:as-user("admin", $magic:password,
-                        sm:remove-group-manager($name, $manager)
-                      )
-                    }
-                    catch * {
-                      "Removing manager:" || $manager
-                    },
                   for $member in $members-to-add
                   return 
                     try {
@@ -397,6 +361,16 @@ declare
                     catch * {
                       "Adding member:" || $member
                     },
+                  for $manager in $managers-to-add
+                  return
+                    try {
+                      system:as-user("admin", $magic:password,
+                        sm:add-group-manager($name, $manager)
+                      )
+                    }
+                    catch * {
+                      "Adding manager: " || $manager
+                    },
                   for $member in $members-to-remove
                   return 
                     try {
@@ -406,6 +380,16 @@ declare
                     }
                     catch * {
                       "Removing member:" || $member
+                    },
+                  for $manager in $managers-to-remove
+                  return
+                    try {
+                      system:as-user("admin", $magic:password,
+                        sm:remove-group-manager($name, $manager)
+                      )
+                    }
+                    catch * {
+                      "Removing manager:" || $manager
                     }
                 )
                 return
@@ -426,12 +410,12 @@ declare
                 api:rest-error(403, "Forbidden")
           else
             (: group does not exist, this is group creation :)
-            let $members := distinct-values($body//g:member[not(xs:boolean(@manager))])
+            let $members := distinct-values($body//g:member)
             let $managers := distinct-values(($body//g:member[xs:boolean(@manager)], "admin", $user))
             let $created :=
               try {
                 system:as-user("admin", $magic:password, 
-                  sm:create-group($name, $managers, string($body//g:description))
+                  sm:create-group($name, $managers, string($body//g:description)) 
                 ),
                 true()
               }
@@ -480,7 +464,8 @@ declare
  : @error HTTP 404 if the group does not exist
  : 
  : Notes: 
- :   Resources owned by a deleted group become property of "everyone"
+ :   Resources owned by a deleted group should become property of "everyone"
+ :   For now, they become property of guest.
  :   TODO: This code has some hacks to work around eXist deficiencies 
  :)
 declare
@@ -504,9 +489,12 @@ declare
             {
               (: members are not removed automatically from a deleted group :)
               let $all-group-members := grp:get-group-members($name)
+              let $all-group-managers := grp:get-group-managers($name)
               return system:as-user("admin", $magic:password, ( 
                 for $member in $all-group-members
                 return sm:remove-group-member($name, $member),
+                for $manager in $all-group-managers
+                return sm:remove-group-manager($name, $manager),
                 sm:remove-group($name)
               ))
             }

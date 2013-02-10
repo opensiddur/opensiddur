@@ -425,6 +425,10 @@ declare
       xmldb:remove($user:path, $resource-name),
       system:as-user("admin", $magic:password, (
         try {
+          for $member in sm:get-group-members($name)
+          return sm:remove-group-member($name, $member),
+          for $manager in sm:get-group-managers($name)
+          return sm:remove-group-manager($name, $manager),
           sm:remove-account($name),
           sm:remove-group($name), (: TODO: successor group is guest! until remove-group#2 exists@ :)
           $return-success

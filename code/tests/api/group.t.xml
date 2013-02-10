@@ -18,7 +18,8 @@
     <!-- make some users and a group, put users 3-5 in it -->
     <code><![CDATA[
       system:as-user("admin", $magic:password, (
-        let $new-group := sm:create-group("grouptests", ("testuser", "admin"), "")
+        let $new-group := sm:create-group("grouptests", "testuser", "")
+        let $user := sm:add-group-member("grouptests", "testuser")
         let $new-group2 := sm:create-group("grouptests2", "admin", "")
         for $i in 3 to 7
         let $user := sm:create-account(
@@ -41,6 +42,7 @@
         if (sm:group-exists("grouptests"))
         then (
           sm:remove-group-member("grouptests", "testuser"),
+          sm:remove-group-manager("grouptests", "testuser"),
           sm:remove-group-member("grouptests", "admin"),
           sm:remove-group("grouptests")
         )
@@ -105,7 +107,6 @@
       ]]></code> 
       <expected desc="returns a group-XML format list">
         <g:group>
-          <g:member manager="true">admin</g:member>
           <g:member manager="true">testuser</g:member>
           <g:member>testuser3</g:member>
           <g:member>testuser4</g:member>
@@ -129,7 +130,7 @@
       grp:get-html("grouptests")
       ]]></code> 
       <xpath desc="returns an HTML list of members">self::html:html/html:body/*[@class="results"]/html:li[@class="result"]/html:a[@class="document"]</xpath>
-      <xpath desc="managers are marked with @property">count(.//html:a[@property="manager"]) = 2</xpath>
+      <xpath desc="managers are marked with @property">count(.//html:a[@property="manager"]) = 1</xpath>
     </test>
     <test>
       <task>Get members of a non-existing group</task>
