@@ -6,6 +6,12 @@ default namespace = "http://jewishliturgy.org/ns/group/1.0"
 
 start = Group
 
+# The description element holds an optional description of 
+# the group
+Description = element description {
+    xsd:string?
+}
+
 # The member element holds the user name of a member,
 # manager is true if the member is a group manager, false or nonexistent otherwise
 Member = element member {
@@ -15,7 +21,6 @@ Member = element member {
 
 # the group element holds a list of members
 Group = element group {
+  Description?,
   Member*
 }
-
-

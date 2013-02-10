@@ -47,6 +47,16 @@ declare function grp:get-user-group-memberships(
   )
 };
 
+declare function grp:get-user-group-managerships(
+  $user as xs:string
+) as xs:string* {
+  system:as-user("admin", $magic:password,
+    sm:list-groups()[
+      sm:get-group-managers(.)=$user
+    ]
+  )
+};
+
 (:~ @return the members of a given group
  : eXist considers group membership a secret. We do not
  :)
@@ -136,13 +146,16 @@ declare
       let $managers := grp:get-group-managers($name)
       return
         <g:group>{
+          for $manager in $managers
+          order by $manager ascending
+          return
+            <g:member manager="true">{
+              $manager
+            }</g:member>,
           for $member in $members
           order by $member ascending
           return
             <g:member>{
-              if ($member=$managers)
-              then attribute manager { true() }
-              else (), 
               $member
             }</g:member>
         }</g:group>
@@ -181,7 +194,7 @@ declare
                   if (xs:boolean($member/@manager))
                   then attribute property { "manager" }
                   else (),
-                  $member
+                  $member/string()
                 }</a>
               </li>
           }</ul>
@@ -213,18 +226,33 @@ declare
           <ul class="results">{
             (: TODO: this code is here because eXist r16512 returns deleted groups
              : until db restart
-             :)
+             
             let $all-groups := grp:get-groups()
+            
             for $group in distinct-values(grp:get-user-group-memberships($user))[.=$all-groups]
             order by $group
             return
               <li class="result">
                 <a class="document" href="group/{encode-for-uri($group)}">{
-                  if (grp:get-group-managers($group) = $user)
-                  then attribute property { "manager" }
-                  else (),
                   $group
                 }</a>
+              </li>
+            :)
+            for $managership in grp:get-user-group-managerships($user)
+            order by $managership
+            return 
+              <li class="result">
+                <a class="document" property="manager" href="group/{encode-for-uri($managership)}">
+                  { $managership }
+                </a>
+              </li>,
+            for $membership in grp:get-user-group-memberships($user)
+            order by $membership
+            return 
+              <li class="result">
+                <a class="document" href="group/{encode-for-uri($membership)}">
+                  { $membership }
+                </a>
               </li>
           }</ul>
         </body>
@@ -266,7 +294,7 @@ declare function grp:validate-report(
   $group-name as xs:string?
   ) as element(report) {
   jvalidate:concatenate-reports((
-    jvalidate:validate-relaxng($doc, xs:anyURI("/schema/group.rnc")),
+    jvalidate:validate-relaxng($doc, xs:anyURI("/db/schema/group.rnc")),
     let $invalid-users := $doc//g:member/string()[not(sm:user-exists(.))]
     let $existing-group-validation :=
       if ($group-name)
@@ -384,9 +412,15 @@ declare
             let $members := distinct-values($body//g:member[not(xs:boolean(@manager))])
             let $managers := distinct-values(($body//g:member[xs:boolean(@manager)], "admin", $user))
             let $created :=
-              system:as-user("admin", $magic:password, 
-                xmldb:create-group($name, $managers)
-              )
+              try {
+                system:as-user("admin", $magic:password, 
+                  sm:create-group($name, $managers, string($body//g:description))
+                ),
+                true()
+              }
+              catch * {
+                false()
+              }
             return
               if ($created)
               then 

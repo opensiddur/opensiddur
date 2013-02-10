@@ -18,8 +18,8 @@
     <!-- make some users and a group, put users 3-5 in it -->
     <code><![CDATA[
       system:as-user("admin", $magic:password, (
-        let $new-group := xmldb:create-group("grouptests", ("testuser", "admin"))
-        let $new-group2 := xmldb:create-group("grouptests2", "admin")
+        let $new-group := sm:create-group("grouptests", ("testuser", "admin"), "")
+        let $new-group2 := sm:create-group("grouptests2", "admin", "")
         for $i in 3 to 7
         let $user := sm:create-account(
           "testuser" || $i, "testuser" || $i, 
@@ -58,9 +58,9 @@
   <namespace prefix="g">http://jewishliturgy.org/ns/group/1.0</namespace>
   <imports>
     import module namespace grp="http://jewishliturgy.org/api/group"
-      at "xmldb:exist:///code/api/group.xqm";
+      at "xmldb:exist:///db/code/api/group.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///code/magic/magic.xqm";
+      at "xmldb:exist:///db/code/magic/magic.xqm";
   </imports>
   <variable name="valid" as="document-node()">
   <![CDATA[
@@ -184,7 +184,7 @@
       <xpath desc="group managers are as specified">
         every $m in $valid//g:member[xs:boolean(@manager)] satisfies grp:get-group-managers("grouptestsnew")=$m</xpath>
       <xpath desc="group members are as specified">
-        every $m in $valid//g:member satisfies grp:get-group-members("grouptestsnew")=$m
+        every $m in $valid//g:member[not(xs:boolean(@manager))] satisfies grp:get-group-members("grouptestsnew")=$m
       </xpath>
       <xpath desc="admin is a group manager">grp:get-group-managers("grouptestsnew")="admin"</xpath>
     </test>

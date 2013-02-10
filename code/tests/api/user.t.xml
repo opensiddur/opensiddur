@@ -179,6 +179,7 @@
       <class href="common.t.xml#Created"/>
       <xpath desc="user has been created">system:as-user("admin", $magic:password, sm:user-exists("testuser3"))</xpath>
       <xpath desc="group has been created">system:as-user("admin", $magic:password, sm:group-exists("testuser3"))</xpath>
+      <xpath desc="user is a manager of its own group">system:as-user("admin", $magic:password, sm:get-group-managers("testuser3")="testuser3")</xpath>
       <xpath desc="profile has been created">doc-available("/user/testuser3.xml")</xpath>
       <xpath desc="profile contains an idno equal to the user name">doc("/user/testuser3.xml")/j:contributor/tei:idno="testuser3"</xpath>
       <xpath desc="user profile permissions are correct">
