@@ -247,7 +247,7 @@ declare
         else if (not($user))
         then
           (: not authenticated, this is a new user request :)
-          if (xmldb:exists-user($name))
+          if (system:as-user("admin", $magic:password, sm:user-exists($name)))
           then 
             (: user already exists, need to be authenticated to change the password :)
             api:rest-error(401, "Not authorized")

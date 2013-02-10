@@ -192,7 +192,7 @@ declare
   ) as item()+ {
   if (app:auth-user())
   then 
-    if (xmldb:exists-user($user))
+    if (sm:user-exists($user))
     then 
       <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
@@ -256,7 +256,7 @@ declare function grp:validate-report(
   ) as element(report) {
   jvalidate:concatenate-reports((
     jvalidate:validate-relaxng($doc, xs:anyURI("/schema/group.rnc")),
-    let $invalid-users := $doc//g:member/string()[not(xmldb:exists-user(.))]
+    let $invalid-users := $doc//g:member/string()[not(sm:user-exists(.))]
     let $existing-group-validation :=
       if ($group-name)
       then
