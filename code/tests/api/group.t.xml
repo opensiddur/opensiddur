@@ -272,7 +272,7 @@
       ]]></code>
       <class href="common.t.xml#NoData"/>
       <xpath desc="group is deleted">not(grp:get-groups()="grouptests")</xpath>
-      <xpath desc="user is not a member of the group">not(xmldb:get-user-groups("testuser")="grouptests")</xpath>
+      <xpath desc="user is not a member of the group">not(sm:get-user-groups("testuser")="grouptests")</xpath>
     </test>
     <test>
       <task>For an existing group, but not a manager</task>

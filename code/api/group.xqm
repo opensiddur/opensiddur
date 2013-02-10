@@ -36,6 +36,17 @@ declare function grp:get-group-managers(
   )
 };
 
+(:~ @return the group memberships of a given user.
+ : eXist considers this a secret, but it is public knowledge in Open Siddur
+ :)
+declare function grp:get-user-group-memberships(
+  $user as xs:string
+  ) as xs:string+ {
+  system:as-user("admin", $magic:password,
+    sm:get-user-groups($user)
+  )
+};
+
 (:~ @return the members of a given group
  : eXist considers group membership a secret. We do not
  :)
@@ -204,7 +215,7 @@ declare
              : until db restart
              :)
             let $all-groups := grp:get-groups()
-            for $group in distinct-values(xmldb:get-user-groups($user))[.=$all-groups]
+            for $group in distinct-values(grp:get-user-group-memberships($user))[.=$all-groups]
             order by $group
             return
               <li class="result">
