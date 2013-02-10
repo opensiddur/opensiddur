@@ -37,18 +37,18 @@
         let $r := xmldb:remove-user-from-group("admin", "testuser" || $i)
         return (
           xmldb:delete-user("testuser" || $i),
-          sm:delete-group("testuser" || $i)
+          sm:remove-group("testuser" || $i)
         ),
         if (xmldb:group-exists("grouptests"))
         then (
           xmldb:remove-user-from-group("admin", "grouptests"),
-          sm:delete-group("grouptests")
+          sm:remove-group("grouptests")
         )
         else (),
         if (xmldb:group-exists("grouptests2"))
         then (
           xmldb:remove-user-from-group("admin", "grouptests2"),
-          sm:delete-group("grouptests2")
+          sm:remove-group("grouptests2")
         )
         else ()
       ))
@@ -168,7 +168,7 @@
             for $user in sm:get-group-members("grouptestsnew")
             let $removed := xmldb:remove-user-from-group($user, "grouptestsnew")
             return (),
-            sm:delete-group("grouptestsnew")
+            sm:remove-group("grouptestsnew")
             )
           else ()
         ))
