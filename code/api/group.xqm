@@ -325,11 +325,21 @@ declare
                 let $managers-to-remove := $old-managers[not(.=$all-new-managers)][not(.="admin")]
                 let $errors := (
                   for $member in distinct-values(($members-to-add, $managers-to-add))
-                  let $added := xmldb:add-user-to-group($member, $name)
-                  where not($added)
-                  return $member,
+                  return 
+                    try {
+                      sm:add-group-member($name, $member)
+                    }
+                    catch * {
+                      $member
+                    },
                   for $member in $members-to-remove
-                  return sm:remove-group-member($name, $member)
+                  return 
+                    try {
+                      sm:remove-group-member($name, $member)
+                    }
+                    catch * {
+                      $member
+                    }
                 )
                 let $warnings :=
                   let $managers-to-change := ($managers-to-add, $managers-to-remove)
@@ -371,9 +381,13 @@ declare
               then 
                 let $errors :=
                   for $member in $members
-                  let $added := xmldb:add-user-to-group($member, $name)
-                  where not($added)
-                  return $member
+                  return 
+                    try {
+                      sm:add-group-member($name, $member)
+                    }
+                    catch * {
+                      $member
+                    }
                 return 
                   if (exists($errors))
                   then
