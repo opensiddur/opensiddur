@@ -183,7 +183,7 @@
       <class href="../common.t.xml#Created"/>
       <expected 
         desc="a change record has been added"
-        xpath="collection('/db/data/original/en')[descendant::tei:title[@type='main'][.='Valid']]//tei:revisionDesc/tei:change[1]">
+        xpath="collection('/db/data/original/en')[util:document-name(.)=tokenize($output//http:header[@name='Location']/@value,'/')[count(.)] || '.xml']//tei:revisionDesc/tei:change[1]">
         <tei:change type="created" who="/user/testuser" when="..."/>
       </expected>
     </test>
