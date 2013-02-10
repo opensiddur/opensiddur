@@ -39,13 +39,13 @@
           xmldb:delete-user("testuser" || $i),
           sm:remove-group("testuser" || $i)
         ),
-        if (xmldb:group-exists("grouptests"))
+        if (sm:group-exists("grouptests"))
         then (
           xmldb:remove-user-from-group("admin", "grouptests"),
           sm:remove-group("grouptests")
         )
         else (),
-        if (xmldb:group-exists("grouptests2"))
+        if (sm:group-exists("grouptests2"))
         then (
           xmldb:remove-user-from-group("admin", "grouptests2"),
           sm:remove-group("grouptests2")

@@ -144,13 +144,17 @@
       <!-- remove user, group, and profile -->
       <code><![CDATA[
       system:as-user("admin", $magic:password,(
-        if (xmldb:group-exists("testuser3"))
+        if (sm:group-exists("testuser3"))
         then 
           try {
             sm:remove-group("testuser3")
           } 
           catch * { 
-            util:log-system-out("WARNING: DELETING GROUPS IS BROKEN BEFORE r16453!") 
+            util:log-system-out((
+    $err:module, ":", $err:line-number, ":", 
+    $err:column-number, ","[$err:code], $err:code, ":"[$err:value], $err:value, ": "[$err:description], 
+    $err:description,
+    ";")) 
           }
         else (),
         if (xmldb:exists-user("testuser3"))
@@ -174,7 +178,7 @@
       ]]></code> 
       <class href="common.t.xml#Created"/>
       <xpath desc="user has been created">xmldb:exists-user("testuser3")</xpath>
-      <xpath desc="group has been created">system:as-user("admin", $magic:password, xmldb:group-exists("testuser3"))</xpath>
+      <xpath desc="group has been created">system:as-user("admin", $magic:password, sm:group-exists("testuser3"))</xpath>
       <xpath desc="profile has been created">doc-available("/user/testuser3.xml")</xpath>
       <xpath desc="profile contains an idno equal to the user name">doc("/user/testuser3.xml")/j:contributor/tei:idno="testuser3"</xpath>
       <xpath desc="user profile permissions are correct">
@@ -488,7 +492,7 @@
         then xmldb:remove("/user", "testuser3.xml")
         else (),
         try { 
-          if (xmldb:group-exists("testuser3"))
+          if (sm:group-exists("testuser3"))
           then sm:remove-group("testuser3")
           else ()
         } 
