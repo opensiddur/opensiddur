@@ -148,7 +148,7 @@
       ]]></code>
       <xpath desc="return an HTML list of groups">self::html:html/html:body/*[@class="results"]/html:li[@class="result"]/html:a[@class="document"]</xpath>
       <xpath desc="return the manager property on managed groups">exists(.//html:a[@property="manager"])</xpath>
-      <xpath desc="returns exactly 2 groups (everyone and testuser)">count(.//html:li[@class="result"]) = 2</xpath>
+      <xpath desc="returns exactly 2 groups (everyone and grouptests)">count(.//html:li[@class="result"]) = 2</xpath>
     </test>
     <test>
       <task>For a non-existing user</task>
@@ -213,7 +213,7 @@
       <class href="common.t.xml#NoData"/>
       <xpath desc="the member has been removed">not(grp:get-group-members("grouptests")="testuser5")</xpath>
     </test>
-    <test ignore="yes">
+    <test>
       <task>For an existing group, addition of a manager</task>
       <code><![CDATA[
       grp:put("grouptests", document {
@@ -226,7 +226,7 @@
       <class href="common.t.xml#NoData"/>
       <xpath desc="the member is now a manager">grp:get-group-managers("grouptests")="testuser5"</xpath>
     </test>
-    <test ignore="yes">
+    <test>
       <task>For an existing group, removal of a manager</task>
       <code><![CDATA[
       grp:put("grouptests", document {

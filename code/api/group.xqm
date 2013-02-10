@@ -355,7 +355,7 @@ declare
             return
               if ($old-managers=$user)
               then
-                let $all-new-members := $body//g:member
+                let $all-new-members := $body//g:member[not(xs:boolean(@manager))]
                 let $all-new-managers := $body//g:member[xs:boolean(@manager)]
                 let $old-members := grp:get-group-members($name)
                 let $members-to-add := $all-new-members[not(.=$old-members)]
@@ -363,38 +363,55 @@ declare
                 let $managers-to-add := $all-new-managers[not(.=$old-managers)]
                 let $managers-to-remove := $old-managers[not(.=$all-new-managers)][not(.="admin")]
                 let $errors := (
-                  for $member in distinct-values(($members-to-add, $managers-to-add))
-                  return 
+                  (: Changing group managerships/memberships is supposed to work 
+                  w/o admin access (it does not). Admin access is required to
+                  ensure it works as an atomic operation if a user removes
+                  his own managership :)
+                  for $manager in $managers-to-add
+                  return
                     try {
-                      sm:add-group-member($name, $member)
+                      system:as-user("admin", $magic:password,
+                        sm:add-group-manager($name, $manager)
+                      )
                     }
                     catch * {
-                      $member
+                      "Adding manager: " || $manager
+                    },
+                  for $manager in $managers-to-remove
+                  return
+                    try {
+                      system:as-user("admin", $magic:password,
+                        sm:remove-group-manager($name, $manager)
+                      )
+                    }
+                    catch * {
+                      "Removing manager:" || $manager
+                    },
+                  for $member in $members-to-add
+                  return 
+                    try {
+                      system:as-user("admin", $magic:password,
+                        sm:add-group-member($name, $member)
+                      )
+                    }
+                    catch * {
+                      "Adding member:" || $member
                     },
                   for $member in $members-to-remove
                   return 
                     try {
-                      sm:remove-group-member($name, $member)
+                      system:as-user("admin", $magic:password,
+                        sm:remove-group-member($name, $member)
+                      )
                     }
                     catch * {
-                      $member
+                      "Removing member:" || $member
                     }
                 )
-                let $warnings :=
-                  let $managers-to-change := ($managers-to-add, $managers-to-remove)
-                  where exists($managers-to-change)
-                  return
-                    debug:debug(
-                      $debug:warn,
-                      "group",
-                      ("Managerial status cannot be changed for: ",
-                      string-join($managers-to-change, " ")
-                      )
-                    )
                 return
                   if (exists($errors))
                   then
-                    api:rest-error(500, "Could not change group status of:",
+                    api:rest-error(500, "Could not change group status:",
                       string-join($errors, " ")
                     )
                   else
