@@ -2,7 +2,7 @@
 #
 # Sets up rules for building, and includes Makefiles from all targets
 #
-# Copyright 2008-2012 Efraim Feinstein
+# Copyright 2008-2013 Efraim Feinstein
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -135,7 +135,7 @@ TEI_REVISION ?= -r 11440
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REV ?= 18081
+EXIST_REV ?= 18254
 EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
@@ -144,7 +144,6 @@ include $(TEXTDIR)/Makefile
 include $(CODEDIR)/Makefile
 include $(ODDDIR)/Makefile
 include $(LIBDIR)/Makefile
-include tests/Makefile
 
 XSLTDOC_CFGFILE ?= XSLTDocConfig.xml
 
@@ -152,12 +151,13 @@ $(TEMPDIR):
 	mkdir $(TEMPDIR)
 
 .PHONY: schema schema-clean
-schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema linkage-schema
+schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema linkage-schema conditional-schema
 	cp schema/build/jlptei.rnc $(DBDIR)/schema
 	cp schema/build/linkage.rnc $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
 	cp schema/build/bibliography.rnc $(DBDIR)/schema
 	cp schema/build/annotation.rnc $(DBDIR)/schema
+	cp schema/build/conditional.rnc $(DBDIR)/schema
 	cp schema/build/*.xsl2 $(DBDIR)/schema
 	cp schema/transliteration.rnc $(DBDIR)/schema
 	cp schema/access.rnc $(DBDIR)/schema
@@ -169,7 +169,7 @@ schema-clean: schema-build-clean
 .PHONY: clean
 clean: xsltdoc-clean schema-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist setup-clean
 
-$(DBDIR)/common: $(DBDIR)/code
+$(DBDIR)/common: $(DBDIR)/code params.xsl2
 
 RSYNC_EXCLUDE=--exclude=.svn --exclude=~*
 
@@ -314,7 +314,7 @@ db-sync:
 db: externals db-nonet
 
 # patch error status ignored because it returns 1 if patches are already applied
-db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common db-tests
+db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common 
 	mkdir -p $(DBDIR)/xforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
 	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources

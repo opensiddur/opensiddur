@@ -120,6 +120,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
         <head>Formal declaration</head>
         <!-- common declarations: -->
         <xi:include href="common-schema.xml"/>
+        <xi:include href="conditional-common.xml"/>
         <schemaSpec ident="jlptei" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
           <moduleRef key="core" include="choice cit corr date divGen foreign head hi item l label lg list name note orig p ptr q quote ref reg sic title"/>
           <moduleRef key="tei"/>
@@ -128,11 +129,13 @@ The Open Siddur intends to work within open standards whenever possible. In choo
           <moduleRef key="analysis" include="c interp interpGrp pc phr s w"/>
           <moduleRef key="certainty" include="respons"/>
           <moduleRef key="gaiji" include="g"/>
-          <moduleRef key="iso-fs" except=""/>
+          <moduleRef key="iso-fs" except="fsDecl fsdDecl fsdLink fsDescr fDescr fDecl vAlt vColl vDefault vLabel vRange if iff then cond fsConstraints bicond"/>
           <moduleRef key="linking" include="ab anchor link linkGrp seg"/>
           <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
           <moduleRef key="transcr" include="sourceDoc"/>
           <specGrpRef target="#common-specs"/>
+          <specGrpRef target="#conditional-specs"/>
+          
           <elementSpec ident="read" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
             <desc>Indicates the portion of a text that is read in read-written (kri-ktiv) choice.</desc>
             <classes>

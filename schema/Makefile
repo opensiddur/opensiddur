@@ -51,10 +51,12 @@ transliteration-schema: schema/build/transliteration.xsl2
 schema/build/transliteration.xsl2: schema/transliteration.sch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
-.PHONY: contributor-schema contributor-schema-clean bibliography-schema bibliography-schema-clean annotation-schema annotation-schema-clean linkage-schema linkage-schema-clean
+.PHONY: contributor-schema contributor-schema-clean bibliography-schema bibliography-schema-clean annotation-schema annotation-schema-clean linkage-schema linkage-schema-clean conditional-schema conditional-schema-clean
 annotation-schema: schema/build/annotation.xsl2
 
 contributor-schema: schema/build/contributor.rnc
+
+conditional-schema: schema/build/conditional.xsl2
 
 bibliography-schema: schema/build/bibliography.xsl2
 
@@ -69,6 +71,12 @@ schema/build/bibliography.rnc: p5subset schema/build schema/bibliography.xml
 schema/build/bibliography.xsl2: schema/build/bibliography.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
+schema/build/conditional.isosch: schema/build/conditional.rnc
+schema/build/conditional.rnc: p5subset schema/build schema/conditional.xml
+	$(TEIROMA) --nodtd --noxsd --isoschematron schema/conditional.xml schema/build
+schema/build/conditional.xsl2: schema/build/conditional.isosch
+	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
+
 schema/build/annotation.isosch: schema/build/annotation.rnc
 schema/build/annotation.rnc: p5subset schema/build schema/annotation.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/annotation.xml schema/build
@@ -80,6 +88,9 @@ schema/build/linkage.rnc: p5subset schema/build schema/linkage.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/linkage.xml schema/build
 schema/build/linkage.xsl2: schema/build/linkage.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
+
+conditional-schema-clean:
+	rm -fr schema/build/conditional.*
 
 linkage-schema-clean:
 	rm -fr schema/build/linkage.* 
