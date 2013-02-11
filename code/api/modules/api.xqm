@@ -141,7 +141,7 @@ declare function api:require-authentication-as-group(
 	then 
 		let $user := app:auth-user()
 		return
-			if (xmldb:get-user-groups($user) = $group)
+			if (sm:get-user-groups($user) = $group)
 			then true()
 			else (
 				false(),

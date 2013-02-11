@@ -35,7 +35,7 @@ declare function local:validate-report(
   let $bad-usernames :=
     $access/
       (a:owner, a:share-user, a:deny-user)
-      [not(xmldb:exists-user(.))]   
+      [not(sm:user-exists(.))]   
   let $all-groups := sm:get-groups()
   let $bad-groups :=
     $access/(a:group, a:share-group, a:deny-group)

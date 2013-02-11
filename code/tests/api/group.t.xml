@@ -18,13 +18,14 @@
     <!-- make some users and a group, put users 3-5 in it -->
     <code><![CDATA[
       system:as-user("admin", $magic:password, (
-        let $new-group := xmldb:create-group("grouptests", ("testuser", "admin"))
-        let $new-group2 := xmldb:create-group("grouptests2", "admin")
+        let $new-group := sm:create-group("grouptests", "testuser", "")
+        let $user := sm:add-group-member("grouptests", "testuser")
+        let $new-group2 := sm:create-group("grouptests2", "admin", "")
         for $i in 3 to 7
-        let $user := xmldb:create-user(
+        let $user := sm:create-account(
           "testuser" || $i, "testuser" || $i, 
-          ("everyone", "grouptests"[$i <= 5]), ())
-        let $group := xmldb:create-group("testuser" || $i, ("testuser" || $i, "admin"))
+          ("everyone", "grouptests"[$i <= 5])
+        )
         return ()
       ))
     ]]></code>
@@ -32,23 +33,24 @@
   <tearDown>
     <code><![CDATA[
       system:as-user("admin", $magic:password, (
-        xmldb:remove-user-from-group("testuser", "grouptests"),
         for $i in 3 to 7
-        let $r := xmldb:remove-user-from-group("admin", "testuser" || $i)
+        let $r := sm:remove-group-member("testuser" || $i, "admin")
         return (
-          xmldb:delete-user("testuser" || $i),
-          sm:delete-group("testuser" || $i)
+          sm:remove-account("testuser" || $i),
+          sm:remove-group("testuser" || $i)
         ),
-        if (xmldb:group-exists("grouptests"))
+        if (sm:group-exists("grouptests"))
         then (
-          xmldb:remove-user-from-group("admin", "grouptests"),
-          sm:delete-group("grouptests")
+          sm:remove-group-member("grouptests", "testuser"),
+          sm:remove-group-manager("grouptests", "testuser"),
+          sm:remove-group-member("grouptests", "admin"),
+          sm:remove-group("grouptests")
         )
         else (),
-        if (xmldb:group-exists("grouptests2"))
+        if (sm:group-exists("grouptests2"))
         then (
-          xmldb:remove-user-from-group("admin", "grouptests2"),
-          sm:delete-group("grouptests2")
+          sm:remove-group-member("grouptests2", "admin"),
+          sm:remove-group("grouptests2")
         )
         else ()
       ))
@@ -58,9 +60,9 @@
   <namespace prefix="g">http://jewishliturgy.org/ns/group/1.0</namespace>
   <imports>
     import module namespace grp="http://jewishliturgy.org/api/group"
-      at "xmldb:exist:///code/api/group.xqm";
+      at "xmldb:exist:///db/code/api/group.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///code/magic/magic.xqm";
+      at "xmldb:exist:///db/code/magic/magic.xqm";
   </imports>
   <variable name="valid" as="document-node()">
   <![CDATA[
@@ -105,7 +107,6 @@
       ]]></code> 
       <expected desc="returns a group-XML format list">
         <g:group>
-          <g:member manager="true">admin</g:member>
           <g:member manager="true">testuser</g:member>
           <g:member>testuser3</g:member>
           <g:member>testuser4</g:member>
@@ -129,7 +130,7 @@
       grp:get-html("grouptests")
       ]]></code> 
       <xpath desc="returns an HTML list of members">self::html:html/html:body/*[@class="results"]/html:li[@class="result"]/html:a[@class="document"]</xpath>
-      <xpath desc="managers are marked with @property">count(.//html:a[@property="manager"]) = 2</xpath>
+      <xpath desc="managers are marked with @property">count(.//html:a[@property="manager"]) = 1</xpath>
     </test>
     <test>
       <task>Get members of a non-existing group</task>
@@ -148,7 +149,7 @@
       ]]></code>
       <xpath desc="return an HTML list of groups">self::html:html/html:body/*[@class="results"]/html:li[@class="result"]/html:a[@class="document"]</xpath>
       <xpath desc="return the manager property on managed groups">exists(.//html:a[@property="manager"])</xpath>
-      <xpath desc="returns exactly 2 groups (everyone and testuser)">count(.//html:li[@class="result"]) = 2</xpath>
+      <xpath desc="returns exactly 2 groups (everyone and grouptests)">count(.//html:li[@class="result"]) = 2</xpath>
     </test>
     <test>
       <task>For a non-existing user</task>
@@ -166,9 +167,9 @@
           if (sm:get-groups()="grouptestsnew")
           then (
             for $user in sm:get-group-members("grouptestsnew")
-            let $removed := xmldb:remove-user-from-group($user, "grouptestsnew")
+            let $removed := sm:remove-group-member("grouptestsnew", $user)
             return (),
-            sm:delete-group("grouptestsnew")
+            sm:remove-group("grouptestsnew")
             )
           else ()
         ))
@@ -184,7 +185,7 @@
       <xpath desc="group managers are as specified">
         every $m in $valid//g:member[xs:boolean(@manager)] satisfies grp:get-group-managers("grouptestsnew")=$m</xpath>
       <xpath desc="group members are as specified">
-        every $m in $valid//g:member satisfies grp:get-group-members("grouptestsnew")=$m
+        every $m in $valid//g:member[not(xs:boolean(@manager))] satisfies grp:get-group-members("grouptestsnew")=$m
       </xpath>
       <xpath desc="admin is a group manager">grp:get-group-managers("grouptestsnew")="admin"</xpath>
     </test>
@@ -213,7 +214,7 @@
       <class href="common.t.xml#NoData"/>
       <xpath desc="the member has been removed">not(grp:get-group-members("grouptests")="testuser5")</xpath>
     </test>
-    <test ignore="yes">
+    <test>
       <task>For an existing group, addition of a manager</task>
       <code><![CDATA[
       grp:put("grouptests", document {
@@ -226,7 +227,7 @@
       <class href="common.t.xml#NoData"/>
       <xpath desc="the member is now a manager">grp:get-group-managers("grouptests")="testuser5"</xpath>
     </test>
-    <test ignore="yes">
+    <test>
       <task>For an existing group, removal of a manager</task>
       <code><![CDATA[
       grp:put("grouptests", document {
@@ -272,7 +273,7 @@
       ]]></code>
       <class href="common.t.xml#NoData"/>
       <xpath desc="group is deleted">not(grp:get-groups()="grouptests")</xpath>
-      <xpath desc="user is not a member of the group">not(xmldb:get-user-groups("testuser")="grouptests")</xpath>
+      <xpath desc="user is not a member of the group">not(sm:get-user-groups("testuser")="grouptests")</xpath>
     </test>
     <test>
       <task>For an existing group, but not a manager</task>

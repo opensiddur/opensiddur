@@ -36,6 +36,27 @@ declare function grp:get-group-managers(
   )
 };
 
+(:~ @return the group memberships of a given user.
+ : eXist considers this a secret, but it is public knowledge in Open Siddur
+ :)
+declare function grp:get-user-group-memberships(
+  $user as xs:string
+  ) as xs:string+ {
+  system:as-user("admin", $magic:password,
+    sm:get-user-groups($user)
+  )
+};
+
+declare function grp:get-user-group-managerships(
+  $user as xs:string
+) as xs:string* {
+  system:as-user("admin", $magic:password,
+    sm:list-groups()[
+      sm:get-group-managers(.)=$user
+    ]
+  )
+};
+
 (:~ @return the members of a given group
  : eXist considers group membership a secret. We do not
  :)
@@ -126,12 +147,15 @@ declare
       return
         <g:group>{
           for $member in $members
+          let $manager := 
+            if ($member=$managers)
+            then
+              attribute manager {true()}
+            else ()
           order by $member ascending
           return
             <g:member>{
-              if ($member=$managers)
-              then attribute manager { true() }
-              else (), 
+              $manager,
               $member
             }</g:member>
         }</g:group>
@@ -170,7 +194,7 @@ declare
                   if (xs:boolean($member/@manager))
                   then attribute property { "manager" }
                   else (),
-                  $member
+                  $member/string()
                 }</a>
               </li>
           }</ul>
@@ -192,7 +216,7 @@ declare
   ) as item()+ {
   if (app:auth-user())
   then 
-    if (xmldb:exists-user($user))
+    if (sm:user-exists($user))
     then 
       <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
@@ -200,20 +224,19 @@ declare
         </head>
         <body>
           <ul class="results">{
-            (: TODO: this code is here because eXist r16512 returns deleted groups
-             : until db restart
-             :)
-            let $all-groups := grp:get-groups()
-            for $group in distinct-values(xmldb:get-user-groups($user))[.=$all-groups]
-            order by $group
-            return
+            let $managerships := grp:get-user-group-managerships($user) 
+            for $membership in grp:get-user-group-memberships($user)
+            let $managership :=
+              if ($managerships=$membership)
+              then
+                attribute property {"manager"}
+              else ()
+            order by $membership
+            return 
               <li class="result">
-                <a class="document" href="group/{encode-for-uri($group)}">{
-                  if (grp:get-group-managers($group) = $user)
-                  then attribute property { "manager" }
-                  else (),
-                  $group
-                }</a>
+                <a class="document" href="group/{encode-for-uri($membership)}">
+                  { $managership, $membership }
+                </a>
               </li>
           }</ul>
         </body>
@@ -255,8 +278,8 @@ declare function grp:validate-report(
   $group-name as xs:string?
   ) as element(report) {
   jvalidate:concatenate-reports((
-    jvalidate:validate-relaxng($doc, xs:anyURI("/schema/group.rnc")),
-    let $invalid-users := $doc//g:member/string()[not(xmldb:exists-user(.))]
+    jvalidate:validate-relaxng($doc, xs:anyURI("/db/schema/group.rnc")),
+    let $invalid-users := $doc//g:member/string()[not(sm:user-exists(.))]
     let $existing-group-validation :=
       if ($group-name)
       then
@@ -320,34 +343,59 @@ declare
                 let $all-new-managers := $body//g:member[xs:boolean(@manager)]
                 let $old-members := grp:get-group-members($name)
                 let $members-to-add := $all-new-members[not(.=$old-members)]
-                let $members-to-remove := $old-members[not(.=$all-new-members)][not(.="admin")]
+                let $members-to-remove := $old-members[not(.=$all-new-members)]
                 let $managers-to-add := $all-new-managers[not(.=$old-managers)]
                 let $managers-to-remove := $old-managers[not(.=$all-new-managers)][not(.="admin")]
                 let $errors := (
-                  for $member in distinct-values(($members-to-add, $managers-to-add))
-                  let $added := xmldb:add-user-to-group($member, $name)
-                  where not($added)
-                  return $member,
-                  for $member in $members-to-remove
-                  let $removed := xmldb:remove-user-from-group($member, $name)
-                  where not($removed)
-                  return $member
-                )
-                let $warnings :=
-                  let $managers-to-change := ($managers-to-add, $managers-to-remove)
-                  where exists($managers-to-change)
-                  return
-                    debug:debug(
-                      $debug:warn,
-                      "group",
-                      ("Managerial status cannot be changed for: ",
-                      string-join($managers-to-change, " ")
+                  (: Changing group managerships/memberships is supposed to work 
+                  w/o admin access (it does not). Admin access is required to
+                  ensure it works as an atomic operation if a user removes
+                  his own managership :)
+                  for $member in $members-to-add
+                  return 
+                    try {
+                      system:as-user("admin", $magic:password,
+                        sm:add-group-member($name, $member)
                       )
-                    )
+                    }
+                    catch * {
+                      "Adding member:" || $member
+                    },
+                  for $manager in $managers-to-add
+                  return
+                    try {
+                      system:as-user("admin", $magic:password,
+                        sm:add-group-manager($name, $manager)
+                      )
+                    }
+                    catch * {
+                      "Adding manager: " || $manager
+                    },
+                  for $member in $members-to-remove
+                  return 
+                    try {
+                      system:as-user("admin", $magic:password,
+                        sm:remove-group-member($name, $member)
+                      )
+                    }
+                    catch * {
+                      "Removing member:" || $member
+                    },
+                  for $manager in $managers-to-remove
+                  return
+                    try {
+                      system:as-user("admin", $magic:password,
+                        sm:remove-group-manager($name, $manager)
+                      )
+                    }
+                    catch * {
+                      "Removing manager:" || $manager
+                    }
+                )
                 return
                   if (exists($errors))
                   then
-                    api:rest-error(500, "Could not change group status of:",
+                    api:rest-error(500, "Could not change group status:",
                       string-join($errors, " ")
                     )
                   else
@@ -362,20 +410,30 @@ declare
                 api:rest-error(403, "Forbidden")
           else
             (: group does not exist, this is group creation :)
-            let $members := distinct-values($body//g:member[not(xs:boolean(@manager))])
+            let $members := distinct-values($body//g:member)
             let $managers := distinct-values(($body//g:member[xs:boolean(@manager)], "admin", $user))
             let $created :=
-              system:as-user("admin", $magic:password, 
-                xmldb:create-group($name, $managers)
-              )
+              try {
+                system:as-user("admin", $magic:password, 
+                  sm:create-group($name, $managers, string($body//g:description)) 
+                ),
+                true()
+              }
+              catch * {
+                false()
+              }
             return
               if ($created)
               then 
                 let $errors :=
                   for $member in $members
-                  let $added := xmldb:add-user-to-group($member, $name)
-                  where not($added)
-                  return $member
+                  return 
+                    try {
+                      sm:add-group-member($name, $member)
+                    }
+                    catch * {
+                      $member
+                    }
                 return 
                   if (exists($errors))
                   then
@@ -406,7 +464,8 @@ declare
  : @error HTTP 404 if the group does not exist
  : 
  : Notes: 
- :   Resources owned by a deleted group become property of "everyone"
+ :   Resources owned by a deleted group should become property of "everyone"
+ :   For now, they become property of guest.
  :   TODO: This code has some hacks to work around eXist deficiencies 
  :)
 declare
@@ -430,12 +489,12 @@ declare
             {
               (: members are not removed automatically from a deleted group :)
               let $all-group-members := grp:get-group-members($name)
+              let $all-group-managers := grp:get-group-managers($name)
               return system:as-user("admin", $magic:password, ( 
                 for $member in $all-group-members
-                let $removed := xmldb:remove-user-from-group($member, $name)
-                where not($removed)
-                return debug:debug($debug:warn, "group", 
-                  ("Could not remove ", $member, " from ", $name)),
+                return sm:remove-group-member($name, $member),
+                for $manager in $all-group-managers
+                return sm:remove-group-manager($name, $manager),
                 sm:remove-group($name)
               ))
             }

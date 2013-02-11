@@ -8,7 +8,7 @@
   <description>
     <p>Test the user and contributor profile API</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012 Efraim Feinstein,
+    <copyright>Copyright 2012-2013 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <asUser>testuser</asUser>
@@ -144,17 +144,21 @@
       <!-- remove user, group, and profile -->
       <code><![CDATA[
       system:as-user("admin", $magic:password,(
-        if (xmldb:group-exists("testuser3"))
+        if (sm:group-exists("testuser3"))
         then 
           try {
-            sm:delete-group("testuser3")
+            sm:remove-group("testuser3")
           } 
           catch * { 
-            util:log-system-out("WARNING: DELETING GROUPS IS BROKEN BEFORE r16453!") 
+            util:log-system-out((
+    $err:module, ":", $err:line-number, ":", 
+    $err:column-number, ","[$err:code], $err:code, ":"[$err:value], $err:value, ": "[$err:description], 
+    $err:description,
+    ";")) 
           }
         else (),
-        if (xmldb:exists-user("testuser3"))
-        then xmldb:delete-user("testuser3")
+        if (sm:user-exists("testuser3"))
+        then sm:remove-account("testuser3")
         else (),
         if (doc-available("/user/testuser3.xml"))
         then xmldb:remove("/user", "testuser3.xml")
@@ -173,8 +177,9 @@
       })
       ]]></code> 
       <class href="common.t.xml#Created"/>
-      <xpath desc="user has been created">xmldb:exists-user("testuser3")</xpath>
-      <xpath desc="group has been created">system:as-user("admin", $magic:password, xmldb:group-exists("testuser3"))</xpath>
+      <xpath desc="user has been created">system:as-user("admin", $magic:password, sm:user-exists("testuser3"))</xpath>
+      <xpath desc="group has been created">system:as-user("admin", $magic:password, sm:group-exists("testuser3"))</xpath>
+      <xpath desc="user is a manager of its own group">system:as-user("admin", $magic:password, sm:get-group-managers("testuser3")="testuser3")</xpath>
       <xpath desc="profile has been created">doc-available("/user/testuser3.xml")</xpath>
       <xpath desc="profile contains an idno equal to the user name">doc("/user/testuser3.xml")/j:contributor/tei:idno="testuser3"</xpath>
       <xpath desc="user profile permissions are correct">
@@ -237,7 +242,7 @@
       <!-- reset testuser2's password -->
       <code><![CDATA[
       system:as-user("admin", $magic:password, 
-        xmldb:change-user("testuser2", "testuser2", (), ())
+        sm:passwd("testuser2", "testuser2")
       )
       ]]></code>
     </tearDown>
@@ -460,12 +465,7 @@
     <setup>
       <code><![CDATA[
       system:as-user("admin", $magic:password, (
-        let $u := xmldb:create-user("testuser3", "testuser3", "everyone", ())
-        let $g := try {
-          xmldb:create-group("testuser3", ("admin", "testuser3"))
-          } catch * { 
-          util:log-system-out("WARNING: CREATING AN EXISTING GROUP CAUSES AN EXCEPTION INSTEAD OF A RETURN OF FALSE") 
-          }
+        let $u := sm:create-account("testuser3", "testuser3", "everyone")
         let $s := xmldb:store("/user", "testuser3.xml",
           <j:contributor>
             <tei:idno>testuser3</tei:idno>
@@ -488,13 +488,13 @@
         then xmldb:remove("/user", "testuser3.xml")
         else (),
         try { 
-          if (xmldb:group-exists("testuser3"))
-          then sm:delete-group("testuser3")
+          if (sm:group-exists("testuser3"))
+          then sm:remove-group("testuser3")
           else ()
         } 
         catch * { () },
-        if (xmldb:exists-user("testuser3"))
-        then xmldb:delete-user("testuser3")
+        if (sm:user-exists("testuser3"))
+        then sm:remove-account("testuser3")
         else ()
       ))
       ]]></code>
@@ -507,7 +507,7 @@
       ))
       ]]></code>
       <class href="common.t.xml#NoData"/>
-      <xpath desc="user removed">not(xmldb:exists-user("testuser3"))</xpath>
+      <xpath desc="user removed">not(sm:user-exists("testuser3"))</xpath>
       <xpath desc="group removed">not(sm:get-groups()="testuser3")</xpath>
       <xpath desc="profile removed">not(doc-available("/user/testuser3.xml"))</xpath>
     </test>

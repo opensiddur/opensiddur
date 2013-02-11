@@ -60,17 +60,17 @@ declare function crest:record-change(
       />
   return
     if (exists($revisionDesc) and exists($revisionDesc/*))
-    then
+    then 
       update insert $change preceding $revisionDesc/*[1]
     else if (exists($revisionDesc))
-    then
+    then 
       update insert $change into $revisionDesc
-    else
+    else 
       update insert 
         <tei:revisionDesc>{
           $change
         }</tei:revisionDesc>
-      following $doc//tei:teiHeader/*[last()]
+      following $doc//tei:teiHeader/*[count(.)] (: TODO: change back to last() when eXist bug is fixed :)    
 };
 
 (:~ validate a document based on a given schema 

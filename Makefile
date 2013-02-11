@@ -135,7 +135,7 @@ TEI_REVISION ?= -r 11440
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REV ?= 18233
+EXIST_REV ?= 18254
 EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
@@ -169,7 +169,7 @@ schema-clean: schema-build-clean
 .PHONY: clean
 clean: xsltdoc-clean schema-clean code-clean input-conversion-clean db-clean db-syncclean clean-hebmorph clean-hebmorph-lucene dist-clean-exist setup-clean
 
-$(DBDIR)/common: $(DBDIR)/code
+$(DBDIR)/common: $(DBDIR)/code params.xsl2
 
 RSYNC_EXCLUDE=--exclude=.svn --exclude=~*
 

@@ -28,6 +28,7 @@ declare namespace error="http://jewishliturgy.org/errors";
 
 (: path to user profile data :)
 declare variable $user:path := "/db/user";
+declare variable $user:api-path := "/api/user";
 (: path to schema :)
 declare variable $user:schema := "/db/schema/contributor.rnc";
 
@@ -60,7 +61,7 @@ declare
       let $api-name := replace(util:document-name(doc($document)), "\.xml$", "")
       return
       <li xmlns="http://www.w3.org/1999/xhtml" class="result">
-        <a class="document" href="/api{$user:path}/{$api-name}">{
+        <a class="document" href="{$user:api-path}/{$api-name}">{
         user:result-title(doc($document)/j:contributor)
         }</a>:
         <ol class="contexts">{
@@ -97,10 +98,10 @@ declare
       let $api-name := replace(util:document-name($user), "\.xml$", "")
       return
         <li class="result">
-          <a class="document" href="/api{$user:path}/{$api-name}">{
+          <a class="document" href="{$user:api-path}/{$api-name}">{
             user:result-title($user)
           }</a>
-          <a class="alt" property="groups" href="/api{$user:path}/{$api-name}/groups">groups</a>
+          <a class="alt" property="groups" href="{$user:api-path}/{$api-name}/groups">groups</a>
         </li>
     }</ul>,
     $start,
@@ -151,7 +152,7 @@ declare
         <title>User and contributor API</title>
         <link rel="search"
                type="application/opensearchdescription+xml" 
-               href="/api/data/OpenSearchDescription?source={encode-for-uri($user:path)}"
+               href="/api/data/OpenSearchDescription?source={encode-for-uri($user:api-path)}"
                title="Full text search" />
         <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
         {((:<meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>:))}
@@ -239,7 +240,7 @@ declare
             </output:serialization-parameters>
             {
             system:as-user("admin", $magic:password, 
-              xmldb:change-user($name, $password, (), ())
+              sm:passwd($name, $password)
             )
             }
             <http:response status="204"/>
@@ -247,7 +248,7 @@ declare
         else if (not($user))
         then
           (: not authenticated, this is a new user request :)
-          if (xmldb:exists-user($name))
+          if (system:as-user("admin", $magic:password, sm:user-exists($name)))
           then 
             (: user already exists, need to be authenticated to change the password :)
             api:rest-error(401, "Not authorized")
@@ -258,17 +259,7 @@ declare
           else ( 
             (: the user can be created :)
             system:as-user("admin", $magic:password, (
-              let $null := xmldb:create-user($name, $password, "everyone", ())
-              let $grouped :=
-                (: TODO: remove this code when using eXist r16453+ :)
-                try {
-                  xmldb:create-group($name, ($name, "admin"))
-                  or true()
-                }
-                catch * {
-                  true(), 
-                  debug:debug($debug:warn, "api", "While creating a user, the group already existed and passed me an NPE")
-                }
+              let $null := sm:create-account($name, $password, "everyone")
               let $stored := 
                 xmldb:store($user:path, 
                   concat(encode-for-uri($name), ".xml"),
@@ -278,7 +269,7 @@ declare
                 )
               let $uri := xs:anyURI($stored)
               return
-                if ($stored and $grouped)
+                if ($stored)
                 then 
                   <rest:response>
                     <output:serialization-parameters>
@@ -294,8 +285,8 @@ declare
                     </http:response>
                   </rest:response>
                 else 
-                  api:rest-error(500, "Internal error in creating a group or storing a document",
-                    ("group creation: " || $grouped || " storage = " || $stored) 
+                  api:rest-error(500, "Internal error in storing a document",
+                    (" storage = " || $stored) 
                   )
             ))
           )
@@ -435,7 +426,11 @@ declare
       xmldb:remove($user:path, $resource-name),
       system:as-user("admin", $magic:password, (
         try {
-          xmldb:delete-user($name),
+          for $member in sm:get-group-members($name)
+          return sm:remove-group-member($name, $member),
+          for $manager in sm:get-group-managers($name)
+          return sm:remove-group-manager($name, $manager),
+          sm:remove-account($name),
           sm:remove-group($name), (: TODO: successor group is guest! until remove-group#2 exists@ :)
           $return-success
         }
