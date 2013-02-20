@@ -79,6 +79,31 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <moduleRef key="tagdocs" include="macro.anyXML"/>
           <specGrpRef target="#common-specs-base"/>
          
+          <macroSpec ident="macro.anyXML" module="tagdocs" mode="change">
+            <content>
+              <rng:element>
+                <rng:anyName>
+                 <rng:except>
+                  <rng:nsName ns="http://www.tei-c.org/ns/1.0"/>
+                  <rng:nsName ns="http://jewishliturgy.org/ns/jlptei/1.0"/>
+                  <rng:name ns="http://www.tei-c.org/ns/Examples">egXML</rng:name>
+                 </rng:except>
+                </rng:anyName>
+                <rng:zeroOrMore>
+                 <rng:attribute>
+                  <rng:anyName/>
+                 </rng:attribute>
+                </rng:zeroOrMore>
+                <rng:zeroOrMore>
+                 <rng:choice>
+                  <rng:text/>
+                  <rng:ref name="macro.anyXML"/>
+                 </rng:choice>
+                </rng:zeroOrMore>
+               </rng:element>
+            </content>
+          </macroSpec>
+         
           <elementSpec ident="stylesheet" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
             <desc>Contains a stylesheet.</desc>
             <classes>

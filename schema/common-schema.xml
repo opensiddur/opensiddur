@@ -10,16 +10,6 @@ schemas, not as an independent unit
   xml:lang="en">
   <xi:include href="common-schema-base.xml"/>
   <specGrpRef target="#common-specs-base"/>
-  <elementSpec ident="sourceDesc" mode="change" module="header">
-    <attList>
-      <attDef ident="default" mode="delete"/>
-    </attList>
-    <content>
-      <rng:oneOrMore xmlns:rng="http://relaxng.org/ns/structure/1.0">
-        <rng:ref name="model.sourceDescPart"/>
-      </rng:oneOrMore>
-    </content>
-  </elementSpec>
   <elementSpec ident="links" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
     <desc>Holds standoff markup links </desc>
     <classes>
