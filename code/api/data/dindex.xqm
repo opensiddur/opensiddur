@@ -38,6 +38,9 @@ declare
             <a class="discovery" href="{$api-base}/notes">Annotation data</a>
           </li>
           <li class="api">
+            <a class="discovery" href="{$api-base}/conditionals">Conditional definition data</a>
+          </li>
+          <li class="api">
             <a class="discovery" href="{$api-base}/linkage">Linkage data</a>
           </li>
           <li class="api">
@@ -45,6 +48,9 @@ declare
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/sources">Sources (Bibliographic data)</a>
+          </li>
+          <li class="api">
+            <a class="discovery" href="{$api-base}/styles">Styles</a>
           </li>
           <li class="api">
             {((: TODO: replace request:get-uri() with rest:get-absolute-uri() 
