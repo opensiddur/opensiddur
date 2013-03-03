@@ -158,6 +158,7 @@ schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema 
 	cp schema/build/bibliography.rnc $(DBDIR)/schema
 	cp schema/build/annotation.rnc $(DBDIR)/schema
 	cp schema/build/conditional.rnc $(DBDIR)/schema
+	cp schema/build/style.rnc $(DBDIR)/schema
 	cp schema/build/*.xsl2 $(DBDIR)/schema
 	cp schema/transliteration.rnc $(DBDIR)/schema
 	cp schema/access.rnc $(DBDIR)/schema
