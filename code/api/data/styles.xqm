@@ -85,9 +85,9 @@ declare
   ) as item()+ {
   let $xml := sty:get-xml($name)
   return
-    if ($xml[2] instance of document-node())
+    if ($xml instance of document-node())
     then
-      $xml[2]//j:stylesheet[@scheme="css"]/string()
+      $xml//j:stylesheet[@scheme="css"]/string()
     else
       $xml
 };
@@ -155,7 +155,7 @@ declare
 };
 
 (:~ Post a new style document 
- : @param $body The JLPTEI document
+ : @param $body The style document
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid JLPTEI XML
  : @error HTTP 401 Not authorized
@@ -173,7 +173,7 @@ declare
     $body as document-node()
   ) as item()+ {
   crest:post(
-    concat($sty:data-type, "/", $body/tei:TEI/@xml:lang),
+    concat($sty:data-type, "/", ($body/tei:TEI/@xml:lang/string(), "none")[1]),
     $sty:path-base,
     $sty:api-path-base,
     $body,
@@ -231,7 +231,7 @@ declare
       }</j:stylesheet>
     case element()
     return 
-      element {QName(name($n), namespace-uri($n))}{
+      element {QName(namespace-uri($n), name($n))}{
         $n/@*,
         sty:replace-stylesheet($n/node(), $replacement, $scheme)
       }
