@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+         xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+         xml:lang="en">
+   <tei:teiHeader>
+      <tei:fileDesc>
+         <tei:titleStmt>
+            <tei:title type="main" xml:lang="en">Existing</tei:title>
+            <j:responsGrp>
+               <tei:respons type="trc" locus="value" target="#parallel" resp="/user/testuser"/>
+            </j:responsGrp>
+         </tei:titleStmt>
+         <tei:publicationStmt>
+            <tei:availability status="free">
+               <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+            </tei:availability>
+            <tei:distributor>
+               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+            </tei:distributor>
+            <tei:date>2012-06-08</tei:date>
+         </tei:publicationStmt>
+         <tei:sourceDesc>
+            <tei:link type="bibl" target="#style /data/sources/Born%20Digital"/>
+         </tei:sourceDesc>
+      </tei:fileDesc>
+      <tei:revisionDesc>
+         <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
+      </tei:revisionDesc>
+   </tei:teiHeader>
+   <j:stylesheet scheme="css" xml:id="style"><![CDATA[
+// just some test CSS
+.tei-seg {
+  display:none;   
+}
+   ]]></j:stylesheet>
+   <tei:text>
+      <tei:body>
+        <tei:div>
+          <tei:p>Changed text.</tei:p>
+        </tei:div>
+      </tei:body>
+   </tei:text>
+</tei:TEI>  
