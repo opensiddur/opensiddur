@@ -210,25 +210,24 @@ dist-clean-exist:
 		./build.sh clean
 
 .PHONY: build-hebmorph build-hebmorph-lucene clean-hebmorph clean-hebmorph-lucene
-build-hebmorph: $(LIBDIR)/hebmorph/java/hebmorph/build/distribution/hebmorph.jar
+build-hebmorph: $(LIBDIR)/hebmorph/java/hebmorph-core/target/hebmorph-core-1.0-SNAPSHOT.jar
 
-$(LIBDIR)/hebmorph/java/hebmorph/build/distribution/hebmorph.jar:
-	cd $(LIBDIR)/hebmorph/java/hebmorph/ && \
-    ant jar
+$(LIBDIR)/hebmorph/java/hebmorph-core/target/hebmorph-core-1.0-SNAPSHOT.jar:
+	cd $(LIBDIR)/hebmorph/java/hebmorph-core/ && \
+    mvn install
 
 clean-hebmorph:
-	cd $(LIBDIR)/hebmorph/java/hebmorph/ && \
-    ant clean
+	cd $(LIBDIR)/hebmorph/java/hebmorph-core/ && \
+    mvn clean
 
-build-hebmorph-lucene: build-hebmorph $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar 
+build-hebmorph-lucene: build-hebmorph lib/hebmorph/java/hebmorph-lucene/target/hebmorph-lucene-1.0-SNAPSHOT.jar 
 
-$(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar:
+$(LIBDIR)/hebmorph/java/hebmorph-lucene/target/hebmorph-lucene-1.0-SNAPSHOT.jar:
 	#cp $(LIBDIR)/exist/extensions/indexes/lucene/lucene*.jar $(LIBDIR)/hebmorph/java/lucene.hebrew/lib
-	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant jar
+	cd $(LIBDIR)/hebmorph/java/hebmorph-lucene && mvn install
 
 clean-hebmorph-lucene:
-	cd $(LIBDIR)/hebmorph/java/lucene.hebrew/ && ant clean
-	rm -f $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar 
+	cd $(LIBDIR)/hebmorph/java/hebmorph-lucene && mvn clean
 
 # Install a copy of the eXist database
 .PHONY: db-install db-install-nonet db-install-wlc db-uninstall db-sync db-syncclean installer patches lucene-install copy-files copy-libs setup-password
@@ -253,10 +252,11 @@ patches:
 	$(XSLT) -s $(EXIST_INSTALL_DIR)/webapp/WEB-INF/controller-config.xml -o $(EXIST_INSTALL_DIR)/webapp/WEB-INF/controller-config.xml $(SETUPDIR)/setup-controller-config-xml.xsl2
 	-patch -Nd $(EXIST_INSTALL_DIR)/tools/jetty/etc < $(SETUPDIR)/jetty.xml.patch
 
-lucene-install: installer $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/lucene.hebrew.jar 
+lucene-install: installer $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/hebmorph-lucene-1.0-SNAPSHOT.jar 
 
-$(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/lucene.hebrew.jar:
-	cp $(LIBDIR)/hebmorph/java/lucene.hebrew/build/distribution/lucene.hebrew.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+$(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/hebmorph-lucene-1.0-SNAPSHOT.jar:
+	cp $(LIBDIR)/hebmorph/java/hebmorph-lucene/target/hebmorph-lucene-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+	cp $(LIBDIR)/hebmorph/java/hebmorph-core/target/hebmorph-core-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
 
 copy-files:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 -d 775 -q 755 $(DBDIR)
