@@ -27,8 +27,15 @@ schemas, not as an independent unit
   </elementSpec>
   <elementSpec ident="segGen" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
     <desc>Generated segment.</desc>
+    <classes>
+      <memberOf key="model.segLike"/>
+      <memberOf key="att.global"/>
+    </classes>
+    <content>
+      <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="macro.paraContent"/>
+    </content>
     <attList>
-      <attDef ident="type" mode="change" usage="req">
+      <attDef ident="type" mode="add" usage="req">
         <desc>Type of segment generation that is required.</desc>
         <datatype minOccurs="1" maxOccurs="1">
           <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
@@ -38,13 +45,6 @@ schemas, not as an independent unit
         </valList>
       </attDef>
     </attList>
-    <classes>
-      <memberOf key="model.segLike"/>
-      <memberOf key="att.global"/>
-    </classes>
-    <content>
-      <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="macro.paraContent"/>
-    </content>
   </elementSpec>
   <elementSpec ident="option" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
     <desc>Marks a section of text, which may be included, depending on the result of a conditional evaluation.</desc>
