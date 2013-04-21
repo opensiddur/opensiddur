@@ -98,7 +98,7 @@ EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
-EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.0RC2-rev$(EXIST_REV).jar
+EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1dev-rev$(EXIST_REV).jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
 EXISTBACKUP ?= java -Dexist.home=$(EXIST_INSTALL_DIR) -jar $(EXIST_INSTALL_DIR)/start.jar org.exist.backup.Main 
 
@@ -135,7 +135,7 @@ TEI_REVISION ?= -r 11440
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REV ?= 18254
+EXIST_REV ?= 18341
 EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
@@ -151,13 +151,14 @@ $(TEMPDIR):
 	mkdir $(TEMPDIR)
 
 .PHONY: schema schema-clean
-schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema linkage-schema conditional-schema style-schema
+schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema linkage-schema conditional-schema style-schema dictionary-schema
 	cp schema/build/jlptei.rnc $(DBDIR)/schema
 	cp schema/build/linkage.rnc $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
 	cp schema/build/bibliography.rnc $(DBDIR)/schema
 	cp schema/build/annotation.rnc $(DBDIR)/schema
 	cp schema/build/conditional.rnc $(DBDIR)/schema
+	cp schema/build/dictionary.rnc $(DBDIR)/schema
 	cp schema/build/style.rnc $(DBDIR)/schema
 	cp schema/build/*.xsl2 $(DBDIR)/schema
 	cp schema/transliteration.rnc $(DBDIR)/schema

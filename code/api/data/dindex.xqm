@@ -41,6 +41,9 @@ declare
             <a class="discovery" href="{$api-base}/conditionals">Conditional definition data</a>
           </li>
           <li class="api">
+            <a class="discovery" href="{$api-base}/dictionaries">Dictionary data</a>
+          </li>
+          <li class="api">
             <a class="discovery" href="{$api-base}/linkage">Linkage data</a>
           </li>
           <li class="api">
