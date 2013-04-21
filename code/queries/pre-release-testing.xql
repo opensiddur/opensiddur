@@ -21,6 +21,7 @@ let $tests-to-run :=
     <test module="/db/code/tests/api/group.t.xml"/>
     <test module="/db/code/tests/api/data/dindex.t.xml"/>
     <test module="/db/code/tests/api/data/conditionals.t.xml"/>
+    <test module="/db/code/tests/api/data/dictionaries.t.xml"/>
     <test module="/db/code/tests/api/data/linkage.t.xml"/>
     <test module="/db/code/tests/api/data/notes.t.xml"/>
     <test module="/db/code/tests/api/data/original.t.xml"/>
