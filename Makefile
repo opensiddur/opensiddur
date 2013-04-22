@@ -255,9 +255,13 @@ patches:
 
 lucene-install: installer $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/hebmorph-lucene-1.0-SNAPSHOT.jar 
 
+# KLUGE: temporarily back up commit bec2a019ddf59e69e4556b74f7d969a820b78200, the last one pre-Maven, avoids a bug.
+# the source code is in the git repository.
 $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/hebmorph-lucene-1.0-SNAPSHOT.jar:
-	cp $(LIBDIR)/hebmorph/java/hebmorph-lucene/target/hebmorph-lucene-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
-	cp $(LIBDIR)/hebmorph/java/hebmorph-core/target/hebmorph-core-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+#	cp $(LIBDIR)/hebmorph/java/hebmorph-lucene/target/hebmorph-lucene-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+#	cp $(LIBDIR)/hebmorph/java/hebmorph-core/target/hebmorph-core-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+	cp $(LIBDIR)/hebmorph.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+	cp $(LIBDIR)/lucene.hebrew.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
 
 copy-files:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 -d 775 -q 755 $(DBDIR)
