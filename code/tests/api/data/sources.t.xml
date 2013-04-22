@@ -30,9 +30,9 @@
       destination="/db/data/sources" destination-name="NoWriteAccess.xml" />
     <code><![CDATA[
       system:as-user("admin", $magic:password,
-        let $existing-uri := xs:anyURI("/data/sources/Existing.xml")
-        let $no-access-uri := xs:anyURI("/data/sources/NoAccess.xml")
-        let $no-write-access-uri := xs:anyURI("/data/sources/NoWriteAccess.xml")
+        let $existing-uri := xs:anyURI("/db/data/sources/Existing.xml")
+        let $no-access-uri := xs:anyURI("/db/data/sources/NoAccess.xml")
+        let $no-write-access-uri := xs:anyURI("/db/data/sources/NoWriteAccess.xml")
         return (
           sm:chown($existing-uri, "testuser"),
           sm:chgrp($existing-uri, "everyone"),
@@ -47,9 +47,14 @@
     ]]></code>
   </setup>
   <tearDown>
-    <remove-document collection="/data/sources" name="Existing.xml"/>
-    <remove-document collection="/data/sources" name="NoAccess.xml"/>
-    <remove-document collection="/data/sources" name="NoWriteAccess.xml"/>
+    <remove-document collection="/db/data/sources" name="Existing.xml"/>
+    <remove-document collection="/db/data/sources" name="NoWriteAccess.xml"/>
+    <!-- NoAccess has to be removed by admin -->
+    <code><![CDATA[
+      system:as-user("admin", $magic:password, 
+          xmldb:remove("/db/data/sources", "NoAccess.xml")
+      )
+    ]]></code>
   </tearDown>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -148,7 +153,7 @@
     <tearDown>
       <code><![CDATA[
       let $document := 
-        collection("/data/sources")//tei:title[.="Valid"]/root(.)
+        collection("/db/data/sources")//tei:title[.="Valid"]/root(.)
       where exists($document)
       return xmldb:remove(
         util:collection-name($document),
@@ -176,7 +181,7 @@
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
-      src:put("Existing", doc("/code/tests/api/data/sources/Existing-After-Put.xml"))
+      src:put("Existing", doc("/db/code/tests/api/data/sources/Existing-After-Put.xml"))
       ]]></code>
       <class href="../common.t.xml#NoData"/>
       <xpath desc="The new document has been saved">collection('/data/sources')[descendant::tei:title[.='Existing']]//tei:date/@when=1920</xpath>
@@ -184,7 +189,7 @@
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      src:put("DoesNotExist", doc("/code/tests/api/data/sources/Valid.xml"))
+      src:put("DoesNotExist", doc("/db/code/tests/api/data/sources/Valid.xml"))
       ]]></code>
       <class href="../common.t.xml#NotFound"/>
     </test>
@@ -247,21 +252,21 @@
     <test>
       <task>src:post(): Post a resource</task>
       <code><![CDATA[
-      src:post(doc("/code/tests/api/data/sources/Valid.xml"))
+      src:post(doc("/db/code/tests/api/data/sources/Valid.xml"))
       ]]></code>
       <class href="../common.t.xml#Unauthorized"/>
     </test>
     <test>
       <task>src:put(): Put an existing resource</task>
       <code><![CDATA[
-      src:put("Existing", doc("/code/tests/api/data/sources/Valid.xml"))
+      src:put("Existing", doc("/db/code/tests/api/data/sources/Valid.xml"))
       ]]></code>
       <class href="../common.t.xml#Unauthorized"/>
     </test>
     <test>
       <task>src:put(): Put a nonexisting resource</task>
       <code><![CDATA[
-      src:put("DoesNotExist", doc("/code/tests/api/data/sources/Valid.xml"))
+      src:put("DoesNotExist", doc("/db/code/tests/api/data/sources/Valid.xml"))
       ]]></code>
       <class href="../common.t.xml#NotFound"/>
     </test>
