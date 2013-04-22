@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+         xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+         xml:lang="en">
+   <tei:teiHeader>
+      <tei:fileDesc>
+         <tei:titleStmt>
+            <tei:title type="main" xml:lang="en">Existing</tei:title>
+            <j:responsGrp>
+               <tei:respons type="trc" locus="value" target="#text" resp="/user/testuser"/>
+            </j:responsGrp>
+         </tei:titleStmt>
+         <tei:publicationStmt>
+            <tei:availability status="free">
+               <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+            </tei:availability>
+            <tei:distributor>
+               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+            </tei:distributor>
+            <tei:date>2012-06-08</tei:date>
+         </tei:publicationStmt>
+         <tei:sourceDesc>
+            <tei:link type="bibl" target="#text /data/sources/Born%20Digital"/>
+         </tei:sourceDesc>
+      </tei:fileDesc>
+      <tei:revisionDesc>
+         <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
+      </tei:revisionDesc>
+   </tei:teiHeader>
+   <tei:text>
+      <tei:body>
+        <tei:entry xml:id="H1">
+            <tei:form>
+               <tei:orth xml:lang="he">אָב</tei:orth>
+               <tei:orth type="transliteration">
+                  <j:segGen type="transliteration" xml:lang="he">אָב</j:segGen>
+               </tei:orth>
+               <tei:pron>awb</tei:pron>
+            </tei:form>
+            <tei:etym>
+               <tei:lang>Hebrew</tei:lang>
+               <tei:gloss>a primitive word;</tei:gloss>
+            </tei:etym>
+            <tei:gramGrp>
+               <tei:pos>n-m</tei:pos>
+            </tei:gramGrp>
+            <tei:cit type="translation">
+               <tei:quote type="strongs">
+                  <tei:hi>father</tei:hi>, in a literal and immediate, or figurative and remote application</tei:quote>
+               <tei:quote type="kjv">chief, (fore-) father(-less), [idiom] patrimony, principal. Compare names in 'Abi-'.</tei:quote>
+            </tei:cit>
+            <tei:sense>
+               <tei:sense xml:id="QueryResult">
+                  <tei:def>Query result</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S1">
+                  <tei:def>father of an individual</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S2">
+                  <tei:def>of God as father of his people</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S3">
+                  <tei:def>head or founder of a household,  group,  family,  or clan</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S4">
+                  <tei:def>ancestor</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S4a">
+                  <tei:def>grandfather,  forefathers — of person</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S4b">
+                  <tei:def>of people</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S5">
+                  <tei:def>originator or patron of a class,  profession,  or art</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S6">
+                  <tei:def>of producer,  generator (fig.)</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S7">
+                  <tei:def>of benevolence and protection (fig.)</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S8">
+                  <tei:def>term of respect and honour</tei:def>
+               </tei:sense>
+               <tei:sense xml:id="H1S9">
+                  <tei:def>ruler or chief (spec.)</tei:def>
+               </tei:sense>
+            </tei:sense>
+         </tei:entry>
+      </tei:body>
+   </tei:text>
+</tei:TEI>  

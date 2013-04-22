@@ -98,7 +98,7 @@ EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
-EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.0RC2-rev$(EXIST_REV).jar
+EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1dev-rev$(EXIST_REV).jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
 EXISTBACKUP ?= java -Dexist.home=$(EXIST_INSTALL_DIR) -jar $(EXIST_INSTALL_DIR)/start.jar org.exist.backup.Main 
 
@@ -135,7 +135,7 @@ TEI_REVISION ?= -r 11440
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REV ?= 18254
+EXIST_REV ?= 18341
 EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
@@ -151,13 +151,14 @@ $(TEMPDIR):
 	mkdir $(TEMPDIR)
 
 .PHONY: schema schema-clean
-schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema linkage-schema conditional-schema style-schema
+schema: $(DBDIR)/schema jlptei-schema transliteration-schema contributor-schema bibliography-schema annotation-schema linkage-schema conditional-schema style-schema dictionary-schema
 	cp schema/build/jlptei.rnc $(DBDIR)/schema
 	cp schema/build/linkage.rnc $(DBDIR)/schema
 	cp schema/build/contributor.rnc $(DBDIR)/schema
 	cp schema/build/bibliography.rnc $(DBDIR)/schema
 	cp schema/build/annotation.rnc $(DBDIR)/schema
 	cp schema/build/conditional.rnc $(DBDIR)/schema
+	cp schema/build/dictionary.rnc $(DBDIR)/schema
 	cp schema/build/style.rnc $(DBDIR)/schema
 	cp schema/build/*.xsl2 $(DBDIR)/schema
 	cp schema/transliteration.rnc $(DBDIR)/schema
@@ -254,9 +255,13 @@ patches:
 
 lucene-install: installer $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/hebmorph-lucene-1.0-SNAPSHOT.jar 
 
+# KLUGE: temporarily back up commit bec2a019ddf59e69e4556b74f7d969a820b78200, the last one pre-Maven, avoids a bug.
+# the source code is in the git repository.
 $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/hebmorph-lucene-1.0-SNAPSHOT.jar:
-	cp $(LIBDIR)/hebmorph/java/hebmorph-lucene/target/hebmorph-lucene-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
-	cp $(LIBDIR)/hebmorph/java/hebmorph-core/target/hebmorph-core-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+#	cp $(LIBDIR)/hebmorph/java/hebmorph-lucene/target/hebmorph-lucene-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+#	cp $(LIBDIR)/hebmorph/java/hebmorph-core/target/hebmorph-core-1.0-SNAPSHOT.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+	cp $(LIBDIR)/hebmorph.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
+	cp $(LIBDIR)/lucene.hebrew.jar $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib
 
 copy-files:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 -d 775 -q 755 $(DBDIR)

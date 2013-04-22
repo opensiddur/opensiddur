@@ -4,10 +4,11 @@
   xmlns:tei="http://www.tei-c.org/ns/1.0"
   xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
   xmlns:osis="http://www.bibletechnologies.net/2003/OSIS/namespace"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
   xmlns:xd="http://www.pnp-software.com/XSLTdoc" 
   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
   xmlns:cc="http://web.resource.org/cc/"
-  exclude-result-prefixes="osis xd rdf cc">
+  exclude-result-prefixes="osis xs xd rdf cc">
   <xsl:import href="../../common/params.xsl2" />
   <xsl:import href="../fill-template.xsl2" />  
   <xsl:output indent="yes" encoding="utf-8" method="xml" />
@@ -55,60 +56,46 @@
     <xd:short>Populate template and launch main processing logic for program</xd:short>
   </xd:doc>
   <xsl:template name="main">
-    <xsl:variable name="bibl-content" as="element(tei:bibl)">
-			<tei:bibl xml:id="biblStrong">
-	      <tei:ptr target="bibliography.xml#strongs-hebrew" />
-			</tei:bibl>
-    </xsl:variable>
-    <xsl:variable name="license-content" as="element()+">
-      <p xml:lang="en" xmlns="http://www.tei-c.org/ns/1.0">
-        To the extent possible under law,
-        the contributors who associated
-        <ref type="license" target="http://www.creativecommons.org/publicdomain/zero/1.0">Creative Commons Zero
-        </ref>
-        with this work have waived all copyright and related or
-        neighboring rights to this work.
-      </p>
-      <rdf:RDF>
-        <cc:License rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
-          <cc:legalcode
-            rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/legalcode" />
-          <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction" />
-          <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution" />
-        </cc:License>
-      </rdf:RDF>
-    </xsl:variable>
-    
-    <xsl:apply-templates select="$template" mode="fill-template">
-      <xsl:with-param tunnel="yes" name="title" as="element(tei:title)+">
-        <tei:title xml:lang="en">Strong's Dictionary of the Words in the Hebrew Bible</tei:title>
+    <xsl:call-template name="fill-template">
+      <xsl:with-param name="xmllang" as="xs:string" select="'en'"/>
+      <xsl:with-param name="respons" as="element(tei:respons)+">
+        <tei:respons locus="value" resp="/user/ZeevClementson" target="#body" type="enc" />
       </xsl:with-param>
-      <xsl:with-param tunnel="yes" name="fsdDecl" as="element(tei:fsdDecl)">
+      <xsl:with-param name="title" as="element(tei:title)+">
+        <tei:title xml:lang="en" type="main">Strong's Dictionary of the Words in the Hebrew Bible</tei:title>
+      </xsl:with-param>
+      <xsl:with-param name="license" as="element(tei:licence)">
+        <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+      </xsl:with-param>
+      <xsl:with-param name="bibliography" as="element(tei:link)+">
+        <tei:link type="bibl" target="#main /sources/StrongsDictionary.xml"/>
+      </xsl:with-param>
+      <!--
+      <xsl:with-param name="fsdDecl" as="element(tei:fsdDecl)">
         <tei:fsdDecl>
           <tei:fsdLink type="transliteration" target="transliteration-fsd.xml#fsTransliteration"/>
         </tei:fsdDecl>
       </xsl:with-param>
-      <xsl:with-param tunnel="yes" name="conditionGrp" as="element(j:conditionGrp)">
+      <xsl:with-param  name="conditionGrp" as="element(j:conditionGrp)">
         <j:conditionGrp>
           <tei:fs type="transliteration" xml:id="transliterator_on">
             <tei:f name="table"><tei:symbol value="strongs"/></tei:f>
           </tei:fs>
         </j:conditionGrp>
       </xsl:with-param>
-      <xsl:with-param tunnel="yes" name="links" as="element(j:links)">          
+      <xsl:with-param  name="links" as="element(j:links)">          
         <j:links>
           <tei:link type="set" targets="#main #transliterator_on"/>
 					<tei:link type="source" targets="#main #biblStrong"/>
         </j:links>
-      </xsl:with-param>    
-      <xsl:with-param tunnel="yes" name="body" as="element(tei:body)">
+      </xsl:with-param>
+      -->    
+      <xsl:with-param  name="body" as="element(tei:body)">
         <tei:body xml:lang="en" xml:id="main">
           <xsl:apply-templates select="osis:osis/osis:osisText/osis:div/osis:div"/>
         </tei:body>
       </xsl:with-param>
-      <xsl:with-param name="license" tunnel="yes" as="element()+" select="$license-content" />
-      <xsl:with-param name="bibl" tunnel="yes" as="element(tei:bibl)" select="$bibl-content" />
-    </xsl:apply-templates>
+    </xsl:call-template>
   </xsl:template>
   
   <xd:doc>
