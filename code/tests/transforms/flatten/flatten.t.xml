@@ -10,7 +10,7 @@
   <description>
     <p>Tests of flatten transform</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012 Efraim Feinstein
+    <copyright>Copyright 2012-2013 Efraim Feinstein
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -18,8 +18,59 @@
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace flatten="http://jewishliturgy.org/transform/flatten"
-      at "xmldb:exist:///code/transforms/flatten/flatten.xqm";
+      at "xmldb:exist:///db/code/transforms/flatten/flatten.xqm";
   </imports>
+  <!-- What needs to be tested:
+  - no j:layer -> acts as identity
+  - j:layer possibilities:
+  <tei:div>
+    <tei:ptr target="st1"/>
+  </tei:div>
+  
+  <tei:div>
+    <tei:head>title</tei:head>
+    <tei:ab>
+      <tei:label>Label</tei:label>
+      <tei:ptr target="st1"/>
+    </tei:ab>
+  </tei:div>
+  
+  <tei:div>
+    <tei:head>title</tei:head>
+    <tei:ab>
+      <tei:label>1</tei:label>
+      <tei:ptr target="st1"/>
+      <tei:label>2</tei:label>
+    </tei:ab>
+  </tei:div>
+  
+  <tei:div>
+    <tei:head>title</tei:head>
+    <tei:ab>
+      <tei:label>1</tei:label>
+      <tei:ptr target="st1"/>
+      <tei:label>2</tei:label>
+      <tei:ptr target="st2"/>
+      <tei:label>3</tei:label>
+    </tei:ab>
+    <tei:label>4</tei:label>
+  </tei:div>
+  
+  <tei:div>
+    <tei:head>title</tei:head>
+    <tei:ab>
+      <tei:label>1</tei:label>
+      <tei:ptr target="st1"/>
+    </tei:ab>
+    <tei:ab>
+      <tei:label>2</tei:label>
+      <tei:ptr target="st2"/>
+      <tei:label>3</tei:label>
+    </tei:ab>
+    <tei:ptr target="st3"/>
+  </tei:div>
+  
+   -->
   <TestSet>
     <testName>No concurrency</testName>
     <test>
