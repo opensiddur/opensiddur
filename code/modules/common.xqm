@@ -3,7 +3,7 @@ xquery version "3.0";
  : Common functions for the transform
  :
  : Open Siddur Project
- : Copyright 2011-2012 Efraim Feinstein 
+ : Copyright 2011-2013 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :)
@@ -206,4 +206,39 @@ declare function common:original-document-uri(
       )
   return    
     ($closest-jf-document-uri, $document-uri)[1]
+};
+
+(:~ apply an identity transform until reaching
+ : a node in $transition-nodes, then apply
+ : $transform 
+ : @param $nodes nodes to identity transform
+ : @param $transition-nodes transitional nodes
+ : @param $transform The transform to apply
+ : @param $params Named parameters to pass to the transform
+ :)
+declare function common:apply-at(
+  $nodes as node()*,
+  $transition-nodes as node()*,
+  $transform as function(node()*, map) as node()*,
+  $params as map
+  ) as node()* {
+  for $node in $nodes
+  return
+    if ($node is $transition-nodes)
+    then 
+      $transform($node, $params)
+    else
+      typeswitch($node)
+      case processing-instruction() return $node
+      case comment() return $node
+      case text() return $node
+      case element()
+      return
+        element {QName(namespace-uri($node), name($node))}{
+          $node/@*,
+          common:apply-at($node/node(), $transition-nodes, $transform, $params)
+        }
+      case document-node() 
+      return document { common:apply-at($node/node(), $transition-nodes, $transform, $params) }
+      default return common:apply-at($node/node(), $transition-nodes, $transform, $params)
 };

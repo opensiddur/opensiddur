@@ -9,6 +9,7 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 
 let $tests-to-run :=
   <tests>
+    <test module="/db/code/tests/modules/common.t.xml"/>
     <test module="/db/code/tests/modules/mirror.t.xml"/>
     <test module="/db/code/tests/modules/follow-uri.t.xml"/>
     <test module="/db/code/tests/modules/refindex.t.xml"/>
