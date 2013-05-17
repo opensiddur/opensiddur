@@ -20,93 +20,158 @@
     import module namespace flatten="http://jewishliturgy.org/transform/flatten"
       at "xmldb:exist:///db/code/transforms/flatten/flatten.xqm";
   </imports>
-  <!-- What needs to be tested:
-  - no j:layer -> acts as identity
-  - j:layer possibilities:
-  <tei:div>
-    <tei:ptr target="st1"/>
-  </tei:div>
-  
-  <tei:div>
-    <tei:head>title</tei:head>
-    <tei:ab>
-      <tei:label>Label</tei:label>
-      <tei:ptr target="st1"/>
-    </tei:ab>
-  </tei:div>
-  
-  <tei:div>
-    <tei:head>title</tei:head>
-    <tei:ab>
-      <tei:label>1</tei:label>
-      <tei:ptr target="st1"/>
-      <tei:label>2</tei:label>
-    </tei:ab>
-  </tei:div>
-  
-  <tei:div>
-    <tei:head>title</tei:head>
-    <tei:ab>
-      <tei:label>1</tei:label>
-      <tei:ptr target="st1"/>
-      <tei:label>2</tei:label>
-      <tei:ptr target="st2"/>
-      <tei:label>3</tei:label>
-    </tei:ab>
-    <tei:label>4</tei:label>
-  </tei:div>
-  
-  <tei:div>
-    <tei:head>title</tei:head>
-    <tei:ab>
-      <tei:label>1</tei:label>
-      <tei:ptr target="st1"/>
-    </tei:ab>
-    <tei:ab>
-      <tei:label>2</tei:label>
-      <tei:ptr target="st2"/>
-      <tei:label>3</tei:label>
-    </tei:ab>
-    <tei:ptr target="st3"/>
-  </tei:div>
-  
-   -->
   <TestSet>
     <testName>No concurrency</testName>
     <test>
       <task>acts as an identity transform</task>
       <code><![CDATA[
-        flatten:flatten(doc("/code/tests/transforms/flatten/no-concurrency.xml"))
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/identity.xml"),
+          map {}
+        )
       ]]></code>
-      <expected desc="acts as an identity transform" href="no-concurrency.xml"/>
+      <expected desc="acts as an identity transform" href="identity.xml"/>
     </test>        
   </TestSet>
   <TestSet>
-    <testName>A layer with an id</testName>
+    <testName>Simple concurrency</testName>
     <test>
-      <task>Flatten the layer</task>
+      <task>pointer to placeholder</task>
       <code><![CDATA[
-        flatten:flatten(doc("/code/tests/transforms/flatten/streamText-and-layer.xml")//j:layer)
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/pointer-to-placeholder.xml"),
+          map {}
+        )
       ]]></code>
-      <expected desc="flat layer, xml:id becomes jx:id, layer id is listed on every layer component">
-        <jf:layer type="p" jf:id="...">
-          <tei:p jf:id="p1" jf:start="p1"/>
-          <tei:label n="test">test</tei:label>
-          <tei:s jf:id="s1" jf:start="s1"/>
-          <jf:placeholder jf:id="seg1" jf:stream="..."/>
-          <tei:s jf:end="s1" />
-          <tei:p jf:end="p1" />
-          <tei:p jf:start="..." />
-          <tei:s jf:start="..." />
-          <jf:placeholder jf:id="seg2" jf:stream="..."/>
-          <jf:placeholder jf:id="seg3" jf:stream="..."/>
-          <jf:placeholder jf:id="seg4" jf:stream="..."/>
-          <jf:placeholder jf:id="an5" jf:stream="..."/>
-          <tei:s jf:end="..." />
-          <tei:p jf:end="..." />
-        </jf:layer>
-      </expected>
-      <xpath desc="all jf:stream attributes are the same">every $stream in .//@jf:stream satisfies $stream=(.//@jf:stream)[1]</xpath>
+      <expected desc="pointer changed to placeholder" 
+        href="pointer-to-placeholder-flat.xml"/>
+    </test>        
+  </TestSet>
+  <TestSet>
+    <testName>pointer to single placeholder with inline no-children elements</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/inline1.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" 
+        href="inline1-flat.xml"/>
+      <xpath desc="assigned id for start/end are same">.//tei:ab[@jf:start]/@jf:start=.//tei:ab[@jf:end]/@jf:end</xpath>
     </test>
   </TestSet>
+  <TestSet>
+    <testName>Two labels in a row</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/inline2.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="first label" xpath=".//tei:label[1]">
+        <tei:label
+          jf:position="1"
+          jf:relative="-1"
+          jf:nchildren="-1"
+          jf:nlevels="3"
+          jf:nprecedents="1"
+          jf:layer-id="div-layer"
+          >Label 1</tei:label>
+      </expected>
+      <expected desc="second label has an increased nprecedents" xpath=".//tei:label[2]">
+      <tei:label
+          jf:position="1"
+          jf:relative="-1"
+          jf:nchildren="-1"
+          jf:nlevels="3"
+          jf:nprecedents="2"
+          jf:layer-id="div-layer"
+          >Label 2</tei:label>
+      </expected>    
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Label following the pointer</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/inline3.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="first label" xpath=".//tei:label[1]">
+        <tei:label
+          jf:position="1"
+          jf:relative="-1"
+          jf:nchildren="-1"
+          jf:nlevels="3"
+          jf:nprecedents="1"
+          jf:layer-id="div-layer"
+          >Label 1</tei:label>
+      </expected>
+      <expected desc="second label has positive relative position" xpath=".//tei:label[2]">
+      <tei:label
+          jf:position="1"
+          jf:relative="1"
+          jf:nchildren="1"
+          jf:nlevels="-3"
+          jf:nprecedents="3"
+          jf:layer-id="div-layer"
+          >Label 2</tei:label>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Two pointers, labels following both and between</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/inline4.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="inline4-flat.xml"/>
+    </test>
+  </TestSet>
+  
+  <!-- What needs to be tested:
+  - j:layer possibilities:  
+  
+  simple suspend and continue:
+  <tei:div>
+    <tei:ptr target="seg1"/>
+    <tei:ptr target="seg3"/>
+  </tei:div>
+  
+  suspend and continue with extra labels
+  <tei:div>
+    <tei:label>before</tei:label>
+    <tei:ptr target="seg1"/>
+    <tei:label>after 1</tei:label>
+    <tei:ptr target="seg3"/>
+    <tei:label>after 3></tei:label>
+  </tei:div>
+  
+  multilevel suspend and continue
+  <tei:div>
+    <tei:ab n="1">
+      <tei:ptr target="seg1"/>
+    </tei:ab>
+    <tei:ptr target="seg3"/>
+  </tei:div>
+  
+  multilevel suspend and continue 2
+  <tei:div>
+    <tei:ab n="1">
+      <tei:ptr target="seg1"/>
+    </tei:ab>
+    <tei:ab n="2">
+      <tei:ptr target="seg3"/>
+    </tei:ab>
+  </tei:div>
+  
+  
+   -->
 </TestSuite>

@@ -106,7 +106,7 @@ declare function flatten:tei-ptr(
         jf:nchildren="0"
         jf:nlevels="0"
         jf:nprecedents="0"
-        jf:stream="{flatten:generate-id($stream)}"/>
+        jf:stream="{$stream/(@xml:id, @jf:id, flatten:generate-id(.))[1]}"/>
     else flatten:element($target, $params)
 };
 
@@ -258,23 +258,24 @@ declare function flatten:set-missing-attributes(
       if ($node/@jf:position)
       then $node
       else 
-        let $position := 
-          (: equivalent of (preceding::jf:placeholder[1], following::jf:placeholder[1])[1] :)
-          $nodes[
-            number((
+        let $position-number := 
+          number((
               $placeholder-positions[. < $pos][last()],
               $placeholder-positions[. > $pos][1]
             )[1])
-          ]
+        let $position := 
+          (: equivalent of (preceding::jf:placeholder[1], following::jf:placeholder[1])[1] :)
+          $nodes[$position-number]
         let $relative := 
-          if ($position << $node)
+          if ($position-number < $pos)
           then +1
           else -1 
         return
           (: need to enter position, relative, and nchildren :)
           element {QName(namespace-uri($node), name($node))}{
-            $node/@*,
+            $node/(@* except @jf:nlevels),
             $position/@jf:position,
+            attribute jf:nlevels { -$relative * $node/@jf:nlevels/number() },
             attribute jf:relative { $relative },
             attribute jf:nchildren {  $relative * $nchildren },
             $node/node()
