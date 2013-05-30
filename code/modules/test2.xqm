@@ -982,8 +982,9 @@ declare function t:deep-equal-wildcard(
 	$node1 as node()*,
 	$node2 as node()*
 	) as xs:boolean {
-	let $counts := count($node1) = count($node2)
-	let $subordinates := 
+	(
+	  count($node1) = count($node2)
+	  and
 		(every $result in 
 			(
 			for $n at $pos in $node1
@@ -998,8 +999,6 @@ declare function t:deep-equal-wildcard(
 			)
 			satisfies $result
 		)
-	return (
-		$counts and $subordinates
 	)
 };
 
