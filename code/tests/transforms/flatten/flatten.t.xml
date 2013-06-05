@@ -135,7 +135,18 @@
       <expected desc="flattened" href="inline4-flat.xml"/>
     </test>
   </TestSet>
-  
+  <TestSet>
+    <testName>Simple suspend and continue with 2 layers</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/suspend1.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="suspend1-flat.xml"/>
+    </test>
+  </TestSet>
   <!-- What needs to be tested:
   - j:layer possibilities:  
   

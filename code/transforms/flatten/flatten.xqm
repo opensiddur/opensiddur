@@ -124,19 +124,99 @@ declare function flatten:copy-attributes(
   else $context/@*
 };
 
+(:~ helper function: rewrite the @nchildren parameter following
+ : application of flatten:suspend-or-continue
+ :)
+declare function flatten:rewrite-suspend-or-continue(
+  $nodes as node()*
+  ) as node()* {
+  if (empty($nodes[@jf:suspend]))
+  then
+    (: no suspend: this is a no-op :)
+    trace($nodes, "no rewrite")
+  else
+    let $temp :=
+      (: required to make *-sibling::* work :)
+      trace(
+      <jf:temp>{
+        $nodes
+      }</jf:temp>
+      , "rewrite-or-suspend of")
+    let $start-node := $nodes[1]
+    let $start-node-id := trace($start-node/@jf:id/string(), "start-node-id")
+    let $start-level := trace($start-node/@jf:nlevels/number(), "start-node-level")
+    for $node in $temp/*
+    let $null := trace($node, "rewriting node")
+    return 
+      if ($node/(@jf:start, @jf:continue) = $start-node-id)
+      then
+        (: this is a start or continue node, look forwards :)
+        element { QName(namespace-uri($node), name($node)) }{
+          $node/(@* except @jf:nchildren),
+          attribute jf:nchildren { 
+            - count(
+              $node/
+                following-sibling::*
+                  [@jf:stream]
+                  [. << $node/following-sibling::*[(@jf:suspend, @jf:end)=$start-node-id][1]]
+            )
+          },
+          $node/node() 
+        }
+      else if ($node/(@jf:end, @jf:suspend) = $start-node-id)
+      then
+        (: this is an end or suspend node, look backwards :)
+        element { QName(namespace-uri($node), name($node)) }{
+          $node/(@* except @jf:nchildren),
+          attribute jf:nchildren { 
+            count(
+              $node/
+                preceding-sibling::*
+                  [@jf:stream]
+                  [. >> $node/preceding-sibling::*[(@jf:start, @jf:continue)=$start-node-id][1]]
+            )
+          },
+          $node/node() 
+        }
+      else if (
+        empty($node/(@jf:start|@jf:continue|@jf:suspend|@jf:end)) and 
+        $node/@jf:nlevels = ($start-level + 1) and
+        $node/preceding-sibling::*[@jf:start|@jf:continue][1]/(@jf:start, @jf:continue) = $start-node-id
+      )
+      then
+        (: this is a child node of the parent with no streamText children :)
+        element { QName(namespace-uri($node), name($node)) }{
+          $node/(@* except @jf:nchildren),
+          attribute jf:nchildren {
+            -1 * ($node/@jf:nchildren/number() < 0) *
+            count(
+              $node/
+                preceding-sibling::*[(@jf:start, @jf:continue)=$start-node-id][1]/
+                  following-sibling::*
+                    [@jf:stream]
+                    [. << following-sibling::*[(@jf:suspend, @jf:end)=$start-node-id][1]]
+            )
+          },
+          $node/node() 
+        }
+      else
+        (: nothing specific -- pass through :)
+        $node
+};
+
 (:~ add suspend or continue elements for the given context 
  : node to a set of flattened elements 
  :)
 declare function flatten:suspend-or-continue(
   $context as element(),
   $node-id as xs:string, 
-  $flattened-nodes as node()*
+  $flattened-nodes as node()*,
+  $start-node as element()
   ) as node()* {
   let $stream-children := $flattened-nodes[@jf:stream]
   let $positions := $stream-children/@jf:position/number()
-  let $nchildren := count($stream-children)
-  for $fnode in $flattened-nodes
-  return 
+  for $fnode at $pos in $flattened-nodes
+  return
     if ($fnode instance of element(jf:placeholder))
     then 
       let $position := $fnode/@jf:position/number()
@@ -149,7 +229,12 @@ declare function flatten:suspend-or-continue(
             attribute jf:continue { $node-id },
             $fnode/@jf:position,
             attribute jf:relative { -1 },
-            attribute jf:nchildren { -$nchildren }
+            $start-node/(
+              @jf:nchildren,
+              @jf:nlevels,
+              @jf:nprecedents,
+              @jf:layer-id
+            )
           }
         ),
         $fnode,
@@ -161,7 +246,10 @@ declare function flatten:suspend-or-continue(
             attribute jf:suspend { $node-id },
             $fnode/@jf:position,
             attribute jf:relative { 1 },
-            attribute jf:nchildren { $nchildren }
+            attribute jf:nchildren { - number($start-node/@jf:nchildren) },
+            attribute jf:nlevels { - number($start-node/@jf:nlevels) },
+            $start-node/@jf:nprecedents,
+            $start-node/@jf:layer-id
           }
         )
       )
@@ -212,24 +300,28 @@ declare function flatten:element(
 	    (: element has children in the streamText :)
   		let $stream-children := $children[@jf:stream]
   		let $nchildren := count($stream-children)
-  		return (
-      	element { QName(namespace-uri($context), local-name($context)) }{
-      		$attributes,
-  				attribute jf:start { $node-id },
-  				$stream-children[1]/@jf:position,
-  				attribute jf:relative { -1 },
-  				attribute jf:nchildren { -$nchildren },
-  				attribute jf:nlevels { $level },
-  				attribute jf:nprecedents { $nprecedents },
-  				attribute jf:layer-id { $params("flatten:layer-id") }
-  			},
+  		let $start-node :=
+  		  element { QName(namespace-uri($context), local-name($context)) }{
+          $attributes,
+          attribute jf:start { $node-id },
+          $stream-children[1]/@jf:position,
+          attribute jf:relative { -1 },
+          attribute jf:nchildren { -$nchildren },
+          attribute jf:nlevels { $level },
+          attribute jf:nprecedents { $nprecedents },
+          attribute jf:layer-id { $params("flatten:layer-id") }
+        }
+  		return flatten:rewrite-suspend-or-continue((
+      	$start-node,
+      	trace(
   			flatten:set-missing-attributes(
   			  $context,
   			  flatten:suspend-or-continue(
-  			    $context, $node-id, $children
+  			    $context, $node-id, $children, $start-node
   			  ),
   			  $nchildren
   			),
+  			"set-missing-attributes"),
   			element { QName(namespace-uri($context), local-name($context)) }{
         	attribute jf:end { $node-id },
         	$stream-children[last()]/@jf:position,
@@ -239,7 +331,7 @@ declare function flatten:element(
           attribute jf:nprecedents { $nprecedents },
           attribute jf:layer-id { $params("flatten:layer-id") }
         }
-      )
+      ))
 };
 
 declare function flatten:set-missing-attributes(
@@ -247,11 +339,12 @@ declare function flatten:set-missing-attributes(
   $nodes as node()*,
   $nchildren as xs:integer
   ) as node()* {
-  let $placeholder-positions := 
-    for $node at $pos in $nodes
-    where $node instance of element(jf:placeholder)
-    return $pos
-  for $node at $pos in $nodes
+  let $temp := 
+    (: required for siblinghood :)
+    <jf:temp>{
+      $nodes
+    }</jf:temp>
+  for $node at $pos in $temp/*
   return
     typeswitch($node)
     case element() return
@@ -259,15 +352,14 @@ declare function flatten:set-missing-attributes(
       then $node
       else 
         let $position-number := 
-          number((
-              $placeholder-positions[. < $pos][last()],
-              $placeholder-positions[. > $pos][1]
-            )[1])
+          count($node/preceding-sibling::jf:placeholder) + 1
         let $position := 
-          (: equivalent of (preceding::jf:placeholder[1], following::jf:placeholder[1])[1] :)
-          $nodes[$position-number]
+          $node/(
+            preceding-sibling::jf:placeholder[1], 
+            following-sibling::jf:placeholder[1]
+          )[1]
         let $relative := 
-          if ($position-number < $pos)
+          if ($position << $node)
           then +1
           else -1 
         return
