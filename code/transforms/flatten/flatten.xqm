@@ -20,6 +20,24 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
+(:~ order the given flattened nodes, using the information in 
+ : the ordering attributes
+ :)
+declare function flatten:order-flattened(
+  $flattened-nodes as node()*
+  ) {
+  for $n in $flattened-nodes
+  order by 
+    $n/@jf:position/number(), 
+    $n/@jf:relative/number(), 
+    $n/@jf:nchildren/number(), 
+    $n/@jf:nlevels/number(), 
+    $n/@jf:nprecedents/number(), 
+    $n/@jf:layer-id
+  return $n
+  
+};
+
 (:~ entry point to run flatten transform on an entire document,
  : returning the document with flattened layers
  :)
@@ -179,26 +197,42 @@ declare function flatten:rewrite-suspend-or-continue(
           $node/node() 
         }
       else if (
-        empty($node/(@jf:start|@jf:continue|@jf:suspend|@jf:end)) and 
-        $node/@jf:nlevels = ($start-level + 1) and
-        $node/preceding-sibling::*[@jf:start|@jf:continue][1]/(@jf:start, @jf:continue) = $start-node-id
+        trace(
+          empty($node/(@jf:start|@jf:continue|@jf:suspend|@jf:end))
+          , "empty cond")
+        and 
+        trace(
+          abs($node/@jf:nlevels) = ($start-level + 1)
+          , "nlevels condition"
+        ) and
+        trace(
+          $node/preceding-sibling::*[@jf:start|@jf:continue][@jf:nlevels = $start-level][1]/(@jf:start, @jf:continue) = $start-node-id
+          , "parent condition"
+        )
       )
       then
         (: this is a child node of the parent with no streamText children :)
-        element { QName(namespace-uri($node), name($node)) }{
-          $node/(@* except @jf:nchildren),
-          attribute jf:nchildren {
-            -1 * ($node/@jf:nchildren/number() < 0) *
-            count(
-              $node/
-                preceding-sibling::*[(@jf:start, @jf:continue)=$start-node-id][1]/
+        let $parent-node := trace(
+          trace($node, "rewrite-child")/preceding-sibling::*[(@jf:start, @jf:continue)=$start-node-id][@jf:nlevels = $start-level][1]
+        , "rewrite-parent")
+        return
+          element { QName(namespace-uri($node), name($node)) }{
+            $node/(@* except @jf:nchildren),
+            attribute jf:nchildren {
+              (
+                if (number($node/@jf:nchildren/number() < 0))
+                then -1
+                else 1
+              ) *
+              count(
+                $parent-node/                
                   following-sibling::*
                     [@jf:stream]
-                    [. << following-sibling::*[(@jf:suspend, @jf:end)=$start-node-id][1]]
-            )
-          },
-          $node/node() 
-        }
+                    [. << $parent-node/following-sibling::*[(@jf:suspend, @jf:end)=$start-node-id][1]]
+              )
+            },
+            $node/node() 
+          }
       else
         (: nothing specific -- pass through :)
         $node
@@ -403,9 +437,11 @@ declare function flatten:j-layer(
       attribute jf:id { 
         $id 
       },
-      flatten:flatten(
-        $context/node(), 
-        map:new(($params, map { "flatten:layer-id" := $id } ))
+      flatten:order-flattened(
+        flatten:flatten(
+          $context/node(), 
+          map:new(($params, map { "flatten:layer-id" := $id } ))
+        )
       )
     }
 };

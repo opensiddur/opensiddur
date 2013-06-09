@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  xml:lang="en">
+  <tei:teiHeader>
+    <!-- leaving it blank... -->
+  </tei:teiHeader>  
+  <tei:text>
+    <j:concurrent>
+      <jf:layer type="div" jf:id="div-layer">
+        <tei:div
+          jf:start="div1"
+          jf:position="1"
+          jf:relative="-1"
+          jf:nchildren="-1"
+          jf:nlevels="1"
+          jf:nprecedents="1"
+          jf:layer-id="div-layer"
+          jf:id="div1"/>
+        <tei:label 
+          jf:id="lbl1"
+          jf:position="1"
+          jf:relative="-1"
+          jf:nchildren="-1"
+          jf:nlevels="2"
+          jf:nprecedents="1"
+          jf:layer-id="div-layer"
+          >before</tei:label>
+        <jf:placeholder
+          jf:position="1"
+          jf:relative="0"
+          jf:nchildren="0"
+          jf:nlevels="0"
+          jf:nprecedents="0"
+          jf:stream="stream"
+          jf:id="seg1"/>
+        <tei:label 
+          jf:id="lbl2"
+          jf:position="1"
+          jf:relative="1"
+          jf:nchildren="1"
+          jf:nlevels="-2"
+          jf:nprecedents="3"
+          jf:layer-id="div-layer"
+          >after 1</tei:label>
+        <tei:div
+          jf:suspend="div1"
+          jf:position="1"
+          jf:relative="1"
+          jf:nchildren="1"
+          jf:nlevels="-1"
+          jf:nprecedents="1"
+          jf:layer-id="div-layer"
+          />
+        <tei:div
+          jf:continue="div1"
+          jf:position="3"
+          jf:relative="-1"
+          jf:nchildren="-1"
+          jf:nlevels="1"
+          jf:nprecedents="1"
+          jf:layer-id="div-layer"
+          />
+        <jf:placeholder
+          jf:position="3"
+          jf:relative="0"
+          jf:nchildren="0"
+          jf:nlevels="0"
+          jf:nprecedents="0"
+          jf:stream="stream"
+          jf:id="seg3"/>
+        <tei:label 
+          jf:id="lbl3"
+          jf:position="3"
+          jf:relative="1"
+          jf:nchildren="1"
+          jf:nlevels="-2"
+          jf:nprecedents="5"
+          jf:layer-id="div-layer"
+          >after 3</tei:label>
+        <tei:div
+          jf:end="div1"
+          jf:position="3"
+          jf:relative="1"
+          jf:nchildren="1"
+          jf:nlevels="-1"
+          jf:nprecedents="1"
+          jf:layer-id="div-layer"
+          />
+      </jf:layer>
+    </j:concurrent>
+    <j:streamText xml:id="stream">
+      <tei:seg xml:id="seg1">One segment</tei:seg>
+      <tei:seg xml:id="seg2">Two segments</tei:seg>
+      <tei:seg xml:id="seg3">Three segments</tei:seg>
+    </j:streamText>
+  </tei:text>
+</tei:TEI>

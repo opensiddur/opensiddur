@@ -136,7 +136,7 @@
     </test>
   </TestSet>
   <TestSet>
-    <testName>Simple suspend and continue with 2 layers</testName>
+    <testName>Simple suspend and continue with 2 levels</testName>
     <test>
       <code><![CDATA[
         flatten:flatten-document(
@@ -147,23 +147,21 @@
       <expected desc="flattened" href="suspend1-flat.xml"/>
     </test>
   </TestSet>
+  <TestSet>
+    <testName>Suspend and continue with labels</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/suspend2.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="suspend2-flat.xml"/>
+    </test>
+  </TestSet>
+  
   <!-- What needs to be tested:
   - j:layer possibilities:  
-  
-  simple suspend and continue:
-  <tei:div>
-    <tei:ptr target="seg1"/>
-    <tei:ptr target="seg3"/>
-  </tei:div>
-  
-  suspend and continue with extra labels
-  <tei:div>
-    <tei:label>before</tei:label>
-    <tei:ptr target="seg1"/>
-    <tei:label>after 1</tei:label>
-    <tei:ptr target="seg3"/>
-    <tei:label>after 3></tei:label>
-  </tei:div>
   
   multilevel suspend and continue
   <tei:div>
