@@ -159,28 +159,28 @@
       <expected desc="flattened" href="suspend2-flat.xml"/>
     </test>
   </TestSet>
-  
-  <!-- What needs to be tested:
-  - j:layer possibilities:  
-  
-  multilevel suspend and continue
-  <tei:div>
-    <tei:ab n="1">
-      <tei:ptr target="seg1"/>
-    </tei:ab>
-    <tei:ptr target="seg3"/>
-  </tei:div>
-  
-  multilevel suspend and continue 2
-  <tei:div>
-    <tei:ab n="1">
-      <tei:ptr target="seg1"/>
-    </tei:ab>
-    <tei:ab n="2">
-      <tei:ptr target="seg3"/>
-    </tei:ab>
-  </tei:div>
-  
-  
-   -->
+  <TestSet>
+    <testName>Multi-level suspend and continue with unequal numbers of levels</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/suspend3.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="suspend3-flat.xml"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Multi-level suspend and continue with end and start at the suspend position</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/suspend4.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="suspend4-flat.xml"/>
+    </test>
+  </TestSet>
 </TestSuite>
