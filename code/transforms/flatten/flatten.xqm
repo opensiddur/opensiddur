@@ -151,20 +151,17 @@ declare function flatten:rewrite-suspend-or-continue(
   if (empty($nodes[@jf:suspend]))
   then
     (: no suspend: this is a no-op :)
-    trace($nodes, "no rewrite")
+    $nodes
   else
     let $temp :=
       (: required to make *-sibling::* work :)
-      trace(
       <jf:temp>{
         $nodes
       }</jf:temp>
-      , "rewrite-or-suspend of")
     let $start-node := $nodes[1]
-    let $start-node-id := trace($start-node/@jf:id/string(), "start-node-id")
-    let $start-level := trace($start-node/@jf:nlevels/number(), "start-node-level")
+    let $start-node-id := $start-node/@jf:id/string()
+    let $start-level := $start-node/@jf:nlevels/number()
     for $node in $temp/*
-    let $null := trace($node, "rewriting node")
     return 
       if ($node/(@jf:start, @jf:continue) = $start-node-id)
       then
@@ -197,24 +194,14 @@ declare function flatten:rewrite-suspend-or-continue(
           $node/node() 
         }
       else if (
-        trace(
-          empty($node/(@jf:start|@jf:continue|@jf:suspend|@jf:end))
-          , "empty cond")
-        and 
-        trace(
-          abs($node/@jf:nlevels) = ($start-level + 1)
-          , "nlevels condition"
-        ) and
-        trace(
-          $node/preceding-sibling::*[@jf:start|@jf:continue][@jf:nlevels = $start-level][1]/(@jf:start, @jf:continue) = $start-node-id
-          , "parent condition"
-        )
+          empty($node/(@jf:start|@jf:continue|@jf:suspend|@jf:end)) and
+          abs($node/@jf:nlevels) = ($start-level + 1) and
+          node/preceding-sibling::*[@jf:start|@jf:continue][@jf:nlevels = $start-level][1]/(@jf:start, @jf:continue) = $start-node-id
       )
       then
         (: this is a child node of the parent with no streamText children :)
-        let $parent-node := trace(
-          trace($node, "rewrite-child")/preceding-sibling::*[(@jf:start, @jf:continue)=$start-node-id][@jf:nlevels = $start-level][1]
-        , "rewrite-parent")
+        let $parent-node := 
+          $node/preceding-sibling::*[(@jf:start, @jf:continue)=$start-node-id][@jf:nlevels = $start-level][1]
         return
           element { QName(namespace-uri($node), name($node)) }{
             $node/(@* except @jf:nchildren),
@@ -347,7 +334,6 @@ declare function flatten:element(
         }
   		return flatten:rewrite-suspend-or-continue((
       	$start-node,
-      	trace(
   			flatten:set-missing-attributes(
   			  $context,
   			  flatten:suspend-or-continue(
@@ -355,7 +341,6 @@ declare function flatten:element(
   			  ),
   			  $nchildren
   			),
-  			"set-missing-attributes"),
   			element { QName(namespace-uri($context), local-name($context)) }{
         	attribute jf:end { $node-id },
         	$stream-children[last()]/@jf:position,
