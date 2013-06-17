@@ -25,7 +25,7 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
  :)
 declare function flatten:order-flattened(
   $flattened-nodes as node()*
-  ) {
+  ) as node()* {
   for $n in $flattened-nodes
   order by 
     $n/@jf:position/number(), 
@@ -35,7 +35,52 @@ declare function flatten:order-flattened(
     $n/@jf:nprecedents/number(), 
     $n/@jf:layer-id
   return $n
-  
+};
+
+(:~ entry point for the merge transform :)
+declare function flatten:merge-document(
+  $doc as document-node(),
+  $params as map
+  ) as document-node() {
+  common:apply-at(
+    $doc, 
+    $doc//j:concurrent, 
+    flatten:merge-concurrent#2,
+    $params  
+  )
+};
+
+declare function flatten:merge-concurrent(
+  $e as element(j:concurrent),
+  $params as map
+  ) as element(j:concurrent) {
+  element { QName(namespace-uri($e), name($e)) }{
+    $e/@*,
+    flatten:merge(
+      flatten:flatten-streamText($e/j:streamText, $params),
+      $e/jf:layer,
+      $params
+    ),
+    $e/(node() except jf:layer)
+  }
+};
+
+(:~ merge flattened layers and a flattened streamText 
+ : @return an ordered structure containing all the elements of the layers and the streamText
+ :)
+declare function flatten:merge(
+  $streamText as element(jf:streamText),
+  $layers as element(jf:layer)*,
+  $params as map
+  ) as element(jf:merged) {
+  element jf:merged {
+    flatten:order-flattened(
+      (
+      $layers/(node() except jf:placeholder),
+      $streamText/node()
+      )
+    )
+  }
 };
 
 (:~ entry point to run flatten transform on an entire document,
@@ -93,6 +138,50 @@ declare function flatten:identity(
   }
 };
 
+(:~ flatten a streamtext. 
+ : This is not part of the transform, rather, it should be used before merge
+ : to obtain placeholders for all streamText elements, whether or not they are
+ : referenced by layers
+ :)
+declare function flatten:flatten-streamText(
+  $st as element(j:streamText),
+  $params as map
+  ) as element(jf:streamText) {
+  element jf:streamText {
+    attribute jf:id { $st/(@xml:id, flatten:generate-id(.))[1] },
+    $st/(@* except @xml:id), 
+    for $node in $st/node()
+    return
+      typeswitch($node)
+      case element() return flatten:write-placeholder($node, $st)
+      default return $node
+  }
+};
+
+declare function flatten:write-placeholder(
+  $e as element(),
+  $stream as element(j:streamText)
+  ) as element(jf:placeholder) {
+  (: 
+    position = position in streamText, starting from 1
+    relative = position relative to placeholder 
+      (-1 for before, 0 for at, 1 for after)
+    nchildren = number of children in streamText
+    nlevels = distance in levels from the streamText
+    nprecedents = number of preceding siblings in layer (0 for streamText)
+    stream = which stream derived from
+    layer-id = which layer derived from
+   :)
+  <jf:placeholder 
+    jf:id="{$e/(@xml:id, flatten:generate-id(.))[1]}" 
+    jf:position="{count($e/preceding-sibling::*) + 1}"
+    jf:relative="0"
+    jf:nchildren="0"
+    jf:nlevels="0"
+    jf:nprecedents="0"
+    jf:stream="{$stream/(@xml:id, @jf:id, flatten:generate-id(.))[1]}"/> 
+};
+
 (:~ flatten a ptr. 
  : evaluate ranges into multiple pointers
  : if it points into the local streamText, turn it into a 
@@ -107,24 +196,7 @@ declare function flatten:tei-ptr(
   return 
     if ($stream)
     then 
-      (: 
-        position = position in streamText, starting from 1
-        relative = position relative to placeholder 
-          (-1 for before, 0 for at, 1 for after)
-        nchildren = number of children in streamText
-        nlevels = distance in levels from the streamText
-        nprecedents = number of preceding siblings in layer (0 for streamText)
-        stream = which stream derived from
-        layer-id = which layer derived from
-       :)
-      <jf:placeholder 
-        jf:id="{$target/@xml:id}" 
-        jf:position="{count($target/preceding-sibling::*) + 1}"
-        jf:relative="0"
-        jf:nchildren="0"
-        jf:nlevels="0"
-        jf:nprecedents="0"
-        jf:stream="{$stream/(@xml:id, @jf:id, flatten:generate-id(.))[1]}"/>
+      flatten:write-placeholder($target, $stream)
     else flatten:element($target, $params)
 };
 
