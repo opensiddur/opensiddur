@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  xml:lang="en">
+  <tei:teiHeader>
+    <!-- leaving it blank... -->
+  </tei:teiHeader>  
+  <tei:text>
+    <jf:unflattened>
+      <tei:div
+        jf:layer-id="div-layer"
+        jf:id="div1">
+        <tei:head
+          jf:layer-id="div-layer"
+          >title</tei:head>
+        <tei:ab
+          jf:layer-id="div-layer">
+          <tei:label
+            jf:layer-id="div-layer"
+            >Label</tei:label>
+          <jf:placeholder
+            jf:id="seg1"
+            jf:stream="stream"/>
+        </tei:ab>
+      </tei:div>
+    </jf:unflattened>
+    <j:streamText xml:id="stream">
+      <tei:seg xml:id="seg1">One segment</tei:seg>
+    </j:streamText>
+  </tei:text>
+</tei:TEI>

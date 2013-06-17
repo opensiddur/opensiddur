@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  >
+  <suiteName>Unflatten transform</suiteName>
+  <description>
+    <p>Tests of unflatten transform</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012-2013 Efraim Feinstein
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
+  <imports>
+    import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
+      at "xmldb:exist:///db/code/transforms/flatten/unflatten.xqm";
+  </imports>
+  <TestSet>
+    <testName>unflatten:unopened-tags()</testName>
+    <test output="text">
+      <task>no unopened tags</task>
+      <code><![CDATA[
+        let $tags := 
+          <jf:temp>
+            <tei:div jf:start="div1" jf:id="div1"/>
+            <tei:ab jf:continue="ab1" jf:id="ab1"/>
+            <tei:label jf:id="lbl1">Label</tei:label>
+            <tei:ab jf:suspend="ab1"/>
+            <tei:div jf:end="div1"/>
+          </jf:temp>
+        return
+          unflatten:unopened-tags(
+            $tags/*
+          )
+      ]]></code>
+      <xpath desc="empty output">empty($output)</xpath>
+    </test> 
+    <test>
+      <task>one ended unopened tag</task>
+      <code><![CDATA[
+        let $tags :=
+          <jf:temp>
+            <tei:label jf:id="lbl1">Label</tei:label>
+            <tei:div jf:end="div1"/>
+          </jf:temp>
+        return
+          unflatten:unopened-tags(
+            $tags/*
+          )
+      ]]></code>
+      <expected desc="ended element"><tei:div jf:end="div1"/></expected>      
+    </test>
+    <test>
+      <task>one suspended unopened tag</task>
+      <code><![CDATA[
+        let $tags :=
+          <jf:temp>
+            <tei:label jf:id="lbl1">Label</tei:label>
+            <tei:div jf:suspend="div1"/>
+          </jf:temp>
+        return
+          unflatten:unopened-tags(
+            $tags/*
+          )
+      ]]></code>
+      <expected desc="suspended element"><tei:div jf:suspend="div1"/></expected>      
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>unflatten:unclosed-tags()</testName>
+    <test output="text">
+      <task>no unclosed tags</task>
+      <code><![CDATA[
+        let $tags := 
+          <jf:temp>
+            <tei:div jf:start="div1" jf:id="div1"/>
+            <tei:ab jf:continue="ab1" jf:id="ab1"/>
+            <tei:label jf:id="lbl1">Label</tei:label>
+            <tei:ab jf:suspend="ab1"/>
+            <tei:div jf:end="div1"/>
+          </jf:temp>
+        return
+          unflatten:unclosed-tags(
+            $tags/*
+          )
+      ]]></code>
+      <xpath desc="empty output">empty($output)</xpath>
+    </test> 
+    <test>
+      <task>one started unclosed tag</task>
+      <code><![CDATA[
+        let $tags :=
+          <jf:temp>
+            <tei:div jf:start="div1" jf:id="div1"/>
+            <tei:label jf:id="lbl1">Label</tei:label>
+          </jf:temp>
+        return
+          unflatten:unclosed-tags(
+            $tags/*
+          )
+      ]]></code>
+      <expected desc="started element"><tei:div jf:start="div1" jf:id="div1"/></expected>      
+    </test>
+    <test>
+      <task>one continued unclosed tag</task>
+      <code><![CDATA[
+        let $tags :=
+          <jf:temp>
+            <tei:div jf:continue="div1" jf:id="div1"/>
+            <tei:label jf:id="lbl1">Label</tei:label>
+          </jf:temp>
+        return
+          unflatten:unclosed-tags(
+            $tags/*
+          )
+      ]]></code>
+      <expected desc="continued element"><tei:div jf:continue="div1" jf:id="div1"/></expected>      
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>unflatten:unflatten-document()</testName>
+    <test>
+      <task>unflatten a simple hierarchy</task>
+      <code><![CDATA[
+        unflatten:unflatten-document(
+          doc("/db/code/tests/transforms/flatten/unflatten1.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="unflattened hierarchy" 
+        href="unflatten1-unflat.xml"/>
+    </test>
+    <test>
+      <task>unflatten a hierarchy with 2 levels with siblings</task>
+      <code><![CDATA[
+        unflatten:unflatten-document(
+          doc("/db/code/tests/transforms/flatten/unflatten2.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="unflattened hierarchy" 
+        href="unflatten2-unflat.xml"/>
+    </test>
+    <test>
+      <task>simple suspend and continue</task>
+      <code><![CDATA[
+        unflatten:unflatten-document(
+          doc("/db/code/tests/transforms/flatten/unflatten3.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="unflattened hierarchy with @jf:part indicating suspension/continuation" 
+        href="unflatten3-unflat.xml"/>
+    </test>
+  </TestSet>
+</TestSuite>
