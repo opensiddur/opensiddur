@@ -285,4 +285,54 @@
       <xpath desc="collection removed">not(xmldb:collection-available("/db/data/tests/mirror/one"))</xpath>
     </test>
   </TestSet>
+  <TestSet>
+    <testName>mirror:apply-if-outdated()</testName>
+    <setup>
+      <store collection="/db/data/tests" name="test-up-to-date.xml">
+        <up-to-date/>
+      </store>
+      <store collection="/db/data/tests" name="test-out-of-date.xml">
+        <up-to-date n="1"/>
+      </store>
+      <store collection="/db/data/tests/mirror" name="test-up-to-date.xml">
+        <up-to-date n="1"/>
+      </store>
+    </setup>
+    <functions>
+      declare function local:transform(
+        $context as node()
+      ) as node()* {
+        typeswitch($context)
+        case document-node() return document { local:transform($context/*)}
+        case element(up-to-date) return element up-to-date { attribute n { $context/@n/number() + 1 }}
+        default return $context
+      };
+    </functions>
+    <tearDown>
+      <remove-document collection="/db/data/tests" name="test-up-to-date.xml"/>
+      <remove-document collection="/db/data/tests" name="test-out-of-date.xml"/>
+    </tearDown>
+    <test>
+      <task>is up to date</task>
+      <code><![CDATA[
+      mirror:apply-if-outdated(
+        $mirror-collection, 
+        "/db/data/tests/test-up-to-date.xml",
+        local:transform#1)
+      ]]></code>
+      <xpath desc="transform did not run">doc("/db/data/tests/mirror/test-up-to-date.xml")/up-to-date/@n = 1</xpath>
+      <xpath desc="return value is correct document">./up-to-date/@n = 1</xpath>
+    </test>
+    <test>
+      <task>is out of date</task>
+      <code><![CDATA[
+      mirror:apply-if-outdated(
+        $mirror-collection, 
+        "/db/data/tests/test-out-of-date.xml",
+        local:transform#1)
+      ]]></code>
+      <xpath desc="transform did run">doc("/db/data/tests/mirror/test-out-of-date.xml")/up-to-date/@n = 2</xpath>
+      <xpath desc="return value is transformed document">./up-to-date/@n = 2</xpath>
+    </test>
+  </TestSet>
 </TestSuite>

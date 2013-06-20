@@ -7,7 +7,7 @@ xquery version "3.0";
  :
  : @author Efraim Feinstein
  : Open Siddur Project
- : Copyright 2011-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2013 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace mirror = 'http://jewishliturgy.org/modules/mirror';
@@ -252,7 +252,7 @@ declare function mirror:is-up-to-date(
 declare function mirror:apply-if-outdated(
   $mirror-path as xs:string,
   $original as item(),
-  $transform as function($context) as node()*
+  $transform as function(node()*) as node()*
   ) as document-node()? {
   if (mirror:is-up-to-date($mirror-path, $original))
   then mirror:doc($mirror-path, $original)
