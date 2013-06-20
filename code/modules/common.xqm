@@ -224,7 +224,7 @@ declare function common:apply-at(
   ) as node()* {
   for $node in $nodes
   return
-    if ($node is $transition-nodes)
+    if (some $t in $transition-nodes satisfies $node is $t)
     then 
       $transform($node, $params)
     else
@@ -241,4 +241,39 @@ declare function common:apply-at(
       case document-node() 
       return document { common:apply-at($node/node(), $transition-nodes, $transform, $params) }
       default return common:apply-at($node/node(), $transition-nodes, $transform, $params)
+};
+
+(:~ simulate following-sibling::* in sequences
+ : @return all items in the sequence $sequence that follow $item
+ : $item is a reference, not a value
+ :)
+declare function common:following(
+  $item as item(),
+  $sequence as item()*
+  ) as item()* {
+  subsequence(
+    $sequence,
+    (: there may be a better way to do this! :) 
+    (for $s at $i in $sequence 
+    where $s is $item 
+    return $i + 1)[1]
+  )
+};
+
+(:~ simulate preceding-sibling::* in sequences
+ : @return all items in the sequence $sequence that precede $item
+ : $item is a reference, not a value
+ :)
+declare function common:preceding(
+  $item as item(),
+  $sequence as item()*
+  ) as item()* {
+  subsequence(
+    $sequence,
+    1,
+    (: there may be a better way to do this! :) 
+    (for $s at $i in $sequence 
+    where $s is $item 
+    return $i - 1)[1]
+  )
 };
