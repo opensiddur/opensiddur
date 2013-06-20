@@ -157,5 +157,16 @@
       <expected desc="unflattened hierarchy with @jf:part indicating suspension/continuation" 
         href="unflatten3-unflat.xml"/>
     </test>
+    <test>
+      <task>multiple hierarchies with broken-up element</task>
+      <code><![CDATA[
+        unflatten:unflatten-document(
+          doc("/db/code/tests/transforms/flatten/unflatten4.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="unflattened hierarchies with automated suspension/continuation" 
+        href="unflatten4-unflat.xml"/>
+    </test>
   </TestSet>
 </TestSuite>

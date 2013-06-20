@@ -99,7 +99,7 @@ declare function unflatten:sequence(
     else if ($s/(@jf:start|@jf:continue))
     then 
       let $tr := trace((), "calling unflatten:start")
-      let $start-return := unflatten:start($s, $params)
+      let $start-return := unflatten:start($s, $sequence, $params)
       return (
         if ($start-return[1] instance of element())
         then $start-return[1]
@@ -107,7 +107,7 @@ declare function unflatten:sequence(
         unflatten:sequence(
           (
             subsequence($start-return, 3),
-            $start-return[2]/following-sibling::* intersect $sequence
+            common:following($start-return[2], $sequence)
           ),
           $params
         )
@@ -160,16 +160,22 @@ declare function unflatten:jf-placeholder(
  :)
 declare function unflatten:start(
   $s as element(),
+  $sequence as node()*,
   $params as map
   ) as node()* {
+  let $following := common:following($s, $sequence)
   let $end := 
     trace(
-    $s/following-sibling::*[(@jf:end|@jf:suspend)=$s/(@jf:start, @jf:continue)][1]
+    $following[(@jf:end|@jf:suspend)=$s/(@jf:start, @jf:continue)][1]
     ,"unflatten:start$end")
   let $inside-sequence := 
     trace(
-    $s/following-sibling::* 
-      intersect $end/preceding-sibling::*
+    if (exists($end))
+    then
+      $following 
+        intersect common:preceding($end, $sequence)
+    else
+      $following
     , "unflatten:start$inside-sequence")
   let $unopened-tags := unflatten:unopened-tags($inside-sequence)
   let $unclosed-tags := unflatten:unclosed-tags($inside-sequence)
@@ -190,17 +196,20 @@ declare function unflatten:start(
         element { QName(namespace-uri($s), name($s)) }{
           $s/(
             (@* except @*[namespace-uri(.)="http://jewishliturgy.org/ns/jlptei/flat/1.0"])
-            |(@jf:id, @jf:layer-id)
+            |(@jf:id[exists($s/@jf:start)], @jf:layer-id)
           ),
-          if (exists($s/@jf:continue) or exists($end/@jf:suspend))
+          if (
+            exists($s/@jf:continue) or 
+            exists($end/@jf:suspend) or 
+            empty($end) (: automatic suspend :) )
           then
             attribute jf:part {
-              distinct-values($s/@jf:continue|$end/@jf:suspend)
+              ($s/@jf:continue, $end/@jf:suspend, $s/@jf:start)[1]
             }
           else (),
           $processed-inside-sequence
         },
-        $end,
+        ($end, $inside-sequence[last()])[1],
         unflatten:continue-or-suspend($unclosed-tags, "continue")
       )
 };
