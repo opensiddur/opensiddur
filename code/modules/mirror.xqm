@@ -243,6 +243,33 @@ declare function mirror:is-up-to-date(
   mirror:is-up-to-date($mirror-path, $original, ())
 };
 
+(:~ apply a function or transform to the original, if the mirror is out of date,
+ : otherwise return the mirror
+ : @param $mirror-path Base of the mirror
+ : @param $original Path or resource node of the original
+ : @param $transform The transform to run, use a partial function to pass parameters
+ :) 
+declare function mirror:apply-if-outdated(
+  $mirror-path as xs:string,
+  $original as item(),
+  $transform as function($context) as node()*
+  ) as document-node()? {
+  if (mirror:is-up-to-date($mirror-path, $original))
+  then mirror:doc($mirror-path, $original)
+  else 
+    let $original-doc := 
+      typeswitch($original)
+      case document-node() return $original
+      default return doc($original)
+    let $collection := util:collection-name($original-doc)
+    let $resource := util:document-name($original-doc)
+    let $path := 
+      mirror:store($mirror-path, $collection, $resource, 
+                   $transform($original-doc)
+                  )
+    return doc($path)
+}; 
+
 (:~ store data in a mirror collection 
  : @param $mirror-path Base of the mirror
  : @param $collection Original path to the collection
