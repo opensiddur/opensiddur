@@ -126,6 +126,35 @@ declare function flatten:resolve-stream(
     default return $node
 };
 
+(:~ prepare a "display" version of a flattened or merged document
+ : without the sorting keys
+ :
+ :)
+declare function flatten:display(
+  $nodes as node()*,
+  $params as map
+  ) as node()* {
+  for $node in $nodes
+  return
+    typeswitch($node)
+    case document-node() 
+    return
+      document { flatten:display($node/node(), $params) }
+    case element()
+    return
+      element {QName(namespace-uri($node), name($node))} {
+        $node/(
+          (@* except 
+            @*[namespace-uri(.)="http://jewishliturgy.org/ns/jlptei/flat/1.0"]),
+          @jf:start, @jf:continue, 
+          @jf:suspend, @jf:end, 
+          @jf:id, @jf:layer-id, @jf:stream
+        ),
+        flatten:display($node/node(), $params)
+      }
+    default return $node
+};
+
 (:~ entry point to run flatten transform on an entire document,
  : returning the document with flattened layers
  :)
