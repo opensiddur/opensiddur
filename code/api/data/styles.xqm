@@ -115,7 +115,8 @@ declare
   crest:list($q, $start, $max-results,
     "Styles API", $sty:api-path-base,
     sty:query-function#1, sty:list-function#0,
-    true(), ()
+    <crest:additional text="access" relative-uri="access"/>, 
+    ()
   )
 };
 

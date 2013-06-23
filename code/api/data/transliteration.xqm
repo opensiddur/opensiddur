@@ -75,7 +75,8 @@ declare
   crest:list($q, $start, $max-results,
     "Transliteration API", $tran:api-path-base,
     tran:query-function#1, tran:list-function#0,
-    true(), tran:title-function#1
+    <crest:additional text="access" relative-uri="access"/>, 
+    tran:title-function#1
   )
 };
 

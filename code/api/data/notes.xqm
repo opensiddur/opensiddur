@@ -99,7 +99,8 @@ declare
     $notes:api-path-base,
     notes:query-function#1,
     notes:list-function#0,
-    true(), ()
+    <crest:additional text="access" relative-uri="access"/>, 
+    ()
   )
 };
 

@@ -136,7 +136,7 @@ declare
   crest:list($q, $start, $max-results,
     "Conditional declaration data API", $cnd:api-path-base,
     cnd:query-function#1, cnd:list-function#0,
-    false(), (: conditionals should not support access restrictions? :) 
+    (), (: conditionals should not support access restrictions? :) 
     ()
   )
 };
