@@ -97,9 +97,11 @@ declare function flatten:resolve-stream(
   for $node in $nodes
   return
     typeswitch ($node)
+    case element (j:streamText)
+    return ()
     case element (jf:placeholder)
     return 
-      let $stream-element := root($s)/id($s/@jf:id)
+      let $stream-element := root($node)/id($node/@jf:id)
       return
         element { QName(namespace-uri($stream-element), name($stream-element)) }{
           $stream-element/(@* except @xml:id),
@@ -107,7 +109,7 @@ declare function flatten:resolve-stream(
           then
             attribute jf:id { $stream-element/@xml:id }
           else (),
-          $s/@jf:stream,
+          $node/@jf:stream,
           $stream-element/node()
         }
     case element()

@@ -183,4 +183,17 @@
       <expected desc="flattened" href="suspend4-flat.xml"/>
     </test>
   </TestSet>
+  <TestSet>
+    <testName>flatten:resolve-stream()</testName>
+    <test>
+      <code><![CDATA[
+        flatten:resolve-stream(
+          doc("/db/code/tests/transforms/flatten/resolve1.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="placeholders are replaced by stream elements" 
+        href="resolve1-resolved.xml"/>
+    </test>
+  </TestSet>
 </TestSuite>
