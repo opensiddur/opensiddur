@@ -1,6 +1,10 @@
 xquery version "3.0";
 (:~
  : Modes to flatten a hierarchy.
+ : To run:
+ : flatten:flatten-document -> flatten:merge-document -> flatten:resolve-stream
+ : At each step, a save is recommended. 
+ :  resolve-stream REQUIRES that the document root be accessible.
  :
  : Open Siddur Project
  : Copyright 2009-2013 Efraim Feinstein 
@@ -83,6 +87,43 @@ declare function flatten:merge(
   }
 };
 
+(:~ replace all references to jf:placeholder with 
+ : their stream elements 
+ :)
+declare function flatten:resolve-stream(
+  $nodes as node()*,
+  $params as map
+  ) as node()* {
+  for $node in $nodes
+  return
+    typeswitch ($node)
+    case element (jf:placeholder)
+    return 
+      let $stream-element := root($s)/id($s/@jf:id)
+      return
+        element { QName(namespace-uri($stream-element), name($stream-element)) }{
+          $stream-element/(@* except @xml:id),
+          if ($stream-element/@xml:id)
+          then
+            attribute jf:id { $stream-element/@xml:id }
+          else (),
+          $s/@jf:stream,
+          $stream-element/node()
+        }
+    case element()
+    return 
+      element { QName(namespace-uri($node), name($node)) }{
+        $node/@*,
+        flatten:resolve-stream($node/node(), $params)
+      }
+    case document-node()
+    return 
+      document { 
+        flatten:resolve-stream($node/node(), $params) 
+      }
+    default return $node
+};
+
 (:~ entry point to run flatten transform on an entire document,
  : returning the document with flattened layers
  :)
@@ -92,19 +133,11 @@ declare function flatten:flatten-document(
   ) as document-node() {
   common:apply-at(
     $doc, 
-    $doc//j:layer, 
-    flatten:flatten-layer#2,
+    $doc//j:concurrent, 
+    flatten:flatten#2,
     $params
   ) 
 }; 
-
-(:~ main entry point for the flatten mode :)
-declare function flatten:flatten-layer(
-  $node as node()*,
-  $params as map
-  ) as node()* {
-  flatten:flatten($node, $params)
-};
 
 declare function flatten:flatten(
 	$node as node()*,
@@ -118,6 +151,8 @@ declare function flatten:flatten(
 		case processing-instruction() return $n
 		case element(j:layer) return flatten:j-layer($n, $params)
 		case element(tei:ptr) return flatten:tei-ptr($n, $params)
+		case element(j:concurrent) return flatten:identity($n, $params)
+		case element(j:streamText) return flatten:j-streamText($n, $params)
 		case element() return 
 		  if ($n is root($n)/*) 
 		  then flatten:identity($n, $params) (: special treatment for root elements :)
@@ -135,6 +170,23 @@ declare function flatten:identity(
   element { QName(namespace-uri($e), name($e))}{
     flatten:copy-attributes($e),
     flatten:flatten($e/node(), $params)
+  }
+};
+
+(:~ streamText within the transform: 
+ : assure that the streamText has an xml:id
+ :)
+declare function flatten:j-streamText(
+  $e as element(j:streamText),
+  $params as map
+  ) {
+  element j:streamText {
+    if (empty($e/@xml:id))
+    then 
+      attribute xml:id { flatten:generate-id($e) }
+    else (),
+    $e/@*,
+    $e/node()
   }
 };
 
@@ -268,7 +320,7 @@ declare function flatten:rewrite-suspend-or-continue(
       else if (
           empty($node/(@jf:start|@jf:continue|@jf:suspend|@jf:end)) and
           abs($node/@jf:nlevels) = ($start-level + 1) and
-          node/preceding-sibling::*[@jf:start|@jf:continue][@jf:nlevels = $start-level][1]/(@jf:start, @jf:continue) = $start-node-id
+          $node/preceding-sibling::*[@jf:start|@jf:continue][@jf:nlevels = $start-level][1]/(@jf:start, @jf:continue) = $start-node-id
       )
       then
         (: this is a child node of the parent with no streamText children :)

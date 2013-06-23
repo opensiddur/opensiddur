@@ -117,9 +117,7 @@ declare function unflatten:sequence(
       if ($s/(@jf:end|@jf:suspend))
       then ()
       else 
-        if ($s instance of element(jf:placeholder))
-        then unflatten:jf-placeholder($s, $params)
-        else if ($s instance of element())
+        if ($s instance of element())
         then unflatten:lone-element($s, $params)
         else $s, 
       unflatten:sequence(
@@ -137,20 +135,10 @@ declare function unflatten:lone-element(
   element { QName(namespace-uri($s), name($s)) }{
     $s/(
       (@* except @*[namespace-uri(.)="http://jewishliturgy.org/ns/jlptei/flat/1.0"])|
-      (@jf:id, @jf:layer-id)),
+      (@jf:id, @jf:layer-id, @jf:stream)),
     $s/node()
   }
 };
-
-declare function unflatten:jf-placeholder(
-  $s as element(jf:placeholder), 
-  $params as map
-  ) as node()* {
-  element jf:placeholder {
-    $s/(@jf:id, @jf:stream),
-    $s/node()
-  }
-}; 
 
 (:~ process a start element.
  : return value: 

@@ -43,14 +43,7 @@
         jf:nprecedents="1"
         jf:layer-id="div-layer"
         >Label</tei:label>
-      <jf:placeholder
-        jf:position="1"
-        jf:relative="0"
-        jf:nchildren="0"
-        jf:nlevels="0"
-        jf:nprecedents="0"
-        jf:stream="stream"
-        jf:id="seg1"/>
+      <tei:seg jf:id="seg1" jf:stream="stream">One segment</tei:seg>
       <tei:ab
         jf:end="ab1"
         jf:position="1"
@@ -70,8 +63,5 @@
         jf:layer-id="div-layer"
         />
     </jf:merged>
-    <j:streamText xml:id="stream">
-      <tei:seg xml:id="seg1">One segment</tei:seg>
-    </j:streamText>
   </tei:text>
 </tei:TEI>
