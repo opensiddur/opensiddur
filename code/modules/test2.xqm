@@ -788,7 +788,7 @@ declare function t:run-testSet(
 
 declare function local:pass-string(
   $pass as xs:string
-  ) {
+  ) as xs:string {
 	switch ($pass)
 	case "true"
 	return "PASS"
@@ -900,7 +900,7 @@ declare function local:result-details(
           }
         </tr>,
         for $test in $set//test
-        let $pass := local:pass-string($test/@pass)
+        let $pass := local:pass-string(string($test/@pass))
         let $subtests := $test/(* except (code, task, result))
         let $n-subtests := count($subtests)
         return (
