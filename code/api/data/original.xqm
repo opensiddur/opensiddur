@@ -18,10 +18,12 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "/db/code/api/modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "/db/code/api/modules/data.xqm";
+import module namespace format="http://jewishliturgy.org/modules/format"
+  at "/db/code/api/modules/format.xqm";
 
 declare variable $orig:data-type := "original";
-declare variable $orig:schema := "/schema/jlptei.rnc";
-declare variable $orig:schematron := "/schema/jlptei.xsl2";
+declare variable $orig:schema := "/db/schema/jlptei.rnc";
+declare variable $orig:schematron := "/db/schema/jlptei.xsl2";
 declare variable $orig:path-base := concat($data:path-base, "/", $orig:data-type);
 declare variable $orig:api-path-base := concat("/api/data/", $orig:data-type);  
 
@@ -281,4 +283,42 @@ declare
     $body as document-node()
   ) as item()+ {
   crest:put-access($orig:data-type, $name, $body)
+};
+
+(:~ Get a flattened version of the original data resource
+ : @param $name The resource to get
+ : @return HTTP 200 A TEI header with a flattened version of the resource as XML
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare 
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/flat")
+  %rest:produces("application/xml", "text/xml")
+  function orig:get-flat(
+    $name as xs:string
+  ) as item()+ {
+  let $doc := crest:get($orig:data-type, $name)
+  return
+    if ($doc instance of document-node())
+    then format:display-flat($doc, map {})
+    else $doc
+};
+
+(:~ Get a version of the original data resource with combined hierarchies
+ : @param $name The resource to get
+ : @return HTTP 200 A TEI header with a combined hierarchy version of the resource as XML
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare 
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/combined")
+  %rest:produces("application/xml", "text/xml")
+  function orig:get-combined(
+    $name as xs:string
+  ) as item()+ {
+  let $doc := crest:get($orig:data-type, $name)
+  return
+    if ($doc instance of document-node())
+    then format:unflatten($doc, map {})
+    else $doc
 };
