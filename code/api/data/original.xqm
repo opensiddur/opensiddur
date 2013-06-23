@@ -154,7 +154,8 @@ declare
   crest:list($q, $start, $max-results,
     "Original data API", $orig:api-path-base,
     orig:query-function#1, orig:list-function#0,
-    true(), ()
+    <crest:additional text="access" relative-uri="access"/>, 
+    ()
   )
 };
 

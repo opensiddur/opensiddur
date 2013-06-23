@@ -98,7 +98,8 @@ declare
   crest:list($q, $start, $max-results,
     "Dictionary data API", $dict:api-path-base,
     dict:query-function#1, dict:list-function#0,
-    true(), ()
+    <crest:additional text="access" relative-uri="access"/>, 
+    ()
   )
 };
 
