@@ -52,61 +52,70 @@ declare function format:setup(
     )
   where not(xmldb:collection-available($collection))
   return
-    mirror:create($collection, "/db/data")
+    mirror:create($collection, "/db/data", true())
 };
 
 (:~ make a cached version of a flattened document,
  : and return it
- : @param $doc The original document to flatten
+ : @param $doc The document to flatten
  : @param $params Parameters to send to the transform
+ : @param $original-doc The original document that was flattened, if not $doc 
  : @return The mirrored flattened document
  :) 
 declare function format:flatten(
   $doc as document-node(),
-  $params as map
+  $params as map,
+  $original-doc as document-node()
   ) as document-node() {
   let $flatten-transform := flatten:flatten-document(?, $params)
   return
     mirror:apply-if-outdated(
       $format:flatten-cache,
       $doc,
-      $flatten-transform
+      $flatten-transform,
+      $original-doc
     )
 };
 
 (:~ perform the transform up to the merge step 
  : @param $doc Original document
  : @param $params Parameters to pass to the transforms
+ : @param $original-doc The original document that was merged, if not $doc 
  : @return The merged document (as an in-database copy)
  :)
 declare function format:merge(
   $doc as document-node(),
-  $params as map
+  $params as map,
+  $original-doc as document-node()
   ) as document-node() {
   let $merge-transform := flatten:merge-document(?, $params)
   return
     mirror:apply-if-outdated(
       $format:merge-cache,
-      format:flatten($doc, $params),
-      $merge-transform
+      format:flatten($doc, $params, $original-doc),
+      $merge-transform,
+      $original-doc
     )
 };
 
 (:~ perform the transform up to the resolve-stream step 
  : @param $doc Original document
  : @param $params Parameters to pass to the transforms
+ : @param $original-doc The original document that was resolved, if not $doc 
  : @return The merged document (as an in-database copy)
  :)
 declare function format:resolve(
   $doc as document-node(),
-  $params as map
+  $params as map,
+  $original-doc as document-node()
   ) as document-node() {
   let $resolve-transform := flatten:resolve-stream(?, $params)
   return
     mirror:apply-if-outdated(
       $format:resolve-cache,
-      format:merge($doc, $params),
-      $resolve-transform
+      format:merge($doc, $params, $original-doc),
+      $resolve-transform,
+      $original-doc
     )
 };
 
@@ -114,10 +123,11 @@ declare function format:resolve(
  :)
 declare function format:display-flat(
   $doc as document-node(),
-  $params as map
+  $params as map,
+  $original-doc as document-node()
   ) as document-node() {
   flatten:display(
-    format:resolve($doc, $params),
+    format:resolve($doc, $params, $original-doc),
     $params
   )
 };
@@ -125,18 +135,21 @@ declare function format:display-flat(
 (:~ perform the transform up to the unflatten step 
  : @param $doc Original document
  : @param $params Parameters to pass to the transforms
+ : @param $original-doc The original document that was unflattened, if not $doc 
  : @return The unflattened document (as an in-database copy)
  :)
 declare function format:unflatten(
   $doc as document-node(),
-  $params as map
+  $params as map,
+  $original-doc as document-node()?
   ) as document-node() {
   let $unflatten-transform := unflatten:unflatten-document(?, $params)
   return
     mirror:apply-if-outdated(
       $format:unflatten-cache,
-      format:resolve($doc, $params),
-      $unflatten-transform
+      format:resolve($doc, $params, $original-doc),
+      $unflatten-transform,
+      ($original-doc, $doc)[1]
     )
 };
 declare function format:transliterate(

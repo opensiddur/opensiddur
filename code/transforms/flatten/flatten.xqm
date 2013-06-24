@@ -61,7 +61,7 @@ declare function flatten:merge-concurrent(
   element { QName(namespace-uri($e), name($e)) }{
     $e/@*,
     flatten:merge(
-      flatten:flatten-streamText($e/j:streamText, $params),
+      flatten:flatten-streamText($e/../j:streamText, $params),
       $e/jf:layer,
       $params
     ),

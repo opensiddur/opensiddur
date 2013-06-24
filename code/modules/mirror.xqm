@@ -27,12 +27,16 @@ declare variable $mirror:configuration := "mirror-conf.xml";
 (:~ create a mirror collection
  : @param $mirror-path Full path to the new mirror collection
  : @param $original-path Full path to the collection that is to be mirrored
+ : @param $allow-universal-access Allow universal r/w/x access 
+ :    to cache *collections*; useful for intermediate processing 
+ :    collections where guests should be allowed to make modifications
  : @return empty-sequence()
  : @error error:INPUT one of the the original or mirror paths is not absolute
  :)
 declare function mirror:create(
   $mirror-path as xs:string,
-  $original-path as xs:string
+  $original-path as xs:string,
+  $allow-universal-access as xs:boolean
   ) as empty-sequence() {
   let $check := 
     if (starts-with($mirror-path, "/db"))
@@ -43,14 +47,23 @@ declare function mirror:create(
     else error(xs:QName("error:INPUT"), "mirror-path must be absolute")
   let $create := 
     app:make-collection-path(
-      $mirror-path, "/", sm:get-permissions($original-path)
+      $mirror-path, "/", 
+      sm:get-permissions($original-path)
     )
+  let $universal :=
+    for $allow in $allow-universal-access
+    where $allow
+    return
+      system:as-user("admin", $magic:password, 
+        sm:chmod(xs:anyURI($mirror-path), "rwxrwxrwx")
+      )
   let $uri := xs:anyURI(
     xmldb:store($mirror-path, $mirror:configuration,
     <mirror:configuration>
       <mirror:of>{
         $original-path
       }</mirror:of>
+      <mirror:universal-access>{$allow-universal-access}</mirror:universal-access>
     </mirror:configuration>)
     )
   return
@@ -62,6 +75,22 @@ declare function mirror:create(
         sm:chmod($uri, "rw-rw-r--")
       ))
     else error(xs:QName("error:STORAGE"), "Cannot store mirror collection configuration.", $mirror-path)  
+};
+
+declare function mirror:create(
+  $mirror-path as xs:string,
+  $original-path as xs:string
+  ) as empty-sequence() {
+  mirror:create($mirror-path, $original-path, false())
+};
+
+(:~ @return Whether the mirror supports universal access
+ : @error error:NOT_A_MIRROR if the collection is not a mirror collection
+ :)
+declare function mirror:supports-universal-access(
+  $mirror-path as xs:string
+  ) as xs:boolean {
+  xs:boolean(local:config($mirror-path)/*/mirror:universal-access)
 };
 
 (:~ @return the configuration file for a mirror collection 
@@ -192,16 +221,29 @@ declare function mirror:make-collection-path(
       ),
       if (xmldb:create-collection($mirror-previous-step, $new-collection))
       then 
-        mirror:mirror-permissions($this-step, $mirror-this-step)
+        mirror:mirror-permissions($mirror-path, $this-step, $mirror-this-step)
       else error(xs:QName('error:CREATE'), concat('Cannot create mirror collection ', $this-step))
     )
 };
 
-declare function mirror:mirror-permissions( 
+declare function mirror:mirror-permissions(
+  $mirror-path as xs:string,
   $source as xs:anyAtomicType,
   $dest as xs:anyAtomicType
   ) as empty-sequence() {
-  app:mirror-permissions($source, $dest)
+  if (mirror:supports-universal-access($mirror-path))
+  then
+    let $src-uri := $source cast as xs:anyURI
+    let $dest-uri := $dest cast as xs:anyURI
+    let $src-permissions := sm:get-permissions($src-uri)
+    return
+      system:as-user("admin", $magic:password, (
+        sm:chown($dest-uri, $src-permissions/*/@owner/string()),
+        sm:chgrp($dest-uri, $src-permissions/*/@group/string()),
+        sm:chmod($dest-uri, "rwxrwxrwx")
+      ))
+  else
+    app:mirror-permissions($source, $dest)
 };
 
 (: determine if a path or original document is up to date 
@@ -222,8 +264,17 @@ declare function mirror:is-up-to-date(
   let $collection := util:collection-name($original-doc)
   let $resource := util:document-name($original-doc)
   let $mirror-collection := mirror:mirror-path($mirror-path, $collection) 
-  let $last-modified := xmldb:last-modified($collection, $resource)
-  let $mirror-last-modified := xmldb:last-modified($mirror-collection, $resource) 
+  let $last-modified := 
+    try {
+      xmldb:last-modified($collection, $resource)
+    }
+    catch * { () }
+  let $mirror-last-modified := 
+    (: if the collection does not exist, xmldb:last-modified() fails :)
+    try {
+      xmldb:last-modified($mirror-collection, $resource)
+    }
+    catch * { () } 
   return
     (
       empty($up-to-date-function)
@@ -243,21 +294,41 @@ declare function mirror:is-up-to-date(
   mirror:is-up-to-date($mirror-path, $original, ())
 };
 
+declare function mirror:apply-if-outdated(
+  $mirror-path as xs:string,
+  $transformee as item(),
+  $transform as function(node()*) as node()*
+  ) as document-node()? {
+  mirror:apply-if-outdated($mirror-path, $transformee, $transform, $transformee)
+};
+
 (:~ apply a function or transform to the original, if the mirror is out of date,
  : otherwise return the mirror
  : @param $mirror-path Base of the mirror
- : @param $original Path or resource node of the original
+ : @param $transformee Path or resource node to be transformed
  : @param $transform The transform to run, use a partial function to pass parameters
+ : @param $original If $transformee is the result of intermediate processing, this should point to the actual original document 
  :) 
 declare function mirror:apply-if-outdated(
   $mirror-path as xs:string,
-  $original as item(),
-  $transform as function(node()*) as node()*
+  $transformee as item(),
+  $transform as function(node()*) as node()*,
+  $original as item()
   ) as document-node()? {
   if (mirror:is-up-to-date($mirror-path, $original))
-  then mirror:doc($mirror-path, $original)
+  then 
+    mirror:doc(
+      $mirror-path, 
+      typeswitch($original)
+      case $o as document-node() return document-uri($o)
+      default $o return $o
+    )
   else 
-    let $original-doc := 
+    let $transformee-doc := 
+      typeswitch($transformee)
+      case document-node() return $transformee
+      default return doc($transformee)
+    let $original-doc :=
       typeswitch($original)
       case document-node() return $original
       default return doc($original)
@@ -265,7 +336,7 @@ declare function mirror:apply-if-outdated(
     let $resource := util:document-name($original-doc)
     let $path := 
       mirror:store($mirror-path, $collection, $resource, 
-                   $transform($original-doc)
+                   $transform($transformee-doc)
                   )
     return doc($path)
 }; 
@@ -287,15 +358,16 @@ declare function mirror:store(
     system:as-user("admin", $magic:password, 
       mirror:make-collection-path($mirror-path, $collection)
     )
-  let $mirror-path := concat($mirror-collection, "/", $resource) 
+  let $mirror-resource := concat($mirror-collection, "/", $resource) 
   return
     if (xmldb:store($mirror-collection, $resource, $data))
     then (
       mirror:mirror-permissions(
+        $mirror-path,
         concat($collection, "/", $resource),
-        $mirror-path
+        $mirror-resource
         ),
-      $mirror-path
+      $mirror-resource
     )
     else () 
 };

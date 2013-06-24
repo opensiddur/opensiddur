@@ -301,7 +301,7 @@ declare
   let $doc := crest:get($orig:data-type, $name)
   return
     if ($doc instance of document-node())
-    then format:display-flat($doc, map {})
+    then format:display-flat($doc, map {}, $doc)
     else $doc
 };
 
@@ -320,6 +320,6 @@ declare
   let $doc := crest:get($orig:data-type, $name)
   return
     if ($doc instance of document-node())
-    then format:unflatten($doc, map {})
+    then format:unflatten($doc, map {}, $doc)
     else $doc
 };
