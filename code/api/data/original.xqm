@@ -19,7 +19,7 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "/db/code/api/modules/data.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
-  at "/db/code/api/modules/format.xqm";
+  at "/db/code/modules/format.xqm";
 
 declare variable $orig:data-type := "original";
 declare variable $orig:schema := "/db/schema/jlptei.rnc";
