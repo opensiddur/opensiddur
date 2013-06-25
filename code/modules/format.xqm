@@ -59,7 +59,7 @@ declare function format:setup(
  : and return it
  : @param $doc The document to flatten
  : @param $params Parameters to send to the transform
- : @param $original-doc The original document that was flattened, if not $doc 
+ : @param $original-doc The original document that was flattened 
  : @return The mirrored flattened document
  :) 
 declare function format:flatten(
@@ -80,7 +80,7 @@ declare function format:flatten(
 (:~ perform the transform up to the merge step 
  : @param $doc Original document
  : @param $params Parameters to pass to the transforms
- : @param $original-doc The original document that was merged, if not $doc 
+ : @param $original-doc The original document that was merged 
  : @return The merged document (as an in-database copy)
  :)
 declare function format:merge(
@@ -101,7 +101,7 @@ declare function format:merge(
 (:~ perform the transform up to the resolve-stream step 
  : @param $doc Original document
  : @param $params Parameters to pass to the transforms
- : @param $original-doc The original document that was resolved, if not $doc 
+ : @param $original-doc The original document that was resolved 
  : @return The merged document (as an in-database copy)
  :)
 declare function format:resolve(
