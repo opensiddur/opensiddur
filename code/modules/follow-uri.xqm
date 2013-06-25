@@ -510,3 +510,39 @@ declare function uri:tei-join(
     else
      	$joined-elements
 };
+
+(:~ find the dependency graph of a given document
+ : @param $doc The document
+ : @param $visited Dependencies already checked
+ : @return A dependency list of database URIs, including the $doc itself
+ :)
+declare function uri:dependency(
+  $doc as document-node(),
+  $visited as xs:string*
+  ) as xs:string+ {
+  let $new-dependencies := 
+    distinct-values(
+      for $targets in $doc//*[@targets|@target]/(@target|@targets)
+      for $target in 
+        tokenize($targets, '\s+')
+          [not(starts-with(., '#'))]
+          [not(starts-with(., 'http:'))]
+          [not(starts-with(., 'https:'))]
+      return 
+        uri:uri-base-path(
+          uri:absolutize-uri($target, $targets/..)
+        )
+    )[not(. = $visited)]
+  let $this-uri := document-uri($doc)
+  return distinct-values((
+    $this-uri,
+    for $dependency in $new-dependencies
+    return 
+      uri:dependency(
+        data:doc($dependency), 
+        ($visited, $this-uri)
+      )
+  ))
+    
+   
+};
