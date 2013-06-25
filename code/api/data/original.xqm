@@ -154,7 +154,10 @@ declare
   crest:list($q, $start, $max-results,
     "Original data API", $orig:api-path-base,
     orig:query-function#1, orig:list-function#0,
-    <crest:additional text="access" relative-uri="access"/>, 
+    (<crest:additional text="access" relative-uri="access"/>,
+     <crest:additional text="flat" relative-uri="flat"/>,
+     <crest:additional text="combined" relative-uri="combined"/>,
+     <crest:additional text="transcluded" relative-uri="combined?transclude=true"/>), 
     ()
   )
 };
@@ -313,9 +316,11 @@ declare
 declare 
   %rest:GET
   %rest:path("/api/data/original/{$name}/combined")
+  %rest:query-param("transclude", "{$transclude}", "false")
   %rest:produces("application/xml", "text/xml")
   function orig:get-combined(
-    $name as xs:string
+    $name as xs:string,
+    $transclude as xs:boolean
   ) as item()+ {
   let $doc := crest:get($orig:data-type, $name)
   return
