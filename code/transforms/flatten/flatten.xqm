@@ -24,6 +24,19 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
+declare variable $flatten:layer-order := map {
+    "none" := 0,
+    "div" := 1,
+    "p"   := 2,
+    "lg"  := 3,
+    "s"   := 4,
+    "ab"  := 5,
+    "verse" := 6,
+    "l"   := 7,
+    "cit" := 8,
+    "choice" := 9
+  };
+
 (:~ order the given flattened nodes, using the information in 
  : the ordering attributes
  :)
@@ -34,7 +47,11 @@ declare function flatten:order-flattened(
   order by 
     $n/@jf:position/number(), 
     $n/@jf:relative/number(), 
-    $n/@jf:nchildren/number(), 
+    $n/@jf:nchildren/number(),
+    (: if an ancestor layer type is available, 
+     : use it to disambiguate :)
+    -1 * $n/@jf:relative/number() * 
+      $flatten:layer-order(($n/ancestor::jf:layer/@type/string(), "none")[1]), 
     $n/@jf:nlevels/number(), 
     $n/@jf:nprecedents/number(), 
     $n/@jf:layer-id
