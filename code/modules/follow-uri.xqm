@@ -332,7 +332,7 @@ declare function uri:fast-follow(
             $document//id(substring-before(substring-after($fragment, "("), ","))
           let $right := 
             $document//id(substring-before(substring-after($fragment, ","), ")"))
-          return ($left | ($left/following::* intersect $right/preceding::*) | $right)
+          return ($left | ($left/following-sibling::node() intersect $right/preceding-sibling::node()) | $right)
         else $document//id($fragment), 
         $steps, (), true(), 
         $intermediate-ptrs
