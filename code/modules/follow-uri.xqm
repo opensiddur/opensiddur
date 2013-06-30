@@ -200,10 +200,13 @@ declare function uri:r-PointerPart(
           )
       else
       	(:util:get-fragment-between($left-pointer, $right-pointer, false()),$right-pointer:)
+        (:
         $left-pointer|
           ($left-pointer/following-sibling::node() intersect 
             $right-pointer/preceding-sibling::node())|
-          $right-pointer 
+          $right-pointer
+        :)
+        uri:range($left-pointer, $right-pointer, true()) 
     )
 	else 
 		debug:debug($debug:warn,
@@ -262,7 +265,7 @@ declare function uri:follow-cached-uri(
         doc($base-path)
       }
 	  return
-	    if ($cache-type=$uri:fragmentation-cache-type)
+	    if ($cache-type)
 	    then mirror:doc($cache-type, document-uri($doc))
 	    else $doc
 	let $pointer-destination as node()* :=
@@ -295,7 +298,15 @@ declare function uri:fast-follow(
   $context as node(),
   $steps as xs:integer
   ) as node()* {
-  uri:fast-follow($uri, $context, $steps, ())
+  uri:fast-follow($uri, $context, $steps, (), false())
+};
+
+declare function uri:fast-follow(
+  $uri as xs:string,
+  $context as node(),
+  $steps as xs:integer,
+  $intermediate-ptrs as xs:boolean?) {
+  uri:fast-follow($uri, $context, $steps, $intermediate-ptrs, false())
 };
 
 (:~ faster routine to follow a pointer one step
@@ -306,7 +317,8 @@ declare function uri:fast-follow(
   $uri as xs:string,
   $context as node(),
   $steps as xs:integer,
-  $intermediate-ptrs as xs:boolean?
+  $intermediate-ptrs as xs:boolean?,
+  $allow-copies as xs:boolean
   ) as node()* {
   let $full-uri as xs:anyURI :=
     uri:absolutize-uri($uri, $context)
@@ -332,7 +344,7 @@ declare function uri:fast-follow(
             $document//id(substring-before(substring-after($fragment, "("), ","))
           let $right := 
             $document//id(substring-before(substring-after($fragment, ","), ")"))
-          return ($left | ($left/following-sibling::node() intersect $right/preceding-sibling::node()) | $right)
+          return uri:range($left, $right, $allow-copies)
         else $document//id($fragment), 
         $steps, (), true(), 
         $intermediate-ptrs
@@ -545,4 +557,79 @@ declare function uri:dependency(
   ))
     
    
+};
+
+(:~ range transform, returning nodes in $context that are
+ : between $left and $right, inclusive.
+ : If $allow-copies is true(), the nodes that are returned
+ : may be copies. If they are, their original document URI
+ : will be included as a uri:document-uri attribute.
+ :)
+declare function uri:range-transform(
+  $context as node()*,
+  $left as node(),
+  $right as node(),
+  $allow-copies as xs:boolean
+  ) as node()* {
+  for $node in $context
+  return
+    if ($node is $right)
+    then
+     (: special case for $right itself... its descendants
+      : should be returned, but won't be because they are
+      : after $right
+      :)
+      $node 
+    else if (
+        ($node << $left or $node >> $right)
+        )
+    then
+      uri:range-transform($node/node(), $left, $right, $allow-copies)
+    else
+      typeswitch($node)
+      case element() 
+      return
+        if ($allow-copies)
+        then
+          element {QName(namespace-uri($node), name($node))}{
+            attribute uri:document-uri { document-uri($node) },
+            $node/@*,
+            uri:range-transform($node/node(), $left, $right, $allow-copies)
+          }
+        else
+          ( 
+          if ($node/descendant::*[. is $right] and $right/following-sibling::node()) 
+          then ()
+          else $node, 
+          uri:range-transform($node/node(), $left, $right, $allow-copies)
+          )
+      default return $node 
+};
+
+(:~
+ : @param $left node pointed to by the left pointer
+ : @param $right node pointed to by the right pointer
+ : @param $allow-copies If true(), allow returning a copy of the nodes, 
+ :  which will result in the nodes being returned in document order and arity,
+ :  but without identity to the place of origin.
+ :  If false(), return a reference to the nodes, which may be duplicated.  
+ : @return The range between $left and $right
+ :) 
+declare function uri:range(
+  $left as node(),
+  $right as node(),
+  $allow-copies as xs:boolean
+  ) as node()* {
+  let $start := (
+    $left/ancestor::* intersect 
+      $right/ancestor::*)[last()]
+  return
+    if ($left/parent::* is $right/parent::*)
+    then
+      (: if $left and $right are siblings, no transform is needed :)
+      $left | 
+      ($left/following-sibling::* intersect $right/preceding-sibling::*) | 
+      $right
+    else
+      uri:range-transform($start, $left, $right, $allow-copies)
 };
