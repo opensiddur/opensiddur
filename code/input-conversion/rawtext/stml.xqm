@@ -243,7 +243,7 @@ declare function stml:AuthEdit(
 declare function stml:ContributorCommand(
   $e as element(r:ContributorCommand)
   ) {
-  <stml:file post-to="/user">
+  <stml:file post-to="/data/user">
     <j:contributor>{
       $e/stml:convert((
         r:Handle,

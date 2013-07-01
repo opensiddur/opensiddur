@@ -18,7 +18,7 @@
     <create-collection parent="/db/data/original/en" name="1900" />
     <create-collection parent="/db/data/original/en/1900" name="01"/>
     <!-- support files required for validity -->
-    <store collection="/db/user" name="testuser.xml">
+    <store collection="/db/data/user" name="testuser.xml">
       <j:contributor>
         <tei:idno>testuser</tei:idno>
         <tei:name>Test User</tei:name>
