@@ -14,6 +14,8 @@ xquery version "3.0";
  :)
 module namespace uri="http://jewishliturgy.org/transform/uri";
 
+import module namespace common="http://jewishliturgy.org/transform/common"
+  at "/db/code/modules/common.xqm"; 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
 	at "/db/code/modules/debug.xqm"; 
 import module namespace grammar="http://jewishliturgy.org/transform/grammar"
@@ -25,6 +27,7 @@ import module namespace data="http://jewishliturgy.org/modules/data"
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
+declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 declare namespace p="http://jewishliturgy.org/ns/parser";
 declare namespace r="http://jewishliturgy.org/ns/parser-result";
 declare namespace error="http://jewishliturgy.org/errors";
@@ -309,10 +312,6 @@ declare function uri:fast-follow(
   uri:fast-follow($uri, $context, $steps, $intermediate-ptrs, false())
 };
 
-(:~ faster routine to follow a pointer one step
- : Only works with shorthand pointers and #range() and 
- : does not support caching
- :)
 declare function uri:fast-follow(
   $uri as xs:string,
   $context as node(),
@@ -320,13 +319,28 @@ declare function uri:fast-follow(
   $intermediate-ptrs as xs:boolean?,
   $allow-copies as xs:boolean
   ) as node()* {
+  uri:fast-follow($uri, $context, $steps, $intermediate-ptrs, $allow-copies, ())
+};
+
+(:~ faster routine to follow a pointer one step
+ : Only works with shorthand pointers and #range().
+ : If $cache is used, assumes that the cache is valid 
+ :)
+declare function uri:fast-follow(
+  $uri as xs:string,
+  $context as node(),
+  $steps as xs:integer,
+  $intermediate-ptrs as xs:boolean?,
+  $allow-copies as xs:boolean,
+  $cache as xs:string?
+  ) as node()* {
   let $full-uri as xs:anyURI :=
     uri:absolutize-uri($uri, $context)
   let $base-path as xs:anyURI := 
     uri:uri-base-path($full-uri)
   let $fragment as xs:anyURI := 
     uri:uri-fragment(string($full-uri))
-  let $document as document-node()? := 
+  let $original-document as document-node()? := 
     try {
       data:doc($base-path)
     }
@@ -334,23 +348,42 @@ declare function uri:fast-follow(
       (: the requested path is not in /data :)
       doc($base-path)
     }
-  let $pointer-destination as node()* :=
-    if ($fragment) 
-    then 
-      uri:follow(
-        if (starts-with($fragment, "range("))
-        then 
-          let $left := 
-            $document//id(substring-before(substring-after($fragment, "("), ","))
-          let $right := 
-            $document//id(substring-before(substring-after($fragment, ","), ")"))
-          return uri:range($left, $right, $allow-copies)
-        else $document//id($fragment), 
-        $steps, (), true(), 
-        $intermediate-ptrs
-      )
-    else $document
-  return $pointer-destination
+  (: short-circuit if the document does not exist :) 
+  where exists($original-document)  
+  return
+    let $document as document-node()? :=
+      if ($cache)
+      then
+        mirror:doc($cache, document-uri($original-document))
+      else $original-document
+    let $pointer-destination as node()* :=
+      if ($fragment) 
+      then 
+        uri:follow(
+          if (starts-with($fragment, "range("))
+          then 
+            let $left :=
+              let $left-ptr := substring-before(substring-after($fragment, "("), ",")
+              return 
+                if ($cache)
+                then $document//*[@jf:id=$left-ptr][1]
+                else $document//id($left-ptr)
+            let $right := 
+              let $right-ptr := substring-before(substring-after($fragment, ","), ")")
+              return
+                if ($cache)
+                then $document//*[@jf:id=$right-ptr][1]
+                else $document//id($right-ptr)
+            return uri:range($left, $right, $allow-copies)
+          else 
+            if ($cache)
+            then $document//*[@jf:id=$fragment][1]
+            else $document//id($fragment), 
+          $steps, $cache, true(), 
+          $intermediate-ptrs
+        )
+      else $document
+    return $pointer-destination
 };
 
 declare function uri:follow-tei-link(
@@ -562,8 +595,10 @@ declare function uri:dependency(
 (:~ range transform, returning nodes in $context that are
  : between $left and $right, inclusive.
  : If $allow-copies is true(), the nodes that are returned
- : may be copies. If they are, their original document URI
- : will be included as a uri:document-uri attribute.
+ : may be copies. If they are, their original document URI,
+ : base-uri and language
+ : will be included as uri:document-uri, uri:base and uri:lang 
+ : attributes.
  :)
 declare function uri:range-transform(
   $context as node()*,
@@ -593,6 +628,12 @@ declare function uri:range-transform(
         then
           element {QName(namespace-uri($node), name($node))}{
             attribute uri:document-uri { document-uri($node) },
+            if ($node/@xml:lang)
+            then ()
+            else attribute uri:lang { common:language($node) },
+            if ($node/@xml:base)
+            then ()
+            else attribute uri:base { base-uri($node) },
             $node/@*,
             uri:range-transform($node/node(), $left, $right, $allow-copies)
           }
