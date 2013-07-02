@@ -23,6 +23,8 @@ import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "xmldb:exist:///db/code/transforms/flatten/flatten.xqm";
 import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
   at "xmldb:exist:///db/code/transforms/flatten/unflatten.xqm";
+import module namespace combine="http://jewishliturgy.org/transform/combine"
+  at "xmldb:exist:///db/code/transforms/flatten/combine.xqm";
   
 declare variable $format:temp-dir := '.format';
 declare variable $format:path-to-xslt := '/db/code/transforms';
@@ -33,6 +35,7 @@ declare variable $format:flatten-cache := "/db/cache/flatten";
 declare variable $format:merge-cache := "/db/cache/merge";
 declare variable $format:resolve-cache := "/db/cache/resolved";
 declare variable $format:unflatten-cache := "/db/cache/unflattened";
+declare variable $format:combine-cache := "/db/cache/combined";
 
 declare function local:wrap-document(
   $node as node()
@@ -51,7 +54,8 @@ declare function format:setup(
     $format:flatten-cache,
     $format:merge-cache,
     $format:resolve-cache,
-    $format:unflatten-cache
+    $format:unflatten-cache,
+    $format:combine-cache
     )
   where not(xmldb:collection-available($collection))
   return
@@ -193,11 +197,32 @@ declare function format:dependencies(
 declare function format:unflatten-dependencies(
   $doc as document-node(),
   $params as map
-  ) {
+  ) as document-node()+ {
   for $dep in format:dependencies($doc)//format:dependency[@transformable]
   return format:unflatten(doc($dep), $params, doc($dep))
 };
   
+(:~ perform the transform up to the combine step 
+ : @param $doc The document to be transformed
+ : @param $params Parameters to pass to the transforms
+ : @param $original-doc The original document that is being transformed (may be the same as $doc) 
+ : @return The combined document (as an in-database copy)
+ :)
+declare function format:combine(
+  $doc as document-node(),
+  $params as map,
+  $original-doc as document-node()
+  ) as document-node() {
+  let $unflats := format:unflatten-dependencies($doc, $params)
+  let $cmb := combine:combine-document(?, $params)
+  return
+    mirror:apply-if-outdated(
+      $format:combine-cache,
+      mirror:doc($format:unflatten-cache, document-uri($doc)),
+      $cmb,
+      $original-doc
+    )
+};
 
 declare function format:transliterate(
   $uri-or-node as item(),
