@@ -27,7 +27,9 @@ declare variable $data:path-base := "/db/data";
 declare function data:api-path-to-db(
 	$api-path as xs:string 
 	) as xs:string? {
-	document-uri(data:doc($api-path))
+	let $doc := data:doc($api-path)
+	where exists($doc)
+	return document-uri($doc)
 };
 
 (:~ Convert a database path to a path in the API
@@ -40,20 +42,25 @@ declare function data:db-path-to-api(
 	let $norm-db-path := replace($db-path, "^(/db)?/", "")
 	let $level := tokenize($norm-db-path, "/")
 	return
-	  if ($level[1] = "user")
+	  if ($level[1] = "data")
 	  then
-	    data:user-api-path($level[2])
-	  else if ($level[1] = "data")
-	  then
-	    string-join(
-	      ( "/api/data", 
-	        $level[2], 
-	        replace($level[last()], "\.xml$", "")
-	      ), "/")
+	    let $doc := doc($db-path)
+	    let $resource-name := replace($level[last()], "\.xml$", "")
+	    where exists($doc)
+	    return
+	      if ($level[2] = "user")
+	      then
+	        data:user-api-path($resource-name)
+	      else 
+    	    string-join(
+    	      ( "/api/data", 
+    	        $level[2], 
+    	        $resource-name
+    	      ), "/")
 	  else  
 	    error(
 	      xs:QName("error:NOTIMPLEMENTED"), 
-	      "Not implemented for this type of path"
+	      "data:db-path-to-api() not implemented for the path: " || $db-path
 	    )
 };
 
@@ -165,6 +172,6 @@ declare function data:doc(
     else
       error(
         xs:QName("error:NOTIMPLEMENTED"), 
-        "Only implemented for the /data hierarchy"
+        "data:doc() not implemented for the path: " || $api-path
       )
 };
