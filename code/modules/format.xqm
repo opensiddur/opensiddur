@@ -17,20 +17,25 @@ import module namespace mirror="http://jewishliturgy.org/modules/mirror"
   at "xmldb:exist:///db/code/modules/mirror.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
   at "xmldb:exist:///db/code/modules/paths.xqm";
-
+import module namespace uri="http://jewishliturgy.org/transform/uri" 
+  at "xmldb:exist:///db/code/modules/follow-uri.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "xmldb:exist:///db/code/transforms/flatten/flatten.xqm";
 import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
   at "xmldb:exist:///db/code/transforms/flatten/unflatten.xqm";
+import module namespace combine="http://jewishliturgy.org/transform/combine"
+  at "xmldb:exist:///db/code/transforms/flatten/combine.xqm";
   
 declare variable $format:temp-dir := '.format';
 declare variable $format:path-to-xslt := '/db/code/transforms';
 declare variable $format:rest-path-to-xslt := app:concat-path($paths:internal-rest-prefix, $format:path-to-xslt);
 
+declare variable $format:dependency-cache := "/db/cache/dependency";
 declare variable $format:flatten-cache := "/db/cache/flatten";
 declare variable $format:merge-cache := "/db/cache/merge";
 declare variable $format:resolve-cache := "/db/cache/resolved";
 declare variable $format:unflatten-cache := "/db/cache/unflattened";
+declare variable $format:combine-cache := "/db/cache/combined";
 
 declare function local:wrap-document(
   $node as node()
@@ -45,10 +50,12 @@ declare function local:wrap-document(
 declare function format:setup(
   ) as empty-sequence() {
   for $collection in (
+    $format:dependency-cache,
     $format:flatten-cache,
     $format:merge-cache,
     $format:resolve-cache,
-    $format:unflatten-cache
+    $format:unflatten-cache,
+    $format:combine-cache
     )
   where not(xmldb:collection-available($collection))
   return
@@ -59,7 +66,7 @@ declare function format:setup(
  : and return it
  : @param $doc The document to flatten
  : @param $params Parameters to send to the transform
- : @param $original-doc The original document that was flattened, if not $doc 
+ : @param $original-doc The original document that was flattened 
  : @return The mirrored flattened document
  :) 
 declare function format:flatten(
@@ -80,7 +87,7 @@ declare function format:flatten(
 (:~ perform the transform up to the merge step 
  : @param $doc Original document
  : @param $params Parameters to pass to the transforms
- : @param $original-doc The original document that was merged, if not $doc 
+ : @param $original-doc The original document that was merged 
  : @return The merged document (as an in-database copy)
  :)
 declare function format:merge(
@@ -101,7 +108,7 @@ declare function format:merge(
 (:~ perform the transform up to the resolve-stream step 
  : @param $doc Original document
  : @param $params Parameters to pass to the transforms
- : @param $original-doc The original document that was resolved, if not $doc 
+ : @param $original-doc The original document that was resolved 
  : @return The merged document (as an in-database copy)
  :)
 declare function format:resolve(
@@ -141,7 +148,7 @@ declare function format:display-flat(
 declare function format:unflatten(
   $doc as document-node(),
   $params as map,
-  $original-doc as document-node()?
+  $original-doc as document-node()
   ) as document-node() {
   let $unflatten-transform := unflatten:unflatten-document(?, $params)
   return
@@ -149,9 +156,74 @@ declare function format:unflatten(
       $format:unflatten-cache,
       format:resolve($doc, $params, $original-doc),
       $unflatten-transform,
-      ($original-doc, $doc)[1]
+      $original-doc
     )
 };
+
+declare function format:get-dependencies(
+  $doc as document-node()
+  ) as document-node() {
+  document {
+    <format:dependencies>{
+      for $dep in uri:dependency($doc, ())
+      let $transformable := 
+        starts-with($dep, "/db/data/original")
+        (: TODO: add other transformables here... :)
+      return 
+        <format:dependency>{
+          if ($transformable)
+          then attribute transformable { $transformable }
+          else (),
+          $dep
+        }</format:dependency>
+    }</format:dependencies>
+  }
+};
+
+(:~ set up an XML file containing all dependencies 
+ : of a given document
+ :)
+declare function format:dependencies(
+  $doc as document-node()
+  ) as document-node() {
+  mirror:apply-if-outdated(
+    $format:dependency-cache,
+    $doc,
+    format:get-dependencies#1
+  )
+};
+
+(:~ unflatten all transformable dependencies of a given document :)
+declare function format:unflatten-dependencies(
+  $doc as document-node(),
+  $params as map
+  ) as document-node()+ {
+  for $dep in format:dependencies($doc)//format:dependency[@transformable]
+  return format:unflatten(doc($dep), $params, doc($dep))
+};
+  
+(:~ perform the transform up to the combine step 
+ : @param $doc The document to be transformed
+ : @param $params Parameters to pass to the transforms
+ : @param $original-doc The original document that is being transformed (may be the same as $doc) 
+ : @return The combined document (as an in-database copy)
+ :)
+declare function format:combine(
+  $doc as document-node(),
+  $params as map,
+  $original-doc as document-node()
+  ) as document-node() {
+  let $unflats := format:unflatten-dependencies($doc, $params)
+  let $cmb := combine:combine-document(?, $params)
+  return
+    mirror:apply-if-outdated(
+      $format:combine-cache,
+      mirror:doc($format:unflatten-cache, document-uri($doc)),
+      $cmb,
+      $original-doc
+    )
+};
+
 declare function format:transliterate(
   $uri-or-node as item(),
   $user as xs:string?,

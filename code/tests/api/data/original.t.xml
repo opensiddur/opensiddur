@@ -3,6 +3,7 @@
   xmlns:tei="http://www.tei-c.org/ns/1.0"
   xmlns:a="http://jewishliturgy.org/ns/access/1.0"
   xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
   xmlns:http="http://expath.org/ns/http-client">
   <suiteName>Original text data API</suiteName>
   <description>
@@ -18,7 +19,7 @@
     <create-collection parent="/db/data/original/en" name="1900" />
     <create-collection parent="/db/data/original/en/1900" name="01"/>
     <!-- support files required for validity -->
-    <store collection="/db/user" name="testuser.xml">
+    <store collection="/db/data/user" name="testuser.xml">
       <j:contributor>
         <tei:idno>testuser</tei:idno>
         <tei:name>Test User</tei:name>
@@ -68,6 +69,7 @@
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
   <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace orig="http://jewishliturgy.org/api/data/original"
       at "xmldb:exist:///db/code/api/data/original.xqm";
@@ -96,6 +98,36 @@
       <task>Get a resource with no read access</task>
       <code><![CDATA[
       orig:get("NoAccess")
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>orig:get-flat()</testName>
+    <tearDown>
+      <remove-collection collection="/db/cache/flatten/original/en/1900" />
+      <remove-collection collection="/db/cache/merge/original/en/1900" />
+      <remove-collection collection="/db/cache/resolved/original/en/1900" />
+    </tearDown>
+    <test>
+      <task>Get an existing resource</task>
+      <code><![CDATA[
+      orig:get-flat("Existing")
+      ]]></code> 
+      <xpath desc="Returns a TEI resource">exists(./tei:TEI)</xpath>
+      <xpath desc="The returned resource is flattened">exists(./tei:TEI//jf:merged)</xpath>
+    </test>
+    <test>
+      <task>Get a nonexisting resource</task>
+      <code><![CDATA[
+      orig:get-flat("DoesNotExist")
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>Get a resource with no read access</task>
+      <code><![CDATA[
+      orig:get-flat("NoAccess")
       ]]></code> 
       <class href="../common.t.xml#NotFound"/>
     </test>

@@ -27,7 +27,7 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
 
 (: path to user profile data :)
-declare variable $user:path := "/db/user";
+declare variable $user:path := "/db/data/user";
 declare variable $user:api-path := "/api/user";
 (: path to schema :)
 declare variable $user:schema := "/db/schema/contributor.rnc";
