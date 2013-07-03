@@ -310,21 +310,27 @@ declare
 
 (:~ Get a version of the original data resource with combined hierarchies
  : @param $name The resource to get
+ : @param $transclude If true(), transclude all pointers, otherwise (default), return the pointers only.
  : @return HTTP 200 A TEI header with a combined hierarchy version of the resource as XML
  : @error HTTP 404 Not found (or not available)
  :)
 declare 
   %rest:GET
   %rest:path("/api/data/original/{$name}/combined")
-  %rest:query-param("transclude", "{$transclude}", "false")
+  %rest:query-param("transclude", "{$transclude}")
   %rest:produces("application/xml", "text/xml")
   function orig:get-combined(
     $name as xs:string,
-    $transclude as xs:boolean
+    $transclude as xs:boolean*
   ) as item()+ {
   let $doc := crest:get($orig:data-type, $name)
   return
     if ($doc instance of document-node())
-    then format:unflatten($doc, map {}, $doc)
+    then
+      if ($transclude[1])
+      then
+        format:combine($doc, map {}, $doc)
+      else
+        format:unflatten($doc, map {}, $doc)
     else $doc
 };
