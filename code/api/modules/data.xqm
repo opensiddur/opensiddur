@@ -151,10 +151,8 @@ declare function data:doc(
   $type as xs:string,
   $name as xs:string
   ) as document-node()? {
-  let $encoded-name := encode-for-uri($name)
-  return
-    collection(app:concat-path($data:path-base, $type))
-      [replace(util:document-name(.), "\.([^.]+)$", "")=$encoded-name]
+  collection(app:concat-path($data:path-base, $type))
+    [replace(util:document-name(.), "\.([^.]+)$", "")=$name]
 };
 
 (:~ get a document using an api path, with or without /api :)
