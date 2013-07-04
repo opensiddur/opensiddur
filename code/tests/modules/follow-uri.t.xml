@@ -164,10 +164,22 @@
         name="no-dependencies.xml"/>
       <copy source="/db/code/tests/modules" destination="/db/data/tests"
         name="external-dependencies.xml"/>
+      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+        name="dep-root.xml"/>
+      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+        name="dep-tree1.xml"/>
+      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+        name="dep-tree2.xml"/>
+      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+        name="dep-tree3.xml"/>
     </setup>
     <tearDown>
       <remove-document collection="/db/data/tests" name="no-dependencies.xml"/>
       <remove-document collection="/db/data/tests" name="external-dependencies.xml"/>
+      <remove-document collection="/db/data/tests" name="dep-root.xml"/>
+      <remove-document collection="/db/data/tests" name="dep-tree1.xml"/>
+      <remove-document collection="/db/data/tests" name="dep-tree2.xml"/>
+      <remove-document collection="/db/data/tests" name="dep-tree3.xml"/>
     </tearDown>
     <test output="text">
       <task>Dependencies of a resource with no dependencies</task>
@@ -182,6 +194,19 @@
       uri:dependency(doc("/db/data/tests/external-dependencies.xml"), ())
       ]]></code>
       <expected desc="self dependency">/db/data/tests/external-dependencies.xml</expected>
+    </test>
+    <test output="text">
+      <task>Dependency tree with one circular dependency</task>
+      <code><![CDATA[
+      uri:dependency(doc("/db/data/tests/dep-root.xml"), ())
+      ]]></code>
+      <xpath desc="4 dependencies listed">count($output)=4</xpath>
+      <xpath desc="all dependencies are included">
+      every $d in (
+        "/db/data/tests/dep-root.xml",
+        "/db/data/tests/dep-tree1.xml",
+        "/db/data/tests/dep-tree2.xml",
+        "/db/data/tests/dep-tree3.xml") satisfies $d=$output</xpath>
     </test>
   </TestSet>
 </TestSuite>

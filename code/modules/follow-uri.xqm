@@ -578,14 +578,16 @@ declare function uri:dependency(
         uri:uri-base-path(
           uri:absolutize-uri($target, $targets/..)
         )
-    )[not(. = $visited)]
+    )
   let $this-uri := document-uri($doc)
   return distinct-values((
     $this-uri,
     for $dependency in $new-dependencies
+    let $next-doc := data:doc($dependency)
+    where not(document-uri($next-doc)=$visited)
     return 
       uri:dependency(
-        data:doc($dependency), 
+        $next-doc, 
         ($visited, $this-uri)
       )
   ))
