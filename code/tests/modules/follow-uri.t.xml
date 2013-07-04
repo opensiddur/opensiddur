@@ -2,7 +2,7 @@
 <TestSuite 
   xmlns:tei="http://www.tei-c.org/ns/1.0"
   xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
   >
   <suiteName>URI follow module</suiteName>
   <description>
@@ -14,7 +14,7 @@
     <author>Efraim Feinstein</author>
   </description>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
-  <namespace prefix="jx">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace uri="http://jewishliturgy.org/transform/uri"
       at "xmldb:exist:///code/modules/follow-uri.xqm";
@@ -54,53 +54,53 @@
     </test>
   </TestSet>
   <TestSet>
-    <testName>uri:follow() a pointer when it...</testName>
+    <testName>uri:follow(fast=true()) a pointer when it...</testName>
     <test>
       <task>is not a pointer</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("destination"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("destination"), -1, (), true())
       ]]></code>
       <xpath desc="result is self">exists(self::tei:seg[@xml:id='destination']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>points one ahead</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("one"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("one"), -1, (), true())
       ]]></code>
       <xpath desc="result is destination">exists($output/self::tei:seg[@xml:id='destination']) and count($output)</xpath>
     </test>
     <test>
       <task>points two ahead</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("two"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("two"), -1, (), true())
       ]]></code>
       <xpath desc="result is destination">exists($output/self::tei:seg[@xml:id='destination']) and count($output)</xpath>
     </test>
     <test>
       <task>points three ahead</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("three"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("three"), -1, (), true())
       ]]></code>
       <xpath desc="result is destination">exists($output/self::tei:seg[@xml:id='destination']) and count($output)</xpath>
     </test>
     <test>
       <task>has evaluate=none</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("noeval"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("noeval"), -1, (), true())
       ]]></code>
       <xpath desc="result is next pointer">exists($output/self::tei:ptr[@xml:id='three']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>has evaluate=one</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("evalone"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("evalone"), -1, (), true())
       ]]></code>
       <xpath desc="result is two pointers ahead">exists($output/self::tei:ptr[@xml:id='two']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>is a join</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("eval_join"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("eval_join"), -1, (), true())
       ]]></code>
       <xpath desc="result is two segments">count($output) = 2</xpath>
       <xpath desc="segment 1 is present">exists($output/self::tei:seg[@xml:id='destination'])</xpath>
@@ -109,7 +109,7 @@
     <test>
       <task>is a join into a paragraph</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("eval_join_as_p"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("eval_join_as_p"), -1, (), true())
       ]]></code>
       <xpath desc="result is one paragraph">count($output) = 1 and exists($output/self::tei:p)</xpath>
       <xpath desc="segment 1 is present">exists($output/tei:seg[@xml:id='destination'])</xpath>
@@ -118,81 +118,72 @@
     <test>
       <task>points into a different file</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("in_file_2"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("in_file_2"), -1, (), true())
       ]]></code>
       <xpath desc="result is segment from other file">exists($output/self::tei:seg[@xml:id='f2_destination']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>points into a different file and has additional indirection</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("in_file_2_indirect"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("in_file_2_indirect"), -1, (), true())
       ]]></code>
       <xpath desc="result is segment from other file">exists($output/self::tei:seg[@xml:id='f2_destination']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>points to a range</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("range"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("range"), -1, (), true())
       ]]></code>
       <expected desc="result is a sequence of all of the segments in the range">
-        <tei:seg jx:id="part1">1</tei:seg>
-        <tei:seg jx:id="part2">2</tei:seg>
-        <tei:seg jx:id="part3">3</tei:seg>
+        <tei:seg jf:id="part1">1</tei:seg>
+        <tei:seg jf:id="part2">2</tei:seg>
+        <tei:seg jf:id="part3">3</tei:seg>
       </expected>
     </test>
     <test>
       <task>that is of type url</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("url_ptr"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("url_ptr"), -1, (), true())
       ]]></code>
       <xpath desc="result is the pointer itself">$output[count(.) = 1]/self::tei:ptr[@xml:id='url_ptr']</xpath>
     </test>
     <test>
       <task>that points to a ptr of type url</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("to_url_ptr"), -1, ())
+      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("to_url_ptr"), -1, (), true())
       ]]></code>
       <xpath desc="result is the URL pointer">$output[count(.) = 1]/self::tei:ptr[@xml:id='url_ptr']</xpath>
     </test>
   </TestSet>
-  <!-- 
-  <x:scenario label="follow-uri mode with cache-type parameter">
-    <x:scenario label="not using the cache...">
-      <x:context href="follow-uri-cached-context.xml" mode="follow-uri">
-        <x:param name="cache-type" as="xs:string?" tunnel="yes" select="()"/>
-      </x:context>
-      <x:scenario label="... and pointing at a document ...">
-        <x:context select="id('doc')"/>
-        <x:expect label="returns the uncached document" test="exists(//jx:uncached-resource)"/>
-      </x:scenario>
-      <x:scenario label="... and pointing at a jx:id ...">
-        <x:context select="id('by-jx-id')"/>
-        <x:expect label="returns the identified resource" test="exists(//jx:identified[@jx:id='id1'])"/>
-      </x:scenario>
-      <x:scenario label="... and pointing at an xml:id ...">
-        <x:context select="id('by-xml-id')"/>
-        <x:expect label="returns the identified resource" test="exists(//jx:identified[@xml:id='id2'])"/>
-      </x:scenario>
-    </x:scenario>
-    <x:scenario label="using the cache...">
-      <x:context href="follow-uri-cached-context.xml" mode="follow-uri">
-        <x:param name="cache-type" as="xs:string?" tunnel="yes" select="'format=fragmentation'"/>
-      </x:context>
-      <x:scenario label="... and pointing at a document ...">
-        <x:context select="id('doc')"/>
-        <x:expect label="returns the cached document" test="exists(//jx:cached-resource)"/>
-      </x:scenario>
-      <x:scenario label="... and pointing at a jx:id ...">
-        <x:context select="id('by-jx-id')"/>
-        <x:expect label="returns the identified resource" test="exists(//jx:identified[@jx:id='id1'])"/>
-      </x:scenario>
-      <x:scenario label="... and pointing at an xml:id ...">
-        <x:context select="id('by-xml-id')"/>
-        <x:expect label="returns the identified resource" test="exists(//jx:identified[@xml:id='id2'])"/>
-      </x:scenario>
-    </x:scenario>
-  </x:scenario>
-   -->
+  <TestSet>
+    <testName>uri:dependency()</testName>
+    <asUser>testuser</asUser>
+    <password>testuser</password>
+    <setup>
+      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+        name="no-dependencies.xml"/>
+      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+        name="external-dependencies.xml"/>
+    </setup>
+    <tearDown>
+      <remove-document collection="/db/data/tests" name="no-dependencies.xml"/>
+      <remove-document collection="/db/data/tests" name="external-dependencies.xml"/>
+    </tearDown>
+    <test output="text">
+      <task>Dependencies of a resource with no dependencies</task>
+      <code><![CDATA[
+      uri:dependency(doc("/db/data/tests/no-dependencies.xml"), ())
+      ]]></code>
+      <expected desc="self dependency">/db/data/tests/no-dependencies.xml</expected>
+    </test>
+    <test output="text">
+      <task>Dependencies of a resource with only internal and external targets</task>
+      <code><![CDATA[
+      uri:dependency(doc("/db/data/tests/external-dependencies.xml"), ())
+      ]]></code>
+      <expected desc="self dependency">/db/data/tests/external-dependencies.xml</expected>
+    </test>
+  </TestSet>
 </TestSuite>
 
 

@@ -1,5 +1,5 @@
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" 
-  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor">
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0">
   <tei:teiHeader/>
   <tei:text>
     <tei:body>
@@ -17,10 +17,10 @@
           <tei:join xml:id="eval_join" targets="#destination #destination2"/>
           <tei:join xml:id="eval_join_as_p" result="p" targets="#destination #destination2"/>
           <tei:ptr xml:id="range" target="#range(part1,part3)"/>
-          <tei:seg jx:id="part1">1</tei:seg>
-          <tei:seg jx:id="part2">2</tei:seg>
-          <tei:seg jx:id="part3">3</tei:seg>
-          <tei:seg jx:id="dont_go_here">You should not be here</tei:seg>
+          <tei:seg jf:id="part1">1</tei:seg>
+          <tei:seg jf:id="part2">2</tei:seg>
+          <tei:seg jf:id="part3">3</tei:seg>
+          <tei:seg jf:id="dont_go_here">You should not be here</tei:seg>
           <tei:ptr xml:id="url_ptr" type="url" target="#dont_go_here"/>
           <tei:ptr xml:id="to_url_ptr" target="#url_ptr"/>
         </tei:ab>

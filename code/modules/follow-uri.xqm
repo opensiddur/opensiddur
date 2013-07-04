@@ -26,7 +26,6 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "/db/code/api/modules/data.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
-declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 declare namespace p="http://jewishliturgy.org/ns/parser";
 declare namespace r="http://jewishliturgy.org/ns/parser-result";
@@ -46,7 +45,7 @@ declare function uri:id(
 	$id as xs:string,
 	$root as node()
 	) as element()? {
-	($root/id($id), $root//*[@jx:id = $id])[1]
+	($root/id($id), $root//*[@jf:id = $id])[1]
 };
 
 (:~ Given a relative URI and a context,  
@@ -364,16 +363,10 @@ declare function uri:fast-follow(
           then 
             let $left :=
               let $left-ptr := substring-before(substring-after($fragment, "("), ",")
-              return 
-                if ($cache)
-                then $document//*[@jf:id=$left-ptr][1]
-                else $document//id($left-ptr)
+              return uri:id($left-ptr, $document)
             let $right := 
               let $right-ptr := substring-before(substring-after($fragment, ","), ")")
-              return
-                if ($cache)
-                then $document//*[@jf:id=$right-ptr][1]
-                else $document//id($right-ptr)
+              return uri:id($right-ptr, $document)
             return uri:range($left, $right, $allow-copies)
           else 
             if ($cache)
@@ -487,6 +480,14 @@ declare function uri:follow(
   uri:follow($node, $steps, $cache-type, (), ())
 };
 
+declare function uri:follow(
+  $node as node()*,
+  $steps as xs:integer,
+  $cache-type as xs:string?,
+  $fast as xs:boolean?
+  ) as node()* {
+  uri:follow($node, $steps, $cache-type, $fast, ())
+};
 
 (:~ 
  : @param $fast use uri:fast-follow()
