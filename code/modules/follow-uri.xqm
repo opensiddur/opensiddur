@@ -369,9 +369,7 @@ declare function uri:fast-follow(
               return uri:id($right-ptr, $document)
             return uri:range($left, $right, $allow-copies)
           else 
-            if ($cache)
-            then $document//*[@jf:id=$fragment][1]
-            else $document//id($fragment), 
+            uri:id($fragment,$document), 
           $steps, $cache, true(), 
           $intermediate-ptrs
         )
