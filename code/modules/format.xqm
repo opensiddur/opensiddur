@@ -36,6 +36,14 @@ declare variable $format:merge-cache := "/db/cache/merge";
 declare variable $format:resolve-cache := "/db/cache/resolved";
 declare variable $format:unflatten-cache := "/db/cache/unflattened";
 declare variable $format:combine-cache := "/db/cache/combined";
+declare variable $format:caches := (
+    $format:dependency-cache,
+    $format:flatten-cache,
+    $format:merge-cache,
+    $format:resolve-cache,
+    $format:unflatten-cache,
+    $format:combine-cache
+    );
 
 declare function local:wrap-document(
   $node as node()
@@ -49,17 +57,24 @@ declare function local:wrap-document(
 (:~ setup to allow format functions to work :)
 declare function format:setup(
   ) as empty-sequence() {
-  for $collection in (
-    $format:dependency-cache,
-    $format:flatten-cache,
-    $format:merge-cache,
-    $format:resolve-cache,
-    $format:unflatten-cache,
-    $format:combine-cache
-    )
+  for $collection in $format:caches
   where not(xmldb:collection-available($collection))
   return
     mirror:create($collection, "/db/data", true())
+};
+
+(:~ clear all format caches of a single file 
+ : @param $path database path of the original resource
+ :)
+declare function format:clear-caches(
+  $path as xs:string
+  ) as empty-sequence() {
+  for $cache in $format:caches
+  where doc-available($path)
+  return 
+    let $doc := doc($path)
+    return
+      mirror:remove($cache, util:collection-name($doc), util:document-name($doc))
 };
 
 (:~ make a cached version of a flattened document,
@@ -167,7 +182,7 @@ declare function format:get-dependencies(
     <format:dependencies>{
       for $dep in uri:dependency($doc, ())
       let $transformable := 
-        starts-with($dep, "/db/data/original")
+        matches($dep, "^/db/data/(original|tests)")
         (: TODO: add other transformables here... :)
       return 
         <format:dependency>{
