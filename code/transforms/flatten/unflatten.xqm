@@ -91,14 +91,13 @@ declare function unflatten:sequence(
   $sequence as node()*,
   $params as map
   ) as node()* {
-  let $s := trace($sequence[1], "unflatten:sequence$s")
-  let $seq := trace($sequence, "unflatten:sequence$sequence")
+  let $s := $sequence[1]
+  let $seq := $sequence
   return
     if (empty($s))
     then ()
     else if ($s/(@jf:start|@jf:continue))
     then 
-      let $tr := trace((), "calling unflatten:start")
       let $start-return := unflatten:start($s, $sequence, $params)
       return (
         if ($start-return[1] instance of element())
@@ -113,7 +112,6 @@ declare function unflatten:sequence(
         )
       )
     else (
-      trace((), "not calling unflatten:start"),
       if ($s/(@jf:end|@jf:suspend))
       then ()
       else 
@@ -153,18 +151,14 @@ declare function unflatten:start(
   ) as node()* {
   let $following := common:following($s, $sequence)
   let $end := 
-    trace(
     $following[(@jf:end|@jf:suspend)=$s/(@jf:start, @jf:continue)][1]
-    ,"unflatten:start$end")
   let $inside-sequence := 
-    trace(
     if (exists($end))
     then
       $following 
         intersect common:preceding($end, $sequence)
     else
       $following
-    , "unflatten:start$inside-sequence")
   let $unopened-tags := unflatten:unopened-tags($inside-sequence)
   let $unclosed-tags := unflatten:unclosed-tags($inside-sequence)
   return 
