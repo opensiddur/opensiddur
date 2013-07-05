@@ -108,6 +108,7 @@
       <remove-collection collection="/db/cache/flatten/original/en/1900" />
       <remove-collection collection="/db/cache/merge/original/en/1900" />
       <remove-collection collection="/db/cache/resolved/original/en/1900" />
+      <remove-collection collection="/db/cache/dependency/original/en/1900" />
     </tearDown>
     <test>
       <task>Get an existing resource</task>
@@ -128,6 +129,56 @@
       <task>Get a resource with no read access</task>
       <code><![CDATA[
       orig:get-flat("NoAccess")
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>orig:get-combined()</testName>
+    <setup>
+      <copy source="/db/code/tests/api/data/original" name="HasTransclude.xml" 
+        destination="/db/data/original/en/1900/01" />
+      <copy source="/db/code/tests/api/data/original" name="Transcluded.xml" 
+        destination="/db/data/original/en/1900/01" />
+    </setup>
+    <tearDown>
+      <remove-collection collection="/db/cache/flatten/original/en/1900" />
+      <remove-collection collection="/db/cache/merge/original/en/1900" />
+      <remove-collection collection="/db/cache/resolved/original/en/1900" />
+      <remove-collection collection="/db/cache/dependency/original/en/1900" />
+      <remove-collection collection="/db/cache/unflattened/original/en/1900" />
+      <remove-collection collection="/db/cache/combined/original/en/1900" />
+    </tearDown>
+    <test>
+      <task>Get a resource, transclude=false()</task>
+      <code><![CDATA[
+      orig:get-combined("HasTransclude", false())
+      ]]></code> 
+      <xpath desc="Returns a TEI resource">exists(./tei:TEI)</xpath>
+      <xpath desc="The returned resource is unflattened">exists(./tei:TEI//jf:unflattened)</xpath>
+      <xpath desc="Pointers are intact">exists(./tei:TEI//tei:ptr[ancestor::jf:unflattened])</xpath>
+    </test>
+    <test>
+      <task>Get a resource, transclude=true()</task>
+      <code><![CDATA[
+        orig:get-combined("HasTransclude", true())
+      ]]></code> 
+      <xpath desc="Returns a TEI resource">exists(./tei:TEI)</xpath>
+      <xpath desc="The returned resource is combined">exists(./tei:TEI//jf:combined)</xpath>
+      <xpath desc="Pointers have been converted to jf:ptr">exists(./tei:TEI//jf:ptr[ancestor::jf:combined])</xpath>
+      <xpath desc="Transcluded section is there">exists(./tei:TEI//tei:seg[@jf:id="tr_seg1"])</xpath>
+    </test>
+    <test>
+      <task>Get a nonexisting resource</task>
+      <code><![CDATA[
+      orig:get-combined("DoesNotExist", false())
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>Get a resource with no read access</task>
+      <code><![CDATA[
+      orig:get-combined("NoAccess", false())
       ]]></code> 
       <class href="../common.t.xml#NotFound"/>
     </test>
