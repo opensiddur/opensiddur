@@ -917,7 +917,7 @@ declare function local:result-details(
         let $n-subtests := count($subtests)
         return (
           for $subtest at $pos in $subtests
-          let $subpass := local:pass-string($subtest/@pass)
+          let $subpass := local:pass-string(string($subtest/@pass))
           return 
             <tr>{
               if ($pos = 1)
