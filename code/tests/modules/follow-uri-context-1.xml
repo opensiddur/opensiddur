@@ -20,9 +20,23 @@
           <tei:seg jf:id="part1">1</tei:seg>
           <tei:seg jf:id="part2">2</tei:seg>
           <tei:seg jf:id="part3">3</tei:seg>
+          <tei:ptr xml:id="range_bdy" target="#range(bdy1,bdy2)"/>
           <tei:seg jf:id="dont_go_here">You should not be here</tei:seg>
           <tei:ptr xml:id="url_ptr" type="url" target="#dont_go_here"/>
           <tei:ptr xml:id="to_url_ptr" target="#url_ptr"/>
+          <tei:ab jf:id="boundary" xml:lang="en">
+            <tei:ab jf:id="outside">
+              <tei:seg jf:id="outbdy1">NO 1</tei:seg>
+              <tei:milestone jf:id="bdy1"/>
+              <tei:seg jf:id="inbdy1">YES 1</tei:seg>
+            </tei:ab>
+            <tei:seg jf:id="inbdy2">YES 2</tei:seg>
+            <tei:ab jf:id="inside">
+              <tei:seg jf:id="inbdy3" xml:lang="he">כן 3</tei:seg>
+              <tei:milestone jf:id="bdy2"/>
+              <tei:seg jf:id="outbdy2">NO 2</tei:seg>
+            </tei:ab>
+          </tei:ab>
         </tei:ab>
       </tei:div>
     </tei:body>

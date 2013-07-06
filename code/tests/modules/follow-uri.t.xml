@@ -3,6 +3,7 @@
   xmlns:tei="http://www.tei-c.org/ns/1.0"
   xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
   xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  xmlns:uri="http://jewishliturgy.org/transform/uri"
   >
   <suiteName>URI follow module</suiteName>
   <description>
@@ -138,6 +139,57 @@
         <tei:seg jf:id="part1">1</tei:seg>
         <tei:seg jf:id="part2">2</tei:seg>
         <tei:seg jf:id="part3">3</tei:seg>
+      </expected>
+    </test>
+    <test>
+      <task>fast-follow: points to a range that crosses a hierarchy, $allow-copies=false()</task>
+      <code><![CDATA[
+      let $ptr := doc("/db/code/tests/modules/follow-uri-context-1.xml")/id("range_bdy")
+      return
+        uri:fast-follow($ptr/@target/string(), $ptr, -1, (), false(), ())[. instance of element()]
+      ]]></code>
+      <!-- actually returns copies of *all* nodes, including duplicates of text nodes -->
+      <expected desc="result is a sequence of all of the segments entirely in the range">
+        <tei:milestone jf:id="bdy1"/>
+        <tei:seg jf:id="inbdy1">YES 1</tei:seg>
+        <tei:seg jf:id="inbdy2">YES 2</tei:seg>
+        <tei:seg jf:id="inbdy3" xml:lang="he">כן 3</tei:seg>
+        <tei:milestone jf:id="bdy2"/>
+      </expected>
+    </test>
+    <test>
+      <task>points to a range that crosses a hierarchy, $allow-copies=true()</task>
+      <code><![CDATA[
+      let $ptr := doc("/db/code/tests/modules/follow-uri-context-1.xml")/id("range_bdy")
+      return
+        uri:fast-follow($ptr/@target/string(), $ptr, -1, (), true(), ())
+      ]]></code>
+      <!-- note: only nodes that are actually *copies* will have the @uri:* attributes -->
+      <expected desc="result is a sequence of all of the segments in the range, and @uri decorators">
+        <tei:milestone jf:id="bdy1" 
+          uri:lang="en" 
+          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml"/>
+        <tei:seg jf:id="inbdy1" 
+          uri:lang="en" 
+          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml">YES 1</tei:seg>
+        <tei:seg jf:id="inbdy2"
+          uri:lang="en" 
+          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml">YES 2</tei:seg>
+        <tei:ab jf:id="inside"
+          uri:lang="en" 
+          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml">
+          <tei:seg jf:id="inbdy3" xml:lang="he"
+          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml">כן 3</tei:seg>
+          <tei:milestone jf:id="bdy2" 
+            uri:lang="en" 
+          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml"/>
+        </tei:ab>
       </expected>
     </test>
     <test>

@@ -615,7 +615,20 @@ declare function uri:range-transform(
       : should be returned, but won't be because they are
       : after $right
       :)
-      $node 
+      if ($allow-copies)
+        then
+          element {QName(namespace-uri($node), name($node))}{
+            attribute uri:document-uri { document-uri(root($node)) },
+            if ($node/@xml:lang)
+            then ()
+            else attribute uri:lang { common:language($node) },
+            if ($node/@xml:base)
+            then ()
+            else attribute uri:base { base-uri($node) },
+            $node/(@*|node())
+          }
+        else
+          $node 
     else if (
         ($node << $left or $node >> $right)
         )
@@ -628,7 +641,7 @@ declare function uri:range-transform(
         if ($allow-copies)
         then
           element {QName(namespace-uri($node), name($node))}{
-            attribute uri:document-uri { document-uri($node) },
+            attribute uri:document-uri { document-uri(root($node)) },
             if ($node/@xml:lang)
             then ()
             else attribute uri:lang { common:language($node) },
