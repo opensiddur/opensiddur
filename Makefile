@@ -135,7 +135,7 @@ TEI_REVISION ?= -r 11440
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REV ?= 18600
+EXIST_REV ?= 18649
 EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
@@ -270,6 +270,8 @@ copy-files:
 	cp $(SETUPDIR)/opensiddur-catalog.xml $(EXIST_INSTALL_DIR)/webapp/WEB-INF
 	cp $(SETUPDIR)/hebrew.dtd $(EXIST_INSTALL_DIR)/webapp/WEB-INF/entities
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"
+	@echo "Running post install script..."   
+	$(EXISTCLIENT) -qls -u admin -P "$(ADMINPASSWORD)" -F $(SETUPDIR)/post-install.xql
 
 .PHONY: setup-password setup-clean
 setup-password: $(SETUPDIR)/setup.xql
