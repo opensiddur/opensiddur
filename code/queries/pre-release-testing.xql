@@ -31,6 +31,7 @@ let $tests-to-run :=
     <test module="/db/code/tests/api/data/transliteration.t.xml"/>
     <test module="/db/code/tests/transforms/flatten/flatten.t.xml"/>
     <test module="/db/code/tests/transforms/flatten/unflatten.t.xml"/>
+    <test module="/db/code/tests/transforms/flatten/combine.t.xml"/>
     <test module="/db/code/tests/transforms/translit/translit.t.xml"/>
     { ((: transforms :))}
     <!-- 

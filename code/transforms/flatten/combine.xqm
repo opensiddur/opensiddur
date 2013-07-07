@@ -50,6 +50,8 @@ declare function combine:combine(
     case element(tei:teiHeader)
     return $node
     (: TODO: add other model.resourceLike elements above :)
+    case element(jf:unflattened)
+    return combine:jf-unflattened($node, $params)
     case element() 
     return combine:element($node, $params) 
     default return $node
@@ -69,6 +71,16 @@ declare function combine:tei-TEI(
     )
   }
 }; 
+
+declare function combine:jf-unflattened(
+  $e as element(jf:unflattened),
+  $params as map
+  ) as element(jf:combined) {
+  element jf:combined {
+    $e/@*,
+    combine:combine($e/node(), $params)
+  } 
+};
 
 declare function combine:element(
   $e as element(),
@@ -174,7 +186,12 @@ declare function combine:tei-ptr(
         uri:follow-steps($e),
         (),
         true(),
-        $format:unflatten-cache
+        if (substring-before($target, "#") or not(contains($target, "#")))
+        then $format:unflatten-cache
+        else ( 
+          (: Already in the cache, no need to try to 
+          find a cache of a cached document :) 
+        )
       )
     return
       element jf:ptr {

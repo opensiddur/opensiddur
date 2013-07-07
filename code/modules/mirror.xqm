@@ -372,6 +372,13 @@ declare function mirror:store(
     else () 
 };
 
+(:~ remove a resource from the given mirror
+ : If there are no more mirror resources in the collection,
+ : remove the collection
+ : @param $mirror The mirror
+ : @param $collection The collection where the resource is
+ : @param $resource The resource 
+ :)
 declare function mirror:remove(
   $mirror as xs:string,
   $collection as xs:string,
@@ -384,7 +391,7 @@ declare function mirror:remove(
       (: remove a collection :)
       let $exists := xmldb:collection-available($mirror-collection)
       where $exists
-      return xmldb:remove($mirror-collection)
+      return mirror:clear-collections($mirror-collection, true())
     else
       (: remove a resource :)
       let $mirror-path := concat($mirror-collection, "/", $resource)
@@ -392,8 +399,37 @@ declare function mirror:remove(
         util:binary-doc-available($mirror-path) or 
         doc-available($mirror-path)
       where $exists
-      return xmldb:remove($mirror-collection, $resource)
+      return (
+        xmldb:remove($mirror-collection, $resource),
+        mirror:clear-collections($mirror-collection, false())
+      )      
 };
+
+(:~ clear cache collections :)
+declare %private function mirror:clear-collections(
+  $collection as xs:string,
+  $allow-nonempty as xs:boolean
+  ) as empty-sequence() {
+  if (
+    $allow-nonempty or
+    empty(
+      system:as-user("admin", $magic:password, 
+        collection($collection)
+      )
+    )
+  )
+  then
+    let $tokens := tokenize($collection, "/")
+    return (
+      xmldb:remove($collection),
+      mirror:clear-collections(
+        string-join(subsequence($tokens, 1, count($tokens) - 1), "/"),
+        false()
+      )
+    )
+  else ()
+};
+
 
 declare function mirror:remove(
   $mirror as xs:string,

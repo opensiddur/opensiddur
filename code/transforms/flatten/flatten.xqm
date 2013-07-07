@@ -65,25 +65,28 @@ declare function flatten:merge-document(
   ) as document-node() {
   common:apply-at(
     $doc, 
-    $doc//j:concurrent, 
+    $doc//(j:concurrent|j:streamText), 
     flatten:merge-concurrent#2,
     $params  
   )
 };
 
 declare function flatten:merge-concurrent(
-  $e as element(j:concurrent),
+  $e as element(),
   $params as map
-  ) as element(j:concurrent) {
-  element { QName(namespace-uri($e), name($e)) }{
-    $e/@*,
+  ) as element()* {
+  typeswitch($e)
+  case element(j:concurrent)
+  return ()
+  default (: j:streamText :) 
+  return (
     flatten:merge(
-      flatten:flatten-streamText($e/../j:streamText, $params),
-      $e/jf:layer,
+      flatten:flatten-streamText($e, $params),
+      $e/../j:concurrent/jf:layer,
       $params
     ),
-    $e/(node() except jf:layer)
-  }
+    $e
+    )
 };
 
 (:~ merge flattened layers and a flattened streamText 

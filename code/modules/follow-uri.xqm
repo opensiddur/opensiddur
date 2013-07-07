@@ -26,7 +26,6 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "/db/code/api/modules/data.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
-declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 declare namespace p="http://jewishliturgy.org/ns/parser";
 declare namespace r="http://jewishliturgy.org/ns/parser-result";
@@ -46,7 +45,7 @@ declare function uri:id(
 	$id as xs:string,
 	$root as node()
 	) as element()? {
-	($root/id($id), $root//*[@jx:id = $id])[1]
+	($root/id($id), $root//*[@jf:id = $id])[1]
 };
 
 (:~ Given a relative URI and a context,  
@@ -364,21 +363,13 @@ declare function uri:fast-follow(
           then 
             let $left :=
               let $left-ptr := substring-before(substring-after($fragment, "("), ",")
-              return 
-                if ($cache)
-                then $document//*[@jf:id=$left-ptr][1]
-                else $document//id($left-ptr)
+              return uri:id($left-ptr, $document)
             let $right := 
               let $right-ptr := substring-before(substring-after($fragment, ","), ")")
-              return
-                if ($cache)
-                then $document//*[@jf:id=$right-ptr][1]
-                else $document//id($right-ptr)
+              return uri:id($right-ptr, $document)
             return uri:range($left, $right, $allow-copies)
           else 
-            if ($cache)
-            then $document//*[@jf:id=$fragment][1]
-            else $document//id($fragment), 
+            uri:id($fragment,$document), 
           $steps, $cache, true(), 
           $intermediate-ptrs
         )
@@ -487,6 +478,14 @@ declare function uri:follow(
   uri:follow($node, $steps, $cache-type, (), ())
 };
 
+declare function uri:follow(
+  $node as node()*,
+  $steps as xs:integer,
+  $cache-type as xs:string?,
+  $fast as xs:boolean?
+  ) as node()* {
+  uri:follow($node, $steps, $cache-type, $fast, ())
+};
 
 (:~ 
  : @param $fast use uri:fast-follow()
@@ -577,14 +576,16 @@ declare function uri:dependency(
         uri:uri-base-path(
           uri:absolutize-uri($target, $targets/..)
         )
-    )[not(. = $visited)]
+    )
   let $this-uri := document-uri($doc)
   return distinct-values((
     $this-uri,
     for $dependency in $new-dependencies
+    let $next-doc := data:doc($dependency)
+    where not(document-uri($next-doc)=$visited)
     return 
       uri:dependency(
-        data:doc($dependency), 
+        $next-doc, 
         ($visited, $this-uri)
       )
   ))
@@ -614,7 +615,20 @@ declare function uri:range-transform(
       : should be returned, but won't be because they are
       : after $right
       :)
-      $node 
+      if ($allow-copies)
+        then
+          element {QName(namespace-uri($node), name($node))}{
+            attribute uri:document-uri { document-uri(root($node)) },
+            if ($node/@xml:lang)
+            then ()
+            else attribute uri:lang { common:language($node) },
+            if ($node/@xml:base)
+            then ()
+            else attribute uri:base { base-uri($node) },
+            $node/(@*|node())
+          }
+        else
+          $node 
     else if (
         ($node << $left or $node >> $right)
         )
@@ -627,7 +641,7 @@ declare function uri:range-transform(
         if ($allow-copies)
         then
           element {QName(namespace-uri($node), name($node))}{
-            attribute uri:document-uri { document-uri($node) },
+            attribute uri:document-uri { document-uri(root($node)) },
             if ($node/@xml:lang)
             then ()
             else attribute uri:lang { common:language($node) },
