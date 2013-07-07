@@ -25,6 +25,8 @@ import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
   at "xmldb:exist:///db/code/transforms/flatten/unflatten.xqm";
 import module namespace combine="http://jewishliturgy.org/transform/combine"
   at "xmldb:exist:///db/code/transforms/flatten/combine.xqm";
+import module namespace tohtml="http://jewishliturgy.org/transform/html"
+  at "xmldb:exist:///db/code/transforms/tohtml.xqm";
   
 declare variable $format:temp-dir := '.format';
 declare variable $format:path-to-xslt := '/db/code/transforms';
@@ -36,13 +38,15 @@ declare variable $format:merge-cache := "/db/cache/merge";
 declare variable $format:resolve-cache := "/db/cache/resolved";
 declare variable $format:unflatten-cache := "/db/cache/unflattened";
 declare variable $format:combine-cache := "/db/cache/combined";
+declare variable $format:html-cache := "/db/cache/html";
 declare variable $format:caches := (
     $format:dependency-cache,
     $format:flatten-cache,
     $format:merge-cache,
     $format:resolve-cache,
     $format:unflatten-cache,
-    $format:combine-cache
+    $format:combine-cache,
+    $format:html-cache
     );
 
 declare function local:wrap-document(
@@ -60,7 +64,11 @@ declare function format:setup(
   for $collection in $format:caches
   where not(xmldb:collection-available($collection))
   return
-    mirror:create($collection, "/db/data", true())
+    mirror:create($collection, "/db/data", true(),
+      if ($collection = $format:html-cache)
+      then map { "xml" := "html" }
+      else map {}
+    )
 };
 
 (:~ clear all format caches of a single file 
@@ -238,6 +246,28 @@ declare function format:combine(
       $original-doc
     )
 };
+
+(:~ perform the transform up to the HTML formatting step 
+ : @param $doc The document to be transformed
+ : @param $params Parameters to pass to the transforms
+ : @param $original-doc The original document that is being transformed (may be the same as $doc) 
+ : @return The combined document (as an in-database copy)
+ :)
+declare function format:html(
+  $doc as document-node(),
+  $params as map,
+  $original-doc as document-node()
+  ) as document-node() {
+  let $html := tohtml:tohtml-document(?, $params)
+  return
+    mirror:apply-if-outdated(
+      $format:html-cache,
+      format:combine($doc, $params, $original-doc),
+      $html,
+      $original-doc
+    )
+};
+
 
 declare function format:transliterate(
   $uri-or-node as item(),

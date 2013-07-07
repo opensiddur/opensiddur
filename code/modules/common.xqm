@@ -277,3 +277,21 @@ declare function common:preceding(
     return $i - 1)[1]
   )
 };
+
+(:~ given a language code, determine its direction
+ : (rtl, ltr) 
+ :)
+declare function common:direction-from-language(
+  $lang as xs:string
+  ) as xs:string {
+  switch ($lang)
+  case "he" (: Hebrew :)
+  case "arc" (: Aramaic :)
+  case "ar" (: Arabic :)
+  return
+    if (contains($lang, "-latn")) (: Latin alphabet transliteration :)
+    then "ltr"
+    else "rtl"
+  default
+  return "ltr"
+};
