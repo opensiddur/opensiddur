@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+  <tei:teiHeader>
+  
+  </tei:teiHeader>
+  <tei:text>
+    <j:streamText xml:id="stream">
+      <tei:seg xml:id="seg1">A segment.</tei:seg>
+    </j:streamText>
+  </tei:text>
+</tei:TEI>
