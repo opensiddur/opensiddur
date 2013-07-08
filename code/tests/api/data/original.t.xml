@@ -73,6 +73,8 @@
   <imports>
     import module namespace orig="http://jewishliturgy.org/api/data/original"
       at "xmldb:exist:///db/code/api/data/original.xqm";
+    import module namespace format="http://jewishliturgy.org/modules/format"
+      at "xmldb:exist:///db/code/modules/format.xqm";
     import module namespace crest="http://jewishliturgy.org/modules/common-rest"
       at "xmldb:exist:///db/code/api/modules/common-rest.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
@@ -142,12 +144,10 @@
         destination="/db/data/original/en/1900/01" />
     </setup>
     <tearDown>
-      <remove-collection collection="/db/cache/flatten/original/en/1900" />
-      <remove-collection collection="/db/cache/merge/original/en/1900" />
-      <remove-collection collection="/db/cache/resolved/original/en/1900" />
-      <remove-collection collection="/db/cache/dependency/original/en/1900" />
-      <remove-collection collection="/db/cache/unflattened/original/en/1900" />
-      <remove-collection collection="/db/cache/combined/original/en/1900" />
+      <code><![CDATA[
+      format:clear-caches("/db/data/original/en/1900/01/HasTransclude.xml"),
+      format:clear-caches("/db/data/original/en/1900/01/Transcluded.xml")
+      ]]></code>
     </tearDown>
     <test>
       <task>Get a resource, transclude=false()</task>
@@ -183,6 +183,51 @@
       <class href="../common.t.xml#NotFound"/>
     </test>
   </TestSet>
+  <TestSet>
+    <testName>orig:get-combined-html()</testName>
+    <setup>
+      <copy source="/db/code/tests/api/data/original" name="HasTransclude.xml" 
+        destination="/db/data/original/en/1900/01" />
+      <copy source="/db/code/tests/api/data/original" name="Transcluded.xml" 
+        destination="/db/data/original/en/1900/01" />
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      format:clear-caches("/db/data/original/en/1900/01/HasTransclude.xml"),
+      format:clear-caches("/db/data/original/en/1900/01/Transcluded.xml")
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Get a resource, transclude=false()</task>
+      <code><![CDATA[
+      orig:get-combined-html("HasTransclude", false())
+      ]]></code> 
+      <xpath desc="Returns an HTML resource">exists(./html:html)</xpath>
+    </test>
+    <test>
+      <task>Get a resource, transclude=true()</task>
+      <code><![CDATA[
+        orig:get-combined-html("HasTransclude", true())
+      ]]></code> 
+      <xpath desc="Returns an HTML resource">exists(./html:html)</xpath>
+      <xpath desc="The returned resource is combined">exists(./html:html//html:div[@data-document="/api/data/original/Transcluded"])</xpath>
+      <xpath desc="Transcluded section is there">exists(./html:html//html:div[contains(@class,"id-tr_seg1")])</xpath>
+    </test>
+    <test>
+      <task>Get a nonexisting resource</task>
+      <code><![CDATA[
+      orig:get-combined-html("DoesNotExist", false())
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+    <test>
+      <task>Get a resource with no read access</task>
+      <code><![CDATA[
+      orig:get-combined-html("NoAccess", false())
+      ]]></code> 
+      <class href="../common.t.xml#NotFound"/>
+    </test>
+  </TestSet>  
   <TestSet>
     <testName>orig:list()</testName>
     <test>
