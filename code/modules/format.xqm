@@ -251,18 +251,22 @@ declare function format:combine(
  : @param $doc The document to be transformed
  : @param $params Parameters to pass to the transforms
  : @param $original-doc The original document that is being transformed (may be the same as $doc) 
+ : @param $transclude Use transclusion?
  : @return The combined document (as an in-database copy)
  :)
 declare function format:html(
   $doc as document-node(),
   $params as map,
-  $original-doc as document-node()
+  $original-doc as document-node(),
+  $transclude as xs:boolean
   ) as document-node() {
   let $html := tohtml:tohtml-document(?, $params)
   return
     mirror:apply-if-outdated(
       $format:html-cache,
-      format:combine($doc, $params, $original-doc),
+      if ($transclude)
+      then format:combine($doc, $params, $original-doc)
+      else format:unflatten($doc, $params, $original-doc),
       $html,
       $original-doc
     )
