@@ -80,10 +80,11 @@ declare
   %rest:path("/api/data/styles/{$name}")
   %rest:produces("text/css", "text/plain")
   %output:method("text")
+  %output:media-type("text/css")
   function sty:get-css(
     $name as xs:string
   ) as item()+ {
-  let $xml := sty:get-xml($name)
+  let $xml := sty:get-xml(replace($name, "\.css$", ""))
   return
     if ($xml instance of document-node())
     then
@@ -261,18 +262,18 @@ declare
     $name as xs:string,
     $body as xs:string
   ) as item()+ {
-  let $old-xml := sty:get-xml($name)
+  let $adj-name := replace($name, "\.css$", "")
+  let $old-xml := sty:get-xml($adj-name)
   return
     if ($old-xml instance of document-node())
     then
       crest:put(
-        $sty:data-type, $name, 
+        $sty:data-type, $adj-name, 
         sty:replace-stylesheet($old-xml, $body, "css"),
         sty:validate#2,
         sty:validate-report#2
       )
     else $old-xml
-  
 };
 
 (:~ Get access/sharing data for a style document
