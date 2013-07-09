@@ -87,7 +87,10 @@ declare function combine:element(
   $params as map
   ) as element() {
   element {QName(namespace-uri($e), name($e))}{
-    $e/(@* except @uri:*),
+    $e/(@* except (@uri:*, @xml:id)),
+    if ($e/@xml:id)
+    then attribute jf:id { $e/@xml:id/string() }
+    else (),
     combine:combine($e/node() ,$params)
   }
 };
