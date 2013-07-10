@@ -213,6 +213,11 @@ TODO:
 		</xsl:copy>
 	</xsl:template>
 	
+  <xd:doc>
+    <xd:short>ignore x</xd:short>
+  </xd:doc>
+  <xsl:template match="x" mode="process-text"/>
+  
 	<xd:doc>
 		<xd:short>Split a given verse into segments based on trope</xd:short>
 		<xd:param name="emet-verse">set to true() if the verse should be considered to use eme"t trope. otherwise, false</xd:param>

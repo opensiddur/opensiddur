@@ -30,14 +30,14 @@
     </titleStmt>
     <editionStmt>
       <edition>Unicode/XML Westminster Leningrad Codex
-        <version>4.16</version>
-        <date>30 Apr 2012</date>
+        <version>4.18</version>
+        <date>13 Jun 2013</date>
       </edition>
       <respStmt>
-        <resp>Transcribed by WLC2XML of 6 Jun 2010 at 05 Jun 2012 @ 21:41.43. Build number: 23.0.</resp>
+        <resp>Transcribed by WLC2XML of 6 Jun 2010 at 25 Jun 2013 @ 20:24.20. Build number: 24.0.</resp>
       </respStmt>
     </editionStmt>
-    <extent>   361,425 bytes</extent>
+    <extent>   361,903 bytes</extent>
     <publicationStmt>
       <authority>Transcription permitted:
         <name>Kirk Lowery</name>
@@ -53,7 +53,7 @@
       <availability status="free">Freely available</availability>
     </publicationStmt>
     <notesStmt>
-      <note>from the electronic version of the Leningrad Codex maintained by the J. Alan Groves Center for Advanced Biblical Research.</note>
+      <note>From the electronic version of the Leningrad Codex maintained by the J. Alan Groves Center for Advanced Biblical Research.</note>
       <note>This text began as an electronic transcription by Richard Whitaker (Princeton Seminary, New Jersey) and H. van Parunak (then at the University of Michigan, Ann Arbor) of the 1983 printed edition of Biblia Hebraica Stuttgartensia (BHS). It was continued with the cooperation of Robert Kraft (University of Pennsylvania) and Emmanuel Tov (Hebrew University, Jerusalem), and completed by Alan Groves (Westminster Theological Seminary).  The transcription was called the Michigan-Claremont-Westminster electronic Hebrew Bible and was archived at the Oxford Text Archive (OTA) in 1987. It has been variously known as the "CCAT" or "eBHS" text. Since that time, the text has been modified in many hundreds of places to conform to the photo-facsimile of the Leningrad Codex, Firkovich B19A, residing at the Russian National Library, St. Petersberg; hence the change of name.</note>
       <note>The J. Alan Groves Center for Advanced Biblical Research has continued to scrutinize and correct this electronic text as a part of its continuing work of building morphology and syntax databases of the Hebrew Bible, since correct linguistic analysis requires an accurate text.</note>
       <note>Vocalized ketib variants are no longer included as they are not part of the original manuscript.</note>
@@ -129,13 +129,13 @@
   <encodingDesc>
   </encodingDesc>
   <profileDesc>
-    <creation>Input text file wlc416_ps.txt provided by the J. Alan Groves Center for Advanced 
-Biblical Research. The file has the MD5 hash: a941 88e1 3fc3 0b18 8bb4 9ac8 c24f 2946 
-and was received on 30 Apr 2012. The WLC text file has been modified by the 
+    <creation>Input text file wlc418_ps.txt provided by the J. Alan Groves Center for Advanced 
+Biblical Research. The file has the MD5 hash: 79fa 8f5a 9957 a0a0 3212 e51e b4c9 fc33 
+and was received on 13 Jun 2013. The WLC text file has been modified by the 
 transcriber to move transcription notes closer to the relevant character in 
-exactly six (6) places. The modified file, wlc_4.16_ps_td.txt, has the following 
-SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 . 
-      <date>05 Jun 2012</date>
+exactly six (6) places. The modified file, wlc_4.18_ps_td.txt, has the following 
+SHA-1 hash: 036E 5248 D7E9 522D D62C 1466 C019 8347 A693 60D9 . 
+      <date>25 Jun 2013</date>
     </creation>
     <langUsage>
       <language ident="HE">Hebrew</language>
@@ -462,8 +462,8 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
       <v n="19">
         <w>וַ/יְהִ֤י</w>
         <w>יְהוָה֙</w>
-        <w>אֶת־</w>
-        <w>יְהוּדָ֔ה</w>
+        <w>אֶתּ־</w>
+        <w>יְהוּדָ֔ה<x>P</x><x>n</x><x>p</x></w>
         <w>וַ/יֹּ֖רֶשׁ</w>
         <w>אֶת־</w>
         <w>הָ/הָ֑ר</w>
@@ -980,7 +980,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>לָ/הֶ֑ם</w>
         <w>וַ/יַּכְעִ֖סוּ</w>
         <w>אֶת־</w>
-        <w>יְהוָֽה׃<x>c</x></w>
+        <w>יְהוָֽה׃<x>C</x><x>c</x></w>
       </v>
       <v n="13">
         <w>וַ/יַּעַזְב֖וּ</w>
@@ -1610,11 +1610,11 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>וַ/יָּחִ֣ילוּ</w>
         <w>עַד־</w>
         <w>בּ֔וֹשׁ</w>
-        <w>וְ/הִנֵּ֛ה</w>
+        <w>וְ/הְנֵּ֛ה<x>Q</x><x>n</x><x>v</x></w>
         <w>אֵינֶ֥/נּוּ</w>
         <w>פֹתֵ֖חַ</w>
         <w>דַּלְת֣וֹת</w>
-        <w>הָֽ/עֲלִיָּ֑ה<x>c</x></w>
+        <w>הָֽ/עֲלִיָּ֑ה<x>Q</x><x>c</x></w>
         <w>וַ/יִּקְח֤וּ</w>
         <w>אֶת־</w>
         <w>הַ/מַּפְתֵּ֙חַ֙</w>
@@ -1903,7 +1903,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>סִֽיסְרָ֑א</w>
         <w>וַ/תָּ֧קָם</w>
         <w>דְּבוֹרָ֛ה</w>
-        <w>וַ/תֵּ֥לֶךְ</w>
+        <w>וַ/תֵּ֥לֶך<x>Q</x><x>n</x><x>v</x></w>
         <w>עִם־</w>
         <w>בָּרָ֖ק</w>
         <w>קֶֽדְשָׁ/ה׃</w>
@@ -2055,7 +2055,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>אֶל־</w>
         <w>אֹ֣הֶל</w>
         <w>יָעֵ֔ל</w>
-        <w>אֵ֖שֶׁת</w>
+        <w>אֵ֖שֶּׁת<x>Q</x><x>n</x><x>p</x></w>
         <w>חֶ֣בֶר</w>
         <w>הַ/קֵּינִ֑י</w>
         <w>כִּ֣י</w>
@@ -2836,7 +2836,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
       <v n="12">
         <w>וַ/יֵּרָ֥א</w>
         <w>אֵלָ֖י/ו</w>
-        <w>מַלְאַ֣ךְ</w>
+        <w>מַלְּאַ֣ךְ<x>Q</x><x>n</x><x>p</x></w>
         <w>יְהוָ֑ה</w>
         <w>וַ/יֹּ֣אמֶר</w>
         <w>אֵלָ֔י/ו</w>
@@ -3283,7 +3283,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>גִּדְע֑וֹן</w>
         <w>וַ/יִּתְקַע֙</w>
         <w>בַּ/שּׁוֹפָ֔ר</w>
-        <w>וַ/יִּזָּעֵ֥ק</w>
+        <w>וַ/יִזָּעֵ֥ק<x>Q</x><x>n</x><x>p</x></w>
         <w>אֲבִיעֶ֖זֶר</w>
         <w>אַחֲרָֽי/ו׃</w>
       </v>
@@ -3292,7 +3292,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>שָׁלַ֣ח</w>
         <w>בְּ/כָל־</w>
         <w>מְנַשֶּׁ֔ה</w>
-        <w>וַ/יִּזָּעֵ֥ק</w>
+        <w>וַ/יִזָּעֵ֥ק<x>Q</x><x>n</x><x>p</x></w>
         <w>גַּם־</w>
         <w>ה֖וּא</w>
         <w>אַחֲרָ֑י/ו</w>
@@ -3845,7 +3845,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>הַ/כַּדִּים֒</w>
         <w>וַ/יַּחֲזִ֤יקוּ</w>
         <w>בְ/יַד־</w>
-        <w>שְׂמאוֹלָ/ם֙<x>1</x></w>
+        <w>שְׂמאוֹלָ/ם֙<x>U</x></w>
         <w>בַּ/לַּפִּדִ֔ים</w>
         <w>וּ/בְ/יַ֨ד־</w>
         <w>יְמִינָ֔/ם</w>
@@ -4280,7 +4280,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>אֲשֶׁ֥ר</w>
         <w>הֲרַגְתֶּ֖ם</w>
         <w>בְּ/תָב֑וֹר</w>
-        <w>וַֽ/יֹּאמְרוּ֙</w>
+        <w>וַֽ/יֹּאמרוּ֙<x>Q</x><x>n</x><x>v</x></w>
         <w>כָּמ֣וֹ/ךָ</w>
         <w>כְמוֹ/הֶ֔ם</w>
         <w>אֶחָ֕ד</w>
@@ -4623,9 +4623,9 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>אֶחָ֑ד</w>
         <w>וּ/זְכַרְתֶּ֕ם</w>
         <w>כִּֽי־</w>
-        <w>עַצְמֵ/כֶ֥ם</w>
+        <w>עַצְמֵ/כֶ֥ם<x>U</x></w>
         <w>וּ/בְשַׂרְ/כֶ֖ם</w>
-        <w>אָנִֽי׃</w>
+        <w>אָנִֽי׃<x>U</x></w>
       </v>
       <v n="3">
         <w>וַ/יְדַבְּר֨וּ</w>
@@ -4654,8 +4654,8 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>ל/וֹ֙</w>
         <w>שִׁבְעִ֣ים</w>
         <w>כֶּ֔סֶף</w>
-        <w>מִ/בֵּ֖ית</w>
-        <w>בַּ֣עַל</w>
+        <w>מִ/בֵּ֖יתּ<x>P</x><x>n</x><x>p</x></w>
+        <w>בַ֣עַל<x>P</x><x>n</x><x>p</x></w>
         <w>בְּרִ֑ית</w>
         <w>וַ/יִּשְׂכֹּ֨ר</w>
         <w>בָּ/הֶ֜ם</w>
@@ -4676,7 +4676,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>אֶחָ֧י/ו</w>
         <w>בְּנֵֽי־</w>
         <w>יְרֻבַּ֛עַל</w>
-        <w>שִׁבְעִ֥ים</w>
+        <w>שִׁבְּעִ֥ים<x>P</x><x>n</x><x>p</x></w>
         <w>אִ֖ישׁ</w>
         <w>עַל־</w>
         <w>אֶ֣בֶן</w>
@@ -6465,7 +6465,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>עַמּ֖וֹן</w>
         <w>לְ/הִלָּ֣חֶם</w>
         <w>בָּ֑/ם</w>
-        <w>וַ/יִּתְּנֵ֥/ם</w>
+        <w>וַ/יִתְּנֵ֥/ם<x>Q</x><x>n</x><x>p</x></w>
         <w>יְהוָ֖ה</w>
         <w>בְּ/יָדֽ/וֹ׃</w>
       </v>
@@ -6473,7 +6473,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>וַ/יַּכֵּ֡/ם</w>
         <w>מֵ/עֲרוֹעֵר֩</w>
         <w>וְ/עַד־</w>
-        <w>בּוֹאֲ/ךָ֨<x>c</x></w>
+        <w>בּוֹאֲ/ךָ֨<x>C</x><x>c</x></w>
         <w>מִנִּ֜ית</w>
         <w>עֶשְׂרִ֣ים</w>
         <w>עִ֗יר</w>
@@ -6526,7 +6526,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>הַכְרֵ֣עַ</w>
         <w>הִכְרַעְתִּ֔/נִי</w>
         <w>וְ/אַ֖תְּ</w>
-        <w>הָיִ֣יתְ<x>1</x></w>
+        <w>הָיִ֣יתְ<x>U</x></w>
         <w>בְּ/עֹֽכְרָ֑/י</w>
         <w>וְ/אָנֹכִ֗י</w>
         <w>פָּצִ֤יתִי־</w>
@@ -6686,7 +6686,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>וָֽ/אֶרְאֶ֞ה</w>
         <w>כִּֽי־</w>
         <w>אֵינְ/ךָ֣</w>
-        <w>מוֹשִׁ֗יעַ</w>
+        <w>מוֹשִׁ֗יע<x>Q</x><x>n</x><x>v</x></w>
         <w>וָ/אָשִׂ֨ימָ/ה</w>
         <w>נַפְשִׁ֤/י</w>
         <w>בְ/כַפִּ/י֙</w>
@@ -7221,7 +7221,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
       </v>
       <v n="18">
         <w>וַ/יֹּ֤אמֶר</w>
-        <w>ל/וֹ֙</w>
+        <w>לּ/וֹ֙<x>Q</x><x>n</x><x>p</x></w>
         <w>מַלְאַ֣ךְ</w>
         <w>יְהוָ֔ה</w>
         <w>לָ֥/מָּה</w>
@@ -7229,7 +7229,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>תִּשְׁאַ֣ל</w>
         <w>לִ/שְׁמִ֑/י</w>
         <w>וְ/הוּא־</w>
-        <w>פֶֽלִאי׃</w>
+        <w>פֶ֛לִאי׃<x>Q</x><x>c</x><x>n</x></w>
         <samekh/>
       </v>
       <v n="19">
@@ -7956,7 +7956,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>וַ/יֹּ֧אמְרוּ</w>
         <w>ל֣/וֹ</w>
         <w>לֵ/אמֹ֗ר</w>
-        <w>לֹ֚א<x>c</x></w>
+        <w>לֹ֚א<x>C</x><x>c</x></w>
         <w>כִּֽי־</w>
         <w>אָסֹ֤ר</w>
         <w>נֶֽאֱסָרְ/ךָ֙</w>
@@ -7978,7 +7978,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>בָ֣א</w>
         <w>עַד־</w>
         <w>לֶ֔חִי</w>
-        <w>וּ/פְלִשְׁתִּ֖ים</w>
+        <w>וּ/פְלִשִׁתִּ֖ים<x>Q</x><x>n</x><x>v</x></w>
         <w>הֵרִ֣יעוּ</w>
         <w>לִ/קְרָאת֑/וֹ</w>
         <w>וַ/תִּצְלַ֨ח</w>
@@ -8130,7 +8130,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>עַד־</w>
         <w>א֥וֹר</w>
         <w>הַ/בֹּ֖קֶר</w>
-        <w>וַ/הֲרְגְנֻֽ/הוּ׃<x>1</x></w>
+        <w>וַ/הֲרְגְנֻֽ/הוּ׃<x>U</x></w>
       </v>
       <v n="3">
         <w>וַ/יִּשְׁכַּ֣ב</w>
@@ -8226,7 +8226,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>לַחִ֖ים</w>
         <w>אֲשֶׁ֣ר</w>
         <w>לֹא־</w>
-        <w>חֹרָ֑בוּ<x>c</x></w>
+        <w>חֹרָ֑בוּ<x>Q</x><x>c</x></w>
         <w>וְ/חָלִ֥יתִי</w>
         <w>וְ/הָיִ֖יתִי</w>
         <w>כְּ/אַחַ֥ד</w>
@@ -8434,7 +8434,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
       </v>
       <v n="18">
         <w>וַ/תֵּ֣רֶא</w>
-        <w>דְלִילָ֗ה<x>p</x></w>
+        <w>דְלִילָ֗ה<x>P</x><x>p</x></w>
         <w>כִּֽי־</w>
         <w>הִגִּ֣יד</w>
         <w>לָ/הּ֮</w>
@@ -8529,7 +8529,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
       <v n="23">
         <w>וְ/סַרְנֵ֣י</w>
         <w>פְלִשְׁתִּ֗ים</w>
-        <w>נֶֽאֱסְפוּ֙<x>1</x></w>
+        <w>נֶֽאֱסְפוּ֙<x>U</x></w>
         <w>לִ/זְבֹּ֧חַ</w>
         <w>זֶֽבַח־</w>
         <w>גָּד֛וֹל</w>
@@ -9805,7 +9805,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
       <v n="13">
         <w>וַ/יֹּ֣אמֶר</w>
         <w>לְ/נַעֲר֔/וֹ</w>
-        <w>לְךָ֥/<x>q</x></w>
+        <w>לְךָ֥/<x>Q</x><x>q</x></w>
         <w>וְ/נִקְרְבָ֖ה</w>
         <w>בְּ/אַחַ֣ד</w>
         <w>הַ/מְּקֹמ֑וֹת</w>
@@ -9873,7 +9873,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>בִּ/רְחֹ֣ב</w>
         <w>הָ/עִ֑יר</w>
         <w>וַ/יֹּ֨אמֶר</w>
-        <w>הָ/אִ֧ישׁ<x>c</x></w>
+        <w>הָ/אִ֧ישׁ<x>C</x><x>c</x></w>
         <w>הַ/זָּקֵ֛ן</w>
         <w>אָ֥נָה</w>
         <w>תֵלֵ֖ךְ</w>
@@ -9949,7 +9949,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
       <v n="21">
         <w>וַ/יְבִיאֵ֣/הוּ</w>
         <w>לְ/בֵית֔/וֹ</w>
-        <w>וַ/יָּ֖בָול<x>n</x><x>q</x></w>
+        <w>וַ/יָּ֖בָול<x>Q</x><x>n</x><x>q</x></w>
         <w>לַ/חֲמוֹרִ֑ים</w>
         <w>וַֽ/יִּרְחֲצוּ֙</w>
         <w>רַגְלֵי/הֶ֔ם</w>
@@ -10008,7 +10008,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <w>הָ/אִ֤ישׁ</w>
         <w>הַ/זֶּה֙</w>
         <w>אַל־</w>
-        <w>בֵּיתִ֔/י<x>1</x></w>
+        <w>בֵּיתִ֔/י<x>U</x></w>
         <w>אַֽל־</w>
         <w>תַּעֲשׂ֖וּ</w>
         <w>אֶת־</w>
@@ -10763,7 +10763,7 @@ SHA-1 hash: 79C7 003E 75C9 40B1 DDDE A885 A3A0 06B3 4C48 7140 .
         <pe/>
       </v>
       <v n="35">
-        <w>וַ/יִּגֹּ֨ף<x>c</x></w>
+        <w>וַ/יִּגֹּ֨ף<x>C</x><x>c</x></w>
         <w>יְהוָ֥ה ׀</w>
         <w>אֶֽת־</w>
         <w>בִּנְיָמִן֮</w>

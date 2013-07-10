@@ -20,7 +20,6 @@ import module namespace magic="http://jewishliturgy.org/magic"
   at "xmldb:exist:///db/code/magic/magic.xqm";
 
 declare namespace error="http://jewishliturgy.org/errors";
-declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 declare variable $mirror:configuration := "mirror-conf.xml";
 
@@ -30,13 +29,15 @@ declare variable $mirror:configuration := "mirror-conf.xml";
  : @param $allow-universal-access Allow universal r/w/x access 
  :    to cache *collections*; useful for intermediate processing 
  :    collections where guests should be allowed to make modifications
+ : @param $extension-map Map extensions to other extensions in this mirror. If an extension is not listed, it stays the same
  : @return empty-sequence()
  : @error error:INPUT one of the the original or mirror paths is not absolute
  :)
 declare function mirror:create(
   $mirror-path as xs:string,
   $original-path as xs:string,
-  $allow-universal-access as xs:boolean
+  $allow-universal-access as xs:boolean,
+  $extension-map as map
   ) as empty-sequence() {
   let $check := 
     if (starts-with($mirror-path, "/db"))
@@ -64,6 +65,11 @@ declare function mirror:create(
         $original-path
       }</mirror:of>
       <mirror:universal-access>{$allow-universal-access}</mirror:universal-access>
+      {
+        for $extension in map:keys($extension-map)
+        return
+          <mirror:map from="{$extension}" to="{$extension-map($extension)}"/>
+      }
     </mirror:configuration>)
     )
   return
@@ -79,9 +85,18 @@ declare function mirror:create(
 
 declare function mirror:create(
   $mirror-path as xs:string,
+  $original-path as xs:string,
+  $allow-universal-access as xs:boolean
+  ) as empty-sequence() {
+  mirror:create($mirror-path, $original-path, $allow-universal-access, map {})
+};
+
+
+declare function mirror:create(
+  $mirror-path as xs:string,
   $original-path as xs:string
   ) as empty-sequence() {
-  mirror:create($mirror-path, $original-path, false())
+  mirror:create($mirror-path, $original-path, false(), map {})
 };
 
 (:~ @return Whether the mirror supports universal access
@@ -91,6 +106,40 @@ declare function mirror:supports-universal-access(
   $mirror-path as xs:string
   ) as xs:boolean {
   xs:boolean(local:config($mirror-path)/*/mirror:universal-access)
+};
+
+(:~ @return A resource name mapped to its in-mirror representation
+ :)
+declare function mirror:map-resource-name(
+  $mirror-path as xs:string,
+  $name as xs:string
+  ) as xs:string {
+  let $extensions :=
+      local:config($mirror-path)/*/mirror:map
+  return (
+    for $ext in $extensions
+    let $regexp := "\." || $ext/@from || "$"
+    where matches($name, $regexp)
+    return replace($name, $regexp, "." || $ext/@to ),
+    $name
+  )[1]
+};
+
+(:~ @return A resource name mapped to its original representation
+ :)
+declare function mirror:unmap-resource-name(
+  $mirror-path as xs:string,
+  $mirror-name as xs:string
+  ) as xs:string {
+  let $extensions :=
+      local:config($mirror-path)/*/mirror:map
+  return (
+    for $ext in $extensions
+    let $regexp := "\." || $ext/@to || "$"
+    where matches($mirror-name, $regexp)
+    return replace($mirror-name, $regexp, "." || $ext/@from ),
+    $mirror-name
+  )[1]
 };
 
 (:~ @return the configuration file for a mirror collection 
@@ -130,17 +179,19 @@ declare function mirror:mirror-path(
     else error(xs:QName("error:INPUT"), "mirror-path is not absolute")
   let $base-path := local:base-path($mirror-path)
   return
-    if (starts-with($path, $base-path))
-    then replace($path, "^" || $base-path, $mirror-path)
-    else if (starts-with($path, "/"))
-    then 
-      error(
-        xs:QName("error:NOT_MIRRORED"), 
-        "The absolute path " || $path || "is not mirrored in " || $mirror-path
-      ) 
-    else 
-      (: relative path :)
-      app:concat-path($mirror-path, $path)
+    mirror:map-resource-name($mirror-path ,
+      if (starts-with($path, $base-path))
+      then replace($path, "^" || $base-path, $mirror-path)
+      else if (starts-with($path, "/"))
+      then 
+        error(
+          xs:QName("error:NOT_MIRRORED"), 
+          "The absolute path " || $path || "is not mirrored in " || $mirror-path
+        ) 
+      else 
+        (: relative path :)
+        app:concat-path($mirror-path, $path)
+    )
 };
 
 (:~ turn a path from relative to a mirror to one relative the original path
@@ -164,7 +215,11 @@ declare function mirror:unmirror-path(
   let $base-path := local:base-path($mirror-path)
   return
     if (starts-with($mirrored-path, $mirror-path)) 
-    then replace($mirrored-path, "^" || $mirror-path, $base-path)
+    then 
+      mirror:unmap-resource-name(
+        $mirror-path,
+        replace($mirrored-path, "^" || $mirror-path, $base-path)
+      )
     else 
       error(
         xs:QName("error:NOT_MIRRORED"), 
@@ -262,17 +317,22 @@ declare function mirror:is-up-to-date(
     case document-node() return $original
     default return doc($original)
   let $collection := util:collection-name($original-doc)
-  let $resource := util:document-name($original-doc)
+  let $original-resource-name := util:document-name($original-doc)
+  let $mirror-resource-name := 
+    mirror:map-resource-name(
+      $mirror-path, 
+      $original-resource-name
+    )
   let $mirror-collection := mirror:mirror-path($mirror-path, $collection) 
   let $last-modified := 
     try {
-      xmldb:last-modified($collection, $resource)
+      xmldb:last-modified($collection, $original-resource-name)
     }
     catch * { () }
   let $mirror-last-modified := 
     (: if the collection does not exist, xmldb:last-modified() fails :)
     try {
-      xmldb:last-modified($mirror-collection, $resource)
+      xmldb:last-modified($mirror-collection, $mirror-resource-name)
     }
     catch * { () } 
   return
@@ -358,9 +418,10 @@ declare function mirror:store(
     system:as-user("admin", $magic:password, 
       mirror:make-collection-path($mirror-path, $collection)
     )
-  let $mirror-resource := concat($mirror-collection, "/", $resource) 
+  let $resource-name := mirror:map-resource-name($mirror-path, $resource)
+  let $mirror-resource := concat($mirror-collection, "/", $resource-name) 
   return
-    if (xmldb:store($mirror-collection, $resource, $data))
+    if (xmldb:store($mirror-collection, $resource-name, $data))
     then (
       mirror:mirror-permissions(
         $mirror-path,
@@ -394,13 +455,14 @@ declare function mirror:remove(
       return mirror:clear-collections($mirror-collection, true())
     else
       (: remove a resource :)
-      let $mirror-path := concat($mirror-collection, "/", $resource)
+      let $resource-name := mirror:map-resource-name($mirror, $resource)
+      let $mirror-path := concat($mirror-collection, "/", $resource-name)
       let $exists := 
         util:binary-doc-available($mirror-path) or 
         doc-available($mirror-path)
       where $exists
       return (
-        xmldb:remove($mirror-collection, $resource),
+        xmldb:remove($mirror-collection, $resource-name),
         mirror:clear-collections($mirror-collection, false())
       )      
 };

@@ -319,6 +319,7 @@ declare
   %rest:path("/api/data/original/{$name}/combined")
   %rest:query-param("transclude", "{$transclude}")
   %rest:produces("application/xml", "text/xml")
+  %output:method("xml")
   function orig:get-combined(
     $name as xs:string,
     $transclude as xs:boolean*
@@ -333,4 +334,44 @@ declare
       else
         format:unflatten($doc, map {}, $doc)
     else $doc
+};
+
+(:~ Get a version of the original data resource with combined hierarchies in HTML
+ : @param $name The resource to get
+ : @param $transclude If true(), transclude all pointers, otherwise (default), return the pointers only.
+ : @return HTTP 200 An HTML file
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare 
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/combined")
+  %rest:query-param("transclude", "{$transclude}")
+  %rest:produces("application/xhtml+xml", "text/html")
+  %output:method("html5")
+  %output:indent("yes")
+  function orig:get-combined-html(
+    $name as xs:string,
+    $transclude as xs:boolean*
+  ) as item()+ {
+  let $doc := crest:get($orig:data-type, $name)
+  return
+    if ($doc instance of document-node())
+    then
+      format:html($doc, map {}, $doc, ($transclude, false())[1])
+    else $doc
+};
+
+(:~ for debugging only :)
+declare 
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/html")
+  %rest:query-param("transclude", "{$transclude}")
+  %rest:produces("application/xhtml+xml", "text/html")
+  %output:method("html5")
+  %output:indent("yes")
+  function orig:get-combined-html-forced(
+    $name as xs:string,
+    $transclude as xs:boolean*
+  ) as item()+ {
+  orig:get-combined-html($name, $transclude)
 };
