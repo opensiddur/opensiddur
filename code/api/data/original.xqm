@@ -348,6 +348,7 @@ declare
   %rest:query-param("transclude", "{$transclude}")
   %rest:produces("application/xhtml+xml", "text/html")
   %output:method("html5")
+  %output:indent("yes")
   function orig:get-combined-html(
     $name as xs:string,
     $transclude as xs:boolean*
@@ -358,4 +359,19 @@ declare
     then
       format:html($doc, map {}, $doc, ($transclude, false())[1])
     else $doc
+};
+
+(:~ for debugging only :)
+declare 
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/html")
+  %rest:query-param("transclude", "{$transclude}")
+  %rest:produces("application/xhtml+xml", "text/html")
+  %output:method("html5")
+  %output:indent("yes")
+  function orig:get-combined-html-forced(
+    $name as xs:string,
+    $transclude as xs:boolean*
+  ) as item()+ {
+  orig:get-combined-html($name, $transclude)
 };
