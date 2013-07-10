@@ -66,20 +66,36 @@ declare function tohtml:tohtml(
     return $node
 };
 
+(:~ add space between elements where necessary 
+ : @param $e preceding element
+ :)
+declare function tohtml:space(
+  $e as element(),
+  $params as map
+  ) as item()? {
+  if (
+    $e/following::*[1] instance of element(tei:pc) or
+    $e/self::tei:pc[.='־'] (: maqef is a connector on both sides :)
+    )
+  then ()
+  else "&#x20;"
+};
+
 declare function tohtml:span-element(
   $e as element(),
   $params as map
-  ) as element(span) {
+  ) as node()+ {
   element span {
     tohtml:attributes($e, $params),
-    tohtml:tohtml($e/node(), $params)
+    tohtml:tohtml($e/node(), $params),
+    tohtml:space($e, $params)
   }
 };
 
 declare function tohtml:tei-pc(
   $e as element(tei:pc),
   $params as map
-  ) as element(span) {
+  ) as node()+ {
   element span {
     let $attributes := tohtml:attributes($e, $params)
     return (
@@ -97,30 +113,30 @@ declare function tohtml:tei-pc(
         ), ' ')
       }, 
       tohtml:tohtml($e/node(), $params)
-    )
+    ),
+    tohtml:space($e, $params)
   }
 };
 
+(:~ @return classes :)
 declare function tohtml:attributes-to-class(
   $attributes as attribute()*,
   $params as map
-  ) as xs:string {
-  string-join((
-    for $a in $attributes
-    return
-      typeswitch ($a)
-      case attribute(jf:id)
-      return "id-" || $a/string()
-      case attribute(type)
-      return "type-" || $a/string()
-      case attribute(subtype)
-      return "subtype-" || $a/string()
-      case attribute(n)
-      return "n-" || $a/string()
-      case attribute(jf:part)
-      return "part-" || $a/string()
-      default return ()
-   ), " ")
+  ) as xs:string* {
+  for $a in $attributes
+  return
+    typeswitch ($a)
+    case attribute(jf:id)
+    return "id-" || $a/string()
+    case attribute(type)
+    return "type-" || $a/string()
+    case attribute(subtype)
+    return "subtype-" || $a/string()
+    case attribute(n)
+    return "n-" || $a/string()
+    case attribute(jf:part)
+    return "part-" || $a/string()
+    default return ()
 };
 
 declare function tohtml:attributes(
