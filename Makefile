@@ -241,8 +241,7 @@ db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patc
 
 # copy libraries that are stored in the filesystem
 copy-libs:
-	mkdir -p $(EXIST_INSTALL_DIR)/webapp/aloha
-	cp -r $(LIBDIR)/aloha/src/* $(EXIST_INSTALL_DIR)/webapp/aloha
+	@echo "Nothing to do here."
 
 installer: $(EXIST_INSTALL_JAR)
 	expect $(SETUPDIR)/install.exp "$(EXIST_INSTALL_JAR)" "$(EXIST_INSTALL_DIR)" "$(ADMINPASSWORD)"
