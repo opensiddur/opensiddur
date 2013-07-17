@@ -10,7 +10,7 @@
   <description>
     <p>Tests of flatten transform</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012 Efraim Feinstein
+    <copyright>Copyright 2012-2013 Efraim Feinstein
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -18,44 +18,182 @@
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace flatten="http://jewishliturgy.org/transform/flatten"
-      at "xmldb:exist:///code/transforms/flatten/flatten.xqm";
+      at "xmldb:exist:///db/code/transforms/flatten/flatten.xqm";
   </imports>
   <TestSet>
     <testName>No concurrency</testName>
     <test>
       <task>acts as an identity transform</task>
       <code><![CDATA[
-        flatten:flatten(doc("/code/tests/transforms/flatten/no-concurrency.xml"))
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/identity.xml"),
+          map {}
+        )
       ]]></code>
-      <expected desc="acts as an identity transform" href="no-concurrency.xml"/>
+      <expected desc="acts as an identity transform" href="identity.xml"/>
     </test>        
   </TestSet>
   <TestSet>
-    <testName>A layer with an id</testName>
+    <testName>Simple concurrency</testName>
     <test>
-      <task>Flatten the layer</task>
+      <task>pointer to placeholder</task>
       <code><![CDATA[
-        flatten:flatten(doc("/code/tests/transforms/flatten/streamText-and-layer.xml")//j:layer)
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/pointer-to-placeholder.xml"),
+          map {}
+        )
       ]]></code>
-      <expected desc="flat layer, xml:id becomes jx:id, layer id is listed on every layer component">
-        <jf:layer type="p" jf:id="...">
-          <tei:p jf:id="p1" jf:start="p1"/>
-          <tei:label n="test">test</tei:label>
-          <tei:s jf:id="s1" jf:start="s1"/>
-          <jf:placeholder jf:id="seg1" jf:stream="..."/>
-          <tei:s jf:end="s1" />
-          <tei:p jf:end="p1" />
-          <tei:p jf:start="..." />
-          <tei:s jf:start="..." />
-          <jf:placeholder jf:id="seg2" jf:stream="..."/>
-          <jf:placeholder jf:id="seg3" jf:stream="..."/>
-          <jf:placeholder jf:id="seg4" jf:stream="..."/>
-          <jf:placeholder jf:id="an5" jf:stream="..."/>
-          <tei:s jf:end="..." />
-          <tei:p jf:end="..." />
-        </jf:layer>
+      <expected desc="pointer changed to placeholder" 
+        href="pointer-to-placeholder-flat.xml"/>
+    </test>        
+  </TestSet>
+  <TestSet>
+    <testName>pointer to single placeholder with inline no-children elements</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/inline1.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" 
+        href="inline1-flat.xml"/>
+      <xpath desc="assigned id for start/end are same">.//tei:ab[@jf:start]/@jf:start=.//tei:ab[@jf:end]/@jf:end</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Two labels in a row</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/inline2.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="first label" xpath=".//tei:label[1]">
+        <tei:label
+          jf:position="1"
+          jf:relative="-1"
+          jf:nchildren="-1"
+          jf:nlevels="3"
+          jf:nprecedents="1"
+          jf:layer-id="div-layer"
+          >Label 1</tei:label>
       </expected>
-      <xpath desc="all jf:stream attributes are the same">every $stream in .//@jf:stream satisfies $stream=(.//@jf:stream)[1]</xpath>
+      <expected desc="second label has an increased nprecedents" xpath=".//tei:label[2]">
+      <tei:label
+          jf:position="1"
+          jf:relative="-1"
+          jf:nchildren="-1"
+          jf:nlevels="3"
+          jf:nprecedents="2"
+          jf:layer-id="div-layer"
+          >Label 2</tei:label>
+      </expected>    
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Label following the pointer</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/inline3.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="first label" xpath=".//tei:label[1]">
+        <tei:label
+          jf:position="1"
+          jf:relative="-1"
+          jf:nchildren="-1"
+          jf:nlevels="3"
+          jf:nprecedents="1"
+          jf:layer-id="div-layer"
+          >Label 1</tei:label>
+      </expected>
+      <expected desc="second label has positive relative position" xpath=".//tei:label[2]">
+      <tei:label
+          jf:position="1"
+          jf:relative="1"
+          jf:nchildren="1"
+          jf:nlevels="-3"
+          jf:nprecedents="3"
+          jf:layer-id="div-layer"
+          >Label 2</tei:label>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Two pointers, labels following both and between</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/inline4.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="inline4-flat.xml"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Simple suspend and continue with 2 levels</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/suspend1.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="suspend1-flat.xml"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Suspend and continue with labels</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/suspend2.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="suspend2-flat.xml"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Multi-level suspend and continue with unequal numbers of levels</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/suspend3.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="suspend3-flat.xml"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Multi-level suspend and continue with end and start at the suspend position</testName>
+    <test>
+      <code><![CDATA[
+        flatten:flatten-document(
+          doc("/db/code/tests/transforms/flatten/suspend4.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="flattened" href="suspend4-flat.xml"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>flatten:resolve-stream()</testName>
+    <test>
+      <code><![CDATA[
+        flatten:resolve-stream(
+          doc("/db/code/tests/transforms/flatten/resolve1.xml"),
+          map {}
+        )
+      ]]></code>
+      <expected desc="placeholders are replaced by stream elements" 
+        href="resolve1-resolved.xml"/>
     </test>
   </TestSet>
 </TestSuite>

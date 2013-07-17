@@ -3,7 +3,7 @@ xquery version "3.0";
  : Modes to merge flattened hierarchical layers
  :
  : Open Siddur Project
- : Copyright 2009-2012 Efraim Feinstein 
+ : Copyright 2009-2013 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -19,7 +19,6 @@ import module namespace debug="http://jewishliturgy.org/transform/debug"
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
-declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 
 (:~ Given a sequence of elements from a flattened hierarchy,
  :  produce equivalent open or closed tags.
@@ -76,31 +75,35 @@ declare function merge:unclosed-tags(
   return $opened
 };
 
-(:~ set the @jx:parents and @jx:ancestors attributes of elements in
- :  a flat hierarchy to the xml:ids of the parent and ancestor elements
- :  Uses the parent-id and ancestor-ids tunnel parameters
- :)
-declare function merge:set-parents(
-	$context as element(),
-	$tunnel as element()?
-	) as attribute()* {
-	let $parent-id as xs:string? := $tunnel/flatten:parent-id/string()
-	let $ancestor-ids as xs:string* := $tunnel/flatten:ancestor-ids/string()
-	return (
-		(:debug:debug($debug:detail, ('set-parents:tunnel in ', $context), ($tunnel, ' parent-id =', $parent-id, ' ancestor-ids=', string-join($ancestor-ids,' '))),:)
-		if (exists($parent-id))
-		then attribute jx:parents { $parent-id }
-		else (),
-		if (exists($ancestor-ids))
-		then attribute jx:ancestors { string-join($ancestor-ids,' ') }
-		else ()
-	)
+(:~ merge layers :)
+declare function merge:merge-layers(
+  $layers as element(jf:layer)*
+  ) as element(jf:merged-layers) {
+  element jf:merged-layers {
+    for $node in $layers/*
+    let $this-position := $n/@jf:position/number()
+    order by 
+      $n/@jf:position/number(), 
+      $n/@jf:relative/number(), 
+      $n/@jf:nchildren/number(), 
+      $n/@jf:nlevels/number(), 
+      $n/@jf:layer-id, 
+      $n/@jf:nprecedents/number()
+    return 
+      if (
+        $node instance of element(jf:placeholder)
+        and exists(preceding-sibling::jf:placeholder[@jf:position=$this-position]) 
+        )
+      then
+        ((: avoid duplicating placeholders :))
+      else $node
+  }
 };
 
 (:~ main entry point for the merge mode, which operates on 
  : streamText
  :)
-declare function merge:merge-j-streamText(
+declare function merge:merge-streamText-to-layers(
   $e as element(j:streamText),
   $layers as element(jf:layer)*
   ) as element(jf:merged-layers) {
@@ -109,76 +112,32 @@ declare function merge:merge-j-streamText(
     then attribute jf:id { $e/@xml:id }
     else (),
     common:copy-attributes-and-context($e, $e/(@* except @xml:id)),
-    merge:merge($e/*, $layers)
+    merge:merge-streamText(
+      merge:merge-layers($layers)
+    )
   }
 };
 
-declare function merge:merge(
-	$node as node()*,
-	$layers as element(jf:layer)*
-	) as node()* {
-	for $n in $node
-	return (
-		typeswitch($n)
-		case text() return $n
-		case comment() return $n
-		case processing-instruction() return $n
-		case element(j:streamText) return merge:merge-j-streamText($n, $layers)
-		case element() return merge:element($n)
-		case document-node() return document { merge:merge($n/node()) }
-		default return merge:merge($n/node())
-	)
+declare function merge:merge-streamText(
+  $e as element(j:streamText),
+  $merged-layer as element(jf:merged-layers)
+  ) as node()* {
+  for $node in $merged-layer/*
+  return
+    typeswitch($node)
+    case element(jf:placeholder)
+    return 
+      let $stream-element := $e/*[$node/@jf:position/number()]
+      return
+        element {QName(namespace-uri($stream-element), name($stream-element))}{
+          $stream-element/(@* except @xml:id),
+          if ($stream-element/@xml:id)
+          then attribute jf:id { $stream-element/@xml:id/string() }
+          else (),
+          $node/(@jf:* except @jf:id),
+          $stream-element/node()
+        }
+    default return $node
 };
 
-(:~ The "meat" of the merge operation, to be run on
- : the elements in the streamText
- : Combine and dump all of the flat hierarchies, 
- : avoid duplicates
- :)
-declare function merge:element(
-  $e as element(),
-  $layers as element(jf:layer)*
-  ) {
-  let $xmlid := $e/(@jf:id, @xml:id)[1]
-  let $stream := $e/parent::j:streamText
-  let $stream-id := $stream/(@jf:uid, common:generate-id(.))[1]
-  let $equivs := $layers/jf:placeholder[@jf:id=$e/@xml:id]
-  let $before := 
-    for $equiv in $equivs
-    let $previous-sibling := $equiv/preceding-sibling::jf:placeholder[1]
-    let $all-preceding := $equiv/preceding-sibling::node() 
-    return 
-      if ($previous-sibling)
-      then 
-        (: a previous sibling exists, get 
-         : the nodes between the siblings
-         :)
-        $all-preceding
-        intersect
-        $previous-sibling/following-sibling::node()
-      else
-        $all-preceding
-  let $after :=
-    for $equiv in $equivs
-    let $following-sibling := $equiv/following-sibling::jf:placeholder[1]
-    let $all-following := $equiv/preceding-sibling::node()
-    return 
-      if ($following-sibling)
-      then
-        $all-following
-        intersect
-        $following-sibling/preceding-sibling::node()
-      else
-        (: if this is the last in a layer :)
-        $all-following
-  return (
-    $before,
-    element { QName(namespace-uri($e), name($e)) } {
-      attribute jf:id { $e/@xml:id },
-      attribute { jf:uid }{ $e/(@jf:uid, common:generate-id($e))[1] },
-      attribute { jf:stream} { $stream-id },
-      $e/(@* except @xml:id, node())
-    },
-    $after
-  )
-};
+

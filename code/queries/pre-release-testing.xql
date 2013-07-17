@@ -9,6 +9,7 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 
 let $tests-to-run :=
   <tests>
+    <test module="/db/code/tests/modules/common.t.xml"/>
     <test module="/db/code/tests/modules/mirror.t.xml"/>
     <test module="/db/code/tests/modules/follow-uri.t.xml"/>
     <test module="/db/code/tests/modules/refindex.t.xml"/>
@@ -28,6 +29,9 @@ let $tests-to-run :=
     <test module="/db/code/tests/api/data/styles.t.xml"/>
     <test module="/db/code/tests/api/data/sources.t.xml"/>
     <test module="/db/code/tests/api/data/transliteration.t.xml"/>
+    <test module="/db/code/tests/transforms/flatten/flatten.t.xml"/>
+    <test module="/db/code/tests/transforms/flatten/unflatten.t.xml"/>
+    <test module="/db/code/tests/transforms/flatten/combine.t.xml"/>
     <test module="/db/code/tests/transforms/translit/translit.t.xml"/>
     { ((: transforms :))}
     <!-- 

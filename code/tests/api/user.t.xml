@@ -14,27 +14,27 @@
   <asUser>testuser</asUser>
   <password>testuser</password>
   <setup>
-    <store collection="/user" name="testuser.xml">
+    <store collection="/db/data/user" name="testuser.xml">
       <j:contributor>
         <tei:idno>testuser</tei:idno>
         <tei:name>Spike Tester</tei:name>
       </j:contributor>
     </store>
-    <store collection="/user" name="notauser.xml">
+    <store collection="/db/data/user" name="notauser.xml">
       <j:contributor>
         <tei:idno>notauser</tei:idno>
         <tei:name>Not a spike user</tei:name>
       </j:contributor>
     </store>
-    <store collection="/user" name="testuser2.xml">
+    <store collection="/db/data/user" name="testuser2.xml">
       <j:contributor>
         <tei:idno>testuser2</tei:idno>
       </j:contributor>
     </store>
     <code><![CDATA[
-      let $testuser := xs:anyURI("/user/testuser.xml")
-      let $testuser2 := xs:anyURI("/user/testuser2.xml")
-      let $notauser := xs:anyURI("/user/notauser.xml")
+      let $testuser := xs:anyURI("/db/data/user/testuser.xml")
+      let $testuser2 := xs:anyURI("/db/data/user/testuser2.xml")
+      let $notauser := xs:anyURI("/db/data/user/notauser.xml")
       return
       system:as-user("admin", $magic:password, (
         sm:chown($testuser, "testuser"),
@@ -48,7 +48,7 @@
         sm:chmod($testuser2, "rw-r--r--")
       ))
     ]]></code>
-    <store collection="/user" name="TestProfile.xml">
+    <store collection="/db/data/user" name="TestProfile.xml">
       <j:contributor>
         <tei:idno>TestProfile</tei:idno>
         <tei:name>A Tester</tei:name>
@@ -56,13 +56,13 @@
     </store>
   </setup>
   <tearDown>
-    <remove-document collection="/user" name="TestProfile.xml"/>
-    <remove-document collection="/user" name="testuser.xml"/>
-    <remove-document collection="/user" name="not_a_real_contributors_profile.xml"/>
-    <remove-document collection="/user" name="notauser.xml"/>
+    <remove-document collection="/db/data/user" name="TestProfile.xml"/>
+    <remove-document collection="/db/data/user" name="testuser.xml"/>
+    <remove-document collection="/db/data/user" name="not_a_real_contributors_profile.xml"/>
+    <remove-document collection="/db/data/user" name="notauser.xml"/>
     <code><![CDATA[
       system:as-user("admin", $magic:password, 
-        xmldb:remove("/user", "testuser2.xml"))
+        xmldb:remove("/db/data/user", "testuser2.xml"))
     ]]></code>
   </tearDown>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
@@ -71,9 +71,9 @@
   <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
   <imports>
     import module namespace user="http://jewishliturgy.org/api/user"
-      at "xmldb:exist:///code/api/user.xqm";
+      at "xmldb:exist:///db/code/api/user.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///code/magic/magic.xqm";
+      at "xmldb:exist:///db/code/magic/magic.xqm";
   </imports>
   <TestSet>
     <testName>user:list()</testName>
@@ -160,8 +160,8 @@
         if (sm:user-exists("testuser3"))
         then sm:remove-account("testuser3")
         else (),
-        if (doc-available("/user/testuser3.xml"))
-        then xmldb:remove("/user", "testuser3.xml")
+        if (doc-available("/db/data/user/testuser3.xml"))
+        then xmldb:remove("/db/data/user", "testuser3.xml")
         else ()
       ))
       ]]></code>
@@ -180,11 +180,11 @@
       <xpath desc="user has been created">system:as-user("admin", $magic:password, sm:user-exists("testuser3"))</xpath>
       <xpath desc="group has been created">system:as-user("admin", $magic:password, sm:group-exists("testuser3"))</xpath>
       <xpath desc="user is a manager of its own group">system:as-user("admin", $magic:password, sm:get-group-managers("testuser3")="testuser3")</xpath>
-      <xpath desc="profile has been created">doc-available("/user/testuser3.xml")</xpath>
-      <xpath desc="profile contains an idno equal to the user name">doc("/user/testuser3.xml")/j:contributor/tei:idno="testuser3"</xpath>
+      <xpath desc="profile has been created">doc-available("/db/data/user/testuser3.xml")</xpath>
+      <xpath desc="profile contains an idno equal to the user name">doc("/db/data/user/testuser3.xml")/j:contributor/tei:idno="testuser3"</xpath>
       <xpath desc="user profile permissions are correct">
-      doc-available("/user/testuser3.xml") and
-      sm:get-permissions(xs:anyURI("/user/testuser3.xml"))/*/(
+      doc-available("/db/data/user/testuser3.xml") and
+      sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/(
         @owner = "testuser3" and @group="testuser3" and @mode="rw-r--r--"
       )</xpath>
     </test>
@@ -324,7 +324,7 @@
       })
       ]]></code>
       <class href="common.t.xml#NoData"/>
-      <xpath desc="profile is edited">doc("/user/testuser.xml")/j:contributor/tei:name="Test User"</xpath>
+      <xpath desc="profile is edited">doc("/db/data/user/testuser.xml")/j:contributor/tei:name="Test User"</xpath>
     </test>
     <test>
       <task>Edit your own profile, changing tei:idno</task>
@@ -373,8 +373,8 @@
       })
       ]]></code>
       <class href="common.t.xml#Created"/>
-      <xpath desc="profile created">doc-available("/user/not_a_real_contributors_profile.xml")</xpath>
-      <xpath desc="profile mode is correct">sm:get-permissions(xs:anyURI("/user/not_a_real_contributors_profile.xml"))/*/(
+      <xpath desc="profile created">doc-available("/db/data/user/not_a_real_contributors_profile.xml")</xpath>
+      <xpath desc="profile mode is correct">sm:get-permissions(xs:anyURI("/db/data/user/not_a_real_contributors_profile.xml"))/*/(
         @owner="testuser" and @group="everyone" and @mode="rw-rw-r--"
       )</xpath>
     </test>
@@ -389,8 +389,8 @@
       })
       ]]></code>
       <class href="common.t.xml#NoData"/>
-      <xpath desc="profile edited">doc("/user/notauser.xml")/j:contributor/tei:name="Not A User"</xpath>
-      <xpath desc="profile mode is correct">sm:get-permissions(xs:anyURI("/user/notauser.xml"))/*/(
+      <xpath desc="profile edited">doc("/db/data/user/notauser.xml")/j:contributor/tei:name="Not A User"</xpath>
+      <xpath desc="profile mode is correct">sm:get-permissions(xs:anyURI("/db/data/user/notauser.xml"))/*/(
         @owner="testuser" and @group="everyone" and @mode="rw-rw-r--"
       )</xpath>
     </test>
@@ -402,12 +402,12 @@
     <setup>
       <code><![CDATA[
       system:as-user("admin", $magic:password, (
-      xmldb:store("/user","notauser.xml",
+      xmldb:store("/db/data/user","notauser.xml",
         <j:contributor>
           <tei:idno>notauser</tei:idno>
         </j:contributor>
       ),
-      let $uri := xs:anyURI("/user/notauser.xml")
+      let $uri := xs:anyURI("/db/data/user/notauser.xml")
       return (
         sm:chmod($uri, "rw-rw-r--"),
         sm:chown($uri, "testuser"),
@@ -419,7 +419,7 @@
     <tearDown>
       <code><![CDATA[
       system:as-user("admin", $magic:password,
-        xmldb:remove("/user", "notauser.xml")
+        xmldb:remove("/db/data/user", "notauser.xml")
       )
       ]]></code>
     </tearDown>
@@ -466,12 +466,12 @@
       <code><![CDATA[
       system:as-user("admin", $magic:password, (
         let $u := sm:create-account("testuser3", "testuser3", "everyone")
-        let $s := xmldb:store("/user", "testuser3.xml",
+        let $s := xmldb:store("/db/data/user", "testuser3.xml",
           <j:contributor>
             <tei:idno>testuser3</tei:idno>
           </j:contributor>
           )
-        let $uri := xs:anyURI("/user/testuser3.xml")
+        let $uri := xs:anyURI("/db/data/user/testuser3.xml")
         let $ch := (
           sm:chown($uri, "testuser3"),
           sm:chgrp($uri, "testuser3"),
@@ -484,8 +484,8 @@
     <tearDown>
       <code><![CDATA[
       system:as-user("admin", $magic:password, (
-        if (doc-available("/user/testuser3.xml"))
-        then xmldb:remove("/user", "testuser3.xml")
+        if (doc-available("/db/data/user/testuser3.xml"))
+        then xmldb:remove("/db/data/user", "testuser3.xml")
         else (),
         try { 
           if (sm:group-exists("testuser3"))
@@ -509,7 +509,7 @@
       <class href="common.t.xml#NoData"/>
       <xpath desc="user removed">not(sm:user-exists("testuser3"))</xpath>
       <xpath desc="group removed">not(sm:get-groups()="testuser3")</xpath>
-      <xpath desc="profile removed">not(doc-available("/user/testuser3.xml"))</xpath>
+      <xpath desc="profile removed">not(doc-available("/db/data/user/testuser3.xml"))</xpath>
     </test>
     <test>
       <task>Delete another user's profile</task>
@@ -536,7 +536,7 @@
         user:delete("notauser")
       ))
       ]]></code>
-      <xpath desc="profile removed">not(doc-available("/user/notauser.xml"))</xpath>      
+      <xpath desc="profile removed">not(doc-available("/db/data/user/notauser.xml"))</xpath>      
     </test>
     <test ignore="yes">
       <task>Delete a profile that has a reference elsewhere</task>

@@ -3,7 +3,7 @@ xquery version "3.0";
  : Common functions for the transform
  :
  : Open Siddur Project
- : Copyright 2011-2012 Efraim Feinstein 
+ : Copyright 2011-2013 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :)
@@ -206,4 +206,92 @@ declare function common:original-document-uri(
       )
   return    
     ($closest-jf-document-uri, $document-uri)[1]
+};
+
+(:~ apply an identity transform until reaching
+ : a node in $transition-nodes, then apply
+ : $transform 
+ : @param $nodes nodes to identity transform
+ : @param $transition-nodes transitional nodes
+ : @param $transform The transform to apply
+ : @param $params Named parameters to pass to the transform
+ :)
+declare function common:apply-at(
+  $nodes as node()*,
+  $transition-nodes as node()*,
+  $transform as function(node()*, map) as node()*,
+  $params as map
+  ) as node()* {
+  for $node in $nodes
+  return
+    if (some $t in $transition-nodes satisfies $node is $t)
+    then 
+      $transform($node, $params)
+    else
+      typeswitch($node)
+      case processing-instruction() return $node
+      case comment() return $node
+      case text() return $node
+      case element()
+      return
+        element {QName(namespace-uri($node), name($node))}{
+          $node/@*,
+          common:apply-at($node/node(), $transition-nodes, $transform, $params)
+        }
+      case document-node() 
+      return document { common:apply-at($node/node(), $transition-nodes, $transform, $params) }
+      default return common:apply-at($node/node(), $transition-nodes, $transform, $params)
+};
+
+(:~ simulate following-sibling::* in sequences
+ : @return all items in the sequence $sequence that follow $item
+ : $item is a reference, not a value
+ :)
+declare function common:following(
+  $item as item(),
+  $sequence as item()*
+  ) as item()* {
+  subsequence(
+    $sequence,
+    (: there may be a better way to do this! :) 
+    (for $s at $i in $sequence 
+    where $s is $item 
+    return $i + 1)[1]
+  )
+};
+
+(:~ simulate preceding-sibling::* in sequences
+ : @return all items in the sequence $sequence that precede $item
+ : $item is a reference, not a value
+ :)
+declare function common:preceding(
+  $item as item(),
+  $sequence as item()*
+  ) as item()* {
+  subsequence(
+    $sequence,
+    1,
+    (: there may be a better way to do this! :) 
+    (for $s at $i in $sequence 
+    where $s is $item 
+    return $i - 1)[1]
+  )
+};
+
+(:~ given a language code, determine its direction
+ : (rtl, ltr) 
+ :)
+declare function common:direction-from-language(
+  $lang as xs:string
+  ) as xs:string {
+  switch ($lang)
+  case "he" (: Hebrew :)
+  case "arc" (: Aramaic :)
+  case "ar" (: Arabic :)
+  return
+    if (contains($lang, "-latn")) (: Latin alphabet transliteration :)
+    then "ltr"
+    else "rtl"
+  default
+  return "ltr"
 };

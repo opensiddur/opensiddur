@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  xml:lang="en">
+  <tei:teiHeader>
+    <!-- leaving it blank... -->
+  </tei:teiHeader>  
+  <tei:text>
+    <jf:merged>
+      <tei:div
+        jf:start="div1"
+        jf:position="1"
+        jf:relative="-1"
+        jf:nchildren="-1"
+        jf:nlevels="1"
+        jf:nprecedents="1"
+        jf:layer-id="div-layer"
+        jf:id="div1"/>
+      <tei:head
+        jf:position="1"
+        jf:relative="-1"
+        jf:nchildren="-1"
+        jf:nlevels="2"
+        jf:nprecedents="1"
+        jf:layer-id="div-layer"
+        >title</tei:head>
+      <tei:ab
+        jf:start="ab1"
+        jf:position="1"
+        jf:relative="-1"
+        jf:nchildren="-1"
+        jf:nlevels="2"
+        jf:nprecedents="2"
+        jf:layer-id="div-layer"
+        />
+      <tei:label
+        jf:position="1"
+        jf:relative="-1"
+        jf:nchildren="-1"
+        jf:nlevels="3"
+        jf:nprecedents="1"
+        jf:layer-id="div-layer"
+        >Label</tei:label>
+      <tei:seg jf:id="seg1" jf:stream="stream">One segment</tei:seg>
+      <tei:ab
+        jf:end="ab1"
+        jf:position="1"
+        jf:relative="1"
+        jf:nchildren="1"
+        jf:nlevels="-2"
+        jf:nprecedents="2"
+        jf:layer-id="div-layer"
+        />
+      <tei:div
+        jf:end="div1"
+        jf:position="1"
+        jf:relative="1"
+        jf:nchildren="1"
+        jf:nlevels="-1"
+        jf:nprecedents="1"
+        jf:layer-id="div-layer"
+        />
+    </jf:merged>
+  </tei:text>
+</tei:TEI>

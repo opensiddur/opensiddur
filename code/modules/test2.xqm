@@ -438,15 +438,17 @@ declare function local:run-xquery-test(
      else ()
   let $full-code := concat($context, $test/code/string())
   let $queryOutput :=
-	  try {
-	    util:eval($full-code)
-	  }
-	  catch * {
-	    local:error("evaluation", 
-	      $err:line-number, $err:column-number, 
-	      $err:code, $err:description, $err:value,
-	      $full-code)
-	  }
+	  trace(
+  	  try {
+  	    util:eval($full-code)
+  	  }
+  	  catch * {
+  	    local:error("evaluation", 
+  	      $err:line-number, $err:column-number, 
+  	      $err:code, $err:description, $err:value,
+  	      $full-code)
+  	  }
+  	, ". . . test run . . .")
 	let $output := 
 	  if ($test/@trace eq 'yes') 
 	  then system:trace() 
@@ -666,38 +668,43 @@ declare function local:run-tests-helper(
   return
     util:expand( 
       <TestSet>{
-        $copy/testName,
+        trace($copy/testName, "Running test set: "),
         $copy/description/p,
         for $test at $p in $copy/test
         let $if := t:if($test/if)
         return 
           if ($test/((empty(@ignore) or @ignore = "no") and not($if)))
           then
-            let $setup as element(error)* := ( 
-              try {
-                if ($suite-user)
-                then
-                  system:as-user($suite-user, $suite-password, t:setup($suite/setup))
-                else t:setup($suite/setup)
-              }
-              catch * {
-                local:error("setup", 
-                  $err:line-number, $err:column-number, 
-                  $err:code, $err:description, $err:value,
-                  $suite/setup)
-              },
-              try {
-                if ($test-user)
-                then 
-                  system:as-user($test-user, $test-password, t:setup($copy/setup))
-                else t:setup($copy/setup)
-              }
-              catch * {
-                local:error("setup", 
-                  $err:line-number, $err:column-number, 
-                  $err:code, $err:description, $err:value, 
-                  $copy/setup)
-              }
+            let $setup as element(error)* := (   
+              trace(
+                try {
+                  if ($suite-user)
+                  then
+                    system:as-user($suite-user, $suite-password, t:setup($suite/setup))
+                  else t:setup($suite/setup)
+                }
+                catch * {
+                  local:error("setup", 
+                    $err:line-number, $err:column-number, 
+                    $err:code, $err:description, $err:value,
+                    $suite/setup)
+                }
+              ,"> > > suite setup > > >"),
+              trace(
+                try {
+                  if ($test-user)
+                  then 
+                    system:as-user($test-user, $test-password, t:setup($copy/setup))
+                  else t:setup($copy/setup)
+                }
+                catch * {
+                  local:error("setup", 
+                    $err:line-number, $err:column-number, 
+                    $err:code, $err:description, $err:value, 
+                    $copy/setup)
+                },
+              "> > > test set setup > > >"
+              )
             )
             let $result :=
               if ($setup instance of element(error))
@@ -707,30 +714,35 @@ declare function local:run-tests-helper(
                   then system:as-user($test-user, $test-password, t:run-test($test, $p))
                   else t:run-test($test, $p)
             let $teardown as element(error)* := (
-              try {
-                if ($test-user)
-                then 
-                  system:as-user($test-user, $test-password, t:tearDown($copy/tearDown))
-                else t:tearDown($copy/tearDown)
-              }
-              catch * {
-                local:error("tearDown", 
-                  $err:line-number, $err:column-number, 
-                  $err:code, $err:description, $err:value, 
-                  $copy/tearDown)
-              },
-              try {
-                if ($suite-user)
-                then
-                  system:as-user($suite-user, $suite-password, t:tearDown($suite/tearDown))
-                else t:tearDown($suite/tearDown)
-              }
-              catch * {
-                local:error("tearDown", 
-                  $err:line-number, $err:column-number, 
-                  $err:code, $err:description, $err:value, 
-                  $suite/tearDown)
-              }            
+              trace(
+                try {
+                  if ($test-user)
+                  then 
+                    system:as-user($test-user, $test-password, t:tearDown($copy/tearDown))
+                  else t:tearDown($copy/tearDown)
+                }
+                catch * {
+                  local:error("tearDown", 
+                    $err:line-number, $err:column-number, 
+                    $err:code, $err:description, $err:value, 
+                    $copy/tearDown)
+                }
+              , "< < < test set tearDown < < <"
+              ),
+              trace(
+                try {
+                  if ($suite-user)
+                  then
+                    system:as-user($suite-user, $suite-password, t:tearDown($suite/tearDown))
+                  else t:tearDown($suite/tearDown)
+                }
+                catch * {
+                  local:error("tearDown", 
+                    $err:line-number, $err:column-number, 
+                    $err:code, $err:description, $err:value, 
+                    $suite/tearDown)
+                }
+              ,"< < < suite tearDown < < <")            
             )
             return
               if (exists($setup))
@@ -788,7 +800,7 @@ declare function t:run-testSet(
 
 declare function local:pass-string(
   $pass as xs:string
-  ) {
+  ) as xs:string {
 	switch ($pass)
 	case "true"
 	return "PASS"
@@ -900,12 +912,12 @@ declare function local:result-details(
           }
         </tr>,
         for $test in $set//test
-        let $pass := local:pass-string($test/@pass)
+        let $pass := local:pass-string(string($test/@pass))
         let $subtests := $test/(* except (code, task, result))
         let $n-subtests := count($subtests)
         return (
           for $subtest at $pos in $subtests
-          let $subpass := local:pass-string($subtest/@pass)
+          let $subpass := local:pass-string(string($subtest/@pass))
           return 
             <tr>{
               if ($pos = 1)
@@ -982,8 +994,9 @@ declare function t:deep-equal-wildcard(
 	$node1 as node()*,
 	$node2 as node()*
 	) as xs:boolean {
-	let $counts := count($node1) = count($node2)
-	let $subordinates := 
+	(
+	  count($node1) = count($node2)
+	  and
 		(every $result in 
 			(
 			for $n at $pos in $node1
@@ -998,8 +1011,6 @@ declare function t:deep-equal-wildcard(
 			)
 			satisfies $result
 		)
-	return (
-		$counts and $subordinates
 	)
 };
 

@@ -155,7 +155,7 @@ declare function crest:get(
  : @param $path-base API base path of the data type (/api/...)
  : @param $query-function function that performs a query for a string
  : @param $list-function function that lists all resources for the data type
- : @param $supports-access whether the data type supports GET and PUT for access control
+ : @param $additional-uris additional sub-uris that are supported in the form: <additional relative-uri="" text=""/>+
  : @param $title-function function that finds the title of a document
  : @return a list of documents that match the search. If the documents match a query, return the context.
  : @error HTTP 404 Not found
@@ -168,7 +168,7 @@ declare function crest:list(
     $path-base as xs:string,
     $query-function as function(xs:string) as element()*,
     $list-function as function(xs:string) as element()*,
-    $supports-access as xs:boolean,
+    $additional-uris as element(crest:additional)*,
     $title-function as (function(document-node()) as xs:string)?
   ) as item()+ {
   <rest:response>
@@ -182,7 +182,7 @@ declare function crest:list(
   let $results as item()+ :=
     if ($query)
     then crest:do-query($query, $start, $count, $path-base, $query-function, $title-function)
-    else crest:do-list($start, $count, $path-base, $list-function, $supports-access, $title-function)
+    else crest:do-list($start, $count, $path-base, $list-function, $additional-uris, $title-function)
   let $result-element := $results[1]
   let $max-results := $results[3]
   let $total := $results[4]
@@ -266,7 +266,7 @@ declare function crest:do-list(
   $count as xs:integer,
   $path-base as xs:string,
   $list-function as (function() as element()*),
-  $supports-access as xs:boolean,
+  $additional-uris as element(crest:additional)*,
   $title-function as (function(document-node()) as xs:string)?
   ) {
   let $title-function as function(document-node()) as xs:string :=
@@ -280,9 +280,9 @@ declare function crest:do-list(
         <li class="result">
           <a class="document" href="{$path-base}/{$api-name}">{$title-function(root($result))}</a>
           {
-            if ($supports-access)
-            then <a class="alt" property="access" href="{$path-base}/{$api-name}/access">access</a>
-            else ()
+            for $additional in $additional-uris
+            return
+              <a class="alt" property="{$additional/@text}" href="{$path-base}/{$api-name}/{$additional/@relative-uri}">{string($additional/@text)}</a>
           }
         </li>
     }</ul>,

@@ -18,10 +18,12 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "/db/code/api/modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "/db/code/api/modules/data.xqm";
+import module namespace format="http://jewishliturgy.org/modules/format"
+  at "/db/code/modules/format.xqm";
 
 declare variable $orig:data-type := "original";
-declare variable $orig:schema := "/schema/jlptei.rnc";
-declare variable $orig:schematron := "/schema/jlptei.xsl2";
+declare variable $orig:schema := "/db/schema/jlptei.rnc";
+declare variable $orig:schematron := "/db/schema/jlptei.xsl2";
 declare variable $orig:path-base := concat($data:path-base, "/", $orig:data-type);
 declare variable $orig:api-path-base := concat("/api/data/", $orig:data-type);  
 
@@ -152,7 +154,11 @@ declare
   crest:list($q, $start, $max-results,
     "Original data API", $orig:api-path-base,
     orig:query-function#1, orig:list-function#0,
-    true(), ()
+    (<crest:additional text="access" relative-uri="access"/>,
+     <crest:additional text="flat" relative-uri="flat"/>,
+     <crest:additional text="combined" relative-uri="combined"/>,
+     <crest:additional text="transcluded" relative-uri="combined?transclude=true"/>), 
+    ()
   )
 };
 
@@ -281,4 +287,91 @@ declare
     $body as document-node()
   ) as item()+ {
   crest:put-access($orig:data-type, $name, $body)
+};
+
+(:~ Get a flattened version of the original data resource
+ : @param $name The resource to get
+ : @return HTTP 200 A TEI header with a flattened version of the resource as XML
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare 
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/flat")
+  %rest:produces("application/xml", "text/xml")
+  function orig:get-flat(
+    $name as xs:string
+  ) as item()+ {
+  let $doc := crest:get($orig:data-type, $name)
+  return
+    if ($doc instance of document-node())
+    then format:display-flat($doc, map {}, $doc)
+    else $doc
+};
+
+(:~ Get a version of the original data resource with combined hierarchies
+ : @param $name The resource to get
+ : @param $transclude If true(), transclude all pointers, otherwise (default), return the pointers only.
+ : @return HTTP 200 A TEI header with a combined hierarchy version of the resource as XML
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare 
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/combined")
+  %rest:query-param("transclude", "{$transclude}")
+  %rest:produces("application/xml", "text/xml")
+  %output:method("xml")
+  function orig:get-combined(
+    $name as xs:string,
+    $transclude as xs:boolean*
+  ) as item()+ {
+  let $doc := crest:get($orig:data-type, $name)
+  return
+    if ($doc instance of document-node())
+    then
+      if ($transclude[1])
+      then
+        format:combine($doc, map {}, $doc)
+      else
+        format:unflatten($doc, map {}, $doc)
+    else $doc
+};
+
+(:~ Get a version of the original data resource with combined hierarchies in HTML
+ : @param $name The resource to get
+ : @param $transclude If true(), transclude all pointers, otherwise (default), return the pointers only.
+ : @return HTTP 200 An HTML file
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare 
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/combined")
+  %rest:query-param("transclude", "{$transclude}")
+  %rest:produces("application/xhtml+xml", "text/html")
+  %output:method("html5")
+  %output:indent("yes")
+  function orig:get-combined-html(
+    $name as xs:string,
+    $transclude as xs:boolean*
+  ) as item()+ {
+  let $doc := crest:get($orig:data-type, $name)
+  return
+    if ($doc instance of document-node())
+    then
+      format:html($doc, map {}, $doc, ($transclude, false())[1])
+    else $doc
+};
+
+(:~ for debugging only :)
+declare 
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/html")
+  %rest:query-param("transclude", "{$transclude}")
+  %rest:produces("application/xhtml+xml", "text/html")
+  %output:method("html5")
+  %output:indent("yes")
+  function orig:get-combined-html-forced(
+    $name as xs:string,
+    $transclude as xs:boolean*
+  ) as item()+ {
+  orig:get-combined-html($name, $transclude)
 };

@@ -1,6 +1,3 @@
 [submodule "lib/hebmorph"]
 	path = lib/hebmorph
 	url = git://github.com/EfraimFeinstein/HebMorph.git
-[submodule "lib/aloha"]
-	path = lib/aloha
-	url = https://github.com/alohaeditor/Aloha-Editor.git

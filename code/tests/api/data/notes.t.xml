@@ -15,34 +15,34 @@
   <password>testuser</password>
   <setup>
     <!-- put all tests into en/1900/01 -->
-    <create-collection parent="/data/notes/en" name="1900" />
-    <create-collection parent="/data/notes/en/1900" name="01"/>
+    <create-collection parent="/db/data/notes/en" name="1900" />
+    <create-collection parent="/db/data/notes/en/1900" name="01"/>
     <!-- support files required for validity -->
-    <store collection="/user" name="testuser.xml">
+    <store collection="/db/data/user" name="testuser.xml">
       <j:contributor>
         <tei:idno>testuser</tei:idno>
         <tei:name>Test User</tei:name>
       </j:contributor>
     </store>
     <!-- existing resource with read/write access for testuser -->
-    <copy source="/code/tests/api/data/notes" name="Existing.xml" 
-      destination="/data/notes/en/1900/01" />
+    <copy source="/db/code/tests/api/data/notes" name="Existing.xml" 
+      destination="/db/data/notes/en/1900/01" />
     <!-- Query result -->
-    <copy source="/code/tests/api/data/notes" name="Query.xml" 
-      destination="/data/notes/en/1900/01" />
+    <copy source="/db/code/tests/api/data/notes" name="Query.xml" 
+      destination="/db/data/notes/en/1900/01" />
     <!-- and with no read/write access -->
-    <copy source="/code/tests/api/data/original" name="Existing.xml" 
-      destination="/data/notes/en/1900/01" destination-name="NoAccess.xml" />
+    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+      destination="/db/data/notes/en/1900/01" destination-name="NoAccess.xml" />
     <!-- and with read only access -->
-    <copy source="/code/tests/api/data/original" name="Existing.xml" 
-      destination="/data/notes/en/1900/01" destination-name="NoWriteAccess.xml" />
+    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+      destination="/db/data/notes/en/1900/01" destination-name="NoWriteAccess.xml" />
     <code><![CDATA[
       system:as-user("admin", $magic:password,
-        let $collections := ("/data/notes/en/1900", "/data/notes/en/1900/01") 
-        let $existing-uri := xs:anyURI("/data/notes/en/1900/01/Existing.xml")
-        let $query-uri := xs:anyURI("/data/notes/en/1900/01/Query.xml")
-        let $no-access-uri := xs:anyURI("/data/notes/en/1900/01/NoAccess.xml")
-        let $no-write-access-uri := xs:anyURI("/data/notes/en/1900/01/NoWriteAccess.xml")
+        let $collections := ("/db/data/notes/en/1900", "/db/data/notes/en/1900/01") 
+        let $existing-uri := xs:anyURI("/db/data/notes/en/1900/01/Existing.xml")
+        let $query-uri := xs:anyURI("/db/data/notes/en/1900/01/Query.xml")
+        let $no-access-uri := xs:anyURI("/db/data/notes/en/1900/01/NoAccess.xml")
+        let $no-write-access-uri := xs:anyURI("/db/data/notes/en/1900/01/NoWriteAccess.xml")
         return (
           for $collection in $collections
           let $c-uri := xs:anyURI($collection)

@@ -86,7 +86,7 @@ declare
   crest:list($q, $start, $max-results,
     "Bibliographic data API", $src:api-path-base,
     src:query-function#1, src:list-function#0,
-    false(), src:title-function#1
+    (), src:title-function#1
   )
 };
 

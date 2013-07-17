@@ -112,7 +112,8 @@ declare
   crest:list($q, $start, $max-results,
     "Linkage data API", $lnk:api-path-base,
     lnk:query-function#1, lnk:list-function#0,
-    true(), ()
+    <crest:additional text="access" relative-uri="access"/>, 
+    ()
   )
 };
 
