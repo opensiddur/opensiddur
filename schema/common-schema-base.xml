@@ -89,46 +89,6 @@ schemas, not as an independent unit
       </rng:oneOrMore>
     </content>
   </elementSpec>
-  <elementSpec ident="responsGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
-    <desc>Group elements that declare responsibility over a portion of text.</desc>
-    <classes>
-      <memberOf key="model.respLike"/>
-      <memberOf key="att.global"/>
-    </classes>
-    <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-      <rng:oneOrMore>
-        <rng:ref name="respons"/>
-      </rng:oneOrMore>
-    </content>
-  </elementSpec>
-  <elementSpec ident="respons" module="certainty" mode="change">
-    <attList>
-      <attDef ident="type" mode="add" usage="req">
-        <desc>Responsibility type, indicated using one of the allowed MARC relator codes, as defined at http://www.loc.gov/marc/relators/relacode.html&#13;
-          aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proofreader), spn, (sponsor), trl (translator), trc (transcriber)</desc>
-        <datatype minOccurs="1" maxOccurs="1">
-          <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
-        </datatype>
-        <valList type="closed">
-          <valItem ident="aut"/>
-          <valItem ident="edt"/>
-          <valItem ident="fac"/>
-          <valItem ident="fnd"/>
-          <valItem ident="pfr"/>
-          <valItem ident="spn"/>
-          <valItem ident="trl"/>
-          <valItem ident="trc"/>
-        </valList>
-      </attDef>
-    </attList>
-    <classes mode="replace">
-      <memberOf key="model.certLike"/>
-      <memberOf key="att.global"/>
-      <memberOf key="att.scoping"/>
-      <memberOf key="model.global" mode="delete"/>
-      <memberOf key="model.global.meta" mode="delete"/>
-    </classes>
-  </elementSpec>
   <elementSpec ident="ab" module="linking" mode="change">
     <classes mode="replace">
       <memberOf key="model.pLike"/>
@@ -171,6 +131,37 @@ schemas, not as an independent unit
       <memberOf key="att.pointing.group"/>
     </classes>
   </elementSpec>
+  <elementSpec ident="resp" module="core" mode="change">
+    <!-- require @key in resp, remove @ref -->
+    <attList>
+      <attDef ident="ref" mode="delete"/>
+      <attDef ident="key" mode="change" usage="req">
+        <desc>Responsibility type, indicated using one of the allowed MARC relator codes, as defined at http://www
+          aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proofreader), spn, (sponsor)</desc>
+        <datatype minOccurs="1" maxOccurs="1">
+          <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
+        </datatype>
+        <valList type="closed">
+          <valItem ident="aut"/>
+          <valItem ident="edt"/>
+          <valItem ident="fac"/>
+          <valItem ident="fnd"/>
+          <valItem ident="pfr"/>
+          <valItem ident="spn"/>
+          <valItem ident="trl"/>
+          <valItem ident="trc"/>
+        </valList>        
+      </attDef>
+    </attList>
+  </elementSpec>
+  <elementSpec ident="respStmt" module="core" mode="change">
+    <constraintSpec mode="add" scheme="isoschematron" ident="respStmt-j-1">
+      <desc>Require @ref in the non-resp element to reference a contributor</desc>
+      <constraint>
+        <sch:assert test="exists(*[not(self::resp)]/@ref)">The name-like element in respStmt is required to reference a contributor using an @ref attribute</sch:assert>
+      </constraint>
+    </constraintSpec>
+  </elementSpec>
   <elementSpec ident="teiHeader" module="header" mode="change">
     <attList>
       <attDef ident="type" mode="delete"/>
@@ -195,7 +186,7 @@ schemas, not as an independent unit
       <attDef ident="sample" mode="delete"/>
     </attList>
   </classSpec>
-  <classSpec ident="att.canonical" mode="delete" module="tei" type="atts"/>
+  <!-- classSpec ident="att.canonical" mode="delete" module="tei" type="atts"/-->
   <classSpec ident="att.declaring" mode="delete" module="tei" type="atts"/>
   <classSpec ident="att.datcat" mode="delete" module="tei" type="atts"/>
   <classSpec ident="att.responsibility" module="tei" mode="delete" type="atts"/>
@@ -254,7 +245,13 @@ schemas, not as an independent unit
   <classSpec ident="att.readFrom" module="tei" mode="delete" type="atts"/>
   <classSpec ident="att.rdgPart" module="textcrit" mode="delete" type="atts"/>
   <classSpec ident="att.ranging" module="tei" mode="delete" type="atts"/>
-  <classSpec ident="att.naming" module="tei" mode="delete" type="atts"/>
+  <classSpec ident="att.naming" module="tei" mode="change" type="atts">
+    <!-- used to keep att.canonical in name/orgName -->
+    <attList mode="change">
+      <attDef ident="role" mode="delete"/>
+      <attDef ident="nymRef" mode="delete"/>
+    </attList>
+  </classSpec>
   <classSpec ident="att.placement" module="tei" mode="delete" type="atts"/>
   <classSpec ident="att.global.analytic" module="analysis" mode="delete" type="atts"/>
   <classSpec ident="att.global.facs" module="transcr" mode="delete" type="atts"/>
