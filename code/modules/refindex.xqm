@@ -103,7 +103,7 @@ declare function ridx:reindex(
         if (mirror:store($ridx:ridx-path, $collection, $resource, 
           element ridx:index {
             attribute document { $doc-uri },
-            ridx:make-index-entries($doc//@target|$doc//@targets)
+            ridx:make-index-entries($doc//@target|$doc//@targets|$doc//@ref)
           }
         ))
         then ()
