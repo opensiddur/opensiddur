@@ -6,9 +6,12 @@
       <tei:fileDesc>
          <tei:titleStmt>
             <tei:title type="main" xml:lang="en">Existing</tei:title>
-            <j:responsGrp>
-               <tei:respons type="trc" locus="value" target="#parallel" resp="/user/testuser"/>
-            </j:responsGrp>
+            
+               <tei:respStmt>
+               <tei:resp key="trc">Transcribed by</tei:resp>
+               <tei:name ref="/user/testuser">Test User</tei:name>
+            </tei:respStmt>
+            
          </tei:titleStmt>
          <tei:publicationStmt>
             <tei:availability status="free">
@@ -27,17 +30,17 @@
          <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
       </tei:revisionDesc>
    </tei:teiHeader>
-   <j:stylesheet scheme="css" xml:id="style"><![CDATA[
+   <j:stylesheet scheme="css" xml:id="style">
 // just some test CSS
 .tei-seg {
   display:none;   
 }
-   ]]></j:stylesheet>
+   </j:stylesheet>
    <tei:text>
       <tei:body>
         <tei:div>
-          <tei:p>Query result.</tei:p>
+            <tei:p>Query result.</tei:p>
         </tei:div>
       </tei:body>
    </tei:text>
-</tei:TEI>  
+</tei:TEI>

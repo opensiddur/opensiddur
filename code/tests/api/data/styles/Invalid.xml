@@ -6,9 +6,12 @@
       <tei:fileDesc>
          <tei:titleStmt>
             <tei:title type="main" xml:lang="en">Invalid</tei:title>
-            <j:responsGrp>
-               <tei:respons type="trc" locus="value" target="#parallel" resp="/user/testuser"/>
-            </j:responsGrp>
+            
+               <tei:respStmt>
+               <tei:resp key="trc">Transcribed by</tei:resp>
+               <tei:name ref="/user/testuser">Test User</tei:name>
+            </tei:respStmt>
+            
          </tei:titleStmt>
          <tei:publicationStmt>
             <tei:availability status="free">
@@ -27,7 +30,7 @@
          <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
       </tei:revisionDesc>
    </tei:teiHeader>
-   <j:stylesheet><![CDATA[
+   <j:stylesheet>
 // just some test CSS
 .tei-seg {
   display:none;   
@@ -37,11 +40,11 @@
   d:x
   y:z
 }
-   ]]></j:stylesheet>
+   </j:stylesheet>
    <tei:text>
       <tei:front>
         <tei:p>This is invalid</tei:p>
       </tei:front>
-      <!-- the lack of tei:body is invalid -->
+      
    </tei:text>
-</tei:TEI>  
+</tei:TEI>
