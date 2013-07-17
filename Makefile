@@ -135,7 +135,7 @@ TEI_REVISION ?= -r 11440
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
 # lock eXist to a given revision
-EXIST_REV ?= 18649
+EXIST_REV ?= 18685
 EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
@@ -241,8 +241,7 @@ db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patc
 
 # copy libraries that are stored in the filesystem
 copy-libs:
-	mkdir -p $(EXIST_INSTALL_DIR)/webapp/aloha
-	cp -r $(LIBDIR)/aloha/src/* $(EXIST_INSTALL_DIR)/webapp/aloha
+	@echo "Nothing to do here."
 
 installer: $(EXIST_INSTALL_JAR)
 	expect $(SETUPDIR)/install.exp "$(EXIST_INSTALL_JAR)" "$(EXIST_INSTALL_DIR)" "$(ADMINPASSWORD)"
