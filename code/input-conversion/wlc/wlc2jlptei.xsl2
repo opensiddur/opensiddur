@@ -25,7 +25,7 @@ TODO:
   <xsl:output indent="yes" encoding="utf-8" method="xml" />
   <xd:doc type="stylesheet">
     <xd:short>Convert the Joined WLC to JLPTEI.</xd:short>
-    <xd:copyright>Copyright 2009-2010,2012 Efraim Feinstein
+    <xd:copyright>Copyright 2009-2010,2012-2013 Efraim Feinstein
     </xd:copyright>
     <xd:detail>
       <p>This program is free software: you can redistribute it
@@ -390,9 +390,11 @@ TODO:
       <tei:licence 
           target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
     </xsl:variable>
-    <xsl:variable name="responsGrp-content" as="element(tei:respons)+">
-      <tei:respons type="trc" locus="value"
-        target="#text" resp="/{$contributors-file-name}" />
+    <xsl:variable name="responsGrp-content" as="element(tei:respStmt)+">
+      <tei:respStmt>
+        <tei:resp key="trc">Transcribed by</tei:resp> 
+        <tei:name ref="/{$contributors-file-name}">Christopher Kimball</tei:name>
+      </tei:respStmt>
     </xsl:variable>
     <xsl:variable name="links-content" as="element(j:links)?">
     </xsl:variable>
@@ -454,7 +456,7 @@ TODO:
         <xsl:with-param name="bibliography"
           as="element(tei:link)" select="$bibl-content" />
         <xsl:with-param name="respons"
-          as="element(tei:respons)" select="$responsGrp-content"/>
+          as="element(tei:respStmt)" select="$responsGrp-content"/>
       </xsl:call-template>
     </xsl:result-document>
     
@@ -481,7 +483,7 @@ TODO:
             </tei:title>
           </xsl:with-param>
           <xsl:with-param name="respons"
-          as="element(tei:respons)" select="$responsGrp-content"/>
+          as="element(tei:respStmt)" select="$responsGrp-content"/>
           <xsl:with-param name="body" as="element()+">
             <xsl:variable name="chapter-ptrs" as="element(jx:tmp)">
               <jx:tmp>
@@ -729,7 +731,7 @@ TODO:
             <xsl:with-param name="bibliography" 
               as="element(tei:link)" select="$bibl-content" />
             <xsl:with-param name="respons" 
-              as="element(tei:respons)+" select="$responsGrp-content" />
+              as="element(tei:respStmt)+" select="$responsGrp-content" />
             <xsl:with-param name="links" 
               as="element(j:links)?" select="$links-content" />
           </xsl:call-template>
@@ -745,9 +747,11 @@ TODO:
           <tei:title type="main" xml:lang="en">Notes from the Westminster Leningrad Codex</tei:title>
         </xsl:with-param>
         <xsl:with-param name="respons" 
-          as="element(tei:respons)">
-          <tei:respons type="trc" locus="value"
-            target="#main" resp="/{$contributors-file-name}" />
+          as="element(tei:respStmt)">
+          <tei:respStmt>
+            <tei:resp key="trc">Transcribed by</tei:resp> 
+            <tei:name ref="/{$contributors-file-name}">Christopher Kimball</tei:name>
+          </tei:respStmt>          
         </xsl:with-param>
         <xsl:with-param name="annotations"
           as="element(j:annotations)">
