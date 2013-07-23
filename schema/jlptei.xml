@@ -122,12 +122,11 @@ The Open Siddur intends to work within open standards whenever possible. In choo
         <xi:include href="common-schema.xml"/>
         <xi:include href="conditional-common.xml"/>
         <schemaSpec ident="jlptei" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
-          <moduleRef key="core" include="choice cit corr date divGen foreign head hi item l label lg list name note orig p ptr q quote ref reg sic title"/>
+          <moduleRef key="core" include="choice cit corr date divGen foreign head hi item l label lg list name note orig p ptr q quote ref reg resp respStmt sic title"/>
           <moduleRef key="tei"/>
           <moduleRef key="header" include="availability change distributor fileDesc licence publicationStmt revisionDesc sourceDesc teiHeader titleStmt"/>
           <moduleRef key="textstructure" include="TEI back body div docAuthor docDate docEdition docImprint docTitle front text titlePage titlePart"/>
           <moduleRef key="analysis" include="c interp interpGrp pc phr s w"/>
-          <moduleRef key="certainty" include="respons"/>
           <moduleRef key="gaiji" include="g"/>
           <moduleRef key="iso-fs" except="fsDecl fsdDecl fsdLink fsDescr fDescr fDecl vAlt vColl vDefault vLabel vRange if iff then cond fsConstraints bicond"/>
           <moduleRef key="linking" include="ab anchor link linkGrp seg"/>

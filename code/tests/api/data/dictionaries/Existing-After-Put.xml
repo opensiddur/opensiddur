@@ -6,9 +6,12 @@
       <tei:fileDesc>
          <tei:titleStmt>
             <tei:title type="main" xml:lang="en">Existing</tei:title>
-            <j:responsGrp>
-               <tei:respons type="trc" locus="value" target="#text" resp="/user/testuser"/>
-            </j:responsGrp>
+            
+               <tei:respStmt>
+               <tei:resp key="trc">Transcribed by</tei:resp>
+               <tei:name ref="/user/testuser">Test User</tei:name>
+            </tei:respStmt>
+            
          </tei:titleStmt>
          <tei:publicationStmt>
             <tei:availability status="free">
@@ -93,4 +96,4 @@
          </tei:entry>
       </tei:body>
    </tei:text>
-</tei:TEI>  
+</tei:TEI>

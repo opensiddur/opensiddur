@@ -357,7 +357,7 @@ declare function stml:header(
 declare function stml:header(
   $license as element(tei:availability),
   $source as element(tei:link)+,
-  $responsibility as element(j:responsGrp)*,
+  $responsibility as element(tei:respStmt)*,
   $title as element(tei:title)
   ) {
   <tei:teiHeader>
@@ -464,21 +464,18 @@ declare function stml:FileContent(
 (:~ write a responsibility structure :)
 declare function stml:responsibility(
   $e as element(r:FileCommand)
-  ) as element(j:responsGrp)? {
+  ) as element(tei:respStmt)? {
   let $ShortName := data($e/r:ShortName)
   let $contributors := root($e)//r:ContributorCommand[data(r:AppliesToCommand/r:ShortName)=$ShortName]
   where exists($contributors)
   return
-    <j:responsGrp>{
+    <tei:respStmt>{
       for $contributor in $contributors
-      return 
-        <tei:respons 
-          type="trc" 
-          locus="value" 
-          resp="/user/{stml:convert($contributor/r:Handle)/string()}" 
-          target="#text"
-          />
-    }</j:responsGrp>
+      return (
+        <tei:resp key="trc">Transcribed by</tei:resp>,
+        <tei:name ref="/user/{stml:convert($contributor/r:Handle)/string()}">{data($contributor/r:ContributorIDCommand[r:Type="name"])}</tei:name>
+      )
+    }</tei:respStmt>
 };
 
 declare function stml:make-annotations(
@@ -519,7 +516,7 @@ declare function stml:annotations(
   let $header := $e/tei:TEI/tei:teiHeader
   let $title := 
     concat("Notes for ", $header/descendant::tei:title[@type="main"])
-  let $responsibility := $header/descendant::j:responsGrp
+  let $responsibility := $header/descendant::tei:respStmt
   let $source := $header/descendant::tei:sourceDesc/*
   let $license := $header/descendant::tei:availability
   return

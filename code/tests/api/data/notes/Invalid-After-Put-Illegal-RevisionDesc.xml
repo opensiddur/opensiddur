@@ -6,9 +6,12 @@
       <tei:fileDesc>
          <tei:titleStmt>
             <tei:title type="main" xml:lang="en">Existing</tei:title>
-            <j:responsGrp>
-               <tei:respons type="trc" locus="value" target="#notes" resp="/user/testuser"/>
-            </j:responsGrp>
+            
+               <tei:respStmt>
+               <tei:resp key="trc">Transcribed by</tei:resp>
+               <tei:name ref="/user/testuser">Test User</tei:name>
+            </tei:respStmt>
+            
          </tei:titleStmt>
          <tei:publicationStmt>
             <tei:availability status="free">
@@ -29,13 +32,13 @@
       </tei:revisionDesc>
    </tei:teiHeader>
   <j:annotations xml:id="notes">
-    <tei:note xml:id="a-note">This is a note.</tei:note>
-    <tei:note xml:id="b-note">This is an added note.</tei:note>
-    <tei:fs xml:id="a-fs" type="fs">
-      <tei:f name="f">
-        <tei:string>String</tei:string>
-      </tei:f>
-    </tei:fs>
-    <tei:interp xml:id="interp">Category</tei:interp>
+      <tei:note xml:id="a-note">This is a note.</tei:note>
+      <tei:note xml:id="b-note">This is an added note.</tei:note>
+      <tei:fs xml:id="a-fs" type="fs">
+         <tei:f name="f">
+            <tei:string>String</tei:string>
+         </tei:f>
+      </tei:fs>
+      <tei:interp xml:id="interp">Category</tei:interp>
   </j:annotations>
-</tei:TEI>  
+</tei:TEI>
