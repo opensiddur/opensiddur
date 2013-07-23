@@ -217,6 +217,7 @@ declare
   %rest:path("/api/user")
   %rest:form-param("user", "{$user}")
   %rest:form-param("password", "{$password}")
+  %rest:consumes("application/x-www-form-urlencoded")
   function user:post-form(
     $user as xs:string*,
     $password as xs:string*
