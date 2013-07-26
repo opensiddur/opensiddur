@@ -130,7 +130,7 @@ XSLTDOCREPO = https://xsltdoc.svn.sourceforge.net/svnroot/xsltdoc/trunk/xsltdoc
 
 TEIDIR = $(LIBDIR)/tei
 TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
-TEI_REVISION ?= -r 11440
+TEI_REVISION ?= -r 11696
 
 EXISTSRCDIR = $(LIBDIR)/exist
 EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
