@@ -118,16 +118,6 @@ RELAXNG ?= $(LIBDIR)/jing $(RELAXNGOPTIONS)
 -include Makefile.cygwin
 
 # directories for externals
-XSPECDIR = $(LIBDIR)/xspec
-XSPECREPO = http://xspec.googlecode.com/svn/trunk/
-
-XSLTFORMSDIR = $(LIBDIR)/xsltforms
-XSLTFORMSREPO = https://xsltforms.svn.sourceforge.net/svnroot/xsltforms
-XSLTFORMS_REVISION ?= -r 565
-
-XSLTDOCDIR = $(LIBDIR)/XSLTDoc
-XSLTDOCREPO = https://xsltdoc.svn.sourceforge.net/svnroot/xsltdoc/trunk/xsltdoc
-
 TEIDIR = $(LIBDIR)/tei
 TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 TEI_REVISION ?= -r 11696
@@ -322,14 +312,8 @@ db: externals db-nonet
 
 # patch error status ignored because it returns 1 if patches are already applied
 db-nonet: schema transforms $(DBDIR)/code $(DBDIR)/common 
-	mkdir -p $(DBDIR)/xforms
-	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xsltforms/trunk/build/ $(DBDIR)/xforms/xsltforms
-	rsync $(RSYNC_EXCLUDE) -a --delete $(LIBDIR)/xspec $(DBDIR)/code/modules/resources
 	rsync $(RSYNC_EXCLUDE) -a --delete data $(DBDIR)
 	cp $(CODEDIR)/common/params.xsl2 $(DBDIR)/code/common	
-	#-patch -p1 -Nr - < $(SETUPDIR)/generate-common-tests.xsl.patch
-	#-patch -p1 -Nr - < $(SETUPDIR)/generate-tests-utils.xsl.patch
-	#-patch -p1 -Nr - < $(SETUPDIR)/generate-xspec-tests.xsl.patch
 
 db-clean:
 	rm -fr $(DBDIR)/schema $(DBDIR)/code $(DBDIR)/data $(DBDIR)/common $(DBDIR)/cache
@@ -338,31 +322,13 @@ db-clean:
 .PHONY: db-externals
 
 .PHONY: externals submodules
-externals: svn-xspec svn-xsltforms svn-xsltdoc svn-tei svn-exist
+externals: svn-tei svn-exist
 
 submodules:
 	git submodule init
 	git submodule update
 
-.PHONY: svn-xspec svn-xsltforms svn-xsltdoc svn-tei svn-exist
-svn-xspec: $(XSPECDIR)
-	svn update $(XSPECDIR)
-
-$(XSPECDIR):
-	svn co $(XSPECREPO) $(XSPECDIR)
-
-svn-xsltforms: $(XSLTFORMSDIR)
-	svn update $(XSLTFORMS_REVISION) $(XSLTFORMSDIR)
-
-$(XSLTFORMSDIR):
-	svn co $(XSLTFORMS_REVISION) $(XSLTFORMSREPO) $(XSLTFORMSDIR)
-
-svn-xsltdoc: $(XSLTDOCDIR)
-	svn update $(XSLTDOCDIR)
-
-$(XSLTDOCDIR):
-	svn co $(XSLTDOCREPO) $(XSLTDOCDIR)
-
+.PHONY: svn-tei svn-exist
 svn-tei: $(TEIDIR)
 	svn update $(TEI_REVISION) $(TEIDIR)
 
