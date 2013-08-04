@@ -63,7 +63,7 @@ DBDIR ?= $(TOPDIR)/db
 TEMPDIR ?= $(TOPDIR)/tmp
 
 # java home... you will probably have to set this in Makefile.local
-JAVA_HOME ?= /usr/lib/jvm/java-6-openjdk/
+JAVA_HOME ?= /usr/lib/jvm/java-7-openjdk/
 
 # everything that can be made depends on these files
 ALL_DEPEND=Makefile $(COMMONDIR)/catalog.xml
@@ -98,7 +98,7 @@ EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
-EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1dev-rev$(EXIST_REV).jar
+EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1dev-rev.jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
 EXISTBACKUP ?= java -Dexist.home=$(EXIST_INSTALL_DIR) -jar $(EXIST_INSTALL_DIR)/start.jar org.exist.backup.Main 
 
@@ -123,10 +123,6 @@ TEIREPO = https://tei.svn.sourceforge.net/svnroot/tei/trunk
 TEI_REVISION ?= -r 11696
 
 EXISTSRCDIR = $(LIBDIR)/exist
-EXISTSRCREPO = svn://svn.code.sf.net/p/exist/code/trunk/eXist
-# lock eXist to a given revision
-EXIST_REV ?= 18685
-EXIST_REVISION ?= -r $(EXIST_REV)
 
 all:  code input-conversion xsltdoc odddoc lib
 
@@ -184,9 +180,6 @@ $(EXIST_INSTALL_JAR): Makefile
 	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
 	cd $(LIBDIR)/exist && \
 		JAVA_HOME=$(JAVA_HOME) \
-		./build.sh svn-download
-	cd $(LIBDIR)/exist && \
-		JAVA_HOME=$(JAVA_HOME) \
 		./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true
 
 .PHONY: build-exist clean-exist dist-clean-exist
@@ -222,7 +215,7 @@ clean-hebmorph-lucene:
 
 # Install a copy of the eXist database
 .PHONY: db-install db-install-nonet db-install-wlc db-uninstall db-sync db-syncclean installer patches lucene-install copy-files copy-libs setup-password
-db-install: submodules svn-exist code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db setup-password copy-files copy-libs   
+db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db setup-password copy-files copy-libs   
 
 #installer that does not rely on the presence of a network. 
 db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db-nonet setup-password copy-files copy-libs
@@ -322,24 +315,18 @@ db-clean:
 .PHONY: db-externals
 
 .PHONY: externals submodules
-externals: svn-tei svn-exist
+externals: svn-tei 
 
 submodules:
 	git submodule init
 	git submodule update
 
-.PHONY: svn-tei svn-exist
+.PHONY: svn-tei 
 svn-tei: $(TEIDIR)
 	svn update $(TEI_REVISION) $(TEIDIR)
 
 $(TEIDIR):
 	svn co $(TEIREPO) $(TEIDIR)
-
-svn-exist: $(EXISTSRCDIR)
-	svn update $(EXIST_REVISION) $(EXISTSRCDIR)
-
-$(EXISTSRCDIR):
-	svn co $(EXIST_REVISION) $(EXISTSRCREPO) $(EXISTSRCDIR)
 
 .PHONY: ridx-enable ridx-disable
 ridx-enable:
