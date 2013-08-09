@@ -9,7 +9,7 @@
   <description>
     <p>Tests for the login API</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012 Efraim Feinstein,
+    <copyright>Copyright 2012-2013 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <setup/>
@@ -48,7 +48,7 @@
     <test>
       <task>login:get-html()</task>
       <code><![CDATA[
-        login:get-html((), ())
+        login:get-html((), (), ())
       ]]></code>
       <class href="common.t.xml#SerializeHTML5"/>
       <expected xpath=".//html:div[@class='result']" desc="empty login name"><html:div class="result"/></expected>
@@ -68,7 +68,7 @@
     <test>
       <task>login:get-html()</task>
       <code><![CDATA[
-        login:get-html((), ())
+        login:get-html((), (), ())
       ]]></code>
       <class href="common.t.xml#SerializeHTML5"/>
       <expected xpath=".//html:div[@class='result']" desc="login name"><html:div class="result">testuser</html:div></expected>
@@ -95,7 +95,7 @@
           <user>testuser</user>
           <password>testuser</password>
         </login>
-      })
+      }, ())
       ]]></code>
       <class href="common.t.xml#NoData"/>
       <xpath desc="user is set">app:auth-user()="testuser"</xpath>
@@ -109,7 +109,7 @@
           <user>testuser</user>
           <password>wrong</password>
         </login>
-      })
+      }, ())
       ]]></code>
       <class href="#BadLogin"/>
     </test>
@@ -121,7 +121,7 @@
           <user>wrong</user>
           <password>wrong</password>
         </login>
-      })
+      }, ())
       ]]></code>
       <class href="#BadLogin"/>
     </test>
@@ -132,7 +132,7 @@
         <login>
           <password>testuser</password>
         </login>
-      })
+      }, ())
       ]]></code>
       <class href="#BadLogin"/>
     </test>
@@ -143,7 +143,7 @@
         <login>
           <user>testuser</user>
         </login>
-      })
+      }, ())
       ]]></code>
       <class href="#BadLogin"/>
     </test>
@@ -164,7 +164,7 @@
     <test>
       <task>with valid user and password</task>
       <code><![CDATA[
-      login:post-form("testuser", "testuser")
+      login:post-form("testuser", "testuser", ())
       ]]></code>
       <class href="common.t.xml#NoData"/>
       <xpath desc="user is set">app:auth-user()="testuser"</xpath>
@@ -173,28 +173,28 @@
     <test>
       <task>with valid user and invalid password</task>
       <code><![CDATA[
-      login:post-form("testuser", "wrong")
+      login:post-form("testuser", "wrong", ())
       ]]></code>
       <class href="#BadLogin"/>
     </test>
     <test>
       <task>with invalid user</task>
       <code><![CDATA[
-      login:post-form("wrong", "testuser")
+      login:post-form("wrong", "testuser", ())
       ]]></code>
       <class href="#BadLogin"/>
     </test>
     <test>
       <task>missing user</task>
       <code><![CDATA[
-      login:post-form((), "testuser")
+      login:post-form((), "testuser", ())
       ]]></code>
       <class href="#BadLogin"/>
     </test>
     <test>
       <task>missing password</task>
       <code><![CDATA[
-      login:post-form("testuser", ())
+      login:post-form("testuser", (), ())
       ]]></code>
       <class href="#BadLogin"/>
     </test>
