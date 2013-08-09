@@ -322,7 +322,7 @@
     <test>
       <task>lnk:get-access()</task>
       <code><![CDATA[
-      lnk:get-access("Existing")
+      lnk:get-access("Existing", ())
       ]]></code>
       <xpath desc="an access structure is returned">self::a:access</xpath>
     </test>
@@ -345,14 +345,14 @@
     <test>
       <task>For an existing resource</task>
       <code><![CDATA[
-      lnk:get-access("Existing")
+      lnk:get-access("Existing", ())
       ]]></code>
       <xpath desc="returns an access structure">exists(./self::a:access)</xpath>
     </test>
     <test>
       <task>For a nonexistent resource</task>
       <code><![CDATA[
-      lnk:get-access("DoesNotExist")
+      lnk:get-access("DoesNotExist", ())
       ]]></code>
       <class href="../common.t.xml#NotFound"/>
     </test>

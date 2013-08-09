@@ -372,7 +372,7 @@
     <test>
       <task>tran:get-access()</task>
       <code><![CDATA[
-      tran:get-access("Garbage")
+      tran:get-access("Garbage", ())
       ]]></code>
       <xpath desc="an access structure is returned">self::a:access</xpath>
     </test>
@@ -395,14 +395,14 @@
     <test>
       <task>For an existing resource</task>
       <code><![CDATA[
-      tran:get-access("Test")
+      tran:get-access("Test", ())
       ]]></code>
       <xpath desc="returns an access structure">exists(./self::a:access)</xpath>
     </test>
     <test>
       <task>For a nonexistent resource</task>
       <code><![CDATA[
-      tran:get-access("DoesNotExist")
+      tran:get-access("DoesNotExist", ())
       ]]></code>
       <class href="../common.t.xml#NotFound"/>
     </test>

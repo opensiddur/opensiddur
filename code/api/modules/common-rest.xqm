@@ -28,6 +28,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
+declare namespace error="http://jewishliturgy.org/errors";
 
 (:~ @return REST error message when access is not allowed :)
 declare function crest:no-access(
@@ -476,18 +477,31 @@ declare function crest:put(
 
 (:~ Get access/sharing data for a document
  : @param $name Name of document
- : @return HTTP 200 and an access structure (a:access)
+ : @param $user Get access permissions as the given user 
+ : @return HTTP 200 and an access structure (a:access), 
+ :    or if $user is given, a:user-access 
+ : @error HTTP 400 Requested user does not exist
  : @error HTTP 404 Document not found or inaccessible
  :)
 declare function crest:get-access(
     $data-type as xs:string,
-    $name as xs:string
+    $name as xs:string,
+    $user as xs:string*
   ) as item()+ {
   let $doc := data:doc($data-type, $name)
   return
-   if ($doc)
-   then acc:get-access($doc)
-   else api:rest-error(404, "Not found", $name)
+    if ($doc)
+    then 
+      if (exists($user))
+      then
+        try {
+          acc:get-access-as-user($doc, $user[1])
+        }
+        catch error:BAD_REQUEST {
+          api:rest-error(400, "User not found", $user[1])
+        }
+      else acc:get-access($doc)
+    else api:rest-error(404, "Not found", $name)
 };
 
 (:~ Set access/sharing data for a document

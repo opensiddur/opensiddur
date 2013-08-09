@@ -65,6 +65,114 @@ declare function acc:validate-report(
   ))
 };
 
+(:~ determine the access rights to a document that a given
+ :  user has.
+ : @param $doc A document
+ : @param $user A user
+ :)
+declare function acc:get-access-as-user(
+  $doc as document-node(),
+  $user as xs:string
+  ) as element(a:user-access) {
+  let $path := document-uri($doc)
+  return
+    <a:user-access user="{$user}">{
+      if ($user = app:auth-user())
+      then (
+        (: the requested user is the current user :)
+        attribute read { sm:has-access($path, "r") },
+        attribute write { sm:has-access($path, "w") }
+      )
+      else 
+        (: the requested user is not the current user
+         : and may not even exist
+         :)
+        if (sm:user-exists($user))
+        then
+          (: OK, user exists :)
+          let $access := acc:get-access($doc)
+          let $user-groups := 
+            system:as-user("admin", $magic:password, 
+              sm:get-user-groups($user)
+            )
+          return
+            if ($user = $access/a:owner)
+            then (
+              (: the user is the owner :)
+              attribute read { true() }, 
+              attribute write { true() }
+            )
+            else if ($user-groups = $access/a:group/@group)
+            then (
+              (: the user is in the owner's group :)
+              attribute read { true() },
+              $access/a:group/@write
+            )
+            else 
+              let $default-read := xs:boolean($access/a:world/@read)
+              let $default-write := xs:boolean($access/a:world/@write)
+              let $share-acl-by-user := 
+                $access/a:share-user[.=$user][last()]
+              let $deny-acl-by-user := 
+                $access/a:deny-user[.=$user][last()]
+              let $share-acl-by-group :=
+                $access/a:share-group[.=$user-groups][last()]
+              let $deny-acl-by-group := 
+                $access/a:deny-group[.=$user-groups][last()]
+              return (
+                attribute read { 
+                  (
+                    let $controlled-by :=
+                      ( $share-acl-by-user |
+                        $deny-acl-by-user[@read="false"] |
+                        $share-acl-by-group |
+                        $deny-acl-by-group[@read="false"]
+                      )[last()]
+                    return 
+                      typeswitch($controlled-by)
+                      case element(a:share-group)
+                      return true()
+                      case element(a:share-user)
+                      return true()
+                      case element(a:deny-group)
+                      return false()
+                      case element(a:deny-user)
+                      return false()
+                      default return (),
+                    $default-read
+                  )[1] 
+                },
+                attribute write { 
+                  (
+                    let $controlled-by :=
+                      ( $share-acl-by-user[@write="true"] |
+                        $deny-acl-by-user |
+                        $share-acl-by-group[@write="true"] |
+                        $deny-acl-by-group
+                      )[last()]
+                    return 
+                      typeswitch($controlled-by)
+                      case element(a:share-group)
+                      return true()
+                      case element(a:share-user)
+                      return true()
+                      case element(a:deny-group)
+                      return false()
+                      case element(a:deny-user)
+                      return false()
+                      default return (),
+                    $default-write
+                  )[1] 
+                } 
+              )
+        else 
+          error(
+            xs:QName("error:BAD_REQUEST"), 
+            "Requested user does not exist"
+          )
+    }</a:user-access>
+};
+
 (:~ get access rights as an a:access structure 
  : @param $doc A document
  :)

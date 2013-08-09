@@ -145,14 +145,23 @@ declare
   )
 };
 
+(:~ Get access/sharing data for a transliteration document
+ : @param $name Name of document
+ : @param $user User to get access as
+ : @return HTTP 200 and an access structure (a:access) or user access (a:user-access)
+ : @error HTTP 400 User does not exist
+ : @error HTTP 404 Document not found or inaccessible
+ :)
 declare 
   %rest:GET
   %rest:path("/api/data/transliteration/{$name}/access")
+  %rest:query-param("user", "{$user}")
   %rest:produces("application/xml")
   function tran:get-access(
-    $name as xs:string
+    $name as xs:string,
+    $user as xs:string*
   ) as item()+ {
-  crest:get-access($tran:data-type, $name)
+  crest:get-access($tran:data-type, $name, $user)
 };
 
 declare 
