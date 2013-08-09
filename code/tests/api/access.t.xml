@@ -241,6 +241,125 @@
     </test>
   </TestSet>
   <TestSet>
+    <testName>acc:get-access-as-user(): calling user is arg #2</testName>
+    <test>
+      <task>Basic permissions only</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser")
+      ]]></code>
+      <expected desc="has r/w access">
+        <a:user-access user="testuser" read="true" write="true"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password,
+          sm:chmod(xs:anyURI($resource), "rw-r--r--")
+        )
+      ]]></code>
+    </setup>
+    <test>
+      <task>Basic permissions for a non-owner</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/o access">
+        <a:user-access user="testuser2" read="true" write="false"/>
+      </expected>
+    </test>
+    <test>
+      <task>Nonexistent user</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "doesnotexist")
+      ]]></code>
+      <error desc="error:BAD_REQUEST" code="error:BAD_REQUEST"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password,(
+          sm:chmod(xs:anyURI($resource), "rw-------"),
+          sm:add-user-ace(xs:anyURI($resource), "testuser2", true(), "r--")
+          )
+        )
+      ]]></code>
+    </setup>
+    <test>
+      <task>with r/o user sharing override</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/o access">
+        <a:user-access user="testuser2" read="true" write="false"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password, (
+          sm:chmod(xs:anyURI($resource), "rw-------"),
+          sm:add-user-ace(xs:anyURI($resource), "testuser2", true(), "rw-")
+        ))
+      ]]></code>
+    </setup>
+    <test>
+      <task>with r/w user sharing override</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/w access">
+        <a:user-access user="testuser2" read="true" write="true"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password, (
+          sm:chmod(xs:anyURI($resource), "rw-rw-rw-"),
+          sm:add-user-ace(xs:anyURI($resource), "testuser2", false(), "-w-")
+        ))
+      ]]></code>
+    </setup>
+    <test>
+      <task>with w/o user denial override</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/o access">
+        <a:user-access user="testuser2" read="true" write="false"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password, (
+          sm:chmod(xs:anyURI($resource), "rw-rw-rw-"),
+          sm:add-user-ace(xs:anyURI($resource), "testuser2", false(), "rw-")
+        ))
+      ]]></code>
+    </setup>
+    <test>
+      <task>with r/w user denial override</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/o access">
+        <a:user-access user="testuser2" read="false" write="false"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
     <testName>acc:set-access(): share with a group</testName>
     <test>
       <task>Share with a group r/w</task>
