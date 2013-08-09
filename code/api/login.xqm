@@ -42,15 +42,17 @@ declare
   %rest:path("/api/login")
   %rest:query-param("user", "{$user}", "")
   %rest:query-param("password", "{$password}", "")
+  %rest:query-param("auth-only", "{$auth-only}", "")
   %rest:produces("application/xhtml+xml", "text/html")
   function login:get-html(
     $user as xs:string*,
-    $password as xs:string*
+    $password as xs:string*,
+    $auth-only as xs:string*
   ) as item()+ {
   let $did-login :=
     if ($user and $password)
     then
-      login:post-form($user[1], $password[1])
+      login:post-form($user[1], $password[1], $auth-only[1])
     else ()
   return (
     <rest:response>
@@ -77,17 +79,20 @@ declare
 declare 
   %rest:POST("{$body}")
   %rest:path("/api/login")
+  %rest:query-param("auth-only", "{$auth-only}", "")
   %rest:consumes("application/xml", "text/xml")
   %rest:produces("text/plain")
   function login:post-xml(
-    $body as document-node()
+    $body as document-node(),
+    $auth-only as xs:string*
   ) as item()+ {
-  login:post-form($body//user, $body//password)
+  login:post-form($body//user, $body//password, $auth-only)
 };
 
 (:~ Log in a user using a form
  : @param $user User name
  : @param $password Password
+ : @param $auth-only Authenticate only, but do not start a session
  : @return HTTP 204 Login successful
  : @error HTTP 400 Wrong user name or password
  :)
@@ -96,14 +101,17 @@ declare
   %rest:path("/api/login")
   %rest:form-param("user", "{$user}")
   %rest:form-param("password", "{$password}")
+  %rest:query-param("auth-only", "{$auth-only}", "")
   %rest:consumes("application/x-www-url-formencoded")
   %rest:produces("text/plain")
   function login:post-form(
     $user as xs:string*,
-    $password as xs:string*
+    $password as xs:string*,
+    $auth-only as xs:string*
   ) as item()+ {
   let $user := $user[1]
   let $password := $password[1]
+  let $auth-only := $auth-only[1]
   return
     if (empty($user) or empty($password))
     then 
@@ -113,7 +121,10 @@ declare
       then (
         debug:debug($debug:info, "login",
           ('Logging in ', $user, ':', $password)),
-        app:login-credentials($user, $password),
+        if (not($auth-only) or lower-case($auth-only) = "false")
+        then
+          app:login-credentials($user, $password)
+        else (),
         <rest:response>
           <output:serialization-parameters>
             <output:method value="text"/>
