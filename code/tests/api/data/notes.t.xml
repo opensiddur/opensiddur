@@ -304,7 +304,7 @@
     <test>
       <task>notes:get-access()</task>
       <code><![CDATA[
-      notes:get-access("Existing")
+      notes:get-access("Existing", ())
       ]]></code>
       <xpath desc="an access structure is returned">self::a:access</xpath>
     </test>
@@ -327,14 +327,14 @@
     <test>
       <task>For an existing resource</task>
       <code><![CDATA[
-      notes:get-access("Existing")
+      notes:get-access("Existing", ())
       ]]></code>
       <xpath desc="returns an access structure">exists(./self::a:access)</xpath>
     </test>
     <test>
       <task>For a nonexistent resource</task>
       <code><![CDATA[
-      notes:get-access("DoesNotExist")
+      notes:get-access("DoesNotExist", ())
       ]]></code>
       <class href="../common.t.xml#NotFound"/>
     </test>

@@ -370,7 +370,7 @@
     <test>
       <task>sty:get-access()</task>
       <code><![CDATA[
-      sty:get-access("Existing")
+      sty:get-access("Existing", ())
       ]]></code>
       <xpath desc="an access structure is returned">self::a:access</xpath>
     </test>
@@ -393,14 +393,14 @@
     <test>
       <task>For an existing resource</task>
       <code><![CDATA[
-      sty:get-access("Existing")
+      sty:get-access("Existing", ())
       ]]></code>
       <xpath desc="returns an access structure">exists(./self::a:access)</xpath>
     </test>
     <test>
       <task>For a nonexistent resource</task>
       <code><![CDATA[
-      sty:get-access("DoesNotExist")
+      sty:get-access("DoesNotExist", ())
       ]]></code>
       <class href="../common.t.xml#NotFound"/>
     </test>

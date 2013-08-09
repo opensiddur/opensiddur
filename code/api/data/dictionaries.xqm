@@ -195,19 +195,23 @@ declare
   )
 };
 
-(:~ Get access/sharing data for a document
+(:~ Get access/sharing data for a dictionary document
  : @param $name Name of document
- : @return HTTP 200 and an access structure (a:access)
+ : @param $user User to get access as
+ : @return HTTP 200 and an access structure (a:access) or user access (a:user-access)
+ : @error HTTP 400 User does not exist
  : @error HTTP 404 Document not found or inaccessible
  :)
 declare 
   %rest:GET
   %rest:path("/api/data/dictionaries/{$name}/access")
+  %rest:query-param("user", "{$user}")
   %rest:produces("application/xml")
   function dict:get-access(
-    $name as xs:string
+    $name as xs:string,
+    $user as xs:string*
   ) as item()+ {
-  crest:get-access($dict:data-type, $name)
+  crest:get-access($dict:data-type, $name, $user)
 };
 
 (:~ Set access/sharing data for a document
