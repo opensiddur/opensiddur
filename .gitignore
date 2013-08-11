@@ -1,13 +1,6 @@
 # local mods to Makefile
 Makefile.local
 
-# fake svn external directories
-lib/xsltforms/
-lib/xspec/
-lib/XSLTDoc/
-lib/tei/
-lib/exist/
-
 # generated text directory
 text/wlc/
 

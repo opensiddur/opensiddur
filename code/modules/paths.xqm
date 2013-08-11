@@ -45,7 +45,7 @@ declare variable $paths:webapp := '/webapp';  (: server local hdd :)
 declare variable $paths:apps := '/db/code/apps';
 (:~ absolute db path to modules.  Concat to $paths:prefix for an absolute path :)
 declare variable $paths:modules := '/db/code/modules';	
-declare variable $paths:xforms := concat($paths:external-rest-prefix, 'db/xforms/xsltforms/xsltforms.xsl');
+declare variable $paths:xforms := concat($paths:external-rest-prefix, 'db/apps/xsltforms/xsltforms.xsl');
 declare variable $paths:xslt-pi := 
 	if ($paths:xforms-processor = 'xsltforms')
 	then ( 
