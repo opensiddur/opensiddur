@@ -70,13 +70,12 @@ ROOTDIR ?=
 #	for saxon v8.9, there are none.  For version 9+, use -ext:on to allow creation of files
 XSLTLOCALOPTIONS ?=
 XSLTOPTIONS ?= -ext:on -x:org.apache.xml.resolver.tools.ResolvingXMLReader -y:org.apache.xml.resolver.tools.ResolvingXMLReader -r:org.apache.xml.resolver.tools.CatalogResolver $(XSLTLOCALOPTIONS) 
-# TeXML options: -e utf8 allows utf-8 encoded input
-TEXMLOPTIONS ?= -e utf8
+
 # Roma options: 
 #	--doc makes TEI documentation, 
 #	--docpdf makes PDF documentation (broken!)
 #	--dochtml makes HTML documentation
-ROMAOPTIONS ?= --xsl=$(LIBDIR)/tei/Stylesheets --localsource=`absolutize $(LIBDIR)/tei/P5/p5subset.xml` --doc --dochtml 
+ROMAOPTIONS ?= --xsl=`absolutize $(LIBDIR)/tei/Stylesheets` --doc --dochtml 
 
 # default eXist install directory
 EXIST_INSTALL_DIR ?= /usr/local/opensiddur

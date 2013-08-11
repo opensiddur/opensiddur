@@ -4,3 +4,9 @@
 [submodule "lib/exist"]
 	path = lib/exist
 	url = git@github.com:opensiddur/exist.git
+[submodule "lib/tei/Roma"]
+	path = lib/tei/Roma
+	url = https://github.com/opensiddur/Roma.git
+[submodule "lib/tei/Stylesheets"]
+	path = lib/tei/Stylesheets
+	url = https://github.com/opensiddur/Stylesheets.git

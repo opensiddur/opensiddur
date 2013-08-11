@@ -1,9 +1,6 @@
 # local mods to Makefile
 Makefile.local
 
-# fake svn external directories
-lib/tei/
-
 # generated text directory
 text/wlc/
 

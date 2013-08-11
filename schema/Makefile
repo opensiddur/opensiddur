@@ -21,7 +21,6 @@
 
 # the TEI dependencies include everything 
 TEI_DEPENDENCIES:=$(wildcard $(LIBDIR)/tei/P5/Source/Specs/*.xml)
-TEI_ALL_ODD = $(LIBDIR)/tei/P5/Exemplars/tei_all.odd
 
 .PHONY: schema-build-clean
 schema-build-clean: 
@@ -33,14 +32,8 @@ jlptei-schema-clean:
 .PHONY: jlptei-schema 
 jlptei-schema: schema/build/jlptei.xsl2
 
-.PHONY: p5subset
-p5subset: $(LIBDIR)/tei/P5/p5subset.xml
-
-$(LIBDIR)/tei/P5/p5subset.xml: $(wildcard $(ODDDIR)/*.xml) $(wildcard $(ODDDIR)/*.sch) $(wildcard $(ODDDIR)/*.xsl2) $(ODDDIR)/Makefile  
-	cd $(LIBDIR)/tei/P5 && make p5subset.xml 
-
 schema/build/jlptei.doc.html: schema/build/jlptei.isosch
-schema/build/jlptei.isosch: p5subset schema/jlptei.xml
+schema/build/jlptei.isosch: schema/jlptei.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/jlptei.xml schema/build
 schema/build/jlptei.xsl2: schema/build/jlptei.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
@@ -66,41 +59,41 @@ style-schema: schema/build/style.xsl2
 
 dictionary-schema: schema/build/dictionary.xsl2
 
-schema/build/contributor.rnc: p5subset schema/build schema/contributor.xml
+schema/build/contributor.rnc: schema/build schema/contributor.xml
 	$(TEIROMA) --nodtd --noxsd schema/contributor.xml schema/build
 
 schema/build/bibliography.isosch: schema/build/bibliography.rnc
-schema/build/bibliography.rnc: p5subset schema/build schema/bibliography.xml
+schema/build/bibliography.rnc: schema/build schema/bibliography.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/bibliography.xml schema/build
 schema/build/bibliography.xsl2: schema/build/bibliography.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
 schema/build/conditional.isosch: schema/build/conditional.rnc
-schema/build/conditional.rnc: p5subset schema/build schema/conditional.xml
+schema/build/conditional.rnc: schema/build schema/conditional.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/conditional.xml schema/build
 schema/build/conditional.xsl2: schema/build/conditional.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
 schema/build/annotation.isosch: schema/build/annotation.rnc
-schema/build/annotation.rnc: p5subset schema/build schema/annotation.xml
+schema/build/annotation.rnc: schema/build schema/annotation.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/annotation.xml schema/build
 schema/build/annotation.xsl2: schema/build/annotation.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
 schema/build/linkage.isosch: schema/build/linkage.rnc
-schema/build/linkage.rnc: p5subset schema/build schema/linkage.xml
+schema/build/linkage.rnc: schema/build schema/linkage.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/linkage.xml schema/build
 schema/build/linkage.xsl2: schema/build/linkage.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
 schema/build/style.isosch: schema/build/style.rnc
-schema/build/style.rnc: p5subset schema/build schema/style.xml
+schema/build/style.rnc: schema/build schema/style.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/style.xml schema/build
 schema/build/style.xsl2: schema/build/style.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
 
 schema/build/dictionary.isosch: schema/build/dictionary.rnc
-schema/build/dictionary.rnc: p5subset schema/build schema/dictionary.xml
+schema/build/dictionary.rnc: schema/build schema/dictionary.xml
 	$(TEIROMA) --nodtd --noxsd --isoschematron schema/dictionary.xml schema/build
 schema/build/dictionary.xsl2: schema/build/dictionary.isosch
 	$(XSLT) -s $< -o $@ lib/iso-schematron/iso_svrl_for_xslt2.xsl
