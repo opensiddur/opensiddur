@@ -12,6 +12,8 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
+import module namespace acc="http://jewishliturgy.org/modules/access"
+  at "/db/code/api/modules/access.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
   at "/db/code/modules/app.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
@@ -81,8 +83,7 @@ declare function orig:validate-changes(
         $old-doc//tei:change/@who/substring-after(., "/user/")
       )
     let $can-change-license := 
-      (count($authors) = 1) and 
-      $authors = app:auth-user()
+      acc:can-relicense($doc, app:auth-user())
     return
       if (not(xmldiff:compare(
         <x>{

@@ -4,7 +4,7 @@ xquery version "3.0";
  : See the access.rnc schema for details
  :
  : Open Siddur Project
- : Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace acc="http://jewishliturgy.org/modules/access";
@@ -16,6 +16,7 @@ import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
 import module namespace magic="http://jewishliturgy.org/magic"
   at "xmldb:exist:///db/code/magic/magic.xqm";
 
+declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace a="http://jewishliturgy.org/ns/access/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 
@@ -65,15 +66,52 @@ declare function acc:validate-report(
   ))
 };
 
+(:~
+ : @param $doc The document
+ : @param $user The user 
+ : @return whether the given user can relicense the document
+ :)
+declare function acc:can-relicense(
+  $doc as document-node(),
+  $user as xs:string?
+  ) as xs:boolean {
+  let $has-adjustable-license := 
+    exists($doc//tei:licence)
+  let $authors := 
+    distinct-values(
+    $doc//tei:change/@who/substring-after(., "/user/")
+  )
+  let $can-change-license :=
+    exists($user) and 
+    $has-adjustable-license and
+    (count($authors) = 1) and 
+    $authors = $user
+  return $can-change-license
+};
+
+declare function acc:get-access-as-user(
+  $doc as document-node(),
+  $user as xs:string?
+  ) as element(a:user-access) {
+  acc:get-access-as-user($doc, $user, true())
+};
+
 (:~ determine the access rights to a document that a given
- :  user has.
+ :  user has. The available rights are: read, write, chmod, and relicense. 
+ : read/write = can read/write the document, 
+ : chmod = can change access rights to the document,
+ : relicense = can change the license of the document
+ : (note that relicensing rights also require write access!)
  : @param $doc A document
  : @param $user A user
+ : @param $can-set Whether to return the @chmod and @relicense bits; default true()
  :)
 declare function acc:get-access-as-user(
   $doc as document-node(),
-  $user as xs:string
+  $user as xs:string?,
+  $can-set as xs:boolean
   ) as element(a:user-access) {
+  let $user := ($user, "guest")[1]  (: no user = guest user :)
   let $path := document-uri($doc)
   return
     <a:user-access user="{$user}">{
@@ -81,13 +119,21 @@ declare function acc:get-access-as-user(
       then (
         (: the requested user is the current user :)
         attribute read { sm:has-access($path, "r") },
-        attribute write { sm:has-access($path, "w") }
+        attribute write { sm:has-access($path, "w") },
+        if ($can-set)
+        then (
+            attribute chmod { acc:can-set-access($doc, $user) },
+            attribute relicense { acc:can-relicense($doc, $user) }
+        )
+        else ()
       )
       else 
         (: the requested user is not the current user
          : and may not even exist
          :)
-        if (sm:user-exists($user))
+        if (
+          $user="guest" or  (: sm:user-exists fails for guests :) 
+          sm:user-exists($user))
         then
           (: OK, user exists :)
           let $access := acc:get-access($doc)
@@ -95,7 +141,13 @@ declare function acc:get-access-as-user(
             system:as-user("admin", $magic:password, 
               sm:get-user-groups($user)
             )
-          return
+          return (
+            if ($can-set)
+            then (
+              attribute chmod { acc:can-set-access($doc, $user) },
+              attribute relicense { acc:can-relicense($doc, $user) }
+            )
+            else (),
             if ($user = $access/a:owner)
             then (
               (: the user is the owner :)
@@ -165,6 +217,7 @@ declare function acc:get-access-as-user(
                   )[1] 
                 } 
               )
+          )
         else 
           error(
             xs:QName("error:BAD_REQUEST"), 
@@ -230,20 +283,27 @@ declare function acc:get-access(
     </a:access>
 };
 
-(: @return true if the logged in user can set access permissions
- : on the given $doc 
- :)
-declare function local:can-set-access(
+declare function acc:can-set-access(
   $doc as document-node()
   ) as xs:boolean {
-  let $user := app:auth-user()
+  acc:can-set-access($doc, app:auth-user())
+};
+
+(: @return true if the given user can set access permissions
+ : on the given $doc 
+ :)
+declare function acc:can-set-access(
+  $doc as document-node(),
+  $user as xs:string?  
+  ) as xs:boolean {
   let $doc-uri := xs:anyURI(document-uri($doc))
   let $permissions as element(sm:permissions) :=
     sm:get-permissions($doc-uri)/*
   return 
     exists($user) and
     xmldb:is-admin-user($user) or (
-      sm:has-access($doc-uri, "w") and
+      (:sm:has-access($doc-uri, "w"):)
+      acc:get-access-as-user($doc, $user, false())/@write="true" and
       $permissions/(
         @owner=$user or
         sm:get-group-members(@group)=$user
@@ -262,7 +322,7 @@ declare function acc:set-access(
   $doc as document-node(),
   $access as element(a:access)
   ) as empty-sequence() {
-  if (local:can-set-access($doc))
+  if (acc:can-set-access($doc))
   then
     if (acc:validate($access))
     then
