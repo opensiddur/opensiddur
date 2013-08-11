@@ -248,7 +248,7 @@
         acc:get-access-as-user(doc($resource), "testuser")
       ]]></code>
       <expected desc="has r/w access">
-        <a:user-access user="testuser" read="true" write="true"/>
+        <a:user-access user="testuser" read="true" write="true" chmod="true" relicense="false"/>
       </expected>
     </test>
   </TestSet>
@@ -267,7 +267,7 @@
         acc:get-access-as-user(doc($resource), "testuser2")
       ]]></code>
       <expected desc="has r/o access">
-        <a:user-access user="testuser2" read="true" write="false"/>
+        <a:user-access user="testuser2" read="true" write="false" chmod="false" relicense="false"/>
       </expected>
     </test>
     <test>
@@ -295,7 +295,7 @@
         acc:get-access-as-user(doc($resource), "testuser2")
       ]]></code>
       <expected desc="has r/o access">
-        <a:user-access user="testuser2" read="true" write="false"/>
+        <a:user-access user="testuser2" read="true" write="false" chmod="false" relicense="false"/>
       </expected>
     </test>
   </TestSet>
@@ -315,7 +315,7 @@
         acc:get-access-as-user(doc($resource), "testuser2")
       ]]></code>
       <expected desc="has r/w access">
-        <a:user-access user="testuser2" read="true" write="true"/>
+        <a:user-access user="testuser2" read="true" write="true" chmod="true" relicense="false"/>
       </expected>
     </test>
   </TestSet>
@@ -335,7 +335,7 @@
         acc:get-access-as-user(doc($resource), "testuser2")
       ]]></code>
       <expected desc="has r/o access">
-        <a:user-access user="testuser2" read="true" write="false"/>
+        <a:user-access user="testuser2" read="true" write="false" chmod="false" relicense="false"/>
       </expected>
     </test>
   </TestSet>
@@ -355,7 +355,7 @@
         acc:get-access-as-user(doc($resource), "testuser2")
       ]]></code>
       <expected desc="has r/o access">
-        <a:user-access user="testuser2" read="false" write="false"/>
+        <a:user-access user="testuser2" read="false" write="false" chmod="false" relicense="false"/>
       </expected>
     </test>
   </TestSet>
@@ -497,7 +497,7 @@
           <a:world read="true" write="false"/>
         </a:access>)
       ]]></code>
-      <error code="error:UNAUTHORIZED"/>
+      <error desc="returns error:UNAUTHORIZED" code="error:UNAUTHORIZED"/>
     </test>
   </TestSet>
   <TestSet>
