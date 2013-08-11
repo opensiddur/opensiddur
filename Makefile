@@ -82,7 +82,7 @@ EXIST_INSTALL_DIR ?= /usr/local/opensiddur
 
 # paths to programs:
 LOCALPATH ?= /usr/local
-EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1dev-rev.jar
+EXIST_INSTALL_JAR ?= $(LIBDIR)/exist/installer/eXist-db-setup-2.1-rev.jar
 EXISTCLIENT ?= $(EXIST_INSTALL_DIR)/bin/client.sh
 EXISTBACKUP ?= java -Dexist.home=$(EXIST_INSTALL_DIR) -jar $(EXIST_INSTALL_DIR)/start.jar org.exist.backup.Main 
 
