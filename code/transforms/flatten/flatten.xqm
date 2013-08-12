@@ -77,7 +77,7 @@ declare function flatten:merge-concurrent(
   ) as element()* {
   typeswitch($e)
   case element(j:concurrent)
-  return ()
+  return flatten:merge-j-concurrent($e, $params)
   default (: j:streamText :) 
   return (
     flatten:merge(
@@ -87,6 +87,27 @@ declare function flatten:merge-concurrent(
     ),
     $e
     )
+};
+
+(:~ @return an element that records all the existing layers
+ : and their layer-ids, recording the match between the layer-id
+ : to the layer type
+ :) 
+declare function flatten:merge-j-concurrent(
+  $e as element(j:concurrent),
+  $params as map
+  ) as element(jf:concurrent) {
+  element jf:concurrent {
+    if ($e/(@jf:id|@xml:id))
+    then
+      attribute jf:id { $e/(@jf:id|@xml:id)/string() }
+    else (),
+    for $layer in $e/jf:layer
+    return
+      element jf:layer {
+        $layer/(@type, @jf:id)
+      }
+  }
 };
 
 (:~ merge flattened layers and a flattened streamText 
