@@ -9,7 +9,7 @@
   </tei:teiHeader>  
   <tei:text>
     <j:concurrent>
-      <jf:layer type="div" jf:id="div-layer">
+      <jf:layer type="div" jf:id="div-layer" jf:layer-id="div-layer">
         <tei:div
           jf:start="div1"
           jf:position="1"

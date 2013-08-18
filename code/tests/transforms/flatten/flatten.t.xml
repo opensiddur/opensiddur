@@ -30,7 +30,7 @@
           map {}
         )
       ]]></code>
-      <expected desc="acts as an identity transform" href="identity.xml"/>
+      <expected desc="acts as an identity transform except streamText has an xml:id" href="identity1.xml"/>
     </test>        
   </TestSet>
   <TestSet>
