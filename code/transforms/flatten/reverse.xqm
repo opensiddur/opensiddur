@@ -95,7 +95,7 @@ declare function reverse:construct-layers(
           $e/*[1], 
           map:new(($params, 
             map {
-              "reverse:layer-id" := $layer/@jf:id/string()
+              "reverse:layer-id" := $layer/@jf:layer-id/string()
             })))
       }
   where $layers
@@ -155,7 +155,7 @@ declare function reverse:construct-layer(
               $params
             )
           )
-        else if ($node/@jf:suspend=$this-parent/@jf:start)
+        else if ($node/@jf:suspend)
         then (
           (: recurse forward, suspending the current :)
           reverse:construct-layer(
@@ -168,7 +168,7 @@ declare function reverse:construct-layer(
             ))
           )
         )
-        else if ($node/@jf:continue=$this-parent/@jf:start)
+        else if ($node/@jf:continue)
         then (
           (: recurse forward, undo the suspension :)
           reverse:construct-layer(

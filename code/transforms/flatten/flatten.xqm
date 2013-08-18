@@ -105,7 +105,7 @@ declare function flatten:merge-j-concurrent(
     for $layer in $e/jf:layer
     return
       element jf:layer {
-        $layer/(@type, @jf:id)
+        $layer/(@type, @jf:id, @jf:layer-id)
       }
   }
 };
@@ -205,7 +205,7 @@ declare function flatten:flatten-document(
   ) as document-node() {
   common:apply-at(
     $doc, 
-    $doc//j:concurrent, 
+    $doc//(j:concurrent|j:streamText), 
     flatten:flatten#2,
     $params
   ) 
@@ -505,7 +505,7 @@ declare function flatten:element(
     then
   	 	(: If an element is empty or has no children in the streamText
   	 	 :)
-    	element { QName(namespace-uri($context), local-name($context)) }{
+    	element { QName(namespace-uri($context), name($context)) }{
     		$attributes,
     		((: position and relative are filled in later :)),
         attribute jf:nlevels { $level },
@@ -518,7 +518,7 @@ declare function flatten:element(
   		let $stream-children := $children[@jf:stream]
   		let $nchildren := count($stream-children)
   		let $start-node :=
-  		  element { QName(namespace-uri($context), local-name($context)) }{
+  		  element { QName(namespace-uri($context), name($context)) }{
           $attributes,
           attribute jf:start { $node-id },
           $stream-children[1]/@jf:position,
@@ -537,7 +537,7 @@ declare function flatten:element(
   			  ),
   			  $nchildren
   			),
-  			element { QName(namespace-uri($context), local-name($context)) }{
+  			element { QName(namespace-uri($context), name($context)) }{
         	attribute jf:end { $node-id },
         	$stream-children[last()]/@jf:position,
           attribute jf:relative { 1 },
@@ -615,9 +615,11 @@ declare function flatten:j-layer(
 	return 
     element jf:layer {
       $context/(@* except @xml:id),
-      attribute jf:id { 
-        $id 
-      },
+      if ($context/@xml:id)
+      then
+        attribute jf:id { $context/@xml:id }
+      else (),
+      attribute jf:layer-id { $id },
       flatten:order-flattened(
         flatten:flatten(
           $context/node(), 
