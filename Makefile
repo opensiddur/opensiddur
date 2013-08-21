@@ -209,7 +209,6 @@ installer: $(EXIST_INSTALL_JAR)
 
 patches:
 	$(XSLT) -s $(EXIST_INSTALL_DIR)/conf.xml -o $(EXIST_INSTALL_DIR)/conf.xml $(SETUPDIR)/setup-conf-xml.xsl2
-	$(XSLT) -s $(EXIST_INSTALL_DIR)/mime-types.xml -o $(EXIST_INSTALL_DIR)/mime-types.xml $(SETUPDIR)/setup-mime-types.xsl2
 
 lucene-install: installer $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/hebmorph-lucene-1.0-SNAPSHOT.jar 
 
