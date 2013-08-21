@@ -192,11 +192,11 @@ clean-hebmorph-lucene:
 	cd $(LIBDIR)/hebmorph/java/hebmorph-lucene && mvn clean
 
 # Install a copy of the eXist database
-.PHONY: db-install db-install-nonet db-install-wlc db-uninstall db-sync db-syncclean installer patches lucene-install copy-files copy-libs setup-password
-db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db setup-password copy-files copy-libs   
+.PHONY: db-install db-install-nonet db-install-wlc db-uninstall db-sync db-syncclean installer lucene-install copy-files copy-libs setup-password
+db-install: submodules code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer lucene-install db setup-password copy-files copy-libs   
 
 #installer that does not rely on the presence of a network. 
-db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer patches lucene-install db-nonet setup-password copy-files copy-libs
+db-install-nonet: code $(EXIST_INSTALL_JAR) build-hebmorph-lucene installer lucene-install db-nonet setup-password copy-files copy-libs
 	@echo "Done."
 	touch $(EXIST_INSTALL_DIR)/EXIST.AUTOINSTALLED
 
@@ -206,9 +206,6 @@ copy-libs:
 
 installer: $(EXIST_INSTALL_JAR)
 	expect $(SETUPDIR)/install.exp "$(EXIST_INSTALL_JAR)" "$(EXIST_INSTALL_DIR)" "$(ADMINPASSWORD)"
-
-patches:
-	$(XSLT) -s $(EXIST_INSTALL_DIR)/conf.xml -o $(EXIST_INSTALL_DIR)/conf.xml $(SETUPDIR)/setup-conf-xml.xsl2
 
 lucene-install: installer $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/hebmorph-lucene-1.0-SNAPSHOT.jar 
 
@@ -223,9 +220,6 @@ $(EXIST_INSTALL_DIR)/extensions/indexes/lucene/lib/hebmorph-lucene-1.0-SNAPSHOT.
 copy-files:
 	$(SETUPDIR)/makedb.py -h $(EXIST_INSTALL_DIR) -p 775 -d 775 -q 755 $(DBDIR)
 	@echo "Copying files to database..."
-	@#copy the transliteration DTD first so eXist will know where they are during restore 
-	cp $(SETUPDIR)/opensiddur-catalog.xml $(EXIST_INSTALL_DIR)/webapp/WEB-INF
-	cp $(SETUPDIR)/hebrew.dtd $(EXIST_INSTALL_DIR)/webapp/WEB-INF/entities
 	$(EXISTBACKUP) -r `pwd`/$(DBDIR)/__contents__.xml -ouri=xmldb:exist:// -p "$(ADMINPASSWORD)"
 	@echo "Running post install script..."   
 	$(EXISTCLIENT) -qls -u admin -P "$(ADMINPASSWORD)" -F $(SETUPDIR)/post-install.xql
