@@ -155,10 +155,9 @@ IZPACK:=$(shell $(LIBDIR)/absolutize $(LIBDIR)/IzPack)
 # made dependent on the Makefile because that is where the revision is set.
 # It will cause too many remakes, but better than not remaking at all
 $(EXIST_INSTALL_JAR): Makefile
-	cp setup/exist-extensions-local.build.properties $(LIBDIR)/exist/extensions/local.build.properties
 	cd $(LIBDIR)/exist && \
 		JAVA_HOME=$(JAVA_HOME) \
-		./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true
+		./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true -Dinclude.feature.security.oauth=true -Dinclude.feature.security.openid=true
 
 .PHONY: build-exist clean-exist dist-clean-exist
 build-exist: $(EXIST_INSTALL_JAR)
