@@ -9,7 +9,7 @@ xquery version "1.0";
 module namespace paths="http://jewishliturgy.org/modules/paths";
 
 (: requires "/rest" in the uri or not? :)
-declare variable $paths:requires-rest := false();
+declare variable $paths:requires-rest := true();
 (:~ Choice of XForms processor: for now, may be 'betterform' or 'xsltforms' :)
 declare variable $paths:xforms-processor := 'xsltforms';
 (:~ path to web application context, relative to server root 
@@ -17,7 +17,7 @@ declare variable $paths:xforms-processor := 'xsltforms';
 declare variable $paths:exist-prefix := 
 	if (request:exists())
 	then substring-after(request:get-context-path(),'/')
-	else '';	
+	else 'exist';	
 (:~ path to db rest interface, relative to server root :)
 declare variable $paths:prefix := concat('/', $paths:exist-prefix, 
 	if ($paths:exist-prefix and $paths:requires-rest) then '/' else '', 
