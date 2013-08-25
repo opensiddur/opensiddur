@@ -12,6 +12,8 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
+import module namespace api="http://jewishliturgy.org/modules/api"
+  at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
   at "/db/code/modules/app.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
@@ -114,7 +116,7 @@ declare
     $max-results as xs:integer*
   ) as item()+ {
   crest:list($q, $start, $max-results,
-    "Styles API", $sty:api-path-base,
+    "Styles API", api:uri-of($sty:api-path-base),
     sty:query-function#1, sty:list-function#0,
     <crest:additional text="access" relative-uri="access"/>, 
     ()
@@ -177,7 +179,7 @@ declare
   crest:post(
     concat($sty:data-type, "/", ($body/tei:TEI/@xml:lang/string(), "none")[1]),
     $sty:path-base,
-    $sty:api-path-base,
+    api:uri-of($sty:api-path-base),
     $body,
     sty:validate#2,
     sty:validate-report#2,

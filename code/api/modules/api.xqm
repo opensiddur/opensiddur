@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.0";
 (:~ general support functions for the REST API
  :
  : Open Siddur Project
@@ -805,4 +805,16 @@ declare function api:rest-response(
     subsequence($r, 2)
     )
   else $r
+};
+
+(:~ @return a valid root-relative HTTP path for a given API :)
+declare function api:uri-of(
+  $api as xs:string?
+  ) as xs:string {
+  try {
+    concat(rest:base-uri(), $api)
+  }
+  catch err:RQDY0101 { (: not in a restxq context :)
+    $api
+  }
 };

@@ -87,8 +87,7 @@ declare
     <body>
       <ul class="apis">
         {
-        (: TODO: replace request:get-uri() with rest:get-absolute-uri() :)
-        let $api-base := "demo"
+        let $api-base := api:uri-of("/api/demo")
         return (
           <li class="api">
             <a class="discovery" href="{$api-base}/stml">STML</a>
@@ -135,8 +134,8 @@ declare
     <body>
       <p>This API supports HTTP POST only.</p>
       <p>If you POST some data to be transliterated to 
-      /api/demo/<i>schema-name</i>, where you can choose a schema from
-      <a href="/api/data/transliteration">any transliteration schema</a>,
+      {api:uri-of("/api/demo/")}<i>schema-name</i>, where you can choose a schema from
+      <a href="{api:uri-of('/api/data/transliteration')}">any transliteration schema</a>,
       you will get back a transliterated version.</p>
       <ul class="results">
       {

@@ -51,7 +51,7 @@ declare function crest:record-change(
   $change-type as xs:string
   ) as empty-sequence() {
   let $who := app:auth-user()
-  let $who-uri := substring-after(data:user-api-path($who), "/api")
+  let $who-uri := substring-after(data:user-api-path($who), api:uri-of("/api"))
   let $revisionDesc := $doc//tei:revisionDesc
   let $change :=
     <tei:change 
@@ -193,7 +193,7 @@ declare function crest:list(
         <title>{$title}</title>
         <link rel="search"
                type="application/opensearchdescription+xml" 
-               href="/api/data/OpenSearchDescription?source={$path-base}"
+               href="{api:uri-of('/api/data/OpenSearchDescription')}?source={$path-base}"
                title="Full text search" />
         <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
         {((:<meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>:)) (: endIndex is not in the Open Search spec and is illegal in meta tags in html5 :)}

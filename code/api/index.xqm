@@ -11,6 +11,9 @@ xquery version "3.0";
  :)
 module namespace index = 'http://jewishliturgy.org/api/index';
 
+import module namespace api="http://jewishliturgy.org/modules/api"
+  at "/db/code/api/modules/api.xqm";
+
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
@@ -35,9 +38,7 @@ declare
     <body>
       <ul class="apis">
         {
-        (: TODO: replace request:get-uri() with rest:get-absolute-uri() 
-              :)
-        let $api-base := "api"
+        let $api-base := api:uri-of("/api")
         return (
           <li class="api">
             <a class="discovery" href="{$api-base}/data">Data</a>

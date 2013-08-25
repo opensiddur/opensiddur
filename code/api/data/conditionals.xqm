@@ -12,6 +12,8 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
+import module namespace api="http://jewishliturgy.org/modules/api"
+  at "/db/code/api/modules/api.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "/db/code/api/modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
@@ -134,7 +136,7 @@ declare
     $max-results as xs:integer*
   ) as item()+ {
   crest:list($q, $start, $max-results,
-    "Conditional declaration data API", $cnd:api-path-base,
+    "Conditional declaration data API", api:uri-of($cnd:api-path-base),
     cnd:query-function#1, cnd:list-function#0,
     (), (: conditionals should not support access restrictions? :) 
     ()
@@ -196,7 +198,7 @@ declare
   crest:post(
     $cnd:data-type,
     $cnd:path-base,
-    $cnd:api-path-base,
+    api:uri-of($cnd:api-path-base),
     $body,
     cnd:validate#2,
     cnd:validate-report#2,

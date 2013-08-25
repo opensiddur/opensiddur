@@ -14,6 +14,8 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
+import module namespace api="http://jewishliturgy.org/modules/api"
+  at "/db/code/api/modules/api.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "/db/code/api/modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
@@ -96,7 +98,7 @@ declare
   crest:list(
     $q, $start, $max-results,
     "Annotation data API",
-    $notes:api-path-base,
+    api:uri-of($notes:api-path-base),
     notes:query-function#1,
     notes:list-function#0,
     <crest:additional text="access" relative-uri="access"/>, 
@@ -159,7 +161,7 @@ declare
   crest:post(
     concat($notes:data-type, "/", $body/tei:TEI/@xml:lang), 
     $notes:path-base,
-    $notes:api-path-base,
+    api:uri-of($notes:api-path-base),
     $body,
     notes:validate#2,
     notes:validate-report#2,

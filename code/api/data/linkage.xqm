@@ -12,6 +12,8 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
+import module namespace api="http://jewishliturgy.org/modules/api"
+  at "/db/code/api/modules/api.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "/db/code/api/modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
@@ -110,7 +112,7 @@ declare
     $max-results as xs:integer*
   ) as item()+ {
   crest:list($q, $start, $max-results,
-    "Linkage data API", $lnk:api-path-base,
+    "Linkage data API", api:uri-of($lnk:api-path-base),
     lnk:query-function#1, lnk:list-function#0,
     <crest:additional text="access" relative-uri="access"/>, 
     ()
@@ -174,7 +176,7 @@ declare
         ($body/tei:TEI/@xml:lang/string()[.], $lnk:no-lang)[1]
         ),
     $lnk:path-base,
-    $lnk:api-path-base,
+    api:uri-of($lnk:api-path-base),
     $body,
     lnk:validate#2,
     lnk:validate-report#2,
