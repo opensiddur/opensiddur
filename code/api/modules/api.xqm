@@ -814,7 +814,7 @@ declare function api:uri-of(
   try {
     concat(rest:base-uri(), $api)
   }
-  catch err:RQDY0101 { (: not in a restxq context :)
+  catch rerr:RQDY0101 { (: not in a restxq context :)
     $api
   }
 };
