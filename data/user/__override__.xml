@@ -1,2 +1,2 @@
-<collection user="admin" group="dba" mode="775">
+<collection user="admin" group="everyone" mode="775">
 </collection>
