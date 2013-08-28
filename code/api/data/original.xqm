@@ -313,6 +313,37 @@ declare
     else $doc
 };
 
+(:~ Save a flattened version of the original data resource.
+ : The resource must already exist.
+ : @param $name The resource to get
+ : @return HTTP 204 Success
+ : @error HTTP 400 Flat XML cannot be reversed; Invalid XML; Attempt to edit a read-only part of the document
+ : @error HTTP 401 Unauthorized - not logged in
+ : @error HTTP 403 Forbidden - the document can be found, but is not writable by you
+ : @error HTTP 404 Not found
+ : @error HTTP 500 Storage error
+ :)
+declare 
+  %rest:PUT("{$body}")
+  %rest:path("/api/data/original/{$name}/flat")
+  %rest:consumes("application/xml", "text/xml")
+  function orig:put-flat(
+    $name as xs:string,
+    $body as document-node()
+  ) as item()+ {
+  let $doc := orig:get($name)
+  return
+    if ($doc instance of document-node())
+    then
+      let $reversed := format:reverse($body, map {})
+      return
+        orig:put($name, $reversed)
+    else
+      (: error in get (eg, 404) :)
+      $doc
+};
+
+
 (:~ Get a version of the original data resource with combined hierarchies
  : @param $name The resource to get
  : @param $transclude If true(), transclude all pointers, otherwise (default), return the pointers only.

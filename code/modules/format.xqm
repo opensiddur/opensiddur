@@ -27,7 +27,9 @@ import module namespace combine="http://jewishliturgy.org/transform/combine"
   at "xmldb:exist:///db/code/transforms/flatten/combine.xqm";
 import module namespace tohtml="http://jewishliturgy.org/transform/html"
   at "xmldb:exist:///db/code/transforms/tohtml.xqm";
-  
+import module namespace reverse="http://jewishliturgy.org/transform/reverse"
+  at "xmldb:exist:///db/code/transforms/flatten/reverse.xqm";
+
 declare variable $format:temp-dir := '.format';
 declare variable $format:path-to-xslt := '/db/code/transforms';
 declare variable $format:rest-path-to-xslt := app:concat-path($paths:internal-rest-prefix, $format:path-to-xslt);
@@ -270,6 +272,13 @@ declare function format:html(
       $html,
       $original-doc
     )
+};
+
+declare function format:reverse(
+  $doc as document-node(),
+  $params as map
+  ) as document-node() {
+  reverse:reverse-document($doc, $params)
 };
 
 
