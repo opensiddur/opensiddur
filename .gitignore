@@ -8,13 +8,12 @@ text/wlc/
 /doc/
 
 # generated schema
-schema/build
+opensiddur-server/schema/build
 
 # generated files:
-/code/common/params.xsl2
-/code/transforms/format/xhtml/muxhtml.xsl2
-/setup/setup.xql
-/setup/eXist-installer.xml
+opensiddur-server/common/params.xsl2
+opensiddur-server/setup/setup.xql
+opensiddur-server/setup/eXist-installer.xml
 
 # db directory except special
 db/*
