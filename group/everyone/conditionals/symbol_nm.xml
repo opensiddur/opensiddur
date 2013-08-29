@@ -1,8 +1,0 @@
-<!-- 
-  Feature conditional value of NO|MAYBE 
-  $Id: symbol_nm.xml 687 2011-01-23 23:36:48Z efraim.feinstein $
--->
-<tei:vColl xmlns:tei="http://www.tei-c.org/ns/1.0">
-  <tei:symbol value="NO"/>
-  <tei:symbol value="MAYBE"/>
-</tei:vColl>

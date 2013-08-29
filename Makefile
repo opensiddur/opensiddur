@@ -142,7 +142,6 @@ RSYNC_EXCLUDE=--exclude=.svn --exclude=~*
 $(DBDIR)/code: code
 	#svn update $(DBDIR)
 	find $(DBDIR) -name __contents__.xml | xargs rm -f
-	rsync $(RSYNC_EXCLUDE) -a --delete group $(DBDIR)
 	rsync $(RSYNC_EXCLUDE) -a --delete code $(DBDIR)
 
 
