@@ -8,6 +8,8 @@ xquery version "3.0";
  :) 
 module namespace data="http://jewishliturgy.org/modules/data";
 
+import module namespace api="http://jewishliturgy.org/modules/api"
+  at "/db/code/api/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
 	at "/db/code/modules/app.xqm";
   
@@ -50,10 +52,10 @@ declare function data:db-path-to-api(
 	    return
 	      if ($level[2] = "user")
 	      then
-	        data:user-api-path($resource-name)
+	        api:uri-of(data:user-api-path($resource-name))
 	      else 
     	    string-join(
-    	      ( "/api/data", 
+    	      ( api:uri-of("/api/data"), 
     	        $level[2], 
     	        $resource-name
     	      ), "/")
@@ -74,7 +76,7 @@ declare function data:user-api-path(
   let $doc := collection("/db/data/user")//tei:idno[.=$name]/root(.)
   where $doc
   return
-    concat("/api/user/", 
+    concat(api:uri-of("/api/user/"), 
       encode-for-uri(
         replace(util:document-name($doc), "\.xml$", "")
       )
@@ -159,7 +161,7 @@ declare function data:doc(
 declare function data:doc(
   $api-path as xs:string
   ) as document-node()? {
-  let $path := replace($api-path, "^(/api)?/", "")
+  let $path := replace($api-path, "^((" || api:uri-of("/api") || ")|(/api))?/", "")
   let $tokens := tokenize($path, "/")
   let $resource-name := $tokens[count($tokens)] || ".xml"
   return

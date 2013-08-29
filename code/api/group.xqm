@@ -23,7 +23,7 @@ declare namespace g="http://jewishliturgy.org/ns/group/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
-declare variable $grp:path := "/group";
+declare variable $grp:schema := "/db/schema/group.rnc";
 
 (:~ @return the group managers of a given group.
  : eXist considers this a secret, but it's public in Open Siddur
@@ -116,7 +116,7 @@ declare
           let $api-name := encode-for-uri($group)
           return
             <li class="result">
-              <a class="document" href="group/{$api-name}">{
+              <a class="document" href="{api:uri-of('/api/group')}/{$api-name}">{
                 $group
               }</a>
             </li>
@@ -190,7 +190,7 @@ declare
             for $member in $group/g:member
             return
               <li class="result">
-                <a class="document" href="user/{encode-for-uri($member)}">{
+                <a class="document" href="{api:uri-of('/api/user')}/{encode-for-uri($member)}">{
                   if (xs:boolean($member/@manager))
                   then attribute property { "manager" }
                   else (),
@@ -234,7 +234,7 @@ declare
             order by $membership
             return 
               <li class="result">
-                <a class="document" href="group/{encode-for-uri($membership)}">
+                <a class="document" href="{api:uri-of('/api/group')}/{encode-for-uri($membership)}">
                   { $managership, $membership }
                 </a>
               </li>
@@ -278,7 +278,7 @@ declare function grp:validate-report(
   $group-name as xs:string?
   ) as element(report) {
   jvalidate:concatenate-reports((
-    jvalidate:validate-relaxng($doc, xs:anyURI("/db/schema/group.rnc")),
+    jvalidate:validate-relaxng($doc, xs:anyURI($grp:schema)),
     let $invalid-users := $doc//g:member/string()[not(sm:user-exists(.))]
     let $existing-group-validation :=
       if ($group-name)
@@ -447,8 +447,8 @@ declare
                         <output:method value="text"/>
                       </output:serialization-parameters>
                       <http:response status="201">
-                        {((: TODO: this is wrong! It needs to be an absolute URI and it needs to reference /restxq? :))}
-                        <http:header name="Location" value="/api/group/{$name}"/>
+                        {((: TODO: this is wrong! It needs to be an absolute URI :))}
+                        <http:header name="Location" value="{api:uri-of('/api/group')}/{$name}"/>
                       </http:response>
                     </rest:response>
               else api:rest-error(500, "Could not create group " || $name)

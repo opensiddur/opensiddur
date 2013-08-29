@@ -11,6 +11,8 @@ xquery version "3.0";
  :)
 module namespace tran = 'http://jewishliturgy.org/api/transliteration';
 
+import module namespace api="http://jewishliturgy.org/modules/api"
+  at "/db/code/api/modules/api.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "/db/code/api/modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
@@ -73,7 +75,7 @@ declare
     $max-results as xs:integer*
   ) as item()+ {
   crest:list($q, $start, $max-results,
-    "Transliteration API", $tran:api-path-base,
+    "Transliteration API", api:uri-of($tran:api-path-base),
     tran:query-function#1, tran:list-function#0,
     <crest:additional text="access" relative-uri="access"/>, 
     tran:title-function#1
@@ -122,7 +124,7 @@ declare
   crest:post(
     $tran:data-type,
     $tran:path-base,
-    $tran:api-path-base,
+    api:uri-of($tran:api-path-base),
     $body,
     tran:validate#2,
     tran:validate-report#2,

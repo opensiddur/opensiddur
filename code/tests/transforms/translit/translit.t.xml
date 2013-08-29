@@ -25,7 +25,7 @@
       /data/transliteration/Society_of_Biblical_Literature-1999.xml
     "/>
   </parameters>
-  <xsl:include href="http://localhost:8080/code/transforms/translit/translit-main.xsl2"/>
+  <xsl:include href="http://localhost:8080/exist/rest/code/transforms/translit/translit-main.xsl2"/>
   <xsl:param name="uri-map" as="document-node()"><xsl:document/></xsl:param>
   <TestSet>
     <testName>No table</testName>

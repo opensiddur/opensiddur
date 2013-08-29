@@ -61,7 +61,7 @@ declare
       let $api-name := replace(util:document-name(doc($document)), "\.xml$", "")
       return
       <li xmlns="http://www.w3.org/1999/xhtml" class="result">
-        <a class="document" href="{$user:api-path}/{$api-name}">{
+        <a class="document" href="{api:uri-of($user:api-path)}/{$api-name}">{
         user:result-title(doc($document)/j:contributor)
         }</a>:
         <ol class="contexts">{
@@ -98,10 +98,10 @@ declare
       let $api-name := replace(util:document-name($user), "\.xml$", "")
       return
         <li class="result">
-          <a class="document" href="{$user:api-path}/{$api-name}">{
+          <a class="document" href="{api:uri-of($user:api-path)}/{$api-name}">{
             user:result-title($user)
           }</a>
-          <a class="alt" property="groups" href="{$user:api-path}/{$api-name}/groups">groups</a>
+          <a class="alt" property="groups" href="{api:uri-of($user:api-path)}/{$api-name}/groups">groups</a>
         </li>
     }</ul>,
     $start,
@@ -282,7 +282,7 @@ declare
                       sm:chgrp($uri, $name)
                     }
                     <http:response status="201">
-                      <http:header name="Location" value="/api/user/{encode-for-uri($name)}"/>
+                      <http:header name="Location" value="{api:uri-of('/api/user')}/{encode-for-uri($name)}"/>
                     </http:response>
                   </rest:response>
                 else 
@@ -378,7 +378,7 @@ declare
               then <http:response status="204"/>
               else 
                 <http:response status="201">
-                  <http:header name="Location" value="/api/user/{encode-for-uri($name)}"/>
+                  <http:header name="Location" value="{api:uri-of('/api/user')}/{encode-for-uri($name)}"/>
                 </http:response>
             }
           </rest:response>
