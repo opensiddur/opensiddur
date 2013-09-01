@@ -7,4 +7,6 @@ declare variable $dir external;
 (: the target collection into which the app is deployed :)
 declare variable $target external;
 
+(: add $target/data/sources/Born Digital using src:post() or src:put() :)
 ()
+(: add $target/data/styles/generic.xml using sty:post() or sty:put() :)

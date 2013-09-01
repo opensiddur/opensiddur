@@ -89,6 +89,12 @@ declare function local:mkcollections(
 
 declare function local:lang-collections(
   ) {
+  local:lang-collections(())
+};
+
+declare function local:lang-collections(
+  $additional-langs as xs:string*
+  ) {
   for $lang in $local:supported-languages
   return
     <collection name="{$lang}"/>
@@ -129,7 +135,7 @@ let $collections :=
       <collection name="data" owner="admin" group="everyone" perms="rwxr-xr-x">
         <collection name="conditionals" perms="rwxrwxr-x"/>
         <collection name="dictionaries" perms="rwxrwxr-x">{local:lang-collections()}</collection>
-        <collection name="linkage" perms="rwxrwxr-x">{local:lang-collections()}</collection>
+        <collection name="linkage" perms="rwxrwxr-x">{local:lang-collections("none")}</collection>
         <collection name="notes" perms="rwxrwxr-x">{local:lang-collections()}</collection>
         <collection name="original" perms="rwxrwxr-x">{local:lang-collections()}</collection>
         <collection name="sources" perms="rwxrwxr-x"/>
