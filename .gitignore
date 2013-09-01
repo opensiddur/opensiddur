@@ -10,6 +10,9 @@ text/wlc/
 # generated schema
 opensiddur-server/schema/build
 
+# generated dist dir
+dist/
+
 # generated files:
 opensiddur-server/common/params.xsl2
 opensiddur-server/setup/setup.xql
