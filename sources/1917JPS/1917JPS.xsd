@@ -71,9 +71,10 @@ TODO: front matter?
 <xs:element name="small-caps" type="xs:string" />
 <!-- TODO: put note inline with their reference -->
 <xs:element name="note">
+	<!-- TODO what exactly should be allowed? -->
 	<xs:complexType mixed="true">
 		<xs:sequence minOccurs="0" maxOccurs="unbounded">
-			<xs:element name="text" />
+			<xs:any maxOccurs="unbounded" />	
 		</xs:sequence>
 		<xs:attribute name="mark" type="xs:string" />
 		<xs:attribute name="id" type="xs:string" />
@@ -94,8 +95,21 @@ if and when they're needed.
 <!-- TODO: xml:lang=he -->
 <xs:element name="parashah-title" type="xs:string" />
 <xs:element name="hebrew-title" type="xs:string" />
-<!-- Used, for example, at the end of Lamentations where a verse is repeated, 
-	for text that is traditionally included but not "really" a verse. -->
+<!-- Text that is part of the Tanakh itself but not a regular verse.
+	For example, at end of Lamentations where a verse is repeated. -->
 <xs:element name="extra-text" type="xs:string" />
-
+<!-- Catchall for anything else. For example, title page. -->
+<xs:element name="other-text">
+ <xs:complexType>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+		<!-- Just passing these along.
+			TODO: Something meaningful with these attributes. -->
+        <xs:attribute name="font" type="xs:string" />
+        <xs:attribute name="size" type="xs:decimal" />
+        <xs:attribute name="y" type="xs:decimal" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:element>
 </xs:schema>

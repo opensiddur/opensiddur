@@ -6,7 +6,7 @@ Copyright 2012 Marc Stober and licensed under the GNU LGPL.
 Output the final XML.
 -->
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-	xmlns:my="https://github.com/marcstober/opensiddur/blob/master/code/input-conversion/1917JPS/my">
+xmlns:my="https://github.com/marcstober/opensiddur/blob/master/code/input-conversion/1917JPS/my">
 <!--
 TODO: get this to pass XMLLINT schema validation!!!
 TODO: organize/document better
@@ -19,13 +19,13 @@ TODO: fix HTML XSL
 <xsl:output method="xml" indent="yes"/>
 
 <xsl:template match="@* | node()">
-	<xsl:copy>
-		<xsl:apply-templates select="@* | node()"/>
-	</xsl:copy>
+<xsl:copy>
+<xsl:apply-templates select="@* | node()"/>
+</xsl:copy>
 </xsl:template>
 
 <xsl:template match="header">
-	<xsl:apply-templates/>
+<xsl:apply-templates/>
 </xsl:template>
 
 <!-- Output the content of column, but not the column element. -->
@@ -38,31 +38,31 @@ TODO: fix HTML XSL
 TODO: do we also need to check it's not italic, Hebrew, etc.?
 -->
 <xsl:template match="text[not(@size) and 
-	not(string-length(normalize-space())=1 and my:is-hebrew(.) = 'true')]">
-	<xsl:choose>
-		<xsl:when test="following-sibling::*[1]/self::small-caps">
+not(string-length(normalize-space())=1 and my:is-hebrew(.) = 'true')]">
+<xsl:choose>
+<xsl:when test="following-sibling::*[1]/self::small-caps">
 <!-- If followed by small caps remove last character;
 see small-caps element below. -->
 <xsl:value-of select="substring(., 0, string-length())"/>
 </xsl:when>
 <xsl:otherwise>
-	<xsl:apply-templates/>
+<xsl:apply-templates/>
 </xsl:otherwise>
 </xsl:choose>
 </xsl:template>
 
 <!-- Replace footnote reference with inline note. -->
 <xsl:template match="note[@ref]">
-	<xsl:variable name="ref">
-		<xsl:value-of select="@ref" />
-	</xsl:variable>
-	<xsl:apply-templates select="//footnotes/note[@id=$ref]" />
+<xsl:variable name="ref">
+<xsl:value-of select="@ref" />
+</xsl:variable>
+<xsl:apply-templates select="//footnotes/note[@id=$ref]" />
 </xsl:template>
 
 <xsl:template match="footnotes/note">
 <!-- only the elements, not the space (empty text nodes) between the elements -->
 <xsl:copy>
-	<xsl:apply-templates select="@* | *"/>
+<xsl:apply-templates select="@* | *"/>
 </xsl:copy>
 </xsl:template>
 
@@ -77,8 +77,8 @@ see small-caps element below. -->
 <!-- Suppress book name which is repeated on header of each page. 
 Not the Hebrew characters though which is parashah name. -->
 <xsl:template match="header/text[@size='18.216' and 
-	string-to-codepoints(.)[1] &lt; 255 and
-	normalize-space() !='']">
+string-to-codepoints(.)[1] &lt; 255 and
+normalize-space() !='']">
 </xsl:template>
 
 <!-- Suppress anything in the footer (e.g., printed page number). -->
@@ -88,67 +88,75 @@ Not the Hebrew characters though which is parashah name. -->
 <!-- Output parashah title in header. This is probably just for first parashah
 of a book.  TODO: Should we tag this 'lang="he"' or something? -->
 <xsl:template match="header/text[@size = '18.216' 
-	and string-to-codepoints(.)[1] > 255]">
-	<xsl:choose>
-		<xsl:when test="ancestor::section[@id = 'THE LAW']">
-			<xsl:element name="parashah-title">
-				<xsl:value-of select="normalize-space(.)"/>
-			</xsl:element>
-		</xsl:when>
-		<xsl:otherwise>
-			<xsl:element name="hebrew-title">
-				<xsl:value-of select="normalize-space(.)"/>
-			</xsl:element>
-		</xsl:otherwise>
-	</xsl:choose>
+and string-to-codepoints(.)[1] > 255]">
+<xsl:choose>
+<xsl:when test="ancestor::section[@id = 'THE LAW']">
+<xsl:element name="parashah-title">
+<xsl:value-of select="normalize-space(.)"/>
+</xsl:element>
+</xsl:when>
+<xsl:otherwise>
+<xsl:element name="hebrew-title">
+<xsl:value-of select="normalize-space(.)"/>
+</xsl:element>
+</xsl:otherwise>
+</xsl:choose>
 </xsl:template>
 
 <!-- Output parashah title.
 Variation in font size in PDF not in original printed book. 
 TODO: Should we tag this 'lang="he"' or something? -->
 <xsl:template match="text[
-	(@size='12.762' or @size='12.538' or @size='17.896') and 
-	string-to-codepoints(.)[1] > 255]">
-	<xsl:element name="parashah-title">
-		<xsl:value-of select="normalize-space(.)"/>
-	</xsl:element>
+(@size='12.762' or @size='12.538' or @size='17.896') and 
+string-to-codepoints(.)[1] > 255]">
+<xsl:element name="parashah-title">
+<xsl:value-of select="normalize-space(.)"/>
+</xsl:element>
 </xsl:template>
 
 <!-- Chapter numbers. -->
 <xsl:template match="text[@size='25.961']">
-	<xsl:element name="chapter-number">
-		<xsl:value-of select="normalize-space(.)"/>
-	</xsl:element>
+<xsl:element name="chapter-number">
+<xsl:value-of select="normalize-space(.)"/>
+</xsl:element>
 </xsl:template>
 
 <!-- Verse numbers. -->
 <xsl:template match="text[@size='6.327' and string(number(normalize-space(.)))!='NaN']">
-	<xsl:element name="verse-number">
-		<xsl:value-of select="normalize-space(.)"/>
-	</xsl:element>
+<xsl:element name="verse-number">
+<xsl:value-of select="normalize-space(.)"/>
+</xsl:element>
 </xsl:template>
 
 <!-- Book titles. -->
 <xsl:template match="text[@size='21.816']">
-	<xsl:element name="book-title">
-		<xsl:value-of select="normalize-space(.)"/>
-	</xsl:element>
+<xsl:element name="book-title">
+<xsl:value-of select="normalize-space(.)"/>
+</xsl:element>
 </xsl:template>
 
-<!-- Used for example in Lamentations. -->
-<xsl:template match="text[(@size='9.054' or @size='10.908' or string-length(normalize-space())=1) and
-	normalize-space() != '' and
-	my:is-hebrew-char(.) = 'true']">
-	<xsl:element name="verse-letter">
-		<xsl:value-of select="normalize-space(.)"/>
-	</xsl:element>
+<!-- Used for example in Lamentations (pp. 1180-1189). -->
+<xsl:template match="book[@id='LAMENTATIONS']//text[
+(@size='9.054' or @size='10.908' or string-length(normalize-space())=1) and
+normalize-space() != '' and
+my:is-hebrew-char(.) = 'true']">
+<xsl:element name="verse-letter">
+<xsl:value-of select="normalize-space(.)"/>
+</xsl:element>
 </xsl:template>
 
 <!-- Used for example in Lamentations. -->
 <xsl:template match="text[@size='8.181']">
-	<xsl:element name="extra-text">
-		<xsl:value-of select="normalize-space(.)"/>
-	</xsl:element>
+<xsl:element name="extra-text">
+<xsl:value-of select="normalize-space(.)"/>
+</xsl:element>
+</xsl:template>
+
+<!-- Catchall. -->
+<xsl:template match="text">
+<xsl:element name="other-text">
+<xsl:copy-of select="@* | text()"/>
+</xsl:element>
 </xsl:template>
 
 </xsl:stylesheet>

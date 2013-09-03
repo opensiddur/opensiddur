@@ -44,6 +44,16 @@ Split columns (in progress)
 		<xsl:copy>
 			<xsl:apply-templates select="@id" />
 
+			<!-- If no splitter, just output it all as one column.
+				For example, front matter.
+				I'm sure this will break something but we'll fix it... -->
+			<xsl:if test="not($splitter)">
+				<xsl:call-template name="column">
+					<xsl:with-param name="nodes" select="*" />
+				</xsl:call-template>
+			</xsl:if>
+			<!-- TODO: don't to the rest if no splitter -->
+
 			<!-- output it as "splitter" element for convenience -->
 			<xsl:element name="splitter">
 				<xsl:apply-templates select="$splitter/@*[local-name() != 'linewidth']" />
@@ -54,17 +64,18 @@ Split columns (in progress)
 				<xsl:apply-templates select="*[@y &gt; $splitter-top]" />
 			</xsl:element>
 
+			<!-- left column -->
 			<xsl:call-template name="column">
 				<xsl:with-param name="nodes" select="*[(@y &lt;= $splitter-top) and 
 					(@y &gt;= number($splitter/@y)) and 
 					(@x &lt;= number($splitter/@x))]" />
 			</xsl:call-template>
 
+			<!-- right column -->
 			<xsl:call-template name="column">
 				<xsl:with-param name="nodes" select="*[(@y &lt;= $splitter-top) and 
 					(@y &gt;= number($splitter/@y)) and 
 					(@x &gt; number($splitter/@x))]" />
-
 			</xsl:call-template>
 
 			<xsl:element name="footer">

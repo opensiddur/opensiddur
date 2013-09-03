@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-test-html.xsl2 for the OpenSiddur project.
-Copyright 2011-2012 Marc Stober and licensed under the GNU LGPL.
+index.xsl2 for the OpenSiddur project.
+Copyright 2011-2013 Marc Stober and licensed under the GNU LGPL.
 
 This outputs HTML for proofreading from an interim XML format.
 
 colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
+
+TODO: refactor to share stuff w/test-html.xsl2
+TODO: not everything is a link
+TODO: fix underscores (fix the files, not this)
 -->
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 	<xsl:output method="html" indent="yes" />
 
-	<!-- default identity template, in case we need it again
-  <xsl:template match="@* | node()">
-	<xsl:copy>
-	  <xsl:apply-templates select="@* | node()"/>
-	</xsl:copy>
-  </xsl:template-->
 
   <!-- pick up an extra text nodes - 
 		what's left of identity template, not sure if this is needed --> 
@@ -30,7 +28,6 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
 	  <xsl:text disable-output-escaping="yes">&lt;!DOCTYPE html&gt;&#xA;</xsl:text>
 	  <html>
 		  <head>
-			<link href='http://fonts.googleapis.com/css?family=Gentium+Book+Basic' rel='stylesheet' type='text/css' />
 			  <!-- make sure browsers see this as UTF-8 -->
 			  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 			  <!-- Make sure iPhone reflows the text to its screen size 
@@ -41,10 +38,7 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
 	<style type="text/css">
 		/* more readable body size and line height 
 		see http://www.alistapart.com/articles/howtosizetextincss */
-		body { /*font-size: 16px;*/ line-height: 1.6;
-			font-family: Gentium Book Basic;
-		}
-		
+		body { /*font-size: 16px;*/ line-height: 1.6; }
 		@media all and (min-width: 800px) 
 		{
 			#container
@@ -105,13 +99,6 @@ colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
 </script>
 	  </head>
 	  <body>
-			<div>
-<!-- TODO make nicer, links, copyright symbol -->
-JPS 1917 Tanakh (Hebrew Bible): A new digital edition (alpha version).
-Questions? Comments? 
-Contact @J_Hacker on Twitter.
-			</div>
-			<hr/>
 		  <div id="container">
 			  <!-- outline: This is intentionally similar to "The Order of the Books"
 				on page xvi of the 1919 printing. -->
@@ -130,8 +117,8 @@ Contact @J_Hacker on Twitter.
 							<li>
 								<a>
 									<xsl:attribute name="href">
-										<xsl:text>#</xsl:text>
 										<xsl:value-of select="@id" />
+										<xsl:text>.html</xsl:text>
 									</xsl:attribute>
 									<xsl:value-of select="@id" />
 								</a>
@@ -140,8 +127,8 @@ Contact @J_Hacker on Twitter.
 								<xsl:for-each select="book">
 									<li><a>
 											<xsl:attribute name="href">
-												<xsl:text>#</xsl:text>
 												<xsl:value-of select="@id" />
+												<xsl:text>.html</xsl:text>
 											</xsl:attribute>
 											<xsl:value-of select="@id" />
 									</a></li>
@@ -154,26 +141,10 @@ Contact @J_Hacker on Twitter.
 
 			<xsl:apply-templates select="* | text()"/>
 		</div>
-		<hr/>
-		<div>Original English translation published by the Jewish Publication Society in 1917
-			now in the public domain. This digital edition Copyright 2013 
-	Marc Stober and may be copied with attribution under the CC-BY license.</div>
 	</body>
 </html>
   </xsl:template>
 
-  <!-- Temporary formatting for elements that don't have it yet -->
-  <xsl:template match="*">
-	  <div style="border: solid 1px #0ff; margin-bottom: 4px; font-family: sans-serif">
-		  <div style="background-color: #0ff; padding: 4px">
-			  <strong><xsl:value-of select="local-name()" /></strong>
-			  <xsl:apply-templates select="@*" />
-		  </div>
-		  <div style="padding: 5px">
-			  <xsl:apply-templates select="node()" />
-		  </div>
-	  </div>
-  </xsl:template>
 
   <xsl:template match="section">
 	  <!-- TODO get the name from the text rather than from the outline -->
