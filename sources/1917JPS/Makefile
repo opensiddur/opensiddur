@@ -78,10 +78,11 @@ pages = $(genesis),$(isaiah),$(psalm150),$(lamentations)
 book: clean_book_temp books/$(book).html
 
 # When making a book, start clean so we don't get mixed up with another book.
-# Save a backup of last book for debugging.
 clean_book_temp:
-	rm -rf $(book_temp).bak
-	if [ -d "$(book_temp)" ]; then mv $(book_temp) $(book_temp).bak; fi
+	rm -rf $(book_temp)
+	@# Save a backup of last book for debugging.
+	@#rm -rf $(book_temp).bak
+	@#if [ -d "$(book_temp)" ]; then mv $(book_temp) $(book_temp).bak; fi
 
 $(book_temp): 
 	@tput bold	
