@@ -21,9 +21,14 @@ books: temp/Makefile.books.generated books/index.html
 	# call makefile that knows about all the books
 	# TODO: variable for 1st dependency?
 	make -f temp/Makefile.books.generated
+	# Change underscores to spaces.
+	# Why spaces? Consistency with 
+	#	https://github.com/blockspeiser/Sefaria-Data/tree/master/sources/JPS1917/usfm-raw
+	# Then why underscores? Because make doesn't play nice with spaces.
+	rename 's/_/ /g' books/*_*
 
 temp: 
-	@# TODO cleanup temp directory - use special target?
+	@# TODO cleanup temp directory
 	mkdir -p $@
 
 temp/Makefile.books.generated: temp $(scripts)/outline.py Makefile
@@ -35,7 +40,7 @@ temp/Makefile.books.generated: temp $(scripts)/outline.py Makefile
 #	but prevents running this every time contents of temp folder are touched!
 #	See: https://www.gnu.org/software/make/manual/html_node/Prerequisite-Types.html
 temp/Tanakh-JPS1917.pdf2txt.xml: | temp
-	# This takes a few minutes and generates a 300MB file.
+	# Takes a few minutes and generates a 300MB file.
 	pdf2txt.py -n -o $@ Tanakh-JPS1917.pdf
 	# Optimize file by removing repeated font name.
 	sed -i 's/font="Times New Roman" //' temp/Tanakh-JPS1917.pdf2txt.xml
@@ -45,7 +50,7 @@ books/index.html: $(scripts)/outline.py Makefile blank.xml \
 	# TODO put template in dependencies?
 	mkdir -p temp/index
 	mkdir -p books
-	# TODO cf. use of outline.py below?
+	# TODO cf. use of outline.py below? Still need both?
 	$(scripts)/outline.py > temp/index/index.xsl2
 	# TODO blank.xml stub hopefully just a temporary thing
 	$(saxon) -s blank.xml -o temp/index/index.xml \
@@ -80,7 +85,7 @@ clean_book_temp:
 
 $(book_temp): 
 	@tput bold	
-	@echo ">>>>> Making $(book)..."
+	@echo "> Making $(book)..."
 	@tput sgr0
 	# TODO cleanup?
 	mkdir -p $(book_temp)
@@ -89,13 +94,7 @@ $(book_temp)/get-pages.xml: $(book-temp) temp/Tanakh-JPS1917.pdf2txt.xml
 	# Get pages from the big XML file
 	$(scripts)/get-pages.py $(pages) temp/Tanakh-JPS1917.pdf2txt.xml > $@
 
-books/$(book).html: $(book_temp) $(book_temp)/get-pages.xml Makefile
-	# Step 0: Convert PDF to XML
-	# page 16=Genesis 1
-	# TODO: all the books/pages - at least some more samples to start
-	# TODO: separate files?
-	#pdf2txt.py -n -p $(pages) -o $(book_temp)/pdf2txt.xml Tanakh-JPS1917.pdf
-
+books/$(book).xml: $(book_temp) $(book_temp)/get-pages.xml Makefile
 	# Step 1: Extract layout coordinates
 	$(saxon) -s $(book_temp)/get-pages.xml -o $(book_temp)/bbox2xywh.xml \
 		$(scripts)/bbox2xywh.xsl2
@@ -142,19 +141,20 @@ books/$(book).html: $(book_temp) $(book_temp)/get-pages.xml Makefile
 	# Step 7: Final XML that should validate against custom XSD
 	$(saxon) -s $(book_temp)/small-caps.xml -o 'books/$(book).xml' \
 		$(scripts)/final.xsl2
-	xmllint --noout "books/$(book).xml" --schema 1917JPS.xsd
-	echo $?
-	# HTML we can proofread, not neccessarily final/supported/canonical structure
 	# validate against schema
 	# TODO make validation its own step (but what's the target?)
 	# TODO see TODO's in XSD
-	$(saxon) -s books/$(book).xml -o $@ \
-		$(scripts)/test-html.xsl2
+	# TODO also use xmllint to format XML?
+	xmllint --noout "books/$(book).xml" --schema 1917JPS.xsd
+	echo $?
 
+books/$(book).html: books/$(book).xml
+	# HTML we can proofread, not neccessarily final/supported/canonical structure
+	$(saxon) -s $< -o $@ \
+		$(scripts)/test-html.xsl2
 
 # TODO: semi-final form (structured format organized by pages of PDF file):
 # TODO: strip remaining whitespace-only nodes. also, normalize-space within text elements?
-# TODO: "Lord" small caps.
 #Tanakh-JPS1917-pdf-pages.xml:
 
 # TODO: final form (organized by section, book, chapter, verse):
@@ -174,15 +174,17 @@ books/$(book).html: $(book_temp) $(book_temp)/get-pages.xml Makefile
 # # clean up temporary file
 # 	rm toc.tmp
 
-.PHONY: clean_all clean_quick clean_temp clean_book_temp
-clean_all: clean_temp
+.PHONY: clean clean_quick clean_temp clean_book_temp
+
+# Clean everything that gets built.
+clean: clean_temp
 	rm -rf books
 
 # Clean temp files, leave build outputs.
 clean_temp:
 	rm -rf temp
 
-# Clean except leave stuff that rarely changes
+# Clean except the big XML file that rarely changes
 # and takes a long time to generate.
 clean_quick:
 	@#find temp/* -type d -exec rm -rf {} \;
