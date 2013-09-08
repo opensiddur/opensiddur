@@ -10,7 +10,7 @@ xquery version "3.0";
 module namespace unflatten='http://jewishliturgy.org/transform/unflatten';
 
 import module namespace common="http://jewishliturgy.org/transform/common"
-  at "/db/code/modules/common.xqm";
+  at "../modules/common.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";

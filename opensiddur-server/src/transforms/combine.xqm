@@ -11,17 +11,17 @@ xquery version "3.0";
 module namespace combine="http://jewishliturgy.org/transform/combine";
 
 import module namespace common="http://jewishliturgy.org/transform/common"
-  at "/db/code/modules/common.xqm";
+  at "../modules/common.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "../modules/data.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
-  at "/db/code/modules/follow-uri.xqm";
+  at "../modules/follow-uri.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
-  at "/db/code/modules/format.xqm";
+  at "../modules/format.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror"
-  at "/db/code/modules/mirror.xqm";
+  at "../modules/mirror.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "/db/code/modules/debug.xqm";
+  at "../modules/debug.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";

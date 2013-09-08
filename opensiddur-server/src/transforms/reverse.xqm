@@ -10,9 +10,9 @@ xquery version "3.0";
 module namespace reverse="http://jewishliturgy.org/transform/reverse";
 
 import module namespace common="http://jewishliturgy.org/transform/common"
-  at "/db/code/modules/common.xqm";
+  at "../modules/common.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "/db/code/modules/debug.xqm";
+  at "../modules/debug.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";

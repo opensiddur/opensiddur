@@ -18,8 +18,10 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 declare default element namespace "http://www.w3.org/1999/xhtml";
 
+import module namespace api="http://jewishliturgy.org/modules/api"
+  at "../modules/api.xqm";
 import module namespace common="http://jewishliturgy.org/transform/common"
-  at "/db/code/modules/common.xqm";
+  at "../modules/common.xqm";
 
 declare variable $tohtml:default-style := "/api/data/styles/generic.css";
 
@@ -199,7 +201,7 @@ declare function tohtml:tei-TEI(
       }, 
       element link { 
         attribute rel { "stylesheet" },
-        attribute href { ($params("tohtml:style"), $tohtml:default-style)[1] },
+        attribute href { ($params("tohtml:style"), api:uri-of($tohtml:default-style))[1] },
         attribute type { "text/css" }
       },
       tohtml:header-title($e/tei:teiHeader, $params)

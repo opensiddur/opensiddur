@@ -14,11 +14,11 @@ xquery version "3.0";
 module namespace flatten="http://jewishliturgy.org/transform/flatten";
 
 import module namespace uri="http://jewishliturgy.org/transform/uri"
-  at "/db/code/modules/follow-uri.xqm";
+  at "../modules/follow-uri.xqm";
 import module namespace common="http://jewishliturgy.org/transform/common"
-  at "/db/code/modules/common.xqm";
+  at "../modules/common.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "/db/code/modules/debug.xqm";
+  at "../modules/debug.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
