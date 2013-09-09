@@ -4,14 +4,17 @@
     </description>
 	<!-- set global properties for this build -->
     <property name="lib.dir" location="lib"/>
-    <property name="server.dir" location="opensiddur-server"/>
+    <property name="izpack" location="${lib.dir}/IzPack"/>
+	<property name="server.dir" location="opensiddur-server"/>
 	<property name="server.src" location="${server.dir}/src"/>
     <property name="server.build" location="${server.dir}/build"/>
 	<property name="dist"  location="dist"/>
 
     <property name="roma" location="${lib.dir}/tei/Roma/roma2.sh"/>
-    <property name="saxon.class" location="net.sf.saxon.Transform"/>
-
+	
+	<!-- set local properties for the build -->
+	<property file="local.build.properties"/>
+	
     <macrodef name="generate-schema" 
         description="generate a schema from ODD source">
         <attribute name="input.file"/>
@@ -61,6 +64,27 @@
         <mkdir dir="${dist}"/>
 	</target>
 
+	<target name="exist" depends="init">
+		<!-- ./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true -Dinclude.feature.security.oauth=true -Dinclude.feature.security.openid=true -->
+		<exec 
+			executable="./build.sh" 
+			dir="${lib.dir}/exist">
+			<arg value="installer"/>
+			<arg value="-Dizpack.dir=${izpack}"/>
+			<arg value="-Dinclude.module.scheduler=true"/>
+			<arg value="-Dinclude.feature.security.oauth=true"/>
+			<arg value="-Dinclude.feature.security.openid=true"/>
+		</exec>
+	</target>
+	
+	<target name="exist-clean">
+		<exec 
+			executable="./build.sh" 
+			dir="${lib.dir}/exist">
+			<arg value="clean"/>
+		</exec>
+	</target>
+	
 	<target name="dist" depends="init,server-xar"
 		description="build everything"/>
 
@@ -108,11 +132,20 @@
         <delete dir="${server.build}/temp"/>
 	</target>
 	
+    <target name="templates"
+        depends="init"
+        description="copy templates to final versions">
+        <copy todir="${server.build}">
+            <fileset dir="${server.src}"/>
+            <mapper type="regexp" from="^(.+)\.tmpl\.(.+)$$" to="\1\.\2"/>
+        </copy>
+    </target>
+
 	<target name="server-xar" 
-		depends="schema"
+		depends="schema,templates"
         description="generate the xar distribution" >
         <copy todir="${server.build}">
-			<fileset dir="${server-src}">
+			<fileset dir="${server.src}">
 				<include name="**/*.html"/>
 				<include name="**/*.css"/>
 				<include name="**/*.js"/>
@@ -123,6 +156,7 @@
 				<include name="**/*.xsl2"/>
 				<include name="img/*"/>
 				<exclude name="schema/*"/>
+				<exclude name="**/*.tmpl.*" />
 				<exclude name="**/*.xar" />
 				<exclude name="build.xml"/>
 			</fileset>
@@ -135,7 +169,8 @@
 	</target>
 
 	<target name="clean"
-        description="clean up" >
+        description="clean up" 
+		depends="exist-clean">
 		<!-- Delete the ${build} and ${dist} directory trees -->
 	    <delete dir="${server.build}"/>
     	<delete dir="${dist}"/>

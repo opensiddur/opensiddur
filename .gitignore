@@ -1,5 +1,6 @@
 # local mods to Makefile
 Makefile.local
+local.build.properties
 
 # generated text directory
 text/wlc/
