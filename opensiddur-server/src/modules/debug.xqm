@@ -9,13 +9,16 @@ xquery version "1.0";
  :)
 module namespace debug="http://jewishliturgy.org/transform/debug";
 
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "app.xqm";
+
 declare variable $debug:error := 1;
 declare variable $debug:warn := 2;
 declare variable $debug:info := 3;
 declare variable $debug:detail := 4;
 declare variable $debug:level := $debug:detail;
 
-declare variable $debug:settings-file := "/db/code/debug.xml";
+declare variable $debug:settings-file := concat($app:repo-base, "/debug.xml");
 declare variable $debug:settings := doc($debug:settings-file);
 
 (:~ debugging output function
