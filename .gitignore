@@ -14,9 +14,10 @@ opensiddur-server/schema/build
 dist/
 
 # generated files:
-opensiddur-server/common/params.xsl2
+opensiddur-server/src/common/params.xsl2
 opensiddur-server/setup/setup.xql
 opensiddur-server/setup/eXist-installer.xml
+opensiddur-server/build/
 
 # db directory except special
 db/*
@@ -31,8 +32,7 @@ __contents__.xml
 # backup files
 *.bak
 *.bkp
-*.swp
-*.swo
+*.sw?
 *.tmp
 *.temp
 temp/
@@ -43,6 +43,7 @@ tmp/
 *.pyc
 
 # local files project
+.pydevproject
 .buildpath
 .project
 .settings
