@@ -13,19 +13,19 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "../../modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/db/code/modules/app.xqm";
+  at "../../modules/app.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "/db/code/api/modules/common-rest.xqm";
+  at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "../../modules/data.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
-  at "/db/code/api/data/original.xqm";
+  at "original.xqm";
 
 declare variable $sty:data-type := "styles";
-declare variable $sty:schema := "/db/schema/style.rnc";
-declare variable $sty:schematron := "/db/schema/style.xsl2";
+declare variable $sty:schema := concat($crest:schema-base, "/style.rnc");
+declare variable $sty:schematron := concat($crest:schema-base, "/style.xsl2");
 declare variable $sty:path-base := concat($data:path-base, "/", $sty:data-type);
 declare variable $sty:api-path-base := concat("/api/data/", $sty:data-type);  
 

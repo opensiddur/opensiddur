@@ -9,26 +9,36 @@ xquery version "3.0";
 module namespace crest = 'http://jewishliturgy.org/modules/common-rest';
 
 import module namespace acc="http://jewishliturgy.org/modules/access"
-  at "/db/code/api/modules/access.xqm";
+  at "access.xqm";
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/db/code/modules/app.xqm";
+  at "app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "data.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
-  at "/db/code/modules/jvalidate.xqm";
+  at "jvalidate.xqm";
 
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "/db/code/magic/magic.xqm";
+  at "../magic/magic.xqm";
   
 import module namespace kwic="http://exist-db.org/xquery/kwic";
 
+declare namespace expath="http://expath.org/ns/pkg";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace error="http://jewishliturgy.org/errors";
+
+(:~ absolute db location of schema files :)
+declare variable $crest:repo-base := 
+  let $descriptor := 
+    collection(repo:get-root())//expath:package[@name = "http://jewishliturgy.org/apps/opensiddur-server"]
+  return
+    util:collection-name($descriptor);
+declare variable $crest:schema-base := 
+  concat($crest:repo-base, "/schema");
 
 (:~ @return REST error message when access is not allowed :)
 declare function crest:no-access(

@@ -12,26 +12,28 @@ declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
-  at "xmldb:exist:///db/code/modules/app.xqm";
+  at "app.xqm";
+import module namespace crest="http://jewishliturgy.org/modules/common-rest" 
+  at "common-rest.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror" 
-  at "xmldb:exist:///db/code/modules/mirror.xqm";
+  at "mirror.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
-  at "xmldb:exist:///db/code/modules/paths.xqm";
+  at "paths.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri" 
-  at "xmldb:exist:///db/code/modules/follow-uri.xqm";
+  at "follow-uri.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
-  at "xmldb:exist:///db/code/transforms/flatten/flatten.xqm";
+  at "../transforms/flatten.xqm";
 import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
-  at "xmldb:exist:///db/code/transforms/flatten/unflatten.xqm";
+  at "../transforms/unflatten.xqm";
 import module namespace combine="http://jewishliturgy.org/transform/combine"
-  at "xmldb:exist:///db/code/transforms/flatten/combine.xqm";
+  at "../transforms/combine.xqm";
 import module namespace tohtml="http://jewishliturgy.org/transform/html"
-  at "xmldb:exist:///db/code/transforms/tohtml.xqm";
+  at "../transforms/tohtml.xqm";
 import module namespace reverse="http://jewishliturgy.org/transform/reverse"
-  at "xmldb:exist:///db/code/transforms/flatten/reverse.xqm";
+  at "../transforms/reverse.xqm";
 
 declare variable $format:temp-dir := '.format';
-declare variable $format:path-to-xslt := '/db/code/transforms';
+declare variable $format:path-to-xslt := concat($crest:repo-base, '/transforms');
 declare variable $format:rest-path-to-xslt := app:concat-path($paths:internal-rest-prefix, $format:path-to-xslt);
 
 declare variable $format:dependency-cache := "/db/cache/dependency";

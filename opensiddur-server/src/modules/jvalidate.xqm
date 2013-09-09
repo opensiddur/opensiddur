@@ -29,9 +29,6 @@ declare variable $jvalidate:not-available := (
   </report>
 );
 
-declare variable $jvalidate:schema-location :=
-  '/db/schema/';
-
 declare function jvalidate:validate-relaxng(
   $content as item(), $grammar as item()) 
   as element(report) {
@@ -91,56 +88,6 @@ declare function jvalidate:validation-boolean(
   $validation-result as element(report))
   as xs:boolean {
   $validation-result/status = ('valid', 'ok')
-};
-
-
-(:~ Validate the document containing the given node as 
- : JLPTEI.  Attempt to determine if it is a special type of file.
- : If it is, validate its additional components.
- : @param $node-or-uri An xs:string or xs:anyURI pointing to a document,
- :  or a node in a document.
- : @return a validation report.
- :)
-declare function jvalidate:validate-jlptei(
-  $node-or-uri as item(),
-  $additional-grammars as xs:string*)
-  as element(report) {
-  let $doc :=
-    typeswitch($node-or-uri)
-      case $u as xs:string
-        return doc($u)
-      case $u as xs:anyURI
-        return doc($u)
-      case $u as node()
-        return root($u)
-      default
-        return error('jvalidate:validate-jlptei' cast as xs:QName,
-          '$node-or-uri must be a URI or a node in a document.', $node-or-uri)
-  let $rng-report := 
-    jvalidate:validate-relaxng($doc, $jvalidate:path-to-relaxng-schema)
-  return
-    jvalidate:concatenate-reports(
-      ($rng-report,
-      let $grammars as xs:string* :=
-          for $schema-ptr in $jvalidate:special-schemas
-          return 
-            if ($doc//tei:div[@type=$schema-ptr/@key] or 
-              $additional-grammars=$schema-ptr/@key) 
-            then concat($jvalidate:schema-location, $schema-ptr/@value)
-            else ()
-      return
-        for $grammar in $grammars
-        return
-         jvalidate:validate-iso-schematron-svrl($doc, $grammar cast as xs:anyURI)
-      )
-    )
-};    
-
-(: jvalidate:validate-jlptei with 1 argument :)
-declare function jvalidate:validate-jlptei(
-  $node-or-uri as item())
-  as element(report) {
-  jvalidate:validate-jlptei($node-or-uri, ())
 };
 
 (:~ Concatenate a number of validation reports into a single-

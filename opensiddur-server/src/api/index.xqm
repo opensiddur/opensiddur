@@ -5,17 +5,29 @@ xquery version "3.0";
  :  authentication,
  :  content negotiation
  : 
- : Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
  : Open Siddur Project
  : Licensed Under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace index = 'http://jewishliturgy.org/api/index';
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "../modules/api.xqm";
 
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+
+(:~ display an element if a package is installed :)
+declare 
+  %private 
+  function index:if-installed(
+    $package as xs:string,
+    $item as element()
+  ) as element()? {
+  let $pkgs := repo:list()
+  where $pkgs = $package
+  return $item
+};
 
 (:~ List all available APIs 
  : @return An HTML list
@@ -43,9 +55,12 @@ declare
           <li class="api">
             <a class="discovery" href="{$api-base}/data">Data</a>
           </li>,
-          <li class="api">
-            <a class="discovery" href="{$api-base}/demo">Demo</a>
-          </li>,
+          index:if-installed(
+            "http://jewishliturgy.org/apps/opensiddur-demos",
+            <li class="api">
+              <a class="discovery" href="{$api-base}/demo">Demo</a>
+            </li>
+          ),
           <li class="api">
             <a class="discovery" href="{$api-base}/group">Group</a>
           </li>,
@@ -55,6 +70,12 @@ declare
           <li class="api">
             <a class="discovery" href="{$api-base}/logout">Logout</a>
           </li>,
+          index:if-installed(
+            "http://jewishliturgy.org/apps/opensiddur-tests",
+            <li class="api">
+              <a class="discovery" href="{$api-base}/tests">Tests</a>
+            </li>
+          ),
           <li class="api">
             <a class="discovery" href="{$api-base}/user">User</a>
           </li>

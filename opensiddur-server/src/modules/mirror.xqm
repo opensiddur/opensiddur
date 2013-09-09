@@ -13,11 +13,11 @@ xquery version "3.0";
 module namespace mirror = 'http://jewishliturgy.org/modules/mirror';
 
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "xmldb:exist:///db/code/modules/app.xqm";
+  at "app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "xmldb:exist:///db/code/modules/debug.xqm";
+  at "debug.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "xmldb:exist:///db/code/magic/magic.xqm";
+  at "../magic/magic.xqm";
 
 declare namespace error="http://jewishliturgy.org/errors";
 

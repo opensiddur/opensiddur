@@ -13,17 +13,17 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "../../modules/api.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "/db/code/api/modules/common-rest.xqm";
+  at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "../../modules/data.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
-  at "/db/code/api/data/original.xqm";
+  at "original.xqm";
   
 declare variable $cnd:data-type := "conditionals";
-declare variable $cnd:schema := "/db/schema/conditional.rnc";
-declare variable $cnd:schematron := "/db/schema/conditional.xsl2";
+declare variable $cnd:schema := concat($crest:schema-base, "/conditional.rnc");
+declare variable $cnd:schematron := concat($crest:schema-base, "/conditional.xsl2");
 declare variable $cnd:path-base := concat($data:path-base, "/", $cnd:data-type);
 declare variable $cnd:api-path-base := concat("/api/data/", $cnd:data-type);
 

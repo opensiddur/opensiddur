@@ -12,7 +12,7 @@ xquery version "3.0";
 module namespace dindex = 'http://jewishliturgy.org/api/data/index';
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "../../modules/api.xqm";
 
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";

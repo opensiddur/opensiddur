@@ -11,22 +11,23 @@ xquery version "1.0";
 module namespace app="http://jewishliturgy.org/modules/app";
 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "xmldb:exist:///db/code/modules/debug.xqm";
+  at "debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
-	at "xmldb:exist:///db/code/modules/paths.xqm";
+	at "paths.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "xmldb:exist:///db/code/magic/magic.xqm";
+  at "../magic/magic.xqm";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
+declare namespace expath="http://expath.org/ns/pkg";
 
-(:~ return application version as a string :)
+(:~ @return server version as a string :)
 declare function app:get-version(
 	) as xs:string {
-	string(doc('/code/apps/version.xml')/version)
+	collection(repo:get-root())//expath:package[@name = "http://jewishliturgy.org/apps/opensiddur-server"]/@version/string()
 };
 
 (:~ return decoded authorization string (username, password) or empty 

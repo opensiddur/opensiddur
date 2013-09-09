@@ -12,11 +12,11 @@ xquery version "3.0";
 module namespace tran = 'http://jewishliturgy.org/api/transliteration';
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "../../modules/api.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "/db/code/api/modules/common-rest.xqm";
+  at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "../../modules/data.xqm";
 
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
@@ -24,8 +24,8 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
 
 declare variable $tran:data-type := "transliteration";
-declare variable $tran:schema := "/db/schema/transliteration.rnc";
-declare variable $tran:schematron := "/db/schema/transliteration.xsl2";
+declare variable $tran:schema := concat($crest:schema-base, "/transliteration.rnc");
+declare variable $tran:schematron := concat($crest:schema-base, "/transliteration.xsl2");
 declare variable $tran:path-base := concat($data:path-base, "/", $tran:data-type);
 declare variable $tran:api-path-base := concat("/api/data/", $tran:data-type);
 

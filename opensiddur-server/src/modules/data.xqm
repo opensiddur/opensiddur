@@ -9,9 +9,9 @@ xquery version "3.0";
 module namespace data="http://jewishliturgy.org/modules/data";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-	at "/db/code/modules/app.xqm";
+	at "app.xqm";
   
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";

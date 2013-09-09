@@ -13,21 +13,21 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "../../modules/api.xqm";
 import module namespace acc="http://jewishliturgy.org/modules/access"
-  at "/db/code/api/modules/access.xqm";
+  at "../../modules/access.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/db/code/modules/app.xqm";
+  at "../../modules/app.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "/db/code/api/modules/common-rest.xqm";
+  at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "../../modules/data.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
-  at "/db/code/modules/format.xqm";
+  at "../../modules/format.xqm";
 
 declare variable $orig:data-type := "original";
-declare variable $orig:schema := "/db/schema/jlptei.rnc";
-declare variable $orig:schematron := "/db/schema/jlptei.xsl2";
+declare variable $orig:schema := concat($crest:schema-base, "/jlptei.rnc");
+declare variable $orig:schematron := concat($crest:schema-base, "/jlptei.xsl2");
 declare variable $orig:path-base := concat($data:path-base, "/", $orig:data-type);
 declare variable $orig:api-path-base := concat("/api/data/", $orig:data-type);  
 

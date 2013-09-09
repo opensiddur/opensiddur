@@ -13,15 +13,15 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "../../modules/api.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "/db/code/api/modules/common-rest.xqm";
+  at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "../../modules/data.xqm";
 
 declare variable $src:data-type := "sources";
-declare variable $src:schema := "/db/schema/bibliography.rnc";
-declare variable $src:schematron := "/db/schema/bibliography.xsl2";
+declare variable $src:schema := concat($crest:schema-base, "/bibliography.rnc");
+declare variable $src:schematron := concat($crest:schema-base, "/bibliography.xsl2");
 declare variable $src:path-base := concat($data:path-base, "/", $src:data-type);
 declare variable $src:api-path-base := concat("/api/data/", $src:data-type);
 

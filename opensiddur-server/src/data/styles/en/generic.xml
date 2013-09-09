@@ -5,10 +5,7 @@
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">Generic CSS</tei:title>
-            <j:responsGrp>
-               <tei:respons type="trc" locus="value" target="#style" resp="/data/user/efraimdf"/>
-            </j:responsGrp>
+            <tei:title type="main" xml:lang="en">generic</tei:title>
          </tei:titleStmt>
          <tei:publicationStmt>
             <tei:availability status="free">

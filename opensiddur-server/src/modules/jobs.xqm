@@ -24,25 +24,27 @@ xquery version "3.0";
  :  </job>
  : </jobs>
  :
- : Copyright 2011 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011,2013 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace jobs="http://jewishliturgy.org/apps/jobs";
 
+import module namespace crest="http://jewishliturgy.org/modules/common-rest"
+  at "common-rest.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "xmldb:exist:///code/modules/debug.xqm";
+  at "debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
-  at "xmldb:exist:///code/modules/paths.xqm";
+  at "paths.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "xmldb:exist:///code/magic/magic.xqm";
+  at "../magic/magic.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "xmldb:exist:///code/modules/app.xqm";
+  at "app.xqm";
 
 declare namespace err="http://jewishliturgy.org/errors";
 
 (:declare option exist:optimize "enable=no";:)
 
-declare variable $jobs:queue-collection := '/code/apps/jobs/data';
+declare variable $jobs:queue-collection := concat($crest:repo-base,'/jobs/data');
 declare variable $jobs:queue-resource := "queue.xml";
 declare variable $jobs:users-resource := "users.xml";
 declare variable $jobs:next-id-resource := "next-id.xml";

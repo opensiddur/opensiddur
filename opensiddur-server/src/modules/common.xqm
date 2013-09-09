@@ -10,7 +10,7 @@ xquery version "3.0";
 module namespace common="http://jewishliturgy.org/transform/common";
 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-	at "/code/modules/debug.xqm";
+	at "debug.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri" 
 	at "follow-uri.xqm";
 

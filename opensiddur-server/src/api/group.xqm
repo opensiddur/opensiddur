@@ -9,21 +9,23 @@ xquery version "3.0";
 module namespace grp = 'http://jewishliturgy.org/api/group';
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "../modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/db/code/modules/app.xqm";
+  at "../modules/app.xqm";
+import module namespace crest="http://jewishliturgy.org/modules/common-rest"
+  at "../modules/common-rest.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "/db/code/modules/debug.xqm";
+  at "../modules/debug.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
-  at "/db/code/modules/jvalidate.xqm";
+  at "../modules/jvalidate.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "/db/code/magic/magic.xqm";
+  at "../magic/magic.xqm";
   
 declare namespace g="http://jewishliturgy.org/ns/group/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
-declare variable $grp:schema := "/db/schema/group.rnc";
+declare variable $grp:schema := concat($crest:schema-base, "/group.rnc");
 
 (:~ @return the group managers of a given group.
  : eXist considers this a secret, but it's public in Open Siddur

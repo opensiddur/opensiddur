@@ -13,20 +13,20 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "../../modules/api.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "/db/code/api/modules/common-rest.xqm";
+  at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "../../modules/data.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
-  at "/db/code/api/data/original.xqm";
+  at "original.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
-  at "/db/code/modules/follow-uri.xqm";
+  at "../../modules/follow-uri.xqm";
   
 declare variable $lnk:data-type := "linkage";
 declare variable $lnk:no-lang := "none";  (: no language :)
-declare variable $lnk:schema := "/db/schema/linkage.rnc";
-declare variable $lnk:schematron := "/db/schema/linkage.xsl2";
+declare variable $lnk:schema := concat($crest:schema-base, "/linkage.rnc");
+declare variable $lnk:schematron := concat($crest:schema-base, "/linkage.xsl2");
 declare variable $lnk:path-base := concat($data:path-base, "/", $lnk:data-type);
 declare variable $lnk:api-path-base := concat("/api/data/", $lnk:data-type);
 

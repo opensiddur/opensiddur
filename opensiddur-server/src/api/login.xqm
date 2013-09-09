@@ -9,11 +9,11 @@ xquery version "1.0";
 module namespace login="http://jewishliturgy.org/api/login";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-	at "/db/code/api/modules/api.xqm";
+	at "../modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-	at "/db/code/modules/app.xqm";
+	at "../modules/app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-	at "/db/code/modules/debug.xqm";
+	at "../modules/debug.xqm";
 	
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors"; 

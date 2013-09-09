@@ -15,15 +15,15 @@ xquery version "3.0";
 module namespace uri="http://jewishliturgy.org/transform/uri";
 
 import module namespace common="http://jewishliturgy.org/transform/common"
-  at "/db/code/modules/common.xqm"; 
+  at "common.xqm"; 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-	at "/db/code/modules/debug.xqm"; 
+	at "debug.xqm"; 
 import module namespace grammar="http://jewishliturgy.org/transform/grammar"
-	at "/db/code/grammar-parser/grammar2.xqm";
+	at "../grammar-parser/grammar2.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror"
-    at "/db/code/modules/mirror.xqm";
+    at "mirror.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "data.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";

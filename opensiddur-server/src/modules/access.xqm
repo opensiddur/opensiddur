@@ -10,17 +10,19 @@ xquery version "3.0";
 module namespace acc="http://jewishliturgy.org/modules/access";
 
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "xmldb:exist:///db/code/modules/app.xqm";
+  at "app.xqm";
+import module namespace crest="http://jewishliturgy.org/modules/common-rest"
+  at "common-rest.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
-  at "xmldb:exist:///db/code/modules/jvalidate.xqm";
+  at "jvalidate.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "xmldb:exist:///db/code/magic/magic.xqm";
+  at "../magic/magic.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace a="http://jewishliturgy.org/ns/access/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 
-declare variable $acc:schema := "/schema/access.rnc";
+declare variable $acc:schema := concat($crest:schema-base, "/access.rnc");
 
 declare function acc:validate(
   $access as element(a:access)

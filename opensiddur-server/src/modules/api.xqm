@@ -9,9 +9,9 @@ xquery version "3.0";
 module namespace api="http://jewishliturgy.org/modules/api";
 
 import module namespace app="http://jewishliturgy.org/modules/app"
-	at "/db/code/modules/app.xqm";
+	at "app.xqm";
 import module namespace t="http://exist-db.org/xquery/testing/modified"
-  at "/db/code/modules/test2.xqm";
+  at "test2.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 
