@@ -32,13 +32,8 @@ declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace error="http://jewishliturgy.org/errors";
 
 (:~ absolute db location of schema files :)
-declare variable $crest:repo-base := 
-  let $descriptor := 
-    collection(repo:get-root())//expath:package[@name = "http://jewishliturgy.org/apps/opensiddur-server"]
-  return
-    util:collection-name($descriptor);
 declare variable $crest:schema-base := 
-  concat($crest:repo-base, "/schema");
+  concat($app:repo-base, "/schema");
 
 (:~ @return REST error message when access is not allowed :)
 declare function crest:no-access(

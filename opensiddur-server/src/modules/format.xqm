@@ -13,8 +13,6 @@ declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 import module namespace app="http://jewishliturgy.org/modules/app" 
   at "app.xqm";
-import module namespace crest="http://jewishliturgy.org/modules/common-rest" 
-  at "common-rest.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror" 
   at "mirror.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths" 
@@ -33,7 +31,7 @@ import module namespace reverse="http://jewishliturgy.org/transform/reverse"
   at "../transforms/reverse.xqm";
 
 declare variable $format:temp-dir := '.format';
-declare variable $format:path-to-xslt := concat($crest:repo-base, '/transforms');
+declare variable $format:path-to-xslt := concat($app:repo-base, '/transforms');
 declare variable $format:rest-path-to-xslt := app:concat-path($paths:internal-rest-prefix, $format:path-to-xslt);
 
 declare variable $format:dependency-cache := "/db/cache/dependency";

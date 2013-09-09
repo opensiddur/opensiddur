@@ -29,8 +29,8 @@ xquery version "3.0";
  :)
 module namespace jobs="http://jewishliturgy.org/apps/jobs";
 
-import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "common-rest.xqm";
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
@@ -44,7 +44,7 @@ declare namespace err="http://jewishliturgy.org/errors";
 
 (:declare option exist:optimize "enable=no";:)
 
-declare variable $jobs:queue-collection := concat($crest:repo-base,'/jobs/data');
+declare variable $jobs:queue-collection := concat($app:repo-base,'/jobs/data');
 declare variable $jobs:queue-resource := "queue.xml";
 declare variable $jobs:users-resource := "users.xml";
 declare variable $jobs:next-id-resource := "next-id.xml";

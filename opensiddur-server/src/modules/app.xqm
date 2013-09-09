@@ -24,6 +24,12 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace expath="http://expath.org/ns/pkg";
 
+declare variable $app:repo-base := 
+  let $descriptor := 
+    collection(repo:get-root())//expath:package[@name = "http://jewishliturgy.org/apps/opensiddur-server"]
+  return
+    util:collection-name($descriptor);
+
 (:~ @return server version as a string :)
 declare function app:get-version(
 	) as xs:string {
