@@ -100,24 +100,6 @@ declare function local:lang-collections(
     <collection name="{$lang}"/>
 };
 
-(: set up the magic password file :)
-declare function local:set-magic-password(
-  ) {
-  let $magic-collection := concat($target, "/magic")
-  let $newcode := replace(
-    "xquery version '1.0';
-    module namespace magic = 'http://jewishliturgy.org/magic';
-
-    declare variable $magic:password := 'ADMINPASSWORD';
-
-    declare function magic:null() {()};
-    ", 
-    "ADMINPASSWORD", 
-    (environment-variable("ADMINPASSWORD"), "ADMINPASSWORD")[1])
-  return 
-    xmldb:store($magic-collection, "magic.xqm", $newcode, "application/xquery")
-};
-
 (: make the 'everyone' group if it does not exist :)
 util:log-system-out('making groups...'),
 local:mkgroup("everyone"),
@@ -151,6 +133,4 @@ let $collections :=
   </collections>
 return  
   local:mkcollections($collections, "/system/config"),
-util:log-system-out('setting password...'),
-local:set-magic-password(),
 util:log-system-out('done')

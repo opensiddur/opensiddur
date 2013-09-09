@@ -11,9 +11,11 @@
 	<property name="dist"  location="dist"/>
 
     <property name="roma" location="${lib.dir}/tei/Roma/roma2.sh"/>
-	
+
 	<!-- set local properties for the build -->
 	<property file="local.build.properties"/>
+    <!-- set global default properties for the build -->
+    <property file="build.properties"/>
 	
     <macrodef name="generate-schema" 
         description="generate a schema from ODD source">
@@ -141,8 +143,18 @@
         </copy>
     </target>
 
+    <target name="magic"
+        depends="init,templates"
+        description="Write magic.xqm">
+        <replace
+            file="${server.build}/magic/magic.xqm"
+            token="ADMINPASSWORD"
+            value="${adminpassword}">
+        </replace> 
+    </target>
+
 	<target name="server-xar" 
-		depends="schema,templates"
+		depends="schema,templates,magic"
         description="generate the xar distribution" >
         <copy todir="${server.build}">
 			<fileset dir="${server.src}">
