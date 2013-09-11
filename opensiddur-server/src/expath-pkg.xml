@@ -6,5 +6,5 @@
   version="0.7.1" 
   spec="1.0">
     <title>Open Siddur Server</title>
-    <!--  dependency package="http://exist-db.org/apps/shared"/-->
+    <dependency package="http://jewishliturgy.org/apps/hebmorph-exist" semver-min="0.0.1"/>
 </package>

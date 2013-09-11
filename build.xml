@@ -86,8 +86,18 @@
 			<arg value="clean"/>
 		</exec>
 	</target>
+    
+    <target name="hebmorph-exist" depends="init">
+        <ant antfile="build.xml" dir="${lib.dir}/hebmorph-exist" target="dist" inheritAll="false"/>
+        <copy todir="${dist}" file="${lib.dir}/hebmorph-exist/dist/hebmorph-exist.xar">
+        </copy>
+    </target>
+    
+    <target name="hebmorph-exist-clean">
+        <ant antfile="build.xml" dir="${lib.dir}/hebmorph-exist" target="clean" inheritAll="false"/>
+    </target>
 	
-	<target name="dist" depends="init,server-xar"
+	<target name="dist" depends="init,hebmorph-exist,server-xar"
 		description="build everything"/>
 
 	<target name="schema" 
@@ -182,7 +192,7 @@
 
 	<target name="clean"
         description="clean up" 
-		depends="exist-clean">
+		depends="exist-clean,hebmorph-exist-clean">
 		<!-- Delete the ${build} and ${dist} directory trees -->
 	    <delete dir="${server.build}"/>
     	<delete dir="${dist}"/>
