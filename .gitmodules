@@ -7,3 +7,6 @@
 [submodule "lib/tei/Stylesheets"]
 	path = lib/tei/Stylesheets
 	url = https://github.com/opensiddur/Stylesheets.git
+[submodule "lib/hebmorph-exist"]
+	path = lib/hebmorph-exist
+	url = git@github.com:opensiddur/hebmorph-exist.git
