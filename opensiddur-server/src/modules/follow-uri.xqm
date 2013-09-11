@@ -18,8 +18,6 @@ import module namespace common="http://jewishliturgy.org/transform/common"
   at "common.xqm"; 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
 	at "debug.xqm"; 
-import module namespace grammar="http://jewishliturgy.org/transform/grammar"
-	at "../grammar-parser/grammar2.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror"
     at "mirror.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
@@ -30,15 +28,6 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 declare namespace p="http://jewishliturgy.org/ns/parser";
 declare namespace r="http://jewishliturgy.org/ns/parser-result";
 declare namespace error="http://jewishliturgy.org/errors";
-
-declare variable $uri:xpointer-grammar :=
-	document {
-		<p:grammar>{
-			doc('/code/grammar-parser/xpointer.xml')/p:grammar | 
-			doc('/code/grammar-parser/xptr-tei.xml')/p:grammar
-		}</p:grammar>
-	};
-declare variable $uri:fragmentation-cache-type := 'fragmentation';
 
 (:~ return an element by id, relative to a node :)
 declare function uri:id(
@@ -108,116 +97,6 @@ declare function uri:uri-fragment(
   )
 };
   
-(:----------- follow parsed XPointer --------:)
-(:~ Get nodes, given $document and $fragment :)
-declare function uri:node-from-pointer(
-	$document as document-node()?,
-  $fragment as xs:anyURI
-  ) as node()* {
-  debug:debug($debug:detail + 1,
-  	"uri",
-  	('func:node-from-pointer: document: ', $document)
-  ), 
-  debug:debug($debug:detail + 1, 
-    "uri",
-    ('func:node-from-pointer: fragment', $fragment)  
-  ),
-  if ($document)
-  then
-  	uri:follow-parsed-xpointer(
-  		grammar:clean(
-  			grammar:parse(string($fragment), 'Pointer', $uri:xpointer-grammar)
-	  	),
-  		$document
-  	)
-  else ()
-};
-
-(:~ follow a parsed xpointer within a given document :)
-declare function uri:follow-parsed-xpointer(
-	$node as node()*,
-	$doc as document-node()
-	) as node()* {
-	for $n in $node
-	return
-		typeswitch($n)
-		case element(r:Shorthand) return uri:r-Shorthand($n, $doc)
-		case element(r:PointerPart) return uri:r-PointerPart($n, $doc)
-		default  
-			(: pass-through. Including r:Pointer, r:SchemeBased :)
-			return uri:follow-parsed-xpointer($n/node(), $doc)	
-};
-
-(: Follow a pointer one step 
- r:Pointer -- pass-through
- r:SchemeBased -- pass-through
-:)
-  
-(:~ Follow a shorthand pointer (aka, id) :)
-declare function uri:r-Shorthand(
-	$context as element(),
-	$doc as document-node()
-	) as node()* {
-	uri:id(string($context), $doc)
-};
-
-(:~ Follow a scheme-based pointer.
- : Send out a debug warning if the scheme is unsupported.
- :
- :)
-declare function uri:r-PointerPart(
-	$context as element(),
-	$doc as document-node()
-	) as node()* {
-	if ($context/r:SchemeName='range')
-	then
-		let $pointers as element(r:Pointer)+ :=
-      grammar:clean(grammar:parse(string($context/r:SchemeData), 'RangeData', $uri:xpointer-grammar))/r:Pointer
-    let $left-pointer as node() :=
-      uri:follow-parsed-xpointer($pointers[1], $doc)
-    let $right-pointer as node() :=
-    	uri:follow-parsed-xpointer($pointers[2], $doc)
-    return (
-    	debug:debug($debug:detail, 'r:PointerPart:pointers', $pointers),
-      (: pointers[1] contains the beginning, 
-       : pointers[2] contains the end.  It is an error for:
-    	 : (1) pointers[2] to be before pointers[1] in document order
-       : (2) pointers[1] or pointers[2] to be empty
-     	 :)    
-      if (empty($left-pointer) or empty($right-pointer))
-      then
-        debug:debug(
-        	$debug:error,
-        	'r:PointerPart',
-          'In a pointer range expression, both pointers must resolve to a location'
-          )
-      else if ($left-pointer >> $right-pointer)
-      then
-        debug:debug(
-        	$debug:error,
-        	'r:PointerPart',
-          ('In a pointer range expression, the second pointer must follow ',
-          'the first in document order. ',
-          '[1] = ', $left-pointer, ' [2] = ', $right-pointer)
-          )
-      else
-      	(:util:get-fragment-between($left-pointer, $right-pointer, false()),$right-pointer:)
-        (:
-        $left-pointer|
-          ($left-pointer/following-sibling::node() intersect 
-            $right-pointer/preceding-sibling::node())|
-          $right-pointer
-        :)
-        uri:range($left-pointer, $right-pointer, true()) 
-    )
-	else 
-		debug:debug($debug:warn,
-			'r:PointerPart',
-      ('Unsupported scheme: ', r:SchemeName, ' in ', $context)
-    )
-};
-  
-(: ----------- following TEI pointers -----:)
 (:~ Follow a given pointer $uri, 
  : including any subsequent pointers or links (such as tei:join). 
  : The $steps parameter indicates the number of pointer steps to follow if 
@@ -230,7 +109,7 @@ declare function uri:follow-uri(
   $context as node(),
   $steps as xs:integer
 	) as node()* {
-  uri:follow-cached-uri($uri, $context, $steps, ())
+  uri:fast-follow($uri, $context, $steps)
 };
 
 declare function uri:follow-cached-uri(
@@ -239,7 +118,7 @@ declare function uri:follow-cached-uri(
   $steps as xs:integer,
   $cache-type as xs:string?
   ) as node()* {
-  uri:follow-cached-uri($uri, $context, $steps, $cache-type, ())
+  uri:fast-follow($uri, $context, $steps, false(), false(), $cache-type)
 };
 
 (:~ Extended uri:follow-uri() to allow caching.
@@ -252,47 +131,7 @@ declare function uri:follow-cached-uri(
   $cache-type as xs:string?,
   $intermediate-ptrs as xs:boolean?
 	) as node()* {
-  let $full-uri as xs:anyURI :=
-  	uri:absolutize-uri($uri, $context)
-	let $base-path := uri:uri-base-path($full-uri)
-  let $fragment as xs:anyURI := 
-  	uri:uri-fragment(string($full-uri))      
-	let $document as document-node()? := 
-	  let $doc :=
-      try {
-        data:doc($base-path)
-      }
-      catch error:NOTIMPLEMENTED {
-        (: the requested path is not in /data :)
-        doc($base-path)
-      }
-	  return
-	    if ($cache-type)
-	    then mirror:doc($cache-type, document-uri($doc))
-	    else $doc
-	let $pointer-destination as node()* :=
-		uri:follow(
-			if ($fragment) 
-      then uri:node-from-pointer($document, $fragment) 
-      else $document,
-      $steps,
-      $cache-type,
-      false(),
-      $intermediate-ptrs)
-	return (
-    debug:debug($debug:detail + 1, 
-    	'uri',
-    	('uri =', $uri,
-        ' full-uri =', $full-uri, 
-        ' base-path =', $base-path,
-        ' fragment =', $fragment,
-        ' cache-type = ', $cache-type)),
-    debug:debug($debug:detail, "uri", 
-      (string-join(('func:follow-pointer(): $fragment, $steps, $pointer-destination for ', 
-        $base-path,'#',$fragment), ''),
-        $fragment, $steps, $pointer-destination)),
-    $pointer-destination
-  )
+  uri:fast-follow($uri, $context, $steps, $intermediate-ptrs, false(), $cache-type) 
 };
 
 declare function uri:fast-follow(
@@ -411,7 +250,7 @@ declare function uri:follow-tei-link(
  : @param $context Link to follow
  : @param $steps Specifies the maximum number of steps to evaluate.  Negative for infinity (default)
  : @param $cache-type Specifies the cache type to use (eg, fragmentation).  Empty for none (default)
- : @param $fast use the fast follow algorithm (default false())
+ : @deprecated @param $fast use the fast follow algorithm (default true()) 
  : @param $intermediate-ptrs return all intermediate pointers, not just the final result (default false())
  :)
 declare function uri:follow-tei-link(
@@ -434,12 +273,15 @@ declare function uri:follow-tei-link(
     	    uri:fast-follow($t, $context, 
     	      uri:follow-steps($context, $steps),
     	      $intermediate-ptrs)
-    	  else
+    	  else 
+            (:
           uri:follow-cached-uri(
           	$t, $context, 
             uri:follow-steps($context, $steps), 
             $cache-type,
             $intermediate-ptrs)
+            :)
+            error(xs:QName("error:DEPRECATED"), "slow follow is deprecated")
 };
 
 (:~ calculate the number of steps to pass to follow-cached-uri()
