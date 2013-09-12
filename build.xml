@@ -1,53 +1,12 @@
-<project name="opensiddur-server" default="dist" basedir=".">
+<project name="opensiddur" default="dist" basedir=".">
 	<description>
-        Build file for opensiddur-server
+        Build file for opensiddur
     </description>
-	<!-- set global properties for this build -->
     <property name="lib.dir" location="lib"/>
-    <property name="izpack" location="${lib.dir}/IzPack"/>
-	<property name="server.dir" location="opensiddur-server"/>
-	<property name="server.src" location="${server.dir}/src"/>
-    <property name="server.build" location="${server.dir}/build"/>
-	<property name="dist"  location="dist"/>
+    <property name="dist" location="dist"/>
 
-    <property name="roma" location="${lib.dir}/tei/Roma/roma2.sh"/>
-
-	<!-- set local properties for the build -->
-	<property file="local.build.properties"/>
-    <!-- set global default properties for the build -->
-    <property file="build.properties"/>
-	
-    <macrodef name="generate-schema" 
-        description="generate a schema from ODD source">
-        <attribute name="input.file"/>
-        <attribute name="temp.dir"/>
-        <attribute name="output.dir"/>
-        <sequential>
-            <mkdir dir="@{temp.dir}"/>
-            <exec executable="${roma}">
-                <arg value="--nodtd"/>
-                <arg value="--noxsd"/>
-                <arg value="--isoschematron"/>
-                <arg value="@{input.file}"/>
-                <arg value="@{temp.dir}"/>
-            </exec>
-            <xslt
-                classpath="${lib.dir}/saxonhe-9.2.1.5.jar"
-                basedir="@{temp.dir}"
-                destdir="@{temp.dir}"
-                style="${lib.dir}/iso-schematron/iso_svrl_for_xslt2.xsl">
-                <factory name="net.sf.saxon.TransformerFactoryImpl" />
-                <mapper type="glob" from="*.isosch" to="*.xsl2"/>
-            </xslt>
-            <copy todir="@{output.dir}">
-                <fileset dir="@{temp.dir}">
-                    <include name="*.rnc" />
-                    <include name="*.xsl2" />
-                </fileset>
-            </copy>
-            <delete dir="@{temp.dir}"/>
-        </sequential>
-    </macrodef>
+    <include file="opensiddur-server/build.xml" as="server"/>
+    
 
 	<target name="init">
 		<!-- Create the time stamp -->
@@ -62,7 +21,6 @@
 		    <arg value="update"/>
 		</exec>
         <!-- make build dirs -->
-        <mkdir dir="${server.build}"/>
         <mkdir dir="${dist}"/>
 	</target>
 
@@ -97,104 +55,19 @@
         <ant antfile="build.xml" dir="${lib.dir}/hebmorph-exist" target="clean" inheritAll="false"/>
     </target>
 	
-	<target name="dist" depends="init,hebmorph-exist,server-xar"
-		description="build everything"/>
-
-	<target name="schema" 
-		description="generate XML schemas">
-        <mkdir dir="${server.build}/schema"/>
-        <mkdir dir="${server.build}/temp"/>
-        <copy todir="${server.build}/schema">
-            <fileset dir="${server.src}/schema">
-                <include name="*.rnc"/>
+	<target name="dist" depends="init,hebmorph-exist,server.dist"
+		description="build everything">
+        <copy todir="${dist}">
+            <fileset dir=".">
+                <include name="*/dist/*.xar"/>
             </fileset>
         </copy>
-        <generate-schema 
-            input.file="${server.src}/schema/jlptei.xml" 
-            output.dir="${server.build}/schema" 
-            temp.dir="${server.build}/temp" />
-        <generate-schema 
-            input.file="${server.src}/schema/linkage.xml" 
-            output.dir="${server.build}/schema" 
-            temp.dir="${server.build}/temp" />
-        <generate-schema 
-            input.file="${server.src}/schema/contributor.xml" 
-            output.dir="${server.build}/schema" 
-            temp.dir="${server.build}/temp" />
-        <generate-schema 
-            input.file="${server.src}/schema/bibliography.xml" 
-            output.dir="${server.build}/schema" 
-            temp.dir="${server.build}/temp" />
-        <generate-schema 
-            input.file="${server.src}/schema/annotation.xml" 
-            output.dir="${server.build}/schema" 
-            temp.dir="${server.build}/temp" />
-        <generate-schema 
-            input.file="${server.src}/schema/conditional.xml" 
-            output.dir="${server.build}/schema" 
-            temp.dir="${server.build}/temp" />
-        <generate-schema 
-            input.file="${server.src}/schema/dictionary.xml" 
-            output.dir="${server.build}/schema" 
-            temp.dir="${server.build}/temp" />
-        <generate-schema 
-            input.file="${server.src}/schema/style.xml" 
-            output.dir="${server.build}/schema" 
-            temp.dir="${server.build}/temp" />
-        <delete dir="${server.build}/temp"/>
-	</target>
-	
-    <target name="templates"
-        depends="init"
-        description="copy templates to final versions">
-        <copy todir="${server.build}">
-            <fileset dir="${server.src}"/>
-            <mapper type="regexp" from="^(.+)\.tmpl\.(.+)$$" to="\1\.\2"/>
-        </copy>
     </target>
-
-    <target name="magic"
-        depends="init,templates"
-        description="Write magic.xqm">
-        <replace
-            file="${server.build}/magic/magic.xqm"
-            token="ADMINPASSWORD"
-            value="${adminpassword}">
-        </replace> 
-    </target>
-
-	<target name="server-xar" 
-		depends="schema,templates,magic"
-        description="generate the xar distribution" >
-        <copy todir="${server.build}">
-			<fileset dir="${server.src}">
-				<include name="**/*.html"/>
-				<include name="**/*.css"/>
-				<include name="**/*.js"/>
-				<include name="**/*.xml"/>
-				<include name="**/*.xq?"/>
-				<include name="**/*.xconf"/>
-				<include name="**/*.rnc"/>
-				<include name="**/*.xsl2"/>
-				<include name="img/*"/>
-				<exclude name="schema/*"/>
-				<exclude name="**/*.tmpl.*" />
-				<exclude name="**/*.xar" />
-				<exclude name="build.xml"/>
-			</fileset>
-        </copy>
-		<zip 
-            destfile="${dist}/opensiddur-server.xar" 
-            update="true"
-            basedir="${server.build}">
-		</zip>
-	</target>
 
 	<target name="clean"
         description="clean up" 
-		depends="exist-clean,hebmorph-exist-clean">
+		depends="exist-clean,hebmorph-exist-clean,server.clean">
 		<!-- Delete the ${build} and ${dist} directory trees -->
-	    <delete dir="${server.build}"/>
     	<delete dir="${dist}"/>
 	</target>
 </project>
