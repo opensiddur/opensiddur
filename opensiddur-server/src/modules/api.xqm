@@ -10,8 +10,6 @@ module namespace api="http://jewishliturgy.org/modules/api";
 
 import module namespace app="http://jewishliturgy.org/modules/app"
 	at "app.xqm";
-import module namespace t="http://exist-db.org/xquery/testing/modified"
-  at "test2.xqm";
 
 declare default element namespace "http://www.w3.org/1999/xhtml"; 
 
@@ -738,23 +736,6 @@ declare function api:get-parameter(
   )[1]
 };
 
-
-(:~ run the given tests and return their results if the _test= query parameter is 
- : given and the method is GET. If this is not a testing call, return ()
- :)
-declare function api:tests(
-  $test-source as xs:string
-  ) as element()? {
-  let $test-param := request:get-parameter("_test", ())
-  let $test-to-run := ($test-param[doc-available(.)], $test-source)[1]
-  return
-    if (api:get-method() = "GET" and $test-param)
-    then (
-      api:serialize-as("xhtml"),
-      t:format-testResult(t:run-testSuite(doc($test-to-run)/*))
-    )
-  else ()
-};
 
 (:~ temporary function to handle rest:response elements
  : and convert them to response:* function calls
