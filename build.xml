@@ -6,7 +6,7 @@
     <property name="dist" location="dist"/>
 
     <include file="opensiddur-server/build.xml" as="server"/>
-    
+    <include file="opensiddur-tests/build.xml" as="tests"/>    
 
 	<target name="init">
 		<!-- Create the time stamp -->
@@ -55,7 +55,7 @@
         <ant antfile="build.xml" dir="${lib.dir}/hebmorph-exist" target="clean" inheritAll="false"/>
     </target>
 	
-	<target name="dist" depends="init,hebmorph-exist,server.dist"
+	<target name="dist" depends="init,hebmorph-exist,server.dist,tests.dist"
 		description="build everything">
         <copy todir="${dist}">
             <fileset dir=".">
@@ -66,7 +66,7 @@
 
 	<target name="clean"
         description="clean up" 
-		depends="exist-clean,hebmorph-exist-clean,server.clean">
+		depends="exist-clean,hebmorph-exist-clean,server.clean,tests.clean">
 		<!-- Delete the ${build} and ${dist} directory trees -->
     	<delete dir="${dist}"/>
 	</target>

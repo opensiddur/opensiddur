@@ -6,7 +6,7 @@
   <status>alpha</status>
   <license>GNU-LGPL</license>
   <copyright>true</copyright>
-  <type>library</type>
+  <type>application</type>
   <target>opensiddur-tests</target> 
   <!--
   <prepare>pre-install.xql</prepare>
