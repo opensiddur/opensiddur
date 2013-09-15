@@ -28,7 +28,7 @@ return
 util:log-system-out("install default styles..."),
 (: add $target/data/styles/generic.xml using sty:post() or sty:put() :)
 let $old-doc := doc("/db/data/styles/en/generic.xml") 
-let $doc := doc($target || "/data/styles/generic.xml")
+let $doc := doc($target || "/data/styles/en/generic.xml")
 return
   if (exists($old-doc))
   then sty:put-xml("generic", $doc)

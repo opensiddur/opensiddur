@@ -5,14 +5,6 @@
       <create qname="@xml:id" type="xs:string"/>
     </index>
     <triggers>
-        <!--trigger class="org.exist.collections.triggers.XQueryTrigger">
-            <parameter name="url" value="xmldb:exist:///db/code/triggers/global-trigger.xqm"/>
-            <parameter name="document-uri" value="1"/>
-            <parameter name="update-record" value="0"/>
-            <parameter name="reference-index" value="0"/>
-        </trigger-->
-        <!--trigger class="org.exist.collections.triggers.XQueryTrigger">
-            <parameter name="url" value="xmldb:exist:///db/code/triggers/uri-index.xql"/>
-        </trigger-->
+      <trigger class="org.exist.extensions.exquery.restxq.impl.RestXqTrigger"/>
     </triggers>
 </collection>
