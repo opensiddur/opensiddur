@@ -57,7 +57,7 @@
         <mkdir dir="${dist}"/>
 	</target>
 
-	<target name="dist" depends="init,server-xar"
+	<target name="dist" depends="init,xar"
 		description="build everything"/>
 
 	<target name="schema" 
@@ -123,7 +123,7 @@
         </replace> 
     </target>
 
-	<target name="server-xar" 
+	<target name="xar" 
 		depends="schema,templates,magic"
         description="generate the xar distribution" >
         <copy todir="${build}">

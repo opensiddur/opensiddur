@@ -5,9 +5,6 @@
     <property name="lib.dir" location="lib"/>
     <property name="dist" location="dist"/>
 
-    <include file="opensiddur-server/build.xml" as="server"/>
-    <include file="opensiddur-tests/build.xml" as="tests"/>    
-
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp/>
@@ -24,7 +21,7 @@
         <mkdir dir="${dist}"/>
 	</target>
 
-	<target name="exist" depends="init">
+	<target name="exist" depends="init,autodeploy">
 		<!-- ./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true -Dinclude.feature.security.oauth=true -Dinclude.feature.security.openid=true -->
 		<exec 
 			executable="./build.sh" 
@@ -44,21 +41,29 @@
 			<arg value="clean"/>
 		</exec>
 	</target>
-    
-    <target name="hebmorph-exist" depends="init">
-        <ant antfile="build.xml" dir="${lib.dir}/hebmorph-exist" target="dist" inheritAll="false"/>
-        <copy todir="${dist}" file="${lib.dir}/hebmorph-exist/dist/hebmorph-exist.xar">
-        </copy>
-    </target>
-    
-    <target name="hebmorph-exist-clean">
-        <ant antfile="build.xml" dir="${lib.dir}/hebmorph-exist" target="clean" inheritAll="false"/>
-    </target>
 	
-	<target name="dist" depends="init,hebmorph-exist,server.dist,tests.dist"
+	<target name="autodeploy" 
+		depends="dist"
+		description="set up built xars for autodeployment">
+		<copy todir="${lib.dir}/exist/autodeploy">
+			<fileset dir="${dist}">
+				<include name="*.xar"/>
+			</fileset>
+		</copy>
+	</target>
+    
+	<target name="dist" depends="init"
 		description="build everything">
-        <copy todir="${dist}">
+		<subant target="dist" inheritAll="false">
+			<fileset dir=".">
+				<include name="*/build.xml"/>
+				<include name="lib/hebmorph-exist/build.xml"/>
+				<exclude name="build.xml"/>
+			</fileset>
+		</subant>
+        <copy todir="${dist}" flatten="true">
             <fileset dir=".">
+            	<include name="lib/*/dist/*.xar"/>
                 <include name="*/dist/*.xar"/>
             </fileset>
         </copy>
@@ -66,9 +71,17 @@
 
 	<target name="clean"
         description="clean up" 
-		depends="exist-clean,hebmorph-exist-clean,server.clean,tests.clean">
+		depends="exist-clean">
+		<subant target="clean" inheritAll="false">
+			<fileset dir=".">
+				<include name="*/build.xml"/>
+				<include name="lib/hebmorph-exist/build.xml"/>
+				<exclude name="build.xml"/>
+			</fileset>
+		</subant>
+
 		<!-- Delete the ${build} and ${dist} directory trees -->
-    	<delete dir="${dist}"/>
+		<delete dir="${dist}"/>
 	</target>
 </project>
 
