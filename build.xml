@@ -5,6 +5,9 @@
     <property name="lib.dir" location="lib"/>
     <property name="dist" location="dist"/>
 
+    <property file="local.build.properties"/>
+    <property file="build.properties"/>
+
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp/>
@@ -21,16 +24,28 @@
         <mkdir dir="${dist}"/>
 	</target>
 
-	<target name="exist" depends="init,autodeploy">
+    <target name="exist" depends="build-exist,autodeploy">
+    </target>
+
+	<target name="build-exist" depends="init">
 		<!-- ./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true -Dinclude.feature.security.oauth=true -Dinclude.feature.security.openid=true -->
 		<exec 
 			executable="./build.sh" 
 			dir="${lib.dir}/exist">
 			<arg value="installer"/>
-			<arg value="-Dizpack.dir=${izpack}"/>
+			<arg value="-Dizpack.dir=${lib.dir}/IzPack"/>
 			<arg value="-Dinclude.module.scheduler=true"/>
 			<arg value="-Dinclude.feature.security.oauth=true"/>
 			<arg value="-Dinclude.feature.security.openid=true"/>
+		</exec>
+	</target>
+	
+	<target name="install-exist" depends="build-exist">
+		<exec
+			executable="java"
+			dir="${lib.dir}/exist/installer">
+			<arg value="eXist-db-setup-2.1-rev.jar"/>
+			<arg value="-console"/>
 		</exec>
 	</target>
 	
@@ -43,9 +58,9 @@
 	</target>
 	
 	<target name="autodeploy" 
-		depends="dist"
+		depends="dist,install-exist"
 		description="set up built xars for autodeployment">
-		<copy todir="${lib.dir}/exist/autodeploy">
+		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
 				<include name="*.xar"/>
 			</fileset>

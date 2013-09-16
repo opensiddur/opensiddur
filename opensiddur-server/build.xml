@@ -13,9 +13,9 @@
     <property name="roma" location="${lib.dir}/tei/Roma/roma2.sh"/>
 
 	<!-- set local properties for the build -->
-	<property file="local.build.properties"/>
+	<property file="../local.build.properties"/>
     <!-- set global default properties for the build -->
-    <property file="build.properties"/>
+    <property file="../build.properties"/>
 	
     <macrodef name="generate-schema" 
         description="generate a schema from ODD source">
@@ -45,14 +45,21 @@
                     <include name="*.xsl2" />
                 </fileset>
             </copy>
-            <delete dir="@{temp.dir}"/>
         </sequential>
     </macrodef>
 
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp/>
-        <!-- make build dirs -->
+		
+		<uptodate property="schema.uptodate">
+			<srcfiles dir="${src}/schema">
+				<include name="*.xml"/>
+				<exclude name="*common*.xml"/>
+			</srcfiles>
+			<mapper type="glob" from="*.xml" to="${build}/schema/*.xsl2"/>
+		</uptodate>
+		<!-- make build dirs --> 
         <mkdir dir="${build}"/>
         <mkdir dir="${dist}"/>
 	</target>
@@ -61,7 +68,9 @@
 		description="build everything"/>
 
 	<target name="schema" 
-		description="generate XML schemas">
+		depends="init"
+		description="generate XML schemas"
+		unless="schema.uptodate">
         <mkdir dir="${build}/schema"/>
         <mkdir dir="${build}/temp"/>
         <copy todir="${build}/schema">
@@ -69,7 +78,7 @@
                 <include name="*.rnc"/>
             </fileset>
         </copy>
-        <generate-schema 
+		<generate-schema 
             input.file="${src}/schema/jlptei.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
