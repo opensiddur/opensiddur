@@ -8,8 +8,8 @@
   <copyright>true</copyright>
   <type>application</type>
   <target>opensiddur-tests</target> 
-  <!--
   <prepare>pre-install.xql</prepare>
+  <!--
   <finish>post-install.xql</finish>
   -->
   <permissions user="admin" password="" group="dba" mode="rw-rw-r--"/>
