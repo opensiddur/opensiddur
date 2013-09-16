@@ -12,13 +12,13 @@ text/wlc/
 opensiddur-server/schema/build
 
 # generated dist dir
+build/
 dist/
 
 # generated files:
 opensiddur-server/src/common/params.xsl2
 opensiddur-server/setup/setup.xql
 opensiddur-server/setup/eXist-installer.xml
-opensiddur-server/build/
 
 # db directory except special
 db/*
