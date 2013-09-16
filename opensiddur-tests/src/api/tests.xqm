@@ -13,6 +13,9 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
     at "/db/apps/opensiddur-server/modules/common-rest.xqm";
 
+declare namespace expath="http://expath.org/ns/pkg";
+declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+
 declare variable $tests:repo-base :=
   let $descriptor := 
     collection(repo:get-root())//expath:package[@name = "http://jewishliturgy.org/apps/opensiddur-tests"]
@@ -64,13 +67,13 @@ declare function tests:do-list(
             <ul class="results">{
                 for $result in collection($tests:path-base)/TestSuite
                 let $api-suite-name :=
-                    replace(util:collection-name($result), $tests:path-base, "") ||
+                    replace(util:collection-name($result), $tests:path-base, "") || "/" ||
                     replace(util:document-name($result), "\.t\.xml$", "")
                 order by document-uri($result) ascending
                 return
                     <li class="result">
                         <a class="document" href="{$tests:api-path-base}?suite={$api-suite-name}">{
-                            $result//SuiteName/string()
+                            $result//suiteName/string()
                         }</a>
                     </li>
             }</ul>
