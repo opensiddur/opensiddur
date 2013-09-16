@@ -3,11 +3,23 @@
         Build file for opensiddur
     </description>
     <property name="lib.dir" location="lib"/>
+	<property name="build" location="build"/>
     <property name="dist" location="dist"/>
 
     <property file="local.build.properties"/>
     <property file="build.properties"/>
-
+    <!--	
+	<path id="classpath.core">
+	    <fileset dir="${lib.dir}/exist/lib/core">
+	        <include name="*.jar"/>
+	    </fileset>
+	    <pathelement path="${lib.dir}/exist/exist.jar"/>
+	    <pathelement path="${lib.dir}/exist/exist-optional.jar"/>
+	</path>
+	<typedef resource="org/exist/ant/antlib.xml" uri="http://exist-db.org/ant">
+	    <classpath refid="classpath.core"/>
+	</typedef>
+	-->
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp/>
@@ -21,6 +33,7 @@
 		    <arg value="update"/>
 		</exec>
         <!-- make build dirs -->
+		<mkdir dir="${build}"/>
         <mkdir dir="${dist}"/>
 	</target>
 
@@ -40,15 +53,40 @@
 		</exec>
 	</target>
 	
-	<target name="install-exist" depends="build-exist">
+	<target name="install-exist" depends="init,build-exist"
+		xmlns:xdb="http://exist-db.org/ant">
+		<echo file="${build}/install-options.xml" append="false">
+INSTALL_PATH=${installdir}
+dataDir=webapp/WEB-INF/data
+divider=
+space=
+MAX_MEMORY=${max.memory}
+cacheSize=${cache.size}
+		</echo>
 		<exec
 			executable="java"
 			dir="${lib.dir}/exist/installer">
 			<arg value="-jar"/>
 			<arg value="eXist-db-setup-2.1-rev.jar"/>
 			<arg value="-console"/>
+			<arg value="-options"/>
+			<arg file="${build}/install-options.xml"/>
 		</exec>
-	</target>
+		<delete file="${build}/install-options.xml"/>
+		<!-- default password has been changed to 'password' -->
+        <exec
+            executable="${installdir}/bin/client.sh"
+            dir="${installdir}"
+            inputstring="sm:passwd('admin','${adminpassword}')"
+            >
+            <arg value="-qls"/>
+            <arg value="-u"/>
+            <arg value="admin"/>
+            <arg value="-P"/>
+            <arg value="password"/>
+            <arg value="-x"/>
+        </exec>
+    </target>
 	
 	<target name="exist-clean">
 		<exec 
@@ -97,6 +135,7 @@
 		</subant>
 
 		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}"/>
 		<delete dir="${dist}"/>
 	</target>
 </project>
