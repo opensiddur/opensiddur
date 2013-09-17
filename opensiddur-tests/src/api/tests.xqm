@@ -49,6 +49,17 @@ declare
         else api:rest-error(400, "There can be at most 1 suite parameter", $suite)
 };
 
+declare function tests:list-function(
+    ) as element(TestSuite)* {
+    collection($tests:path-base)/TestSuite
+};
+
+declare function tests:title-function(
+    $doc as document-node()
+    ) as xs:string {
+    ($doc/TestSuite/suiteName[1]/string(), replace(document-uri($doc), $tests:path-base || "/", "") )[1]
+};
+
 declare function tests:do-list(
     ) as item()+ {
     (: this is like crest:list() but different enough that it
@@ -65,15 +76,16 @@ declare function tests:do-list(
         </head>
         <body>
             <ul class="results">{
-                for $result in collection($tests:path-base)/TestSuite
-                let $api-suite-name :=
-                    replace(util:collection-name($result), $tests:path-base, "") || "/" ||
-                    replace(util:document-name($result), "\.t\.xml$", "")
-                order by document-uri($result) ascending
+                for $result in tests:list-function()
+                let $root := root($result)
+                let $api-suite-name := 
+                    replace(util:collection-name($root), $tests:path-base, "") || "/" ||
+                    replace(util:document-name($root), "\.t\.xml$", "")
+                order by document-uri($root) ascending
                 return
                     <li class="result">
                         <a class="document" href="{$tests:api-path-base}?suite={$api-suite-name}">{
-                            $result//suiteName/string()
+                            tests:title-function($root)   
                         }</a>
                     </li>
             }</ul>
