@@ -19,18 +19,16 @@ util:log-system-out("setup format..."),
 format:setup(),
 util:log-system-out("install default sources..."),
 (: add $target/data/sources/Born Digital using src:post() or src:put() :)
-let $old-doc := doc("/db/data/sources/Born%20Digital.xml") 
-let $doc := doc($target || "/data/sources/Born%20Digital.xml")
-return
-  if (exists($old-doc))
-  then src:put("Born%20Digital", $doc)
-  else src:post($doc),
+xmldb:store(
+    "/db/data/sources",
+    "Born%20Digital.xml",
+    doc($target || "/data/sources/Born%20Digital.xml")
+    ),
 util:log-system-out("install default styles..."),
 (: add $target/data/styles/generic.xml using sty:post() or sty:put() :)
-let $old-doc := doc("/db/data/styles/en/generic.xml") 
-let $doc := doc($target || "/data/styles/en/generic.xml")
-return
-  if (exists($old-doc))
-  then sty:put-xml("generic", $doc)
-  else sty:post($doc),
+xmldb:store(
+    "/db/data/styles/en",
+    "generic.xml",
+    doc($target || "/data/styles/en/generic.xml")
+    ),
 util:log-system-out("done")

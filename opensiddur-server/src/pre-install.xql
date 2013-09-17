@@ -121,7 +121,7 @@ let $collections :=
         <collection name="notes" perms="rwxrwxr-x">{local:lang-collections()}</collection>
         <collection name="original" perms="rwxrwxr-x">{local:lang-collections()}</collection>
         <collection name="sources" perms="rwxrwxr-x"/>
-        <collection name="styles" perms="rwxrwxr-x"/>
+        <collection name="styles" perms="rwxrwxr-x">{local:lang-collections()}</collection>
         <collection name="transliteration" perms="rwxrwxr-x"/>
         <collection name="user" perms="rwxrwxr-x"/>
       </collection>
