@@ -11,6 +11,6 @@ declare function local:create-user(
 
 util:log-system-out("Adding test users..."),
 for $user in ('testuser', 'testuser2')
-return local:create-user($user)
+return local:create-user($user),
 util:log-system-out("Done.")
 
