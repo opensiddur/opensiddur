@@ -3,6 +3,7 @@
         Build file for opensiddur
     </description>
     <property name="lib.dir" location="lib"/>
+	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-2.1-rev.jar"/>
 	<property name="build" location="build"/>
     <property name="dist" location="dist"/>
 
@@ -32,7 +33,16 @@
 		    <arg value="submodule"/>
 		    <arg value="update"/>
 		</exec>
-        <!-- make build dirs -->
+       
+		<uptodate property="exist.uptodate" targetfile="${installer}">
+			<srcfiles dir="${lib.dir}/exist">
+				<include name="**/*.java"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.tmpl"/>
+				<exclude name="${installer}"/>
+			</srcfiles>
+		</uptodate>
+		<!-- make build dirs -->
 		<mkdir dir="${build}"/>
         <mkdir dir="${dist}"/>
 	</target>
@@ -40,7 +50,7 @@
     <target name="exist" depends="build-exist,autodeploy">
     </target>
 
-	<target name="build-exist" depends="init">
+	<target name="build-exist" depends="init" unless="exist.uptodate">
 		<!-- ./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true -Dinclude.feature.security.oauth=true -Dinclude.feature.security.openid=true -->
 		<exec 
 			executable="./build.sh" 
@@ -65,9 +75,9 @@ cacheSize=${cache.size}
 		</echo>
 		<exec
 			executable="java"
-			dir="${lib.dir}/exist/installer">
+			dir=".">
 			<arg value="-jar"/>
-			<arg value="eXist-db-setup-2.1-rev.jar"/>
+			<arg value="${installer}"/>
 			<arg value="-console"/>
 			<arg value="-options"/>
 			<arg file="${build}/install-options.xml"/>
