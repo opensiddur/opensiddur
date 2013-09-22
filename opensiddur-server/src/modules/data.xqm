@@ -52,7 +52,7 @@ declare function data:db-path-to-api(
 	    return
 	      if ($level[2] = "user")
 	      then
-	        api:uri-of(data:user-api-path($resource-name))
+	        data:user-api-path($resource-name)
 	      else 
     	    string-join(
     	      ( api:uri-of("/api/data"), 

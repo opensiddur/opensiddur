@@ -12,7 +12,7 @@
   <password>testuser</password>
   <imports>
     import module namespace data="http://jewishliturgy.org/modules/data"
-      at "xmldb:exist:///db/code/api/modules/data.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/data.xqm";
   </imports>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
@@ -59,7 +59,7 @@
       <code><![CDATA[
         data:db-path-to-api("/db/data/user/testuser.xml")
       ]]></code>
-      <expected desc="API path">/api/user/testuser</expected>
+      <expected desc="API path">/exist/restxq/api/user/testuser</expected>
     </test>
     <test output="text">
       <task>In /data/user hierarchy, user does not exist</task>
@@ -73,7 +73,7 @@
       <code><![CDATA[
         data:db-path-to-api("/db/data/original/en/1900/01/test.xml")
       ]]></code>
-      <expected desc="API path">/api/data/original/test</expected>
+      <expected desc="API path">/exist/restxq/api/data/original/test</expected>
     </test>
     <test output="text">
       <task>In /data/original hierarchy, document does not exist</task>
