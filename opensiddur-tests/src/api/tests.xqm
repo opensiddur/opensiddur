@@ -84,7 +84,7 @@ declare function tests:do-list(
                 order by document-uri($root) ascending
                 return
                     <li class="result">
-                        <a class="document" href="{$tests:api-path-base}?suite={$api-suite-name}">{
+                        <a class="document" href="{api:uri-of($tests:api-path-base)}?suite={$api-suite-name}">{
                             tests:title-function($root)   
                         }</a>
                     </li>
@@ -98,7 +98,7 @@ declare function tests:do-test(
     $suite as xs:string,
     $test as xs:string?
     ) as item()+ {
-    let $suite-doc := concat($tests:path-base, $suite) 
+    let $suite-doc := concat($tests:path-base, $suite, ".t.xml") 
     return
         if (exists(doc($suite-doc)))
         then (
@@ -110,8 +110,8 @@ declare function tests:do-test(
             t:format-testResult(
                 if ($test)
                 then t:run-testSet(doc($suite-doc)//TestSet[TestName=$test], (), ())
-                else t:run-testSuite($suite-doc, (), ())
+                else t:run-testSuite(doc($suite-doc)/TestSuite, (), ())
             )
         )
-        else api:error(404, "Not found", $suite)
+        else api:rest-error(404, "Not found", $suite)
 };
