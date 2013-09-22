@@ -88,14 +88,14 @@
       <code><![CDATA[
       sty:get-xml("DoesNotExist")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>Get a resource with no read access</task>
       <code><![CDATA[
       sty:get-xml("NoAccess")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -112,14 +112,14 @@
       <code><![CDATA[
       sty:get-css("DoesNotExist")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>Get a resource with no read access</task>
       <code><![CDATA[
       sty:get-css("NoAccess")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -134,7 +134,7 @@
         every $li in .//html:li[@class="result"] 
         satisfies exists($li/html:a[@class="alt"][@property="access"])
       </xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
     <test>
       <task>List some resources</task>
@@ -142,7 +142,7 @@
         sty:list("", 1, 2)
       ]]></code>
       <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
     <test>
       <task>Respond to a query</task>
@@ -150,7 +150,7 @@
         sty:list("Query", 1, 100)
       ]]></code>
       <xpath desc="returns 1 results">count(.//html:ol[@class="results"]/html:li)=1</xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
   </TestSet>
   <TestSet>
@@ -160,28 +160,28 @@
       <code><![CDATA[
       sty:delete("Existing")
       ]]></code>
-      <class href="../common.t.xml#NoData"/>
+      <class href="../common.t.incl.xml#NoData"/>
     </test>
     <test>
       <task>Remove a nonexisting resource</task>
       <code><![CDATA[
       sty:delete("DoesNotExist")
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>Remove a resource without write access</task>
       <code><![CDATA[
       sty:delete("NoWriteAccess")
       ]]></code>
-      <class href="../common.t.xml#Forbidden"/>
+      <class href="../common.t.incl.xml#Forbidden"/>
     </test>
     <test ignore="yes">
       <task>Remove a resource that has external references</task>
       <code><![CDATA[
       sty:delete("ExternalReference")
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
   </TestSet>
   <TestSet>
@@ -202,7 +202,7 @@
       <code><![CDATA[
       sty:post(doc("/db/code/tests/api/data/styles/Valid.xml"))
       ]]></code>
-      <class href="../common.t.xml#Created"/>
+      <class href="../common.t.incl.xml#Created"/>
       <expected 
         desc="a change record has been added"
         xpath="collection('/db/data/styles/en')[util:document-name(.)=tokenize($output//http:header[@name='Location']/@value,'/')[count(.)] || '.xml']//tei:revisionDesc/tei:change[1]">
@@ -214,7 +214,7 @@
       <code><![CDATA[
       sty:post(doc("/db/code/tests/api/data/styles/Invalid.xml"))
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
   </TestSet>
   <TestSet>
@@ -224,7 +224,7 @@
       <code><![CDATA[
       sty:put-xml("Existing", doc("/db/code/tests/api/data/styles/Existing-After-Put.xml"))
       ]]></code>
-      <class href="../common.t.xml#NoData"/>
+      <class href="../common.t.incl.xml#NoData"/>
       <expected 
         desc="a change record has been added"
         xpath="(collection('/db/data/styles/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change)[1]">
@@ -242,7 +242,7 @@
       <code><![CDATA[
       sty:put-xml("Existing", doc("/db/code/tests/api/data/styles/Invalid.xml"))
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
   </TestSet>
   <TestSet>
@@ -252,7 +252,7 @@
       <code><![CDATA[
       sty:put-css("Existing", ".tei-div { display:none; }")
       ]]></code>
-      <class href="../common.t.xml#NoData"/>
+      <class href="../common.t.incl.xml#NoData"/>
       <xpath desc="j:stylesheet content changed">contains(
         (collection('/db/data/styles/en')
           [util:document-name(.)='Existing.xml']//j:stylesheet[@scheme="css"])[1], 
@@ -274,7 +274,7 @@
       <code><![CDATA[
       sty:put-css("Existing", "xxxx")
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
   </TestSet>
   <TestSet>
@@ -300,14 +300,14 @@
       <code><![CDATA[
       sty:get-xml("NoAccess")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>sty:get-xml(): Get a nonexisting resource</task>
       <code><![CDATA[
       sty:get-xml("DoesNotExist")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>sty:list(): Get a list of all resources</task>
@@ -316,56 +316,56 @@
       ]]></code>
       <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
       <xpath desc="does not list resource with no read access">empty(.//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])</xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
     <test>
       <task>sty:delete(): Remove an existing resource</task>
       <code><![CDATA[
       sty:delete("Existing")
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>sty:delete(): Remove a nonexisting resource</task>
       <code><![CDATA[
       sty:delete("DoesNotExist")
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>sty:post(): Post a resource</task>
       <code><![CDATA[
       sty:post(doc("/db/code/tests/api/data/styles/Valid.xml"))
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>sty:put-xml(): Put an existing resource</task>
       <code><![CDATA[
       sty:put-xml("Existing", doc("/db/code/tests/api/data/styles/Existing.xml"))
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>sty:put-xml(): Put a nonexisting resource</task>
       <code><![CDATA[
       sty:put-xml("DoesNotExist", doc("/db/code/tests/api/data/styles/Existing.xml"))
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>sty:put-css(): Put an existing resource</task>
       <code><![CDATA[
       sty:put-css("Existing", ".tei-div { display:none;}")
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>sty:put-css(): Put a nonexisting resource</task>
       <code><![CDATA[
       sty:put-css("DoesNotExist", ".tei-div { display:none;}")
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>sty:get-access()</task>
@@ -385,7 +385,7 @@
         </a:access>
         })
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
   </TestSet>
   <TestSet>
@@ -402,7 +402,7 @@
       <code><![CDATA[
       sty:get-access("DoesNotExist", ())
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -418,7 +418,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#NoData"/>
+      <class href="../common.t.incl.xml#NoData"/>
     </test>
     <test>
       <task>With an invalid access structure</task>
@@ -429,7 +429,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>For a resource with no write access</task>
@@ -442,7 +442,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#Forbidden"/>
+      <class href="../common.t.incl.xml#Forbidden"/>
     </test>
     <test>
       <task>For a nonexistent resource</task>
@@ -455,7 +455,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
 </TestSuite>

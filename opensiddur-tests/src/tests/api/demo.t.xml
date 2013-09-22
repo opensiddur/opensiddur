@@ -61,7 +61,7 @@
       <code><![CDATA[
       demo:list()
       ]]></code>
-      <class href="common.t.xml#DiscoveryAPI"/>
+      <class href="common.t.incl.xml#DiscoveryAPI"/>
     </test>
     <test>
       <task>demo:transliteration-list()</task>

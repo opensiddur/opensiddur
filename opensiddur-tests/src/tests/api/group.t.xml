@@ -119,7 +119,7 @@
       <code><![CDATA[
       grp:get-xml("doesnotexist")
       ]]></code> 
-      <class href="common.t.xml#NotFound"/>
+      <class href="common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -137,7 +137,7 @@
       <code><![CDATA[
       grp:get-html("doesnotexist")
       ]]></code> 
-      <class href="common.t.xml#NotFound"/>
+      <class href="common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -156,7 +156,7 @@
       <code><![CDATA[
       grp:get-user-groups("doesnotexist")
       ]]></code>
-      <class href="common.t.xml#NotFound"/>
+      <class href="common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -180,7 +180,7 @@
       <code><![CDATA[
       grp:put("grouptestsnew", $valid)
       ]]></code>
-      <class href="common.t.xml#Created"/>
+      <class href="common.t.incl.xml#Created"/>
       <xpath desc="group has been created">grp:get-groups()="grouptestsnew"</xpath>
       <xpath desc="group managers are as specified">
         every $m in $valid//g:member[xs:boolean(@manager)] satisfies grp:get-group-managers("grouptestsnew")=$m</xpath>
@@ -199,7 +199,7 @@
         </g:group>
       })
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="the new user has been added to the group">grp:get-group-members("grouptests")="testuser6"</xpath>
     </test>
     <test>
@@ -211,7 +211,7 @@
         </g:group>
       })
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="the member has been removed">not(grp:get-group-members("grouptests")="testuser5")</xpath>
     </test>
     <test>
@@ -224,7 +224,7 @@
         </g:group>
       })
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="the member is now a manager">grp:get-group-managers("grouptests")="testuser5"</xpath>
     </test>
     <test>
@@ -237,7 +237,7 @@
         </g:group>
       })
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="the member is no longer a manager">not(grp:get-group-managers("grouptests")="testuser")</xpath>
       <xpath desc="the member is still a member">grp:get-group-members("grouptests")="testuser"</xpath>
     </test>
@@ -246,7 +246,7 @@
       <code><![CDATA[
       grp:put("grouptests", $valid)
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="admin is still a group manager">grp:get-group-managers("grouptests")="admin"</xpath>
     </test>
     <test>
@@ -254,14 +254,14 @@
       <code><![CDATA[
       grp:put("grouptests", $invalid)
       ]]></code>
-      <class href="common.t.xml#BadRequest"/>
+      <class href="common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>For an existing group of which user is not a manager</task>
       <code><![CDATA[
       grp:put("grouptests2", $valid)
       ]]></code>
-      <class href="common.t.xml#Forbidden"/>
+      <class href="common.t.incl.xml#Forbidden"/>
     </test>
   </TestSet>
   <TestSet>
@@ -271,7 +271,7 @@
       <code><![CDATA[
       grp:delete("grouptests")
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="group is deleted">not(grp:get-groups()="grouptests")</xpath>
       <xpath desc="user is not a member of the group">not(sm:get-user-groups("testuser")="grouptests")</xpath>
     </test>
@@ -282,14 +282,14 @@
         grp:delete("grouptests")
       )
       ]]></code>
-      <class href="common.t.xml#Forbidden"/>
+      <class href="common.t.incl.xml#Forbidden"/>
     </test>
     <test>
       <task>For a non-existent group</task>
       <code><![CDATA[
       grp:delete("doesnotexist")
       ]]></code>
-      <class href="common.t.xml#NotFound"/>
+      <class href="common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -308,70 +308,70 @@
       <code><![CDATA[
       grp:get-xml("grouptests")
       ]]></code> 
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>grp:get-xml() for a non-existing group</task>
       <code><![CDATA[
       grp:get-xml("doesnotexist")
       ]]></code> 
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>grp:get-html() for members of an existing group</task>
       <code><![CDATA[
       grp:get-html("grouptests")
       ]]></code> 
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>grp:get-html() for members of a non-existing group</task>
       <code><![CDATA[
       grp:get-html("doesnotexist")
       ]]></code> 
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>  
     <test>
       <task>grp:get-user-groups() for an existing user</task>
       <code><![CDATA[
       grp:get-user-groups("testuser")
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>grp:get-user-groups() for a non-existing user</task>
       <code><![CDATA[
       grp:get-user-groups("doesnotexist")
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>grp:put() for an existing group</task>
       <code><![CDATA[
       grp:put("grouptests", $valid)
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>grp:put() for a nonexisting group</task>
       <code><![CDATA[
       grp:put("doesnotexist", $valid)
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>grp:delete() for an existing group</task>
       <code><![CDATA[
       grp:delete("grouptests")
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>grp:delete() for a nonexisting group</task>
       <code><![CDATA[
       grp:delete("doesnotexist")
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
   </TestSet>
 </TestSuite>

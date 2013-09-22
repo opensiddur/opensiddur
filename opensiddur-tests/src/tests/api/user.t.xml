@@ -82,7 +82,7 @@
       <code><![CDATA[
       user:list("", 1, 100)
       ]]></code> 
-      <class href="common.t.xml#SearchResults"/>
+      <class href="common.t.incl.xml#SearchResults"/>
       <xpath desc="returns at least 4 results">count(.//html:*[@class="result"])&gt;=4</xpath>
       <xpath desc="groups view is presented as an alternate">
         exists(.//html:li[@class="result"]/html:a[@class="document"]) and (
@@ -95,7 +95,7 @@
       <code><![CDATA[
       user:list("spike", 1, 100)
       ]]></code> 
-      <class href="common.t.xml#SearchResults"/>
+      <class href="common.t.incl.xml#SearchResults"/>
       <xpath desc="returns at least 2 results">count(.//html:*[@class="result"])&gt;=2</xpath>
     </test>
   </TestSet>
@@ -118,7 +118,7 @@
       <code><![CDATA[
       user:get("doesnotexist")
       ]]></code> 
-      <class href="common.t.xml#NotFound"/>
+      <class href="common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -133,7 +133,7 @@
       <code><![CDATA[
       user:get("doesnotexist")
       ]]></code> 
-      <class href="common.t.xml#NotFound"/>
+      <class href="common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -176,7 +176,7 @@
         </new>
       })
       ]]></code> 
-      <class href="common.t.xml#Created"/>
+      <class href="common.t.incl.xml#Created"/>
       <xpath desc="user has been created">system:as-user("admin", $magic:password, sm:user-exists("testuser3"))</xpath>
       <xpath desc="group has been created">system:as-user("admin", $magic:password, sm:group-exists("testuser3"))</xpath>
       <xpath desc="user is a manager of its own group">system:as-user("admin", $magic:password, sm:get-group-managers("testuser3")="testuser3")</xpath>
@@ -197,7 +197,7 @@
         </new>
       })
       ]]></code>
-      <class href="common.t.xml#BadRequest"/> 
+      <class href="common.t.incl.xml#BadRequest"/> 
     </test>
     <test>
       <task>Create a new user with blank password</task>
@@ -209,7 +209,7 @@
         </new>
       })
       ]]></code>
-      <class href="common.t.xml#BadRequest"/> 
+      <class href="common.t.incl.xml#BadRequest"/> 
     </test>
     <test>
       <task>Create a new user when the user already exists</task>
@@ -221,7 +221,7 @@
         </new>
       })
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>Create a new user when no user exists, but a profile exists</task>
@@ -233,7 +233,7 @@
         </new>
       })
       ]]></code> 
-      <class href="common.t.xml#Forbidden"/>
+      <class href="common.t.incl.xml#Forbidden"/>
     </test>
   </TestSet>
   <TestSet>
@@ -258,7 +258,7 @@
         })
       )
       ]]></code> 
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="password is changed">xmldb:authenticate("/db", "testuser2", "testusernewpassword")</xpath>
     </test>
     <test>
@@ -271,7 +271,7 @@
         </change>
       })
       ]]></code>
-      <class href="common.t.xml#Forbidden"/> 
+      <class href="common.t.incl.xml#Forbidden"/> 
     </test>
     <test>
       <task>Missing username</task>
@@ -282,7 +282,7 @@
         </change>
       })
       ]]></code>
-      <class href="common.t.xml#BadRequest"/>
+      <class href="common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>Missing password</task>
@@ -293,7 +293,7 @@
         </change>
       })
       ]]></code>
-      <class href="common.t.xml#BadRequest"/>
+      <class href="common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>Attempt to change a username</task>
@@ -308,7 +308,7 @@
       <!-- forbidden because it's also an attempt to change 
       the password of another user
        -->
-      <class href="common.t.xml#Forbidden"/>
+      <class href="common.t.incl.xml#Forbidden"/>
     </test>
   </TestSet>
   <TestSet>
@@ -323,7 +323,7 @@
         </j:contributor>
       })
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="profile is edited">doc("/db/data/user/testuser.xml")/j:contributor/tei:name="Test User"</xpath>
     </test>
     <test>
@@ -336,7 +336,7 @@
         </j:contributor>
       })
       ]]></code>
-      <class href="common.t.xml#BadRequest"/>
+      <class href="common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>Edit your own profile, with invalid contributor data</task>
@@ -348,7 +348,7 @@
         </j:contributor>
       })
       ]]></code>
-      <class href="common.t.xml#BadRequest"/>
+      <class href="common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>Edit another user's profile</task>
@@ -360,7 +360,7 @@
         </j:contributor>
       })
       ]]></code>
-      <class href="common.t.xml#Forbidden"/>
+      <class href="common.t.incl.xml#Forbidden"/>
     </test>
     <test>
       <task>Create a non-user profile</task>
@@ -372,7 +372,7 @@
         </j:contributor>
       })
       ]]></code>
-      <class href="common.t.xml#Created"/>
+      <class href="common.t.incl.xml#Created"/>
       <xpath desc="profile created">doc-available("/db/data/user/not_a_real_contributors_profile.xml")</xpath>
       <xpath desc="profile mode is correct">sm:get-permissions(xs:anyURI("/db/data/user/not_a_real_contributors_profile.xml"))/*/(
         @owner="testuser" and @group="everyone" and @mode="rw-rw-r--"
@@ -388,7 +388,7 @@
         </j:contributor>
       })
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="profile edited">doc("/db/data/user/notauser.xml")/j:contributor/tei:name="Not A User"</xpath>
       <xpath desc="profile mode is correct">sm:get-permissions(xs:anyURI("/db/data/user/notauser.xml"))/*/(
         @owner="testuser" and @group="everyone" and @mode="rw-rw-r--"
@@ -433,7 +433,7 @@
         </j:contributor>
       })
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>Edit a non-user profile</task>
@@ -445,7 +445,7 @@
         </j:contributor>
       })
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>Create a profile</task>
@@ -457,7 +457,7 @@
         </j:contributor>
       })
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
   </TestSet>
   <TestSet>
@@ -506,7 +506,7 @@
         user:delete("testuser3")
       ))
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="user removed">not(sm:user-exists("testuser3"))</xpath>
       <xpath desc="group removed">not(sm:get-groups()="testuser3")</xpath>
       <xpath desc="profile removed">not(doc-available("/db/data/user/testuser3.xml"))</xpath>
@@ -518,7 +518,7 @@
         user:delete("testuser3")
       ))
       ]]></code>
-      <class href="common.t.xml#Forbidden"/>
+      <class href="common.t.incl.xml#Forbidden"/>
     </test>
     <test>
       <task>Delete a non-existent profile</task>
@@ -527,7 +527,7 @@
         user:delete("doesnotexist")
       ))
       ]]></code>
-      <class href="common.t.xml#NotFound"/>
+      <class href="common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>Delete a non-user profile</task>
@@ -543,7 +543,7 @@
       <code><![CDATA[
         user:delete("withreference")
       ]]></code>
-      <class href="common.t.xml#BadRequest"/>
+      <class href="common.t.incl.xml#BadRequest"/>
     </test>
   </TestSet>
   <TestSet>
@@ -555,21 +555,21 @@
       <code><![CDATA[
       user:delete("testuser")
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>Delete a non-user profile</task>
       <code><![CDATA[
       user:delete("notauser")
       ]]></code>
-      <class href="common.t.xml#Unauthorized"/>
+      <class href="common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>Delete a non-existent profile</task>
       <code><![CDATA[
       user:delete("doesnotexist")
       ]]></code>
-      <class href="common.t.xml#NotFound"/>
+      <class href="common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
 </TestSuite>

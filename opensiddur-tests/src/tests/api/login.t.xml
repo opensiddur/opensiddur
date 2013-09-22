@@ -25,12 +25,12 @@
       at "xmldb:exist:///code/modules/app.xqm";
   </imports>
   <TestClass xml:id="BadLogin">
-    <class href="common.t.xml#BadRequest"/>
+    <class href="common.t.incl.xml#BadRequest"/>
     <xpath desc="user is not set">empty(app:auth-user())</xpath>
     <xpath desc="password is not set">empty(app:auth-password())</xpath>
   </TestClass>
   <TestClass xml:id="LoggedOut">
-    <class href="common.t.xml#NoData"/>
+    <class href="common.t.incl.xml#NoData"/>
     <xpath desc="user is not set">empty(app:auth-user())</xpath>
     <xpath desc="password is not set">empty(app:auth-password())</xpath>
   </TestClass>
@@ -50,7 +50,7 @@
       <code><![CDATA[
         login:get-html((), (), ())
       ]]></code>
-      <class href="common.t.xml#SerializeHTML5"/>
+      <class href="common.t.incl.xml#SerializeHTML5"/>
       <expected xpath=".//html:div[@class='result']" desc="empty login name"><html:div class="result"/></expected>
     </test>
   </TestSet>
@@ -70,7 +70,7 @@
       <code><![CDATA[
         login:get-html((), (), ())
       ]]></code>
-      <class href="common.t.xml#SerializeHTML5"/>
+      <class href="common.t.incl.xml#SerializeHTML5"/>
       <expected xpath=".//html:div[@class='result']" desc="login name"><html:div class="result">testuser</html:div></expected>
     </test>
   </TestSet>
@@ -97,7 +97,7 @@
         </login>
       }, ())
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="user is set">app:auth-user()="testuser"</xpath>
       <xpath desc="password is set">app:auth-password()="testuser"</xpath>
     </test>
@@ -166,7 +166,7 @@
       <code><![CDATA[
       login:post-form("testuser", "testuser", ())
       ]]></code>
-      <class href="common.t.xml#NoData"/>
+      <class href="common.t.incl.xml#NoData"/>
       <xpath desc="user is set">app:auth-user()="testuser"</xpath>
       <xpath desc="password is set">app:auth-password()="testuser"</xpath>
     </test>

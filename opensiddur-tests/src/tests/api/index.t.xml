@@ -23,7 +23,7 @@
       <code><![CDATA[
         index:list()
       ]]></code>
-      <class href="common.t.xml#DiscoveryAPI"/>
+      <class href="common.t.incl.xml#DiscoveryAPI"/>
     </test>
   </TestSet>
 </TestSuite>

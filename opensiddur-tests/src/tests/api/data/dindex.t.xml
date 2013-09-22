@@ -26,8 +26,8 @@
       <code><![CDATA[
       dindex:list()
       ]]></code>
-      <class href="../common.t.xml#SerializeHTML5"/>
-      <class href="../common.t.xml#DiscoveryAPI"/>
+      <class href="../common.t.incl.xml#SerializeHTML5"/>
+      <class href="../common.t.incl.xml#DiscoveryAPI"/>
     </test>
   </TestSet>
   <TestSet>

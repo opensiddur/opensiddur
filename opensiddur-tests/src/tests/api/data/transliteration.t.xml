@@ -161,7 +161,7 @@
         every $li in .//html:li[@class="result"] 
         satisfies exists($li/html:a[@class="alt"][@property="access"])
       </xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
     <test>
       <task>List some resources</task>
@@ -169,7 +169,7 @@
         tran:list("", 1, 2)
       ]]></code>
       <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
     <test>
       <task>Respond to a query</task>
@@ -177,7 +177,7 @@
         tran:list("Test", 1, 100)
       ]]></code>
       <xpath desc="returns 3 results">count(.//html:ol[@class="results"]/html:li)=3</xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
   </TestSet>
   <TestSet>
@@ -346,28 +346,28 @@
       tran:list("", 1, 100)
       ]]></code>
       <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
     <test>
       <task>tran:post()</task>
       <code><![CDATA[
       tran:post($valid)
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>tran:delete()</task>
       <code><![CDATA[
         tran:delete("Garbage")
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>tran:put()</task>
       <code><![CDATA[
       tran:put("Garbage", $valid)
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>tran:get-access()</task>
@@ -387,7 +387,7 @@
         </a:access>
         })
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
   </TestSet>
   <TestSet>
@@ -404,7 +404,7 @@
       <code><![CDATA[
       tran:get-access("DoesNotExist", ())
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -420,7 +420,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#NoData"/>
+      <class href="../common.t.incl.xml#NoData"/>
     </test>
     <test>
       <task>With an invalid access structure</task>
@@ -431,7 +431,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>For a resource with no write access</task>
@@ -444,7 +444,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#Forbidden"/>
+      <class href="../common.t.incl.xml#Forbidden"/>
     </test>
     <test>
       <task>For a nonexistent resource</task>
@@ -457,7 +457,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
 </TestSuite>

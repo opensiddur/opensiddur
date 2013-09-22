@@ -110,14 +110,14 @@
       <code><![CDATA[
       lnk:get("DoesNotExist")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>Get a resource with no read access</task>
       <code><![CDATA[
       lnk:get("NoAccess")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -132,7 +132,7 @@
         every $li in .//html:li[@class="result"] 
         satisfies exists($li/html:a[@class="alt"][@property="access"])
       </xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
     <test>
       <task>List some resources</task>
@@ -140,7 +140,7 @@
         lnk:list("", 1, 2)
       ]]></code>
       <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
     <test>
       <task>Respond to a query</task>
@@ -148,7 +148,7 @@
         lnk:list("Query", 1, 100)
       ]]></code>
       <xpath desc="returns 2 results (Existing and NoWriteAccess)">count(.//html:ol[@class="results"]/html:li)=2</xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
   </TestSet>
   <TestSet>
@@ -158,28 +158,28 @@
       <code><![CDATA[
       lnk:delete("Existing")
       ]]></code>
-      <class href="../common.t.xml#NoData"/>
+      <class href="../common.t.incl.xml#NoData"/>
     </test>
     <test>
       <task>Remove a nonexisting resource</task>
       <code><![CDATA[
       lnk:delete("DoesNotExist")
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>Remove a resource without write access</task>
       <code><![CDATA[
       lnk:delete("NoWriteAccess")
       ]]></code>
-      <class href="../common.t.xml#Forbidden"/>
+      <class href="../common.t.incl.xml#Forbidden"/>
     </test>
     <test ignore="yes">
       <task>Remove a resource that has external references</task>
       <code><![CDATA[
       lnk:delete("ExternalReference")
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
   </TestSet>
   <TestSet>
@@ -200,7 +200,7 @@
       <code><![CDATA[
       lnk:post(doc("/db/code/tests/api/data/linkage/Valid.xml"))
       ]]></code>
-      <class href="../common.t.xml#Created"/>
+      <class href="../common.t.incl.xml#Created"/>
       <expected 
         desc="a change record has been added"
         xpath="collection('/db/data/linkage/none')[descendant::tei:title[@type='main'][.='Valid']]//tei:revisionDesc/tei:change[1]">
@@ -212,7 +212,7 @@
       <code><![CDATA[
       lnk:post(doc("/db/code/tests/api/data/linkage/Invalid.xml"))
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
   </TestSet>
   <TestSet>
@@ -222,7 +222,7 @@
       <code><![CDATA[
       lnk:put("Existing", doc("/db/code/tests/api/data/linkage/Existing-After-Put.xml"))
       ]]></code>
-      <class href="../common.t.xml#NoData"/>
+      <class href="../common.t.incl.xml#NoData"/>
       <expected 
         desc="a change record has been added"
         xpath="(collection('/db/data/linkage/none')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
@@ -234,14 +234,14 @@
       <code><![CDATA[
       lnk:put("DoesNotExist", doc("/db/code/tests/api/data/linkage/Valid.xml"))
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>Put an invalid resource</task>
       <code><![CDATA[
       lnk:put("Existing", doc("/db/code/tests/api/data/linkage/Invalid.xml"))
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>Put a valid resource that is invalidated by an illegal change</task>
@@ -266,14 +266,14 @@
       <code><![CDATA[
       lnk:get("NoAccess")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>lnk:get(): Get a nonexisting resource</task>
       <code><![CDATA[
       lnk:get("DoesNotExist")
       ]]></code> 
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>lnk:list(): Get a list of all resources</task>
@@ -282,42 +282,42 @@
       ]]></code>
       <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
       <xpath desc="does not list resource with no read access">empty(.//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])</xpath>
-      <class href="../common.t.xml#SearchResults"/>
+      <class href="../common.t.incl.xml#SearchResults"/>
     </test>
     <test>
       <task>lnk:delete(): Remove an existing resource</task>
       <code><![CDATA[
       lnk:delete("Existing")
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>lnk:delete(): Remove a nonexisting resource</task>
       <code><![CDATA[
       lnk:delete("DoesNotExist")
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>lnk:post(): Post a resource</task>
       <code><![CDATA[
       lnk:post(doc("/db/code/tests/api/data/linkage/Valid.xml"))
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>lnk:put(): Put an existing resource</task>
       <code><![CDATA[
       lnk:put("Existing", doc("/db/code/tests/api/data/linkage/Existing.xml"))
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>lnk:put(): Put a nonexisting resource</task>
       <code><![CDATA[
       lnk:put("DoesNotExist", doc("/db/code/tests/api/data/linkage/Existing.xml"))
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>lnk:get-access()</task>
@@ -337,7 +337,7 @@
         </a:access>
         })
       ]]></code>
-      <class href="../common.t.xml#Unauthorized"/>
+      <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
   </TestSet>
   <TestSet>
@@ -354,7 +354,7 @@
       <code><![CDATA[
       lnk:get-access("DoesNotExist", ())
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
   <TestSet>
@@ -370,7 +370,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#NoData"/>
+      <class href="../common.t.incl.xml#NoData"/>
     </test>
     <test>
       <task>With an invalid access structure</task>
@@ -381,7 +381,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#BadRequest"/>
+      <class href="../common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>For a resource with no write access</task>
@@ -394,7 +394,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#Forbidden"/>
+      <class href="../common.t.incl.xml#Forbidden"/>
     </test>
     <test>
       <task>For a nonexistent resource</task>
@@ -407,7 +407,7 @@
         </a:access>
       })
       ]]></code>
-      <class href="../common.t.xml#NotFound"/>
+      <class href="../common.t.incl.xml#NotFound"/>
     </test>
   </TestSet>
 </TestSuite>
