@@ -28,7 +28,7 @@
   </tearDown>
   <imports>
     import module namespace mirror="http://jewishliturgy.org/modules/mirror"
-      at "xmldb:exist:///db/code/modules/mirror.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/mirror.xqm";
   </imports>
   <variable name="original-collection">'/db/data/tests'</variable>
   <variable name="mirror-collection">'/db/data/tests/mirror'</variable>

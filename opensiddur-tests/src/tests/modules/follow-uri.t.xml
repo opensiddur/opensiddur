@@ -10,7 +10,7 @@
     <p>Tests for uri:follow-uri(), 
   uri:follow-cached-uri(), and uri:follow-tei-link(),
   and uri:fast-follow()</p>
-    <copyright>Copyright 2010-2012 Efraim Feinstein
+    <copyright>Copyright 2010-2013 Efraim Feinstein
   Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
     <author>Efraim Feinstein</author>
   </description>
@@ -18,7 +18,7 @@
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace uri="http://jewishliturgy.org/transform/uri"
-      at "xmldb:exist:///code/modules/follow-uri.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/follow-uri.xqm";
   </imports>
   <TestSet>
     <testName>uri:uri-base-path</testName>
@@ -59,49 +59,49 @@
     <test>
       <task>is not a pointer</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("destination"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("destination"), -1, (), true())
       ]]></code>
       <xpath desc="result is self">exists(self::tei:seg[@xml:id='destination']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>points one ahead</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("one"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("one"), -1, (), true())
       ]]></code>
       <xpath desc="result is destination">exists($output/self::tei:seg[@xml:id='destination']) and count($output)</xpath>
     </test>
     <test>
       <task>points two ahead</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("two"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("two"), -1, (), true())
       ]]></code>
       <xpath desc="result is destination">exists($output/self::tei:seg[@xml:id='destination']) and count($output)</xpath>
     </test>
     <test>
       <task>points three ahead</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("three"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("three"), -1, (), true())
       ]]></code>
       <xpath desc="result is destination">exists($output/self::tei:seg[@xml:id='destination']) and count($output)</xpath>
     </test>
     <test>
       <task>has evaluate=none</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("noeval"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("noeval"), -1, (), true())
       ]]></code>
       <xpath desc="result is next pointer">exists($output/self::tei:ptr[@xml:id='three']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>has evaluate=one</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("evalone"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("evalone"), -1, (), true())
       ]]></code>
       <xpath desc="result is two pointers ahead">exists($output/self::tei:ptr[@xml:id='two']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>is a join</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("eval_join"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("eval_join"), -1, (), true())
       ]]></code>
       <xpath desc="result is two segments">count($output) = 2</xpath>
       <xpath desc="segment 1 is present">exists($output/self::tei:seg[@xml:id='destination'])</xpath>
@@ -110,7 +110,7 @@
     <test>
       <task>is a join into a paragraph</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("eval_join_as_p"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("eval_join_as_p"), -1, (), true())
       ]]></code>
       <xpath desc="result is one paragraph">count($output) = 1 and exists($output/self::tei:p)</xpath>
       <xpath desc="segment 1 is present">exists($output/tei:seg[@xml:id='destination'])</xpath>
@@ -119,21 +119,21 @@
     <test>
       <task>points into a different file</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("in_file_2"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("in_file_2"), -1, (), true())
       ]]></code>
       <xpath desc="result is segment from other file">exists($output/self::tei:seg[@xml:id='f2_destination']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>points into a different file and has additional indirection</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("in_file_2_indirect"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("in_file_2_indirect"), -1, (), true())
       ]]></code>
       <xpath desc="result is segment from other file">exists($output/self::tei:seg[@xml:id='f2_destination']) and count($output) = 1</xpath>
     </test>
     <test>
       <task>points to a range</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("range"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("range"), -1, (), true())
       ]]></code>
       <expected desc="result is a sequence of all of the segments in the range">
         <tei:seg jf:id="part1">1</tei:seg>
@@ -144,7 +144,7 @@
     <test>
       <task>fast-follow: points to a range that crosses a hierarchy, $allow-copies=false()</task>
       <code><![CDATA[
-      let $ptr := doc("/db/code/tests/modules/follow-uri-context-1.xml")/id("range_bdy")
+      let $ptr := doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("range_bdy")
       return
         uri:fast-follow($ptr/@target/string(), $ptr, -1, (), false(), ())[. instance of element()]
       ]]></code>
@@ -160,7 +160,7 @@
     <test>
       <task>points to a range that crosses a hierarchy, $allow-copies=true()</task>
       <code><![CDATA[
-      let $ptr := doc("/db/code/tests/modules/follow-uri-context-1.xml")/id("range_bdy")
+      let $ptr := doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("range_bdy")
       return
         uri:fast-follow($ptr/@target/string(), $ptr, -1, (), true(), ())
       ]]></code>
@@ -168,41 +168,41 @@
       <expected desc="result is a sequence of all of the segments in the range, and @uri decorators">
         <tei:milestone jf:id="bdy1" 
           uri:lang="en" 
-          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
-          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml"/>
+          uri:base="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml"/>
         <tei:seg jf:id="inbdy1" 
           uri:lang="en" 
-          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
-          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml">YES 1</tei:seg>
+          uri:base="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml">YES 1</tei:seg>
         <tei:seg jf:id="inbdy2"
           uri:lang="en" 
-          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
-          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml">YES 2</tei:seg>
+          uri:base="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml">YES 2</tei:seg>
         <tei:ab jf:id="inside"
           uri:lang="en" 
-          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
-          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml">
+          uri:base="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml">
           <tei:seg jf:id="inbdy3" xml:lang="he"
-          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
-          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml">כן 3</tei:seg>
+          uri:base="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml">כן 3</tei:seg>
           <tei:milestone jf:id="bdy2" 
             uri:lang="en" 
-          uri:base="/db/code/tests/modules/follow-uri-context-1.xml"
-          uri:document-uri="/db/code/tests/modules/follow-uri-context-1.xml"/>
+          uri:base="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml"
+          uri:document-uri="/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml"/>
         </tei:ab>
       </expected>
     </test>
     <test>
       <task>that is of type url</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("url_ptr"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("url_ptr"), -1, (), true())
       ]]></code>
       <xpath desc="result is the pointer itself">$output[count(.) = 1]/self::tei:ptr[@xml:id='url_ptr']</xpath>
     </test>
     <test>
       <task>that points to a ptr of type url</task>
       <code><![CDATA[
-      uri:follow(doc("/code/tests/modules/follow-uri-context-1.xml")/id("to_url_ptr"), -1, (), true())
+      uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("to_url_ptr"), -1, (), true())
       ]]></code>
       <xpath desc="result is the URL pointer">$output[count(.) = 1]/self::tei:ptr[@xml:id='url_ptr']</xpath>
     </test>
@@ -212,17 +212,29 @@
     <asUser>testuser</asUser>
     <password>testuser</password>
     <setup>
-      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+      <copy 
+        source="/db/apps/opensiddur-tests/tests/modules" 
+        destination="/db/data/tests"
         name="no-dependencies.xml"/>
-      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+      <copy 
+        source="/db/apps/opensiddur-tests/tests/modules" 
+        destination="/db/data/tests"
         name="external-dependencies.xml"/>
-      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+      <copy 
+        source="/db/apps/opensiddur-tests/tests/modules" 
+        destination="/db/data/tests"
         name="dep-root.xml"/>
-      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+      <copy 
+        source="/db/apps/opensiddur-tests/tests/modules" 
+        destination="/db/data/tests"
         name="dep-tree1.xml"/>
-      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+      <copy 
+        source="/db/apps/opensiddur-tests/tests/modules" 
+        destination="/db/data/tests"
         name="dep-tree2.xml"/>
-      <copy source="/db/code/tests/modules" destination="/db/data/tests"
+      <copy 
+        source="/db/apps/opensiddur-tests/tests/modules" 
+        destination="/db/data/tests"
         name="dep-tree3.xml"/>
     </setup>
     <tearDown>

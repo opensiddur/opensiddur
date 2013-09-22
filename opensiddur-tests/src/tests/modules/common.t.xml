@@ -17,7 +17,7 @@
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace common="http://jewishliturgy.org/transform/common"
-      at "xmldb:exist:///db/code/modules/common.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/common.xqm";
   </imports>
   <TestSet>
     <testName>common:apply-at</testName>
