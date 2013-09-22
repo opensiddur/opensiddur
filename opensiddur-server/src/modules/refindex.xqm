@@ -34,6 +34,28 @@ declare variable $ridx:indexed-base-path := "/db/data";
  :)
 declare variable $ridx:disable-flag := "disabled.xml";
 
+(:~ initial setup :)
+declare function ridx:setup(
+    ) {
+    if (xmldb:collection-available($ridx:ridx-path))
+    then (
+        (: (re)write the mirror configuration :)
+        xmldb:store($ridx:ridx-path, $mirror:configuration,
+            <mirror:configuration>
+              <mirror:of>/db/data</mirror:of>
+              <mirror:universal-access>false</mirror:universal-access>
+            </mirror:configuration>
+        ),
+        let $uri := xs:anyURI(concat($ridx:ridx-path, "/", $mirror:configuration))
+        return (
+            sm:chown($uri, "admin"),
+            sm:chgrp($uri, "dba"),
+            sm:chmod($uri, "rw-rw-r--")
+        )
+    )
+    else mirror:create($ridx:ridx-path, "/db/data")
+};
+
 (:~ given a collection, return its index :)
 declare function ridx:index-collection(
   $collection as xs:string

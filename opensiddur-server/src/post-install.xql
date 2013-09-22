@@ -2,6 +2,8 @@ xquery version "3.0";
 
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "modules/format.xqm";
+import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+  at "modules/refindex.xqm";
 import module namespace src="http://jewishliturgy.org/api/data/sources"
   at "api/data/sources.xqm";
 import module namespace sty="http://jewishliturgy.org/api/data/styles"
@@ -17,6 +19,8 @@ declare variable $target external;
 util:log-system-out("starting post-install..."),
 util:log-system-out("setup format..."),
 format:setup(),
+util:log-system-out("setup refindex..."),
+ridx:setup(),
 util:log-system-out("install default sources..."),
 (: add $target/data/sources/Born Digital using src:post() or src:put() :)
 xmldb:store(

@@ -113,7 +113,7 @@ let $permissions := "rwxrwxr-x"
 let $collections := 
   <collections owner="admin" group="everyone" perms="rwxrwxr-x">
     <collection name="/db" owner="admin" group="dba">
-      <collection name="refindex" owner="admin" group="dba"/>
+      <collection name="refindex" owner="admin" group="everyone" perms="rwxr-xr-x"/>
       <collection name="data" owner="admin" group="everyone" perms="rwxr-xr-x">
         <collection name="conditionals" perms="rwxrwxr-x"/>
         <collection name="dictionaries" perms="rwxrwxr-x">{local:lang-collections()}</collection>
