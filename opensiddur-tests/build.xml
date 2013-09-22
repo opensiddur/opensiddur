@@ -38,7 +38,6 @@
         </copy>
 		<zip 
             destfile="${dist}/opensiddur-tests.xar" 
-            update="true"
             basedir="${build}">
 		</zip>
 	</target>

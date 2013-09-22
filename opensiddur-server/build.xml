@@ -154,7 +154,6 @@
         </copy>
 		<zip 
             destfile="${dist}/opensiddur-server.xar" 
-            update="true"
             basedir="${build}">
 		</zip>
 	</target>
