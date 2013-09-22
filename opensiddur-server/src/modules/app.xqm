@@ -5,17 +5,17 @@ xquery version "1.0";
  : mostly authentication issues.
  :
  : Open Siddur Project
- : Copyright 2010-2012 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2010-2013 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace app="http://jewishliturgy.org/modules/app";
 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "debug.xqm";
+    at "debug.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
-	at "paths.xqm";
+    at "paths.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
-  at "../magic/magic.xqm";
+    at "../magic/magic.xqm";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace xsl="http://www.w3.org/1999/XSL/Transform";
@@ -89,25 +89,6 @@ declare function local:get-auth-string() as xs:string* {
   else ()
 };
 
-(:~ generate a uuid that is guaranteed not to collide with any of the 
- : strings in $collisions 
- : @param $prefix prefix to add before the proposed uuid to make an xml:id
- : @param $root document node from which we need to make the xml:ids unique
- :)
-declare function app:unique-xmlid(
-	$prefix as xs:string,
-	$root as document-node()
-	) as xs:string {
-	let $proposal := concat($prefix, util:uuid())
-	let $collisions := 
-		for $xmlid in $root//@xml:id
-		return string($xmlid) 
-	return
-		if ($proposal = $collisions)
-		then app:unique-xmlid($prefix, $root)
-		else $proposal
-};
-
 (:~ Authenticate and return authenticated user.  
  : HTTP Basic authentication and Username/Password in header takes priority
  : over the logged in user. :)
@@ -120,71 +101,6 @@ declare function app:auth-user()
 declare function app:auth-password()
   as xs:string? {
   (session:get-attribute('app.password'), local:get-auth-string()[2])[1]
-};
-
-(:~ Read HTTP headers to determine if the user can be logged in or is already logged in.  
- : If so, log in to the resource
- : @return true() on success, false() on failure
- :)
-declare function app:authenticate()
-  as xs:boolean {
-  let $authorization as xs:string* := local:get-auth-string()
-  let $user-name as xs:string? := $authorization[1]
-  let $password as xs:string? := $authorization[2]
-  let $logged-in as xs:boolean := boolean(xmldb:get-current-user()[not(. = 'guest')])
-  return (
-  	debug:debug(
-  	  $debug:info, 
-  	  "app",
-  	  ('authenticate() : get-auth-string is ', $authorization)
-  	), 
-  	$logged-in or (
-    if ($user-name and $password)
-    then (
-    	xmldb:login('/db', $user-name, $password),
-    	debug:debug(
-    	  $debug:info,
-    	  "app",
-    		('logging you in as :', $user-name)
-    	)
-    )
-    else false() )
-  )
-};
-
-(:~ specify that authentication (aside from guest) is required
- : to perform any following operations.
- : if the user is not authenticated, return status code 401 with a request for HTTP basic
- : authentication
- :)
-declare function app:require-authentication(
-	) as xs:boolean {
-	app:authenticate() or (
-    false(),
-    if (request:exists())
-    then ( 
-      response:set-status-code(401), 
-      response:set-header('WWW-Authenticate', 'Basic')
-    )
-    else ()
-  )
-};
-
-(: return the db-relative path of the called URI context :)
-declare function app:context-path() 
-  as xs:string? {
-  substring-after(request:get-uri(), 
-    string-join((request:get-context-path(),request:get-servlet-path()),''))
-};
-
-(: Return the resource in the URI context :)
-declare function app:context-resource() 
-  as document-node()? {
-  let $path := app:context-path()
-  return
-    if (doc-available($path))
-    then doc($path)
-    else ()
 };
 
 (:~ make a collection path that does not exist; (like mkdir -p)
@@ -295,129 +211,6 @@ declare function app:make-collection-path(
         else ()
         )
     else ()
-};
-
-
-(:~ obfuscate an email address if the user is not logged in
- : @param $address Address to obfuscate
- :)
-declare function app:obfuscate-email-address(
-	$address as xs:string) 
-	as xs:string {
-	if (app:auth-user())
-	then $address
-	else string-join(
-		(substring($address, 1, 2), 
-		substring($address, string-length($address)-1, 2))
-		,'...')
-};
-
-(:~ expand a given data set so it covers prototype
- : all of the elements and attributes in a prototype.
- : The xml:id "new" is special. 
- : tei:name will be collapsed unless $collapse-names is false
- :)
-declare function app:expand-prototype(
-	$data as element(),
-	$prototype as element(),
-	$collapse-names as xs:boolean)
-	as element() {
-	let $transform :=
-		<xsl:stylesheet version="2.0" 
-			xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-			xmlns:xs="http://www.w3.org/2001/XMLSchema"
-			exclude-result-prefixes="xs">		
-			<xsl:output encoding="utf-8" indent="yes" method="xml"/>
-    	<xsl:strip-space elements="*"/>
-    
-    	<xsl:include href="{$paths:rest-prefix}{$paths:modules}/prototype.xsl2"/>
-    	<xsl:param name="prototype" as="element()">
-    		{$prototype}
-    	</xsl:param>
-    
-    	<xsl:template match="/*">
-    		<xsl:for-each select="*">
-    			<xsl:apply-templates select="$prototype">
- 						<xsl:with-param name="data" as="element()" select=".">
- 						</xsl:with-param>
- 					</xsl:apply-templates>
-    		</xsl:for-each>
-    	</xsl:template>
-		</xsl:stylesheet>
-	return
-		transform:transform($data, $transform, 
-			<parameters>
-				<param name="collapse-names" value="{if ($collapse-names) then 'true' else ''}" />
-			</parameters>)
-};
-
-(:~ contract a given data set so it doesn't include empty attributes
- :)
-declare function app:contract-data(
-	$data as element(),
-	$expand-names as xs:boolean)
-	as element() {
-	let $transform :=
-		<xsl:stylesheet version="2.0" 
-			xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-			xmlns:xs="http://www.w3.org/2001/XMLSchema"
-      xmlns:tei="http://www.tei-c.org/ns/1.0"
-			exclude-result-prefixes="xs">		
-      {
-      if ($expand-names)
-      then 
-        <xsl:import href="{$paths:rest-prefix}{$paths:modules}/name.xsl2"/>
-      else ()
-      }
-			<xsl:output encoding="utf-8" indent="yes" method="xml"/>
-    	<xsl:strip-space elements="*"/>
-
-    	<xsl:include href="{$paths:rest-prefix}{$paths:modules}/relevance.xsl2"/>
-      
-      <!-- convert name text into expanded names -->
-      {
-      if ($expand-names)
-      then (
-        <xsl:template match="tei:name/text()">
-          <xsl:call-template name="split-name"/>
-        </xsl:template>
-      )
-      else ()
-      }
-
-    	<xsl:template match="/*" priority="10">
-        <xsl:copy>
-          <xsl:copy-of select="@*"/>
-          <xsl:apply-templates/>
-        </xsl:copy>
-    	</xsl:template>
-		</xsl:stylesheet>
-	return
-		transform:transform($data, $transform, ())
-};
-
-
-(:~ return a formatted error message, assuming an error occurred :)
-declare function app:error-message() 
-  as element(error) {
-  <error xmlns="">
-    <exception>Error: {$util:exception-message}</exception>
-  </error>
-};
-
-(:~ return a formatted error message, infixed in the original data element :)
-declare function app:error-message(
-	$original-data as element()?
-	) 
-  as element() {
-  if ($original-data) 
-  then
-	  element {QName(namespace-uri($original-data), name($original-data))} {
-	  	$original-data/@*,
-	  	$original-data/*,
-	  	app:error-message()
-	  }
-	else app:error-message()
 };
 
 (:~ concatenate two components together as a path, making sure that the result
@@ -578,60 +371,6 @@ declare function app:logout-credentials(
 	  let $guest-login := xmldb:login("/db", "guest", "guest")
 	  return session:invalidate()
 	else ()
-};
-
-(:~ pass login credentials from the session to an XQuery
- : This function should be used inside <exist:dispatch/> 
- :)
-declare function app:pass-credentials-xq(
-	) as element()+ {
-	local:pass-credentials('xquery')
-};
-
-(:~ pass login credentials from the session to an XSLT
- : This function should be used inside <exist:dispatch/> 
- :)
-declare function app:pass-credentials-xsl(
-	) as element()+ {
-	local:pass-credentials('xslt')
-};
-
-(:~ pass credentials to next xquery or xslt, depending on $type
- : @param $type either 'xquery' or 'xslt'
- :)
-declare function local:pass-credentials(
-	$type as xs:string
-	) as element()+ {
-	let $user := session:get-attribute('app.user')
-	let $password := session:get-attribute('app.password')
-	return (
-		<exist:set-attribute name="{$type}.user" value="{$user}"/>,
-		<exist:set-attribute name="{$type}.password" value="{$password}"/>
-	)			
-};
-
-(:~ forward from a controller to an identity view to display protected XML
- : Use within <exist:dispatch/> as the last view
- :) 
-declare function app:identity-view(
-	) as element() {
-	app:identity-view(())
-};
-
-(:~ forward from a controller to an identity view to display protected XML
- : Use within <exist:dispatch/> as the last view
- :) 
-declare function app:identity-view(
-	$uri as xs:string?
-	) as element() {
-	<exist:forward url="/code/queries/identity.xql">
-		{
-		if ($uri)
-		then
-			<exist:add-parameter name="uri" value="{$uri}" />
-		else ()
-		}
-	</exist:forward>
 };
 
 (: return an XPath that points to the given node :)
