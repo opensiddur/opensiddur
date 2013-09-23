@@ -20,9 +20,9 @@
   <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
   <imports>
     import module namespace login="http://jewishliturgy.org/api/login"
-      at "xmldb:exist:///code/api/login.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/login.xqm";
     import module namespace app="http://jewishliturgy.org/modules/app"
-      at "xmldb:exist:///code/modules/app.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/app.xqm";
   </imports>
   <TestClass xml:id="BadLogin">
     <class href="common.t.incl.xml#BadRequest"/>

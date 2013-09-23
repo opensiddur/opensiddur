@@ -17,18 +17,18 @@
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace format="http://jewishliturgy.org/modules/format"
-      at "xmldb:exist:///db/code/modules/format.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/format.xqm";
     import module namespace mirror="http://jewishliturgy.org/modules/mirror"
-      at "xmldb:exist:///db/code/modules/mirror.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/mirror.xqm";
     import module namespace combine="http://jewishliturgy.org/transform/combine"
-      at "xmldb:exist:///db/code/transforms/flatten/combine.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/transforms/combine.xqm";
   </imports>
   <asUser>testuser</asUser>
   <password>testuser</password>
   <functions><![CDATA[
     declare function local:setup($file as xs:string) {
       xmldb:copy(
-        "/db/code/tests/transforms/flatten", 
+        "/db/apps/opensiddur-tests/tests/transforms/flatten", 
         "/db/data/tests", 
         $file),
       let $doc := doc("/db/data/tests/" || $file)

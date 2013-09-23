@@ -18,7 +18,7 @@
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
-      at "xmldb:exist:///db/code/transforms/flatten/unflatten.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/transforms/unflatten.xqm";
   </imports>
   <TestSet>
     <testName>unflatten:unopened-tags()</testName>
@@ -128,7 +128,7 @@
       <task>unflatten a simple hierarchy</task>
       <code><![CDATA[
         unflatten:unflatten-document(
-          doc("/db/code/tests/transforms/flatten/unflatten1.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/unflatten1.xml"),
           map {}
         )
       ]]></code>
@@ -139,7 +139,7 @@
       <task>unflatten a hierarchy with 2 levels with siblings</task>
       <code><![CDATA[
         unflatten:unflatten-document(
-          doc("/db/code/tests/transforms/flatten/unflatten2.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/unflatten2.xml"),
           map {}
         )
       ]]></code>
@@ -150,7 +150,7 @@
       <task>simple suspend and continue</task>
       <code><![CDATA[
         unflatten:unflatten-document(
-          doc("/db/code/tests/transforms/flatten/unflatten3.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/unflatten3.xml"),
           map {}
         )
       ]]></code>
@@ -161,7 +161,7 @@
       <task>multiple hierarchies with broken-up element</task>
       <code><![CDATA[
         unflatten:unflatten-document(
-          doc("/db/code/tests/transforms/flatten/unflatten4.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/unflatten4.xml"),
           map {}
         )
       ]]></code>

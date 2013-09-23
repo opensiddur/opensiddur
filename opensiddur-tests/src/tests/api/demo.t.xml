@@ -11,15 +11,15 @@
   <password>testuser</password>
   <imports>
   import module namespace demo="http://jewishliturgy.org/api/demo"
-    at "xmldb:exist:///code/api/demo.xqm";
+    at "xmldb:exist:///db/apps/opensiddur-demos/api/demo.xqm";
   </imports>
   <namespace prefix="tr">http://jewishliturgy.org/ns/tr/1.0</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <setup>
-    <create-collection parent="/data/transliteration" name="1900"/>
-    <create-collection parent="/data/transliteration/1900" name="01"/>
-    <store collection="/data/transliteration/1900/01" name="Test.xml">
+    <create-collection parent="/db/data/transliteration" name="1900"/>
+    <create-collection parent="/db/data/transliteration/1900" name="01"/>
+    <store collection="/db/data/transliteration/1900/01" name="Test.xml">
       <tr:schema>
         <tr:title xml:lang="en">Test</tr:title>
         <tr:description xml:lang="en">A test</tr:description>
@@ -52,7 +52,7 @@
     </store>
   </setup>
   <tearDown>
-    <remove-collection collection="/data/transliteration/1900"/>
+    <remove-collection collection="/db/data/transliteration/1900"/>
   </tearDown>
   <TestSet>
     <testName>demo index APIs</testName>

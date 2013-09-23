@@ -4,14 +4,14 @@
   <description>
     <p>Access module function calls</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012 Efraim Feinstein, 
+    <copyright>Copyright 2012-2013 Efraim Feinstein, 
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <imports>
   import module namespace magic="http://jewishliturgy.org/magic"
-    at "xmldb:exist:///code/magic/magic.xqm";
+    at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   import module namespace acc="http://jewishliturgy.org/modules/access"
-    at "xmldb:exist:///code/api/modules/access.xqm";
+    at "xmldb:exist:///db/apps/opensiddur-server/modules/access.xqm";
   </imports>
   <asUser>testuser</asUser>
   <password>testuser</password>
@@ -315,7 +315,7 @@
         acc:get-access-as-user(doc($resource), "testuser2")
       ]]></code>
       <expected desc="has r/w access">
-        <a:user-access user="testuser2" read="true" write="true" chmod="true" relicense="false"/>
+        <a:user-access user="testuser2" read="true" write="true" chmod="false" relicense="false"/>
       </expected>
     </test>
   </TestSet>

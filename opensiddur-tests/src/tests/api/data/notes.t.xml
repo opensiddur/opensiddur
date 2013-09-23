@@ -8,7 +8,7 @@
   <description>
     <p>Test annotation data API</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012 Efraim Feinstein,
+    <copyright>Copyright 2012-2013 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <asUser>testuser</asUser>
@@ -25,16 +25,16 @@
       </j:contributor>
     </store>
     <!-- existing resource with read/write access for testuser -->
-    <copy source="/db/code/tests/api/data/notes" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/notes" name="Existing.xml" 
       destination="/db/data/notes/en/1900/01" />
     <!-- Query result -->
-    <copy source="/db/code/tests/api/data/notes" name="Query.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/notes" name="Query.xml" 
       destination="/db/data/notes/en/1900/01" />
     <!-- and with no read/write access -->
-    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Existing.xml" 
       destination="/db/data/notes/en/1900/01" destination-name="NoAccess.xml" />
     <!-- and with read only access -->
-    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Existing.xml" 
       destination="/db/data/notes/en/1900/01" destination-name="NoWriteAccess.xml" />
     <code><![CDATA[
       system:as-user("admin", $magic:password,
@@ -67,7 +67,7 @@
     ]]></code>
   </setup>
   <tearDown>
-    <remove-collection collection="/data/notes/en/1900"/>
+    <remove-collection collection="/db/data/notes/en/1900"/>
   </tearDown>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -75,9 +75,9 @@
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <imports>
     import module namespace notes="http://jewishliturgy.org/api/data/notes"
-      at "xmldb:exist:///code/api/data/notes.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/notes.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///code/magic/magic.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <TestSet>
     <testName>notes:get()</testName>
@@ -181,19 +181,19 @@
     <test>
       <task>Post a valid resource</task>
       <code><![CDATA[
-      notes:post(doc("/code/tests/api/data/notes/Valid.xml"))
+      notes:post(doc("/db/apps/opensiddur-tests/tests/api/data/notes/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Created"/>
       <expected 
         desc="a change record has been added"
-        xpath="collection('/data/notes/en')[descendant::tei:title[@type='main'][.='Valid']]//tei:revisionDesc/tei:change[1]">
+        xpath="collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Valid']]//tei:revisionDesc/tei:change[1]">
         <tei:change type="created" who="/user/testuser" when="..."/>
       </expected>
     </test>
     <test>
       <task>Post an invalid resource</task>
       <code><![CDATA[
-      notes:post(doc("/code/tests/api/data/notes/Invalid.xml"))
+      notes:post(doc("/db/apps/opensiddur-tests/tests/api/data/notes/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
@@ -203,32 +203,32 @@
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
-      notes:put("Existing", doc("/code/tests/api/data/notes/Existing-After-Put.xml"))
+      notes:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Existing-After-Put.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NoData"/>
       <expected 
         desc="a change record has been added"
-        xpath="(collection('/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
+        xpath="(collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
         <tei:change type="edited" who="/user/testuser" when="..."/>
       </expected>
     </test>
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      notes:put("DoesNotExist", doc("/code/tests/api/data/notes/Valid.xml"))
+      notes:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Valid.xml"))
       ]]></code>
     </test>
     <test>
       <task>Put an invalid resource</task>
       <code><![CDATA[
-      notes:put("Existing", doc("/code/tests/api/data/notes/Invalid.xml"))
+      notes:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>Put a valid resource that is invalidated by an illegal change</task>
       <code><![CDATA[
-      notes:put("Existing", doc("/code/tests/api/data/notes/Invalid-After-Put-Illegal-RevisionDesc.xml"))
+      notes:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Invalid-After-Put-Illegal-RevisionDesc.xml"))
       ]]></code>
     </test>
   </TestSet>
@@ -283,21 +283,21 @@
     <test>
       <task>notes:post(): Post a resource</task>
       <code><![CDATA[
-      notes:post(doc("/code/tests/api/data/notes/Valid.xml"))
+      notes:post(doc("/db/apps/opensiddur-tests/tests/api/data/notes/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>notes:put(): Put an existing resource</task>
       <code><![CDATA[
-      notes:put("Existing", doc("/code/tests/api/data/notes/Existing.xml"))
+      notes:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>notes:put(): Put a nonexisting resource</task>
       <code><![CDATA[
-      notes:put("DoesNotExist", doc("/code/tests/api/data/notes/Existing.xml"))
+      notes:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>

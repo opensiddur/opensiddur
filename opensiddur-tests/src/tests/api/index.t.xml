@@ -9,7 +9,7 @@
   </description>
   <imports>
   import module namespace index="http://jewishliturgy.org/api/index"
-    at "xmldb:exist:///code/api/index.xqm";
+    at "xmldb:exist:///apps/opensiddur-server/api/index.xqm";
   </imports>
   <asUser>testuser</asUser>
   <password>testuser</password>

@@ -25,14 +25,14 @@
       </j:contributor>
     </store>
     <!-- existing resource with read/write access for testuser -->
-    <copy source="/db/code/tests/api/data/styles" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/styles" name="Existing.xml" 
       destination="/db/data/styles/en/1900/01" />
-    <copy source="/db/code/tests/api/data/styles" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/styles" name="Existing.xml" 
       destination="/db/data/styles/en/1900/01" destination-name="NoAccess.xml" />
-    <copy source="/db/code/tests/api/data/styles" name="NoWriteAccess.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/styles" name="NoWriteAccess.xml" 
       destination="/db/data/styles/en/1900/01" />
     <!-- query result --><!--  
-    <copy source="/db/code/tests/api/data/styles" name="QueryResult.xml"
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/styles" name="QueryResult.xml"
       destination="/db/data/styles/en/1900/01"/>-->
     <!-- existing, valid resource with no read access -->
     <code><![CDATA[
@@ -70,9 +70,9 @@
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <imports>
     import module namespace sty="http://jewishliturgy.org/api/data/styles"
-      at "xmldb:exist:///db/code/api/data/styles.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/styles.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///db/code/magic/magic.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <TestSet>
     <testName>sty:get-xml()</testName>
@@ -200,7 +200,7 @@
     <test>
       <task>Post a valid resource</task>
       <code><![CDATA[
-      sty:post(doc("/db/code/tests/api/data/styles/Valid.xml"))
+      sty:post(doc("/db/apps/opensiddur-tests/tests/api/data/styles/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Created"/>
       <expected 
@@ -212,7 +212,7 @@
     <test>
       <task>Post an invalid resource</task>
       <code><![CDATA[
-      sty:post(doc("/db/code/tests/api/data/styles/Invalid.xml"))
+      sty:post(doc("/db/apps/opensiddur-tests/tests/api/data/styles/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
@@ -222,7 +222,7 @@
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
-      sty:put-xml("Existing", doc("/db/code/tests/api/data/styles/Existing-After-Put.xml"))
+      sty:put-xml("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/styles/Existing-After-Put.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NoData"/>
       <expected 
@@ -234,13 +234,13 @@
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      sty:put-xml("DoesNotExist", doc("/db/code/tests/api/data/styles/Valid.xml"))
+      sty:put-xml("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/styles/Valid.xml"))
       ]]></code>
     </test>
     <test>
       <task>Put an invalid resource</task>
       <code><![CDATA[
-      sty:put-xml("Existing", doc("/db/code/tests/api/data/styles/Invalid.xml"))
+      sty:put-xml("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/styles/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
@@ -335,21 +335,21 @@
     <test>
       <task>sty:post(): Post a resource</task>
       <code><![CDATA[
-      sty:post(doc("/db/code/tests/api/data/styles/Valid.xml"))
+      sty:post(doc("/db/apps/opensiddur-tests/tests/api/data/styles/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>sty:put-xml(): Put an existing resource</task>
       <code><![CDATA[
-      sty:put-xml("Existing", doc("/db/code/tests/api/data/styles/Existing.xml"))
+      sty:put-xml("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/styles/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>sty:put-xml(): Put a nonexisting resource</task>
       <code><![CDATA[
-      sty:put-xml("DoesNotExist", doc("/db/code/tests/api/data/styles/Existing.xml"))
+      sty:put-xml("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/styles/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>

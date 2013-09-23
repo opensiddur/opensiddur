@@ -30,16 +30,16 @@
       </j:contributor>
     </store>
     <!-- existing resource with read/write access for testuser -->
-    <copy source="/db/code/tests/api/data/linkage" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/linkage" name="Existing.xml" 
       destination="/db/data/linkage/none/1900/01" />
-    <copy source="/db/code/tests/api/data/linkage" name="A-he.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/linkage" name="A-he.xml" 
       destination="/db/data/original/he/1900/01" />
-    <copy source="/db/code/tests/api/data/linkage" name="B-en.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/linkage" name="B-en.xml" 
       destination="/db/data/original/en/1900/01" />
     
-    <copy source="/db/code/tests/api/data/linkage" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/linkage" name="Existing.xml" 
       destination="/db/data/linkage/none/1900/01" destination-name="NoAccess.xml" />
-    <copy source="/db/code/tests/api/data/linkage" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/linkage" name="Existing.xml" 
       destination="/db/data/linkage/none/1900/01" destination-name="NoWriteAccess.xml" />
     <!-- existing, valid resource with no read access -->
     <code><![CDATA[
@@ -92,9 +92,9 @@
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <imports>
     import module namespace lnk="http://jewishliturgy.org/api/data/linkage"
-      at "xmldb:exist:///code/api/data/linkage.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/linkage.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///code/magic/magic.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <TestSet>
     <testName>lnk:get()</testName>
@@ -198,7 +198,7 @@
     <test>
       <task>Post a valid resource</task>
       <code><![CDATA[
-      lnk:post(doc("/db/code/tests/api/data/linkage/Valid.xml"))
+      lnk:post(doc("/db/apps/opensiddur-tests/tests/api/data/linkage/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Created"/>
       <expected 
@@ -210,7 +210,7 @@
     <test>
       <task>Post an invalid resource</task>
       <code><![CDATA[
-      lnk:post(doc("/db/code/tests/api/data/linkage/Invalid.xml"))
+      lnk:post(doc("/db/apps/opensiddur-tests/tests/api/data/linkage/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
@@ -220,7 +220,7 @@
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
-      lnk:put("Existing", doc("/db/code/tests/api/data/linkage/Existing-After-Put.xml"))
+      lnk:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/linkage/Existing-After-Put.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NoData"/>
       <expected 
@@ -232,21 +232,21 @@
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      lnk:put("DoesNotExist", doc("/db/code/tests/api/data/linkage/Valid.xml"))
+      lnk:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/linkage/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>Put an invalid resource</task>
       <code><![CDATA[
-      lnk:put("Existing", doc("/db/code/tests/api/data/linkage/Invalid.xml"))
+      lnk:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/linkage/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>Put a valid resource that is invalidated by an illegal change</task>
       <code><![CDATA[
-      lnk:put("Existing", doc("/code/tests/api/data/linkage/Invalid-After-Put-Illegal-RevisionDesc.xml"))
+      lnk:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/linkage/Invalid-After-Put-Illegal-RevisionDesc.xml"))
       ]]></code>
     </test>
   </TestSet>
@@ -301,21 +301,21 @@
     <test>
       <task>lnk:post(): Post a resource</task>
       <code><![CDATA[
-      lnk:post(doc("/db/code/tests/api/data/linkage/Valid.xml"))
+      lnk:post(doc("/db/apps/opensiddur-tests/tests/api/data/linkage/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>lnk:put(): Put an existing resource</task>
       <code><![CDATA[
-      lnk:put("Existing", doc("/db/code/tests/api/data/linkage/Existing.xml"))
+      lnk:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/linkage/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>lnk:put(): Put a nonexisting resource</task>
       <code><![CDATA[
-      lnk:put("DoesNotExist", doc("/db/code/tests/api/data/linkage/Existing.xml"))
+      lnk:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/linkage/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>

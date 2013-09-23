@@ -25,11 +25,11 @@
       </j:contributor>
     </store>
     <!-- existing resource with read/write access for testuser -->
-    <copy source="/db/code/tests/api/data/dictionaries" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/dictionaries" name="Existing.xml" 
       destination="/db/data/dictionaries/en/1900/01" />
-    <copy source="/db/code/tests/api/data/dictionaries" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/dictionaries" name="Existing.xml" 
       destination="/db/data/dictionaries/en/1900/01" destination-name="NoAccess.xml" />
-    <copy source="/db/code/tests/api/data/dictionaries" name="NoWriteAccess.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/dictionaries" name="NoWriteAccess.xml" 
       destination="/db/data/dictionaries/en/1900/01" />
     <!-- existing, valid resource with no read access -->
     <code><![CDATA[
@@ -67,9 +67,9 @@
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <imports>
     import module namespace dict="http://jewishliturgy.org/api/data/dictionaries"
-      at "xmldb:exist:///db/code/api/data/dictionaries.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/dictionaries.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///db/code/magic/magic.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <TestSet>
     <testName>dict:get()</testName>
@@ -173,7 +173,7 @@
     <test>
       <task>Post a valid resource</task>
       <code><![CDATA[
-      dict:post(doc("/db/code/tests/api/data/dictionaries/Valid.xml"))
+      dict:post(doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Created"/>
       <expected 
@@ -185,7 +185,7 @@
     <test>
       <task>Post an invalid resource</task>
       <code><![CDATA[
-      dict:post(doc("/db/code/tests/api/data/dictionaries/Invalid.xml"))
+      dict:post(doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
@@ -195,7 +195,7 @@
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
-      dict:put("Existing", doc("/db/code/tests/api/data/dictionaries/Existing-After-Put.xml"))
+      dict:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Existing-After-Put.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NoData"/>
       <expected 
@@ -211,20 +211,20 @@
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      dict:put("DoesNotExist", doc("/db/code/tests/api/data/dictionaries/Valid.xml"))
+      dict:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Valid.xml"))
       ]]></code>
     </test>
     <test>
       <task>Put an invalid resource</task>
       <code><![CDATA[
-      dict:put("Existing", doc("/db/code/tests/api/data/dictionaries/Invalid.xml"))
+      dict:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>Put a valid resource that is invalidated by an illegal change</task>
       <code><![CDATA[
-      dict:put("Existing", doc("/db/code/tests/api/data/dictionaries/Invalid-After-Put.xml"))
+      dict:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Invalid-After-Put.xml"))
       ]]></code>
     </test>
   </TestSet>
@@ -279,21 +279,21 @@
     <test>
       <task>dict:post(): Post a resource</task>
       <code><![CDATA[
-      dict:post(doc("/db/code/tests/api/data/dictionaries/Valid.xml"))
+      dict:post(doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>dict:put(): Put an existing resource</task>
       <code><![CDATA[
-      dict:put("Existing", doc("/db/code/tests/api/data/dictionaries/Existing.xml"))
+      dict:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>dict:put(): Put a nonexisting resource</task>
       <code><![CDATA[
-      dict:put("DoesNotExist", doc("/db/code/tests/api/data/dictionaries/Existing.xml"))
+      dict:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>

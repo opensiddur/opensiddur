@@ -22,11 +22,11 @@
       </j:contributor>
     </store>
     <!-- existing resource with read/write access for testuser -->
-    <copy source="/db/code/tests/api/data/sources" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="Existing.xml" 
       destination="/db/data/sources" />
-    <copy source="/db/code/tests/api/data/sources" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="Existing.xml" 
       destination="/db/data/sources" destination-name="NoAccess.xml" />
-    <copy source="/db/code/tests/api/data/sources" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="Existing.xml" 
       destination="/db/data/sources" destination-name="NoWriteAccess.xml" />
     <code><![CDATA[
       system:as-user("admin", $magic:password,
@@ -61,9 +61,9 @@
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <imports>
     import module namespace src="http://jewishliturgy.org/api/data/sources"
-      at "xmldb:exist:///db/code/api/data/sources.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/sources.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///db/code/magic/magic.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <TestSet>
     <testName>src:get()</testName>
@@ -164,7 +164,7 @@
     <test>
       <task>Post a valid resource</task>
       <code><![CDATA[
-      src:post(doc("/code/tests/api/data/sources/Valid.xml"))
+      src:post(doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Created"/>
     </test>
@@ -181,7 +181,7 @@
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
-      src:put("Existing", doc("/db/code/tests/api/data/sources/Existing-After-Put.xml"))
+      src:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Existing-After-Put.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NoData"/>
       <xpath desc="The new document has been saved">collection('/data/sources')[descendant::tei:title[.='Existing']]//tei:date/@when=1920</xpath>
@@ -189,7 +189,7 @@
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      src:put("DoesNotExist", doc("/db/code/tests/api/data/sources/Valid.xml"))
+      src:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>
@@ -252,21 +252,21 @@
     <test>
       <task>src:post(): Post a resource</task>
       <code><![CDATA[
-      src:post(doc("/db/code/tests/api/data/sources/Valid.xml"))
+      src:post(doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>src:put(): Put an existing resource</task>
       <code><![CDATA[
-      src:put("Existing", doc("/db/code/tests/api/data/sources/Valid.xml"))
+      src:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>src:put(): Put a nonexisting resource</task>
       <code><![CDATA[
-      src:put("DoesNotExist", doc("/db/code/tests/api/data/sources/Valid.xml"))
+      src:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>

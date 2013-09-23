@@ -18,7 +18,7 @@
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>  
-  <TestSet>
+  <TestSet ignore="true">
     <testName>set-priorities</testName>
     <test>
       <task>with element inside stream</task>

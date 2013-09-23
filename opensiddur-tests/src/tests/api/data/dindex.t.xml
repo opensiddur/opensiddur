@@ -9,7 +9,7 @@
   <description>
     <p>Test the data API index</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012 Efraim Feinstein,
+    <copyright>Copyright 2012-2013 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <setup/>
@@ -17,7 +17,7 @@
   <namespace prefix="o">http://a9.com/-/spec/opensearch/1.1/</namespace>
   <imports>
     import module namespace dindex="http://jewishliturgy.org/api/data/index"
-      at "xmldb:exist:///code/api/data/dindex.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/dindex.xqm";
   </imports>
   <TestSet>
     <testName>dindex:list()</testName>

@@ -26,14 +26,14 @@
       </j:contributor>
     </store>
     <!-- existing resource with read/write access for testuser -->
-    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Existing.xml" 
       destination="/db/data/original/en/1900/01" />
-    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Existing.xml" 
       destination="/db/data/original/en/1900/01" destination-name="NoAccess.xml" />
-    <copy source="/db/code/tests/api/data/original" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Existing.xml" 
       destination="/db/data/original/en/1900/01" destination-name="NoWriteAccess.xml" />
     <!-- query result -->
-    <copy source="/db/code/tests/api/data/original" name="QueryResult.xml"
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="QueryResult.xml"
       destination="/db/data/original/en/1900/01"/>
     <!-- existing, valid resource with no read access -->
     <code><![CDATA[
@@ -72,13 +72,13 @@
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace orig="http://jewishliturgy.org/api/data/original"
-      at "xmldb:exist:///db/code/api/data/original.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/original.xqm";
     import module namespace format="http://jewishliturgy.org/modules/format"
-      at "xmldb:exist:///db/code/modules/format.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/format.xqm";
     import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-      at "xmldb:exist:///db/code/api/modules/common-rest.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/modules/common-rest.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///db/code/magic/magic.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <TestSet>
     <testName>orig:get()</testName>
@@ -138,9 +138,9 @@
   <TestSet>
     <testName>orig:get-combined()</testName>
     <setup>
-      <copy source="/db/code/tests/api/data/original" name="HasTransclude.xml" 
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="HasTransclude.xml" 
         destination="/db/data/original/en/1900/01" />
-      <copy source="/db/code/tests/api/data/original" name="Transcluded.xml" 
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Transcluded.xml" 
         destination="/db/data/original/en/1900/01" />
     </setup>
     <tearDown>
@@ -186,9 +186,9 @@
   <TestSet>
     <testName>orig:get-combined-html()</testName>
     <setup>
-      <copy source="/db/code/tests/api/data/original" name="HasTransclude.xml" 
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="HasTransclude.xml" 
         destination="/db/data/original/en/1900/01" />
-      <copy source="/db/code/tests/api/data/original" name="Transcluded.xml" 
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Transcluded.xml" 
         destination="/db/data/original/en/1900/01" />
     </setup>
     <tearDown>
@@ -306,7 +306,7 @@
     <test>
       <task>Post a valid resource</task>
       <code><![CDATA[
-      orig:post(doc("/db/code/tests/api/data/original/Valid.xml"))
+      orig:post(doc("/db/apps/opensiddur-tests/tests/api/data/original/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Created"/>
       <expected 
@@ -318,7 +318,7 @@
     <test>
       <task>Post an invalid resource</task>
       <code><![CDATA[
-      orig:post(doc("/db/code/tests/api/data/original/Invalid.xml"))
+      orig:post(doc("/db/apps/opensiddur-tests/tests/api/data/original/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
@@ -328,7 +328,7 @@
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
-      orig:put("Existing", doc("/db/code/tests/api/data/original/Existing-After-Put.xml"))
+      orig:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/original/Existing-After-Put.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NoData"/>
       <expected 
@@ -344,20 +344,20 @@
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      orig:put("DoesNotExist", doc("/db/code/tests/api/data/original/Valid.xml"))
+      orig:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/original/Valid.xml"))
       ]]></code>
     </test>
     <test>
       <task>Put an invalid resource</task>
       <code><![CDATA[
-      orig:put("Existing", doc("/db/code/tests/api/data/original/Invalid.xml"))
+      orig:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/original/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
     <test>
       <task>Put a valid resource that is invalidated by an illegal change</task>
       <code><![CDATA[
-      orig:put("Existing", doc("/db/code/tests/api/data/original/Invalid-After-Put-Illegal-RevisionDesc.xml"))
+      orig:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/original/Invalid-After-Put-Illegal-RevisionDesc.xml"))
       ]]></code>
     </test>
   </TestSet>
@@ -412,21 +412,21 @@
     <test>
       <task>orig:post(): Post a resource</task>
       <code><![CDATA[
-      orig:post(doc("/db/code/tests/api/data/original/Valid.xml"))
+      orig:post(doc("/db/apps/opensiddur-tests/tests/api/data/original/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>orig:put(): Put an existing resource</task>
       <code><![CDATA[
-      orig:put("Existing", doc("/db/code/tests/api/data/original/Existing.xml"))
+      orig:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/original/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>orig:put(): Put a nonexisting resource</task>
       <code><![CDATA[
-      orig:put("DoesNotExist", doc("/db/code/tests/api/data/original/Existing.xml"))
+      orig:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/original/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>
@@ -456,7 +456,7 @@
     <test>
       <task>Put a valid flattened resource to an existing resource</task>
       <code><![CDATA[
-      orig:put-flat("Existing", doc("/db/code/tests/api/data/original/Existing-Flat.xml"))
+      orig:put-flat("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/original/Existing-Flat.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NoData"/>
       <expected 
@@ -472,13 +472,13 @@
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      orig:put-flat("DoesNotExist", doc("/db/code/tests/api/data/original/Valid-Flat.xml"))
+      orig:put-flat("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/original/Valid-Flat.xml"))
       ]]></code>
     </test>
     <test>
       <task>Put an invalid flattened resource</task>
       <code><![CDATA[
-      orig:put-flat("Existing", doc("/db/code/tests/api/data/original/Invalid-Flat.xml"))
+      orig:put-flat("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/original/Invalid-Flat.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>

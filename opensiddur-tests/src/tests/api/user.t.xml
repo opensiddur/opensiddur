@@ -71,9 +71,9 @@
   <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
   <imports>
     import module namespace user="http://jewishliturgy.org/api/user"
-      at "xmldb:exist:///db/code/api/user.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/user.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///db/code/magic/magic.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <TestSet>
     <testName>user:list()</testName>

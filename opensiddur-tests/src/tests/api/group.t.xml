@@ -60,9 +60,9 @@
   <namespace prefix="g">http://jewishliturgy.org/ns/group/1.0</namespace>
   <imports>
     import module namespace grp="http://jewishliturgy.org/api/group"
-      at "xmldb:exist:///db/code/api/group.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/group.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///db/code/magic/magic.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <variable name="valid" as="document-node()">
   <![CDATA[
@@ -149,7 +149,7 @@
       ]]></code>
       <xpath desc="return an HTML list of groups">self::html:html/html:body/*[@class="results"]/html:li[@class="result"]/html:a[@class="document"]</xpath>
       <xpath desc="return the manager property on managed groups">exists(.//html:a[@property="manager"])</xpath>
-      <xpath desc="returns exactly 2 groups (everyone and grouptests)">count(.//html:li[@class="result"]) = 2</xpath>
+      <xpath desc="returns exactly 3 groups (testuser, everyone and grouptests)">count(.//html:li[@class="result"]) = 3</xpath>
     </test>
     <test>
       <task>For a non-existing user</task>

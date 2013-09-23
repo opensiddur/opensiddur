@@ -18,7 +18,7 @@
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
   <imports>
     import module namespace flatten="http://jewishliturgy.org/transform/flatten"
-      at "xmldb:exist:///db/code/transforms/flatten/flatten.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/transforms/flatten.xqm";
   </imports>
   <TestSet>
     <testName>No concurrency</testName>
@@ -26,7 +26,7 @@
       <task>acts as an identity transform</task>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/identity.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/identity.xml"),
           map {}
         )
       ]]></code>
@@ -39,7 +39,7 @@
       <task>pointer to placeholder</task>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/pointer-to-placeholder.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/pointer-to-placeholder.xml"),
           map {}
         )
       ]]></code>
@@ -52,7 +52,7 @@
     <test>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/inline1.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/inline1.xml"),
           map {}
         )
       ]]></code>
@@ -66,7 +66,7 @@
     <test>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/inline2.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/inline2.xml"),
           map {}
         )
       ]]></code>
@@ -97,7 +97,7 @@
     <test>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/inline3.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/inline3.xml"),
           map {}
         )
       ]]></code>
@@ -128,7 +128,7 @@
     <test>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/inline4.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/inline4.xml"),
           map {}
         )
       ]]></code>
@@ -140,7 +140,7 @@
     <test>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/suspend1.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/suspend1.xml"),
           map {}
         )
       ]]></code>
@@ -152,7 +152,7 @@
     <test>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/suspend2.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/suspend2.xml"),
           map {}
         )
       ]]></code>
@@ -164,7 +164,7 @@
     <test>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/suspend3.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/suspend3.xml"),
           map {}
         )
       ]]></code>
@@ -176,7 +176,7 @@
     <test>
       <code><![CDATA[
         flatten:flatten-document(
-          doc("/db/code/tests/transforms/flatten/suspend4.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/suspend4.xml"),
           map {}
         )
       ]]></code>
@@ -188,7 +188,7 @@
     <test>
       <code><![CDATA[
         flatten:resolve-stream(
-          doc("/db/code/tests/transforms/flatten/resolve1.xml"),
+          doc("/db/apps/opensiddur-tests/tests/transforms/flatten/resolve1.xml"),
           map {}
         )
       ]]></code>

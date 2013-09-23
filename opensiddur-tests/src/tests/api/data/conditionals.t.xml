@@ -27,12 +27,12 @@
       </j:contributor>
     </store>
     <!-- existing resource with read/write access for testuser -->
-    <copy source="/db/code/tests/api/data/conditionals" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/conditionals" name="Existing.xml" 
       destination="/db/data/conditionals/1900/01" />
     
-    <copy source="/db/code/tests/api/data/conditionals" name="Existing.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/conditionals" name="Existing.xml" 
       destination="/db/data/conditionals/1900/01" destination-name="NoAccess.xml" />
-    <copy source="/db/code/tests/api/data/conditionals" name="NoWriteAccess.xml" 
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/conditionals" name="NoWriteAccess.xml" 
       destination="/db/data/conditionals/1900/01" />
     <!-- existing, valid resource with no read access -->
     <code><![CDATA[
@@ -79,9 +79,9 @@
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <imports>
     import module namespace cnd="http://jewishliturgy.org/api/data/conditionals"
-      at "xmldb:exist:///db/code/api/data/conditionals.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/conditionals.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
-      at "xmldb:exist:///db/code/magic/magic.xqm";
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <TestSet>
     <testName>cnd:get()</testName>
@@ -186,7 +186,7 @@
     <test>
       <task>Post a valid resource</task>
       <code><![CDATA[
-      cnd:post(doc("/db/code/tests/api/data/conditionals/Valid.xml"))
+      cnd:post(doc("/db/apps/opensiddur-tests/tests/api/data/conditionals/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Created"/>
       <expected 
@@ -198,7 +198,7 @@
     <test>
       <task>Post an invalid resource</task>
       <code><![CDATA[
-      cnd:post(doc("/db/code/tests/api/data/conditionals/Invalid.xml"))
+      cnd:post(doc("/db/apps/opensiddur-tests/tests/api/data/conditionals/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
@@ -208,7 +208,7 @@
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
-      cnd:put("Existing", doc("/db/code/tests/api/data/conditionals/Existing-After-Put.xml"))
+      cnd:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/conditionals/Existing-After-Put.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NoData"/>
       <expected 
@@ -220,14 +220,14 @@
     <test>
       <task>Put a valid resource to a nonexisting resource</task>
       <code><![CDATA[
-      cnd:put("DoesNotExist", doc("/db/code/tests/api/data/conditionals/Valid.xml"))
+      cnd:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/conditionals/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>
     <test>
       <task>Put an invalid resource</task>
       <code><![CDATA[
-      cnd:put("Existing", doc("/db/code/tests/api/data/conditionals/Invalid.xml"))
+      cnd:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/conditionals/Invalid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
@@ -283,21 +283,21 @@
     <test>
       <task>cnd:post(): Post a resource</task>
       <code><![CDATA[
-      cnd:post(doc("/db/code/tests/api/data/conditionals/Valid.xml"))
+      cnd:post(doc("/db/apps/opensiddur-tests/tests/api/data/conditionals/Valid.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>cnd:put(): Put an existing resource</task>
       <code><![CDATA[
-      cnd:put("Existing", doc("/db/code/tests/api/data/conditionals/Existing.xml"))
+      cnd:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/conditionals/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#Unauthorized"/>
     </test>
     <test>
       <task>cnd:put(): Put a nonexisting resource</task>
       <code><![CDATA[
-      cnd:put("DoesNotExist", doc("/db/code/tests/api/data/conditionals/Existing.xml"))
+      cnd:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/conditionals/Existing.xml"))
       ]]></code>
       <class href="../common.t.incl.xml#NotFound"/>
     </test>

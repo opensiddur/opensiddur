@@ -11,11 +11,11 @@
   <password>testuser</password>
   <imports>
   import module namespace tran="http://jewishliturgy.org/api/transliteration"
-    at "xmldb:exist:///code/api/data/transliteration.xqm";
+    at "xmldb:exist:///db/apps/opensiddur-server/api/data/transliteration.xqm";
   import module namespace data="http://jewishliturgy.org/modules/data"
-    at "xmldb:exist:///code/api/modules/data.xqm";
+    at "xmldb:exist:///db/apps/opensiddur-server/api/modules/data.xqm";
   import module namespace magic="http://jewishliturgy.org/magic"
-    at "xmldb:exist:///code/magic/magic.xqm";
+    at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <namespace prefix="tr">http://jewishliturgy.org/ns/tr/1.0</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
@@ -55,9 +55,9 @@
   }
   ]]></variable>
   <setup>
-    <create-collection parent="/data/transliteration" name="1900"/>
-    <create-collection parent="/data/transliteration/1900" name="01"/>
-    <store collection="/data/transliteration/1900/01" name="Test.xml">
+    <create-collection parent="/db/data/transliteration" name="1900"/>
+    <create-collection parent="/db/data/transliteration/1900" name="01"/>
+    <store collection="/db/data/transliteration/1900/01" name="Test.xml">
       <tr:schema>
         <tr:title xml:lang="en">Test</tr:title>
         <tr:description xml:lang="en">A test</tr:description>
@@ -69,7 +69,7 @@
         </tr:table>
       </tr:schema>
     </store>
-    <store collection="/data/transliteration/1900/01" name="Test%202.xml">
+    <store collection="/db/data/transliteration/1900/01" name="Test%202.xml">
       <tr:schema>
        	<tr:title xml:lang="en">Test 2</tr:title>
         <tr:description xml:lang="en">Another test</tr:description>
@@ -81,7 +81,7 @@
         </tr:table>
       </tr:schema>
     </store>
-    <store collection="/data/transliteration/1900/01" name="Mivchan.xml">
+    <store collection="/db/data/transliteration/1900/01" name="Mivchan.xml">
       <tr:schema>
         <tr:title xml:lang="en">Mivchan</tr:title>
         <tr:description xml:lang="en">Test in Hebrew</tr:description>
@@ -93,7 +93,7 @@
         </tr:table>
       </tr:schema>
     </store>  
-    <store collection="/data/transliteration/1900/01" name="Garbage.xml">
+    <store collection="/db/data/transliteration/1900/01" name="Garbage.xml">
       <tr:schema>
         <tr:title xml:lang="en">Garbage</tr:title>
         <tr:description xml:lang="en">Just some garbage</tr:description>
@@ -105,7 +105,7 @@
         </tr:table>
       </tr:schema>
     </store>
-    <store collection="/data/transliteration/1900/01" name="NoWrite.xml">
+    <store collection="/db/data/transliteration/1900/01" name="NoWrite.xml">
       <tr:schema>
         <tr:title xml:lang="en">NoWrite</tr:title>
         <tr:description xml:lang="en">No write access</tr:description>
@@ -119,7 +119,7 @@
     </store>
     <code><![CDATA[
       system:as-user("admin", $magic:password, (
-        let $uri := xs:anyURI("/data/transliteration/1900/01/NoWrite.xml")
+        let $uri := xs:anyURI("/db/data/transliteration/1900/01/NoWrite.xml")
         return (
           sm:chown($uri, "testuser2"),
           sm:chgrp($uri, "everyone"),
@@ -128,7 +128,7 @@
     ]]></code>
   </setup>
   <tearDown>
-    <remove-collection collection="/data/transliteration/1900"/>
+    <remove-collection collection="/db/data/transliteration/1900"/>
   </tearDown>
   <TestSet>
     <testName>tran:get()</testName>
@@ -225,13 +225,13 @@
     <password>testuser</password>
     <setup>
       <code><![CDATA[
-        sm:insert-user-ace(xs:anyURI("/data/transliteration"), 0, "testuser2", false(), "w")
+        sm:insert-user-ace(xs:anyURI("/db/data/transliteration"), 0, "testuser2", false(), "w")
       ]]></code>
     </setup>
     <tearDown>
       <code><![CDATA[
-        sm:remove-ace(xs:anyURI("/data/transliteration"), 0),
-        let $created := collection("/data/transliteration")//tr:schema[tr:title="Valid"]
+        sm:remove-ace(xs:anyURI("/db/data/transliteration"), 0),
+        let $created := collection("/db/data/transliteration")//tr:schema[tr:title="Valid"]
         where ($created)
         return
           let $month-collection := util:collection-name($created)
@@ -288,7 +288,7 @@
     <testName>tran:put()</testName>
     <setup>
       <code><![CDATA[
-        sm:add-user-ace(xs:anyURI("/data/transliteration/1900/01/Garbage.xml"), "testuser2", false(), "w")
+        sm:add-user-ace(xs:anyURI("/db/data/transliteration/1900/01/Garbage.xml"), "testuser2", false(), "w")
       ]]></code>
     </setup>
     <test>
