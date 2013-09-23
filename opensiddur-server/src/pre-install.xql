@@ -95,7 +95,7 @@ declare function local:lang-collections(
 declare function local:lang-collections(
   $additional-langs as xs:string*
   ) {
-  for $lang in $local:supported-languages
+  for $lang in ($local:supported-languages, $additional-langs)
   return
     <collection name="{$lang}"/>
 };
