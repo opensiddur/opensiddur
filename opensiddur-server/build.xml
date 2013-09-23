@@ -73,11 +73,21 @@
 		unless="schema.uptodate">
         <mkdir dir="${build}/schema"/>
         <mkdir dir="${build}/temp"/>
+		<!-- pre-generated rnc -->
         <copy todir="${build}/schema">
             <fileset dir="${src}/schema">
                 <include name="*.rnc"/>
             </fileset>
         </copy>
+		<!-- pre-generated iso schematron -->
+    	<xslt
+            classpath="${lib.dir}/saxonhe-9.2.1.5.jar"
+            basedir="${src}/schema"
+            destdir="${build}/schema"
+            style="${lib.dir}/iso-schematron/iso_svrl_for_xslt2.xsl">
+            <factory name="net.sf.saxon.TransformerFactoryImpl" />
+            <mapper type="glob" from="*.isosch" to="*.xsl2"/>
+        </xslt>
 		<generate-schema 
             input.file="${src}/schema/jlptei.xml" 
             output.dir="${build}/schema" 

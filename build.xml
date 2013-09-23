@@ -134,8 +134,8 @@ cacheSize=${cache.size}
     </target>
 
 	<target name="clean"
-        description="clean up" 
-		depends="exist-clean">
+        description="clean up Open Siddur code" 
+		>
 		<subant target="clean" inheritAll="false">
 			<fileset dir=".">
 				<include name="*/build.xml"/>
@@ -147,6 +147,11 @@ cacheSize=${cache.size}
 		<!-- Delete the ${build} and ${dist} directory trees -->
 		<delete dir="${build}"/>
 		<delete dir="${dist}"/>
+	</target>
+	
+	<target name="lib-clean"
+		depends="clean,exist-clean"
+		description="clean open siddur code and library code">
 	</target>
 </project>
 
