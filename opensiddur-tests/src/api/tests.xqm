@@ -51,7 +51,7 @@ declare
 
 declare function tests:list-function(
     ) as element(TestSuite)* {
-    collection($tests:path-base)/TestSuite
+    collection($tests:path-base)[ends-with(document-uri(.), ".t.xml")]/TestSuite
 };
 
 declare function tests:title-function(
