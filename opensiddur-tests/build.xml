@@ -32,6 +32,8 @@
 			<fileset dir="${src}">
 				<include name="**/*.xml"/>
 				<include name="**/*.xq?"/>
+				<include name="**/*.html"/>
+				<include name="**/*.js"/>
 				<exclude name="**/*.xar" />
 				<exclude name="build.xml"/>
 			</fileset>
