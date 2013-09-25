@@ -813,7 +813,7 @@ declare function local:pass-string(
 declare function local:result-summary-table(
   $result as element(TestSet)*
   ) as element(table) {
-  <table border="1">
+  <table border="1" class="summary">
     <tr>
       <th>Tests</th>
       <th>Passed</th>
