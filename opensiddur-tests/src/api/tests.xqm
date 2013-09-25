@@ -44,7 +44,7 @@ declare
         if (count($suite) = 1)
         then 
             if (count($test) <= 1) 
-            then tests:do-test($suite[1], $test[1])
+            then tests:do-test($suite[1], $test[1], false())
             else api:rest-error(400, "There can be at most 1 test parameter", $test)
         else api:rest-error(400, "There can be at most 1 suite parameter", $suite)
 };
@@ -96,7 +96,8 @@ declare function tests:do-list(
 (:~ @param $suite is the part of the path after {$tests:path-base} :)
 declare function tests:do-test(
     $suite as xs:string,
-    $test as xs:string?
+    $test as xs:string?,
+    $format as xs:boolean
     ) as item()+ {
     let $suite-doc := concat($tests:path-base, $suite, ".t.xml") 
     return
@@ -107,11 +108,14 @@ declare function tests:do-test(
                     <output:method value="xml"/>
                 </output:serialization-parameters>
             </rest:response>,
-            t:format-testResult(
+            let $results :=
                 if ($test)
                 then t:run-testSet(doc($suite-doc)//TestSet[TestName=$test], (), ())
                 else t:run-testSuite(doc($suite-doc)/TestSuite, (), ())
-            )
+            return
+                if ($format) 
+                then t:format-testResult($results)
+                else $results
         )
         else api:rest-error(404, "Not found", $suite)
 };
