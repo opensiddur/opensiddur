@@ -92,9 +92,7 @@ declare function local:error(
     code="{$code}"
     >
     <value>{$value}</value>
-    <description><pre xmlns="http://www.w3.org/1999/xhtml">{
-      $description
-    }</pre></description>
+    <description>{$description}</description>
     {$error-data}
   </error>
 };

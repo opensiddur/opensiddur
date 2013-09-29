@@ -23,15 +23,15 @@
         padding: 9px 0;
       }
       
-      .PASS {
+      .pass {
           background-color:green;
       }
       
-      .FAIL {
+      .fail {
           background-color:red;
       }
       
-      .IGNORE {
+      .ignore {
           background-color:darkgrey;
       }
 
@@ -59,12 +59,31 @@
         <button class="btn btn-large btn-primary" type="submit" data-ng-click="runAll()"  data-ng-disabled="runningAll">{{runningButtonText()}}</button>
       </div>
       <div class="row-fluid">
-        <div class="span8 offset2">
+        <div class="span12">
+          <table border="1" class="summary">
+            <tr>
+              <th>Tests run</th>
+              <th>Passed</th>
+              <th>Failed</th>
+              <th>Ignored</th>
+            </tr>
+            <tr>
+                <td class="total">{{passed + failed + ignored}}</td>
+                <td data-ng-class="{pass: passed > 0}">{{passed}}</td>
+                <td data-ng-class="{fail: failed > 0}">{{failed}}</td>
+                <td data-ng-class="{ignore: ignored > 0}">{{ignored}}</td>
+            </tr>  
+          </table>  
           <div data-ng-repeat="suite in suites">
-            <h2>{{suite.name}}</h2>
+            <h2>
             <button data-ng-hide="suite.running || runningAll" 
                 data-ng-click="runSuite(suite.n)"
                 class="btn">Run</button> 
+            {{suite.name}} |
+                <span data-ng-class="{pass: suite.passed > 0}">Pass: {{suite.passed}}</span>| 
+                <span data-ng-class="{fail: suite.failed > 0}">Fail: {{suite.failed}}</span>|
+                <span data-ng-class="{ignore: suite.ignored > 0}">Ignore: {{suite.ignored}}</span>
+            </h2>
             <div data-ng-show="suite.running">Running tests...</div>
             <div data-ng-show="suite.complete">
               <table border="1" class="summary">
@@ -75,26 +94,34 @@
                   <th>Ignored</th>
                 </tr>
                 <tr>
-                    <td class="TOTAL">{{suite.total}}</td>
-                    <td class="PASS">{{suite.pass}}</td>
-                    <td class="FAIL">{{suite.fail}}</td>
-                    <td class="IGNORE">{{suite.ignore}}</td>
+                    <td class="total">{{suite.total}}</td>
+                    <td data-ng-class="{pass: suite.passed > 0}">{{suite.passed}}</td>
+                    <td data-ng-class="{fail: suite.failed > 0}">{{suite.failed}}</td>
+                    <td data-ng-class="{ignore: suite.ignored > 0}">{{suite.ignored}}</td>
                 </tr>  
               </table>  
               <a data-ng-hide="suite.showDetails" data-ng-click="suite.toggleDetails()">Show details &gt;&gt; </a>
-              <div data-ng-show="suite.showDetails">
+              <div class="span12" data-ng-show="suite.showDetails">
                 <a data-ng-click="suite.toggleDetails()">&lt;&lt; Hide details</a>
-                <p>{{suite.details.description}}</p>
-                <table>
-                    <tr data-ng-repeat="testSet in suite.details.testSets">
-                        <td>{{testSet.description}}</td>
-                        <td>
-                            <ul>
-                                <li data-ng-repeat="test in testSet.tests">{{test.description}}:{{test.pass}}</li>
-                            </ul>
-                        </td>
-                    </tr>
-                </table>
+                <h3>{{suite.details.description}}</h3>
+                <div class="span10" data-ng-repeat="testSet in suite.details.testSets">
+                    <h4>{{testSet.description}} |
+                        <span data-ng-class="{pass: testSet.passed > 0}">Pass: {{testSet.passed}}</span>| 
+                        <span data-ng-class="{fail: testSet.failed > 0}">Fail: {{testSet.failed}}</span>|
+                        <span data-ng-class="{ignore: testSet.ignored > 0}">Ignore: {{testSet.ignored}}</span>
+                    </h4>
+                    <div data-ng-repeat="test in testSet.tests">
+                        <h5>{{test.description}} | 
+                          <span data-ng-class="{pass: test.passed > 0}">Pass: {{test.passed}}</span>| 
+                          <span data-ng-class="{fail: test.failed > 0}">Fail: {{test.failed}}</span>|
+                          <span data-ng-class="{ignore: test.ignored > 0}">Ignore: {{test.ignored}}</span>
+                        </h5>
+                        <div data-ng-repeat="assertion in test.assertions">
+                            <h6 class="{{assertion.pass}}">{{assertion.description}}: {{assertion.pass}}</h6>
+                            <div data-ng-show="{{assertion.pass == 'fail'}}"><pre>{{assertion.error}}</pre></div>
+                        </div>
+                    </div>
+                </div>
               </div>
             </div>
           </div>

@@ -7,34 +7,69 @@ var httpPrefix = "/exist/restxq";
 /* retrieve an API error return value and return the string */
 var getApiError = function(data) {
   return $($.parseXML(data)).find("message").text();
-}
+};
 
 var OpenSiddurTestingApp = 
     angular.module(
             'OpenSiddurTestingApp', []
     );
 
+var passClass = function(passValue) {
+    return (passValue == "true") ? "pass" :
+        (passValue == "false") ? "fail" : 
+        passValue;
+};
+
 var parseDetails = function(testSuite) {
     testSets = [];
+    passed = 0;
+    failed = 0;
+    ignored = 0;
+    
     $("testSet", testSuite).each(function() {
         var thisSet = $(this);
         var testSet = {};
         var tests = [];
         testSet.description = $("testName", thisSet).text();
+        testSet.passed = 0;
+        testSet.failed = 0;
+        testSet.ignored = 0;
+
         $("test", thisSet).each(function() {
             var thisTest = {};
             var assertions = [];
 
             thisTest.description = $(this).attr("desc");
-            thisTest.pass = $(this).attr("pass");
-
-            $(this).children().each(function() {
-                thisAssert = $(this)
+            thisTest.pass = passClass($(this).attr("pass"));
+            thisTest.result = $("result", this).html();
+            thisTest.passed = 0;
+            thisTest.failed = 0;
+            thisTest.ignored = 0;
+            $(this).children(":not(result)").each(function() {
+                thisAssert = $(this);
+                pass = passClass(thisAssert.attr("pass"));
+                if (pass == "pass") {
+                    ++thisTest.passed;
+                    ++testSet.passed;
+                    ++passed;
+                }
+                else if (pass == "fail") {
+                    ++thisTest.failed;
+                    ++testSet.failed;
+                    ++failed;
+                }
+                else { 
+                    ++thisTest.ignored;
+                    ++testSet.ignored;
+                    ++ignored;
+                }
+ 
                 assertions.push({
                     "description" : thisAssert.attr("desc"),
-                    "pass" : thisAssert.attr("pass"),
-                    "error" : thisAssert.text()
+                    "pass" : pass,
+                    "error" : thisTest.result
                 });
+                console.log(thisTest);
             });
             thisTest.assertions = assertions;
             tests.push(thisTest);
@@ -44,7 +79,10 @@ var parseDetails = function(testSuite) {
     });
     return {
         "description" : $("p", testSuite).text(),
-        "testSets" : testSets
+        "testSets" : testSets,
+        "passed" : passed,
+        "failed" : failed,
+        "ignored" : ignored
     };
 }; 
 
@@ -56,6 +94,9 @@ OpenSiddurTestingApp.controller(
           
             $scope.errorMessage = "";
             $scope.suites = [];
+            $scope.passed = 0;
+            $scope.failed = 0;
+            $scope.ignored = 0;
             $scope.runningAll = false;
             $scope.list = function () {
                 $http.get(
@@ -71,13 +112,13 @@ OpenSiddurTestingApp.controller(
                                     testSuites.push({
                                         "name" : element.text(),
                                         "api" : element.attr("href"),
-                                        "n" : n,
+                                        "n" : n,            // counts the number of tests. Saves some computation.
                                         "running" : false,
                                         "complete" : false,
                                         "total" : undefined,
-                                        "pass" : undefined,
-                                        "fail" : undefined,
-                                        "ignore" : undefined,
+                                        "passed" : undefined,
+                                        "failed" : undefined,
+                                        "ignored" : undefined,
                                         "showDetails" : false,
                                         "details" : undefined,
                                         "toggleDetails" : function () {
@@ -107,6 +148,9 @@ OpenSiddurTestingApp.controller(
           $scope.runAll = function() {
                 console.log("Run all tests");
                 this.runningAll = true;
+                this.passed = 0;
+                this.failed = 0;
+                this.ignored = 0;
                 callback = function(testSuiteNumber, data) {
                     console.log("callback for " + testSuiteNumber + " # of suites: " + $scope.suites.length);
                     next = testSuiteNumber + 1;
@@ -125,10 +169,13 @@ OpenSiddurTestingApp.controller(
                 .success(function(data) {
                         console.log("Success");
                         // extract total, pass, fail, ignore numbers
-                        testSuiteObject.pass = $("test *[pass=true]", data).length;
-                        testSuiteObject.fail = $("test *[pass=false]", data).length;
-                        testSuiteObject.ignore = $("test *[pass=ignore]", data).length;
-                        testSuiteObject.total = testSuiteObject.pass + testSuiteObject.fail + testSuiteObject.ignore;
+                        testSuiteObject.passed = $("test *[pass=true]", data).length;
+                        testSuiteObject.failed = $("test *[pass=false]", data).length;
+                        testSuiteObject.ignored = $("test *[pass=ignore]", data).length;
+                        testSuiteObject.total = testSuiteObject.passed + testSuiteObject.failed + testSuiteObject.ignored;
+                        $scope.passed += testSuiteObject.passed;
+                        $scope.failed += testSuiteObject.failed;
+                        $scope.ignored += testSuiteObject.ignored;
                         testSuiteObject.details = parseDetails(data);
                         testSuiteObject.complete = true;
                         testSuiteObject.running = false;
