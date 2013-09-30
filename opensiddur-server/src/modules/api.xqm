@@ -36,7 +36,13 @@ declare function api:rest-error(
     <path>{
       if (request:exists())
       then request:get-uri()
-      else rest:uri()
+      else 
+        try {
+            rest:uri()
+        }
+        catch rerr:RQDY0101 { (: called from non-RESTXQ context :)
+            ""
+        }
     }</path>
     <message>{$message}</message>
     {
