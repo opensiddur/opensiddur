@@ -1,0 +1,70 @@
+<project name="opensiddur-sources" default="dist" basedir=".">
+	<description>
+        Build file for opensiddur-sources
+    </description>
+	<!-- set global properties for this build -->
+	<dirname property="base.dir" file="${ant.file.opensiddur-sources}"/>
+    <property name="lib.dir" location="../lib"/>
+	<property name="src" location="${base.dir}/src"/>
+    <property name="build" location="${base.dir}/build"/>
+	<property name="dist"  location="${base.dir}/dist"/>
+    <!-- 
+    <property name="wlc.xslt.path" file="${base.dir}/input-conversion/wlc"/>    
+    <property name="wlc.data.path" file="${base.dir}/sources/wlc"/>    
+    -->
+	<!-- set local properties for the build -->
+	<property file="local.build.properties"/>
+    <!-- set global default properties for the build -->
+    <property file="build.properties"/>
+	
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+        <!-- make build dirs -->
+        <mkdir dir="${build}"/>
+        <mkdir dir="${dist}"/>
+	</target>
+
+	<target name="dist" depends="init,xar"
+		description="build everything"/>
+
+    <target name="wlc"
+        description="build the WLC"
+        unless="wlc.uptodate">
+        <!--
+        <xslt
+            classpath="${lib.dir}/saxonhe-9.2.1.5.jar"
+            basedir="@{temp.dir}"
+            destdir="@{temp.dir}"
+            style="${lib.dir}/iso-schematron/iso_svrl_for_xslt2.xsl">
+            <factory name="net.sf.saxon.TransformerFactoryImpl" />
+            <mapper type="glob" from="*.isosch" to="*.xsl2"/>
+        </xslt>
+        -->
+    </target>
+
+	<target name="xar"
+        depends="init,wlc" 
+        description="generate the xar distribution" >
+        <copy todir="${build}">
+			<fileset dir="${src}">
+				<include name="**/*.xml"/>
+				<include name="**/*.xql"/>
+				<exclude name="**/*.xar" />
+				<exclude name="build.xml"/>
+			</fileset>
+        </copy>
+		<zip 
+            destfile="${dist}/opensiddur-sources.xar" 
+            basedir="${build}">
+		</zip>
+	</target>
+
+	<target name="clean"
+        description="clean up">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+	    <delete dir="${build}"/>
+    	<delete dir="${dist}"/>
+	</target>
+</project>
+
