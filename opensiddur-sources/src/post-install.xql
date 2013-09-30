@@ -1,10 +1,11 @@
 xquery version "3.0";
-(:~ pre-install for opensiddur-sources
+(:~ post-install for opensiddur-sources
  : loads the sources data into the proper places in the database
  : 
  : Copyright 2013 Efraim Feinstein, efraim@opensiddur.org
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
+(: This script has to be post-install, because pre-install cannot access imported modules :)
 import module namespace debug="http://jewishliturgy.org/transform/debug"
     at "xmldb:exist:///db/apps/opensiddur-server/modules/debug.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
@@ -57,6 +58,7 @@ declare function local:upgrade-or-install(
 
 declare function local:install-transliteration(
     ) {
+    util:log-system-out("Installing transliteration tables..."),
     let $get := tran:get#1
     let $put := tran:put#2
     let $post := tran:post#1

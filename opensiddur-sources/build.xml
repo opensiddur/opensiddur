@@ -4,14 +4,15 @@
     </description>
 	<!-- set global properties for this build -->
 	<dirname property="base.dir" file="${ant.file.opensiddur-sources}"/>
-    <property name="lib.dir" location="../lib"/>
+    <property name="lib.dir" location="${base.dir}/../lib"/>
 	<property name="src" location="${base.dir}/src"/>
     <property name="build" location="${base.dir}/build"/>
 	<property name="dist"  location="${base.dir}/dist"/>
-    <!-- 
-    <property name="wlc.xslt.path" file="${base.dir}/input-conversion/wlc"/>    
-    <property name="wlc.data.path" file="${base.dir}/sources/wlc"/>    
-    -->
+
+    <property name="saxon" location="${lib.dir}/exist/lib/endorsed/saxonhe-9.4.0.7.jar"/>
+    <property name="wlc.xslt.dir" location="${base.dir}/input-conversion/wlc"/>    
+    <property name="wlc.data.dir" location="${base.dir}/sources/tanach/WLC"/>    
+    
 	<!-- set local properties for the build -->
 	<property file="local.build.properties"/>
     <!-- set global default properties for the build -->
@@ -20,6 +21,17 @@
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp/>
+
+        <!-- up to date status of WLC -->
+		<uptodate property="wlc.uptodate" targetfile="${build}/data/sources/The\ Westminster\ Leningrad\ Codex.xml">
+			<srcfiles dir="${wlc.data.dir}">
+				<include name="Books/*.xml"/>
+			</srcfiles>
+            <srcfiles dir="{$wlc.xslt.dir}">
+                <include name="**/*.xsl2"/>
+            </srcfiles>
+		</uptodate>
+
         <!-- make build dirs -->
         <mkdir dir="${build}"/>
         <mkdir dir="${dist}"/>
@@ -31,16 +43,37 @@
     <target name="wlc"
         description="build the WLC"
         unless="wlc.uptodate">
-        <!--
+        <mkdir dir="${build}/wlc.tmp"/>
+         
         <xslt
-            classpath="${lib.dir}/saxonhe-9.2.1.5.jar"
-            basedir="@{temp.dir}"
-            destdir="@{temp.dir}"
-            style="${lib.dir}/iso-schematron/iso_svrl_for_xslt2.xsl">
-            <factory name="net.sf.saxon.TransformerFactoryImpl" />
-            <mapper type="glob" from="*.isosch" to="*.xsl2"/>
+            classpath="${saxon}"
+            basedir="${wlc.data.dir}"
+            destdir="${build}/wlc.tmp"
+            in="${wlc.xslt.dir}/join-wlc.xsl2"
+            out="${build}/wlc.tmp/joined.built"
+            style="${wlc.xslt.dir}/join-wlc.xsl2">
+            <factory name="net.sf.saxon.TransformerFactoryImpl">
+                <attribute name="http://saxon.sf.net/feature/initialTemplate" value="main"/>
+            </factory>
+            <param name="input-directory" expression="${wlc.data.dir}/Books"/>
+            <param name="output-file" expression="${build}/wlc.tmp/joined-wlc.xml"/>
         </xslt>
-        -->
+        <xslt
+            classpath="${saxon}"
+            basedir="${build}/wlc.tmp"
+            destdir="${build}"
+            in="${wlc.xslt.dir}/wlc2jlptei.xsl2"
+            out="${build}/wlc.tmp/wlc2jlptei.built"
+            style="${wlc.xslt.dir}/wlc2jlptei.xsl2">
+            <factory name="net.sf.saxon.TransformerFactoryImpl">
+                <attribute name="http://saxon.sf.net/feature/initialTemplate" value="main"/>
+                <!-- avoid multiple import warnings? -->
+                <attribute name="http://saxon.sf.net/feature/recoveryPolicy" value="0"/>
+            </factory>
+            <param name="input-file" expression="${build}/wlc.tmp/joined-wlc.xml"/>
+            <param name="result-directory" expression="${build}/data"/>
+        </xslt>
+        <delete dir="${build}/wlc.tmp"/>
     </target>
 
 	<target name="xar"
