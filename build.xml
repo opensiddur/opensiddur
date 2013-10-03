@@ -96,6 +96,12 @@ cacheSize=${cache.size}
             <arg value="password"/>
             <arg value="-x"/>
         </exec>
+        <!-- copy the icu4j library from lib -->
+        <copy todir="${installdir}/lib/user">
+            <fileset dir="${lib.dir}">
+            	<include name="icu4j-*"/>
+            </fileset>
+        </copy>
     </target>
 	
 	<target name="exist-clean">
