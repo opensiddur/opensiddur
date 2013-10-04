@@ -273,47 +273,48 @@ declare function translit:replace-tetragrammaton-text(
             typeswitch ($a)
             case element(fn:match)
             return
-				if ($a/fn:group[@nr=5]=$translit:hebrew("hiriq"))
+				if ($a//fn:group[@nr=5]=$translit:hebrew("hiriq"))
                 then
 					(: elohim :)
 					string-join(
 								($translit:hebrew("aleph"),
-								if ($a/fn:group[@nr=2]=$translit:hebrew("sheva")) then $translit:hebrew("hatafsegol") else "",
-								$a/fn:group[@nr=3]/string(),
+								if ($a//fn:group[@nr=2]=$translit:hebrew("sheva")) then $translit:hebrew("hatafsegol") else "",
+								$a//fn:group[@nr=3]/string(),
 								$translit:hebrew("lamed"),
                                 $translit:hebrew("holam"),
-								$a/fn:group[@nr=4]/string(),
+								$a//fn:group[@nr=4]/string(),
 								$translit:hebrew("he"),
                                 $translit:hebrew("hiriq"),
-								$a/fn:group[@nr=6],
+								$a//fn:group[@nr=6],
 								$translit:hebrew("finalmem"),
-								$a/fn:group[@nr=7]/string()
+								$a//fn:group[@nr=7]/string()
                                 ),"")
-                else if ($a/fn:group[@nr=8])
+                else if ($a//fn:group[@nr=8])
                 then
                     (: adonai without cantillation :)
                     string-join(
                                 ($translit:hebrew("aleph"),
-                                if ($a/fn:group[@nr=9]=$translit:hebrew("sheva")) then $translit:hebrew("hatafpatah") else "",
+                                if ($a//fn:group[@nr=9]=$translit:hebrew("sheva")) then $translit:hebrew("hatafpatah") else "",
                                 $translit:hebrew("dalet"),
                                 $translit:hebrew("holam"),
                                 $translit:hebrew("nun"),
+                                ($a//fn:group[@nr=5], $translit:hebrew("qamats"))[1],
                                 $translit:hebrew("yod")
                                 ), "")
 				else
                     (: adonai :)
 					string-join(
 								($translit:hebrew("aleph"),
-								if ($a/fn:group[@nr=2]=$translit:hebrew("sheva")) then $translit:hebrew("hatafpatah") else "",
-								$a/fn:group[@nr=3]/string(),
+								if ($a//fn:group[@nr=2]=$translit:hebrew("sheva")) then $translit:hebrew("hatafpatah") else "",
+								$a//fn:group[@nr=3]/string(),
 								$translit:hebrew("dalet"),
                                 $translit:hebrew("holam"),
-								$a/fn:group[@nr=4]/string(),
+								$a//fn:group[@nr=4]/string(),
 								$translit:hebrew("nun"),
-								$a/fn:group[@nr=5]/string(),
-								$a/fn:group[@nr=6]/string(),
+								$a//fn:group[@nr=5]/string(),
+								$a//fn:group[@nr=6]/string(),
 								$translit:hebrew("yod"),
-								$a/fn:group[@nr=7]/string()),"")
+								$a//fn:group[@nr=7]/string()),"")
 			default (: non match :) 
             return $a/string()
 	return text { string-join($replaced, "") }
@@ -429,7 +430,7 @@ declare function translit:transliterate-final(
             )
             then translit:transliterate-final-continue($node, $params)
             else if (
-                ($node/self::tr:cons[not(tr:suppress) and following-sibling::tr:d])
+                ($node instance of element (tr:cons) and $node[not(tr:suppress) and following-sibling::tr:d])
                 and not(contains($node/string(), $translit:hebrew("dageshormapiq") or $node/string()=$translit:hebrew("vav"))) 
             )
             then translit:transliterate-final-different-by-dagesh($node, $params)
@@ -441,7 +442,7 @@ declare function translit:transliterate-final(
             then translit:transliterate-final-ignored($node, $params)
             else if ($node[not(tr:suppress) and not(parent::tr:silent)])
             then translit:transliterate-final-non-ignored($node, $params)
-            else if ($node/self::tr:cons[parent::tr:silent])
+            else if ($node instance of element(tr:cons) and $node[parent::tr:silent])
             then translit:transliterate-final-silent($node, $params)
             else translit:identity($node, $params, translit:transliterate-final#2)
         case text() return $node
@@ -491,7 +492,7 @@ declare function translit:transliterate-final-silent(
 declare function translit:transliterate-final-non-ignored(
     $context as element(),
     $params as map
-    ) as text() {
+    ) as text()? {
     let $table as element(tr:table)? := $params("translit:table")
     let $text := $context/string()
     return text {
@@ -527,7 +528,7 @@ declare function translit:transliterate(
 declare function translit:transliterate-text(
     $context as text(),
     $params as map
-    ) as text() {
+    ) as text()? {
     let $table as element(tr:table) := $params("translit:table")
     for $token in tokenize($context, "\s+")[.]
     let $original := $token
