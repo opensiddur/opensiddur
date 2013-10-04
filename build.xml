@@ -111,15 +111,25 @@ cacheSize=${cache.size}
 			<arg value="clean"/>
 		</exec>
 	</target>
-	
-	<target name="autodeploy" 
-		depends="dist,install-exist"
-		description="set up built xars for autodeployment">
+    
+    <target name="autoupgrade"
+        depends="dist"
+        description="install or upgrade Open Siddur packages without touching eXist">
+        <copy todir="${installdir}/extensions/indexes/lucene/lib" flatten="true">
+            <fileset dir="${lib.dir}/hebmorph-exist/build">
+                <include name="**/*.jar"/>
+            </fileset>
+        </copy>
 		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
 				<include name="*.xar"/>
 			</fileset>
 		</copy>
+    </target>
+    	
+	<target name="autodeploy" 
+		depends="install-exist,autoupgrade"
+		description="set up eXist and built xars for autodeployment">
 	</target>
     
 	<target name="dist" depends="init"
