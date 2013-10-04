@@ -596,7 +596,7 @@ declare function t:run-testSuite(
 			{
 			  for $set in $suite/TestSet
 			  return
-			    if (not($if) or $set/(empty(@ignore) or @ignore = "no"))
+			    if (not($if) and $set/(empty(@ignore) or @ignore = "no"))
 			    then t:run-testSet($set, $run-user, $run-password)
 			    else if ($if instance of element(error))
 			    then t:fail-testSet($set, $if)
