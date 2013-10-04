@@ -8,4 +8,6 @@
     <title>Open Siddur Tests</title>
     <!-- these tests are intended for version 0.7.1 -->
     <dependency package="http://jewishliturgy.org/apps/opensiddur-server" semver="0.7.1"/>
+    <!-- the sources dependency may be relaxed if the transliteration test comes from elsewhere -->
+    <dependency package="http://jewishliturgy.org/apps/opensiddur-sources" semver="0.7.1"/>
 </package>
