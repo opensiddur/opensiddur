@@ -5,22 +5,22 @@ xquery version "3.0";
  :  authentication,
  :  content negotiation
  : 
- : Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
  : Open Siddur Project
  : Licensed Under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace demo="http://jewishliturgy.org/api/demo";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-  at "/db/code/api/modules/api.xqm";
+  at "/db/apps/opensiddur-server/modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-  at "/db/code/modules/app.xqm";
+  at "/db/apps/opensiddur-server/modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
-import module namespace format="http://jewishliturgy.org/modules/format"
-  at "/db/code/modules/format.xqm";
+  at "/db/apps/opensiddur-server/modules/data.xqm";
+import module namespace translit="http://jewishliturgy.org/transforms/transliterator"
+  at "/db/apps/opensiddur-server/transforms/translit/translit.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
-  at "/db/code/api/data/transliteration.xqm";
+  at "/db/apps/opensiddur-server/api/data/transliteration.xqm";
   
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
@@ -31,40 +31,19 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 (:~ transliterate the given data, which is wrapped in XML :)
 declare function local:transliterate(
   $data as element(),
-  $schema as xs:string
+  $schema as document-node()
   ) as node()* {
-  let $user := app:auth-user()
-  let $password := app:auth-password()
-  let $data-with-selected-schema :=
-    (: default language is Hebrew; a different language can 
-     : be specified by the data
-     :)
-    <jx:relationship type="set" xml:lang="he">
-      <jx:linked-relationship>
-        <tei:fs type="Transliterator">
-          <tei:f name="Table">
-            <tei:symbol value="{$schema}"/>
-          </tei:f>
-          <tei:f name="Alignment-Namespace">
-            <tei:string>{namespace-uri($data)}</tei:string>
-          </tei:f>
-          <tei:f name="Alignment-Element">
-            <tei:string>{local-name($data)}</tei:string>
-          </tei:f>
-        </tei:fs>
-      </jx:linked-relationship>
-      {$data}
-    </jx:relationship>
-  let $transliterated :=
-    format:transliterate($data-with-selected-schema, $user, $password)
-  let $tr-element := $transliterated/*/j:parallelGrp/j:parallel/*
+  let $in-lang := ($data/@xml:lang/string(), "he")[1]
+  let $out-lang := $in-lang || "-Latn"
+  let $table := $schema/tr:schema/tr:table[tr:lang[@in=$in-lang][@out=$out-lang]]
+  let $transliterated := translit:transliterate($data, map { "translit:table" := $table })
   return 
     element { 
-      QName(namespace-uri($tr-element), name($tr-element)) 
+      QName(namespace-uri($transliterated), name($transliterated)) 
     }{
-      $tr-element/(
+      $transliterated/(
         @* except @xml:lang,
-        parent::j:parallel/@xml:lang,
+        attribute xml:lang { $out-lang },
         node()
       )
     }
@@ -171,7 +150,7 @@ declare
   return
     if ($schema-exists)
     then
-      let $transliterated := local:transliterate($body/*, $schema)
+      let $transliterated := local:transliterate($body/*, $schema-exists)
       return $transliterated
     else
       api:rest-error(404, "Schema cannot be found", $schema)
