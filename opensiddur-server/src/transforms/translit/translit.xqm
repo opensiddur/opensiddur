@@ -528,7 +528,7 @@ declare function translit:transliterate(
 declare function translit:transliterate-text(
     $context as text(),
     $params as map
-    ) as text()? {
+    ) as text()* {
     let $table as element(tr:table) := $params("translit:table")
     for $token in tokenize($context, "\s+")[.]
     let $original := $token
