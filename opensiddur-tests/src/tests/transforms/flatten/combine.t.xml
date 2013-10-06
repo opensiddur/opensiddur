@@ -56,7 +56,7 @@
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine1.xml"),
           map {})
       ]]></code>
-      <xpath desc="has @jf:document on root element">./tei:TEI/@jf:document="/api/data/tests/combine1"</xpath>
+      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine1$")</xpath>
       <xpath 
         desc="acts as an identity transform for unflattened text" 
         >exists(./tei:TEI/tei:text/jf:combined/tei:seg[@jf:id="seg1"][@jf:stream="stream"])
@@ -78,7 +78,7 @@
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine2.xml"),
           map {})
       ]]></code>
-      <xpath desc="has @jf:document on root element">./tei:TEI/@jf:document="/api/data/tests/combine2"</xpath>
+      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine2$")</xpath>
       <xpath 
         desc="incorporate destination in-place" 
         >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/tei:seg[@jf:id="seg1"])
