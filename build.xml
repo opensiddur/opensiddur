@@ -123,6 +123,8 @@ cacheSize=${cache.size}
 		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
 				<include name="*.xar"/>
+                <!-- hebmorph is being installed directly, not as a xar -->
+                <exclude name="hebmorph-exist.xar"/>
 			</fileset>
 		</copy>
     </target>
