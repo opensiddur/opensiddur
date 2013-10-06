@@ -48,7 +48,7 @@ import module namespace expand="http://jewishliturgy.org/transform/grammar/expan
 import module namespace clean="http://jewishliturgy.org/transform/grammar/clean"
 	at "clean.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
-	at "/db/code/modules/debug.xqm";
+	at "../modules/debug.xqm";
 
 declare namespace p="http://jewishliturgy.org/ns/parser";
 declare namespace r="http://jewishliturgy.org/ns/parser-result";

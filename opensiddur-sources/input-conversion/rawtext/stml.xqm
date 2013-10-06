@@ -12,11 +12,11 @@ xquery version "3.0";
 module namespace stml="http://jewishliturgy.org/transform/stml";
 
 import module namespace grammar="http://jewishliturgy.org/transform/grammar"
-  at "/db/code/grammar-parser/grammar2.xqm";
+  at "/db/apps/opensiddur-server/grammar-parser/grammar2.xqm";
 import module namespace name="http://jewishliturgy.org/modules/name"
-  at "/db/code/modules/name.xqm";
+  at "/db/apps/opensiddur-server/modules/name.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-  at "/db/code/api/modules/data.xqm";
+  at "/db/apps/opensiddur-server/modules/data.xqm";
   
 import module namespace stxt="http://jewishliturgy.org/transform/streamtext"
   at "streamtext.xqm";
@@ -29,7 +29,7 @@ declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 
-declare variable $stml:grammar := "/code/grammar-parser/stml-grammar.xml";
+declare variable $stml:grammar := "/db/apps/opensiddur-server/grammar-parser/stml-grammar.xml";
 
 (:~ parse STML, or flag an error
  :
