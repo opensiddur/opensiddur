@@ -512,8 +512,15 @@ TODO:
                     <xsl:value-of select="$book-he" />
                   </tei:head>
                   <tei:ab>
-                    <tei:ptr
-                      target="#range({$chapter-ptrs/tei:ptr[1]/@xml:id},{$chapter-ptrs/tei:ptr[last()]/@xml:id})" />
+                    <xsl:choose>
+                      <xsl:when test="count($chapter-ptrs/tei:ptr)=1">
+                        <tei:ptr target="#{$chapter-ptrs/tei:ptr/@xml:id}"/>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <tei:ptr
+                          target="#range({$chapter-ptrs/tei:ptr[1]/@xml:id},{$chapter-ptrs/tei:ptr[last()]/@xml:id})" />
+                      </xsl:otherwise>
+                    </xsl:choose>
                   </tei:ab>
                 </tei:div> 
               </j:layer>
