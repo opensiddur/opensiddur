@@ -478,7 +478,7 @@ declare function translit:transliterate-final-different-by-dagesh(
 declare function translit:transliterate-final-silent(
     $context as element(tr:cons),
     $params as map
-    ) as text() {
+    ) as text()? {
     let $table as element(tr:table)? := $params("translit:table")
     return text {
         $table/tr:tr[@from=$context/string()]/@silent/string()
@@ -528,43 +528,43 @@ declare function translit:transliterate(
 declare function translit:transliterate-text(
     $context as text(),
     $params as map
-    ) as text()* {
-    let $table as element(tr:table) := $params("translit:table")
-    for $token in tokenize($context, "\s+")[.]
-    let $original := $token
-    let $replaced-tetragrammaton as element(tr:w) :=
-        let $whole-word as element(tr:w) :=
-            element tr:w {
-  				if ($context/ancestor::tei:w)
-                then translit:assemble-word-reverse($context/ancestor::tei:w, map:new(($params, map { "translit:this-context" := $context } )))
-  				else $original
-  			}
-        return
-            if (not($table/tr:option
-                [@name='replace-tetragrammaton'][@value=('off','false','no')])
-                )
-            then
-  				translit:replace-tetragrammaton($whole-word, $params)
-            else $whole-word
-    let $complex-character-word as element(tr:w)? :=
-        translit:make-word($replaced-tetragrammaton, $params)
-    where (exists($complex-character-word))
-    return text {
-        string-join(
-            let $pass0-result as element(tr:w) :=
-                translit:pass0($complex-character-word, $params)
-  			let $pass1-result as element(tr:w) :=
-                translit:pass1($pass0-result, $params)
-            let $pass2-result as element(tr:w) :=
-                translit:pass2($pass1-result, $params)  
-            let $pass3-result as element(tr:w) :=
-                translit:pass3($pass2-result, $params) 
-            let $pass4-result as element(tr:w) :=
-                translit:pass4($pass3-result, $params) 
+    ) as text()? {
+    text { 
+        string-join((
+            let $table as element(tr:table) := $params("translit:table")
+            let $original := $context/string()
+            let $replaced-tetragrammaton as element(tr:w) :=
+                let $whole-word as element(tr:w) :=
+                    element tr:w {
+                        if ($context/ancestor::tei:w)
+                        then translit:assemble-word-reverse($context/ancestor::tei:w, map:new(($params, map { "translit:this-context" := $context } )))
+                        else $original
+                    }
+                return
+                    if (not($table/tr:option
+                        [@name='replace-tetragrammaton'][@value=('off','false','no')])
+                        )
+                    then
+                        translit:replace-tetragrammaton($whole-word, $params)
+                    else $whole-word
+            let $complex-character-word as element(tr:w)? :=
+                translit:make-word($replaced-tetragrammaton, $params)
+            where (exists($complex-character-word))
             return
-                translit:transliterate-final($pass4-result, $params) 
-        , "")
-    }
+                    let $pass0-result as element(tr:w) :=
+                        translit:pass0($complex-character-word, $params)
+                    let $pass1-result as element(tr:w) :=
+                        translit:pass1($pass0-result, $params)
+                    let $pass2-result as element(tr:w) :=
+                        translit:pass2($pass1-result, $params)  
+                    let $pass3-result as element(tr:w) :=
+                        translit:pass3($pass2-result, $params) 
+                    let $pass4-result as element(tr:w) :=
+                        translit:pass4($pass3-result, $params) 
+                    return
+                        translit:transliterate-final($pass4-result, $params) 
+        ), "")
+    } 
 };
 
 declare function translit:pass0(
@@ -929,7 +929,7 @@ declare function translit:pass3(
 declare function translit:pass3-identify-dagesh(
     $context as element(tr:cc),
     $params as map
-    ) as element(tr:cc) {
+    ) as element(tr:cc)+ {
     (: dagesh kal if begedkeft letter at beginning of word or after sheva(nach) :)
     let $is-bgdkft as xs:boolean :=
         $context/tr:cons=(
