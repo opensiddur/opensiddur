@@ -532,37 +532,42 @@ declare function translit:transliterate-text(
     text { 
         string-join((
             let $table as element(tr:table) := $params("translit:table")
-            let $original := $context/string()
-            let $replaced-tetragrammaton as element(tr:w) :=
-                let $whole-word as element(tr:w) :=
-                    element tr:w {
-                        if ($context/ancestor::tei:w)
-                        then translit:assemble-word-reverse($context/ancestor::tei:w, map:new(($params, map { "translit:this-context" := $context } )))
-                        else $original
-                    }
-                return
-                    if (not($table/tr:option
-                        [@name='replace-tetragrammaton'][@value=('off','false','no')])
-                        )
-                    then
-                        translit:replace-tetragrammaton($whole-word, $params)
-                    else $whole-word
-            let $complex-character-word as element(tr:w)? :=
-                translit:make-word($replaced-tetragrammaton, $params)
-            where (exists($complex-character-word))
+            for $token in analyze-string($context/string(), "\S+")/*
             return
-                    let $pass0-result as element(tr:w) :=
-                        translit:pass0($complex-character-word, $params)
-                    let $pass1-result as element(tr:w) :=
-                        translit:pass1($pass0-result, $params)
-                    let $pass2-result as element(tr:w) :=
-                        translit:pass2($pass1-result, $params)  
-                    let $pass3-result as element(tr:w) :=
-                        translit:pass3($pass2-result, $params) 
-                    let $pass4-result as element(tr:w) :=
-                        translit:pass4($pass3-result, $params) 
+                typeswitch($token)
+                case element(fn:match) return
+                    let $original := $token/string()
+                    let $replaced-tetragrammaton as element(tr:w) :=
+                        let $whole-word as element(tr:w) :=
+                            element tr:w {
+                                if ($context/ancestor::tei:w)
+                                then translit:assemble-word-reverse($context/ancestor::tei:w, map:new(($params, map { "translit:this-context" := $context } )))
+                                else $original
+                            }
+                        return
+                            if (not($table/tr:option
+                                [@name='replace-tetragrammaton'][@value=('off','false','no')])
+                                )
+                            then
+                                translit:replace-tetragrammaton($whole-word, $params)
+                            else $whole-word
+                    let $complex-character-word as element(tr:w)? :=
+                        translit:make-word($replaced-tetragrammaton, $params)
+                    where (exists($complex-character-word))
                     return
-                        translit:transliterate-final($pass4-result, $params) 
+                            let $pass0-result as element(tr:w) :=
+                                translit:pass0($complex-character-word, $params)
+                            let $pass1-result as element(tr:w) :=
+                                translit:pass1($pass0-result, $params)
+                            let $pass2-result as element(tr:w) :=
+                                translit:pass2($pass1-result, $params)  
+                            let $pass3-result as element(tr:w) :=
+                                translit:pass3($pass2-result, $params) 
+                            let $pass4-result as element(tr:w) :=
+                                translit:pass4($pass3-result, $params) 
+                            return
+                                translit:transliterate-final($pass4-result, $params) 
+                default return $token/string() (: whitespace :)
         ), "")
     } 
 };
