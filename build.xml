@@ -111,15 +111,25 @@ cacheSize=${cache.size}
 			<arg value="clean"/>
 		</exec>
 	</target>
-    
-    <target name="autoupgrade"
+
+    <target name="install-hebmorph"
         depends="dist"
-        description="install or upgrade Open Siddur packages without touching eXist">
+        description="install the hebmorph files into eXist">
         <copy todir="${installdir}/extensions/indexes/lucene/lib" flatten="true">
             <fileset dir="${lib.dir}/hebmorph-exist/build">
                 <include name="**/*.jar"/>
             </fileset>
         </copy>
+        <copy todir="${installdir}/extensions/indexes/lucene/lib">
+            <fileset dir="${lib.dir}/hebmorph-exist/src/hebmorph-exist">
+                <include name="hspell-data-files/*"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="autoupgrade"
+        depends="dist,install-hebmorph"
+        description="install or upgrade Open Siddur packages without touching eXist">
 		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
 				<include name="*.xar"/>
