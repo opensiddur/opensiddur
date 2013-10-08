@@ -27,6 +27,8 @@ import module namespace combine="http://jewishliturgy.org/transform/combine"
   at "../transforms/combine.xqm";
 import module namespace tohtml="http://jewishliturgy.org/transform/html"
   at "../transforms/tohtml.xqm";
+import module namespace translit="http://jewishliturgy.org/transform/transliterator"
+  at "../transforms/translit/translit.xqm";
 import module namespace reverse="http://jewishliturgy.org/transform/reverse"
   at "../transforms/reverse.xqm";
 
@@ -283,27 +285,10 @@ declare function format:reverse(
 
 
 declare function format:transliterate(
-  $uri-or-node as item(),
-  $user as xs:string?,
-  $password as xs:string?
+  $doc as document-node(),
+  $params as map
   ) as document-node() {
-  local:wrap-document(
-    app:transform-xslt($uri-or-node, 
-      app:concat-path($format:rest-path-to-xslt, 'translit/translit-main.xsl2'),
-      (
-        if ($user)
-        then (
-          <param name="user" value="{$user}"/>,
-          <param name="password" value="{$password}"/>
-        )
-        else (), 
-        <param name="transliteration-tables" value="{
-          string-join(
-            collection("/data/transliteration")/tr:schema/document-uri(root(.)),
-            " ")
-        }"/>
-      ), ()
-    )
-  )
+  (: TODO: set up a transliteration cache :)
+  translit:transliterate-document($doc, $params)
 };
 
