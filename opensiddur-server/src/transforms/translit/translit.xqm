@@ -3,7 +3,7 @@ xquery version "3.0";
  : Copyright 2008-2010,2013 Efraim Feinstein, efraim@opensiddur.org
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
-module namespace translit="http://jewishliturgy.org/transforms/transliterator";
+module namespace translit="http://jewishliturgy.org/transform/transliterator";
 
 import module namespace uri="http://jewishliturgy.org/transform/uri"
     at "../../modules/follow-uri.xqm";

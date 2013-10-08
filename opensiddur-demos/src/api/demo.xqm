@@ -17,7 +17,7 @@ import module namespace app="http://jewishliturgy.org/modules/app"
   at "/db/apps/opensiddur-server/modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "/db/apps/opensiddur-server/modules/data.xqm";
-import module namespace translit="http://jewishliturgy.org/transforms/transliterator"
+import module namespace translit="http://jewishliturgy.org/transform/transliterator"
   at "/db/apps/opensiddur-server/transforms/translit/translit.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
   at "/db/apps/opensiddur-server/api/data/transliteration.xqm";

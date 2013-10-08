@@ -17,7 +17,7 @@
     <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
     <namespace prefix="tr">http://jewishliturgy.org/ns/tr/1.0</namespace>
     <imports>
-        import module namespace translit="http://jewishliturgy.org/transforms/transliterator"
+        import module namespace translit="http://jewishliturgy.org/transform/transliterator"
             at "/db/apps/opensiddur-server/transforms/translit/translit.xqm";
     </imports>
     <!-- TODO: use a custom translit table for tests that can test all of the features -->
