@@ -23,13 +23,9 @@
 		<tstamp/>
 
         <!-- up to date status of WLC -->
-		<uptodate property="wlc.uptodate" targetfile="${build}/data/sources/The\ Westminster\ Leningrad\ Codex.xml">
-			<srcfiles dir="${wlc.data.dir}">
-				<include name="Books/*.xml"/>
-			</srcfiles>
-            <srcfiles dir="{$wlc.xslt.dir}">
-                <include name="**/*.xsl2"/>
-            </srcfiles>
+		<uptodate property="wlc.uptodate" targetfile="${build}/data/user/Christopher.Kimball.xml">
+			<srcfiles dir="${wlc.data.dir}/Books" includes="*.xml"/>
+            <srcfiles dir="${wlc.xslt.dir}" includes="**/*.xsl2"/>
 		</uptodate>
 
         <!-- make build dirs -->
