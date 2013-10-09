@@ -11,18 +11,18 @@ module namespace acc="http://jewishliturgy.org/modules/access";
 
 import module namespace app="http://jewishliturgy.org/modules/app"
   at "app.xqm";
-import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "common-rest.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "jvalidate.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
   at "../magic/magic.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "paths.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace a="http://jewishliturgy.org/ns/access/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 
-declare variable $acc:schema := concat($crest:schema-base, "/access.rnc");
+declare variable $acc:schema := concat($paths:schema-base, "/access.rnc");
 
 declare function acc:validate(
   $access as element(a:access)

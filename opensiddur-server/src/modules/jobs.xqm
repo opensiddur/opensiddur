@@ -42,7 +42,7 @@ declare namespace err="http://jewishliturgy.org/errors";
 
 (:declare option exist:optimize "enable=no";:)
 
-declare variable $jobs:queue-collection := concat($app:repo-base,'/jobs/data');
+declare variable $jobs:queue-collection := concat($paths:repo-base,'/jobs/data');
 declare variable $jobs:queue-resource := "queue.xml";
 declare variable $jobs:users-resource := "users.xml";
 declare variable $jobs:next-id-resource := "next-id.xml";

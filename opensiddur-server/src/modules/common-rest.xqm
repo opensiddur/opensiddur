@@ -18,22 +18,19 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "data.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "jvalidate.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "paths.xqm";
 
 import module namespace magic="http://jewishliturgy.org/magic"
   at "../magic/magic.xqm";
   
 import module namespace kwic="http://exist-db.org/xquery/kwic";
 
-declare namespace expath="http://expath.org/ns/pkg";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace error="http://jewishliturgy.org/errors";
-
-(:~ absolute db location of schema files :)
-declare variable $crest:schema-base := 
-  concat($app:repo-base, "/schema");
 
 (:~ @return REST error message when access is not allowed :)
 declare function crest:no-access(

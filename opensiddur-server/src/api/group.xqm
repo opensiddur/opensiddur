@@ -12,20 +12,20 @@ import module namespace api="http://jewishliturgy.org/modules/api"
   at "../modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
   at "../modules/app.xqm";
-import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "../modules/common-rest.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "../modules/jvalidate.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
   at "../magic/magic.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "../modules/paths.xqm";
   
 declare namespace g="http://jewishliturgy.org/ns/group/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
-declare variable $grp:schema := concat($crest:schema-base, "/group.rnc");
+declare variable $grp:schema := concat($paths:schema-base, "/group.rnc");
 
 (:~ @return the group managers of a given group.
  : eXist considers this a secret, but it's public in Open Siddur

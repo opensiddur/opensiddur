@@ -22,10 +22,12 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "original.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "../../modules/paths.xqm";
 
 declare variable $sty:data-type := "styles";
-declare variable $sty:schema := concat($crest:schema-base, "/style.rnc");
-declare variable $sty:schematron := concat($crest:schema-base, "/style.xsl2");
+declare variable $sty:schema := concat($paths:schema-base, "/style.rnc");
+declare variable $sty:schematron := concat($paths:schema-base, "/style.xsl2");
 declare variable $sty:path-base := concat($data:path-base, "/", $sty:data-type);
 declare variable $sty:api-path-base := concat("/api/data/", $sty:data-type);  
 

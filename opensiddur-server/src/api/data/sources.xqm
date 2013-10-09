@@ -18,10 +18,12 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "../../modules/paths.xqm";
 
 declare variable $src:data-type := "sources";
-declare variable $src:schema := concat($crest:schema-base, "/bibliography.rnc");
-declare variable $src:schematron := concat($crest:schema-base, "/bibliography.xsl2");
+declare variable $src:schema := concat($paths:schema-base, "/bibliography.rnc");
+declare variable $src:schematron := concat($paths:schema-base, "/bibliography.xsl2");
 declare variable $src:path-base := concat($data:path-base, "/", $src:data-type);
 declare variable $src:api-path-base := concat("/api/data/", $src:data-type);
 

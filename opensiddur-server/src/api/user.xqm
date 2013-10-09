@@ -10,8 +10,6 @@ import module namespace api="http://jewishliturgy.org/modules/api"
   at "../modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
   at "../modules/app.xqm";
-import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-  at "../modules/common-rest.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
@@ -20,6 +18,8 @@ import module namespace magic="http://jewishliturgy.org/magic"
   at "../magic/magic.xqm";
 import module namespace name="http://jewishliturgy.org/modules/name"
   at "../modules/name.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "../modules/paths.xqm";
 import module namespace kwic="http://exist-db.org/xquery/kwic";
   
 declare namespace html="http://www.w3.org/1999/xhtml";
@@ -32,7 +32,7 @@ declare namespace error="http://jewishliturgy.org/errors";
 declare variable $user:path := "/db/data/user";
 declare variable $user:api-path := "/api/user";
 (: path to schema :)
-declare variable $user:schema := concat($crest:schema-base, "/contributor.rnc");
+declare variable $user:schema := concat($paths:schema-base, "/contributor.rnc");
 
 declare 
   %private 

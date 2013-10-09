@@ -20,10 +20,12 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "original.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "../../modules/paths.xqm";
   
 declare variable $cnd:data-type := "conditionals";
-declare variable $cnd:schema := concat($crest:schema-base, "/conditional.rnc");
-declare variable $cnd:schematron := concat($crest:schema-base, "/conditional.xsl2");
+declare variable $cnd:schema := concat($paths:schema-base, "/conditional.rnc");
+declare variable $cnd:schematron := concat($paths:schema-base, "/conditional.xsl2");
 declare variable $cnd:path-base := concat($data:path-base, "/", $cnd:data-type);
 declare variable $cnd:api-path-base := concat("/api/data/", $cnd:data-type);
 

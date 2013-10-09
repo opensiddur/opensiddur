@@ -20,13 +20,15 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "original.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "../../modules/paths.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
   at "../../modules/follow-uri.xqm";
   
 declare variable $lnk:data-type := "linkage";
 declare variable $lnk:no-lang := "none";  (: no language :)
-declare variable $lnk:schema := concat($crest:schema-base, "/linkage.rnc");
-declare variable $lnk:schematron := concat($crest:schema-base, "/linkage.xsl2");
+declare variable $lnk:schema := concat($paths:schema-base, "/linkage.rnc");
+declare variable $lnk:schematron := concat($paths:schema-base, "/linkage.xsl2");
 declare variable $lnk:path-base := concat($data:path-base, "/", $lnk:data-type);
 declare variable $lnk:api-path-base := concat("/api/data/", $lnk:data-type);
 

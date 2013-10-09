@@ -22,10 +22,12 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "original.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "../../modules/paths.xqm";
 
 declare variable $dict:data-type := "dictionaries";
-declare variable $dict:schema := concat($crest:schema-base, "/dictionary.rnc");
-declare variable $dict:schematron := concat($crest:schema-base, "/dictionary.xsl2");
+declare variable $dict:schema := concat($paths:schema-base, "/dictionary.rnc");
+declare variable $dict:schematron := concat($paths:schema-base, "/dictionary.xsl2");
 declare variable $dict:path-base := concat($data:path-base, "/", $dict:data-type);
 declare variable $dict:api-path-base := concat("/api/data/", $dict:data-type);  
 

@@ -24,10 +24,12 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "../../modules/format.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "../../modules/paths.xqm";
 
 declare variable $orig:data-type := "original";
-declare variable $orig:schema := concat($crest:schema-base, "/jlptei.rnc");
-declare variable $orig:schematron := concat($crest:schema-base, "/jlptei.xsl2");
+declare variable $orig:schema := concat($paths:schema-base, "/jlptei.rnc");
+declare variable $orig:schematron := concat($paths:schema-base, "/jlptei.xsl2");
 declare variable $orig:path-base := concat($data:path-base, "/", $orig:data-type);
 declare variable $orig:api-path-base := concat("/api/data/", $orig:data-type);  
 

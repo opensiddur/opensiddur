@@ -22,10 +22,12 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "original.xqm";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "../../modules/paths.xqm";
 
 declare variable $notes:data-type := "notes";
-declare variable $notes:schema := concat($crest:schema-base, "/annotation.rnc");
-declare variable $notes:schematron := concat($crest:schema-base, "/annotation.xsl2");
+declare variable $notes:schema := concat($paths:schema-base, "/annotation.rnc");
+declare variable $notes:schematron := concat($paths:schema-base, "/annotation.xsl2");
 declare variable $notes:path-base := concat($data:path-base, "/", $notes:data-type);
 declare variable $notes:api-path-base := concat("/api/data/", $notes:data-type);
 

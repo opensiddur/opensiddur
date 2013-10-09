@@ -9,11 +9,8 @@ xquery version "1.0";
  :)
 module namespace debug="http://jewishliturgy.org/transform/debug";
 
-(: circular dependency causing issues for restxq trigger:
-import module namespace app="http://jewishliturgy.org/modules/app"
-  at "app.xqm";
-:)
-declare namespace expath="http://expath.org/ns/pkg";
+import module namespace paths="http://jewishliturgy.org/modules/paths"
+  at "paths.xqm";
 
 declare variable $debug:error := 1;
 declare variable $debug:warn := 2;
@@ -21,15 +18,7 @@ declare variable $debug:info := 3;
 declare variable $debug:detail := 4;
 declare variable $debug:level := $debug:detail;
 
-(: copied from app :)
-declare variable $debug:repo-base := 
-  let $descriptor := 
-    collection(repo:get-root())//expath:package[@name = "http://jewishliturgy.org/apps/opensiddur-server"]
-  return
-    util:collection-name($descriptor);
-
-
-declare variable $debug:settings-file := concat($debug:repo-base, "/debug.xml");
+declare variable $debug:settings-file := concat($paths:repo-base, "/debug.xml");
 declare variable $debug:settings := doc($debug:settings-file);
 
 (:~ debugging output function
