@@ -1,5 +1,6 @@
 # local mods to Makefile
 Makefile.local
+local.build.properties
 
 # generated text directory
 text/wlc/
@@ -8,13 +9,16 @@ text/wlc/
 /doc/
 
 # generated schema
-schema/build
+opensiddur-server/schema/build
+
+# generated dist dir
+build/
+dist/
 
 # generated files:
-/code/common/params.xsl2
-/code/transforms/format/xhtml/muxhtml.xsl2
-/setup/setup.xql
-/setup/eXist-installer.xml
+opensiddur-server/src/common/params.xsl2
+opensiddur-server/setup/setup.xql
+opensiddur-server/setup/eXist-installer.xml
 
 # db directory except special
 db/*
@@ -29,8 +33,7 @@ __contents__.xml
 # backup files
 *.bak
 *.bkp
-*.swp
-*.swo
+*.sw?
 *.tmp
 *.temp
 temp/
@@ -41,6 +44,7 @@ tmp/
 *.pyc
 
 # local files project
+.pydevproject
 .buildpath
 .project
 .settings

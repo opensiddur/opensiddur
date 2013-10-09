@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"  
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  >
+  <tei:teiHeader>
+  </tei:teiHeader>
+  <tei:fsdDecl>
+    <tei:fsdLink type="TwoWaySwitch" 
+      target="test-conditional-declarations.xml#fsTwoWaySwitch"/>
+    <tei:fsdLink type="ThreeWaySwitch"
+      target="test-conditional-declarations.xml#fsThreeWaySwitch"/>
+    <tei:fsdLink type="TwoWayStructureSwitch"
+      target="test-conditional-declarations.xml#fsTwoWayStructureSwitch"/>
+  </tei:fsdDecl>
+  <j:conditionGrp>
+    <tei:linkGrp type="set">
+      <tei:link targets="#p2_Y_Y #two-way-yes"/>
+      <tei:link targets="#p2_Y_N #two-way-yes"/>
+      <tei:link targets="#p2_N_Y #two-way-no"/>
+      <tei:link targets="#p2_N_N #two-way-no"/>
+      <tei:link targets="#ps_ON_ON #two-way-on"/>
+      <tei:link targets="#ps_ON_OFF #two-way-on"/>
+      <tei:link targets="#ps_OFF_ON #two-way-off"/>
+      <tei:link targets="#ps_OFF_OFF #two-way-off"/>
+      <tei:link targets="#p3_Y_Y #three-way-yes"/>
+      <tei:link targets="#p3_Y_N #three-way-yes"/>
+      <tei:link targets="#p3_N_Y #three-way-no"/>
+      <tei:link targets="#p3_N_N #three-way-no"/>
+      <tei:link targets="#p3_M_Y #three-way-maybe"/>
+      <tei:link targets="#p3_M_N #three-way-maybe"/>
+    </tei:linkGrp>
+    <tei:linkGrp type="association">
+      <tei:link targets="#p2_Y_Y #two-way-yes"/>
+      <tei:link targets="#p2_Y_N #two-way-no"/>
+      <tei:link targets="#p2_N_Y #two-way-yes"/>
+      <tei:link targets="#p2_N_N #two-way-no"/>
+      <tei:link targets="#ps_ON_ON #two-way-on"/>
+      <tei:link targets="#ps_ON_OFF #two-way-off"/>
+      <tei:link targets="#ps_OFF_ON #two-way-on"/>
+      <tei:link targets="#ps_OFF_OFF #two-way-off"/>
+      <tei:link targets="#p3_Y_Y #three-way-yes"/>
+      <tei:link targets="#p3_Y_N #three-way-no"/>
+      <tei:link targets="#p3_N_Y #three-way-yes"/>
+      <tei:link targets="#p3_N_N #three-way-no"/>
+      <tei:link targets="#p3_M_Y #three-way-yes #instruction"/>
+      <tei:link targets="#p3_M_N #three-way-no #instruction"/>
+    </tei:linkGrp>
+
+    <tei:fs xml:id="two-way-yes" type="TwoWaySwitch">
+      <tei:f name="TheSwitch">
+        <tei:symbol value="YES"/>
+      </tei:f>
+    </tei:fs>
+    <tei:fs xml:id="two-way-no" type="TwoWaySwitch">
+      <tei:f name="TheSwitch">
+        <tei:symbol value="NO"/>
+      </tei:f>
+    </tei:fs>
+
+    <tei:fs xml:id="two-way-on" type="TwoWayStructureSwitch">
+      <tei:f name="TheSwitch">
+        <tei:symbol value="ON"/>
+      </tei:f>
+    </tei:fs>
+    <tei:fs xml:id="two-way-off" type="TwoWayStructureSwitch">
+      <tei:f name="TheSwitch">
+        <tei:symbol value="OFF"/>
+      </tei:f>
+    </tei:fs>
+
+    <tei:fs xml:id="three-way-yes" type="ThreeWaySwitch">
+      <tei:f name="TheSwitch">
+        <tei:symbol value="YES"/>
+      </tei:f>
+    </tei:fs>
+    <tei:fs xml:id="three-way-no" type="ThreeWaySwitch">
+      <tei:f name="TheSwitch">
+        <tei:symbol value="NO"/>
+      </tei:f>
+    </tei:fs>
+    <tei:fs xml:id="three-way-maybe" type="ThreeWaySwitch">
+      <tei:f name="TheSwitch">
+        <tei:symbol value="MAYBE"/>
+      </tei:f>
+    </tei:fs>
+    
+  </j:conditionGrp>
+  <tei:text>
+    <tei:body>
+      <tei:div jx:id="div">
+        <tei:p jx:id="NoControl">Not under control</tei:p>
+        <tei:p jx:id="p2_Y_Y">Included</tei:p>
+        <tei:div jx:id="Exclusion_2_Y_N">
+          <tei:p jx:id="p2_Y_N">Excluded</tei:p>
+        </tei:div>
+        <tei:div jx:id="Exclusion_2_N_Y">
+          <tei:p jx:id="p2_N_Y">Excluded</tei:p>
+        </tei:div>
+        <tei:p jx:id="p2_N_N">Included</tei:p>
+        <tei:p jx:id="ps_ON_ON">Included</tei:p>
+        <tei:div jx:id="Exclusion_2_ON_OFF">
+          <tei:p jx:id="ps_ON_OFF">Excluded</tei:p>
+        </tei:div>
+        <tei:div jx:id="Exclusion_2_OFF_ON">
+          <tei:p jx:id="ps_OFF_ON">Excluded</tei:p>
+        </tei:div>
+        <tei:p jx:id="ps_OFF_OFF">Included</tei:p>
+        <tei:p jx:id="p3_Y_Y">Included</tei:p>
+        <tei:div jx:id="Exclusion_3_Y_N">
+          <tei:p jx:id="p3_Y_N">Excluded</tei:p>
+        </tei:div>
+        <tei:div jx:id="Exclusion_3_N_Y">
+          <tei:p jx:id="p3_N_Y">Excluded</tei:p>
+        </tei:div>
+        <tei:p jx:id="p3_N_N">Included</tei:p>
+        <tei:p jx:id="p3_M_Y">Included with instructions</tei:p>
+        <tei:p jx:id="p3_M_N">Included with instructions</tei:p>
+      </tei:div>
+      <tei:note jx:id="instruction">Instruction.</tei:note>
+    </tei:body>
+  </tei:text>  
+</tei:TEI>

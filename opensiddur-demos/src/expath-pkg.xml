@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package 
+  xmlns="http://expath.org/ns/pkg" 
+  name="http://jewishliturgy.org/apps/opensiddur-demos" 
+  abbrev="opensiddur-demos" 
+  version="0.7.1" 
+  spec="1.0">
+    <title>Open Siddur Pre-Client Demos</title>
+    <dependency package="http://jewishliturgy.org/apps/opensiddur-server" semver="0.7.1"/>
+    <!-- transliteration tables: -->
+    <dependency package="http://jewishliturgy.org/apps/opensiddur-sources" semver="0.7.1"/>
+</package>

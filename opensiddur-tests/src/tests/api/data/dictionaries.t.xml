@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:a="http://jewishliturgy.org/ns/access/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:http="http://expath.org/ns/http-client">
+  <suiteName>Dictionary data API</suiteName>
+  <description>
+    <p>Test dictionary data API</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012-2013 Efraim Feinstein,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <setup>
+    <!-- put all tests into en/1900/01 -->
+    <create-collection parent="/db/data/dictionaries/en" name="1900" />
+    <create-collection parent="/db/data/dictionaries/en/1900" name="01"/>
+    <!-- support files required for validity -->
+    <store collection="/db/data/user" name="testuser.xml">
+      <j:contributor>
+        <tei:idno>testuser</tei:idno>
+        <tei:name>Test User</tei:name>
+      </j:contributor>
+    </store>
+    <!-- existing resource with read/write access for testuser -->
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/dictionaries" name="Existing.xml" 
+      destination="/db/data/dictionaries/en/1900/01" />
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/dictionaries" name="Existing.xml" 
+      destination="/db/data/dictionaries/en/1900/01" destination-name="NoAccess.xml" />
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/dictionaries" name="NoWriteAccess.xml" 
+      destination="/db/data/dictionaries/en/1900/01" />
+    <!-- existing, valid resource with no read access -->
+    <code><![CDATA[
+      system:as-user("admin", $magic:password,
+        let $collections := ("/db/data/dictionaries/en/1900", "/db/data/dictionaries/en/1900/01") 
+        let $existing-uri := xs:anyURI("/db/data/dictionaries/en/1900/01/Existing.xml")
+        let $no-access-uri := xs:anyURI("/db/data/dictionaries/en/1900/01/NoAccess.xml")
+        let $no-write-access-uri := xs:anyURI("/db/data/dictionaries/en/1900/01/NoWriteAccess.xml")
+        return (
+          for $collection in $collections
+          let $c-uri := xs:anyURI($collection)
+          return (
+            sm:chown($c-uri, "admin"),
+            sm:chgrp($c-uri, "everyone"),
+            sm:chmod($c-uri, "rwxrwxr-x")
+          ),
+          sm:chown($existing-uri, "testuser"),
+          sm:chgrp($existing-uri, "everyone"),
+          sm:chmod($existing-uri, "rw-rw-r--"),
+          sm:chown($no-access-uri, "testuser2"),
+          sm:chgrp($no-access-uri, "everyone"),
+          sm:chmod($no-access-uri, "rw-------"),
+          sm:chown($no-write-access-uri, "testuser2"),
+          sm:chgrp($no-write-access-uri, "everyone"),
+          sm:chmod($no-write-access-uri, "rw-r--r--")
+      ))
+    ]]></code>
+  </setup>
+  <tearDown>
+    <remove-collection collection="/db/data/dictionaries/en/1900"/>
+  </tearDown>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <imports>
+    import module namespace dict="http://jewishliturgy.org/api/data/dictionaries"
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/dictionaries.xqm";
+    import module namespace magic="http://jewishliturgy.org/magic"
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
+  </imports>
+  <TestSet>
+    <testName>dict:get()</testName>
+    <test>
+      <task>Get an existing resource</task>
+      <code><![CDATA[
+      dict:get("Existing")
+      ]]></code> 
+      <xpath desc="Returns a TEI resource">exists(./tei:TEI)</xpath>
+    </test>
+    <test>
+      <task>Get a nonexisting resource</task>
+      <code><![CDATA[
+      dict:get("DoesNotExist")
+      ]]></code> 
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+    <test>
+      <task>Get a resource with no read access</task>
+      <code><![CDATA[
+      dict:get("NoAccess")
+      ]]></code> 
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>dict:list()</testName>
+    <test>
+      <task>List all resources</task>
+      <code><![CDATA[
+        dict:list("", 1, 100)
+      ]]></code>
+      <xpath desc="returns at least 1 result">count(.//html:li[@class="result"])&gt;=1</xpath>
+      <xpath desc="results include a pointer to access API">
+        every $li in .//html:li[@class="result"] 
+        satisfies exists($li/html:a[@class="alt"][@property="access"])
+      </xpath>
+      <class href="../common.t.incl.xml#SearchResults"/>
+    </test>
+    <test>
+      <task>List some resources</task>
+      <code><![CDATA[
+        dict:list("", 1, 2)
+      ]]></code>
+      <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
+      <class href="../common.t.incl.xml#SearchResults"/>
+    </test>
+    <test>
+      <task>Respond to a query</task>
+      <code><![CDATA[
+        dict:list("Query", 1, 100)
+      ]]></code>
+      <xpath desc="returns 1 results">count(.//html:ol[@class="results"]/html:li)=1</xpath>
+      <class href="../common.t.incl.xml#SearchResults"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>dict:delete()</testName>
+    <test>
+      <task>Remove an existing resource</task>
+      <code><![CDATA[
+      dict:delete("Existing")
+      ]]></code>
+      <class href="../common.t.incl.xml#NoData"/>
+    </test>
+    <test>
+      <task>Remove a nonexisting resource</task>
+      <code><![CDATA[
+      dict:delete("DoesNotExist")
+      ]]></code>
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+    <test>
+      <task>Remove a resource without write access</task>
+      <code><![CDATA[
+      dict:delete("NoWriteAccess")
+      ]]></code>
+      <class href="../common.t.incl.xml#Forbidden"/>
+    </test>
+    <test ignore="yes">
+      <task>Remove a resource that has external references</task>
+      <code><![CDATA[
+      dict:delete("ExternalReference")
+      ]]></code>
+      <class href="../common.t.incl.xml#BadRequest"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>dict:post()</testName>
+    <tearDown>
+      <code><![CDATA[
+      let $document := 
+        collection("/db/data/dictionaries")//tei:titleStmt/tei:title[@type="main"][.="Valid"]/root(.)
+      where exists($document)
+      return xmldb:remove(
+        util:collection-name($document),
+        util:document-name($document)
+        )
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Post a valid resource</task>
+      <code><![CDATA[
+      dict:post(doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Valid.xml"))
+      ]]></code>
+      <class href="../common.t.incl.xml#Created"/>
+      <expected 
+        desc="a change record has been added"
+        xpath="collection('/db/data/dictionaries/en')[util:document-name(.)=tokenize($output//http:header[@name='Location']/@value,'/')[count(.)] || '.xml']//tei:revisionDesc/tei:change[1]">
+        <tei:change type="created" who="/user/testuser" when="..."/>
+      </expected>
+    </test>
+    <test>
+      <task>Post an invalid resource</task>
+      <code><![CDATA[
+      dict:post(doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Invalid.xml"))
+      ]]></code>
+      <class href="../common.t.incl.xml#BadRequest"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>dict:put()</testName>
+    <test>
+      <task>Put a valid resource to an existing resource</task>
+      <code><![CDATA[
+      dict:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Existing-After-Put.xml"))
+      ]]></code>
+      <class href="../common.t.incl.xml#NoData"/>
+      <expected 
+        desc="a change record has been added"
+        xpath="(collection('/db/data/dictionaries/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change)[1]">
+        <tei:change type="edited" who="/user/testuser" when="..."/>
+      </expected>
+      <xpath desc="There are 2 change records total">count(collection('/db/data/dictionaries/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change)=2</xpath>
+      <xpath desc="The first shows type='edited'">collection('/db/data/dictionaries/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change[1]/@type="edited"</xpath>
+      <xpath desc="The first shows who=testuser">collection('/db/data/dictionaries/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change[1]/@who="/user/testuser"</xpath>
+      <xpath desc="The first shows when">exists(collection('/db/data/dictionaries/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change[1]/@when)</xpath>
+    </test>
+    <test>
+      <task>Put a valid resource to a nonexisting resource</task>
+      <code><![CDATA[
+      dict:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Valid.xml"))
+      ]]></code>
+    </test>
+    <test>
+      <task>Put an invalid resource</task>
+      <code><![CDATA[
+      dict:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Invalid.xml"))
+      ]]></code>
+      <class href="../common.t.incl.xml#BadRequest"/>
+    </test>
+    <test>
+      <task>Put a valid resource that is invalidated by an illegal change</task>
+      <code><![CDATA[
+      dict:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Invalid-After-Put.xml"))
+      ]]></code>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Unauthenticated</testName>
+    <asUser/>
+    <password/>
+    <test>
+      <task>dict:get(): Get an existing resource</task>
+      <code><![CDATA[
+      dict:get("Existing")
+      ]]></code> 
+      <xpath desc="Returns a TEI resource">exists(./tei:TEI)</xpath>
+    </test>
+    <test>
+      <task>dict:get(): Get an existing resource with no read access</task>
+      <code><![CDATA[
+      dict:get("NoAccess")
+      ]]></code> 
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+    <test>
+      <task>dict:get(): Get a nonexisting resource</task>
+      <code><![CDATA[
+      dict:get("DoesNotExist")
+      ]]></code> 
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+    <test>
+      <task>dict:list(): Get a list of all resources</task>
+      <code><![CDATA[
+      dict:list("", 1, 100)
+      ]]></code>
+      <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
+      <xpath desc="does not list resource with no read access">empty(.//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])</xpath>
+      <class href="../common.t.incl.xml#SearchResults"/>
+    </test>
+    <test>
+      <task>dict:delete(): Remove an existing resource</task>
+      <code><![CDATA[
+      dict:delete("Existing")
+      ]]></code>
+      <class href="../common.t.incl.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>dict:delete(): Remove a nonexisting resource</task>
+      <code><![CDATA[
+      dict:delete("DoesNotExist")
+      ]]></code>
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+    <test>
+      <task>dict:post(): Post a resource</task>
+      <code><![CDATA[
+      dict:post(doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Valid.xml"))
+      ]]></code>
+      <class href="../common.t.incl.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>dict:put(): Put an existing resource</task>
+      <code><![CDATA[
+      dict:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Existing.xml"))
+      ]]></code>
+      <class href="../common.t.incl.xml#Unauthorized"/>
+    </test>
+    <test>
+      <task>dict:put(): Put a nonexisting resource</task>
+      <code><![CDATA[
+      dict:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/dictionaries/Existing.xml"))
+      ]]></code>
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+    <test>
+      <task>dict:get-access()</task>
+      <code><![CDATA[
+      dict:get-access("Existing", ())
+      ]]></code>
+      <xpath desc="an access structure is returned">self::a:access</xpath>
+    </test>
+    <test>
+      <task>dict:put-access()</task>
+      <code><![CDATA[
+      dict:put-access("Existing", document{
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="false">everyone</a:group>
+          <a:world read="false" write="false"/>
+        </a:access>
+        })
+      ]]></code>
+      <class href="../common.t.incl.xml#Unauthorized"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>dict:get-access()</testName>
+    <test>
+      <task>For an existing resource</task>
+      <code><![CDATA[
+      dict:get-access("Existing", ())
+      ]]></code>
+      <xpath desc="returns an access structure">exists(./self::a:access)</xpath>
+    </test>
+    <test>
+      <task>For a nonexistent resource</task>
+      <code><![CDATA[
+      dict:get-access("DoesNotExist", ())
+      ]]></code>
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>dict:put-access()</testName>
+    <test>
+      <task>Set with a valid access structure</task>
+      <code><![CDATA[
+      dict:put-access("Existing", document{
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world write="true" read="true"/>
+        </a:access>
+      })
+      ]]></code>
+      <class href="../common.t.incl.xml#NoData"/>
+    </test>
+    <test>
+      <task>With an invalid access structure</task>
+      <code><![CDATA[
+      dict:put-access("Existing", document{
+        <a:access>
+          <a:invalid/>
+        </a:access>
+      })
+      ]]></code>
+      <class href="../common.t.incl.xml#BadRequest"/>
+    </test>
+    <test>
+      <task>For a resource with no write access</task>
+      <code><![CDATA[
+      dict:put-access("NoWriteAccess", document{
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="false">testuser</a:group>
+          <a:world write="false" read="false"/>
+        </a:access>
+      })
+      ]]></code>
+      <class href="../common.t.incl.xml#Forbidden"/>
+    </test>
+    <test>
+      <task>For a nonexistent resource</task>
+      <code><![CDATA[
+      dict:put-access("DoesNotExist", document{
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="false">testuser</a:group>
+          <a:world write="false" read="false"/>
+        </a:access>
+      })
+      ]]></code>
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+  </TestSet>
+</TestSuite>

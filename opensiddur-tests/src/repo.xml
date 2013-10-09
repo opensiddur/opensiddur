@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta xmlns="http://exist-db.org/xquery/repo">
+  <description>Open Siddur Tests</description>
+  <author>Efraim Feinstein</author>
+  <website>http://github.com/opensiddur/opensiddur</website>
+  <status>alpha</status>
+  <license>GNU-LGPL</license>
+  <copyright>true</copyright>
+  <type>application</type>
+  <target>opensiddur-tests</target> 
+  <prepare>pre-install.xql</prepare>
+  <finish>post-install.xql</finish>
+  <permissions user="admin" password="" group="dba" mode="rw-rw-r--"/>
+</meta>

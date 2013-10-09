@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+         xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+         xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+         xml:lang="en">
+  <tei:teiHeader/>
+  <j:links>
+      <tei:respStmt>
+         <tei:resp key="">Transcribed by</tei:resp>
+         <tei:name ref="/contributors/irrelevant">Test User</tei:name>
+      </tei:respStmt>
+      <tei:link xml:id="irrelevant-link-to-concurrent" type="source"
+                targets="#concurrent /sources/irrelevant"/>
+      <tei:link xml:id="external-link" type="note" targets="standoff-views-context.xml#sA #n1"/>
+  </j:links>
+  <tei:text>
+      <j:concurrent xml:id="concurrent">
+         <j:selection xml:id="selection">
+            <tei:ptr xml:id="sA" target="#rA"/>
+            <tei:ptr xml:id="sB" target="#rB"/>            
+         </j:selection>
+         <j:view type="note">
+            <tei:note xml:id="n1">
+               <tei:ptr xml:id="n1A" target="#sA"/>
+               <tei:ptr xml:id="n1B" target="#sB"/>
+            </tei:note>
+         </j:view>
+      </j:concurrent>
+      <j:repository xml:id="repository">
+         <tei:seg xml:id="rA">a</tei:seg>
+         <tei:seg xml:id="rB">b</tei:seg>
+      </j:repository>
+  </tei:text>
+</tei:TEI>

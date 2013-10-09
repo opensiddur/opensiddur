@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+         xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+         xml:lang="en">
+   <tei:teiHeader>
+      <tei:fileDesc>
+         <tei:titleStmt>
+            <tei:title type="main" xml:lang="en">generic</tei:title>
+         </tei:titleStmt>
+         <tei:publicationStmt>
+            <tei:availability status="free">
+               <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+            </tei:availability>
+            <tei:distributor>
+               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+            </tei:distributor>
+            <tei:date>2012-06-08</tei:date>
+         </tei:publicationStmt>
+         <tei:sourceDesc>
+            <tei:link type="bibl" target="#style /data/sources/Born%20Digital"/>
+         </tei:sourceDesc>
+      </tei:fileDesc>
+      <tei:revisionDesc>
+         <tei:change type="create" when="2013-07-09-04:00">Document created from template</tei:change>
+      </tei:revisionDesc>
+   </tei:teiHeader>
+   <j:stylesheet scheme="css" xml:id="style"><![CDATA[
+:lang(he) {
+    font-family:"Keter YG";
+}
+
+.tei-head {
+    font-size:large;
+    font-weight:bold;
+}
+
+.tei-ab {
+    display:inline;
+}
+
+.tei-ab.type-verse {
+    display:inline;
+}
+
+.tei-p {
+    display:block;
+}
+
+.tei-seg {
+    display:inline;
+}
+
+.tei-label.n-chapter {
+    display:inline;
+    font-size:large;
+}
+
+.tei-label.n-verse {
+    display:inline;
+    font-size:small;
+    vertical-align:super;
+}
+
+.tei-choice {
+    display:inherit;
+}
+
+.j-written {
+    display:inline;    
+    color:red;
+}
+
+.j-read {
+    display:inline;
+    color:blue;
+}
+   ]]></j:stylesheet>
+   <tei:text>
+      <tei:body>
+        <tei:div>
+          <tei:p>Generic CSS.</tei:p>
+        </tei:div>
+      </tei:body>
+   </tei:text>
+</tei:TEI>  

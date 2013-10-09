@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE xsl:stylesheet [
+<!ENTITY % hebrewent PUBLIC "HEBREW" "hebrew.dtd">
+%hebrewent;
+]>
+<xsl:stylesheet version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+  xmlns:jx="http://jewishliturgy.org/ns/jlptei-processor"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:tmp="http://jewishliturgy.org/ns/tmp" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc" xmlns:cat="urn:oasis:names:tc:entity:xmlns:xml:catalog"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cc="http://web.resource.org/cc/"
+  exclude-result-prefixes="#all">
+  <xsl:import href="../../common/common.xsl2"/>
+  <xd:doc type="stylesheet">
+    <xd:short>Convert the WLC multi-file Tanach into a single XML file
+      containing all the books</xd:short>
+    <xd:copyright>Copyright 2009,2012 Efraim Feinstein
+    </xd:copyright>
+    <xd:detail>
+      <p>This program is free software: you can redistribute it
+        and/or modify
+        it under the terms of the GNU Lesser General Public License as
+        published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+      <p>This program is distributed in the hope that it will be
+        useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+        GNU Lesser General Public License for more details.</p>
+
+      <p>
+        You should have received a copy of the GNU Lesser General Public
+        License
+        along with this program. If not, see
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/
+        </a>
+        .
+      </p>
+    </xd:detail>
+  </xd:doc>
+  
+  <xd:doc>
+    Input directory.  The automated guess is based on whether we're in a branch or not.
+  </xd:doc>
+  <xsl:param name="input-directory" as="xs:string" 
+    select="concat(
+      if (doc-available('../../../sources/tanach/WLC/Books/Genesis.xml'))
+      then '' 
+      else '../../',
+      '../../../sources/tanach/WLC/Books')"/>
+  <xsl:param name="output-file" as="xs:string"
+    select="'joined-wlc.xml'"/>
+  
+  <xsl:variable name="books" as="xs:string+" 
+    select="(
+      'Genesis',
+      'Exodus',
+      'Leviticus',
+      'Numbers',
+      'Deuteronomy',
+      'Joshua',
+      'Judges',
+      'Samuel_1',
+      'Samuel_2',
+      'Kings_1',
+      'Kings_2',
+      'Isaiah',
+      'Jeremiah',
+      'Ezekiel',
+      'Hosea',
+      'Joel',
+      'Amos',
+      'Obadiah',
+      'Jonah',
+      'Micah',
+      'Nahum',
+      'Habakkuk',
+      'Zephaniah',
+      'Haggai',
+      'Zechariah',
+      'Malachi',
+      'Ezra',
+      'Nehemiah',
+      'Daniel',
+      'Psalms',
+      'Job',
+      'Proverbs',
+      'Ruth',
+      'Song_of_Songs',
+      'Ecclesiastes',
+      'Lamentations',
+      'Esther',
+      'Chronicles_1',
+      'Chronicles_2'
+    )"/>
+  
+  <xd:doc>Ignored elements</xd:doc>
+  <xsl:template match="vs|cs"/>
+  
+  <xd:doc>
+    <xd:short>Split w's containing pc's into a w+a pc</xd:short>
+  </xd:doc>
+  <xsl:template match="s">
+    <xsl:variable name="apply-result" as="node()*">
+      <xsl:apply-templates/>
+    </xsl:variable>
+    
+    <tei:c>
+      <xsl:attribute name="type" select="@t"/>
+      <xsl:sequence select="$apply-result[not(self::tei:pc)]"/>
+    </tei:c>
+    <xsl:sequence select="$apply-result/self::tei:pc"/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Split text containing pc's into text+a pc</xd:short>
+  </xd:doc>
+  <xsl:template match="text()">
+    <xsl:analyze-string select="replace(.,'/','')" 
+      regex="(\s+)|([\p{{L}}\p{{M}}\p{{N}}\p{{S}}\p{{C}}]+)|(\p{{P}})">
+      <xsl:matching-substring>
+        <xsl:variable name="word-chars" select="regex-group(2)"/>
+        <xsl:variable name="punct-chars" select="regex-group(3)"/>
+        <xsl:if test="string-length($word-chars) &gt; 0">
+          <xsl:value-of select="$word-chars"/>
+        </xsl:if>
+        <xsl:if test="string-length($punct-chars) &gt; 0">
+          <tei:pc>
+            <xsl:value-of select="$punct-chars"/>
+          </tei:pc>
+        </xsl:if>
+      </xsl:matching-substring>
+      <xsl:non-matching-substring>
+        <xsl:sequence select="
+        func:debug(
+        concat('word with character that does not match anything: ', 
+          .),
+        'text()',$debug-error)"/>
+      </xsl:non-matching-substring>
+    </xsl:analyze-string>    
+  </xsl:template>
+  
+  <xsl:template match="names">
+    <xsl:sequence select="."/>
+  </xsl:template>
+      
+  <xsl:template match="v">
+    <tei:ab>
+      <xsl:attribute name="xml:id" select="concat('v',@n)"/>
+      <xsl:variable name="v-grouped" as="element()+">
+        <xsl:for-each-group select="*" 
+          group-adjacent="name()">
+          <xsl:variable name="adj-name" as="xs:string" 
+            select="current-grouping-key()"/>
+          <xsl:choose>
+            <xsl:when test="$adj-name='q'">
+              <xsl:variable name="read-content" as="node()*">
+                <xsl:apply-templates select="current-group()"/>
+              </xsl:variable>
+              <j:read>
+                <xsl:sequence 
+                  select="$read-content except $read-content/self::tei:pc[.='&sofpasuq;']"/>
+              </j:read>
+              <xsl:sequence 
+                select="$read-content/self::tei:pc[.='&sofpasuq;']"/>
+            </xsl:when>
+            <xsl:when test="$adj-name='k'">
+              <j:written>
+                <xsl:apply-templates select="current-group()"/>
+              </j:written>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:apply-templates select="current-group()"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:for-each-group>
+      </xsl:variable>
+      <xsl:for-each-group select="$v-grouped" 
+        group-adjacent="self::j:read or self::j:written">
+        <xsl:variable name="r-or-w" as="xs:boolean"
+          select="current-group()/self::j:read or
+            current-group()/self::j:written"/>
+        <xsl:choose>
+          <xsl:when test="$r-or-w">
+            <tei:choice>
+              <xsl:sequence select="current-group()"/>
+            </tei:choice>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:sequence select="current-group()"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each-group>
+    </tei:ab>
+  </xsl:template>
+  
+  <xd:doc>
+    words or kri-ktiv
+  </xd:doc>
+  <xsl:template match="w|q|k">
+    <xsl:variable name="text-plus-pc" as="node()+">
+      <xsl:apply-templates/>
+    </xsl:variable>
+    <tei:w>
+      <xsl:sequence select="$text-plus-pc[not(self::tei:pc)]"/>
+    </tei:w>
+    <xsl:sequence select="$text-plus-pc/self::tei:pc"/>
+  </xsl:template>
+  
+  <xsl:template match="reversednun">
+    <tei:pc><xsl:text>&nunhafukha;</xsl:text></tei:pc>
+  </xsl:template>
+  
+  <xsl:template match="samekh">
+    <tei:pc><xsl:text>&samekh;</xsl:text></tei:pc>
+  </xsl:template>
+  
+  <xsl:template match="pe">
+    <tei:pc><xsl:text>&pe;</xsl:text></tei:pc>
+  </xsl:template>
+  
+  <xsl:template match="note">
+    <tei:note>
+			<xsl:attribute name="xml:id" select="concat('note_',code)"/>
+      <xsl:sequence select="note/child::node()"/>
+    </tei:note>
+  </xsl:template>
+ 
+  <xd:doc>
+    <xd:short>Copy only one header or notes section</xd:short>
+  </xd:doc>
+  <xsl:template match="element()">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates />
+    </xsl:copy>
+  </xsl:template>
+  <!-- 
+  <xd:doc>
+    <xd:short>Remove the / markers</xd:short>
+  </xd:doc>
+  <xsl:template match="text()">
+    <xsl:sequence select="replace(.,'/','')"/>
+  </xsl:template>
+  -->
+  <xd:doc>
+    Main entry point
+  </xd:doc>
+	<xsl:template name="main">
+    <xsl:result-document encoding="utf-8" 
+      method="xml" indent="yes" href="{$output-file}">
+      <xsl:variable name="first-filename" as="xs:string"
+        select="string-join(($input-directory,'/',$books[1],'.xml'),'')"/>
+      <Tanach>
+        <xsl:sequence select="document($first-filename)//teiHeader"/>
+        <tanach>
+          <xsl:for-each select="$books">
+            <xsl:variable name="wlc-filename" as="xs:string"
+              select="string-join(($input-directory,'/',.,'.xml'),'')"/>
+            <xsl:apply-templates select="document($wlc-filename)//book"/>
+          </xsl:for-each>
+        </tanach>
+        <xsl:apply-templates select="document($first-filename)//notes"/>
+      </Tanach>  
+    </xsl:result-document>
+	</xsl:template>
+</xsl:stylesheet>

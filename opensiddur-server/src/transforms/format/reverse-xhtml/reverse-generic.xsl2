@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet
+  version="2.0" 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"  
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  exclude-result-prefixes="#all"
+>
+  <xsl:import href="../../../common/common.xsl2"/>
+  <xsl:output method="xml" version="1.0" encoding="UTF-8"  
+    indent="yes"/>
+  <xd:doc type="stylesheet">
+    <xd:short>Generic transformation operation to fragmentation TEI from XHTML.</xd:short>
+    <xd:copyright>Copyright 2009,2011 Efraim Feinstein</xd:copyright>
+    <xd:detail>
+      <p>This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU Lesser General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.</p>
+
+      <p>This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU Lesser General Public License for more details.</p>
+
+      <p>You should have received a copy of the GNU Lesser General Public License
+      along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+    </xd:detail>
+  </xd:doc>
+  
+  <xsl:key name="by-document" match="*" 
+    use="ancestor-or-self::*[@property='document-source'][1]/@resource"/>
+  <xsl:key name="by-class" match="*[@class]" use="tokenize(@class, '\s+')"/>
+  
+  <xsl:function name="func:source-document-by-node" as="xs:string">
+    <xsl:param name="node" as="node()"/>
+    <xsl:sequence select="$node/ancestor-or-self::*[@property='document-source'][1]/@resource"/>
+  </xsl:function>
+
+  <xsl:variable name="ns-map" as="element()">
+    <ns-map>
+      <ns prefix="j" ns="http://jewishliturgy.org/ns/jlptei/1.0"/>
+      <ns prefix="jx" ns="http://jewishliturgy.org/ns/jlp-processor"/>
+      <ns prefix="tei" ns="http://www.tei-c.org/ns/1.0"/>
+    </ns-map>
+  </xsl:variable>
+    
+
+  <xsl:template match="@property[.='document-source']" as="attribute()+">
+    <xsl:attribute name="jx:document-uri" select="../@resource"/>
+  </xsl:template>
+  
+  <xsl:template match="@xml:lang" as="attribute()*">
+    <xsl:if test="../..[not(lang(.))]">
+      <xsl:copy/>
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:template match="@*"/>
+  
+  <xsl:template match="html:html">
+    <tei:TEI>
+      <xsl:apply-templates select="@*"/>
+      <!-- can't edit front matter through this interface -->
+      <tei:text> 
+        <xsl:apply-templates />
+      </tei:text>
+    </tei:TEI>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Convert class-coded attributes to tei/j/jx attributes; add jx:id if it is not already present</xd:short>
+  </xd:doc>
+  <xsl:template name="get-attributes" as="attribute()*">
+    <xsl:param name="classes" select="tokenize(@class, '\s+')" as="xs:string*"/>
+    <xsl:param name="set-id" as="xs:boolean" select="true()"/>
+    <xsl:param name="additional-attributes" select="()" as="attribute()*"/>
+    
+    <xsl:variable name="name-class" as="xs:string?" 
+      select="$classes[some $prefix in $ns-map/ns/@prefix satisfies starts-with(., concat($prefix, '-'))]"/>
+    <xsl:variable name="local-name" as="xs:string"
+      select="substring-after($name-class, '-')"/>   
+    
+    <xsl:variable name="my-id-class" as="xs:string?" select="$classes[starts-with(., 'id-')]"/>
+    <xsl:variable name="my-document" as="xs:string?" 
+      select="func:source-document-by-node(.)"/>
+    <xsl:variable name="context" as="element()" select="."/>
+    
+    <xsl:apply-templates select="@* except @class"/>
+    <xsl:sequence select="$additional-attributes"/>
+    <xsl:for-each select="$classes">
+      <xsl:variable name="prefix" as="xs:string" select="substring-before(., '-')"/>
+      <xsl:variable name="content" as="xs:string" select="substring-after(., '-')"/>
+      <xsl:choose>
+        <xsl:when test="$prefix=('type', 'subtype', 'n')">
+          <xsl:attribute name="{$prefix}" select="$content"/>
+        </xsl:when>
+        <xsl:when test="$prefix='id' and $set-id">
+          <xsl:attribute name="jx:id" select="$content"/>
+        </xsl:when>
+        <!-- TODO: does not handle the case of a manually added next or prev! -->
+        <xsl:when test=". = 'next'">
+          <xsl:variable name="next" as="element()" 
+            select="(key('by-class', $my-id-class, root($context)) intersect key('by-document', $my-document, root($context)))[. >> $context][1]"/>
+          <xsl:variable name="next-id" select="substring-after(tokenize($next/@class,'\s+')[starts-with(., 'id-')], 'id-')"/>
+          <xsl:attribute name="next" select="concat('#', $next-id)"/>
+        </xsl:when>
+        <xsl:when test=". = 'prev'">
+          <xsl:variable name="prev" as="element()"
+            select="(key('by-class', $my-id-class, root($context)) intersect key('by-document', $my-document, root($context)))[. &lt;&lt; $context][last()]"/>
+          <xsl:variable name="prev-id" select="substring-after(tokenize($prev/@class,'\s+')[starts-with(., 'id-')], 'id-')"/>
+          <xsl:attribute name="prev" select="concat('#', $prev-id)"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <!-- I don't know what to do with this class -->
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+    <!-- add a jx:id attribute if one does not already exist -->
+    <xsl:if test="not($my-id-class) and $set-id">
+      <xsl:attribute name="jx:id" select="concat($local-name, '-', generate-id(.))"/>
+    </xsl:if>
+  </xsl:template>
+
+  <!-- elements that convert back from div or span -->  
+  <xsl:template match="html:div|html:span" mode="#default reorder">
+    <xsl:variable name="classes" select="tokenize(@class, '\s+')" as="xs:string*"/>
+    <xsl:variable name="name-class" as="xs:string?" 
+      select="$classes[some $prefix in $ns-map/ns/@prefix satisfies starts-with(., concat($prefix, '-'))]"/>
+    <xsl:variable name="local-name" as="xs:string"
+      select="substring-after($name-class, '-')"/>
+    <xsl:variable name="prefix" as="xs:string"
+      select="substring-before($name-class, '-')"/>
+    
+    <xsl:choose>
+      <xsl:when test="$name-class">
+        <xsl:element 
+          name="{concat($prefix, ':', $local-name)}" 
+          namespace="{$ns-map/ns[@prefix=$prefix]/@ns}">
+          <xsl:call-template name="get-attributes">
+            <xsl:with-param name="classes" select="$classes" as="xs:string*"/>
+          </xsl:call-template>
+          <xsl:apply-templates/>
+        </xsl:element>  
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates/>
+      </xsl:otherwise>
+    </xsl:choose>  
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Special processing for tei:ab[@type='verse'] to reorder the labels</xd:short>
+  </xd:doc>
+  <xsl:template match="html:div[contains(@class, 'type-verse')][contains(@class, 'tei-ab')]">
+    <tei:ab>
+      <xsl:call-template name="get-attributes"/>
+      <xsl:apply-templates mode="reorder" select="descendant::html:span[contains(@class,'n-chapter') or contains(@class,'n-verse')][position() &lt;= 2]"/>
+      <xsl:apply-templates/>
+    </tei:ab>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Convert pointers into one pointer per link</xd:short>
+  </xd:doc>
+  <xsl:template match="html:div[contains(@class, 'tei-ptr')][not(contains(@class, 'type-url'))]">
+    <xsl:variable name="context" as="element(tei:ptr)" select="."/>
+    
+    <xsl:variable name="context-classes" as="xs:string*" select="tokenize(@class, '\s+')"/>
+    <xsl:variable name="common-attributes" as="attribute()*">
+      <xsl:call-template name="get-attributes">
+        <xsl:with-param name="set-id" as="xs:boolean" select="false()"/>
+        <xsl:with-param name="classes" as="xs:string+" 
+          select="$context-classes[not(starts-with(., 'target-'))]"/> 
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:variable name="my-document" as="xs:string"
+      select="func:source-document-by-node(.)"/>
+    <xsl:variable name="my-id" as="xs:string?" 
+      select="substring-after($context-classes[starts-with(., 'id-')],'id-')"/>
+    
+    <!-- this has to exclude tei:label[@type=n-chapter|n-verse];
+    if there are any more elements to ignore, will have to write
+    this differently
+     -->
+    <xsl:for-each select="* except *[contains(@class, 'tei-label') and (contains(@class, 'n-chapter') or contains(@class, 'n-verse'))]">
+      <xsl:variable name="classes" as="xs:string*" select="tokenize(@class, '\s+')"/>
+      <xsl:variable name="name-class" as="xs:string?" 
+        select="(
+          $classes[some $prefix in $ns-map/ns/@prefix satisfies starts-with(., concat($prefix, '-'))],
+          local-name(.)
+          )[1]"/>
+      <xsl:variable name="local-name" as="xs:string"
+        select="substring-after($name-class, '-')"/>
+
+      <tei:ptr>
+        <xsl:attribute name="jx:id" 
+          select="if (position()=1 and $my-id) then $my-id else concat('ptr-', generate-id(.))"/>
+        <xsl:attribute name="target">
+          <xsl:choose>
+            <xsl:when test="../contains(@class, 'external') and self::html:a">
+              <!-- unexpanded external pointer -->
+              <xsl:variable name="external-ptr" as="xs:string" 
+                select="(., @href)[1]"/>
+              <xsl:variable name="base-ptr" as="xs:string"
+                select="
+                  if (contains($external-ptr,'/-id/'))
+                  then substring-before($external-ptr, '/-id/')
+                  else $external-ptr"/>
+              <xsl:variable name="fragment-ptr" as="xs:string"
+                select="
+                  for $frag in substring-after($external-ptr, '/-id/')[.]
+                  return concat('#', $frag)"/>
+              <xsl:sequence select="concat($base-ptr, $fragment-ptr)"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:variable name="target-ids" as="xs:string*" 
+                select="
+                  for $id in ($classes[starts-with(., 'id-')], 
+                    concat('id-', $local-name, '-', generate-id(.)))[1]
+                  return concat(
+                    if (func:source-document-by-node(.) = $my-document) 
+                    then '' 
+                    else func:source-document-by-node(.), '#', substring-after($id, 'id-')
+                    )">
+              </xsl:variable>
+              <xsl:sequence select="string-join($target-ids, ' ')"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:attribute>
+        <xsl:sequence select="common-attributes"/>
+        <xsl:apply-templates select="."/>
+      </tei:ptr>
+    </xsl:for-each>
+  </xsl:template>
+  
+  <!-- elements that are moved from their original positions -->
+  <xsl:template match="html:span[contains(@class,'n-chapter') or contains(@class,'n-verse')]"/>
+
+  <!-- elements that are added by the forward transform but can't be transformed to anything -->
+  <xsl:template match="html:head"/>  
+  
+  <!-- elements that are added by the forward transform and become passthrough -->
+  <xsl:template match="html:body">
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="text()">
+    <xsl:value-of select="normalize-space(.)"/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>convert links to tei:ref[@type=url]</xd:short>
+  </xd:doc>
+  <xsl:template match="html:a">
+    <tei:ref type="url" target="{@href}">
+      <xsl:call-template name="get-attributes"/>
+      <xsl:apply-templates/>
+    </tei:ref>
+  </xsl:template>
+</xsl:stylesheet>

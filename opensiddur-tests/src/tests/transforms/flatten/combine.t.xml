@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  >
+  <suiteName>Combine transform</suiteName>
+  <description>
+    <p>Tests of combine transform</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2013 Efraim Feinstein
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
+  <imports>
+    import module namespace format="http://jewishliturgy.org/modules/format"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/format.xqm";
+    import module namespace mirror="http://jewishliturgy.org/modules/mirror"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/mirror.xqm";
+    import module namespace combine="http://jewishliturgy.org/transform/combine"
+      at "xmldb:exist:///db/apps/opensiddur-server/transforms/combine.xqm";
+  </imports>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <functions><![CDATA[
+    declare function local:setup($file as xs:string) {
+      xmldb:copy(
+        "/db/apps/opensiddur-tests/tests/transforms/flatten", 
+        "/db/data/tests", 
+        $file),
+      let $doc := doc("/db/data/tests/" || $file)
+      return 
+        format:unflatten-dependencies($doc, map {})
+    };
+    
+    declare function local:tearDown($file as xs:string) {
+      format:clear-caches("/db/data/tests/" || $file),
+      xmldb:remove("/db/data/tests", $file)
+    };
+  ]]></functions>
+  <TestSet>
+    <testName>No pointers</testName>
+    <setup><code><![CDATA[
+    local:setup("combine1.xml")
+    ]]></code></setup>
+    <tearDown><code><![CDATA[
+    local:tearDown("combine1.xml")
+    ]]></code></tearDown>
+    <test>
+      <task>acts as an identity transform</task>
+      <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/combine1.xml"),
+          map {})
+      ]]></code>
+      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine1$")</xpath>
+      <xpath 
+        desc="acts as an identity transform for unflattened text" 
+        >exists(./tei:TEI/tei:text/jf:combined/tei:seg[@jf:id="seg1"][@jf:stream="stream"])
+      </xpath>
+    </test>        
+  </TestSet>
+  <TestSet>
+    <testName>Local pointer</testName>
+    <setup><code><![CDATA[
+    local:setup("combine2.xml")
+    ]]></code></setup>
+    <tearDown><code><![CDATA[
+    local:tearDown("combine2.xml")
+    ]]></code></tearDown>
+    <test>
+      <task>one segment</task>
+      <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/combine2.xml"),
+          map {})
+      ]]></code>
+      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine2$")</xpath>
+      <xpath 
+        desc="incorporate destination in-place" 
+        >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/tei:seg[@jf:id="seg1"])
+      </xpath>
+      <xpath desc="no @jf:document attribute on jf:ptr">
+        empty(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/@jf:document)
+      </xpath>
+    </test>
+  </TestSet>
+</TestSuite>

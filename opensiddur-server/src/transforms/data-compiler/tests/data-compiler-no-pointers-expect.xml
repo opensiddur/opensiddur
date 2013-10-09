@@ -1,0 +1,7 @@
+<tei:TEI
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xml:lang="en">
+  <tei:text/>
+</tei:TEI>

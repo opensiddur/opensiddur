@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Test sort-flat-hierarchy-by-priority template
+
+Open Siddur Project
+Copyright 2010 Efraim Feinstein
+Licensed under the GNU Lesser General Public License, version 3 or later
+
+$Id: sort-flat-hierarchy-by-priority.xspec 739 2011-04-15 04:17:09Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  stylesheet="../concurrent.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="garbage">
+      <x:context><tei:junk/><j:junk/><jx:junk/></x:context>
+    </x:scenario>
+  </x:pending>
+  <x:scenario label="sort-flat-hierarchy-by-priority template">
+    <x:call template="sort-flat-hierarchy-by-priority"/>
+    <x:scenario label="3 mixed hierarchies with 2 priorities">
+      <x:call>
+        <x:param name="sequence" as="element()*">
+          <tei:div jx:uid="2" jx:start="2" jx:priority="1"/>
+          <tei:div jx:uid="1" jx:start="1" jx:priority="3"/>
+          <tei:label jx:uid="11" jx:priority="3" jx:parents="1" jx:ancestors="1">A</tei:label>
+          <tei:ptr jx:uid="222" target="#r1" jx:selection="111"/>
+          <tei:milestone jx:uid="12" jx:priority="1" jx:parents="1" jx:ancestors="1"/>
+          <tei:div jx:uid="3" jx:start="3" jx:priority="1"/>
+          <tei:div jx:uid="2" jx:end="2" jx:priority="1"/>
+          <tei:ptr jx:uid="333" target="#r2" jx:selection="111"/>
+          <tei:div jx:uid="1" jx:end="1" jx:priority="3"/>
+          <tei:div jx:uid="3" jx:end="3" jx:priority="1"/>
+        </x:param>
+        <x:param name="selection-id" as="xs:string" select="'111'"/>
+      </x:call>
+      <!-- TODO: the order of the elements is dependent on the code details and some of it doesn't matter.
+      This test should really reference a bunch of relative xpath positions -->
+      <x:expect label="Elements are sorted by priority in descending order and tei:ptr[@jx:selection] unmoved">
+        <tei:div jx:uid="1" jx:start="1" jx:priority="3"/>
+        <tei:label jx:uid="11" jx:priority="3" jx:parents="1" jx:ancestors="1">A</tei:label>
+        <tei:div jx:uid="2" jx:start="2" jx:priority="1"/>
+        <tei:ptr jx:uid="222" target="#r1" jx:selection="111"/>
+        <tei:div jx:uid="2" jx:end="2" jx:priority="1"/>
+        <tei:milestone jx:uid="12" jx:priority="1" jx:parents="1" jx:ancestors="1"/>
+        <tei:div jx:uid="3" jx:start="3" jx:priority="1"/>
+        <tei:ptr jx:uid="333" target="#r2" jx:selection="111"/>
+        <tei:div jx:uid="3" jx:end="3" jx:priority="1"/>
+        <tei:div jx:uid="1" jx:end="1" jx:priority="3"/>
+      </x:expect>
+    </x:scenario>
+
+  </x:scenario>
+  <x:scenario label="sort-flat-hierarchy-by-ancestry template">
+    <x:call template="sort-flat-hierarchy-by-ancestry"/>
+    
+    <x:scenario label="empty input">
+      <x:call>
+        <x:param name="unsorted" as="element()?"/>
+      </x:call>
+      <x:expect label="returns empty output" select="()"/>
+    </x:scenario>
+
+    <x:scenario label="with one start element">
+      <x:call>
+        <x:param name="unsorted" as="element()">
+          <tei:div jx:start="1"/>
+        </x:param>
+      </x:call>
+      <x:expect label="returns same element">
+        <tei:div jx:start="1"/>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="with start element and end element">
+      <x:call>
+        <x:param name="unsorted" as="element()+">
+          <tei:div jx:start="2"/>
+          <tei:div jx:end="1"/>
+        </x:param>
+      </x:call>
+      <x:expect label="returns end element before start">
+        <tei:div jx:end="1"/>
+        <tei:div jx:start="2"/>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="with 2 start elements, one parent of other">
+      <x:call>
+        <x:param name="unsorted" as="element()+">
+          <tei:div jx:uid="1" jx:start="1"/>
+          <tei:div jx:uid="2" jx:start="2" jx:parents="1" jx:ancestors="1"/>
+        </x:param>
+      </x:call>
+      <x:expect label="returns elements in with parent first">
+        <tei:div jx:start="1" jx:uid="1" />
+        <tei:div jx:start="2" jx:uid="2" jx:parents="1" jx:ancestors="1"/>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="with 2 start elements, one parent of other, initial positions reversed">
+      <x:call>
+        <x:param name="unsorted" as="element()+">
+          <tei:div jx:uid="2" jx:start="2" jx:parents="1" jx:ancestors="1"/>
+          <tei:div jx:uid="1" jx:start="1"/>
+        </x:param>
+      </x:call>
+      <x:expect label="returns elements with ancestor first">
+        <tei:div jx:start="1" jx:uid="1"/>
+        <tei:div jx:start="2" jx:uid="2" jx:parents="1" jx:ancestors="1"/>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="with a start element, a nonhierarchy element and an end element">
+      <x:call>
+        <x:param name="unsorted" as="element()+">
+          <tei:div jx:uid="1" jx:start="1"/>
+          <tei:label jx:uid="3" jx:parents="1" jx:ancestors="1">Test</tei:label>
+          <tei:div jx:uid="2" jx:end="2" />
+        </x:param>
+      </x:call>
+      <x:expect label="returns end element before start, label element after its start">
+        <tei:div jx:uid="2" jx:end="2" />
+        <tei:div jx:uid="1" jx:start="1"/>
+        <tei:label jx:uid="3" jx:parents="1" jx:ancestors="1">Test</tei:label>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="with 2 nonhierarchy elements">
+      <x:call>
+        <x:param name="unsorted" as="element()+">
+          <tei:div jx:uid="1" jx:start="1"/>
+          <tei:label jx:uid="3" jx:parents="1" jx:ancestors="1">ONE</tei:label>
+          <tei:label jx:uid="4" jx:parents="1" jx:ancestors="1">TWO</tei:label>
+        </x:param>
+      </x:call>
+      <x:expect label="nonhierarchic elements return in original document order">
+        <tei:div jx:uid="1" jx:start="1"/>
+        <tei:label jx:uid="3" jx:parents="1" jx:ancestors="1">ONE</tei:label>
+        <tei:label jx:uid="4" jx:parents="1" jx:ancestors="1">TWO</tei:label>
+      </x:expect>
+    </x:scenario>
+    
+    <x:scenario label="regression test case">
+      <x:call>
+        <x:param name="unsorted" as="element()+">
+          <jx:relationship type="responsibility" subtype="proofreader" jx:uid="d226e5" jx:priority="1.02" jx:start="d226e5"/>
+          <jx:relationship type="responsibility" subtype="encoder" jx:uid="d226e1" jx:priority="1.01" jx:start="d226e1"/>
+          <tei:div xml:lang="en" jx:uid="d104e20" jx:id="div1" jx:priority="1.01" jx:start="d104e20" jx:parents="d226e5" jx:ancestors="d226e5"/>
+          <tei:p jx:uid="d104e17" jx:id="p1" jx:priority="1" jx:start="d104e17" jx:parents="d104e20 d226e1" jx:ancestors="d104e20 d226e1 d226e5"/>
+          <tei:note jx:uid="d104e14" jx:id="note_ext" jx:priority="1" jx:end="d104e14"/>
+        </x:param>
+      </x:call>
+      <!--x:expect label="want to see results"><a/></x:expect-->
+      <x:expect label="div is above p" test="//tei:div &lt;&lt; //tei:p"/>
+    </x:scenario>
+  </x:scenario>
+</x:description>
+

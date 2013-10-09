@@ -1,0 +1,44 @@
+<tei:TEI
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:cc="http://web.resource.org/cc/"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xml:lang="en">
+  <tei:teiHeader>
+    <tei:fileDesc>
+      <tei:publicationStmt>
+        <tei:availability status="free">
+          <tei:p xml:lang="en">To the extent possible under law, 
+          the contributors who associated  
+          <tei:ref type="license" target="http://creativecommons.org/licenses/publicdomain/zero/1.0">Creative Commons Zero</tei:ref> 
+          with this work have waived all copyright and related or neighboring rights to this work.  
+          </tei:p>
+          <rdf:RDF>
+            <cc:License rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+              <cc:legalcode rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/legalcode"/>
+              <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+              <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+            </cc:License>
+          </rdf:RDF>
+        </tei:availability>
+      </tei:publicationStmt>
+    </tei:fileDesc>
+  </tei:teiHeader>
+  <j:links/>
+  <tei:text>
+    <j:concurrent>
+      <j:selection>
+        <tei:ptr xml:id="se1" target="#A"/>
+      </j:selection>
+      <j:view type="p">
+        <tei:p>
+          <tei:ptr target="#se1"/>
+        </tei:p>
+      </j:view>
+    </j:concurrent>
+  </tei:text>
+  <j:repository>
+    <tei:seg xml:id="A">segment 1</tei:seg>
+  </j:repository>
+</tei:TEI>

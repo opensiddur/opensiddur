@@ -1,0 +1,87 @@
+<tei:TEI
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xml:lang="en">
+  <tei:teiHeader/>
+  <tei:fsdDecl>
+    <tei:fsDecl type="fs-declared">
+      <tei:fDecl name="f-declared">
+        <tei:vRange>
+          <tei:symbol value="ON"/>
+          <tei:symbol value="OFF"/>
+        </tei:vRange>
+        <tei:vDefault>
+          <tei:symbol value="OFF"/>
+        </tei:vDefault>
+      </tei:fDecl>
+    </tei:fsDecl>
+  </tei:fsdDecl>
+  <j:conditionGrp>
+    <tei:fs jx:id="test-nothing-special" type="test-nothing-special">
+      <tei:f name="nothing-special">
+        <tei:symbol value="YES"/>
+      </tei:f>
+    </tei:fs>
+
+    <tei:fs jx:id="with-feats-included" type="with-feats-included" feats="#include1 #include2"/>
+
+    <tei:fs jx:id="with-feats-included-and-inline" type="with-feats-included-and-inline" feats="#include1">
+      <tei:f name="inline">
+        <tei:symbol value="YES"/>
+      </tei:f>
+      <tei:f name="inline-with-string">
+        <tei:string>STRING</tei:string>
+      </tei:f>
+    </tei:fs>
+
+    <tei:fs jx:id="fs-with-fVal" type="with-fVal">
+      <tei:f name="f-with-fVal" fVal="#lib1"/>
+    </tei:fs>
+
+    <tei:fs jx:id="fs-with-vAlt" type="with-vAlt">
+      <tei:f name="f-with-vAlt-vAlt">
+        <tei:vAlt>
+          <tei:vAlt>
+            <tei:symbol value="YES"/>
+            <tei:symbol value="NO"/>
+          </tei:vAlt>
+          <tei:symbol value="MAYBE"/>
+        </tei:vAlt>
+      </tei:f>
+    </tei:fs>
+
+    <tei:fs jx:id="fs-with-vLabel" type="fs-with-vLabel">
+      <tei:f name="f-with-named-vLabel">
+        <tei:vLabel name="two-way">
+          <tei:vAlt>
+            <tei:symbol value="ON"/>
+            <tei:symbol value="OFF"/>
+          </tei:vAlt>
+        </tei:vLabel>
+      </tei:f>
+      <tei:f name="f-with-referenced-vLabel">
+        <tei:vLabel name="two-way"/>
+      </tei:f>
+    </tei:fs>
+
+    <tei:fs jx:id="with-default" type="fs-declared">
+      <tei:f name="f-declared">
+        <tei:default/>
+      </tei:f>
+    </tei:fs>
+
+    <tei:fLib>
+      <tei:f jx:id="include1">
+        <tei:symbol value="INCLUDE_ME"/>
+      </tei:f>
+      <tei:f jx:id="include2">
+        <tei:symbol value="INCLUDE_ME_TOO"/>
+      </tei:f>
+    </tei:fLib>
+    <tei:fvLib>
+      <tei:symbol jx:id="lib1" value="YES"/>
+      <tei:symbol jx:id="lib2" value="NO"/>
+    </tei:fvLib>
+  </j:conditionGrp>
+</tei:TEI>

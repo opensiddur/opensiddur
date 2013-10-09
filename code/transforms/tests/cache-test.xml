@@ -1,4 +1,0 @@
-<jx:uncached-resource xmlns:jx="http://jewishliturgy.org/ns/jlp-processor">
-  <jx:identified jx:id="id1">Uncached with jx:id</jx:identified>
-  <jx:identified xml:id="id2">Uncached with xml:id</jx:identified>
-</jx:uncached-resource>

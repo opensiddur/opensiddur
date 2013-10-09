@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI 
+  xmlns="http://www.tei-c.org/ns/1.0" 
+  xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xml:lang="en">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>Annotation Documents</title>
+        <editor xml:id="EDF">Efraim Feinstein</editor>
+        <editor xml:id="sbauman.emt">Syd Bauman</editor>
+        <editor xml:id="LB">Lou Burnard</editor>
+        <editor xml:id="SR">Sebastian Rahtz</editor>
+      </titleStmt>
+      <publicationStmt>
+        <availability status="restricted">
+          <licence target="http://www.creativecommons.org/licenses/by-sa/3.0"/>
+        </availability>
+      </publicationStmt>
+      <notesStmt>
+        <note type="ns">http://jewishliturgy.org/ns/jlptei/1.0</note>
+      </notesStmt>
+      <sourceDesc>
+        <p>Initially created on <date when="2006-10-12T05:24:41">Thursday 12th
+            October 2006</date> by the form at
+        http://www.tei-c.org.uk/Roma/.</p>
+      </sourceDesc>
+    </fileDesc>
+    <revisionDesc>
+      <change when="2012-06-23" who="#EDF">Limit to annotation documents</change>
+      <change when="2012-05-06" who="#EDF">Change bare TEI ODD to JLPTEI</change>
+      <change when="2011-03-26" who="#SR">rewrite as new-style ODD </change>
+      <change when="2007-08-12" who="#LB">Removed further elements added
+since this ODD was first created </change>
+      <change when="2007-04-09" who="#LB">Added prose and reorganized
+structure to make it more document-like; changed deletion of attribute
+decls into deletion of att.declaring class; add deletes for elements
+email and floatingText added to P5 since this ODD was first created;
+considered but did not implement removal of all irrelevant datatype specs...</change>
+      <change when="2006-10-14" who="#sbauman.emt"> Made valid: <list><item>removed empty <att>prefix</att> attribute</item><item>added required <att>type</att> attribute to
+          <gi>classSpec</gi>s</item></list><!--. <note>Sebastian had also made the above changes.</note> -->Also
+        removed extraneous <gi>altIdent</gi> elements, improved
+        <gi>sourceDesc</gi>, changed the <att>ident</att> of <gi>schemaSpec</gi>
+        to match the filename, and added this revision description. </change>
+    </revisionDesc>
+  </teiHeader>
+  <text>
+    <front>
+      <divGen type="toc"/>
+    </front>
+    <body>
+      <p>This customization is for annotation-only files.</p>
+      <div>
+        <head>Formal declaration</head>
+        <xi:include href="common-schema.xml"/>
+        <xi:include href="conditional-common.xml"/>
+        <schemaSpec ident="annotation" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
+          <moduleRef key="core" include="choice cit corr date foreign head hi item l label lg list name note orig p ptr q quote ref reg resp respStmt sic title"/>
+          <moduleRef key="tei"/>
+          <moduleRef key="header" include="availability change distributor fileDesc licence publicationStmt revisionDesc sourceDesc teiHeader titleStmt"/>
+          <moduleRef key="textstructure" include="TEI div"/>
+          <moduleRef key="analysis" include="c interp interpGrp pc phr s w"/>
+          <moduleRef key="certainty" include="respons"/>
+          <moduleRef key="gaiji" include="g"/>
+          <moduleRef key="iso-fs" except="fsDecl fsdDecl fsdLink fsDescr fDescr fDecl vAlt vColl vDefault vLabel vRange if iff then cond fsConstraints bicond"/>
+          <moduleRef key="linking" include="ab anchor link linkGrp seg"/>
+          <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
+          <!-- import consolidated changes that are the same in all XML files
+            -->
+          <specGrpRef target="#common-specs"/>
+          <specGrpRef target="#conditional-specs"/>
+          <elementSpec ident="annotations" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-annotation">
+            <desc>A resource that holds annotations, such as notes or standoff annotations.</desc>
+            <classes>
+              <memberOf key="model.resourceLike"/>
+              <memberOf key="att.global"/>
+            </classes>
+            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
+              <rng:oneOrMore>
+                <rng:choice>
+                  <rng:ref name="interpGrp"/>
+                  <rng:ref name="interp"/>
+                  <rng:ref name="note"/>
+                  <rng:ref name="fs"/>
+                  <rng:ref name="fvLib"/>
+                </rng:choice>
+              </rng:oneOrMore>
+            </content>
+          </elementSpec>
+        </schemaSpec>
+      </div>
+    </body>
+  </text>
+</TEI>

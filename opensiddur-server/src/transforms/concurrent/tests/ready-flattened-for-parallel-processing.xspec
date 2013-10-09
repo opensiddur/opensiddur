@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Test ready-flattened-for-parallel-processing mode
+
+Open Siddur Project
+Copyright 2010 Efraim Feinstein
+Licensed under the GNU Lesser General Public License, version 3 or later
+
+$Id: ready-flattened-for-parallel-processing.xspec 739 2011-04-15 04:17:09Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  stylesheet="../parallel.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="garbage">
+      <x:context><tei:junk/><j:junk/><jx:junk/></x:context>
+    </x:scenario>
+  </x:pending>
+
+  <x:scenario label="ready-flattened-for-parallel-processing mode">
+    <x:scenario label="j:original">
+      <x:context mode="ready-flattened-for-parallel-processing" select="/*/j:original[1]">
+        <x:param name="selection-id" as="xs:string" tunnel="yes" select="'111'"/>
+        <root>
+          <j:original jx:start="1" jx:selection-origin="111"/>
+          <tei:div jx:start="2"/>
+          <tei:label>Test</tei:label>
+          <tei:div jx:end="2"/>
+          <j:original jx:end="1" jx:selection-origin="111"/>
+        </root>
+      </x:context>
+      <x:scenario label="from current selection">
+        <x:context>
+          <x:param name="selection-id" as="xs:string" tunnel="yes" select="'111'"/>
+        </x:context>
+        <x:expect label="transformed to hierarchy">
+          <j:original jx:selection-origin="111">
+            <tei:div jx:start="2"/>
+            <tei:label>Test</tei:label>
+            <tei:div jx:end="2"/>
+          </j:original>
+        </x:expect>
+      </x:scenario>
+      <x:scenario label="from current selection, 1 suspended tag">
+        <x:context>
+          <x:param name="selection-id" as="xs:string" tunnel="yes" select="'111'"/>
+          <x:param name="suspended-tags" as="element()">
+            <tei:div jx:start="3"/>
+          </x:param>
+        </x:context>
+        <x:expect label="transformed to hierarchy with continue and resuspend">
+          <j:original jx:selection-origin="111">
+            <tei:div jx:continue="3"/>
+            <tei:div jx:start="2"/>
+            <tei:label>Test</tei:label>
+            <tei:div jx:end="2"/>
+            <tei:div jx:suspend="3"/>
+          </j:original>
+        </x:expect>
+      </x:scenario>
+      <x:scenario label="from other selection">
+        <x:context>
+          <x:param name="selection-id" as="xs:string" tunnel="yes" select="'112'"/>
+        </x:context>
+        <x:expect label="transformed to hierarchy">
+          <j:original jx:selection-origin="111">
+            <tei:div jx:start="2"/>
+            <tei:label>Test</tei:label>
+            <tei:div jx:end="2"/>
+          </j:original>
+        </x:expect>
+      </x:scenario>
+      <x:scenario label="from other selection, 1 suspended tag">
+        <x:context>
+          <x:param name="selection-id" as="xs:string" tunnel="yes" select="'112'"/>
+          <x:param name="suspended-tags" as="element()">
+            <tei:div jx:start="3"/>
+          </x:param>
+        </x:context>
+        <x:expect label="transformed to hierarchy with no additional continue and resuspend">
+          <j:original jx:selection-origin="111">
+            <tei:div jx:start="2"/>
+            <tei:label>Test</tei:label>
+            <tei:div jx:end="2"/>
+          </j:original>
+        </x:expect>
+      </x:scenario>
+    </x:scenario>
+    <x:scenario label="j:original from current selection, 1 suspended tag ended inside">
+      <x:context mode="ready-flattened-for-parallel-processing" select="/*/j:original[1]">
+        <x:param name="suspended-tags" as="element()">
+          <tei:div jx:start="3"/>
+        </x:param>
+        <x:param name="selection-id" as="xs:string" tunnel="yes" select="'111'"/>
+        <root>
+          <j:original jx:start="1" jx:selection-origin="111"/>
+          <tei:div jx:start="2"/>
+          <tei:label>Test</tei:label>
+          <tei:div jx:end="2"/>
+          <tei:div jx:end="3"/>
+          <tei:div jx:start="4"/>
+          <tei:div jx:end="4"/>
+          <j:original jx:end="1" jx:selection-origin="111"/>
+        </root>
+      </x:context>
+      <x:expect label="transformed to hierarchy with suspended tag continued and resuspended">
+        <j:original jx:selection-origin="111">
+          <tei:div jx:continue="3"/>
+          <tei:div jx:start="2"/>
+          <tei:label>Test</tei:label>
+          <tei:div jx:end="2"/>
+          <tei:div jx:end="3"/>
+          <tei:div jx:start="4"/>
+          <tei:div jx:end="4"/>
+        </j:original>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="open tags before j:parallelGrp">
+      <x:context mode="ready-flattened-for-parallel-processing" select="/root/*[1]">
+        <x:param name="selection-id" as="xs:string" tunnel="yes" select="'111'"/>
+        <root>
+          <tei:div jx:uid="1" jx:start="1"/>
+          <j:parallelGrp jx:uid="2" jx:start="2"/>
+          <j:original jx:uid="3" jx:start="3" jx:parents="2" jx:selection-origin="111"/>
+          <j:original jx:end="3" jx:selection-origin="111"/>
+          <j:parallel jx:uid="4" jx:start="4" jx:parents="2" jx:selection-origin="112"/>
+          <j:parallel jx:end="4" jx:selection-origin="112"/>
+          <j:parallelGrp jx:end="2"/>
+        </root>
+      </x:context>
+      <x:expect label="are suspended and continued in the original and after the parallelGrp">
+        <tei:div jx:uid="1" jx:start="1"/>
+        <tei:div jx:uid="1" jx:suspend="1"/>
+        <j:parallelGrp jx:uid="2">
+          <j:original jx:uid="3" jx:parents="2" jx:selection-origin="111">
+            <tei:div jx:uid="1" jx:continue="1"/>
+            <tei:div jx:uid="1" jx:suspend="1"/>
+          </j:original>
+          <j:parallel jx:uid="4" jx:parents="2" jx:selection-origin="112">
+          </j:parallel>
+        </j:parallelGrp>
+        <tei:div jx:uid="1" jx:continue="1"/>
+      </x:expect>
+    </x:scenario>
+  </x:scenario>
+</x:description>
+

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE xsl:stylesheet [
+<!ENTITY % hebrewent PUBLIC "HEBREW" "hebrew.dtd">
+%hebrewent;
+]>
+<xsl:stylesheet version="2.0" 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:cc="http://web.resource.org/cc/"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"  
+  exclude-result-prefixes="#all"
+  >
+  	
+  <xd:doc type="stylesheet">
+    <xd:short>Perform pre-encoding operations on Hebrew texts</xd:short>
+    <xd:copyright>Copyright 2009-2010 Efraim Feinstein
+    </xd:copyright>
+    <xd:detail>
+      <p>Pre-encoding includes:
+      <ul>
+        <li>Regularization of God's name</li>
+        <li>Correct holam haser for vav</li>
+        <li>Correct ktiv form of Yerushalayim</li>
+        <li>Regularize dash to maqqaf in Hebrew text</li>
+      </ul>
+      </p>
+      <p>This program is free software: you can redistribute it
+        and/or modify it under the terms of the GNU Lesser General Public License as
+        published by the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+      <p>This program is distributed in the hope that it will be
+        useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+        GNU Lesser General Public License for more details.</p>
+
+      <p>
+        You should have received a copy of the GNU Lesser General Public
+        License along with this program. If not, see
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/
+        </a>
+        .
+      </p>
+    </xd:detail>
+    <xd:svnId>$Id: pre-encode.xsl2 709 2011-02-24 06:37:44Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+
+  <xd:doc>
+    <xd:short>Already split elements run an identity transform in
+    already-split mode</xd:short>
+  </xd:doc>
+  <xsl:template match="*" mode="pre-encode">
+    <xsl:copy copy-namespaces="no">
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Search for regular expression matches and do 
+    replacement for already-split text nodes</xd:short>
+  </xd:doc>
+  <xsl:template match="text()" mode="pre-encode">
+    <xsl:variable name="yod-yod-regex" as="xs:string"
+      select="'&yod;(&sheva;?)&yod;&qamats;'"/>
+    <xsl:variable name="holam-haser-regex" as="xs:string"
+      select="'([&vowel;][&trope;]?&vav;&dageshormapiq;?)&holam;'"/>
+    <xsl:variable name="yerushalayim-regex" as="xs:string"
+      select="string-join(('(&yod;&sheva;[&trope;]?&resh;&qubuts;?[&trope;]?',
+        '(&vav;&dageshormapiq;)?&shin;&shindot;&qamats;[&trope;]?',
+        '&lamed;)([&qamats;&patah;&meteg;&cgj;&hiriq;]+|([&trope;]))+(&finalmem;)'),'')"/>
+    <xsl:variable name="dash-regex" as="xs:string"
+      select="'-'"/>
+    
+    <xsl:analyze-string select="." 
+      regex="{string-join(('(',$yod-yod-regex,(: groups 1, 2 :)
+        ')|(',$holam-haser-regex,')|(',       (: groups 3-4 :)
+        $yerushalayim-regex, ')|(',           (: groups 5-10 :)
+        $dash-regex, ')'                      (: group 11 :) 
+        ),'')}">
+        <!--  -->
+      <xsl:matching-substring>
+        <xsl:choose>
+          <xsl:when test="string-length(regex-group(1)) &gt; 0">
+            <j:divineName>
+              <tei:reg>
+                <xsl:sequence select="string-join((
+                  '&yod;',
+                  regex-group(2),
+                  '&he;&vav;&qamats;&he;'
+                  ),'')"/>
+              </tei:reg>
+              <tei:orig>
+                <xsl:copy/>
+              </tei:orig>
+            </j:divineName>
+          </xsl:when>
+          <xsl:when test="string-length(regex-group(3)) &gt; 0">
+            <xsl:value-of 
+              select="string-join((regex-group(4),'&holamhaserforvav;'),'')"/>
+          </xsl:when>
+          <xsl:when test="string-length(regex-group(5)) &gt; 0">
+            <xsl:variable name="vowel" select="
+              if (contains(regex-group(8),'&qamats;')) 
+              then '&qamats;'
+              else '&patah;'"/>
+            <tei:choice>
+              <tei:orig>
+                <xsl:sequence select="string-join((
+                  regex-group(6),
+                  $vowel, '&meteg;&cgj;&hiriq;',
+                  regex-group(9),'&finalmem;'
+                  ),'')"/>
+              </tei:orig>
+              <tei:reg>
+                <xsl:sequence select="string-join((
+                  regex-group(6),
+                  $vowel, '&meteg;',
+                  regex-group(9),'&yod;&hiriq;&finalmem;'
+                  ),'')"/>
+              </tei:reg>
+            </tei:choice>
+          </xsl:when>
+          <xsl:when test="string-length(regex-group(11)) &gt; 0">
+            <xsl:value-of select="'&maqaf;'"/>
+          </xsl:when> 
+          <xsl:otherwise/>
+        </xsl:choose>
+      </xsl:matching-substring>
+      <xsl:non-matching-substring>
+        <xsl:copy/>
+      </xsl:non-matching-substring>
+    </xsl:analyze-string>
+    
+  </xsl:template>  
+</xsl:stylesheet>

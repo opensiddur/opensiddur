@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+         xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+         xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+         xml:lang="en">
+  <tei:teiHeader/>
+  <j:links>
+      <tei:link type="note"
+                targets="standoff-relationship-context.xml#has_a_note_in_another_file #note_ext"/>
+    
+      <tei:respStmt>
+         <tei:resp key="">Transcribed by</tei:resp>
+         <tei:name ref="standoff-relationship-notes.xml#transcriber">Test User</tei:name>
+      </tei:respStmt>
+      <tei:respStmt>
+         <tei:resp key="">Transcribed by</tei:resp>
+         <tei:name ref="standoff-relationship-notes.xml#transcriber2">Test User</tei:name>
+      </tei:respStmt>
+  </j:links>
+  <tei:text>
+      <j:concurrent>
+         <j:selection xml:id="selection">
+            <tei:ptr xml:id="se1" target="#r_note_ext"/>
+            <tei:ptr xml:id="se2" target="#r_external_content"/>
+         </j:selection>
+         <j:view type="note">
+            <tei:note xml:id="note_ext">
+               <tei:ptr target="#se1"/>
+            </tei:note>
+         </j:view>
+         <j:view xml:id="view1" type="p">
+            <tei:p xml:id="p1">
+               <tei:ptr xml:id="has_relationships_in_ancestors" target="#se2"/>
+            </tei:p>
+         </j:view>
+         <j:view xml:id="view2" type="div">
+            <tei:div xml:id="div1">
+               <tei:ptr target="#p1"/>
+            </tei:div>
+         </j:view>
+      </j:concurrent>
+      <j:repository>
+         <tei:seg xml:id="r_note_ext">External note.</tei:seg>
+         <tei:seg xml:id="r_external_content">External content</tei:seg>
+      </j:repository>
+  </tei:text>
+</tei:TEI>
