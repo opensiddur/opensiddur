@@ -11,12 +11,8 @@ declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
-import module namespace app="http://jewishliturgy.org/modules/app" 
-  at "app.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror" 
   at "mirror.xqm";
-import module namespace paths="http://jewishliturgy.org/modules/paths" 
-  at "paths.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri" 
   at "follow-uri.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
@@ -33,8 +29,6 @@ import module namespace reverse="http://jewishliturgy.org/transform/reverse"
   at "../transforms/reverse.xqm";
 
 declare variable $format:temp-dir := '.format';
-declare variable $format:path-to-xslt := concat($app:repo-base, '/transforms');
-declare variable $format:rest-path-to-xslt := app:concat-path($paths:internal-rest-prefix, $format:path-to-xslt);
 
 declare variable $format:dependency-cache := "/db/cache/dependency";
 declare variable $format:flatten-cache := "/db/cache/flatten";
