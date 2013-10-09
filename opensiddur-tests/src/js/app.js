@@ -169,9 +169,6 @@ OpenSiddurTestingApp.controller(
                 .success(function(data) {
                         console.log("Success");
                         // extract total, pass, fail, ignore numbers
-                        $scope.passed += testSuiteObject.passed;
-                        $scope.failed += testSuiteObject.failed;
-                        $scope.ignored += testSuiteObject.ignored;
                         testSuiteObject.details = parseDetails(data);
                         testSuiteObject.complete = true;
                         testSuiteObject.running = false;
@@ -179,6 +176,9 @@ OpenSiddurTestingApp.controller(
                         testSuiteObject.failed = testSuiteObject.details.failed;
                         testSuiteObject.ignored = testSuiteObject.details.ignored;
                         testSuiteObject.total = testSuiteObject.passed + testSuiteObject.failed + testSuiteObject.ignored;
+                        $scope.passed += testSuiteObject.passed;
+                        $scope.failed += testSuiteObject.failed;
+                        $scope.ignored += testSuiteObject.ignored;
                         if (successCallback)
                             successCallback(testSuiteNumber, data);
                     }
