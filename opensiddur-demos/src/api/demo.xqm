@@ -68,9 +68,9 @@ declare
         {
         let $api-base := api:uri-of("/api/demo")
         return (
-          <li class="api">
+          (:<li class="api">
             <a class="discovery" href="{$api-base}/stml">STML</a>
-          </li>,
+          </li>,:)
           <li class="api">
             <a class="discovery" href="{$api-base}/transliteration">Transliteration</a>
           </li>
