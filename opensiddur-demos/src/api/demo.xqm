@@ -37,7 +37,6 @@ declare function local:transliterate(
   let $out-lang := $in-lang || "-Latn"
   let $table := $schema/tr:schema/tr:table[tr:lang[@in=$in-lang][@out=$out-lang]]
   let $transliterated := translit:transliterate($data, map { "translit:table" := $table })
-  let $null := util:log-system-out($transliterated)
   return 
     element { 
       QName(namespace-uri($transliterated), name($transliterated)) 
