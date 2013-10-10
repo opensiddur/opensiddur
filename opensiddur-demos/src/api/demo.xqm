@@ -37,6 +37,7 @@ declare function local:transliterate(
   let $out-lang := $in-lang || "-Latn"
   let $table := $schema/tr:schema/tr:table[tr:lang[@in=$in-lang][@out=$out-lang]]
   let $transliterated := translit:transliterate($data, map { "translit:table" := $table })
+  let $null := util:log-system-out($transliterated)
   return 
     element { 
       QName(namespace-uri($transliterated), name($transliterated)) 
@@ -167,14 +168,10 @@ declare
   %rest:consumes("text/plain")
   %rest:produces("text/plain")
   function demo:transliterate-text(
-    $body as item(),
+    $body as xs:base64Binary,
     $schema as xs:string
     ) as item()+ {
-    let $text :=
-      typeswitch($body)
-      case xs:base64Binary
-      return util:binary-to-string($body)
-      default return $body
+    let $text := util:binary-to-string($body)
     let $transliterated := 
       demo:transliterate-xml(
         document {

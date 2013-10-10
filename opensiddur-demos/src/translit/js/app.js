@@ -63,20 +63,20 @@ OpenSiddurTranslitDemoApp.controller(
           };
             $scope.transliterate = function () {
                 $http.post(
-                    httpPrefix + $scope.selectedTable.demoApi,
-                    $scope.text, 
+                    $scope.selectedTable.demoApi,
+                    "<transliterate xml:lang='he'>" + $scope.text + "</transliterate>", 
                     {
                     headers : {
-                        "Content-Type" : "text/plain"
+                        "Content-Type" : "application/xml"
                     },
-                    responseType: "text"
+                    responseType: "xml"
                     }
                   )
                 .success(
                     function(data, status, headers, config) {
                         $scope.errorMessage = "";
                         console.log(data);
-                        $scope.transliterated = data;
+                        $scope.transliterated = $(data).html();
                     }
                 )
                 .error(
