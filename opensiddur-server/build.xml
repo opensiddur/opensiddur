@@ -28,6 +28,7 @@
                 <arg value="--nodtd"/>
                 <arg value="--noxsd"/>
                 <arg value="--isoschematron"/>
+                <arg value="--dochtml"/>
                 <arg value="@{input.file}"/>
                 <arg value="@{temp.dir}"/>
             </exec>
@@ -43,6 +44,11 @@
                 <fileset dir="@{temp.dir}">
                     <include name="*.rnc" />
                     <include name="*.xsl2" />
+                </fileset>
+            </copy>
+            <copy todir="@{output.dir}/doc">
+                <fileset dir="@{temp.dir}">
+                    <include name="*.html" />
                 </fileset>
             </copy>
         </sequential>
