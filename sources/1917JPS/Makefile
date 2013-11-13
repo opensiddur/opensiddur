@@ -11,7 +11,7 @@
 # TODO: Tidy?
 
 saxon = ../../lib/saxon
-scripts = ../../code/input-conversion/1917JPS
+code = ../../code/input-conversion/1917JPS
 # TODO do I need this?
 book = 1917JPS
 book_temp = temp/book
@@ -31,9 +31,9 @@ temp:
 	@# TODO cleanup temp directory
 	mkdir -p $@
 
-temp/Makefile.books.generated: temp $(scripts)/outline.py Makefile
+temp/Makefile.books.generated: temp $(code)/outline.py Makefile
 	# generate the makefile that knows about all the books
-	$(scripts)/outline.py -m > $@
+	$(code)/outline.py -m > $@
 
 # Make the big XML file.
 # N.B. the pipe for an "order-only" dependency; makes sure temp folder created
@@ -45,22 +45,26 @@ temp/Tanakh-JPS1917.pdf2txt.xml: | temp
 	# Optimize file by removing repeated font name.
 	sed -i 's/font="Times New Roman" //' temp/Tanakh-JPS1917.pdf2txt.xml
 
-books/index.html: $(scripts)/outline.py Makefile blank.xml \
-		$(scripts)/join-pages.xsl2 $(scripts)/final.xsl2 $(scripts)/index.xsl2
+books/index.html: $(code)/outline.py Makefile blank.xml \
+		$(code)/join-pages.xsl2 $(code)/final.xsl2 $(code)/index.xsl2 \
+		$(code)/index.template.html
 	# TODO put template in dependencies?
 	mkdir -p temp/index
 	mkdir -p books
 	# TODO cf. use of outline.py below? Still need both?
-	$(scripts)/outline.py > temp/index/index.xsl2
+	$(code)/outline.py > temp/index/index.xsl2
 	# TODO blank.xml stub hopefully just a temporary thing
 	$(saxon) -s blank.xml -o temp/index/index.xml \
 		temp/index/index.xsl2
 	$(saxon) -s temp/index/index.xml -o temp/index/index2.xml \
-		$(scripts)/join-pages.xsl2
+		$(code)/join-pages.xsl2
 	$(saxon) -s temp/index/index2.xml -o temp/index/index3.xml \
-		$(scripts)/final.xsl2
-	$(saxon) -s temp/index/index3.xml -o $@ \
-		$(scripts)/index.xsl2
+		$(code)/final.xsl2
+	# TODO xml version to keep?
+	$(saxon) -s temp/index/index3.xml -o temp/index/index.html \
+		$(code)/index.xsl2
+	$(code)/include.py temp/index/index.html \
+		$(code)/index.template.html > $@
 
 # TODO this is a just a selection for this round of dev/test
 genesis = 16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90
@@ -93,38 +97,38 @@ $(book_temp):
 
 $(book_temp)/get-pages.xml: $(book-temp) temp/Tanakh-JPS1917.pdf2txt.xml
 	# Get pages from the big XML file
-	$(scripts)/get-pages.py $(pages) temp/Tanakh-JPS1917.pdf2txt.xml > $@
+	$(code)/get-pages.py $(pages) temp/Tanakh-JPS1917.pdf2txt.xml > $@
 
 books/$(book).xml: $(book_temp) $(book_temp)/get-pages.xml Makefile
 	# Step 1: Extract layout coordinates
 	$(saxon) -s $(book_temp)/get-pages.xml -o $(book_temp)/bbox2xywh.xml \
-		$(scripts)/bbox2xywh.xsl2
+		$(code)/bbox2xywh.xsl2
 
 	# Step 2: Group text into blocks
 	# TODO: see TODO's in xslt
 	# TODO: front matter tables, and other front matter
 	$(saxon) -s $(book_temp)/bbox2xywh.xml -o $(book_temp)/get-blocks.xml \
-		$(scripts)/get-blocks.xsl2
+		$(code)/get-blocks.xsl2
 
 	# Step 2.5: Fix Hebrew characters in wrong order
 	$(saxon) -s $(book_temp)/get-blocks.xml -o $(book_temp)/fix-hebrew.xml \
-		$(scripts)/fix-hebrew.xsl2
+		$(code)/fix-hebrew.xsl2
 
 	# Step 3: Fix chapter numbers and mark paragraphs
 	$(saxon) -s $(book_temp)/fix-hebrew.xml -o $(book_temp)/fix-chapter-numbers.xml \
-		$(scripts)/fix-chapter-numbers.xsl2
+		$(code)/fix-chapter-numbers.xsl2
 
 	# Step 3.5: Fix apostrophe-s and smart quote issues
 	$(saxon) -s $(book_temp)/fix-chapter-numbers.xml -o $(book_temp)/fix-apostrophe-s.xml \
-		$(scripts)/fix-apostrophe-s.xsl2
+		$(code)/fix-apostrophe-s.xsl2
 
 	# Step 4: Merge adjacent text elements
 	$(saxon) -s $(book_temp)/fix-apostrophe-s.xml -o $(book_temp)/join-text.xml \
-		$(scripts)/join-text.xsl2
+		$(code)/join-text.xsl2
 
 	# Step 4.4: Generate outline, custom based on selected pages
 	# needs dependency on Makefile since that's how we select pages
-	$(scripts)/outline.py $(pages) > $(book_temp)/outline.xsl2
+	$(code)/outline.py $(pages) > $(book_temp)/outline.xsl2
 
 	# Step 4.5: Group pages using generated outline.
 	# (Different than other steps, because the XSLT is generated.)
@@ -133,15 +137,15 @@ books/$(book).xml: $(book_temp) $(book_temp)/get-pages.xml Makefile
 
 	# Step 5: Flatten pages (within sections)
 	$(saxon) -s $(book_temp)/outline.xml -o $(book_temp)/join-pages.xml \
-		$(scripts)/join-pages.xsl2
+		$(code)/join-pages.xsl2
 
 	# Step 6: Small caps
 	$(saxon) -s $(book_temp)/join-pages.xml -o $(book_temp)/small-caps.xml \
-		$(scripts)/small-caps.xsl2
+		$(code)/small-caps.xsl2
 
 	# Step 7: Final XML that should validate against custom XSD
 	$(saxon) -s $(book_temp)/small-caps.xml -o 'books/$(book).xml' \
-		$(scripts)/final.xsl2
+		$(code)/final.xsl2
 	# validate against schema
 	# TODO make validation its own step (but what's the target?)
 	# TODO see TODO's in XSD
@@ -152,7 +156,7 @@ books/$(book).xml: $(book_temp) $(book_temp)/get-pages.xml Makefile
 books/$(book).html: books/$(book).xml
 	# HTML we can proofread, not neccessarily final/supported/canonical structure
 	$(saxon) -s $< -o $@ \
-		$(scripts)/test-html.xsl2
+		$(code)/test-html.xsl2
 
 # TODO: semi-final form (structured format organized by pages of PDF file):
 # TODO: strip remaining whitespace-only nodes. also, normalize-space within text elements?
@@ -165,13 +169,13 @@ books/$(book).html: books/$(book).xml
 
 # # p should NOT be a container like HTML since heirarchy is book, chapter, verse
 # # TODO Isn't there a PDFMiner tool to get this from outline in PDF?
-# toc.txt: Tanakh-JPS1917.xml $(scripts)/toc.py
+# toc.txt: Tanakh-JPS1917.xml $(code)/toc.py
 # # extract just the lines that *could* be in Table of Contents
 # # to get it down to a manageable size
 # # this includes page numbers and 22-point headings
 # 	grep "font=\"1\"\|<page number" Tanakh-JPS1917.xml > toc.tmp
 # # now run that through the python script to get the finished TOC
-# 	$(scripts)/toc.py toc.tmp
+# 	$(code)/toc.py toc.tmp
 # # clean up temporary file
 # 	rm toc.tmp
 
