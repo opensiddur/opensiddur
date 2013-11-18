@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tei:div xmlns:tei="http://www.tei-c.org/ns/1.0" type="contributors" xml:lang="en">
+   <tei:list>
+      <tei:item xml:id="Fanny.Schmeidl.Neuda">
+         <tei:forename>Fanny</tei:forename>
+         <tei:surname>Schmeidl Neuda</tei:surname>
+         <tei:affiliation>
+            <tei:ptr target="#SDA-HOD"/>
+         </tei:affiliation>
+      </tei:item>
+	  <tei:item xml:id="Moritz.Mayer">
+         <tei:forename>Moritz</tei:forename>
+         <tei:surname>Mayer</tei:surname>
+         <tei:affiliation>
+            <tei:ptr target="#SDA-HOD"/>
+         </tei:affiliation>
+      </tei:item>
+	  <tei:item xml:id="Aharon.Varady">
+         <tei:forename>Aharon</tei:forename>
+         <tei:surname>Varady</tei:surname>
+         <tei:affiliation>
+            <tei:ptr target="#SDA-HOD"/>
+         </tei:affiliation>
+      </tei:item>
+      <tei:item xml:id="SDA-HOD">
+         <tei:orgName>The Open Siddur Project</tei:orgName>
+		 <tei:email>aharon@opensiddur.org</tei:email>
+         <tei:ptr type="url" target="http://opensiddur.org"/>
+      </tei:item>
+   </tei:list>
+</tei:div>

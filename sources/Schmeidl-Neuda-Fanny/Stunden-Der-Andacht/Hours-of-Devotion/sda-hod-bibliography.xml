@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tei:div xmlns:tei="http://www.tei-c.org/ns/1.0" type="bibliography" xml:lang="en">
+   <tei:biblStruct xml:id="Neuda-Mayer1866">
+      <tei:monogr>
+         <tei:title>Hours of Devotion</tei:title>
+	     <tei:subtitle>A Book of Prayers and Meditation for the use of the Daughters of Israel, during public service and at home, for all conditions of woman's life. Translated from the German "Stunden Der Andacht"</tei:subtite>
+         <tei:edition>Fifth Edition</tei:edition>
+         <tei:author>
+            <tei:name>Fanny Schmeidl Neuda</tei:name>
+         </tei:author>
+		<tei:respStmt>
+			<tei:resp>Translator</tei:resp>
+			<tei:name>Moritz Mayer</tei:name>
+		</tei:respStmt>
+         <tei:imprint>
+            <tei:publisher>Hebrew Publishing Co.</tei:publisher>
+            <tei:date>1866</tei:date>
+         </tei:imprint>
+      </tei:monogr>
+      <tei:note type="copyright">
+            The transcriber has shared the text with a Creative Commons Zero Public Domain Declaration details at <tei:ref type="url"
+                  target="http://creativecommons.org/publicdomain/zero/1.0/">creativecommons.org</tei:ref>. 
+          </tei:note>
+   </tei:biblStruct>
+</tei:div>
