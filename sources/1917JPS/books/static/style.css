@@ -1,10 +1,9 @@
 /* more readable body size and line height 
    see http://www.alistapart.com/articles/howtosizetextincss */
 body { /*font-size: 16px;*/ 
-	margin: 0.5em;
+	margin: 0 0.5em 0.5em;
 	line-height: 1.6;
 	font-family: Gentium Book Basic;
-	
 }
 
 @media all and (min-width: 800px) 
@@ -14,6 +13,11 @@ body { /*font-size: 16px;*/
 		width: 40em;
 		margin: auto;
 	}
+}
+header
+{
+	background-color: #DDD; 
+	padding: 0.4em 0.2em 0.2em;
 }
 h1, h2, h3 
 { 

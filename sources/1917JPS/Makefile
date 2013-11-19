@@ -183,7 +183,7 @@ books/$(book).html: books/$(book).xml
 
 # Clean everything that gets built.
 clean: clean_temp
-	rm -rf books
+	rm books/*
 
 # Clean temp files, leave build outputs.
 clean_temp:
