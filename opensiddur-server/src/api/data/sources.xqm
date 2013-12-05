@@ -100,21 +100,21 @@ declare function src:query-function(
     ) as element()* {
   for $doc in
     collection($src:path-base)//tei:biblStruct[ft:query(.,$query)]
-  order by $doc//tei:title(:[@type="main" or not(@type)]:) ascending
+  order by src:title-function(root($doc)) ascending
   return $doc
 };
 
 declare function src:list-function(
   ) as element()* {
   for $doc in collection($src:path-base)/tei:biblStruct
-  order by $doc//tei:title(:[@type="main" or not(@type)]:) ascending
+  order by src:title-function(root($doc)) ascending
   return $doc
 };
 
 declare function src:title-function(
   $doc as document-node()
   ) as xs:string {
-  $doc//tei:title/string()
+  ($doc//tei:monogr, $doc//tei:analytic, $doc//tei:series)[1]/(tei:title[@type="main"],tei:title[not(@type)])[1]/string()
 };
 
 (:~ Delete a bibliographic entry text
