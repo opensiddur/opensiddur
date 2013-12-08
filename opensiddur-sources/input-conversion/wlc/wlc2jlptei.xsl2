@@ -135,6 +135,42 @@ TODO:
   </xsl:param>
 
   <xd:doc>
+    <xd:short>Return a reformatted date from DD\sMonth\sYYYY to YYYY-MM-DD</xd:short>
+  </xd:doc>
+  <xsl:function name="func:reformat-date" as="xs:string">
+    <xsl:param name="old-date" as="xs:string"/>
+    <xsl:variable name="months" as="element()">
+      <months>
+        <month n="01" name="jan"/>
+        <month n="02" name="feb"/>
+        <month n="03" name="mar"/>
+        <month n="04" name="apr"/>
+        <month n="05" name="may"/>
+        <month n="06" name="jun"/>
+        <month n="07" name="jul"/>
+        <month n="08" name="aug"/>
+        <month n="09" name="sep"/>
+        <month n="10" name="oct"/>
+        <month n="11" name="nov"/>
+        <month n="12" name="dec"/>
+      </months>
+    </xsl:variable>
+
+    <xsl:analyze-string regex="(\d{{1,2}})\s+(\S+)\s+(\d{{4}})" select="$old-date">
+      <xsl:matching-substring>
+        <xsl:variable name="day" select="regex-group(1)"/>
+        <xsl:variable name="month" select="lower-case(regex-group(2))"/>
+        <xsl:variable name="year" select="regex-group(3)"/>
+        <xsl:sequence select="string-join((
+              $year,
+              $months/month[@name=$month]/@n,
+              format-number(number($day), '00')
+              ), '-')"/>
+      </xsl:matching-substring>
+    </xsl:analyze-string>
+  </xsl:function>
+
+  <xd:doc>
     <xd:short>Return the generated xml:id of a word</xd:short>
   </xd:doc>
   <xsl:function name="func:make-word-xmlid" as="xs:string">
@@ -797,9 +833,9 @@ TODO:
     </xsl:result-document>
     <xsl:result-document
       href="{$result-directory}/{$bibliography-file-name}{$extension}">
-      <tei:biblStruct>
+      <tei:biblStruct xml:lang="en">
         <tei:monogr>
-          <tei:title>
+          <tei:title xml:lang="en" type="main">
             <xsl:value-of
               select="$tanach-as-xml//fileDesc//title[@level='s' and @type='main']" />
           </tei:title>
@@ -817,15 +853,14 @@ TODO:
             <xsl:value-of select="$tanach-as-xml//version/node()" />
           </tei:edition>
           <tei:imprint>
-            <tei:publisher>J. Alan Groves Center for Advanced Biblical
-              Research</tei:publisher>
+            <tei:publisher>J. Alan Groves Center for Advanced Biblical Research</tei:publisher>
             <tei:pubPlace>Glenside, PA</tei:pubPlace>
             <tei:date>
-              <xsl:value-of select="$tanach-as-xml//edition/date/node()" />
+              <xsl:value-of select="func:reformat-date($tanach-as-xml//edition/date/node())" />
             </tei:date>
             <tei:distributor>
-              <xsl:value-of
-                select="$tanach-as-xml//distributor/name[not(@type)]" />
+              <tei:name><xsl:value-of
+                select="$tanach-as-xml//distributor/name[not(@type)]" /></tei:name>
               <tei:ref type="url"
                 target="{$tanach-as-xml//distributor/name[@type='url']}">via web site</tei:ref>
               <tei:date type="access">2012-06-07</tei:date>
@@ -833,10 +868,9 @@ TODO:
           </tei:imprint>
         </tei:monogr>
         <tei:note type="copyright">
-          The transcriber has released the text "without restriction."
-          A copy of the license is in our
+          <tei:note>The transcriber has released the text "without restriction."</tei:note>
             <tei:ref type="url"
-              target="https://github.com/opensiddur/opensiddur/blob/master/sources/tanach/WLC/License.html">source code repository</tei:ref>.
+              target="https://github.com/opensiddur/opensiddur/blob/master/opensiddur-sources/sources/tanach/WLC/License.html">Link to license.</tei:ref>
         </tei:note>
       </tei:biblStruct>
     </xsl:result-document>
