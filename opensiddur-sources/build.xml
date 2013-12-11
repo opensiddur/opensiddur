@@ -39,8 +39,17 @@
     <target name="wlc"
         description="build the WLC"
         unless="wlc.uptodate">
+        <tstamp>
+            <format property="yyyy.mm" pattern="yyyy/MM"/>
+        </tstamp>
         <mkdir dir="${build}/wlc.tmp"/>
-         
+        <delete failonerror="false">
+            <fileset dir="${build}/data">
+                <include name="original/**/*.xml"/>
+                <include name="notes/**/*.xml"/>
+                <exclude name="*/*/${yyyy.mm}/*.xml"/>
+            </fileset>
+        </delete> 
         <xslt
             classpath="${saxon}"
             basedir="${wlc.data.dir}"
