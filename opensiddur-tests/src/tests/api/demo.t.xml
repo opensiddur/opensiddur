@@ -110,7 +110,7 @@
       <task>Post text and a valid transliteration schema</task>
       <code><![CDATA[
       demo:transliterate-text(
-        "אבגדה וזח",
+        util:string-to-binary("אבגדה וזח"),
         "Test")
       ]]></code>
       <xpath desc="output is text/plain">$output[1]/self::rest:response/output:serialization-parameters/output:method/@value="text"</xpath>
@@ -120,7 +120,7 @@
       <task>Post text and a nonexistent transliteration schema</task>
       <code><![CDATA[
       demo:transliterate-text(
-        "אבגדה וזח",
+        util:string-to-binary("אבגדה וזח"),
         "NotExistent")
       ]]></code>
       <xpath desc="returns status code 404">$output[1]/self::rest:response/http:response/@status=404</xpath>
