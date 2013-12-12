@@ -112,6 +112,15 @@ cacheSize=${cache.size}
 		</exec>
 	</target>
 
+    <target name="fix-restxq">
+        <!-- BUG workaround: copy the restxq registry -->
+        <copy todir="${installdir}/webapp/WEB-INF/data" overwrite="true">
+            <fileset dir="${lib.dir}">
+                <include name="restxq.registry"/>
+            </fileset>
+        </copy>
+    </target>
+
     <target name="install-hebmorph"
         depends="dist"
         description="install the hebmorph files into eXist">
@@ -181,5 +190,11 @@ cacheSize=${cache.size}
 		depends="clean,exist-clean"
 		description="clean open siddur code and library code">
 	</target>
+
+    <target name="uninstall">
+        <echo level="warning">Warning: About to delete everything in ${installdir}. If this not what you want to do, press ^C now! You have 5 seconds...</echo>
+        <sleep seconds="5"/>
+        <delete dir="${installdir}"/>
+    </target>
 </project>
 
