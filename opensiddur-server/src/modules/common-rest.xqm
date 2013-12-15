@@ -32,6 +32,18 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace error="http://jewishliturgy.org/errors";
 
+(:~ @return true() if validation should be disabled (during deployment) :)
+declare 
+    %private 
+    function crest:validation-disabled(
+    ) as xs:boolean {
+    contains(
+        system:as-user("admin", $magic:password, 
+            system:get-running-xqueries()
+        )//system:sourceKey/string(), 
+    "post-install.xql")
+};
+
 (:~ @return REST error message when access is not allowed :)
 declare function crest:no-access(
   ) as item()+ {
@@ -94,7 +106,8 @@ declare function crest:validate(
       function(item(), document-node()?) as element()
     )*
   ) as xs:boolean {
-  validation:jing($doc, $schema-path) and
+  crest:validation-disabled() or (
+    validation:jing($doc, $schema-path) and
     jvalidate:validation-boolean(
       jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path))
     ) and (
@@ -107,6 +120,7 @@ declare function crest:validate(
             )
         )
     )
+  )
 };
 
 (:~ validate, returning a validation report 
