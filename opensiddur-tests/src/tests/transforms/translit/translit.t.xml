@@ -43,6 +43,13 @@
           <expected desc="word is transliterated, element and attributes are preserved"><tei:w n="2">ʾefrayim</tei:w></expected>
       </test>
       <test>
+          <task>maleh vowel</task>
+          <code><![CDATA[
+            translit:transliterate(<tei:w>רִית</tei:w>, map { "translit:table" := $table })
+          ]]></code>
+          <expected desc="word is transliterated"><tei:w>riyt</tei:w></expected>
+      </test>
+      <test>
           <task>Tetragrammaton 1</task>
           <code><![CDATA[
             translit:transliterate(<tei:w>יְהוָה</tei:w>, map { "translit:table" := $table })
