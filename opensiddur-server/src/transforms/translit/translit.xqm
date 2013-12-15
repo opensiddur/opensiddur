@@ -783,15 +783,16 @@ declare function translit:pass1-male-vowels(
     $context as element(tr:cc),
     $params as map
     ) as element(tr:cc) {
+    (: note: a bug in eXist *somewhere* is preventing the context from being preserved in this function :)
     $context/(
         let $table as element(tr:table) := $params("translit:table")    
         let $vowel-male as element() :=
             element tr:vl {
                 string-join((
-                    tr:vs|tr:vl,
+                    $context/(tr:vs,tr:vl),
                     $translit:hebrew("yod"),
-                    if (tr:vs=$translit:hebrew("hiriq") and 
-                        following::tr:cc[1][tr:d] and
+                    if ($context/tr:vs=$translit:hebrew("hiriq") and 
+                        $context/following::tr:cc[1][tr:d] and
                         $table/tr:tr[@from=($translit:hebrew("hiriq") || $translit:hebrew("yod") || $translit:hebrew("dageshormapiq"))])
                     then $translit:hebrew("dageshormapiq")
                     else ()
@@ -799,11 +800,11 @@ declare function translit:pass1-male-vowels(
             }
         return
             element tr:cc {
-                following::tr:cc[1]/@last,
-                @*, 
-                tr:cons,
+                $context/following::tr:cc[1]/@last,
+                $context/@*, 
+                $context/tr:cons,
                 $vowel-male,
-                * except (tr:cons,tr:vs,tr:vl)
+                $context/(* except (tr:cons,tr:vs,tr:vl))
             }
     )
 };
