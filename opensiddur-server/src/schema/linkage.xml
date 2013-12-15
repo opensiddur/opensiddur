@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI 
+  xmlns="http://www.tei-c.org/ns/1.0" 
+  xmlns:rng="http://relaxng.org/ns/structure/1.0"
+  xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xml:lang="en">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>Translation linkage documents</title>
+        <editor xml:id="EDF">Efraim Feinstein</editor>
+        <editor xml:id="sbauman.emt">Syd Bauman</editor>
+        <editor xml:id="LB">Lou Burnard</editor>
+        <editor xml:id="SR">Sebastian Rahtz</editor>
+      </titleStmt>
+      <publicationStmt>
+        <availability status="restricted">
+          <licence target="http://www.creativecommons.org/licenses/by-sa/3.0"/>
+        </availability>
+      </publicationStmt>
+      <notesStmt>
+        <note type="ns">http://jewishliturgy.org/ns/jlptei/1.0</note>
+      </notesStmt>
+      <sourceDesc>
+        <p>Initially created on <date when="2006-10-12T05:24:41">Thursday 12th
+            October 2006</date> by the form at
+        http://www.tei-c.org.uk/Roma/.</p>
+      </sourceDesc>
+    </fileDesc>
+    <revisionDesc>
+      <change when="2013-01-08" who="#EDF">Update for translation linkage documents</change>
+      <change when="2012-05-06" who="#EDF">Change bare TEI ODD to JLPTEI</change>
+      <change when="2011-03-26" who="#SR">rewrite as new-style ODD </change>
+      <change when="2007-08-12" who="#LB">Removed further elements added
+since this ODD was first created </change>
+      <change when="2007-04-09" who="#LB">Added prose and reorganized
+structure to make it more document-like; changed deletion of attribute
+decls into deletion of att.declaring class; add deletes for elements
+email and floatingText added to P5 since this ODD was first created;
+considered but did not implement removal of all irrelevant datatype specs...</change>
+      <change when="2006-10-14" who="#sbauman.emt"> Made valid: <list><item>removed empty <att>prefix</att> attribute</item><item>added required <att>type</att> attribute to
+          <gi>classSpec</gi>s</item></list><!--. <note>Sebastian had also made the above changes.</note> -->Also
+        removed extraneous <gi>altIdent</gi> elements, improved
+        <gi>sourceDesc</gi>, changed the <att>ident</att> of <gi>schemaSpec</gi>
+        to match the filename, and added this revision description. </change>
+    </revisionDesc>
+  </teiHeader>
+  <text>
+    <front>
+      <divGen type="toc"/>
+    </front>
+    <body>
+      <div>
+        <head>Translations and parallel texts</head>
+        <!-- TODO: fill in -->
+        <p>A parallel text document may have introductory material
+        in the <gi>front</gi> element and concluding material
+        in the <gi>back</gi> element. The main content is one or
+        more <gi>parallelText</gi> elements, each of which contains
+        a single parallelization of a text. </p>
+      </div>
+      <div>
+        <head>Formal declaration</head>
+        <!-- common declarations: -->
+        <xi:include href="common-schema.xml"/>
+        <xi:include href="conditional-common.xml"/>
+        <schemaSpec ident="linkage" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
+          <moduleRef key="core" include="choice cit corr date divGen foreign head hi item l label lg list name note orig p ptr q quote ref reg resp respStmt sic title"/>
+          <moduleRef key="tei"/>
+          <moduleRef key="header" include="availability change distributor fileDesc licence publicationStmt revisionDesc sourceDesc teiHeader titleStmt"/>
+          <moduleRef key="textstructure" include="TEI back body div docAuthor docDate docEdition docImprint docTitle front text titlePage titlePart"/>
+          <moduleRef key="analysis" include="c pc phr s w"/>
+          <moduleRef key="certainty" include="respons"/>
+          <moduleRef key="gaiji" include="g"/>
+          <moduleRef key="iso-fs" except="fsDecl fsdDecl fsdLink fsDescr fDescr fDecl vAlt vColl vDefault vLabel vRange if iff then cond fsConstraints bicond"/>
+          <moduleRef key="linking" include="ab anchor link linkGrp seg"/>
+          <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
+          <moduleRef key="transcr" include="sourceDoc"/>
+          <specGrpRef target="#common-specs"/>
+          <specGrpRef target="#conditional-common"/>
+          <elementSpec ident="parallelGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-parallel">
+            <desc>A special type of <gi>linkGrp</gi> that groups units of parallel text by language. The <gi>ptr</gi> 
+            elements must have <att>targetLang</att> attributes</desc>
+            <classes>
+              <memberOf key="att.global"/>
+            </classes>
+            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
+              <rng:oneOrMore>
+                <rng:ref name="ptr"/>
+              </rng:oneOrMore>
+            </content>
+            <constraintSpec ident="parallelGrp-1" scheme="isoschematron">
+              <constraint>
+                <sch:assert test="empty(tei:ptr[not(@targetLang)])">Every tei:ptr inside a parallelGrp requires @targetLang.</sch:assert>
+              </constraint>
+            </constraintSpec>
+          </elementSpec>
+          <elementSpec ident="parallelText" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-parallel">
+            <desc>The main body element for a text that consists of a parallelization of multiple texts. 
+            Multiple parallelizations of the same text may be in the same document.</desc>
+            <attList>
+              <attDef ident="level" mode="add" usage="opt">
+                <desc>The segmentation level at which the parallelization is done, for example, segment, verse, paragraph, line-group, line, etc. Use one of the recommended values unless none of them makes sense.</desc>
+                <datatype minOccurs="1" maxOccurs="1">
+                  <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
+                </datatype>
+                <defaultVal>other</defaultVal>
+                <valList type="open">
+                  <valItem ident="seg"/>
+                  <valItem ident="verse"/>
+                  <valItem ident="chapter"/>
+                  <valItem ident="p"/>
+                  <valItem ident="lg"/>
+                  <valItem ident="l"/>
+                  <valItem ident="div"/>
+                </valList>
+              </attDef>
+            </attList>
+            <classes>
+              <memberOf key="att.global"/>
+            </classes>
+            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
+              <rng:oneOrMore>
+                <rng:ref name="parallelGrp"/>
+              </rng:oneOrMore>
+            </content>
+          </elementSpec>
+          <elementSpec ident="text" module="textstructure" mode="change">
+            <classes mode="replace">
+              <memberOf key="att.global"/>
+              <memberOf key="att.typed"/>
+              <memberOf key="att.declaring" mode="delete"/>
+            </classes>
+            <content>
+              <rng:group xmlns:rng="http://relaxng.org/ns/structure/1.0">
+                <rng:optional>
+                  <rng:ref name="front"/>
+                </rng:optional>
+                <rng:oneOrMore>
+                  <rng:ref name="parallelText"/>
+                </rng:oneOrMore>
+                <rng:optional>
+                  <rng:ref name="back"/>
+                </rng:optional>
+              </rng:group>
+            </content>
+          </elementSpec>
+        </schemaSpec>
+      </div>
+    </body>
+  </text>
+</TEI>

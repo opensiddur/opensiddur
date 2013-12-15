@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  conditional evaluation
+  Open Siddur Project
+  Copyright 2010 Efraim Feinstein
+  Licensed under the GNU Lesser General Public License, version 3 or later
+
+  $Id: evaluate-conditionals.xspec 746 2011-04-17 20:54:20Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  stylesheet="../conditionals.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="force xmlns declaration">
+      <x:context><func:test/><tei:test/><jx:test/><j:test/></x:context>
+    </x:scenario>
+  </x:pending>
+  <x:scenario label="func:get-selection-value()">
+    <x:call function="func:get-selection-value">
+    </x:call>
+    <x:scenario label="empty settings">
+      <x:call>
+        <x:param as="document-node()?" select="()" />
+        <x:param as="xs:string" select="'fs-1'" />
+        <x:param as="xs:string" select="'f-1'" />
+      </x:call>
+      <x:expect label="empty response" select="()"/>
+    </x:scenario>
+    <x:scenario label="with settings">
+      <x:call>
+        <x:param as="document-node()" href="get-selection-value-context.xml" />
+        <x:param as="xs:string" select="'fs-1'" />
+        <x:param as="xs:string" select="'f-1'" />
+      </x:call>
+      <x:expect label="returns value of setting" select="'MAYBE'"/>
+    </x:scenario>
+    <x:scenario label="func:get-selection-value-or-default()">
+      <x:call function="func:get-selection-value-or-default">
+      </x:call>
+      <x:scenario label="with existing defaulted feature">
+        <x:call>
+          <x:param as="document-node()" href="get-selection-value-context.xml"/>
+          <x:param as="xs:string" select="'fs-1'" />
+          <x:param as="xs:string" select="'f-1'"/>
+          <x:param as="node()" href="evaluate-conditionals-context.xml"/> 
+        </x:call>
+        <x:expect label="selected value is returned" select="'MAYBE'" />
+      </x:scenario>
+      <x:scenario label="with nonexistent defaulted feature"> 
+        <x:call>
+          <x:param as="document-node()" href="get-selection-value-context.xml"/>
+          <x:param as="xs:string" select="'fs-1'" />
+          <x:param as="xs:string" select="'f-2'"/>
+          <x:param as="node()" href="evaluate-conditionals-context.xml"/> 
+        </x:call>
+        <x:expect label="defaulted value is returned" select="'NO'" />
+      </x:scenario>
+    </x:scenario>
+  </x:scenario> 
+  <x:scenario label="evaluate-conditionals mode, truth table">
+    <x:context mode="evaluate-conditionals">
+      <x:param name="evaluation-context" as="node()" href="evaluate-conditionals-context.xml" tunnel="yes"/>
+    </x:context>
+    <x:scenario label="... YES set and YES conditional ...">
+      <x:context href="fs-1-f-1-Y.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-1-Y.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is YES" select="'YES'"/>
+    </x:scenario>
+    <x:scenario label="... YES set and NO conditional ...">
+      <x:context href="fs-1-f-1-N.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-1-Y.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is NO" select="'NO'"/>
+    </x:scenario>
+    <x:scenario label="... NO set and YES conditional ...">
+      <x:context href="fs-1-f-1-Y.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-1-N.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is NO" select="'NO'"/>
+    </x:scenario>
+    <x:scenario label="... NO set and NO conditional ...">
+      <x:context href="fs-1-f-1-N.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-1-N.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is YES" select="'YES'"/>
+    </x:scenario>
+    <x:scenario label="... MAYBE set and YES conditional ...">
+      <x:context href="fs-1-f-1-Y.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-1-M.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is MAYBE" select="'MAYBE'"/>
+    </x:scenario>
+    <x:scenario label="... MAYBE set and NO conditional ...">
+      <x:context href="fs-1-f-1-N.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-1-M.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is MAYBE" select="'MAYBE'"/>
+    </x:scenario>
+    <x:scenario label="... ON set and ON conditional ...">
+      <x:context href="fs-1-f-3-ON.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-3-ON.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is ON" select="'ON'"/>
+    </x:scenario>
+    <x:scenario label="... ON set and OFF conditional ...">
+      <x:context href="fs-1-f-3-OFF.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-3-ON.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is OFF" select="'OFF'"/>
+    </x:scenario>
+    <x:scenario label="... OFF set and ON conditional ...">
+      <x:context href="fs-1-f-3-ON.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-3-OFF.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is OFF" select="'OFF'"/>
+    </x:scenario>
+    <x:scenario label="... OFF set and OFF conditional ...">
+      <x:context href="fs-1-f-3-OFF.xml" select="//tei:fs">
+        <x:param name="current-settings" as="document-node()" href="fs-1-f-3-OFF.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is ON" select="'ON'"/>
+    </x:scenario>
+  </x:scenario>
+  <x:scenario label="evaluate-conditionals mode with logical operators">
+    <x:context href="evaluate-conditionals-context.xml" mode="evaluate-conditionals">
+      <x:param name="evaluation-context" as="node()" href="evaluate-conditionals-context.xml" tunnel="yes"/>
+    </x:context>
+    <x:scenario label="and Y,Y">
+      <x:context select="id('and-Y-Y')">
+        <x:param name="current-settings" as="document-node()" href="fs-1-YES-YES.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is YES" select="'YES'"/>
+    </x:scenario>
+    <x:scenario label="and Y,N">
+      <x:context select="id('and-Y-N')">
+        <x:param name="current-settings" as="document-node()" href="fs-1-YES-YES.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is NO" select="'NO'"/>
+    </x:scenario>
+    <x:scenario label="and Y,M">
+      <x:context select="id('and-Y-M')">
+        <x:param name="current-settings" as="document-node()" href="fs-1-YES-MAYBE.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is MAYBE" select="'MAYBE'"/>
+    </x:scenario>
+    <x:scenario label="or Y,Y">
+      <x:context select="id('or-Y-Y')">
+        <x:param name="current-settings" as="document-node()" href="fs-1-YES-YES.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is YES" select="'YES'"/>
+    </x:scenario>
+    <x:scenario label="or Y,N">
+      <x:context select="id('or-Y-N')">
+        <x:param name="current-settings" as="document-node()" href="fs-1-YES-YES.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is YES" select="'YES'"/>
+    </x:scenario>
+    <x:scenario label="or N,N">
+      <x:context select="id('or-N-N')">
+        <x:param name="current-settings" as="document-node()" href="fs-1-YES-YES.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is NO" select="'NO'"/>
+    </x:scenario>
+    <x:scenario label="not Y">
+      <x:context select="id('not-Y')">
+        <x:param name="current-settings" as="document-node()" href="fs-1-YES-YES.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is NO" select="'NO'"/>
+    </x:scenario>
+    <x:scenario label="not N">
+      <x:context select="id('not-N')">
+        <x:param name="current-settings" as="document-node()" href="fs-1-YES-YES.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is YES" select="'YES'"/>
+    </x:scenario>
+    <x:scenario label="not M">
+      <x:context select="id('not-M')">
+        <x:param name="current-settings" as="document-node()" href="fs-1-YES-MAYBE.xml" tunnel="yes"/>
+      </x:context>
+      <x:expect label="result is MAYBE" select="'MAYBE'"/>
+    </x:scenario>
+  </x:scenario>
+</x:description>

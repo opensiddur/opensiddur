@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"  
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:debug="http://jewishliturgy.org/ns/debug/1.0"
+  >
+  <tei:teiHeader>
+  </tei:teiHeader>
+  <tei:fsdDecl>
+    <tei:fsdLink type="fs-1" target="conditional-setting.xml#fs-1"/>
+    <tei:fsdLink type="fs-2" target="conditional-setting.xml#fs-2"/>
+  </tei:fsdDecl>
+  <j:conditionGrp>
+    <tei:linkGrp type="set">
+      <tei:link targets="#internal-setting conditional-setting.xml#fs-2-f-2-Y"/>
+    </tei:linkGrp>
+  </j:conditionGrp>
+  <tei:text>
+    <tei:body>
+      <jx:joined-concurrent>
+        <tei:div jx:id="div">
+          <tei:p jx:id="external-setting">
+            <debug:output-conditionals/>
+          </tei:p>
+          <tei:p jx:id="internal-setting">
+            <debug:output-conditionals/>
+          </tei:p>
+        </tei:div>
+      </jx:joined-concurrent>
+    </tei:body>
+  </tei:text>  
+</tei:TEI>
+

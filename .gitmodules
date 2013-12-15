@@ -1,3 +1,12 @@
-[submodule "lib/hebmorph"]
-	path = lib/hebmorph
-	url = git://github.com/EfraimFeinstein/HebMorph.git
+[submodule "lib/exist"]
+	path = lib/exist
+	url = git@github.com:opensiddur/exist.git
+[submodule "lib/tei/Roma"]
+	path = lib/tei/Roma
+	url = https://github.com/opensiddur/Roma.git
+[submodule "lib/tei/Stylesheets"]
+	path = lib/tei/Stylesheets
+	url = https://github.com/opensiddur/Stylesheets.git
+[submodule "lib/hebmorph-exist"]
+	path = lib/hebmorph-exist
+	url = git@github.com:opensiddur/hebmorph-exist.git

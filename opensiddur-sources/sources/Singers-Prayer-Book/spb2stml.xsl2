@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet
+  version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  extension-element-prefixes="xd"
+  >
+  <xsl:output method="text" omit-xml-declaration="yes" indent="no"/>
+  
+    <xd:doc type="stylesheet">
+	<xd:short>Conversion of tidied HTML Standard Prayer Book to STML.</xd:short>
+  	<xd:copyright>Copyright 2010 Efraim Feinstein</xd:copyright>
+	<xd:detail>
+      <p>This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU Lesser General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.</p>
+
+      <p>This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU Lesser General Public License for more details.</p>
+
+      <p>You should have received a copy of the GNU Lesser General Public License
+      along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+      
+    </xd:detail>
+    <xd:svnId>$Id: spb2stml.xsl2 563 2010-07-26 15:12:07Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+
+  <xsl:template match="head"/>
+  
+  <xsl:template match="i">
+    <xsl:text>&lt;i&gt;</xsl:text>
+    <xsl:apply-templates/>
+    <xsl:text>&lt;/i&gt;</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="h3">
+    <xsl:text>{section </xsl:text>
+    <xsl:apply-templates/>
+    <xsl:text>}&#x0a;</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="p">
+    <xsl:apply-templates />
+    <xsl:text>&#x0a;&#x0a;</xsl:text>
+  </xsl:template>
+  
+  <!-- xsl:template match="text()">
+    <xsl:value-of select="replace(., '\n', ' ')"/>
+  </xsl:template-->
+  
+  <xsl:template match="*">
+    <xsl:apply-templates />
+  </xsl:template>
+</xsl:stylesheet>

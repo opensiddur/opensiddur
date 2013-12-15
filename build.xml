@@ -1,0 +1,200 @@
+<project name="opensiddur" default="dist" basedir=".">
+	<description>
+        Build file for opensiddur
+    </description>
+    <property name="lib.dir" location="lib"/>
+	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-2.1-rev.jar"/>
+	<property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+
+    <property file="local.build.properties"/>
+    <property file="build.properties"/>
+    <!--	
+	<path id="classpath.core">
+	    <fileset dir="${lib.dir}/exist/lib/core">
+	        <include name="*.jar"/>
+	    </fileset>
+	    <pathelement path="${lib.dir}/exist/exist.jar"/>
+	    <pathelement path="${lib.dir}/exist/exist-optional.jar"/>
+	</path>
+	<typedef resource="org/exist/ant/antlib.xml" uri="http://exist-db.org/ant">
+	    <classpath refid="classpath.core"/>
+	</typedef>
+	-->
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- do git submodule init, update -->
+		<exec executable="git">
+		    <arg value="submodule"/>
+		    <arg value="init"/>
+		</exec>
+		<exec executable="git">
+		    <arg value="submodule"/>
+		    <arg value="update"/>
+		</exec>
+       
+		<uptodate property="exist.uptodate" targetfile="${installer}">
+			<srcfiles dir="${lib.dir}/exist">
+				<include name="**/*.java"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.tmpl"/>
+				<exclude name="${installer}"/>
+			</srcfiles>
+		</uptodate>
+		<!-- make build dirs -->
+		<mkdir dir="${build}"/>
+        <mkdir dir="${dist}"/>
+	</target>
+
+    <target name="exist" depends="build-exist,autodeploy">
+    </target>
+
+	<target name="build-exist" depends="init" unless="exist.uptodate">
+		<!-- ./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true -Dinclude.feature.security.oauth=true -Dinclude.feature.security.openid=true -->
+		<exec 
+			executable="./build.sh" 
+			dir="${lib.dir}/exist">
+			<arg value="installer"/>
+			<arg value="-Dizpack.dir=${lib.dir}/IzPack"/>
+			<arg value="-Dinclude.module.scheduler=true"/>
+			<arg value="-Dinclude.feature.security.oauth=true"/>
+			<arg value="-Dinclude.feature.security.openid=true"/>
+		</exec>
+	</target>
+	
+	<target name="install-exist" depends="init,build-exist"
+		xmlns:xdb="http://exist-db.org/ant">
+		<echo file="${build}/install-options.xml" append="false">
+INSTALL_PATH=${installdir}
+dataDir=webapp/WEB-INF/data
+divider=
+space=
+MAX_MEMORY=${max.memory}
+cacheSize=${cache.size}
+		</echo>
+		<exec
+			executable="java"
+			dir=".">
+			<arg value="-jar"/>
+			<arg value="${installer}"/>
+			<arg value="-console"/>
+			<arg value="-options"/>
+			<arg file="${build}/install-options.xml"/>
+		</exec>
+		<delete file="${build}/install-options.xml"/>
+		<!-- default password has been changed to 'password' -->
+        <exec
+            executable="${installdir}/bin/client.sh"
+            dir="${installdir}"
+            inputstring="sm:passwd('admin','${adminpassword}')"
+            >
+            <arg value="-qls"/>
+            <arg value="-u"/>
+            <arg value="admin"/>
+            <arg value="-P"/>
+            <arg value="password"/>
+            <arg value="-x"/>
+        </exec>
+        <!-- copy the icu4j library from lib -->
+        <copy todir="${installdir}/lib/user">
+            <fileset dir="${lib.dir}">
+            	<include name="icu4j-*"/>
+            </fileset>
+        </copy>
+    </target>
+	
+	<target name="exist-clean">
+		<exec 
+			executable="./build.sh" 
+			dir="${lib.dir}/exist">
+			<arg value="clean"/>
+		</exec>
+	</target>
+
+    <target name="fix-restxq">
+        <!-- BUG workaround: copy the restxq registry -->
+        <copy todir="${installdir}/webapp/WEB-INF/data" overwrite="true">
+            <fileset dir="${lib.dir}">
+                <include name="restxq.registry"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="install-hebmorph"
+        depends="dist"
+        description="install the hebmorph files into eXist">
+        <copy todir="${installdir}/extensions/indexes/lucene/lib" flatten="true">
+            <fileset dir="${lib.dir}/hebmorph-exist/build">
+                <include name="**/*.jar"/>
+            </fileset>
+        </copy>
+        <copy todir="${installdir}/extensions/indexes/lucene/lib">
+            <fileset dir="${lib.dir}/hebmorph-exist/src/hebmorph-exist">
+                <include name="hspell-data-files/*"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="autoupgrade"
+        depends="dist,install-hebmorph"
+        description="install or upgrade Open Siddur packages without touching eXist">
+		<copy todir="${installdir}/autodeploy">
+			<fileset dir="${dist}">
+				<include name="*.xar"/>
+                <!-- hebmorph is being installed directly, not as a xar -->
+                <exclude name="hebmorph-exist.xar"/>
+			</fileset>
+		</copy>
+    </target>
+    	
+	<target name="autodeploy" 
+		depends="install-exist,autoupgrade"
+		description="set up eXist and built xars for autodeployment">
+	</target>
+    
+	<target name="dist" depends="init"
+		description="build everything">
+		<subant target="dist" inheritAll="false">
+			<fileset dir=".">
+				<include name="*/build.xml"/>
+				<include name="lib/hebmorph-exist/build.xml"/>
+				<exclude name="build.xml"/>
+			</fileset>
+		</subant>
+        <copy todir="${dist}" flatten="true">
+            <fileset dir=".">
+            	<include name="lib/*/dist/*.xar"/>
+                <include name="*/dist/*.xar"/>
+            </fileset>
+        </copy>
+    </target>
+
+	<target name="clean"
+        description="clean up Open Siddur code" 
+		>
+		<subant target="clean" inheritAll="false">
+			<fileset dir=".">
+				<include name="*/build.xml"/>
+				<include name="lib/hebmorph-exist/build.xml"/>
+				<exclude name="build.xml"/>
+			</fileset>
+		</subant>
+
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}"/>
+		<delete dir="${dist}"/>
+	</target>
+	
+	<target name="lib-clean"
+		depends="clean,exist-clean"
+		description="clean open siddur code and library code">
+	</target>
+
+    <target name="uninstall">
+        <echo level="warning">Warning: About to delete everything in ${installdir}. If this not what you want to do, press ^C now! You have 5 seconds...</echo>
+        <sleep seconds="5"/>
+        <delete dir="${installdir}"/>
+    </target>
+</project>
+

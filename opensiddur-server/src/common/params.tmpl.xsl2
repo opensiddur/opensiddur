@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet
+	version="2.0" 
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:tei="http://www.tei-c.org/ns/1.0"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:j="urn:jewish-liturgy-extension"
+	xmlns:tmp="temporary-namespace"
+	xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+	exclude-result-prefixes="tmp xs xd"
+	>
+	<xd:doc type="stylesheet">
+		<xd:short>User-adjustable parameters; intended to be imported in other stylesheets.</xd:short>
+		<xd:author>$Author: efraim.feinstein $</xd:author>
+		<xd:copyright>Copyright 2008 Efraim Feinstein</xd:copyright>
+		<xd:detail>
+			<p>
+				  This work is provided 'as-is', without any express or implied
+				  warranty.  In no event will the authors be held liable for any damages
+				  arising from the use of this work.
+			</p>
+
+			<p>
+				  Permission is granted to anyone to use this work for any purpose,
+				  including commercial applications, and to alter it and redistribute it
+				  freely, subject to the following restrictions:
+			</p>
+
+			<ol>
+				  <li>The origin of this work must not be misrepresented; you must not
+				  claim that you wrote the original work. If you use this work
+				  in a product, an acknowledgment in the product documentation would be
+				  appreciated but is not required.</li>
+				  <li>Altered source versions must be plainly marked as such, and must not be
+				  misrepresented as being the original work.</li>
+				  <li>This notice may not be removed or altered from any source distribution.</li>
+			</ol>
+		</xd:detail>
+		<xd:svnId>$Id: params.tmpl.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
+	</xd:doc>
+	
+	<xd:doc>
+		<xd:short>Show every element that is traversed.</xd:short>
+	</xd:doc>
+	<xsl:param name="debug-show-process" as="xs:boolean" select="true()"/>
+	
+	<xd:doc>
+		<xd:short>Debug level 0</xd:short>
+	</xd:doc>
+	<xsl:param name="debug-none" as="xs:integer" select="0" />
+	<xd:doc>
+		<xd:short>Debug level 1</xd:short>
+	</xd:doc>
+	<xsl:param name="debug-error" as="xs:integer" select="1" />
+	<xd:doc>
+		<xd:short>Debug level 2</xd:short>
+	</xd:doc>
+	<xsl:param name="debug-warn" as="xs:integer" select="2" />
+	<xd:doc>
+		<xd:short>Debug level 3</xd:short>
+	</xd:doc>
+	<xsl:param name="debug-info" as="xs:integer" select="3" />
+	<xd:doc>
+		<xd:short>Debug level 4</xd:short>
+	</xd:doc>
+	<xsl:param name="debug-detail" as="xs:integer" select="4" />
+	
+	<xd:doc>
+		<xd:short>Debug level.  Use one of the $debug* parameters as a value. 
+    All debugging messages with levels at or below this value will display.
+    </xd:short>
+	</xd:doc>
+	<xsl:param name="debug-level" as="xs:integer" select="$debug-warn" />
+	
+	<!-- end of adjustable parameters -->
+	
+	
+</xsl:stylesheet>

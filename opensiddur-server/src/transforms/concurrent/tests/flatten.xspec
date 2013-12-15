@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  stylesheet="../flatten.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="garbage">
+      <x:call function="func:junk"/>
+      <x:expect><func:junk/><jx:junk/><j:junk/><tei:junk/></x:expect>
+    </x:scenario>
+  </x:pending>
+  <x:scenario label="Flat pseudo-hierarchy support functions">
+    <x:scenario label="func:unopened-tags">
+      <x:call function="func:unopened-tags"/>
+      <x:scenario label="empty call">
+        <x:call>
+          <x:param as="element()*"/>
+        </x:call>
+        <x:expect label="empty return" select="()"/>
+      </x:scenario>
+      <x:scenario label="all opened are closed">
+        <x:call>
+          <x:param as="element()+">
+            <tei:div jx:start="3"/>
+            <tei:div jx:start="1"/>
+            <tei:div jx:end="1"/>
+            <tei:div jx:start="2"/>
+            <tei:div jx:end="2"/>
+            <tei:div jx:end="3"/>
+          </x:param>
+        </x:call>
+        <x:expect label="empty return" select="()"/>
+      </x:scenario>
+      <x:scenario label="unopened tag from @jx:end">
+        <x:call>
+          <x:param as="element()+">
+            <tei:div jx:end="1"/>
+          </x:param>
+        </x:call>
+        <x:expect label="ended element is returned">
+          <tei:div jx:end="1"/>
+        </x:expect>
+      </x:scenario>
+      <x:scenario label="unopened tag from @jx:suspend">
+        <x:call>
+          <x:param as="element()+">
+            <tei:div jx:suspend="1"/>
+          </x:param>
+        </x:call>
+        <x:expect label="suspended element is returned">
+          <tei:div jx:suspend="1"/>
+        </x:expect>
+      </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="func:unclosed-tags">
+      <x:call function="func:unclosed-tags"/>
+      <x:scenario label="empty call">
+        <x:call>
+          <x:param as="element()*"/>
+        </x:call>
+        <x:expect label="empty return" select="()"/>
+      </x:scenario>
+      <x:scenario label="all opened are closed">
+        <x:call>
+          <x:param as="element()+">
+            <tei:div jx:start="3"/>
+            <tei:div jx:start="1"/>
+            <tei:div jx:end="1"/>
+            <tei:div jx:start="2"/>
+            <tei:div jx:end="2"/>
+            <tei:div jx:end="3"/>
+          </x:param>
+        </x:call>
+        <x:expect label="empty return" select="()"/>
+      </x:scenario>
+      <x:scenario label="unclosed tag from @jx:start">
+        <x:call>
+          <x:param as="element()+">
+            <tei:div jx:start="1"/>
+          </x:param>
+        </x:call>
+        <x:expect label="started element is returned">
+          <tei:div jx:start="1"/>
+        </x:expect>
+      </x:scenario>
+      <x:scenario label="unclosed tag from @jx:continue">
+        <x:call>
+          <x:param as="element()+">
+            <tei:div jx:continue="1"/>
+          </x:param>
+        </x:call>
+        <x:expect label="continued element is returned">
+          <tei:div jx:continue="1"/>
+        </x:expect>
+      </x:scenario>
+    </x:scenario>
+    <x:scenario label="func:continue-or-suspend">
+      <x:call function="func:continue-or-suspend"/>
+      <x:scenario label="empty call, continue mode">
+        <x:call>
+          <x:param as="element()*"/>
+          <x:param as="xs:string" select="'continue'"/>
+        </x:call>
+        <x:expect label="empty return" select="()"/>
+      </x:scenario>
+      <x:scenario label="empty call, suspend mode">
+        <x:call>
+          <x:param as="element()*"/>
+          <x:param as="xs:string" select="'suspend'"/>
+        </x:call>
+        <x:expect label="empty return" select="()"/>
+      </x:scenario> 
+      <x:scenario label="element with jx:start, suspend mode">
+        <x:call>
+          <x:param as="element()">
+            <tei:div jx:start="1"/>
+          </x:param>
+          <x:param as="xs:string" select="'suspend'"/>
+        </x:call>
+        <x:expect label="suspended element">
+          <tei:div jx:suspend="1"/>
+        </x:expect>
+      </x:scenario> 
+      <x:scenario label="element with jx:continue, suspend mode">
+        <x:call>
+          <x:param as="element()">
+            <tei:div jx:continue="1"/>
+          </x:param>
+          <x:param as="xs:string" select="'suspend'"/>
+        </x:call>
+        <x:expect label="suspended element">
+          <tei:div jx:suspend="1"/>
+        </x:expect>
+      </x:scenario> 
+      <x:scenario label="element with jx:end, suspend mode">
+        <x:call>
+          <x:param as="element()">
+            <tei:div jx:end="1"/>
+          </x:param>
+          <x:param as="xs:string" select="'suspend'"/>
+        </x:call>
+        <x:expect label="suspended element">
+          <tei:div jx:suspend="1"/>
+        </x:expect>
+      </x:scenario> 
+      <x:scenario label="element with jx:suspend, suspend mode">
+        <x:call>
+          <x:param as="element()">
+            <tei:div jx:suspend="1"/>
+          </x:param>
+          <x:param as="xs:string" select="'suspend'"/>
+        </x:call>
+        <x:expect label="suspended element">
+          <tei:div jx:suspend="1"/>
+        </x:expect>
+      </x:scenario> 
+      <x:scenario label="element with jx:start, continue mode">
+        <x:call>
+          <x:param as="element()">
+            <tei:div jx:start="1"/>
+          </x:param>
+          <x:param as="xs:string" select="'continue'"/>
+        </x:call>
+        <x:expect label="continued element">
+          <tei:div jx:continue="1"/>
+        </x:expect>
+      </x:scenario> 
+      <x:scenario label="element with jx:end, continue mode">
+        <x:call>
+          <x:param as="element()">
+            <tei:div jx:end="1"/>
+          </x:param>
+          <x:param as="xs:string" select="'continue'"/>
+        </x:call>
+        <x:expect label="continued element">
+          <tei:div jx:continue="1"/>
+        </x:expect>
+      </x:scenario> 
+      <x:scenario label="element with jx:continue, continue mode">
+        <x:call>
+          <x:param as="element()">
+            <tei:div jx:continue="1"/>
+          </x:param>
+          <x:param as="xs:string" select="'continue'"/>
+        </x:call>
+        <x:expect label="continued element">
+          <tei:div jx:continue="1"/>
+        </x:expect>
+      </x:scenario> 
+      <x:scenario label="element with jx:suspend, continue mode">
+        <x:call>
+          <x:param as="element()">
+            <tei:div jx:suspend="1"/>
+          </x:param>
+          <x:param as="xs:string" select="'continue'"/>
+        </x:call>
+        <x:expect label="continued element">
+          <tei:div jx:continue="1"/>
+        </x:expect>
+      </x:scenario> 
+    </x:scenario>
+  </x:scenario>
+
+  <x:scenario label="flatten mode">
+    <x:scenario label="on childless element with one parent">
+      <x:context mode="flatten">
+        <root>
+          <tei:p>
+            <tei:ptr jx:selection="1" target="#a1"/>
+          </tei:p>
+        </root>
+      </x:context>
+      <x:expect label="root element copied as-is" test="exists(/root[tei:p and tei:ptr])"/>
+      <x:expect label="childless element copied with parent attributes" test="/root/tei:ptr">
+        <tei:ptr target="#a1" jx:selection="1" jx:parents="..." jx:ancestors="..."/>
+      </x:expect>
+      <x:expect label="parents and ancestors identify parent" 
+        test="exists(/root/tei:ptr[@jx:parents = @jx:ancestors])"/>
+    </x:scenario>
+    
+    <x:scenario label="on childless element with multiple ancestors">
+      <x:context mode="flatten">
+        <tei:div>
+          <tei:ab>
+            <tei:p n="1">
+              <tei:ptr jx:selection="1" target="#a1"/>
+            </tei:p>
+          </tei:ab>
+        </tei:div>
+      </x:context>
+      <x:expect label="root element exists" test="exists(//tei:div)"/>
+      <x:expect label="hierarchical structure flattened">
+        <tei:div>
+          <tei:ab jx:start="..."/>
+          <tei:p n="1" jx:start="..." jx:parents="..." jx:ancestors="..."/>
+          <tei:ptr target="#a1" jx:selection="1" jx:parents="..." jx:ancestors="..."/>
+          <tei:p n="1" jx:end="..." jx:parents="..." jx:ancestors="..."/>
+          <tei:ab jx:end="..."/>
+        </tei:div>
+      </x:expect>
+      <x:expect label="start id matches end id" 
+        test="/tei:div/tei:p/@jx:start = /tei:div/tei:p/@jx:end and /tei:div/tei:ab/@jx:start = /tei:div/tei:ab/@jx:end"/>
+      <x:expect label="all ancestors listed in @jx:ancestors" test="count(tokenize(/tei:div/tei:ptr/@jx:ancestors, '\s+')) = 2"/>
+    </x:scenario>
+    
+    <x:scenario label="on element with assigned UID">
+      <x:context mode="flatten">
+        <tei:div>
+          <tei:p jx:uid="111">
+            <tei:ptr jx:selection="1" target="#a1"/>
+          </tei:p>
+        </tei:div>
+      </x:context>
+      <x:expect label="UID preserved at start and end" test="exists(/tei:div/tei:p[@jx:uid = (@jx:start,@jx:end)])"/>
+    </x:scenario>
+    
+    <x:scenario label="on element hierarchy with no selection">
+      <x:context mode="flatten">
+        <root>
+          <tei:div>
+            <tei:label><tei:hi rend="italic">Test</tei:hi></tei:label>
+            <tei:p jx:uid="111">
+              <tei:ptr jx:selection="1" target="#a1"/>
+            </tei:p>
+          </tei:div>
+        </root>
+      </x:context>
+      <x:expect label="label is copied with parents and ancestors record" test="/root/tei:label">
+        <tei:label jx:parents="..." jx:ancestors="...">
+          <tei:hi rend="italic">Test</tei:hi>
+        </tei:label>
+      </x:expect>
+    </x:scenario>
+    
+
+    <x:scenario label="on j:view">
+      <x:context mode="flatten">
+        <root xml:base="original.xml" jx:document-uri="original.xml" xml:lang="en">
+          <j:view>
+            <tei:p>
+              <tei:ptr jx:selection="1" target="#a1"/>
+            </tei:p>
+          </j:view>
+        </root>
+      </x:context>
+      <x:expect label="converted to jx:flat-view" test="/root/*">
+        <jx:flat-view xml:base="..." jx:document-uri="..." xml:lang="en">
+          <tei:p jx:start="..." />
+          <tei:ptr jx:selection="1" target="#a1" jx:parents="..." jx:ancestors="..."/>
+          <tei:p jx:end="..."/>
+        </jx:flat-view>
+      </x:expect>
+    </x:scenario>
+  </x:scenario>
+
+  <x:scenario label="unflatten mode">
+    <x:context mode="unflatten" select="/*[1]"/>
+    <x:scenario label="single element, no children">
+      <x:context>
+        <tei:ptr jx:selection="111" jx:id="sA" jx:uid="1" target="#r1" jx:parents="2" jx:ancestors="2 3" />
+      </x:context>
+      <x:expect label="copy without jx:parents/ancestors">
+        <tei:ptr jx:selection="111" jx:id="sA" jx:uid="1" target="#r1" />
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="single element, with children">
+      <x:context>
+        <tei:label jx:uid="1" jx:parents="2" jx:ancestors="2 3">Test <tei:hi rend="italic">Highlight</tei:hi></tei:label>
+      </x:context>
+      <x:expect label="copy self and children without jx:parents/ancestors">
+        <tei:label jx:uid="1">Test <tei:hi rend="italic">Highlight</tei:hi></tei:label>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="element with flattened children, start/end">
+      <x:context>
+        <tei:div jx:id="A" jx:start="1" jx:parents="0" jx:ancestors="0"/>
+        <tei:seg jx:id="B" jx:start="2" jx:parents="1" jx:ancestors="0 1"/>
+        <tei:ptr target="r1" jx:selection="111" jx:parents="2" jx:ancestors="0 1 2"/>
+        <tei:seg jx:end="2" jx:parents="1" jx:ancestors="0 1"/>
+        <tei:div jx:end="1" jx:parents="0" jx:ancestors="0" />
+      </x:context>
+      <x:expect label="hierarchic elements">
+        <tei:div jx:id="A">
+          <tei:seg jx:id="B">
+            <tei:ptr target="r1" jx:selection="111" />
+          </tei:seg>
+        </tei:div>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="element with flattened children, continue/suspend">
+      <x:context>
+        <tei:div jx:id="C" jx:start="3" jx:parents="4" jx:ancestors="4"/>
+        <tei:div jx:id="A" jx:start="1" jx:parents="0" jx:ancestors="0"/>
+        <tei:seg jx:id="B" jx:start="2" jx:parents="1" jx:ancestors="0 1"/>
+        <tei:ptr target="#r1" jx:selection="111" jx:parents="2" jx:ancestors="0 1 2"/>
+        <tei:seg jx:suspend="2" jx:parents="1" jx:ancestors="0 1"/>
+        <tei:div jx:end="1" jx:parents="0" jx:ancestors="0"/> 
+        <tei:seg jx:continue="2" jx:parents="1" jx:ancestors="0 1"/>
+        <tei:ptr target="#r2" jx:selection="111" jx:parents="2" jx:ancestors="2 3 4"/>
+        <tei:seg jx:end="2" jx:parents="1" jx:ancestors="0 1"/> 
+        <tei:div jx:end="3" jx:parents="4" jx:ancestors="4"/> 
+      </x:context>
+      <x:expect label="hierarchic elements">
+        <tei:div jx:id="C">
+          <tei:div jx:id="A">
+            <tei:seg jx:id="B" jx:part="2">
+              <tei:ptr target="#r1" jx:selection="111" />
+            </tei:seg>
+          </tei:div>
+          <tei:seg jx:part="2">
+            <tei:ptr target="#r2" jx:selection="111" />
+          </tei:seg>
+        </tei:div>
+      </x:expect>
+    </x:scenario>
+  </x:scenario> 
+</x:description>
+

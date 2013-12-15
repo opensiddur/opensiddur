@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- languages code table -->
+<code-table xmlns="">
+  <language>
+    <code>arc</code>
+    <dir>rtl</dir>
+    <desc xml:lang="arc">Aramaic</desc>    
+  </language>
+  <language>
+    <code>en</code>
+    <dir>ltr</dir>
+    <desc xml:lang="en">English</desc>    
+  </language>
+  <language>
+    <code>he</code>
+    <dir>rtl</dir>
+    <desc xml:lang="he">Hebrew</desc>    
+  </language>
+</code-table>

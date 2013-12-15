@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  stylesheet="../resolve-internal.xsl2"
+  >
+  <x:scenario label="resolve-internal mode">
+    <x:context mode="resolve-internal" href="resolve-internal-context.xml">
+      <x:param name="current-document-uri" as="xs:anyURI" select="xs:anyURI('resolve-internal.xspec')" tunnel="yes"/> 
+    </x:context>
+    <x:scenario label="with one view, two paragraphs, all pointers direct to selection">
+      <x:context select="/tei:TEI/tei:text/j:concurrent/j:view[1]">
+      </x:context>
+      <x:expect label="one paragraph with internal links resolved">
+        <j:view type="p" jx:uid="..." jx:document-uri="..." xml:base="..." xml:lang="...">
+          <tei:p jx:id="p1" jx:uid="...">
+            <tei:ptr jx:id="sA" target="#rA" jx:uid="..." jx:selection="..."/>
+            <tei:ptr jx:id="sB" target="#rB" jx:uid="..." jx:selection="..."/>
+          </tei:p>
+          <tei:p jx:id="p2" jx:uid="...">
+            <tei:ptr jx:id="sC" target="#rC" jx:uid="..." jx:selection="..."/>
+          </tei:p>
+        </j:view>
+      </x:expect>
+      <x:expect label="all links come from the same selection" 
+        test="count(distinct-values(//tei:ptr/@jx:selection)) = 1"/>
+    </x:scenario>
+    <x:scenario label="with a pointer to a view">
+      <x:context select="/tei:TEI/tei:text/j:concurrent/j:view[2]"/>
+      <x:expect label="view is resolved">
+        <j:view type="div" jx:uid="..." jx:document-uri="..." xml:base="..." xml:lang="...">
+          <tei:div jx:id="div1" jx:uid="...">
+            <tei:p jx:id="p1" jx:uid="...">
+              <tei:ptr jx:id="sA" target="#rA" jx:uid="..." jx:selection="..."/>
+              <tei:ptr jx:id="sB" target="#rB" jx:uid="..." jx:selection="..."/>
+            </tei:p>
+          </tei:div>
+        </j:view>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="... with $full-context set to true">
+      <x:context select="/tei:TEI/tei:text/j:concurrent/j:view[1]">
+        <x:param name="full-context" as="xs:boolean" select="true()" tunnel="yes"/>
+      </x:context>
+      <x:expect label="every element has a jx:document-uri attribute" 
+        test="every $e in //* satisfies $e/@jx:document-uri"/>
+      <x:expect label="every element has a xml:lang attribute" 
+        test="every $e in //* satisfies $e/@xml:lang"/>
+      <x:expect label="every element has a xml:base attribute" 
+        test="every $e in //* satisfies $e/@xml:base"/>
+      
+    </x:scenario>
+  </x:scenario>
+</x:description>
+

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet
+  version="2.0" 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  extension-element-prefixes="xs xd func"
+  >
+  <xsl:import href="../../common/common.xsl2"/>
+  <xsl:import href="../copy-context.xsl2"/>  
+  <xsl:import href="../follow-uri.xsl2"/>
+  <!-- xsl:include href="conditionals.xsl2"/-->
+  <xd:doc type="stylesheet">
+    <xd:short>
+      Provides templates for handling stand-off markup links of all types
+      and storing the active links in a globally passed tunneled parameter
+      $available-links.  $available-links is stored with a document node at the root
+      so it can be indexed by key. Its root element is jx:active-links.
+      The xml:base is maintained so id references can be used from any context. 
+    </xd:short>
+    <xd:copyright>Copyright 2007-2011 Efraim Feinstein</xd:copyright>
+    <xd:detail>
+      <p>This file cannot be used standalone, because it and data-compiler.xsl2
+      both need conditionals.xsl2 to work with priorities.  It should be included
+      in data-compiler.xsl2</p>
+      
+      <p>This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU Lesser General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.</p>
+
+      <p>This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU Lesser General Public License for more details.</p>
+
+      <p>You should have received a copy of the GNU Lesser General Public License
+        along with this program.  If not, see 
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.
+      </p>
+    </xd:detail>
+    <xd:svnId>$Id: standoff.xsl2 769 2011-04-29 00:02:54Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+
+  <xd:doc>All standoff-markup links, indexed by first target.  
+  It is up to the particular function to figure out what type they are.
+  </xd:doc>
+  <xsl:key name="all-links"
+    match="tei:link"
+    use="func:absolutize-uri(tokenize(@targets, '\s+')[1],.)"/>
+
+  <xd:doc>Parallel files referenced in $available-links, indexed by the 
+  document URI of the original file.  These files contain stand-off links
+  that apply to the current file.</xd:doc>
+  <!-- parallel-files used to be traced -->
+  <xsl:key name="parallel-files" 
+    match="tei:link[@type='parallel-file']" 
+    use="func:absolutize-uri(tokenize(@targets, '\s+')[1],.)"/>
+  
+  <xd:doc>Index pointers by their targets</xd:doc>
+  <xsl:key name="ptr-targets" match="tei:ptr"
+    use="for $target in tokenize(@target,'\s+') 
+      return func:absolutize-uri($target, .)"/>
+
+  <xd:doc>Index elements by their absolutized xml:ids</xd:doc>
+  <xsl:key name="absolute-ids" match="*[@xml:id|@jx:id]"
+    use="func:absolutize-uri(concat('#',@jx:id), .)"/>
+
+  <xd:doc>
+    <xd:short>If newly in the file, find ancestor relationship links that need to be
+    preserved and preserve them
+    </xd:short>
+  </xd:doc>
+  <xsl:template match="jx:concurrent|*[@xml:id|@jx:id]" priority="801"
+    mode="data-compiler">
+    <xsl:param name="from-context" as="element()?" tunnel="yes"/>
+    
+    <xsl:variable name="newly-in-file" as="xs:boolean" 
+      select="(exists($from-context) and not(func:original-document-uri($from-context) = func:original-document-uri(.))) 
+        or (. is /*) or self::jx:concurrent"/>
+
+    <xsl:variable name="next-match" as="node()*">
+      <xsl:next-match/>
+    </xsl:variable>
+    
+    <!-- get ancestor relationships:
+    if the context is newly in the file, it can either be in the joined-concurrent
+    or in the repository (directly via a selection pointer.)  For the latter case,
+    we need to find ancestor relationships from the equivalent place in the concurrent
+    hierarchies. 
+     -->
+    <xsl:variable name="ancestor-relationships" as="element(jx:relationship)*"
+      select="
+      (
+      if (ancestor::j:repository)
+      then key('ptr-targets',func:absolutize-uri(concat('#', @jx:id), .), //jx:joined-concurrent)
+      else . )/
+      ancestor::jx:relationship"/>
+        
+    <xsl:if test="exists($next-match)">
+      <xsl:choose>
+        <xsl:when test="$newly-in-file and exists($ancestor-relationships)">
+          <xsl:apply-templates select="$ancestor-relationships[1]" 
+            mode="build-relationships">
+            <xsl:with-param name="apply-to" as="element(jx:relationship)*"
+              select="subsequence($ancestor-relationships,2)" tunnel="yes"/>
+            <xsl:with-param name="child" as="node()*" tunnel="yes" select="$next-match"/>
+          </xsl:apply-templates>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="$next-match"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:if>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Build a hierarchy of relationships in-place from existing ancestors</xd:short>
+    <xd:param name="child">The relationship hierarchy is built backwards,
+    so the children to be included in this element are passed in a tunneled 
+    parameter</xd:param>
+    <xd:param name="apply-to">Next relationship to build in.</xd:param>
+  </xd:doc>
+  <xsl:template match="jx:relationship" mode="build-relationships">
+    <xsl:param name="apply-to" tunnel="yes" as="element(jx:relationship)*"/>
+    <xsl:param name="child" tunnel="yes" as="node()*" />
+    
+    <!-- test if this relationship is under a conditional by applying
+    any conditional tests to the link that made this relationship happen -->
+    <xsl:variable name="test-conditional" as="element()?">
+      <xsl:choose>
+        <xsl:when test="@jx:id">
+          <xsl:apply-templates 
+            select="
+              key('xmlids', @jx:id, 
+                func:follow-cached-uri(@jx:source-document-uri, ., -1, $fragmentation-cache-type))
+                [not(self::jx:relationship)]"
+              mode="process-conditionals"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="."/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    
+    <xsl:variable name="me" as="node()*">
+      <xsl:choose>
+        <xsl:when test="exists($test-conditional)">
+          <xsl:copy>
+            <xsl:call-template name="copy-attributes-and-context">
+              <xsl:with-param name="attributes" as="attribute()*" 
+                select="@* except (@target-source, @target)"/>
+            </xsl:call-template>
+            <jx:linked-relationship>
+              <xsl:apply-templates mode="data-compiler-update-links" 
+                select="func:follow-cached-uri(@target, ., -1, $fragmentation-cache-type)">
+                <xsl:with-param name="from-context" as="element()" select="." tunnel="yes"/>
+              </xsl:apply-templates>
+            </jx:linked-relationship>
+            <xsl:sequence select="$child"/>
+          </xsl:copy>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="$child"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+<!-- xsl:message>
+*****mode=build-relationships for <xsl:sequence select="func:get-xpath(.)"/>
+*****$apply-to = <xsl:sequence select="$apply-to"/>
+*****
+</xsl:message-->    
+    <xsl:choose>
+      <xsl:when test="exists($apply-to)">
+        <xsl:apply-templates select="$apply-to[1]" mode="#current">
+          <xsl:with-param name="apply-to" select="subsequence($apply-to, 2)"
+            tunnel="yes" as="element(jx:relationship)*"/>
+          <xsl:with-param name="child" as="node()*" tunnel="yes" select="$me"/>
+        </xsl:apply-templates>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$me"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Keep track of internal target sources in jx:relationships</xd:short>
+  </xd:doc>
+  <xsl:key name='relationship-target-source' match="jx:relationship[@target-source]"
+    use="func:absolutize-uri(@target-source, .)"/>
+  
+  <xd:doc>
+    <xd:short>Process a stand-off relationship by leaving the content of the
+    relationship in jx:linked-relationship</xd:short>
+  </xd:doc>
+  <xsl:template match="jx:relationship[not(@next|@target-source)]" 
+    mode="data-compiler">
+    <xsl:apply-templates select="." mode="build-relationships">
+      <xsl:with-param name="child" as="node()*" tunnel="yes">
+        <xsl:apply-templates mode="#current"/>
+      </xsl:with-param>
+      <xsl:with-param name="apply-to" select="()" tunnel="yes" />
+    </xsl:apply-templates>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>When jx:relationship is a continuation or has a target-source
+    skip it.  It is handled elsewhere.</xd:short>
+  </xd:doc>
+  <xsl:template match="jx:relationship[@next|@target-source]" mode="data-compiler">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Check for jx:relationship with target-source.  If it exists,
+    add the jx:relationship and target source here.</xd:short>
+  </xd:doc>
+  <xsl:template match="*[@jx:id]" priority="700" mode="data-compiler">
+    <xsl:variable name="my-relationships" as="element(jx:relationship)*"
+      select="key('relationship-target-source', 
+        func:absolutize-uri(concat('#', @jx:id), .))"/>
+    <xsl:variable name="next-match" as="node()*">
+      <xsl:next-match/>
+    </xsl:variable>
+    <xsl:choose>
+      <xsl:when test="exists($my-relationships) and exists($next-match)">
+        <xsl:apply-templates select="$my-relationships[1]" mode="build-relationships">
+          <xsl:with-param name="child" as="node()*" select="$next-match" tunnel="yes"/>
+          <xsl:with-param name="apply-to" as="element(jx:relationship)*" 
+            select="subsequence($my-relationships, 2)" tunnel="yes"/>
+        </xsl:apply-templates>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$next-match"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>find standoff markup that causes diversion, 
+    if present, divert to the correct place.</xd:short>
+    <xd:detail>If the context is already a parallelGrp, this should not do anything.</xd:detail>
+  </xd:doc>
+  <xsl:template match="jx:joined-concurrent|*[@xml:id|@jx:id][not(ancestor::j:parallelGrp)]" 
+    priority="800" mode="data-compiler">
+    <xsl:param name="current-settings" 
+      as="document-node(element(jx:current-settings))?" tunnel="yes"/>
+    <xsl:param name="from-context" as="element()?" tunnel="yes" />
+    
+    <xsl:variable name="new-document-uri" as="xs:anyURI" 
+      select="func:original-document-uri(.)"/>
+    
+    <xsl:choose>
+      <xsl:when test="exists($current-settings) and 
+        (empty($from-context) or 
+        not(func:original-document-uri($from-context) = $new-document-uri) )">
+        <xsl:variable name="parallel-files" as="element(tei:link)*">
+          <xsl:apply-templates mode="process-conditionals" 
+            select="key('parallel-files', $new-document-uri, $current-settings)"/>
+        </xsl:variable>
+        <xsl:choose>
+          <xsl:when test="count($parallel-files) = 1">
+            <xsl:variable name="my-parallel-file" as="node()" 
+              select="func:follow-cached-uri(
+                tokenize($parallel-files/@targets, '\s+')[2], $parallel-files, -1, 
+                $fragmentation-cache-type)"/>
+            <!-- possibilities:
+              we're at jx:joined-concurrent -> get joined concurrent, 
+              or @jx:id (get equivalent parallelGrp) 
+             -->
+             <xsl:apply-templates mode="#current" 
+              select="
+              if (. instance of element(jx:joined-concurrent))
+              then $my-parallel-file//jx:joined-concurrent
+              else key('xmlids', (@xml:id, @jx:id)[1], $my-parallel-file)/(ancestor::j:parallelGrp[1], .)[1]"/>
+          </xsl:when>
+          <xsl:when test="count($parallel-files) &gt; 1">
+            <xsl:sequence select="func:debug(
+              ('More than one parallel file is selected for the same document at ',
+               $new-document-uri, '/', func:get-xpath(.)), 
+               'Parallel file selection', $debug-error)"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:next-match/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+</xsl:stylesheet>

@@ -1,0 +1,32 @@
+<tei:TEI
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xml:lang="en">
+  <tei:text>
+    <tei:body>
+      <jx:joined-concurrent>
+        <tei:p jx:document-uri="http://localhost:8080/db/code/transforms/list-compiler/tests/licensing-cc0.xml">
+          <tei:s>
+            <tei:seg>segment 1.</tei:seg>
+          </tei:s>  
+        </tei:p>
+        <tei:p jx:document-uri="http://localhost:8080/db/code/transforms/list-compiler/tests/licensing-cc-by.xml">
+          <tei:s>
+            <tei:seg>segment 2.</tei:seg>
+          </tei:s>  
+        </tei:p>
+        <tei:p jx:document-uri="http://localhost:8080/db/code/transforms/list-compiler/tests/licensing-cc-by-sa.xml">
+          <tei:s>
+            <tei:seg>segment 3.</tei:seg>
+          </tei:s>  
+        </tei:p>
+        <tei:p jx:document-uri="http://localhost:8080/db/code/transforms/list-compiler/tests/licensing-cc-by-attribution.xml">
+          <tei:s>
+            <tei:seg>segment 4.</tei:seg>
+          </tei:s>  
+        </tei:p>
+      </jx:joined-concurrent>
+    </tei:body>
+  </tei:text>
+</tei:TEI>

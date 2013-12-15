@@ -1,0 +1,38 @@
+<!-- 
+ A template for a bibliographic entry, which should cover most works.
+ Remove and replace FILLIN comments.
+ If a tag is completely irrelevant, remove it
+ To validate your bibliography against the schema, use
+    make schema   # you only need to do this once
+    jing -c schema/build/bibliography.rnc <schema file>
+ Note that command line jing rejects file names 
+ -->
+<biblStruct xmlns="http://www.tei-c.org/ns/1.0" xml:lang="en">
+  <monogr>
+    <title><!-- 
+      one title is required. 
+      If the title is not in English, use the xml:lang="LANGCODE" attribute.
+      for multiple titles, use the type="main" attribute to designate the main
+      title. Alternate titles MAY be designated with type="alt"
+       --></title>
+    <!-- name examples:
+    <name><roleName>Rabbi</roleName> <forename>Abraham</forename> <forename>Joshua</forename> <surname>Heschel</surname></name>
+    <name><forename>Serah</forename> <nameLink>bat</nameLink> <surname>Asher</surname></name>
+     -->
+    <author><name><!-- fill in, using the name template --></name></author>
+    <!-- if a work has more than one author, add additional author tags here -->
+    <editor><name><!-- fill in --></name></editor>
+    <!-- if a work has more than one editor, add additional editor tags here -->
+    <edition><!-- an OPTIONAL edition number, such as 2 ed. --></edition>
+    <imprint>
+      <publisher><!-- publisher, from the copyright page, REQUIRED --></publisher>
+      <pubPlace><!-- publication place, from the copyright page, REQUIRED --></pubPlace>
+      <date when="9999"><!-- publication date, from the copyright page, REQUIRED --></date>
+      <distributor><!-- distributor, if different from the publisher, may include a link to a website, using
+        <ref target="http://...">web site name</ref>       
+       --></distributor>
+    </imprint>
+  </monogr>
+  <note type="copyright"><!-- special notes about the copyright, if applicable, may include a ref link to the license page --></note>
+  <relatedItem type="scan" target="SCAN" targetPattern="http://path-to-scan.com/bookid?page={$page}"/>
+</biblStruct>

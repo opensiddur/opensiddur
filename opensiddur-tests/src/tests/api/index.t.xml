@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite xmlns:a="http://jewishliturgy.org/ns/access/1.0">
+  <suiteName>Index API Module</suiteName>
+  <description>
+    <p>Index module APIs</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012 Efraim Feinstein, 
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <imports>
+  import module namespace index="http://jewishliturgy.org/api/index"
+    at "xmldb:exist:///apps/opensiddur-server/api/index.xqm";
+  </imports>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
+  <TestSet>
+    <testName>Main index API</testName>
+    <test>
+      <task>List available APIs</task>
+      <code><![CDATA[
+        index:list()
+      ]]></code>
+      <class href="common.t.incl.xml#DiscoveryAPI"/>
+    </test>
+  </TestSet>
+</TestSuite>

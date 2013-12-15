@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite xmlns:a="http://jewishliturgy.org/ns/access/1.0">
+  <suiteName>Access Module</suiteName>
+  <description>
+    <p>Access module function calls</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2012-2013 Efraim Feinstein, 
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <imports>
+  import module namespace magic="http://jewishliturgy.org/magic"
+    at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
+  import module namespace acc="http://jewishliturgy.org/modules/access"
+    at "xmldb:exist:///db/apps/opensiddur-server/modules/access.xqm";
+  </imports>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
+  
+  <variable name="resource">"/db/data/tests/Test1.xml"</variable>
+  
+  <setup>
+    <store collection="/db/data/tests" name="Test1.xml">
+      <a/>
+    </store>
+  </setup>
+  <tearDown>
+    <remove-document collection="/db/data/tests" name="Test1.xml"/>
+  </tearDown>
+  <TestSet>
+    <testName>access:get-access(): Basic permissions</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password,(
+        sm:chown($uri, "testuser"),
+        sm:chgrp($uri, "dba"),
+        sm:chmod($uri, "rw-r--r--")
+      ))
+      ]]></code></setup>
+    <test>
+      <task>Basic owner/group/mode</task>
+      <code><![CDATA[
+      acc:get-access(doc($resource))
+      ]]></code>
+      <expected desc="an access structure">
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="false">dba</a:group>
+          <a:world read="true" write="false"/>
+        </a:access>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>access:get-access(): Shared with a group, r/w</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password,
+        sm:add-group-ace($uri, "everyone", true(), "rw-")
+      )
+      ]]></code></setup>
+    <test>
+      <task>Return a:share-group</task>
+      <code><![CDATA[
+      acc:get-access(doc("/db/data/tests/Test1.xml"))
+      ]]></code>
+      <expected desc="an access structure" xpath="a:share-group">
+        <a:share-group write="true">everyone</a:share-group>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>access:get-access(): Shared with a group, r/o</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password,
+        sm:add-group-ace($uri, "everyone", true(), "r--")
+      )
+      ]]></code></setup>
+    <test>
+      <task>Return a:share-group</task>
+      <code><![CDATA[
+      acc:get-access(doc($resource))
+      ]]></code>
+      <expected desc="an access structure" xpath="a:share-group">
+        <a:share-group write="false">everyone</a:share-group>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>access:get-access(): Shared with a user, r/w</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password,
+        sm:add-user-ace($uri, "testuser2", true(), "rw-")
+      )
+      ]]></code></setup>
+    <test>
+      <task>Return a:share-user</task>
+      <code><![CDATA[
+      acc:get-access(doc($resource))
+      ]]></code>
+      <expected desc="an access structure" xpath="a:share-user">
+        <a:share-user write="true">testuser2</a:share-user>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>access:get-access(): Shared with a user, r/o</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password,
+        sm:add-user-ace($uri, "testuser2", true(), "r--")
+      )
+      ]]></code></setup>
+    <test>
+      <task>Return a:share-user</task>
+      <code><![CDATA[
+      acc:get-access(doc($resource))
+      ]]></code>
+      <expected desc="an access structure" xpath="a:share-user">
+        <a:share-user write="false">testuser2</a:share-user>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>access:get-access(): Denied r/w access to a group</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password, (
+        sm:chgrp($uri, "everyone"),
+        sm:chmod($uri, "rw-rw-r--"),
+        sm:add-group-ace($uri, "guest", false(), "rw-")
+      ))
+      ]]></code></setup>
+    <test>
+      <task>Return a:deny-group</task>
+      <code><![CDATA[
+      acc:get-access(doc($resource))
+      ]]></code>
+      <expected desc="an access structure" xpath="a:deny-group">
+        <a:deny-group read="false">guest</a:deny-group>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>access:get-access(): Denied o/w access to a group</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password, (
+        sm:chgrp($uri, "everyone"),
+        sm:chmod($uri, "rw-rw-r--"),
+        sm:add-group-ace($uri, "guest", false(), "-w-")
+      ))
+      ]]></code></setup>
+    <test>
+      <task>Return a:deny-group</task>
+      <code><![CDATA[
+      acc:get-access(doc($resource))
+      ]]></code>
+      <expected desc="an access structure" xpath="a:deny-group">
+        <a:deny-group read="true">guest</a:deny-group>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>access:get-access(): Denied r/w access to a user</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password, (
+        sm:chgrp($uri, "everyone"),
+        sm:chmod($uri, "rw-rw-r--"),
+        sm:add-user-ace($uri, "testuser2", false(), "rw-")
+      ))
+      ]]></code></setup>
+    <test>
+      <task>Return a:deny-group</task>
+      <code><![CDATA[
+      acc:get-access(doc($resource))
+      ]]></code>
+      <expected desc="an access structure" xpath="a:deny-user">
+        <a:deny-user read="false">testuser2</a:deny-user>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>access:get-access(): Denied o/w access to a user</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password, (
+        sm:chgrp($uri, "everyone"),
+        sm:chmod($uri, "rw-rw-r--"),
+        sm:add-user-ace($uri, "testuser2", false(), "-w-")
+      ))
+      ]]></code></setup>
+    <test>
+      <task>Return a:deny-group</task>
+      <code><![CDATA[
+      acc:get-access(doc($resource))
+      ]]></code>
+      <expected desc="an access structure" xpath="a:deny-user">
+        <a:deny-user read="true">testuser2</a:deny-user>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:set-access(): general parameters</testName>
+    <setup>
+      <code><![CDATA[
+      let $uri := xs:anyURI($resource)
+      return system:as-user("admin", $magic:password, (
+        sm:chown($uri, "testuser"),
+        sm:chgrp($uri, "dba"),
+        sm:chmod($uri, "rw-r--rw-")
+      ))
+      ]]></code></setup>
+    <test>
+      <task>Set general parameters</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+        </a:access>)
+      ]]></code>
+      <xpath desc="owner has been set">sm:get-permissions(xs:anyURI($resource))/*/@owner="testuser"</xpath>
+      <xpath desc="group has been set">sm:get-permissions(xs:anyURI($resource))/*/@group="everyone"</xpath>
+      <xpath desc="mode has been set">sm:get-permissions(xs:anyURI($resource))/*/@mode="rw-rw-r--"</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is arg #2</testName>
+    <test>
+      <task>Basic permissions only</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser")
+      ]]></code>
+      <expected desc="has r/w access">
+        <a:user-access user="testuser" read="true" write="true" chmod="true" relicense="false"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password,
+          sm:chmod(xs:anyURI($resource), "rw-r--r--")
+        )
+      ]]></code>
+    </setup>
+    <test>
+      <task>Basic permissions for a non-owner</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/o access">
+        <a:user-access user="testuser2" read="true" write="false" chmod="false" relicense="false"/>
+      </expected>
+    </test>
+    <test>
+      <task>Nonexistent user</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "doesnotexist")
+      ]]></code>
+      <error desc="error:BAD_REQUEST" code="error:BAD_REQUEST"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password,(
+          sm:chmod(xs:anyURI($resource), "rw-------"),
+          sm:add-user-ace(xs:anyURI($resource), "testuser2", true(), "r--")
+          )
+        )
+      ]]></code>
+    </setup>
+    <test>
+      <task>with r/o user sharing override</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/o access">
+        <a:user-access user="testuser2" read="true" write="false" chmod="false" relicense="false"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password, (
+          sm:chmod(xs:anyURI($resource), "rw-------"),
+          sm:add-user-ace(xs:anyURI($resource), "testuser2", true(), "rw-")
+        ))
+      ]]></code>
+    </setup>
+    <test>
+      <task>with r/w user sharing override</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/w access">
+        <a:user-access user="testuser2" read="true" write="true" chmod="false" relicense="false"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password, (
+          sm:chmod(xs:anyURI($resource), "rw-rw-rw-"),
+          sm:add-user-ace(xs:anyURI($resource), "testuser2", false(), "-w-")
+        ))
+      ]]></code>
+    </setup>
+    <test>
+      <task>with w/o user denial override</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/o access">
+        <a:user-access user="testuser2" read="true" write="false" chmod="false" relicense="false"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:get-access-as-user(): calling user is different from arg #2</testName>
+    <setup>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password, (
+          sm:chmod(xs:anyURI($resource), "rw-rw-rw-"),
+          sm:add-user-ace(xs:anyURI($resource), "testuser2", false(), "rw-")
+        ))
+      ]]></code>
+    </setup>
+    <test>
+      <task>with r/w user denial override</task>
+      <code><![CDATA[
+        acc:get-access-as-user(doc($resource), "testuser2")
+      ]]></code>
+      <expected desc="has r/o access">
+        <a:user-access user="testuser2" read="false" write="false" chmod="false" relicense="false"/>
+      </expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:set-access(): share with a group</testName>
+    <test>
+      <task>Share with a group r/w</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+          <a:share-group write="true">guest</a:share-group>
+        </a:access>)
+      ]]></code>
+      <xpath desc="group share is present and has r/w access">sm:get-permissions(xs:anyURI($resource))//sm:ace
+        [@target="GROUP"][@who="guest"][@access_type="ALLOWED"]/@mode="rw-"</xpath>
+    </test>
+    <test>
+      <task>Share with a group r/o</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+          <a:share-group write="false">guest</a:share-group>
+        </a:access>)
+      ]]></code>
+      <xpath desc="group share is present and has r/o access">sm:get-permissions(xs:anyURI($resource))//sm:ace
+        [@target="GROUP"][@who="guest"][@access_type="ALLOWED"]/@mode="r--"</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:set-access(): share with a user</testName>
+    <test>
+      <task>Share with a user r/w</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+          <a:share-user write="true">guest</a:share-user>
+        </a:access>)
+      ]]></code>
+      <xpath desc="user share is present and has r/w access">sm:get-permissions(xs:anyURI($resource))//sm:ace
+        [@target="USER"][@who="guest"][@access_type="ALLOWED"]/@mode="rw-"</xpath>
+    </test>
+    <test>
+      <task>Share with a user r/o</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+          <a:share-user write="false">guest</a:share-user>
+        </a:access>)
+      ]]></code>
+      <xpath desc="user share is present and has r/o access">sm:get-permissions(xs:anyURI($resource))//sm:ace
+        [@target="USER"][@who="guest"][@access_type="ALLOWED"]/@mode="r--"</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:set-access(): deny a group</testName>
+    <test>
+      <task>Deny a group r/w access</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+          <a:deny-group read="false">guest</a:deny-group>
+        </a:access>)
+      ]]></code>
+      <xpath desc="group deny is present and covers r/w access">sm:get-permissions(xs:anyURI($resource))//sm:ace
+        [@target="GROUP"][@who="guest"][@access_type="DENIED"]/@mode="rw-"</xpath>
+    </test>
+    <test>
+      <task>Deny with a group write only</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+          <a:deny-group read="true">guest</a:deny-group>
+        </a:access>)
+      ]]></code>
+      <xpath desc="group deny is present and covers w/o access">sm:get-permissions(xs:anyURI($resource))//sm:ace
+        [@target="GROUP"][@who="guest"][@access_type="DENIED"]/@mode="-w-"</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:set-access(): deny a user</testName>
+    <test>
+      <task>Deny a user r/w access</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+          <a:deny-user read="false">guest</a:deny-user>
+        </a:access>)
+      ]]></code>
+      <xpath desc="user deny is present and covers r/w access">sm:get-permissions(xs:anyURI($resource))//sm:ace
+        [@target="USER"][@who="guest"][@access_type="DENIED"]/@mode="rw-"</xpath>
+    </test>
+    <test>
+      <task>Deny with a user write only</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+          <a:deny-user read="true">guest</a:deny-user>
+        </a:access>)
+      ]]></code>
+      <xpath desc="user deny is present and covers w/o access">sm:get-permissions(xs:anyURI($resource))//sm:ace
+        [@target="USER"][@who="guest"][@access_type="DENIED"]/@mode="-w-"</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:set-access(): unauthenticated access</testName>
+    <asUser/>
+    <password/>
+    <test>
+      <task>Without any authorization</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+        </a:access>)
+      ]]></code>
+      <error desc="returns error:UNAUTHORIZED" code="error:UNAUTHORIZED"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:set-access(): badly authenticated access</testName>
+    <asUser>testuser2</asUser>
+    <password>testuser2</password>
+    <test>
+      <task>With authorization from a non-owner</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">everyone</a:group>
+          <a:world read="true" write="false"/>
+        </a:access>)
+      ]]></code>
+      <error code="error:FORBIDDEN"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>acc:set-access(): invalid access structures</testName>
+    <test>
+      <task>Not an access structure</task>
+      <code><![CDATA[ 
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:invalid/>
+        </a:access>)
+      ]]></code>
+      <error code="error:VALIDATION"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>functional test: get-access() following set-access()</testName>
+    <test>
+      <task>get-access following set-access</task>
+      <code><![CDATA[
+      acc:set-access(doc($resource), 
+        <a:access>
+          <a:owner>testuser</a:owner>
+          <a:group write="true">dba</a:group>
+          <a:world read="true" write="false"/>
+          <a:share-group write="false">everyone</a:share-group>
+          <a:share-user write="true">testuser2</a:share-user> 
+          <a:deny-user read="true">guest</a:deny-user>
+          <a:deny-group read="true">guest</a:deny-group>
+        </a:access>),
+      acc:get-access(doc($resource))
+      ]]></code>
+      <xpath desc="correct number of conditions">count(*)=7</xpath>
+      <expected desc="owner" xpath="a:owner"><a:owner>testuser</a:owner></expected>
+      <expected desc="group" xpath="a:group"><a:group write="true">dba</a:group></expected>
+      <expected desc="world" xpath="a:world"><a:world read="true" write="false"/></expected>
+      <expected desc="share-group" xpath="a:share-group"><a:share-group write="false">everyone</a:share-group></expected>
+      <expected desc="share-user" xpath="a:share-user"><a:share-user write="true">testuser2</a:share-user></expected> 
+      <expected desc="deny-user" xpath="a:deny-user"><a:deny-user read="true">guest</a:deny-user></expected>
+      <expected desc="deny-group" xpath="a:deny-group"><a:deny-group read="true">guest</a:deny-group></expected>
+    </test>
+  </TestSet>
+</TestSuite>

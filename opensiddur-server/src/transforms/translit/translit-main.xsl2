@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt" xmlns:tr="http://jewishliturgy.org/ns/tr/1.0"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  extension-element-prefixes="xs xd">
+  <xsl:import href="../../common/common.xsl2"/>
+  <xsl:include href="translit.xsl2" />
+  
+  <xd:doc type="stylesheet">
+    <xd:short>
+      Main entry point to the transliterator as a stage in the 
+      transform pipeline.
+    </xd:short>
+    <xd:detail>
+      Requires two settings: (1) Transliteration table (default is none) 
+      (2) alignment (default is j:parallelGrp/j:original|j:parallel if it exists and tei:seg 
+      if it does not)
+    </xd:detail>
+    <xd:copyright>Copyright 2011-2012 Efraim Feinstein</xd:copyright>
+    <xd:detail>
+      <p>This program is free software: you can redistribute it and/or
+        modify
+        it under the terms of the GNU Lesser General Public License as
+        published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.
+      </p>
+
+      <p>This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+        GNU Lesser General Public License for more details.
+      </p>
+
+      <p>
+        You should have received a copy of the GNU Lesser General Public
+        License
+        along with this program. If not, see
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>
+        .
+      </p>
+    </xd:detail>
+  </xd:doc>
+
+  <xsl:param name="transliteration-fs-type" as="xs:string" 
+    select="'Transliterator'"/>
+    
+  <xd:doc>
+    <xd:short>This is a required parameter containing a list of in-database paths
+    accessible transliteration tables as a space-separated string.</xd:short>
+    <xd:detail>This is required because collection('group') is not accessible
+    from XSLT. When we use eXist's native XSLT, this will be unnecessary.</xd:detail>
+  </xd:doc>
+  <xsl:param name="transliteration-tables" as="xs:string" required="yes"/>
+
+  <xd:doc>
+    <xd:short>Login user</xd:short>
+  </xd:doc>
+  <xsl:param name="user" as="xs:string" select="'guest'"/>
+  
+  <xd:doc>
+    <xd:short>Login password</xd:short>
+  </xd:doc>
+  <xsl:param name="password" as="xs:string" select="'guest'"/>
+  
+  <xsl:variable name="transliteration-table-paths">
+    <xsl:document>
+      <transliteration-tables>
+        <xsl:for-each select="tokenize($transliteration-tables, '\s+')">
+          <table>
+            <xsl:attribute name="shortname" 
+              select="replace(tokenize(.,'/')[.][last()], '\.xml$', '')"/>
+            <xsl:value-of select="concat('xmldb:exist://', $user, ':', $password, '@', .)"/>
+          </table>
+        </xsl:for-each>
+      </transliteration-tables>
+    </xsl:document>
+  </xsl:variable>
+  <xsl:key name="tables" match="table" use="@shortname"/>
+
+  <xsl:variable name="tei-ns" as="xs:string" select="'http://www.tei-c.org/ns/1.0'"/>
+  <xsl:variable name="j-ns" as="xs:string" select="'http://jewishliturgy.org/ns/jlptei/1.0'"/>
+
+  <xd:doc>
+    <xd:short>Elements that if an element is a descendant of them and not inside
+    a parallelGrp, will not cause the transliterator to form
+    a new parallelGrp</xd:short>
+  </xd:doc>
+  <xsl:variable name="ancestor-exceptions" as="xs:QName+"
+    select="(QName($tei-ns, 'note'))"/>
+
+  <xd:doc>
+    <xd:short>Return a transliteration schema by its short name</xd:short>
+  </xd:doc>
+  <xsl:function name="func:get-transliteration-schema" as="element(tr:schema)?">
+    <xsl:param name="shortname" as="xs:string?"/>
+    
+    <xsl:if test="$shortname">
+      <xsl:sequence select="doc(key('tables', $shortname, $transliteration-table-paths))/tr:schema"/>
+    </xsl:if>
+  </xsl:function>
+
+  <xd:doc>
+    <xd:short>Given a transliteration schema and language, return the right table</xd:short>
+  </xd:doc>
+  <xsl:function name="func:get-transliteration-table" as="element(tr:table)?">
+    <xsl:param name="schema" as="element(tr:schema)?"/>
+    <xsl:param name="lang" as="xs:string"/>
+    
+    <xsl:sequence select="$schema/tr:table[tr:lang/@in=$lang]"/>
+  </xsl:function>
+
+  <xsl:template match="/">
+    <xsl:copy>
+      <xsl:apply-templates>
+        <xsl:with-param name="alignment-element" as="xs:QName?"
+          select="QName('http://www.tei-c.org/ns/1.0','seg')"
+          tunnel="yes"/>
+        <xsl:with-param name="schema" as="element(tr:schema)?" 
+          tunnel="yes"/>
+      </xsl:apply-templates>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template name="insert-transliteration" as="element(j:parallel)?">
+    <xsl:param name="schema" as="element(tr:schema)?" tunnel="yes"/>
+    <xsl:param name="to-transliterate" as="node()?"/>
+    
+    <xsl:variable name="language" as="xs:string" 
+      select="
+      if ($to-transliterate) 
+      then func:language($to-transliterate) 
+      else ''"/>
+    <xsl:variable name="table" select="func:get-transliteration-table($schema, $language)"/>      
+    <xsl:if test="$table and exists($to-transliterate)">
+      <j:parallel type="transliteration" xml:lang="{$table/tr:lang[@in=$language]/@out}">
+        <xsl:apply-templates select="$to-transliterate" mode="transliterate">
+          <xsl:with-param name="table" select="$table" 
+            as="element(tr:table)" tunnel="yes"/>
+        </xsl:apply-templates>
+      </j:parallel>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="j:parallelGrp">
+    <xsl:param name="schema" as="element(tr:schema)?" tunnel="yes"/>
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+      <xsl:call-template name="insert-transliteration">
+        <xsl:with-param name="to-transliterate" as="element()?"
+          select="(j:original|j:parallel)[some $lang in $schema//tr:lang/@in satisfies lang($lang)]/node()"/>
+      </xsl:call-template>
+    </xsl:copy>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>If a transliteration is called for and we are not in a 
+      parallelGrp</xd:short>
+  </xd:doc>
+  <xsl:template match="*[not(ancestor::j:parallelGrp)]">
+    <xsl:param name="schema" as="element(tr:schema)?" tunnel="yes"/>
+    <xsl:param name="alignment-element" as="xs:QName?" tunnel="yes"/>
+    
+    <xsl:choose>
+      <!-- this is an odd way to express the condition, but tr:lang[@in=func:language(.)] returns nothing! -->
+      <xsl:when test="$schema//tr:lang/@in=func:language(.)">
+        <xsl:variable name="next" as="node()*">
+          <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:apply-templates/>
+          </xsl:copy>
+        </xsl:variable>
+        
+        <xsl:choose>
+          <!-- 
+            does a table exist?
+            is this the alignment element?
+            is this element an exception?
+          -->
+          <xsl:when test="
+            exists($schema) and 
+            local-name(.)=local-name-from-QName($alignment-element) and 
+            namespace-uri(.)=namespace-uri-from-QName($alignment-element)
+            and not(
+              some $ancestor in ancestor-or-self::* 
+              satisfies QName(namespace-uri($ancestor), local-name($ancestor))=$ancestor-exceptions
+              )">
+            <j:parallelGrp>
+              <j:original>
+                <xsl:sequence select="$next"/>
+              </j:original>
+              <xsl:call-template name="insert-transliteration">
+                <xsl:with-param name="to-transliterate" as="element()"
+                  select="."/>
+              </xsl:call-template>
+            </j:parallelGrp>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:sequence select="$next"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+    <xd:doc>
+    <xd:short>Replace transliteration-calls by @xml:lang with
+    the transliteration, if one is set</xd:short>
+  </xd:doc>
+  <xsl:template match="j:segGen[@type='transliteration']" priority="1">
+    <xsl:param name="schema" as="element(tr:schema)?" tunnel="yes"/>
+    
+    <xsl:variable name="language" select="func:language(.)"/>
+    <xsl:variable name="table" as="element(tr:table)?" 
+      select="func:get-transliteration-table($schema, $language)"/>
+    <xsl:variable name="result">
+      <tei:seg>
+        <xsl:choose>
+          <xsl:when test="empty($table)">
+            <!-- no transliteration table, convert it into a tei:seg -->
+            <xsl:sequence select="@*|node()"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <!-- TODO - check if this is right! -->
+            <xsl:copy-of select="@* except (@xml:lang, @xml:id)"/>
+            <xsl:attribute name="xml:lang" select="$table/tr:lang[@in=$language]/@out"/>
+            <xsl:apply-templates mode="transliterate">
+              <xsl:with-param name="table" as="element(tr:table)"
+                select="$table" tunnel="yes"/>
+            </xsl:apply-templates>
+          </xsl:otherwise>
+        </xsl:choose>
+      </tei:seg>
+    </xsl:variable>
+    <xsl:apply-templates select="$result"/>
+  </xsl:template>
+  
+  <xsl:template match="jx:relationship[@type='set']" priority="100">
+    <xsl:param name="schema" as="element(tr:schema)?" tunnel="yes"/>
+    <xsl:param name="alignment-element" as="xs:QName" tunnel="yes"/>
+    
+    <xsl:next-match>
+      <xsl:with-param name="schema" tunnel="yes" as="element(tr:schema)?">
+        <xsl:variable name="new-schema" as="xs:string?"
+          select="jx:linked-relationship/
+              tei:fs[@type=$transliteration-fs-type]/
+                tei:f[@name='Table']/(tei:symbol/@value, *)[1]/string()"/>
+        <xsl:sequence select="(func:get-transliteration-schema($new-schema), $schema)[1]"/>
+      </xsl:with-param>
+      <xsl:with-param name="alignment-element" as="xs:QName" tunnel="yes">
+        <xsl:variable name="new-namespace" as="xs:string?"
+          select="(
+            jx:linked-relationship/
+              tei:fs[@type=$transliteration-fs-type]/
+                tei:f[@name='Alignment-Namespace']/(tei:symbol/@value, *)[1]/string(),
+            namespace-uri-from-QName($alignment-element)  
+                )[1]"/>
+        <xsl:variable name="new-local-name" as="xs:string?"
+          select="(
+            jx:linked-relationship/
+              tei:fs[@type=$transliteration-fs-type]/
+                tei:f[@name='Alignment-Element']/(tei:symbol/@value, *)[1]/string(),
+            local-name-from-QName($alignment-element)
+            )[1]"/>
+        <xsl:sequence select="QName($new-namespace, $new-local-name)"/>
+      </xsl:with-param>
+    </xsl:next-match>
+  </xsl:template>
+
+  <xsl:template match="node()">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates />
+    </xsl:copy>
+  </xsl:template>
+
+</xsl:stylesheet>

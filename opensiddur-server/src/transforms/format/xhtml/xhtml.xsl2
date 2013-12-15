@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:html="http://www.w3.org/1999/xhtml" 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+  exclude-result-prefixes="#all">
+  <xsl:import href="../../../common/common.xsl2"/>
+  <!-- xsl:include href="../copy-context.xsl2"/-->
+  <xsl:include href="dict.xsl2"/>
+  <xsl:include href="xhtml-generic.xsl2"/>
+  <xsl:include href="bibliography-xhtml.xsl2"/>
+  <xsl:include href="inline.xsl2"/>
+  <xsl:include href="credits-list.xsl2"/>
+  <xsl:include href="ref.xsl2"/>
+  <xsl:include href="relationship.xsl2"/>
+  
+  <xd:doc type="stylesheet">
+    <xd:short>Main entry point for intermediate format from list-compiler to XHTML transform. 
+    Include other stylesheets that do the work.</xd:short>
+    <xd:copyright>Copyright 2009-2011 Efraim Feinstein
+    </xd:copyright>
+    <xd:detail>
+      <p>This program is free software: you can redistribute it
+        and/or modify
+        it under the terms of the GNU Lesser General Public License as
+        published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+      <p>This program is distributed in the hope that it will be
+        useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+        GNU Lesser General Public License for more details.</p>
+
+      <p>
+        You should have received a copy of the GNU Lesser General Public
+        License along with this program. If not, see
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/
+        </a>
+        .
+      </p>
+    </xd:detail>
+    <xd:svnId>$Id: xhtml.xsl2 687 2011-01-23 23:36:48Z efraim.feinstein $</xd:svnId>
+  </xd:doc>
+
+  
+  <xsl:strip-space elements="*"/>
+ 
+  
+</xsl:stylesheet>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- test main data compiler 
+  Open Siddur Project
+  Copyright 2010 Efraim Feinstein
+  Licensed under the GNU Lesser General Public License, version 3 or later
+
+  $Id: standardize-features.xspec 687 2011-01-23 23:36:48Z efraim.feinstein $
+ -->
+<x:description 
+  xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
+  stylesheet="../conditionals.xsl2"
+  >
+  <x:pending>
+    <x:scenario label="force xmlns declarations">
+      <x:context><j:test/><jx:test/><tei:test/></x:context>
+      <x:expect label="nothing" test="()"/>
+    </x:scenario>
+  </x:pending>
+  <x:scenario label="standardize-features mode">
+    <x:context href="standardize-features-context.xml" mode="standardize-features"/>
+    <x:scenario label="on a feature structure with one feature">
+      <x:context select="//*[@jx:id='test-nothing-special']"/>
+      <x:expect label="behaves like an identity template">
+        <tei:fs jx:id="test-nothing-special" type="test-nothing-special">
+          <tei:f name="nothing-special">
+            <tei:symbol value="YES"/>
+          </tei:f>
+        </tei:fs>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="on a feature structure with @feats">
+      <x:context select="//*[@jx:id='with-feats-included']"/>
+      <x:expect label="return the feature structure with the features included inline">
+        <tei:fs jx:id="with-feats-included" type="with-feats-included">
+          <tei:f jx:id="include1">
+            <tei:symbol value="INCLUDE_ME"/>
+          </tei:f>
+          <tei:f jx:id="include2">
+            <tei:symbol value="INCLUDE_ME_TOO"/>
+          </tei:f>
+        </tei:fs>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="on a feature structure with combined @feats and inline">
+      <x:context select="//*[@jx:id='with-feats-included-and-inline']"/>
+      <x:expect label="return the feature structure with all features included inline">
+        <tei:fs jx:id="with-feats-included-and-inline" type="with-feats-included-and-inline">
+          <tei:f jx:id="include1">
+            <tei:symbol value="INCLUDE_ME"/>
+          </tei:f>
+          <tei:f name="inline">
+            <tei:symbol value="YES"/>
+          </tei:f>
+          <tei:f name="inline-with-string">
+            <tei:string>STRING</tei:string>
+          </tei:f>
+        </tei:fs>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="feature structure containing a feature with fVal">
+      <x:context select="//*[@jx:id='fs-with-fVal']"/>
+      <x:expect label="feature is expanded inline" test="*/tei:f">
+        <tei:f name="f-with-fVal">
+          <tei:symbol jx:id="lib1" value="YES"/>
+        </tei:f>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="feature structure with vAlt">
+      <x:context select="//*[@jx:id='fs-with-vAlt']"/>
+      <x:expect label="only one vAlt hierarchy remains" test="*/tei:f">
+        <tei:f name="f-with-vAlt-vAlt">
+          <tei:vAlt>
+            <tei:symbol value="YES"/>
+            <tei:symbol value="NO"/>
+            <tei:symbol value="MAYBE"/>
+          </tei:vAlt>
+        </tei:f>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="feature structure with vLabel">
+      <x:context select="//*[@jx:id='fs-with-vLabel']"/>
+      <x:expect label="vLabel is removed from its origin" test="*/tei:f[@name='f-with-named-vLabel']">
+        <tei:f name="f-with-named-vLabel">
+          <tei:vAlt>
+            <tei:symbol value="ON"/>
+            <tei:symbol value="OFF"/>
+          </tei:vAlt>
+        </tei:f>
+      </x:expect>
+      <x:expect label="vLabel content is inserted at reference" test="*/tei:f[@name='f-with-referenced-vLabel']">
+        <tei:f name="f-with-referenced-vLabel">
+          <tei:vAlt>
+            <tei:symbol value="ON"/>
+            <tei:symbol value="OFF"/>
+          </tei:vAlt>
+        </tei:f>
+      </x:expect>
+    </x:scenario>
+    <x:scenario label="feature structure with a declared default">
+      <x:context select="//*[@jx:id='with-default']"/>
+      <x:expect label="default value replaces tei:default" test="*/tei:f">
+        <tei:f name="f-declared">
+          <tei:symbol value="OFF"/>
+        </tei:f>
+      </x:expect>
+    </x:scenario>
+  </x:scenario>
+</x:description>

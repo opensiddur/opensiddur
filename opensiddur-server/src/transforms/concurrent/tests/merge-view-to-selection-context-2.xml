@@ -1,0 +1,10 @@
+<j:selection jx:uid="111"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor" 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xml:lang="en">
+  <tei:ptr target="#r1" xml:id="c2s1"/>
+  <tei:ptr target="#r2" xml:id="c2s2"/>
+  <tei:ptr target="#r3" xml:id="c2s3"/>
+  <tei:ptr target="#r4" xml:id="c2s4"/>
+</j:selection>

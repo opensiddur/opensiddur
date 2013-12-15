@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="2.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:osis="http://www.bibletechnologies.net/2003/OSIS/namespace"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:xd="http://www.pnp-software.com/XSLTdoc" 
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+  xmlns:cc="http://web.resource.org/cc/"
+  exclude-result-prefixes="osis xs xd rdf cc">
+  <xsl:import href="../../common/params.xsl2" />
+  <xsl:import href="../fill-template.xsl2" />  
+  <xsl:output indent="yes" encoding="utf-8" method="xml" />
+  <xd:doc type="stylesheet">
+    <xd:short>Convert the Strong's dictionary from OSIS to JLPTEI.
+    </xd:short>
+    <xd:copyright>Copyright 2010 Ze'ev Clementson
+    </xd:copyright>
+    <xd:detail>
+      <p>The output is a JLPTEI XML file. Refer to Chapter 9 </p>
+      <p>(Dictionaries) of the TEI Guidelines for an explanation</p>
+      <p>of the elements/attributes that have been used.</p>
+      <p>This program is free software: you can redistribute it
+        and/or modify
+        it under the terms of the GNU Lesser General Public License as
+        published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.</p>
+
+      <p>This program is distributed in the hope that it will be
+        useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+        GNU Lesser General Public License for more details.</p>
+
+      <p>
+        You should have received a copy of the GNU Lesser General Public
+        License
+        along with this program. If not, see
+        <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/
+        </a>
+        .
+      </p>
+    </xd:detail>
+  </xd:doc>
+  
+  <xd:doc>
+    <xd:short>Top-level entry point for all processing</xd:short>
+  </xd:doc>
+  <xsl:template match="/">
+    <xsl:call-template name="main"/>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Populate template and launch main processing logic for program</xd:short>
+  </xd:doc>
+  <xsl:template name="main">
+    <xsl:call-template name="fill-template">
+      <xsl:with-param name="xmllang" as="xs:string" select="'en'"/>
+      <xsl:with-param name="respons" as="element(tei:respons)+">
+        <tei:respons locus="value" resp="/user/ZeevClementson" target="#body" type="enc" />
+      </xsl:with-param>
+      <xsl:with-param name="title" as="element(tei:title)+">
+        <tei:title xml:lang="en" type="main">Strong's Dictionary of the Words in the Hebrew Bible</tei:title>
+      </xsl:with-param>
+      <xsl:with-param name="license" as="element(tei:licence)">
+        <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+      </xsl:with-param>
+      <xsl:with-param name="bibliography" as="element(tei:link)+">
+        <tei:link type="bibl" target="#main /sources/StrongsDictionary.xml"/>
+      </xsl:with-param>
+      <!--
+      <xsl:with-param name="fsdDecl" as="element(tei:fsdDecl)">
+        <tei:fsdDecl>
+          <tei:fsdLink type="transliteration" target="transliteration-fsd.xml#fsTransliteration"/>
+        </tei:fsdDecl>
+      </xsl:with-param>
+      <xsl:with-param  name="conditionGrp" as="element(j:conditionGrp)">
+        <j:conditionGrp>
+          <tei:fs type="transliteration" xml:id="transliterator_on">
+            <tei:f name="table"><tei:symbol value="strongs"/></tei:f>
+          </tei:fs>
+        </j:conditionGrp>
+      </xsl:with-param>
+      <xsl:with-param  name="links" as="element(j:links)">          
+        <j:links>
+          <tei:link type="set" targets="#main #transliterator_on"/>
+					<tei:link type="source" targets="#main #biblStrong"/>
+        </j:links>
+      </xsl:with-param>
+      -->    
+      <xsl:with-param  name="body" as="element(tei:body)">
+        <tei:body xml:lang="en" xml:id="main">
+          <xsl:apply-templates select="osis:osis/osis:osisText/osis:div/osis:div"/>
+        </tei:body>
+      </xsl:with-param>
+    </xsl:call-template>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Create new dictionary entry</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:div">
+    <tei:entry>
+      <xsl:attribute name="xml:id"><xsl:value-of select="osis:w/@ID"/></xsl:attribute>
+      <xsl:apply-templates select="osis:w[@ID]"/>
+      <xsl:if test="osis:note[@type = 'explanation'] or osis:note[@type = 'translation']">
+        <tei:cit type="translation">
+          <xsl:if test="osis:note[@type = 'explanation']">
+            <xsl:apply-templates select="osis:note[@type='explanation']"/>
+          </xsl:if>
+          <xsl:if test="osis:note[@type = 'translation']">
+            <xsl:apply-templates select="osis:note[@type='translation']"/>
+          </xsl:if>
+        </tei:cit>
+      </xsl:if>
+      <xsl:apply-templates select="osis:list"/>
+      <xsl:if test="osis:w/@gloss or osis:foreign">
+        <tei:re>
+          <xsl:if test="osis:w/@gloss">
+            <tei:ref type="offline-resource" target="bibliography#twot">TWOT:<xsl:value-of select="osis:w/@gloss"/></tei:ref>
+          </xsl:if>
+          <xsl:apply-templates select="osis:foreign"/>
+        </tei:re>
+      </xsl:if>
+    </tei:entry>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Populate orthographic form, etymology, grammatical values</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:w[@ID]">
+    <tei:form>
+      <tei:orth xml:lang="he"><xsl:value-of select="@lemma"/></tei:orth>
+      <tei:orth type="transliteration">
+        <j:segGen type="transliteration" xml:lang="he"><xsl:value-of select="@lemma"/></j:segGen>
+      </tei:orth>
+      <tei:pron><xsl:value-of select="@POS"/></tei:pron>
+    </tei:form>
+    <tei:etym>
+      <tei:lang>
+        <xsl:choose>
+          <xsl:when test="@xml:lang='heb'">
+            <xsl:text>Hebrew</xsl:text>
+          </xsl:when>
+          <xsl:when test="@xml:lang='arc'">
+            <xsl:text>Aramaic</xsl:text>
+          </xsl:when>
+          <xsl:when test="@xml:lang='x-pn'">
+            <xsl:text>Name</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>Unknown</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>      
+      </tei:lang>
+      <xsl:apply-templates select="../osis:note[@type='exegesis']"/>
+    </tei:etym>
+    <tei:gramGrp>
+      <tei:pos><xsl:value-of select="@morph"/></tei:pos>
+    </tei:gramGrp>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Populate definition #1 value</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:note[@type='explanation']">
+    <tei:quote type="strongs"><xsl:apply-templates/></tei:quote>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Populate definition #2 value</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:note[@type='translation']">
+    <tei:quote type="kjv"><xsl:apply-templates/></tei:quote>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Populate sense values</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:list">
+    <tei:sense>
+      <xsl:for-each select="osis:item">
+        <xsl:variable name="sense-number" select="substring-before(., ') ')"/>
+        <xsl:variable name="sense-number-length" select="string-length($sense-number)"/>
+        <xsl:variable name="strongs-number"><xsl:value-of select="../../osis:w/@ID"/></xsl:variable>
+        <xsl:choose>
+          <xsl:when test="$sense-number and $sense-number-length lt 5">
+            <xsl:variable name="sense-number-ref" select="concat($strongs-number, 'S', $sense-number)"/>
+            <xsl:variable name="sense-definition" select="substring-after(., ') ')"/>
+            <tei:sense>
+              <xsl:attribute name="xml:id"><xsl:value-of select="$sense-number-ref"/></xsl:attribute>
+              <tei:def><xsl:value-of select="$sense-definition"/></tei:def>
+            </tei:sense>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:variable name="sense-number-ref" select="concat($strongs-number, 'S0', position())"/>
+            <xsl:variable name="sense-definition"><xsl:value-of select="."/></xsl:variable>
+            <tei:sense>
+              <xsl:attribute name="xml:id"><xsl:value-of select="$sense-number-ref"/></xsl:attribute>
+              <tei:def><xsl:value-of select="$sense-definition"/></tei:def>
+            </tei:sense>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each>
+    </tei:sense>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Populate exegesis note value</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:note[@type='exegesis']">
+    <tei:gloss><xsl:apply-templates/></tei:gloss>   
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Populate related foreign word references</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:foreign">
+    <xsl:for-each select="osis:w">
+      <tei:ref type="offline-resource" target="bibliography#strongs-greek">Strongs Greek:<xsl:value-of select="replace(@gloss,':','')"/>
+      </tei:ref>
+    </xsl:for-each>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Populate cross-reference word values</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:w">
+    <tei:ref>
+      <xsl:if test="@src">
+        <xsl:variable name="strongs-number"><xsl:value-of select="@src"/></xsl:variable>
+        <xsl:variable name="strongs-number-ref" select="concat('#H', $strongs-number)"/>
+        <xsl:attribute name="target"><xsl:value-of select="$strongs-number-ref"/></xsl:attribute> 
+        <xsl:attribute name="xml:lang">he</xsl:attribute> 
+      </xsl:if>
+      <xsl:attribute name="xml:lang">he</xsl:attribute> 
+      <xsl:value-of select="@lemma"/>
+      <xsl:value-of select="."/>     
+    </tei:ref>
+  </xsl:template>
+
+  <xd:doc>
+    <xd:short>Add highlight emphasis on text</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:hi">
+    <tei:hi><xsl:apply-templates/></tei:hi>
+  </xsl:template>
+  
+  <xd:doc>
+    <xd:short>Ignore notes about typographical fixes</xd:short>
+  </xd:doc>
+  <xsl:template match="osis:note[@type='x-typo']">
+  </xsl:template>
+    
+</xsl:stylesheet>

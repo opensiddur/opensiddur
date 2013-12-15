@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet
+	version="2.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:tei="http://www.tei-c.org/ns/1.0"
+	xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"  
+	xmlns:func="http://jewishliturgy.org/ns/functions/xslt"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:xd="http://www.pnp-software.com/XSLTdoc"
+	exclude-result-prefixes="j tei xs xd func"
+	>
+	<xsl:import href="params.xsl2"/>
+	<xd:doc type="stylesheet">
+		<xd:short>Common functions required by multiple stages of the TEI processing.</xd:short>
+		<xd:copyright>Copyright 2007-2011 Efraim Feinstein</xd:copyright>
+		<xd:detail>
+				<p>This program is free software: you can redistribute it and/or modify
+				it under the terms of the GNU Lesser General Public License as published by
+				the Free Software Foundation, either version 3 of the License, or
+				(at your option) any later version.</p>
+
+				<p>This program is distributed in the hope that it will be useful,
+				but WITHOUT ANY WARRANTY; without even the implied warranty of
+				MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+				GNU Lesser General Public License for more details.</p>
+
+				<p>You should have received a copy of the GNU Lesser General Public License
+				along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+			</xd:detail>
+			<xd:svnId>$Id: common.xsl2 766 2011-04-28 02:42:20Z efraim.feinstein $</xd:svnId>
+	</xd:doc>
+
+  <xd:doc>User name to log in as on the database (optional)</xd:doc>
+  <xsl:param name="user" as="xs:string?" />
+  
+  <xd:doc>Password to log in as on the database (required if user is specified)</xd:doc>
+  <xsl:param name="password" as="xs:string?" />
+  
+  <xd:doc>base64 encoded authentication to log in as on the database (optional, overrides user/password)</xd:doc>
+  <xsl:param name="auth" as="xs:string?" />
+	
+	<xd:doc type="xs:string">
+		<xd:short>Keeps track of all <code>@xml:id</code> and <code>@jx:id</code> attributes in the sources.</xd:short>
+	</xd:doc>
+	<xsl:key name="xmlids" match="*" use="(@xml:id,@jx:id)"/>
+
+	<xd:doc>
+		<xd:short>Output a debugging message, depending on debug level.  
+    Each message is given a unique ID so its end can be associated 
+    with its beginning.  If the debug level is $debug-error,
+    terminate with the message, otherwise output it.</xd:short>
+		<xd:param name="msg">The message, which may include nodes</xd:param>
+		<xd:param name="source">The source of the message</xd:param>
+		<xd:param name="level">The debug level of the message</xd:param>
+	</xd:doc>
+	<xsl:function name="func:debug" as="empty-sequence()">
+		<xsl:param name="msg" as="item()*"/>
+		<xsl:param name="source" as="item()+"/>
+		<xsl:param name="level" as="xs:integer"/>
+		
+		<xsl:if test="$debug-level &gt;= $level">
+			<xsl:variable name="msg-as-doc" as="document-node()">
+				<!-- The message has to be kept as its own document node so only one id will be shown for each message -->
+				<xsl:document>
+					<xsl:sequence select="$msg"/>
+				</xsl:document>
+			</xsl:variable>
+
+			<xsl:variable name="message-id" select="$msg-as-doc/generate-id()"/>
+			<xsl:variable name="error-level" as="xs:string">
+				<xsl:choose>
+					<xsl:when test="$level=$debug-error">
+						<xsl:text>ERROR</xsl:text>
+					</xsl:when>
+					<xsl:when test="$level=$debug-warn">
+						<xsl:text>WARNING</xsl:text>
+					</xsl:when>
+					<xsl:when test="$level=$debug-info">
+						<xsl:text>INFO</xsl:text>
+					</xsl:when>
+					<xsl:when test="$level=$debug-detail">
+						<xsl:text>DETAIL</xsl:text>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>MESSAGE</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:variable>
+			<xsl:variable name="source-string" as="xs:string"
+        select="string-join(($source),'')" />
+      <xsl:variable name="message" as="element()">
+        <xsl:element name="{$error-level}">
+          <xsl:attribute name="xml:id" select="$message-id" />
+          <source><xsl:value-of select="$source-string"/></source>
+          <message><xsl:sequence select="$msg-as-doc"/></message>
+        </xsl:element>
+      </xsl:variable>
+      <xsl:choose>
+        <xsl:when test="$level=$debug-error">
+          <xsl:message terminate="yes">
+            <xsl:sequence select="$message"/>
+          </xsl:message>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:message>
+            <xsl:sequence select="$message"/>
+          </xsl:message>
+        </xsl:otherwise>
+      </xsl:choose>
+		</xsl:if>
+	</xsl:function>
+
+	<xd:doc type="xs:string">
+		<xd:short>Returns the language of the given node, as it would be tested with the lang() function.</xd:short>
+		<xd:detail>
+			If none can be found, returns and empty string.
+		</xd:detail>
+		<xd:param name="node">A single node to return the language for.</xd:param>
+	</xd:doc>
+  <xsl:function name="func:language" as="xs:string">
+    <xsl:param name="node" as="node()"/>
+		<xsl:variable as="xs:string" name="lang" select="string($node/((ancestor-or-self::*/@xml:lang)[last()]))"/>
+		<xsl:sequence select="func:debug(('returns:', $lang),('func:language(',name($node),')'),$debug-detail + 1)"/>
+		<xsl:sequence select="$lang"/>
+  </xsl:function>
+	
+	<xd:doc type="xs:string">
+		<xd:short>Return the text direction ('ltr' or 'rtl'), given a language code as a string.</xd:short>
+		<xd:param name="lang">A language code</xd:param>
+	</xd:doc>
+	<xsl:function name="func:direction-by-lang" as="xs:string">
+		<xsl:param name="lang" as="xs:string"/>
+    <xsl:sequence select="
+      if ($lang=('he','arc'))
+      then 'rtl'
+      else 'ltr'
+    "/>
+	</xsl:function>
+	
+	<xd:doc type="xs:string">
+		<xd:short>Returns the direction ('ltr' or 'rtl') as a string, dependent on the current language of the given node.</xd:short>
+		<xd:param name="of-node">Node to test language.</xd:param>
+	</xd:doc>
+	<xsl:function name="func:direction-by-language" as="xs:string">
+		<xsl:param name="of-node" as="node()"/>
+		<xsl:choose>
+			<xsl:when test="lang('he',$of-node) or lang('arc',$of-node)">
+				<xsl:text>rtl</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:text>ltr</xsl:text>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:function>
+
+  <xd:doc>
+    <xd:short>Add the given attribute nodes.  
+    If equivalent named attributes already exist, override them</xd:short>
+    <xd:param name="elements">The element nodes to add to</xd:param>
+    <xd:param name="attributes">The nodes to add</xd:param>
+  </xd:doc>
+  <xsl:function name="func:add-attributes" as="element()*">
+    <xsl:param name="elements" as="element()*"/>
+    <xsl:param name="attributes" as="attribute()*"/>
+    
+    <xsl:for-each select="$elements">
+      <xsl:copy>
+        <xsl:copy-of select="@* except @*[name()=$attributes/name()]"/>
+        <xsl:copy-of select="$attributes"/>
+        <xsl:sequence select="child::node()"/>
+      </xsl:copy>
+    </xsl:for-each>
+  </xsl:function>
+  <!--
+  <xd:doc>
+    <xd:short>Change the xml:base and/or xml:lang of the roots of a 
+    given element.  Does not override base or language if it is explicitly
+    specified in the element.  $new-base and $new-lang must either both be
+    empty or have the same length as $sequence, otherwise an error is flagged.
+    Return a copy of the elements.</xd:short>
+    <xd:param name="sequence">Elements to change base of</xd:param>
+    <xd:param name="new-base">New base URI, empty for auto</xd:param>
+    <xd:param name="new-lang">New xml:lang, empty for auto</xd:param>
+  </xd:doc>	
+  <xsl:function name="func:change-base-and-lang" as="element()*">
+    <xsl:param name="sequence" as="element()*"/>
+    <xsl:param name="new-base" as="xs:anyURI*"/>
+    <xsl:param name="new-lang" as="xs:string*"/>
+    
+    <xsl:choose>
+      <xsl:when test="
+        (empty($new-lang) or count($sequence) eq count($new-lang)) 
+        and (empty($new-base) or count($sequence) eq count($new-base))">        
+        <xsl:for-each-group select="$sequence" group-by="position()">
+          <xsl:copy>
+            <xsl:copy-of select="@* except (@xml:base, @xml:lang)"/>
+            <xsl:variable name="proposed-new-base" 
+              select="(@xml:base, $new-base[position()], base-uri(.))[1]"/>
+            <xsl:variable name="proposed-new-lang"
+              select="(@xml:lang, $new-lang[position()], func:language(.))[1]"/>
+            <xsl:if test="string-length($proposed-new-base) &gt; 0">
+              <xsl:attribute name="xml:base" select="$proposed-new-base"/>
+            </xsl:if>
+            <xsl:if test="string-length($proposed-new-lang) &gt; 0">
+              <xsl:attribute name="xml:lang" select="$proposed-new-lang"/>
+            </xsl:if>
+            <xsl:sequence select="child::node()"/>
+          </xsl:copy>
+        </xsl:for-each-group>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="func:debug(string-join(
+        ('$sequence must have the same ', 
+        'number of elements as $new-lang or $new-base or $new-lang or ',
+        '$new-base must be empty.'),'')
+          , 'change-base-and-lang', $debug-error)"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+  -->
+  <!-- 
+	<xd:doc>
+		<xd:short>change-base mode: changes the base-uri and language of an element to the values given in the parameters, unless they are specified in the element itself</xd:short>
+	</xd:doc>
+	<xsl:template match="element()" mode="change-base" priority="4000">
+		<xsl:param name="new-base" as="xs:anyURI" required="yes"/>
+		<xsl:param name="new-lang" as="xs:string" required="yes"/>
+		<xsl:param name="other-attributes" as="attribute()*" />
+		<xsl:param name="translation-mode" as="xs:string?" select="''" tunnel="yes"/> 
+		<xsl:sequence select="func:debug(
+		('$new-base = ',$new-base,' $new-lang = ',$new-lang,' $other-attributes = ',
+		$other-attributes),'change-base mode:', $debug-detail + 1)"/>
+		<xsl:copy>
+			<xsl:call-template name="copy-attributes"/>
+			<xsl:if test="not(@xml:base)">
+				<xsl:attribute name="xml:base" select="$new-base"/>
+			</xsl:if>
+			<xsl:if test="not(@xml:lang) and not($translation-mode='transliteration')">
+				<!-xsl:message>change-base: setting xml:lang=<xsl:value-of select="$new-lang"/></xsl:message->
+				<xsl:attribute name="xml:lang" select="$new-lang"/>
+			</xsl:if>
+			<xsl:if test="not(empty($other-attributes))">
+				<xsl:for-each select="$other-attributes" >
+					<!-xsl:message>adding attribute <xsl:copy-of select="."/></xsl:message->
+					<xsl:copy-of select="."/>
+				</xsl:for-each>
+			</xsl:if>
+			<xsl:sequence select="child::node()"/>
+		</xsl:copy>
+	</xsl:template>
+ -->
+	<xd:doc>
+		<xd:short>Debugging catcher for elements.  Displays the element and path when $debug-show-process is set.
+		WON'T WORK BECAUSE OF TUNNELING PARAMETERS!</xd:short>
+	</xd:doc>
+	<!--xsl:template match="element()" priority="100000" mode="#all">
+		<xsl:if test="$debug-show-process">
+			<xsl:message><xsl:value-of select="
+			concat(base-uri(), '/',
+			string-join(
+			for $e in ancestor-or-self::element() return 
+				concat($e/name(), 
+				if ($e/@xml:id) then concat('(#',@xml:id,')') else '',
+				'[', $e/position(), ']',
+				'/'),''))"/>
+			</xsl:message>
+		</xsl:if>
+		<xsl:next-match/>
+	</xsl:template-->
+
+   
+  <xd:doc>
+    <xd:short>Return a unique identifier for a document.</xd:short>
+    <xd:detail>Used as a replacement for document-uri() when it won't work
+    in the database.</xd:detail>
+    <xd:param name="node">Document node whose id we're obtaining</xd:param>
+  </xd:doc>
+  <xsl:function name="func:document-id" as="xs:anyURI?">
+    <xsl:param name="node" as="node()"/>
+    
+    <xsl:variable name="root-node" as="document-node()?" 
+      select="root($node)/self::document-node()"/>
+    
+    <xsl:sequence select="
+      if ($root-node)
+      then (document-uri($root-node), xs:anyURI(generate-id($root-node)))[1]
+      else ()"/>
+  </xsl:function>
+ 
+  <xd:doc>
+    <xd:short>Retrieve an xpath that identifies the given node.</xd:short>
+    <xd:param name="node">The node to find the xpath from</xd:param>
+  </xd:doc>
+  <xsl:function name="func:get-xpath" as="xs:string">
+    <xsl:param name="node" as="node()"/>
+  
+    <xsl:variable name="result" as="xs:string+">
+      <xsl:apply-templates select="$node" mode="get-xpath" />
+    </xsl:variable>
+    <xsl:value-of select="string-join($result, '')"/>
+  </xsl:function>
+  
+  <xsl:template match="document-node()" mode="get-xpath">
+    <xsl:text>/</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="attribute()" mode="get-xpath">
+    <xsl:apply-templates mode="#current" select=".."/>
+    <xsl:text>/</xsl:text>
+    <xsl:value-of select="concat('@',string(node-name(.)))"/>
+  </xsl:template>
+  
+  <xsl:template match="comment()" mode="get-xpath">
+    <xsl:apply-templates select=".." mode="#current"/>
+    <xsl:text>/</xsl:text>
+    <xsl:value-of select="string-join(
+      ('comment()[', 
+       string(count(preceding-sibling::comment()) + 1), 
+       ']'),'')"/>
+  </xsl:template>
+
+  <xsl:template match="processing-instruction()" mode="get-xpath">
+    <xsl:apply-templates mode="#current" select=".."/>
+    <xsl:text>/</xsl:text>
+    <xsl:value-of select="string-join(('processing-instruction()[', 
+      string(count(
+        preceding-sibling::processing-instruction()) + 1), ']'),'')"/>
+  </xsl:template>
+
+  <xsl:template match="text()" mode="get-xpath">
+    <xsl:apply-templates mode="#current" select=".."/>
+    <xsl:text>/</xsl:text>    
+    <xsl:value-of select="string-join(('text()[', 
+      string(count(preceding-sibling::text()) + 1), ']'),'')"/>
+  </xsl:template>
+  
+  <xsl:template match="element()" mode="get-xpath">
+    <xsl:variable name="parent" as="node()?" select=".."/>
+    <xsl:choose>
+      <xsl:when test="empty($parent)">
+        <xsl:value-of select="string-join(
+          (string(node-name(.)), '[',string(position()),']'),
+          '')"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates mode="#current" select="$parent"/>
+        <xsl:value-of select="if ($parent is root(.)) then '' else '/'"/>
+        <xsl:value-of select="string-join(
+          (string(node-name(.)), '[', string(count(
+            preceding-sibling::*[node-name(.)=node-name(current())]) + 1), 
+            ']'),'')"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+	<xd:doc>
+		common base URI for the project
+	</xd:doc>
+	<xsl:variable name="common-base-uri" as="xs:anyURI">http://jewishliturgy.org/base/text/</xsl:variable>
+
+  <xd:doc>
+    Named template to do identity transform and continue in current mode.
+  </xd:doc>
+  <xsl:template name="identity-in-mode">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates mode="#current" />
+    </xsl:copy>
+  </xsl:template>
+
+	<xd:doc>
+		Default catcher for elements.  Copy and continue.
+	</xd:doc>
+	<xsl:template match="element()" priority="-10">
+    <xsl:call-template name="identity-in-mode"/>
+	</xsl:template>
+
+  <xd:doc>
+    Identity mode
+  </xd:doc>
+  <xsl:template match="*" mode="identity">
+    <xsl:call-template name="identity-in-mode"/>
+  </xsl:template>
+
+	<xd:doc>
+		Default catcher for text.  Copy.
+	</xd:doc>
+	<xsl:template match="text()" mode="#default" priority="-10"><xsl:copy/></xsl:template>
+
+</xsl:stylesheet>
