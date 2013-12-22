@@ -41,12 +41,13 @@
       ))
       ]]></code></setup>
     <test>
-      <task>Basic owner/group/mode</task>
+      <task>Basic you/owner/group/mode</task>
       <code><![CDATA[
       acc:get-access(doc($resource))
       ]]></code>
       <expected desc="an access structure">
         <a:access>
+          <a:you read="true" write="true" chmod="true" relicense="false"/>
           <a:owner>testuser</a:owner>
           <a:group write="false">dba</a:group>
           <a:world read="true" write="false"/>
@@ -547,7 +548,7 @@
         </a:access>),
       acc:get-access(doc($resource))
       ]]></code>
-      <xpath desc="correct number of conditions">count(*)=7</xpath>
+      <xpath desc="correct number of conditions">count(*)=8</xpath><!-- include you -->
       <expected desc="owner" xpath="a:owner"><a:owner>testuser</a:owner></expected>
       <expected desc="group" xpath="a:group"><a:group write="true">dba</a:group></expected>
       <expected desc="world" xpath="a:world"><a:world read="true" write="false"/></expected>

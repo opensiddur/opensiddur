@@ -24,7 +24,18 @@ Write = (
   attribute write { xsd:boolean }
 )
 
+Chmod = (
+  attribute chmod { xsd:boolean }
+)
+
+Relicense = (
+  attribute relicense { xsd:boolean }
+)
+
 Access = element access {
+  ## permissions that affect the caller. 
+  ## Read-only: cannot be used for changing permissions
+  element you { Read, Write, Relicense, Chmod }?,
   # default sets of permissions for owner/owner group/world
   # no permissions for owner because you cannot make something read-only or unreadable for its owner
   element owner { xsd:string }, 

@@ -138,7 +138,7 @@ declare function acc:get-access-as-user(
           sm:user-exists($user))
         then
           (: OK, user exists :)
-          let $access := acc:get-access($doc)
+          let $access := acc:get-access-data($doc)
           let $user-groups := 
             system:as-user("admin", $magic:password, 
               sm:get-user-groups($user)
@@ -228,10 +228,25 @@ declare function acc:get-access-as-user(
     }</a:user-access>
 };
 
-(:~ get access rights as an a:access structure 
- : @param $doc A document
+(:~ get access rights as an a:access structure, including details and you 
+ : @param $doc a document
  :)
 declare function acc:get-access(
+  $doc as document-node()
+  ) as element(a:access) {
+  let $as-user := acc:get-access-as-user($doc, app:auth-user())
+  let $details := acc:get-access-data($doc)
+  return 
+    <a:access>
+        <a:you>{$as-user/(@* except @user)}</a:you>
+        {$details/*}
+    </a:access>
+};
+
+(:~ get access rights as an a:access structure, excluding a:you 
+ : @param $doc A document
+ :)
+declare function acc:get-access-data(
   $doc as document-node()
   ) as element(a:access) {
   let $permissions as element(sm:permissions) := 
