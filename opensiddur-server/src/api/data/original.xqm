@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+(: Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Original data API
@@ -67,6 +67,42 @@ declare function orig:validate-report(
   )
 };
 
+declare 
+    %private
+    function orig:validate-revisionDesc(
+    $new as element(tei:revisionDesc),
+    $old as element(tei:revisionDesc)
+    ) as xs:boolean {
+    let $offset := count($new/tei:change) - count($old/tei:change) 
+    return
+        ($offset = (0,1) ) and not(false()=( 
+        for $change at $x in $old/tei:change
+        return xmldiff:compare($new/tei:change[$x + $offset], $change)
+        ))
+};
+
+(:~ remove ignorable text nodes :)
+declare function orig:remove-whitespace(
+    $nodes as node()*
+    ) as node()* {
+    for $node in $nodes
+    return
+        typeswitch ($node)
+        case document-node() return
+            document { orig:remove-whitespace($node/node()) }
+        case comment() return ()
+        case text() return
+            if (normalize-space($node)='')
+            then ()
+            else $node
+        case element() return
+            element { QName(namespace-uri($node), name($node)) }{
+                $node/@*,
+                orig:remove-whitespace($node/node())
+            }
+        default return orig:remove-whitespace($node/node())
+};
+
 (:~ determine if all the changes between an old version and
  : a new version of a document are legal
  : @param $doc new document
@@ -79,32 +115,32 @@ declare function orig:validate-changes(
   ) as element(report) {
   (: TODO: check for missing externally referenced xml:id's :)
   let $messages := ( 
-    if (not(xmldiff:compare($doc//tei:revisionDesc, $old-doc//tei:revisionDesc)))
-    then <message>You may not alter the revision history</message>
+    if (not(orig:validate-revisionDesc($doc//tei:revisionDesc, $old-doc//tei:revisionDesc)))
+    then <message>You may not alter the existing revision history. You may add one change log entry.</message>
     else (),
-    let $authors := 
-      distinct-values(
-        $old-doc//tei:change/@who/substring-after(., "/user/")
-      )
     let $can-change-license := 
       acc:can-relicense($doc, app:auth-user())
     return
       if (not(xmldiff:compare(
         <x>{
-          $doc//tei:publicationStmt/
+          orig:remove-whitespace(
+            $doc//tei:publicationStmt/
             (* except (
               if ($can-change-license) 
               then () 
               else tei:licence
             ))
+          )
         }</x>, 
         <x>{
-          $old-doc//tei:publicationStmt/
-          (* except (
-            if ($can-change-license) 
-            then () 
-            else tei:licence
-          ))
+          orig:remove-whitespace(
+            $old-doc//tei:publicationStmt/
+            (* except (
+              if ($can-change-license) 
+              then () 
+              else tei:licence
+            ))
+          )
         }</x>)
       ))
       then <message>The information in the tei:publicationStmt is immutable and only the original author can change the text's license.</message>
