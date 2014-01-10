@@ -181,7 +181,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               </rng:group>
             </content>
           </elementSpec>
-          <elementSpec ident="layer" prefix="j" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
+          <elementSpec ident="layer" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
             <desc>A hierarchic layer of text. @type should indicate what layer is being provided, and all the top level contained elements should be consistent with that type.</desc>
             <classes>
               <memberOf key="att.global"/>
