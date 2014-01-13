@@ -46,7 +46,7 @@ declare function user:result-title(
     return
         if (exists($c/tei:name))
         then name:name-to-string($c/tei:name)
-        else $c/(tei:orgName, tei:idno)[1]/string()
+        else ($c/tei:orgName, $c/tei:idno)[1]/string()
 };
 
 declare function user:query-function(
