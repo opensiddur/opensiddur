@@ -192,33 +192,21 @@ declare function ridx:query(
   $position as xs:integer*,
   $include-ancestors as xs:boolean?
   ) as node()* {
-  for $query in
-    (
-    if ($include-ancestors)
-    then $query-nodes/ancestor-or-self::node()
-    else $query-nodes
-    )
-  let $query-document := document-uri(root($query))
-  let $query-id := util:node-id($query)
-  for $source-node in $source-nodes
-  let $source-document := document-uri(root($source-node))
-  let $source-node-id := 
-    if ($source-node instance of document-node())
-    then ()
-    else util:node-id($source-node)
-  let $null := debug:debug($debug:detail, "refindex", 
-    ("$query=", $query, ", $source-node=", $source-node,
-    ", $source-document=", $source-document, 
-    ", $query-document=", $query-document,
-    ", $query-id=", $query-id,
-    ", $position=", $position,
-    " ***possible entries=", 
-    collection($ridx:ridx-path)/
-      ridx:index[@document=$source-document]/
-        ridx:entry
-    )
-  )
   let $nodes :=
+    for $query in
+      (
+      if ($include-ancestors)
+      then $query-nodes/ancestor-or-self::node()
+      else $query-nodes
+      )
+    let $query-document := document-uri(root($query))
+    let $query-id := util:node-id($query)
+    for $source-node in $source-nodes
+    let $source-document := document-uri(root($source-node))
+    let $source-node-id := 
+      if ($source-node instance of document-node())
+      then ()
+      else util:node-id($source-node)
     for $entry in 
       collection($ridx:ridx-path)/
         ridx:index[@document=$source-document]/
@@ -227,18 +215,14 @@ declare function ridx:query(
             [@target-node=$query-id]
             [empty($source-node) or @source-node=$source-node-id]
             [empty($position) or @position=$position]
-    let $null := debug:debug($debug:detail, "refindex",
-      ("$entry=", $entry)
-    )
     group by 
       $document-uri := string(root($entry)/*/@document),
       $entry-source-node := string($entry/@source-node)
     return (
-      util:log-system-out(("^^^ document-uri=", $document-uri, " entry-source-node=", $entry-source-node)),
       util:node-by-id(doc($document-uri), $entry-source-node)
     )
   return 
-    $nodes
+    $nodes | ()
 };
 
 declare function ridx:query-all(
