@@ -70,12 +70,13 @@ declare function orig:validate-report(
 declare 
     %private
     function orig:validate-revisionDesc(
-    $new as element(tei:revisionDesc),
-    $old as element(tei:revisionDesc)
+    $new as element(tei:revisionDesc)?,
+    $old as element(tei:revisionDesc)?
     ) as xs:boolean {
     let $offset := count($new/tei:change) - count($old/tei:change) 
     return
-        ($offset = (0,1) ) and not(false()=( 
+        ($offset = (0,1) ) and not(false()=(
+        true(),     (: handle the case of the empty revisionDesc :) 
         for $change at $x in $old/tei:change
         return xmldiff:compare($new/tei:change[$x + $offset], $change)
         ))
