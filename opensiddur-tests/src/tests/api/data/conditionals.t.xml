@@ -204,7 +204,7 @@
     </test>
   </TestSet>
   <TestSet>
-    <testName>lnk:put()</testName>
+    <testName>cnd:put()</testName>
     <test>
       <task>Put a valid resource to an existing resource</task>
       <code><![CDATA[
