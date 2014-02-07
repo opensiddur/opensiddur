@@ -1,6 +1,6 @@
 # Access rights XML
 # Open Siddur Project
-# Copyright 2012 Efraim Feinstein <efraim@opensiddur.org>
+# Copyright 2012,2014 Efraim Feinstein <efraim@opensiddur.org>
 # Licensed under the GNU Lesser General Public License, version 3 or later
 default namespace  = "http://jewishliturgy.org/ns/access/1.0"
 
@@ -42,15 +42,18 @@ Access = element access {
   element group { Write, xsd:string },
   # default permissions to a user who is not the owner, not in the owning group, or not logged in
   element world { Read, Write },
-  # user and group exceptions: which user/group is excepted and what the exceptions are.
-  # sharing is processed before denial
-  # for sharing, you may share read access read/write access
-  # for denial, you may deny write access or read/write access
-  # to deny read access, set @read="false"
-  (
-    element share-user { Write, xsd:string } |
-    element deny-user { Read, xsd:string } |
-    element share-group { Write, xsd:string } |
-    element deny-group { Read, xsd:string }
-  )*
+  # grant special access to a group or user; write="true" if the user or group can edit
+  element grant {
+    (
+      element grant-group { Write, xsd:string } |
+      element grant-user { Write, xsd:string }
+    )*
+  }?,
+  # deny rights to a group or user; read="true" if the group/user can read, false if you want to deny read rights 
+  element deny {
+    (
+      element deny-group { Read, xsd:string } |
+      element deny-user { Read, xsd:string }
+    )*
+  }?
 }

@@ -4,7 +4,7 @@
   <description>
     <p>Access module function calls</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012-2013 Efraim Feinstein, 
+    <copyright>Copyright 2012-2014 Efraim Feinstein, 
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <imports>
@@ -65,12 +65,12 @@
       )
       ]]></code></setup>
     <test>
-      <task>Return a:share-group</task>
+      <task>Return a:grant-group</task>
       <code><![CDATA[
       acc:get-access(doc("/db/data/tests/Test1.xml"))
       ]]></code>
-      <expected desc="an access structure" xpath="a:share-group">
-        <a:share-group write="true">everyone</a:share-group>
+      <expected desc="an access structure" xpath="a:grant/a:grant-group">
+        <a:grant-group write="true">everyone</a:grant-group>
       </expected>
     </test>
   </TestSet>
@@ -84,12 +84,12 @@
       )
       ]]></code></setup>
     <test>
-      <task>Return a:share-group</task>
+      <task>Return a:grant-group</task>
       <code><![CDATA[
       acc:get-access(doc($resource))
       ]]></code>
-      <expected desc="an access structure" xpath="a:share-group">
-        <a:share-group write="false">everyone</a:share-group>
+      <expected desc="an access structure" xpath="a:grant/a:grant-group">
+        <a:grant-group write="false">everyone</a:grant-group>
       </expected>
     </test>
   </TestSet>
@@ -103,12 +103,12 @@
       )
       ]]></code></setup>
     <test>
-      <task>Return a:share-user</task>
+      <task>Return a:grant-user</task>
       <code><![CDATA[
       acc:get-access(doc($resource))
       ]]></code>
-      <expected desc="an access structure" xpath="a:share-user">
-        <a:share-user write="true">testuser2</a:share-user>
+      <expected desc="an access structure" xpath="a:grant/a:grant-user">
+        <a:grant-user write="true">testuser2</a:grant-user>
       </expected>
     </test>
   </TestSet>
@@ -122,12 +122,12 @@
       )
       ]]></code></setup>
     <test>
-      <task>Return a:share-user</task>
+      <task>Return a:grant-user</task>
       <code><![CDATA[
       acc:get-access(doc($resource))
       ]]></code>
-      <expected desc="an access structure" xpath="a:share-user">
-        <a:share-user write="false">testuser2</a:share-user>
+      <expected desc="an access structure" xpath="a:grant/a:grant-user">
+        <a:grant-user write="false">testuser2</a:grant-user>
       </expected>
     </test>
   </TestSet>
@@ -147,7 +147,7 @@
       <code><![CDATA[
       acc:get-access(doc($resource))
       ]]></code>
-      <expected desc="an access structure" xpath="a:deny-group">
+      <expected desc="an access structure" xpath="a:deny/a:deny-group">
         <a:deny-group read="false">guest</a:deny-group>
       </expected>
     </test>
@@ -168,7 +168,7 @@
       <code><![CDATA[
       acc:get-access(doc($resource))
       ]]></code>
-      <expected desc="an access structure" xpath="a:deny-group">
+      <expected desc="an access structure" xpath="a:deny/a:deny-group">
         <a:deny-group read="true">guest</a:deny-group>
       </expected>
     </test>
@@ -185,11 +185,11 @@
       ))
       ]]></code></setup>
     <test>
-      <task>Return a:deny-group</task>
+      <task>Return a:deny-user</task>
       <code><![CDATA[
       acc:get-access(doc($resource))
       ]]></code>
-      <expected desc="an access structure" xpath="a:deny-user">
+      <expected desc="an access structure" xpath="a:deny/a:deny-user">
         <a:deny-user read="false">testuser2</a:deny-user>
       </expected>
     </test>
@@ -206,11 +206,11 @@
       ))
       ]]></code></setup>
     <test>
-      <task>Return a:deny-group</task>
+      <task>Return a:deny-user</task>
       <code><![CDATA[
       acc:get-access(doc($resource))
       ]]></code>
-      <expected desc="an access structure" xpath="a:deny-user">
+      <expected desc="an access structure" xpath="a:deny/a:deny-user">
         <a:deny-user read="true">testuser2</a:deny-user>
       </expected>
     </test>
@@ -370,7 +370,9 @@
           <a:owner>testuser</a:owner>
           <a:group write="true">everyone</a:group>
           <a:world read="true" write="false"/>
-          <a:share-group write="true">guest</a:share-group>
+          <a:grant>
+            <a:grant-group write="true">guest</a:grant-group>
+          </a:grant>
         </a:access>)
       ]]></code>
       <xpath desc="group share is present and has r/w access">sm:get-permissions(xs:anyURI($resource))//sm:ace
@@ -384,7 +386,9 @@
           <a:owner>testuser</a:owner>
           <a:group write="true">everyone</a:group>
           <a:world read="true" write="false"/>
-          <a:share-group write="false">guest</a:share-group>
+          <a:grant>
+            <a:grant-group write="false">guest</a:grant-group>
+          </a:grant>
         </a:access>)
       ]]></code>
       <xpath desc="group share is present and has r/o access">sm:get-permissions(xs:anyURI($resource))//sm:ace
@@ -401,7 +405,9 @@
           <a:owner>testuser</a:owner>
           <a:group write="true">everyone</a:group>
           <a:world read="true" write="false"/>
-          <a:share-user write="true">guest</a:share-user>
+          <a:grant>
+            <a:grant-user write="true">guest</a:grant-user>
+          </a:grant>
         </a:access>)
       ]]></code>
       <xpath desc="user share is present and has r/w access">sm:get-permissions(xs:anyURI($resource))//sm:ace
@@ -415,7 +421,9 @@
           <a:owner>testuser</a:owner>
           <a:group write="true">everyone</a:group>
           <a:world read="true" write="false"/>
-          <a:share-user write="false">guest</a:share-user>
+          <a:grant>
+            <a:grant-user write="false">guest</a:grant-user>
+          </a:grant>
         </a:access>)
       ]]></code>
       <xpath desc="user share is present and has r/o access">sm:get-permissions(xs:anyURI($resource))//sm:ace
@@ -432,7 +440,9 @@
           <a:owner>testuser</a:owner>
           <a:group write="true">everyone</a:group>
           <a:world read="true" write="false"/>
-          <a:deny-group read="false">guest</a:deny-group>
+          <a:deny>
+            <a:deny-group read="false">guest</a:deny-group>
+          </a:deny>
         </a:access>)
       ]]></code>
       <xpath desc="group deny is present and covers r/w access">sm:get-permissions(xs:anyURI($resource))//sm:ace
@@ -446,7 +456,9 @@
           <a:owner>testuser</a:owner>
           <a:group write="true">everyone</a:group>
           <a:world read="true" write="false"/>
-          <a:deny-group read="true">guest</a:deny-group>
+          <a:deny>
+            <a:deny-group read="true">guest</a:deny-group>
+          </a:deny>
         </a:access>)
       ]]></code>
       <xpath desc="group deny is present and covers w/o access">sm:get-permissions(xs:anyURI($resource))//sm:ace
@@ -463,7 +475,9 @@
           <a:owner>testuser</a:owner>
           <a:group write="true">everyone</a:group>
           <a:world read="true" write="false"/>
-          <a:deny-user read="false">guest</a:deny-user>
+          <a:deny>
+            <a:deny-user read="false">guest</a:deny-user>
+          </a:deny>
         </a:access>)
       ]]></code>
       <xpath desc="user deny is present and covers r/w access">sm:get-permissions(xs:anyURI($resource))//sm:ace
@@ -477,7 +491,9 @@
           <a:owner>testuser</a:owner>
           <a:group write="true">everyone</a:group>
           <a:world read="true" write="false"/>
-          <a:deny-user read="true">guest</a:deny-user>
+          <a:deny>
+            <a:deny-user read="true">guest</a:deny-user>
+          </a:deny>
         </a:access>)
       ]]></code>
       <xpath desc="user deny is present and covers w/o access">sm:get-permissions(xs:anyURI($resource))//sm:ace
@@ -541,21 +557,25 @@
           <a:owner>testuser</a:owner>
           <a:group write="true">dba</a:group>
           <a:world read="true" write="false"/>
-          <a:share-group write="false">everyone</a:share-group>
-          <a:share-user write="true">testuser2</a:share-user> 
-          <a:deny-user read="true">guest</a:deny-user>
-          <a:deny-group read="true">guest</a:deny-group>
+          <a:grant>
+            <a:grant-group write="false">everyone</a:grant-group>
+            <a:grant-user write="true">testuser2</a:grant-user> 
+          </a:grant>
+          <a:deny>
+            <a:deny-user read="true">guest</a:deny-user>
+            <a:deny-group read="true">guest</a:deny-group>
+          </a:deny>
         </a:access>),
       acc:get-access(doc($resource))
       ]]></code>
-      <xpath desc="correct number of conditions">count(*)=8</xpath><!-- include you -->
+      <xpath desc="correct number of conditions">count(*)=6 and count(a:grant/*)=2 and count(a:deny/*)=2</xpath><!-- include you -->
       <expected desc="owner" xpath="a:owner"><a:owner>testuser</a:owner></expected>
       <expected desc="group" xpath="a:group"><a:group write="true">dba</a:group></expected>
       <expected desc="world" xpath="a:world"><a:world read="true" write="false"/></expected>
-      <expected desc="share-group" xpath="a:share-group"><a:share-group write="false">everyone</a:share-group></expected>
-      <expected desc="share-user" xpath="a:share-user"><a:share-user write="true">testuser2</a:share-user></expected> 
-      <expected desc="deny-user" xpath="a:deny-user"><a:deny-user read="true">guest</a:deny-user></expected>
-      <expected desc="deny-group" xpath="a:deny-group"><a:deny-group read="true">guest</a:deny-group></expected>
+      <expected desc="grant-group" xpath="a:grant/a:grant-group"><a:grant-group write="false">everyone</a:grant-group></expected>
+      <expected desc="grant-user" xpath="a:grant/a:grant-user"><a:grant-user write="true">testuser2</a:grant-user></expected> 
+      <expected desc="deny-user" xpath="a:deny/a:deny-user"><a:deny-user read="true">guest</a:deny-user></expected>
+      <expected desc="deny-group" xpath="a:deny/a:deny-group"><a:deny-group read="true">guest</a:deny-group></expected>
     </test>
   </TestSet>
 </TestSuite>
