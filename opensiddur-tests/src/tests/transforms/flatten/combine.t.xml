@@ -9,7 +9,7 @@
   <description>
     <p>Tests of combine transform</p>
     <author>Efraim Feinstein</author>
-    <copyright>Copyright 2013 Efraim Feinstein
+    <copyright>Copyright 2013-2014 Efraim Feinstein
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -38,7 +38,12 @@
     
     declare function local:tearDown($file as xs:string) {
       format:clear-caches("/db/data/tests/" || $file),
-      xmldb:remove("/db/data/tests", $file)
+      try {
+        xmldb:remove("/db/data/tests", $file)
+      }
+      catch * {
+        ()
+      }
     };
   ]]></functions>
   <TestSet>
@@ -61,6 +66,12 @@
         desc="acts as an identity transform for unflattened text" 
         >exists(./tei:TEI/tei:text/jf:combined/tei:seg[@jf:id="seg1"][@jf:stream="stream"])
       </xpath>
+      <xpath 
+        desc="a license statement is added"
+        >exists(./tei:TEI/tei:text/tei:back/tei:div[@type="licensing"])</xpath>
+      <xpath 
+        desc="the license statement references 1 license"
+        >count(.//tei:div[@type="licensing"]/tei:div[@type="license-statement"]/tei:ref[@target="http://www.creativecommons.org/publicdomain/zero/1.0"])=1</xpath>
     </test>        
   </TestSet>
   <TestSet>
@@ -86,6 +97,43 @@
       <xpath desc="no @jf:document attribute on jf:ptr">
         empty(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/@jf:document)
       </xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>External pointer</testName>
+    <setup><code><![CDATA[
+    local:setup("combine1.xml"),
+    local:setup("combine3.xml")
+    ]]></code></setup>
+    <tearDown><code><![CDATA[
+    local:tearDown("combine3.xml"),
+    local:tearDown("combine1.xml")
+    ]]></code></tearDown>
+    <test>
+      <task>combine with inclusion</task>
+      <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/combine3.xml"),
+          map {})
+      ]]></code>
+      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine3$")</xpath>
+      <xpath desc="has @jf:document on the included element">matches(./tei:TEI//jf:ptr[@jf:id="ptr1"]/@jf:document,"^(/exist/restxq)?/api/data/tests/combine1$")</xpath>
+      <xpath 
+        desc="incorporate destination in-place" 
+        >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/tei:seg[@jf:id="seg1"])
+      </xpath>
+      <xpath 
+        desc="a license statement is added"
+        >exists(./tei:TEI/tei:text/tei:back/tei:div[@type="licensing"])</xpath>
+      <xpath 
+        desc="the license statement references 2 licenses"
+        ><![CDATA[
+        let $statements := .//tei:div[@type="licensing"]/tei:div[@type="license-statement"]
+        return
+            count($statements)=2 and 
+            exists($statements/tei:ref[@target="http://www.creativecommons.org/publicdomain/zero/1.0"]) and
+            exists($statements/tei:ref[@target="http://www.creativecommons.org/licenses/by/3.0"])
+        ]]></xpath>
     </test>
   </TestSet>
 </TestSuite>

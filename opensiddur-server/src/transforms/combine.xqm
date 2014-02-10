@@ -4,7 +4,7 @@ xquery version "3.0";
  : JLPTEI document
  :
  : Open Siddur Project
- : Copyright 2013 Efraim Feinstein 
+ : Copyright 2013-2014 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -47,6 +47,8 @@ declare function combine:combine(
     return combine:tei-ptr($node, $params)
     case element(tei:TEI)
     return combine:tei-TEI($node,$params)
+    case element(tei:text)
+    return combine:tei-text($node, $params)
     case element(tei:teiHeader)
     return $node
     (: TODO: add other model.resourceLike elements above :)
@@ -145,7 +147,13 @@ declare function combine:new-document-params(
   $new-doc-nodes as node()*,
   $params as map
   ) as map {
-  combine:update-params($new-doc-nodes[1], $params)
+  let $new-params := map:new((
+      $params, 
+      (: store the currently applicable license :)
+      map { "combine:license" := root($new-doc-nodes[1])//tei:licence/@target/string() }
+    ))
+  return
+    combine:update-params($new-doc-nodes[1], $params)
 }; 
 
 (:~ update parameters are required for any new context :)
@@ -166,6 +174,39 @@ declare function combine:document-uri(
     [(@jf:document-uri|@uri:document-uri)][1]/
       (@jf:document-uri, @uri:document-uri)[1]/string()
   )[1]
+};
+
+(: add back matter that's derived from the text's metadata :)
+declare function combine:tei-text(
+  $e as element(tei:text),
+  $params as map
+  ) as element(tei:text) {
+  let $text-output := combine:element($e, $params)
+  return 
+    element tei:text {
+      $text-output/@*,
+      $text-output/(* except tei:back),
+      element tei:back {
+        $text-output/tei:back/(@*|node()),
+        let $api-documents := $text-output//@jf:document
+        let $unique-documents-db := distinct-values((
+                mirror:unmirror-path(       (: this document :)
+                  $format:unflatten-cache,
+                  document-uri(root($e))
+                ),
+                for $doc in $api-documents 
+                return data:api-path-to-db($doc)
+            ))
+        let $unique-documents :=
+            for $d in $unique-documents-db
+            return doc($d) 
+        let $null := util:log-system-out(("unique documents=", $unique-documents-db))
+        return (
+            (: licensing :)
+            combine:license-statements($unique-documents) 
+        )
+      }
+    }
 };
 
 (:~ handle a pointer :)
@@ -217,4 +258,45 @@ declare function combine:tei-ptr(
             combine:new-document-params($destination, $params))
         )
       }
+};
+
+declare function combine:license-statements(
+    $documents as document-node()*
+    ) as element(tei:div)? {
+    let $text-licenses := 
+        distinct-values($documents//tei:licence/@target/string())
+    let $supported-licenses := (
+        "http://www.creativecommons.org/publicdomain/zero/",
+        "http://www.creativecommons.org/licenses/by/",
+        "http://www.creativecommons.org/licenses/by-sa/"
+    )
+    let $supported-license-names := map {
+        "http://www.creativecommons.org/publicdomain/zero/" := "Creative Commons Zero",
+        "http://www.creativecommons.org/licenses/by/" := "Creative Commons Attribution",
+        "http://www.creativecommons.org/licenses/by-sa/" := "Creative Commons Attribution-ShareAlike"
+    }
+    return
+        if (count($text-licenses)>0)
+        then 
+            element tei:div {
+                attribute type { "licensing" },
+                attribute xml:lang { "en" },
+                if (count($text-licenses)=1) 
+                then "This text is licensed under the terms of the following license:"
+                else "This text is derived from works under the following licenses:",
+                for $license in $supported-licenses, 
+                    $text-license in $text-licenses
+                where starts-with($text-license, $license)
+                return
+                    let $lic-version := replace($text-license, "http://[^/]+/[^/]+/[^/]+/", "") 
+                    return
+                        <tei:div type="license-statement">
+                            <tei:ref target="{$text-license}">{
+                                string-join((
+                                    $supported-license-names($license), 
+                                    $lic-version
+                                    ), " ")}</tei:ref>
+                        </tei:div>
+            }
+        else ()
 };

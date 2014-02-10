@@ -3,7 +3,11 @@
   xmlns:tei="http://www.tei-c.org/ns/1.0"
   xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
   <tei:teiHeader>
-  
+    <tei:publicationStmt>
+      <tei:availability status="free">
+        <tei:licence target="http://www.creativecommons.org/licenses/by/3.0"/>
+      </tei:availability> 
+    </tei:publicationStmt>
   </tei:teiHeader>
   <tei:text>
     <j:streamText xml:id="stream">
