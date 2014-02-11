@@ -200,7 +200,6 @@ declare function combine:tei-text(
         let $unique-documents :=
             for $d in $unique-documents-db
             return doc($d) 
-        let $null := util:log-system-out(("unique documents=", $unique-documents-db))
         return (
             (: licensing :)
             combine:license-statements($unique-documents) 

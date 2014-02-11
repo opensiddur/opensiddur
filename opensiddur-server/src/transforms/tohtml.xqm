@@ -52,6 +52,8 @@ declare function tohtml:tohtml(
     return tohtml:span-element($node, $params)
     case element(tei:list)
     return tohtml:span-element($node, $params)
+    case element(tei:ref)
+    return tohtml:tei-ref($node, $params)
     case element(tei:roleName)
     return tohtml:span-element($node, $params)
     case element(tei:surname)
@@ -74,13 +76,13 @@ declare function tohtml:tohtml(
 declare function tohtml:space(
   $e as element(),
   $params as map
-  ) as item()? {
+  ) as node()? {
   if (
     $e/following::*[1] instance of element(tei:pc) or
     $e/self::tei:pc[.='־'] (: maqef is a connector on both sides :)
     )
   then ()
-  else "&#x20;"
+  else text { "&#x20;" }
 };
 
 declare function tohtml:span-element(
@@ -118,6 +120,46 @@ declare function tohtml:tei-pc(
     ),
     tohtml:space($e, $params)
   }
+};
+
+declare function tohtml:tei-ref(
+    $e as element(tei:ref),
+    $params as map
+    ) as node()+ {
+    element a {
+        attribute href { $e/@target },
+        tohtml:attributes($e, $params),
+        if ($e/ancestor::tei:div[@type="license-statement"])
+        then tohtml:tei-ref-license($e, $params)
+        else (),
+        tohtml:tohtml($e/node(), $params)
+    },
+    tohtml:space($e, $params)
+};
+
+declare function tohtml:tei-ref-license(
+    $e as element(tei:ref),
+    $params as map
+    ) as node()+ {
+    let $icons := map {
+        "zero" := "/api/static/cc-zero.svg",
+        "by" := "/api/static/cc-by.svg",
+        "by-sa" := "/api/static/cc-by-sa.svg"
+    }
+    let $license-type := tokenize($e/@target, "/")[5]
+    let $img :=
+        if ($license-type)
+        then
+            element object {
+                attribute data { $icons($license-type) },
+                attribute type { "image/svg+xml" },
+                text { if ($license-type="zero") then "No rights reserved" else "Some rights reserved" }
+            }
+        else ()
+    return (
+        attribute rel { "license" },
+        $img
+    )
 };
 
 (:~ @return classes :)
