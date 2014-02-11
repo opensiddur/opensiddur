@@ -1,11 +1,7 @@
 xquery version "3.0";
 (:~ API module for functions for index URIs 
  : 
- : Functions assume that the following has already been done:
- :  authentication,
- :  content negotiation
- : 
- : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Open Siddur Project
  : Licensed Under the GNU Lesser General Public License, version 3 or later
  :)
@@ -69,6 +65,9 @@ declare
           </li>,
           <li class="api">
             <a class="discovery" href="{$api-base}/logout">Logout</a>
+          </li>,
+          <li class="api">
+            <a class="discovery" href="{$api-base}/static">Static files</a>
           </li>,
           index:if-installed(
             "http://jewishliturgy.org/apps/opensiddur-tests",
