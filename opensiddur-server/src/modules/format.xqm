@@ -1,7 +1,7 @@
 (:~
  : XQuery functions to output a given XML file in a format.
  : 
- : Copyright 2011-2013 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2014 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -21,6 +21,8 @@ import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
   at "../transforms/unflatten.xqm";
 import module namespace combine="http://jewishliturgy.org/transform/combine"
   at "../transforms/combine.xqm";
+import module namespace compile="http://jewishliturgy.org/transform/compile"
+  at "../transforms/compile.xqm";
 import module namespace tohtml="http://jewishliturgy.org/transform/html"
   at "../transforms/tohtml.xqm";
 import module namespace translit="http://jewishliturgy.org/transform/transliterator"
@@ -36,6 +38,7 @@ declare variable $format:merge-cache := "/db/cache/merge";
 declare variable $format:resolve-cache := "/db/cache/resolved";
 declare variable $format:unflatten-cache := "/db/cache/unflattened";
 declare variable $format:combine-cache := "/db/cache/combined";
+declare variable $format:compile-cache := "/db/cache/compiled";
 declare variable $format:html-cache := "/db/cache/html";
 declare variable $format:caches := (
     $format:dependency-cache,
@@ -44,6 +47,7 @@ declare variable $format:caches := (
     $format:resolve-cache,
     $format:unflatten-cache,
     $format:combine-cache,
+    $format:compile-cache,
     $format:html-cache
     );
 
@@ -245,6 +249,27 @@ declare function format:combine(
     )
 };
 
+(:~ perform the transform up to the compile step 
+ : @param $doc The document to be transformed
+ : @param $params Parameters to pass to the transforms
+ : @param $original-doc The original document that is being transformed (may be the same as $doc) 
+ : @return The compiled document (as an in-database copy)
+ :)
+declare function format:compile(
+  $doc as document-node(),
+  $params as map,
+  $original-doc as document-node()
+  ) as document-node() {
+  let $cmp := compile:compile-document(?, $params)
+  return
+    mirror:apply-if-outdated(
+      $format:compile-cache,
+      format:combine($doc, $params, $original-doc),
+      $cmp,
+      $original-doc
+    )
+};
+
 (:~ perform the transform up to the HTML formatting step 
  : @param $doc The document to be transformed
  : @param $params Parameters to pass to the transforms
@@ -263,7 +288,7 @@ declare function format:html(
     mirror:apply-if-outdated(
       $format:html-cache,
       if ($transclude)
-      then format:combine($doc, $params, $original-doc)
+      then format:compile($doc, $params, $original-doc)
       else format:unflatten($doc, $params, $original-doc),
       $html,
       $original-doc

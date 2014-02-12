@@ -407,7 +407,7 @@ declare
     then
       if ($transclude[1])
       then
-        format:combine($doc, map {}, $doc)
+        format:compile($doc, map {}, $doc)
       else
         format:unflatten($doc, map {}, $doc)
     else $doc
