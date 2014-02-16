@@ -22,6 +22,8 @@
       at "xmldb:exist:///db/apps/opensiddur-server/modules/mirror.xqm";
     import module namespace compile="http://jewishliturgy.org/transform/compile"
       at "xmldb:exist:///db/apps/opensiddur-server/transforms/compile.xqm";
+    import module namespace user="http://jewishliturgy.org/api/user"
+      at "xmldb:exist:///db/apps/opensiddur-server/api/user.xqm";
   </imports>
   <asUser>testuser</asUser>
   <password>testuser</password>
@@ -45,6 +47,7 @@
         ()
       }
     };
+
   ]]></functions>
   <TestSet>
     <testName>No external pointers</testName>
@@ -104,4 +107,74 @@
         ]]></xpath>
     </test>
   </TestSet>
+    <TestSet>
+        <testName>contributor list</testName>
+        <setup>
+            <code><![CDATA[
+                user:put(
+                    "testuser10",
+                    document {
+                      <j:contributor>
+                          <tei:idno>testuser10</tei:idno>
+                          <tei:name>Test User 10</tei:name>
+                      </j:contributor>
+                    }
+                ),
+                user:put(
+                    "testorg11",
+                    document {
+                        <j:contributor>
+                            <tei:idno>testorg11</tei:idno>
+                            <tei:orgName>Organization</tei:orgName>
+                        </j:contributor>
+                    }
+                ),
+                local:setup("compile1.xml"),
+                local:setup("compile2.xml"),
+                local:setup("compile3.xml")
+            ]]></code>
+        </setup>
+        <tearDown>
+            <code><![CDATA[
+                local:tearDown("compile1.xml"),
+                local:tearDown("compile2.xml"),
+                local:tearDown("compile3.xml"),
+                user:delete("testorg11"),
+                user:delete("testuser10")
+            ]]></code>
+        </tearDown>
+        <test>
+            <task>referenced by change elements</task>
+            <code><![CDATA[
+                compile:compile-document(
+                    mirror:doc($format:combine-cache, "/db/data/tests/compile1.xml"),
+                    map {}
+                )
+            ]]></code>
+            <xpath desc="returns a list of editors">count(.//tei:back/tei:div[@type="contributors"]/tei:list[tei:head="Editors"]/tei:item)=2</xpath>
+            <xpath desc="sorted by name">.//tei:div[@type="contributors"]/tei:list/(tei:item[1]/j:contributor/tei:idno="testorg11" and tei:item[2]/j:contributor/tei:idno="testuser10")</xpath>
+        </test>
+        <test>
+            <task>referenced by respStmt elements</task>
+            <code><![CDATA[
+                compile:compile-document(
+                    mirror:doc($format:combine-cache, "/db/data/tests/compile2.xml"),
+                    map {}
+                )
+            ]]></code>
+            <xpath desc="returns a list for each key in the respStmt">count(.//tei:back/tei:div[@type="contributors"]/tei:list)=2</xpath>
+            <xpath desc="references contributor of type 'fnd' in funders list">.//tei:div[@type="contributors"]/tei:list[tei:head="Funders"]/tei:item/j:contributor/tei:idno="testorg11"</xpath>
+            <xpath desc="references contributor of type 'trc' in transcribers list">.//tei:div[@type="contributors"]/tei:list[tei:head="Transcribers"]/tei:item/j:contributor/tei:idno="testuser10"</xpath>
+        </test>
+        <test>
+            <task>same user referenced more than once for the same contribution</task>
+            <code><![CDATA[
+                compile:compile-document(
+                    mirror:doc($format:combine-cache, "/db/data/tests/compile3.xml"),
+                    map {}
+                )
+            ]]></code>
+            <xpath desc="returns only one reference">count(.//tei:div[@type="contributors"]/tei:list/tei:item)=1</xpath>
+        </test>
+    </TestSet>
 </TestSuite>
