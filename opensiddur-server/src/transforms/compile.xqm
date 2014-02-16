@@ -18,6 +18,7 @@ import module namespace mirror="http://jewishliturgy.org/modules/mirror"
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
 
+declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
@@ -81,7 +82,9 @@ declare function compile:tei-text(
             return doc($d) 
         return (
             (: licensing :)
-            compile:license-statements($unique-documents) 
+            compile:license-statements($unique-documents),
+            (: contributor list :)
+            compile:contributor-list($unique-documents) 
         )
       }
     }
@@ -126,4 +129,62 @@ declare function compile:license-statements(
                         </tei:div>
             }
         else ()
+};
+
+declare variable $compile:contributor-types := 
+    map {
+        "aut" := "Author",
+        "ann" := "Annotator",
+        "ctb" := "Contributor",
+        "cre" := "Creator",
+        "edt" := "Editor",
+        "fac" := "Facsimilist",
+        "fnd" := "Funder",
+        "mrk" := "Markup editor",
+        "oth" := "Other",
+        "pfr" := "Proofreader",
+        "trc" := "Transcriber"
+    };
+
+declare function compile:contributor-list(
+    $documents as document-node()*
+    ) as element(tei:div)? {
+    let $responsibility-statements := $documents//tei:respStmt
+    let $change-statements := $documents//tei:change
+    let $all-responsibilities := $responsibility-statements | $change-statements
+    where exists($all-responsibilities)
+    return
+        element tei:div {
+            attribute type { "contributors" },
+            attribute xml:lang { "en" },
+            for $contributor in $all-responsibilities
+            group by 
+                $key := ($contributor/tei:resp/@key/string(), "edt")[1]
+            order by $key
+            return ( 
+                let $contributor-uris :=
+                    distinct-values($contributor/(*/@ref,@who)[1]/string()[.])
+                let $n := count($contributor-uris)
+                where $n > 0
+                return
+                    element tei:list {
+                        element tei:head {
+                           text { $compile:contributor-types($key) || "s" } 
+                        },
+                        for $contributor-uri in $contributor-uris
+                        let $contributor-doc :=
+                            if ($contributor-uri)
+                            then data:doc($contributor-uri) 
+                            else () 
+                        let $contributor-name := $contributor-doc/*/(tei:name, tei:orgName, tei:idno)[1]
+                        where $contributor-doc
+                        order by $contributor-name
+                        return
+                            element tei:item {
+                                $contributor-doc
+                            }
+                    }
+            )
+                 
+        }
 };
