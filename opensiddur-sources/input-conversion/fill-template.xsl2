@@ -68,11 +68,11 @@
               <xsl:sequence select="$respons"/>
             </tei:titleStmt>
             <tei:publicationStmt>
+              <tei:distributor><tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref></tei:distributor>
               <tei:availability status="free">
                 <xsl:sequence select="$license"/>
               </tei:availability>
-              <tei:distributor><tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref></tei:distributor>
-              <tei:date><xsl:sequence select="format-date(current-date(), '[Y]-[M02]-[D02]')"/></tei:date>
+              <tei:date><xsl:sequence select="format-date(current-date(), '[Y0001]-[M01]-[D01]')"/></tei:date>
             </tei:publicationStmt>
             <tei:sourceDesc>
               <xsl:sequence select="$bibliography"/>
