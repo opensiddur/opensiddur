@@ -61,42 +61,42 @@
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("destination"), -1, (), true())
       ]]></code>
-      <xpath desc="result is self">exists(self::tei:seg[@xml:id='destination']) and count($output) = 1</xpath>
+      <xpath desc="result is self">$output/self::tei:seg/@xml:id='destination' and count($output) = 1</xpath>
     </test>
     <test>
       <task>points one ahead</task>
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("one"), -1, (), true())
       ]]></code>
-      <xpath desc="result is destination">exists($output/self::tei:seg[@xml:id='destination']) and count($output)</xpath>
+      <xpath desc="result is destination">$output/self::tei:seg/@xml:id='destination' and count($output)=1</xpath>
     </test>
     <test>
       <task>points two ahead</task>
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("two"), -1, (), true())
       ]]></code>
-      <xpath desc="result is destination">exists($output/self::tei:seg[@xml:id='destination']) and count($output)</xpath>
+      <xpath desc="result is destination">$output/self::tei:seg/@xml:id='destination' and count($output)=1</xpath>
     </test>
     <test>
       <task>points three ahead</task>
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("three"), -1, (), true())
       ]]></code>
-      <xpath desc="result is destination">exists($output/self::tei:seg[@xml:id='destination']) and count($output)</xpath>
+      <xpath desc="result is destination">$output/self::tei:seg/@xml:id='destination' and count($output)=1</xpath>
     </test>
     <test>
       <task>has evaluate=none</task>
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("noeval"), -1, (), true())
       ]]></code>
-      <xpath desc="result is next pointer">exists($output/self::tei:ptr[@xml:id='three']) and count($output) = 1</xpath>
+      <xpath desc="result is next pointer">$output/self::tei:ptr/@xml:id='three' and count($output) = 1</xpath>
     </test>
     <test>
       <task>has evaluate=one</task>
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("evalone"), -1, (), true())
       ]]></code>
-      <xpath desc="result is two pointers ahead">exists($output/self::tei:ptr[@xml:id='two']) and count($output) = 1</xpath>
+      <xpath desc="result is two pointers ahead">$output/self::tei:ptr/@xml:id='two' and count($output) = 1</xpath>
     </test>
     <test>
       <task>is a join</task>
@@ -104,8 +104,8 @@
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("eval_join"), -1, (), true())
       ]]></code>
       <xpath desc="result is two segments">count($output) = 2</xpath>
-      <xpath desc="segment 1 is present">exists($output/self::tei:seg[@xml:id='destination'])</xpath>
-      <xpath desc="segment 2 is present">exists($output/self::tei:seg[@xml:id='destination2'])</xpath>
+      <xpath desc="segment 1 is present">$output/self::tei:seg/@xml:id='destination'</xpath>
+      <xpath desc="segment 2 is present">$output/self::tei:seg/@xml:id='destination2'</xpath>
     </test>
     <test>
       <task>is a join into a paragraph</task>
@@ -113,22 +113,22 @@
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("eval_join_as_p"), -1, (), true())
       ]]></code>
       <xpath desc="result is one paragraph">count($output) = 1 and exists($output/self::tei:p)</xpath>
-      <xpath desc="segment 1 is present">exists($output/tei:seg[@xml:id='destination'])</xpath>
-      <xpath desc="segment 2 is present">exists($output/tei:seg[@xml:id='destination2'])</xpath>
+      <xpath desc="segment 1 is present">$output/tei:seg/@xml:id='destination'</xpath>
+      <xpath desc="segment 2 is present">$output/tei:seg/@xml:id='destination2'</xpath>
     </test>
     <test>
       <task>points into a different file</task>
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("in_file_2"), -1, (), true())
       ]]></code>
-      <xpath desc="result is segment from other file">exists($output/self::tei:seg[@xml:id='f2_destination']) and count($output) = 1</xpath>
+      <xpath desc="result is segment from other file">$output/self::tei:seg/@xml:id='f2_destination' and count($output) = 1</xpath>
     </test>
     <test>
       <task>points into a different file and has additional indirection</task>
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("in_file_2_indirect"), -1, (), true())
       ]]></code>
-      <xpath desc="result is segment from other file">exists($output/self::tei:seg[@xml:id='f2_destination']) and count($output) = 1</xpath>
+      <xpath desc="result is segment from other file">$output/self::tei:seg/@xml:id='f2_destination' and count($output) = 1</xpath>
     </test>
     <test>
       <task>points to a range</task>
@@ -197,14 +197,14 @@
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("url_ptr"), -1, (), true())
       ]]></code>
-      <xpath desc="result is the pointer itself">$output[count(.) = 1]/self::tei:ptr[@xml:id='url_ptr']</xpath>
+      <xpath desc="result is the pointer itself">$output/self::tei:ptr/@xml:id='url_ptr' and count($output)=1</xpath>
     </test>
     <test>
       <task>that points to a ptr of type url</task>
       <code><![CDATA[
       uri:follow(doc("/db/apps/opensiddur-tests/tests/modules/follow-uri-context-1.xml")/id("to_url_ptr"), -1, (), true())
       ]]></code>
-      <xpath desc="result is the URL pointer">$output[count(.) = 1]/self::tei:ptr[@xml:id='url_ptr']</xpath>
+      <xpath desc="result is the URL pointer">$output/self::tei:ptr/@xml:id='url_ptr' and count($output)=1</xpath>
     </test>
   </TestSet>
   <TestSet>
