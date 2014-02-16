@@ -46,6 +46,13 @@ declare function tohtml:tohtml(
     return tohtml:tei-TEI($node, $params)
     case element(tei:teiHeader)
     return ()
+    case element(tei:div)
+    return
+        if ($node/@type="licensing")
+        then tohtml:div-with-header($node, $params, "Licensing")
+        else if ($node/@type="contributors")
+        then tohtml:div-with-header($node, $params, "Contributors")
+        else tohtml:element($node, $params)
     case element(tei:forename)
     return tohtml:span-element($node, $params)
     case element(tei:item)
@@ -64,6 +71,8 @@ declare function tohtml:tohtml(
     return tohtml:span-element($node, $params)
     case element(tei:pc)
     return tohtml:tei-pc($node,$params)
+    case element(j:contributor)
+    return tohtml:j-contributor($node, $params)
     case element()
     return tohtml:element($node, $params)
     default 
@@ -160,6 +169,43 @@ declare function tohtml:tei-ref-license(
         attribute rel { "license" },
         $img
     )
+};
+
+declare function tohtml:wrap-in-link(
+    $item as item()*,
+    $link as xs:string?
+    ) as item()* {
+    if ($link)
+    then 
+        element a {
+            attribute href { $link },
+            $item
+        }
+    else $item
+};
+
+(:~ @return contributor list entry :)
+declare function tohtml:j-contributor(
+    $e as element(j:contributor),
+    $params as map
+    ) as element() {
+    let $name := 
+        let $name := tohtml:tohtml(($e/tei:name,$e/tei:orgName,$e/tei:idno)[1], $params)
+        let $website := $e/tei:ptr[@type="url"]/@target/string()
+        return tohtml:wrap-in-link($name, $website)
+    let $affiliation := 
+        if ($e/tei:affiliation)
+        then
+            let $name := tohtml:tohtml($e/tei:affiliation, $params)
+            let $website := $e/tei:affiliation/tei:ptr[@type="url"]/@target/string()
+            return tohtml:wrap-in-link($name, $website)
+        else ()
+    return
+        element div {
+            tohtml:attributes($e, $params),
+            $name,
+            $affiliation
+        }
 };
 
 (:~ @return classes :)
@@ -283,6 +329,20 @@ declare function tohtml:header-title(
       $title-element/string()
     )
   }
+};
+
+declare function tohtml:div-with-header(
+    $e as element(tei:div),
+    $params as map,
+    $header as item()*
+    ) as element() {
+    element div {
+        tohtml:attributes($e, $params),
+        element h2 {
+            $header
+        },
+        tohtml:tohtml($e/node(), $params)
+    }
 };
 
 (:~ generic element :)
