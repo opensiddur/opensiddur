@@ -84,7 +84,9 @@ declare function compile:tei-text(
             (: licensing :)
             compile:license-statements($unique-documents),
             (: contributor list :)
-            compile:contributor-list($unique-documents) 
+            compile:contributor-list($unique-documents),
+            (: bibliography :)
+            compile:source-list($unique-documents) 
         )
       }
     }
@@ -186,5 +188,53 @@ declare function compile:contributor-list(
                     }
             )
                  
+        }
+};
+
+declare function compile:name-sort-key(
+    $name as element()
+    ) as xs:string? {
+    (string-join($name/(tei:nameLink, tei:surname, tei:genName, tei:forename), " "), string($name))[1]
+};
+
+declare function compile:source-list(
+    $documents as document-node()*
+    ) as element(tei:div)? {
+    let $source-link-elements := $documents//tei:link[@type="bibl"]
+    let $source-links := 
+        distinct-values(
+            for $link-element in $source-link-elements
+            return tokenize($link-element/@target, '\s+')[2][.]
+        )
+    where exists($source-links)
+    return
+        element tei:div {
+            attribute type { "bibliography" },
+            attribute xml:lang { "en" },
+            element tei:listBibl {
+                element tei:head {
+                   text { "Bibliography" } 
+                },
+                for $source-link in $source-links
+                let $source-doc := data:doc($source-link) 
+                let $source-key := lower-case(string-join((
+                    $source-doc/*/(
+                        for $e in (
+                            tei:analytic/tei:author/tei:name,
+                            tei:analytic/tei:editor/tei:name,
+                            tei:monogr/tei:author/tei:name,
+                            tei:monogr/tei:editor/tei:name, 
+                            tei:series/tei:author/tei:name,
+                            tei:series/tei:editor/tei:name
+                        ) 
+                        return compile:name-sort-key($e),
+                        tei:analytic/tei:title,
+                        tei:monogr/tei:title,
+                        tei:series/tei:title,
+                        tei:monogr/tei:imprint/tei:date
+                    )), " "))
+                order by $source-key
+                return $source-doc
+            } 
         }
 };

@@ -177,4 +177,27 @@
             <xpath desc="returns only one reference">count(.//tei:div[@type="contributors"]/tei:list/tei:item)=1</xpath>
         </test>
     </TestSet>
+    <TestSet>
+        <testName>bibliography</testName>
+        <setup>
+           <code><![CDATA[  
+            local:setup("compile4.xml")
+            ]]></code> 
+        </setup>
+        <tearDown>
+           <code><![CDATA[  
+            local:tearDown("compile4.xml")
+            ]]></code> 
+        </tearDown>
+        <test>
+            <task>with one reference</task>
+            <code><![CDATA[
+                compile:compile-document(
+                    mirror:doc($format:combine-cache, "/db/data/tests/compile4.xml"),
+                    map {}
+                )
+            ]]></code>
+            <xpath desc="generates a bibliography with one entry">count(.//tei:back/tei:div[@type="bibliography"]/tei:listBibl/tei:biblStruct)=1</xpath>
+        </test>
+    </TestSet>
 </TestSuite>
