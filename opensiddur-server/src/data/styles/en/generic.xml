@@ -29,6 +29,14 @@
     font-family:"Keter YG";
 }
 
+:lang(en) {
+    font-family:"Times";
+}
+
+.tei-date {
+    white-space: nowrap;    /* prevent dates from wrapping */
+}
+
 .tei-head {
     font-size:large;
     font-weight:bold;
@@ -73,6 +81,33 @@
 .j-read {
     display:inline;
     color:blue;
+}
+
+.j-contributor * {
+    display:inline;
+}
+
+.tei-biblStruct {
+	display:block;
+    text-indent:-2em;
+    padding-left:2em;
+}
+
+.tei-biblStruct * {
+	display:inline;	
+}
+
+.tei-biblStruct .tei-title {
+	font-style:italic;	
+}
+
+.tei-biblStruct .tei-note {
+    display:block;
+    padding-left:2em;
+}
+
+.tei-biblStruct .tei-note * {
+    display:inline;
 }
    ]]></j:stylesheet>
    <tei:text>
