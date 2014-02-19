@@ -6,7 +6,7 @@ xquery version "3.0";
  :    tohtml:style (temporary) -> pointer to API for CSS styling
  :
  : Open Siddur Project
- : Copyright 2013 Efraim Feinstein 
+ : Copyright 2013-2014 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -46,6 +46,8 @@ declare function tohtml:tohtml(
     return tohtml:tei-TEI($node, $params)
     case element(tei:teiHeader)
     return ()
+    case element(tei:listBibl)
+    return tohtml:tei-listBibl($node, $params)
     case element(tei:div)
     return
         if ($node/@type="licensing")
@@ -343,6 +345,388 @@ declare function tohtml:div-with-header(
         },
         tohtml:tohtml($e/node(), $params)
     }
+};
+
+declare function tohtml:tei-listBibl(
+    $e as element(tei:listBibl),
+    $params as map
+    ) as element() {
+    element div {
+        tohtml:attributes($e, $params),
+        element h2 {
+            tohtml:tohtml($e/tei:head/node(), $params)
+        },
+        tohtml:bibliography($e/tei:biblStruct, $params)
+    }
+};
+
+declare function tohtml:bibliography(
+    $nodes as node()*,
+    $params as map
+    ) as node()* {
+    for $node in $nodes
+    return
+        typeswitch($node)
+        case element(tei:edition)
+        return tohtml:bibl-tei-edition($node, $params)
+        case element(tei:imprint)
+        return tohtml:bibl-tei-imprint($node, $params)
+        case element(tei:author)
+        return tohtml:bibl-tei-author-or-editor($node, $params)
+        case element(tei:editor)
+        return tohtml:bibl-tei-author-or-editor($node, $params)
+        case element(tei:surname)
+        return tohtml:bibl-tei-surname($node, $params)
+        case element(tei:forename)
+        return ()
+        case element(tei:nameLink)
+        return ()
+        case element(tei:roleName)
+        return ()
+        case element(tei:title)
+        return tohtml:bibl-tei-title($node, $params)
+        case element(tei:meeting)
+        return tohtml:bibl-tei-meeting($node, $params)
+        case element(tei:date)
+        return tohtml:bibl-tei-date($node, $params)
+        case element(tei:pubPlace)
+        return tohtml:bibl-tei-pubPlace($node, $params)
+        case element(tei:publisher)
+        return tohtml:bibl-tei-publisher($node, $params)
+        case element(tei:idno)
+        return tohtml:bibl-tei-idno($node, $params)
+        case element(tei:note)
+        return tohtml:bibl-tei-note($node, $params)
+        case element(tei:distributor)
+        return tohtml:bibl-tei-distributor($node, $params)
+        case element(tei:biblStruct)
+        return tohtml:bibl-tei-biblStruct($node, $params)
+        (: regular processing :)
+        case element(tei:ref)
+        return tohtml:tohtml($node, $params)
+        case element(tei:ptr)
+        return tohtml:tohtml($node, $params)
+        case text()
+        return tohtml:bibl-text($node, $params)
+        default return tohtml:bibliography($node/node(), $params)
+};
+
+declare function tohtml:bibl-tei-edition(
+    $e as element(tei:edition),
+    $params as map
+    ) as node()+ {
+    element div {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params)
+    }, text { "." }
+};
+
+declare function tohtml:bibl-tei-imprint(
+    $e as element(tei:imprint),
+    $params as map
+    ) as node()* {
+    element div {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography((
+            $e/tei:date, 
+            $e/tei:pubPlace,
+            $e/tei:publisher,
+            $e/tei:distributor,
+            $e/tei:biblScope), $params)
+    }
+};
+
+declare function tohtml:bibl-tei-author-or-editor(
+    $e as element(),
+    $params as map
+    ) as node()* {
+    if (not($e/@corresp)) 
+    then    (: do not include translations :)
+        let $n-following := count($e/following-sibling::*[name()=$e/name()][not(@corresp)])
+        return (
+            element div {
+                tohtml:attributes($e, $params),
+                tohtml:bibliography($e/node(), $params)
+            },
+            text {
+                if ($e instance of element(tei:author) and $n-following=0)
+                then "." (: last name in a list :)
+                else if ($e instance of element(tei:editor) and $n-following=0)
+                then string-join((
+                    " (ed",
+                    if ($e/preceding-sibling::tei:editor) then "s" else (),
+                    ".) "), "") (: editor :)
+                else if ($n-following=1)
+                then " and " (: penultimate in list :)
+                else ", " (: first or middle name in a list :)
+            }
+        )
+    else ()
+};
+
+declare function tohtml:bibl-tei-surname(
+    $e as element(tei:surname),
+    $params as map
+    ) as node()* {
+    let $rn := $e/../tei:roleName
+    where exists($rn)
+    return (tohtml:use-bibl($rn, $params), text { " " }),
+    let $fn := $e/../tei:foreName
+    where exists($fn)
+    return (tohtml:use-bibl($fn, $params), text { " " }),
+    let $nl := $e/../tei:nameLink
+    where exists($nl)
+    return (tohtml:use-bibl($nl, $params), text { " " }),
+    element div {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params)
+    }
+};
+
+declare function tohtml:use-bibl(
+    $nodes as node()*,
+    $params as map
+    ) as node()* {
+    for $node in $nodes
+    return
+        typeswitch($node)
+        case element(tei:forename)
+        return tohtml:use-bibl-tei-forename($node, $params)
+        case element(tei:nameLink)
+        return tohtml:use-bibl-any($node, $params)
+        case element(tei:roleName)
+        return tohtml:use-bibl-any($node, $params)
+        case text()
+        return $node
+        default return tohtml:use-bibl($node/node(), $params)
+};
+
+declare function tohtml:use-bibl-tei-forename(
+    $e as element(tei:forename),
+    $params as map
+    ) as node()* {
+    if ($e/preceding-sibling::tei:forename)
+    then text { " " }
+    else (),
+    element span {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params)
+    }
+};
+
+declare function tohtml:use-bibl-any(
+    $e as element(),
+    $params as map
+    ) as node()* {
+    element span {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params)
+    }
+};
+
+(: TODO: differentiate between different level titles :)
+declare function tohtml:bibl-tei-title(
+    $e as element(tei:title),
+    $params as map
+    ) as node()* {
+    element div {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params)
+    },
+    if ($e/@type="sub" and $e/following-sibling::*)
+    then text { " " }
+    else (),
+    text { ". " }
+};
+
+declare function tohtml:bibl-tei-meeting(
+    $e as element(tei:meeting),
+    $params as map
+    ) as node()* {
+    text { " (" },
+    element div {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params)
+    },
+    text { ")" },
+    if (exists($e/following-sibling::*))
+    then text { " " }
+    else ()
+};
+
+declare function tohtml:bibl-tei-date(
+    $e as element(tei:date),
+    $params as map
+    ) as node()* {
+    if ($e/@type="access")
+    then text { "Accessed " }
+    else (),
+    element div {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params)
+    },
+    if (exists($e/following-sibling::*))
+    then text { ". " }
+    else ()
+};
+
+declare function tohtml:bibl-tei-pubPlace(
+    $e as element(tei:pubPlace),
+    $params as map
+    ) as node()* {
+    element div {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params)
+    },
+    text {
+        if ($e/following-sibling::tei:pubPlace)
+        then ", "
+        else if ($e/../tei:publisher)
+        then ": "
+        else ". "
+    }
+};
+
+declare function tohtml:bibl-tei-publisher(
+    $e as element(tei:publisher),
+    $params as map
+    ) as node()+ {
+    element div {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params)
+    },
+    text { ". " }
+};
+
+declare function tohtml:bibl-tei-biblScope(
+    $e as element(tei:biblScope),
+    $params as map
+    ) as node()+ {
+    if ($e/ancestor::tei:bibl)
+    then tohtml:bibliography($e/node(), $params)
+    else if ($e/@type="vol")
+    then 
+        element div {
+            tohtml:attributes($e, $params),
+            tohtml:bibliography($e/node(), $params)
+        }
+    else if ($e/@type="chap") 
+    then (
+        text { "chapter " },
+        element div {
+            tohtml:attributes($e, $params),
+            tohtml:bibliography($e/node(), $params)
+        }
+    )
+    else if ($e/@type="issue")
+    then (
+        text { " (" },
+        element div {
+            tohtml:attributes($e, $params),
+            tohtml:bibliography($e/node(), $params)
+        },  
+        text { ") " }
+    )
+    else if ($e/@type="pp")
+    then (
+        if (contains($e, "-") or contains($e, "ff") or contains($e, " "))
+        then text { "pp. " }
+        else text { "p. " },
+        element div {
+            tohtml:attributes($e, $params),
+            tohtml:bibliography($e/node(), $params)
+        }
+    )
+    else
+        tohtml:bibliography($e/node(), $params),
+    if ($e/@type="vol" and $e/following-sibling::tei:biblScope)
+    then text { " " }
+    else if ($e/ancestor::tei:biblStruct)
+    then text { ". " }
+    else ()
+};
+
+declare function tohtml:bibl-tei-idno(
+    $e as element(tei:idno),
+    $params as map
+    ) as node()* {
+    if ($e/@type=("doi", "isbn", "ISBN"))
+    then ()
+    else (
+        text { " " },
+        element div {
+            tohtml:attributes($e, $params),
+            tohtml:bibliography($e/node(), $params)
+        }
+    )
+};
+
+declare function tohtml:bibl-tei-biblStruct(
+    $e as element(tei:biblStruct),
+    $params as map
+    ) as element() {
+    element div {
+        tohtml:attributes($e, $params),
+        element div {
+            attribute class { "bibl-authors" },
+            tohtml:bibliography($e/tei:*/tei:author, $params)
+        },
+        element div {
+            attribute class { "bibl-editors" },
+            tohtml:bibliography($e/tei:*/tei:editor, $params)
+        },
+        element div {
+            attribute class { "bibl-titles" },
+            tohtml:bibliography($e/(tei:analytic, tei:monogr, tei:series)/tei:title, $params)
+        },
+        tohtml:bibliography($e/tei:*/(tei:edition, tei:imprint), $params),
+        element div {
+            attribute class { "bibl-notes" },
+            tohtml:bibliography($e/tei:note, $params)
+        }
+    }
+};
+
+declare function tohtml:bibl-tei-note(
+    $e as element(tei:note),
+    $params as map
+    ) as element() {
+    element div {
+        tohtml:attributes($e, $params),
+        (: apply in default mode :)
+        tohtml:tohtml($e/node(), $params)
+    }
+};
+
+declare function tohtml:bibl-tei-distributor(
+    $e as element(tei:distributor),
+    $params as map
+    ) as node()+ {
+    text { "Distributed by " },
+    element div {
+        tohtml:attributes($e, $params),
+        tohtml:bibliography($e/node(), $params),
+        text { "." }
+    }
+};
+
+declare function tohtml:bibl-text(
+    $e as text(),
+    $params as map
+    ) as text()? {
+    if ($e/ancestor::tei:name/descendant::text()[last()])
+    then $e (: last name in a list :)
+    else if (
+        some $text 
+        in $e/(ancestor::tei:monogr|ancestor::tei:imprint|ancestor::tei:series|ancestor::tei:analytic)/*/
+            descendant::text()[last()]
+        satisfies $text is $e
+    )
+    then
+        (: last text node in any item of imprint :)
+        $e
+    else 
+        tohtml:tohtml($e, $params)
 };
 
 (:~ generic element :)
