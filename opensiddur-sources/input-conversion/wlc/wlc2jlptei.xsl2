@@ -25,7 +25,7 @@ TODO:
   <xsl:output indent="yes" encoding="utf-8" method="xml" />
   <xd:doc type="stylesheet">
     <xd:short>Convert the Joined WLC to JLPTEI.</xd:short>
-    <xd:copyright>Copyright 2009-2010,2012-2013 Efraim Feinstein
+    <xd:copyright>Copyright 2009-2010,2012-2014 Efraim Feinstein
     </xd:copyright>
     <xd:detail>
       <p>This program is free software: you can redistribute it
@@ -459,7 +459,7 @@ TODO:
                   as="xs:string" />
                 <xsl:variable name="book-uri"
                   select="func:bookref-to-uri($book, ())" />
-                <tei:ptr target="/data/original/{$book-uri}#main">
+                <tei:ptr target="/data/original/{$book-uri}#text">
                   <xsl:attribute name="xml:id"
                     select="concat('se_',translate($book, ' ', '_'))" />
                 </tei:ptr>
@@ -527,7 +527,7 @@ TODO:
                   <xsl:variable name="chap" select="@n" />
                   <xsl:variable name="chap-uri"
                     select="func:bookref-to-uri($book, $chap)" />
-                  <tei:ptr target="/data/original/{$chap-uri}#main">
+                  <tei:ptr target="/data/original/{$chap-uri}#text">
                     <xsl:attribute name="xml:id"
                       select="concat('se_ch',$chap)" />
                   </tei:ptr>
@@ -806,7 +806,7 @@ TODO:
         </xsl:with-param>
         <xsl:with-param name="license" as="element()+" select="$license-content" />
         <xsl:with-param name="bibliography" as="element(tei:link)">
-          <tei:link type="bibl" target="#main /data/{$bibliography-file-name}"/>          
+          <tei:link type="bibl" target="#text /data/{$bibliography-file-name}"/>          
         </xsl:with-param>
         <xsl:with-param name="links"  as="element(j:links)">
           <j:links>

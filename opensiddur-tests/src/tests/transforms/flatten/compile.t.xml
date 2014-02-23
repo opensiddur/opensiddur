@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  >
+  <suiteName>Compile transform</suiteName>
+  <description>
+    <p>Tests of compile transform</p>
+    <author>Efraim Feinstein</author>
+    <copyright>Copyright 2013-2014 Efraim Feinstein
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
+  <imports>
+    import module namespace format="http://jewishliturgy.org/modules/format"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/format.xqm";
+    import module namespace mirror="http://jewishliturgy.org/modules/mirror"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/mirror.xqm";
+    import module namespace compile="http://jewishliturgy.org/transform/compile"
+      at "xmldb:exist:///db/apps/opensiddur-server/transforms/compile.xqm";
+    import module namespace user="http://jewishliturgy.org/api/user"
+      at "xmldb:exist:///db/apps/opensiddur-server/api/user.xqm";
+  </imports>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <functions><![CDATA[
+    declare function local:setup($file as xs:string) {
+      xmldb:copy(
+        "/db/apps/opensiddur-tests/tests/transforms/flatten", 
+        "/db/data/tests", 
+        $file),
+      let $doc := doc("/db/data/tests/" || $file)
+      return 
+        format:combine($doc, map {}, $doc)
+    };
+    
+    declare function local:tearDown($file as xs:string) {
+      format:clear-caches("/db/data/tests/" || $file),
+      try {
+        xmldb:remove("/db/data/tests", $file)
+      }
+      catch * {
+        ()
+      }
+    };
+
+  ]]></functions>
+  <TestSet>
+    <testName>No external pointers</testName>
+    <setup><code><![CDATA[
+    local:setup("combine1.xml")
+    ]]></code></setup>
+    <tearDown><code><![CDATA[
+    local:tearDown("combine1.xml")
+    ]]></code></tearDown>
+    <test>
+      <task>acts as an identity transform</task>
+      <code><![CDATA[
+        compile:compile-document(
+          mirror:doc($format:combine-cache, "/db/data/tests/combine1.xml"),
+          map {})
+      ]]></code>
+      <xpath 
+        desc="acts as an identity transform for unflattened text" 
+        >exists(./tei:TEI/tei:text/jf:combined/tei:seg[@jf:id="seg1"][@jf:stream="stream"])
+      </xpath>
+      <xpath 
+        desc="a license statement is added"
+        >exists(./tei:TEI/tei:text/tei:back/tei:div[@type="licensing"])</xpath>
+      <xpath 
+        desc="the license statement references 1 license"
+        >count(.//tei:div[@type="licensing"]/tei:div[@type="license-statement"]/tei:ref[@target="http://www.creativecommons.org/publicdomain/zero/1.0"])=1</xpath>
+    </test>        
+  </TestSet>
+  <TestSet>
+    <testName>External pointer</testName>
+    <setup><code><![CDATA[
+    local:setup("combine1.xml"),
+    local:setup("combine3.xml")
+    ]]></code></setup>
+    <tearDown><code><![CDATA[
+    local:tearDown("combine3.xml"),
+    local:tearDown("combine1.xml")
+    ]]></code></tearDown>
+    <test>
+      <task>compile with inclusion</task>
+      <code><![CDATA[
+        compile:compile-document(
+          mirror:doc($format:combine-cache, "/db/data/tests/combine3.xml"),
+          map {})
+      ]]></code>
+      <xpath 
+        desc="a license statement is added"
+        >exists(./tei:TEI/tei:text/tei:back/tei:div[@type="licensing"])</xpath>
+      <xpath 
+        desc="the license statement references 2 licenses"
+        ><![CDATA[
+        let $statements := .//tei:div[@type="licensing"]/tei:div[@type="license-statement"]
+        return
+            count($statements)=2 and 
+            exists($statements/tei:ref[@target="http://www.creativecommons.org/publicdomain/zero/1.0"]) and
+            exists($statements/tei:ref[@target="http://www.creativecommons.org/licenses/by/3.0"])
+        ]]></xpath>
+    </test>
+  </TestSet>
+    <TestSet>
+        <testName>contributor list</testName>
+        <setup>
+            <code><![CDATA[
+                user:put(
+                    "testuser10",
+                    document {
+                      <j:contributor>
+                          <tei:idno>testuser10</tei:idno>
+                          <tei:name>Test User 10</tei:name>
+                      </j:contributor>
+                    }
+                ),
+                user:put(
+                    "testorg11",
+                    document {
+                        <j:contributor>
+                            <tei:idno>testorg11</tei:idno>
+                            <tei:orgName>Organization</tei:orgName>
+                        </j:contributor>
+                    }
+                ),
+                local:setup("compile1.xml"),
+                local:setup("compile2.xml"),
+                local:setup("compile3.xml")
+            ]]></code>
+        </setup>
+        <tearDown>
+            <code><![CDATA[
+                local:tearDown("compile1.xml"),
+                local:tearDown("compile2.xml"),
+                local:tearDown("compile3.xml"),
+                user:delete("testorg11"),
+                user:delete("testuser10")
+            ]]></code>
+        </tearDown>
+        <test>
+            <task>referenced by change elements</task>
+            <code><![CDATA[
+                compile:compile-document(
+                    mirror:doc($format:combine-cache, "/db/data/tests/compile1.xml"),
+                    map {}
+                )
+            ]]></code>
+            <xpath desc="returns a list of editors">count(.//tei:back/tei:div[@type="contributors"]/tei:list[tei:head="Editors"]/tei:item)=2</xpath>
+            <xpath desc="sorted by name">.//tei:div[@type="contributors"]/tei:list/(tei:item[1]/j:contributor/tei:idno="testorg11" and tei:item[2]/j:contributor/tei:idno="testuser10")</xpath>
+        </test>
+        <test>
+            <task>referenced by respStmt elements</task>
+            <code><![CDATA[
+                compile:compile-document(
+                    mirror:doc($format:combine-cache, "/db/data/tests/compile2.xml"),
+                    map {}
+                )
+            ]]></code>
+            <xpath desc="returns a list for each key in the respStmt">count(.//tei:back/tei:div[@type="contributors"]/tei:list)=2</xpath>
+            <xpath desc="references contributor of type 'fnd' in funders list">.//tei:div[@type="contributors"]/tei:list[tei:head="Funders"]/tei:item/j:contributor/tei:idno="testorg11"</xpath>
+            <xpath desc="references contributor of type 'trc' in transcribers list">.//tei:div[@type="contributors"]/tei:list[tei:head="Transcribers"]/tei:item/j:contributor/tei:idno="testuser10"</xpath>
+        </test>
+        <test>
+            <task>same user referenced more than once for the same contribution</task>
+            <code><![CDATA[
+                compile:compile-document(
+                    mirror:doc($format:combine-cache, "/db/data/tests/compile3.xml"),
+                    map {}
+                )
+            ]]></code>
+            <xpath desc="returns only one reference">count(.//tei:div[@type="contributors"]/tei:list/tei:item)=1</xpath>
+        </test>
+    </TestSet>
+    <TestSet>
+        <testName>bibliography</testName>
+        <setup>
+           <code><![CDATA[  
+            local:setup("compile4.xml")
+            ]]></code> 
+        </setup>
+        <tearDown>
+           <code><![CDATA[  
+            local:tearDown("compile4.xml")
+            ]]></code> 
+        </tearDown>
+        <test>
+            <task>with one reference</task>
+            <code><![CDATA[
+                compile:compile-document(
+                    mirror:doc($format:combine-cache, "/db/data/tests/compile4.xml"),
+                    map {}
+                )
+            ]]></code>
+            <xpath desc="generates a bibliography with one entry">count(.//tei:back/tei:div[@type="bibliography"]/tei:listBibl/tei:biblStruct)=1</xpath>
+        </test>
+    </TestSet>
+</TestSuite>

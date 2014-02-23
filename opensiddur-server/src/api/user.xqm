@@ -6,10 +6,14 @@ xquery version "3.0";
  :)
 module namespace user="http://jewishliturgy.org/api/user";
 
+import module namespace acc="http://jewishliturgy.org/modules/access"
+  at "../modules/access.xqm";
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "../modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
   at "../modules/app.xqm";
+import module namespace crest="http://jewishliturgy.org/modules/common-rest"
+  at "../modules/common-rest.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
@@ -31,87 +35,34 @@ declare namespace error="http://jewishliturgy.org/errors";
 (: path to user profile data :)
 declare variable $user:path := "/db/data/user";
 declare variable $user:api-path := "/api/user";
+declare variable $user:data-type := "user";
 (: path to schema :)
 declare variable $user:schema := concat($paths:schema-base, "/contributor.rnc");
 
-declare 
-  %private 
-  function user:result-title(
-  $result as element(j:contributor)
-  ) as xs:string {
-  if (exists($result/tei:name))
-  then name:name-to-string($result/tei:name)
-  else $result/(tei:orgName, tei:idno)[1]/string()
-};
-
-(: @return (list, start, count, n-results) :) 
-declare 
-  %private 
-  function user:do-query(
-    $query as xs:string,
-    $start as xs:integer,
-    $count as xs:integer
-  ) as item()+ {
-  let $all-results := 
-      collection($user:path)/j:contributor[ft:query(.,$query)]
-  let $list-of-results :=
-    for $result in  
-      subsequence($all-results, $start, $count)
-    group by $document := document-uri(root($result))
-    order by max(for $r in $result return ft:score($r))
+declare function user:result-title(
+    $result as document-node()
+    ) as xs:string {
+    let $c := $result/j:contributor
     return
-      let $api-name := replace(util:document-name(doc($document)), "\.xml$", "")
-      return
-      <li xmlns="http://www.w3.org/1999/xhtml" class="result">
-        <a class="document" href="{api:uri-of($user:api-path)}/{$api-name}">{
-        user:result-title(doc($document)/j:contributor)
-        }</a>:
-        <ol class="contexts">{
-          for $h in $result
-          order by ft:score($h) descending
-          return
-            <li class="context">{
-              kwic:summarize($h, <config xmlns="" width="40" />)
-            }</li>
-        }</ol>
-      </li>
-  let $listed-results := 
-    <ol xmlns="http://www.w3.org/1999/xhtml" class="results">{
-      $list-of-results
-    }</ol>
-  return (
-    $listed-results,
-    $start,
-    $count, 
-    count($all-results)
-  )
+        if (exists($c/tei:name))
+        then name:name-to-string($c/tei:name)
+        else ($c/tei:orgName, $c/tei:idno)[1]/string()
 };
 
-declare
-  %private 
-  function user:do-list(
-  $start as xs:integer,
-  $count as xs:integer
-  ) {
-  let $all := collection($user:path)/j:contributor
-  return (
-    <ul xmlns="http://www.w3.org/1999/xhtml" class="results">{
-      for $user in subsequence($all, $start, $count) 
-      let $api-name := replace(util:document-name($user), "\.xml$", "")
-      return
-        <li class="result">
-          <a class="document" href="{api:uri-of($user:api-path)}/{$api-name}">{
-            user:result-title($user)
-          }</a>
-          <a class="alt" property="groups" href="{api:uri-of($user:api-path)}/{$api-name}/groups">groups</a>
-        </li>
-    }</ul>,
-    $start,
-    $count,
-    count($all)
-  )
+declare function user:query-function(
+    $query as xs:string
+    ) as element()* {
+    for $doc in collection($user:path)/j:contributor[ft:query(.,$query)]
+    order by user:result-title(root($doc)) ascending
+    return $doc
 };
 
+declare function user:list-function(
+    ) as element()* {
+    for $doc in collection($user:path)/j:contributor
+    order by user:result-title(root($doc)) ascending
+    return $doc
+};
 
 (:~ List or query users and contributors
  : @param $q text of the query, empty string for all
@@ -132,40 +83,15 @@ declare
     $start as xs:integer*,
     $max-results as xs:integer*
     ) as item()+ {
-  <rest:response>
-    <output:serialization-parameters>
-      <output:method value="html5"/>
-    </output:serialization-parameters>
-  </rest:response>,
-  let $query := string-join($q[.], " ")
-  let $start := $start[1]
-  let $max-results := $max-results[1]
-  let $results as item()+ := 
-    if ($query) 
-    then user:do-query($query, $start, $max-results)
-    else user:do-list($start, $max-results)
-  let $result-element := $results[1]
-  let $start := $results[2] 
-  let $count := $results[3]
-  let $total := $results[4]
-  return
-    <html xmlns="http://www.w3.org/1999/xhtml">
-      <head>
-        <title>User and contributor API</title>
-        <link rel="search"
-               type="application/opensearchdescription+xml" 
-               href="/api/data/OpenSearchDescription?source={encode-for-uri($user:api-path)}"
-               title="Full text search" />
-        <meta name="startIndex" content="{if ($total eq 0) then 0 else $start}"/>
-        {((:<meta name="endIndex" content="{min(($start + $max-results - 1, $total))}"/>:))}
-        <meta name="itemsPerPage" content="{$max-results}"/>
-        <meta name="totalResults" content="{$total}"/>
-      </head>
-      <body>{
-        $result-element
-      }</body>
-    </html>
-
+    crest:list($q, $start, $max-results,
+        "User and contributor API", api:uri-of($user:api-path),
+        user:query-function#1, user:list-function#0,
+        (
+            <crest:additional text="access" relative-uri="access"/>,
+            <crest:additional text="groups" relative-uri="groups"/>
+        ),
+        user:result-title#1
+    )
 };
 
 (:~ Get a user profile
@@ -455,3 +381,43 @@ declare
       (: must be another user's profile :)
       api:rest-error(403, "Forbidden")
 };
+
+(:~ Get access/sharing data for a contributor profile
+ : @param $name Name of contributor
+ : @param $user User to get access as
+ : @return HTTP 200 and an access structure (a:access) or user access (a:user-access)
+ : @error HTTP 400 User does not exist
+ : @error HTTP 404 Document not found or inaccessible
+ :)
+declare 
+  %rest:GET
+  %rest:path("/api/user/{$name}/access")
+  %rest:query-param("user", "{$user}")
+  %rest:produces("application/xml")
+  function user:get-access(
+    $name as xs:string,
+    $user as xs:string*
+  ) as item()+ {
+  crest:get-access($user:data-type, $name, $user)
+};
+
+(:~ Set access/sharing data for a contributor profile
+ : @param $name Name of document
+ : @param $body New sharing rights, as an a:access structure 
+ : @return HTTP 204 No data, access rights changed
+ : @error HTTP 400 Access structure is invalid
+ : @error HTTP 401 Not authorized
+ : @error HTTP 403 Forbidden
+ : @error HTTP 404 Document not found or inaccessible
+ :)
+declare 
+  %rest:PUT("{$body}")
+  %rest:path("/api/user/{$name}/access")
+  %rest:consumes("application/xml", "text/xml")
+  function user:put-access(
+    $name as xs:string,
+    $body as document-node()
+  ) as item()+ {
+  crest:put-access($user:data-type, $name, $body)
+};
+

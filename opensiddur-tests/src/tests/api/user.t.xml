@@ -89,6 +89,11 @@
         every $d in .//html:li[@class="result"]/html:a[@class="document"]
         satisfies exists($d/following-sibling::html:a[@class="alt"][@property="groups"])
         )</xpath>
+      <xpath desc="access view is presented as an alternate">
+        exists(.//html:li[@class="result"]/html:a[@class="document"]) and (
+        every $d in .//html:li[@class="result"]/html:a[@class="document"]
+        satisfies exists($d/following-sibling::html:a[@class="alt"][@property="access"])
+        )</xpath>
     </test>
     <test>
       <task>Query all users</task>

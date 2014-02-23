@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+(: Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Common REST API functions
@@ -59,6 +59,7 @@ declare function crest:no-access(
  :
  : If the document has no existing revisionDesc, one is created
  : New changes are positioned as the first element in the revisionDesc
+ : If the first change record lacks @when, it is considered to be the commit log for this change.
  :)
 declare function crest:record-change(
   $doc as document-node(),
@@ -67,14 +68,18 @@ declare function crest:record-change(
   let $who := app:auth-user()
   let $who-uri := substring-after(data:user-api-path($who), api:uri-of("/api"))
   let $revisionDesc := $doc//tei:revisionDesc
+  let $commit-log := $revisionDesc/tei:change[1][not(@when)]
   let $change :=
     <tei:change 
-      type="{$change-type}" 
+      type="{$change-type}"
       who="{$who-uri}"
       when="{current-dateTime()}"
-      />
+      >{$commit-log/(@xml:lang, @xml:id, node())}</tei:change>
   return
-    if (exists($revisionDesc) and exists($revisionDesc/*))
+    if (exists($commit-log))
+    then
+      update replace $commit-log with $change
+    else if (exists($revisionDesc) and exists($revisionDesc/*))
     then 
       update insert $change preceding $revisionDesc/*[1]
     else if (exists($revisionDesc))

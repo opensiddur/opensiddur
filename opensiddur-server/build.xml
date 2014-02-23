@@ -160,6 +160,7 @@
 				<include name="**/*.xq?"/>
 				<include name="**/*.xconf"/>
 				<include name="**/*.rnc"/>
+				<include name="**/*.svg"/>
 				<include name="**/*.xsl2"/>
 				<include name="img/*"/>
 				<exclude name="schema/*"/>

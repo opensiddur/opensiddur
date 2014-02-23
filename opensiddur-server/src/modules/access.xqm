@@ -4,7 +4,7 @@ xquery version "3.0";
  : See the access.rnc schema for details
  :
  : Open Siddur Project
- : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace acc="http://jewishliturgy.org/modules/access";
@@ -37,11 +37,11 @@ declare function local:validate-report(
   ) as element(report) {
   let $bad-usernames :=
     $access/
-      (a:owner, a:share-user, a:deny-user)
+      (a:owner, a:grant/a:grant-user, a:deny/a:deny-user)
       [not(sm:user-exists(.))]   
   let $all-groups := sm:get-groups()
   let $bad-groups :=
-    $access/(a:group, a:share-group, a:deny-group)
+    $access/(a:group, a:grant/a:grant-group, a:deny/a:deny-group)
       [not(.=$all-groups)]
   return
     element report {
@@ -138,7 +138,7 @@ declare function acc:get-access-as-user(
           sm:user-exists($user))
         then
           (: OK, user exists :)
-          let $access := acc:get-access($doc)
+          let $access := acc:get-access-data($doc)
           let $user-groups := 
             system:as-user("admin", $magic:password, 
               sm:get-user-groups($user)
@@ -166,13 +166,13 @@ declare function acc:get-access-as-user(
               let $default-read := xs:boolean($access/a:world/@read)
               let $default-write := xs:boolean($access/a:world/@write)
               let $share-acl-by-user := 
-                $access/a:share-user[.=$user][last()]
+                $access/a:grant/a:grant-user[.=$user][last()]
               let $deny-acl-by-user := 
-                $access/a:deny-user[.=$user][last()]
+                $access/a:deny/a:deny-user[.=$user][last()]
               let $share-acl-by-group :=
-                $access/a:share-group[.=$user-groups][last()]
+                $access/a:grant/a:grant-group[.=$user-groups][last()]
               let $deny-acl-by-group := 
-                $access/a:deny-group[.=$user-groups][last()]
+                $access/a:deny/a:deny-group[.=$user-groups][last()]
               return (
                 attribute read { 
                   (
@@ -184,9 +184,9 @@ declare function acc:get-access-as-user(
                       )[last()]
                     return 
                       typeswitch($controlled-by)
-                      case element(a:share-group)
+                      case element(a:grant-group)
                       return true()
-                      case element(a:share-user)
+                      case element(a:grant-user)
                       return true()
                       case element(a:deny-group)
                       return false()
@@ -206,9 +206,9 @@ declare function acc:get-access-as-user(
                       )[last()]
                     return 
                       typeswitch($controlled-by)
-                      case element(a:share-group)
+                      case element(a:grant-group)
                       return true()
-                      case element(a:share-user)
+                      case element(a:grant-user)
                       return true()
                       case element(a:deny-group)
                       return false()
@@ -228,10 +228,25 @@ declare function acc:get-access-as-user(
     }</a:user-access>
 };
 
-(:~ get access rights as an a:access structure 
- : @param $doc A document
+(:~ get access rights as an a:access structure, including details and you 
+ : @param $doc a document
  :)
 declare function acc:get-access(
+  $doc as document-node()
+  ) as element(a:access) {
+  let $as-user := acc:get-access-as-user($doc, app:auth-user())
+  let $details := acc:get-access-data($doc)
+  return 
+    <a:access>
+        <a:you>{$as-user/(@* except @user)}</a:you>
+        {$details/*}
+    </a:access>
+};
+
+(:~ get access rights as an a:access structure, excluding a:you 
+ : @param $doc A document
+ :)
+declare function acc:get-access-data(
   $doc as document-node()
   ) as element(a:access) {
   let $permissions as element(sm:permissions) := 
@@ -253,34 +268,48 @@ declare function acc:get-access(
         )
       }</a:world>
       {
-        for $group-share-ace in $permissions/sm:acl/sm:ace
-          [@target="GROUP"][@access_type="ALLOWED"]
+        let $grants := (
+          for $group-share-ace in $permissions/sm:acl/sm:ace
+            [@target="GROUP"][@access_type="ALLOWED"]
+          return
+            element a:grant-group { 
+              attribute write { contains($group-share-ace/@mode, "w") },
+              $group-share-ace/@who/string()
+            },
+          for $user-share-ace in $permissions/sm:acl/sm:ace
+            [@target="USER"][@access_type="ALLOWED"]
+          return
+            element a:grant-user { 
+              attribute write { contains($user-share-ace/@mode, "w") },
+              $user-share-ace/@who/string()
+            }
+        )
+        where $grants
         return
-          element a:share-group { 
-            attribute write { contains($group-share-ace/@mode, "w") },
-            $group-share-ace/@who/string()
-          },
-        for $user-share-ace in $permissions/sm:acl/sm:ace
-          [@target="USER"][@access_type="ALLOWED"]
+            <a:grant>{
+                $grants
+            }</a:grant>,
+        let $denials := (
+          for $group-deny-ace in $permissions/sm:acl/sm:ace
+            [@target="GROUP"][@access_type="DENIED"]
+          return
+            element a:deny-group { 
+              attribute read { not(contains($group-deny-ace/@mode, "r")) },
+              $group-deny-ace/@who/string()
+            },
+          for $user-deny-ace in $permissions/sm:acl/sm:ace
+            [@target="USER"][@access_type="DENIED"]
+          return
+            element a:deny-user { 
+              attribute read { not(contains($user-deny-ace/@mode, "r")) },
+              $user-deny-ace/@who/string()
+            }
+        )
+        where $denials
         return
-          element a:share-user { 
-            attribute write { contains($user-share-ace/@mode, "w") },
-            $user-share-ace/@who/string()
-          },
-        for $group-deny-ace in $permissions/sm:acl/sm:ace
-          [@target="GROUP"][@access_type="DENIED"]
-        return
-          element a:deny-group { 
-            attribute read { not(contains($group-deny-ace/@mode, "r")) },
-            $group-deny-ace/@who/string()
-          },
-        for $user-deny-ace in $permissions/sm:acl/sm:ace
-          [@target="USER"][@access_type="DENIED"]
-        return
-          element a:deny-user { 
-            attribute read { not(contains($user-deny-ace/@mode, "r")) },
-            $user-deny-ace/@who/string()
-          }
+            <a:deny>{
+                $denials
+            }</a:deny>
       }
     </a:access>
 };
@@ -344,18 +373,26 @@ declare function acc:set-access(
             )
           ),
           sm:clear-acl($doc-uri),
-          for $exception in $access/a:share-group
-          return sm:add-group-ace($doc-uri, $exception, true(), 
-            "r" || ("w"[xs:boolean($exception/@write)], "-")[1] || "-"),
-          for $exception in $access/a:share-user
-          return sm:add-user-ace($doc-uri, $exception, true(),
-            "r" || ("w"[xs:boolean($exception/@write)], "-")[1] || "-"),
-          for $exception in $access/a:deny-group
-          return sm:add-group-ace($doc-uri, $exception, false(),
-            ("r"[not(xs:boolean($exception/@read))], "-")[1]||"w-"),
-          for $exception in $access/a:deny-user
-          return sm:add-user-ace($doc-uri, $exception, false(),
-            ("r"[not(xs:boolean($exception/@read))], "-")[1]||"w-")
+          for $exception in $access/(a:grant|a:deny)/*
+          return 
+            typeswitch($exception)
+            case element(a:grant-group)
+            return
+                sm:add-group-ace($doc-uri, $exception, true(), 
+                    "r" || ("w"[xs:boolean($exception/@write)], "-")[1] || "-")
+            case element(a:grant-user)
+            return
+                sm:add-user-ace($doc-uri, $exception, true(),
+                    "r" || ("w"[xs:boolean($exception/@write)], "-")[1] || "-")
+            case element(a:deny-group)
+            return 
+                sm:add-group-ace($doc-uri, $exception, false(),
+                    ("r"[not(xs:boolean($exception/@read))], "-")[1]||"w-")
+            case element(a:deny-user)
+            return 
+                sm:add-user-ace($doc-uri, $exception, false(),
+                    ("r"[not(xs:boolean($exception/@read))], "-")[1]||"w-")
+            default return ()
           )
         )
     else 

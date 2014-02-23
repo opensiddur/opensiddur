@@ -10,13 +10,13 @@
         </tei:respStmt>
       </tei:titleStmt>
       <tei:publicationStmt>
+        <tei:distributor>
+          <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+        </tei:distributor>
         <tei:availability status="free">
           <tei:licence
             target="http://www.creativecommons.org/publicdomain/zero/1.0" />
         </tei:availability>
-        <tei:distributor>
-          <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
-        </tei:distributor>
         <tei:date>2012-06-08</tei:date>
       </tei:publicationStmt>
       <tei:sourceDesc>

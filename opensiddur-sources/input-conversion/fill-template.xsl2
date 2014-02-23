@@ -10,7 +10,7 @@
   <xd:doc type="stylesheet">
     <xd:short>Fill JLPTEI template with the given parameters.
     </xd:short>
-    <xd:copyright>Copyright 2009-2010,2012-2013 Efraim Feinstein &lt;efraim.feinstein@gmail.com&gt;
+    <xd:copyright>Copyright 2009-2010,2012-2014 Efraim Feinstein &lt;efraim.feinstein@gmail.com&gt;
     </xd:copyright>
     <xd:detail>
       <p>This program is free software: you can redistribute it
@@ -68,18 +68,18 @@
               <xsl:sequence select="$respons"/>
             </tei:titleStmt>
             <tei:publicationStmt>
+              <tei:distributor><tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref></tei:distributor>
               <tei:availability status="free">
                 <xsl:sequence select="$license"/>
               </tei:availability>
-              <tei:distributor><tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref></tei:distributor>
-              <tei:date><xsl:sequence select="format-date(current-date(), '[Y]-[M02]-[D02]')"/></tei:date>
+              <tei:date><xsl:sequence select="format-date(current-date(), '[Y0001]-[M01]-[D01]')"/></tei:date>
             </tei:publicationStmt>
             <tei:sourceDesc>
               <xsl:sequence select="$bibliography"/>
             </tei:sourceDesc>
           </tei:fileDesc>
           <tei:revisionDesc>
-            <tei:change type="created" when="{current-date()}">Document created from template</tei:change>
+            <tei:change>Document created from template</tei:change>
           </tei:revisionDesc>
         </tei:teiHeader>
         <xsl:if test="exists($sourceDocs)">

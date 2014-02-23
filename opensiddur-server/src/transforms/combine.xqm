@@ -4,7 +4,7 @@ xquery version "3.0";
  : JLPTEI document
  :
  : Open Siddur Project
- : Copyright 2013 Efraim Feinstein 
+ : Copyright 2013-2014 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -145,7 +145,9 @@ declare function combine:new-document-params(
   $new-doc-nodes as node()*,
   $params as map
   ) as map {
-  combine:update-params($new-doc-nodes[1], $params)
+  let $new-params := $params
+  return
+    combine:update-params($new-doc-nodes[1], $new-params)
 }; 
 
 (:~ update parameters are required for any new context :)
@@ -218,3 +220,4 @@ declare function combine:tei-ptr(
         )
       }
 };
+
