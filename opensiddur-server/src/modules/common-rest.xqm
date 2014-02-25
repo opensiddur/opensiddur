@@ -417,7 +417,7 @@ declare function crest:post(
                   let $change-record := crest:record-change(doc($db-path), "created")
                   return system:as-user("admin", $magic:password, (
                     sm:chown($uri, $user),
-                    sm:chgrp($uri, $user),
+                    sm:chgrp($uri, "everyone"),
                     sm:chmod($uri, "rw-rw-r--")
                   ))
                 }
