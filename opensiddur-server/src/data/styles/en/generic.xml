@@ -54,6 +54,10 @@
     display:block;
 }
 
+.tei-anchor {
+    display:none;
+}
+
 .tei-seg {
     display:inline;
 }
