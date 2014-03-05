@@ -290,23 +290,23 @@ declare function ridx:query-document(
   $docs as item()*,
   $accept-same as xs:boolean
   ) as node()* {
-  for $doc in $docs
-  let $target-document-uri :=
-    document-uri(
-      typeswitch ($doc)
-      case node() return root($doc)
-      default return doc($doc)
-    )
-  let $entries :=
-    if ($accept-same)
-    then
-      collection($ridx:ridx-path)/
-        ridx:index[@document=$target-document-uri]/
-        ridx:entry[@target-doc=$target-document-uri]
-    else 
-      collection($ridx:ridx-path)//
-        ridx:entry[@target-doc=$target-document-uri]
   let $nodes :=
+    for $doc in $docs
+    let $target-document-uri :=
+      document-uri(
+        typeswitch ($doc)
+        case node() return root($doc)
+        default return doc($doc)
+      )
+    let $entries :=
+      if ($accept-same)
+      then
+        collection($ridx:ridx-path)/
+          ridx:index[@document=$target-document-uri]/
+          ridx:entry[@target-doc=$target-document-uri]
+      else 
+        collection($ridx:ridx-path)//
+          ridx:entry[@target-doc=$target-document-uri]
     for $entry in $entries
     return
       try {
