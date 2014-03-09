@@ -8,7 +8,7 @@ xquery version "3.0";
  : the linking elements that make the references
  :
  : Open Siddur Project
- : Copyright 2011-2013 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2014 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
@@ -249,15 +249,15 @@ declare function ridx:query-all(
   $position as xs:integer*,
   $include-ancestors as xs:boolean?
   ) as node()* {
-  for $query in
-    (
-    if ($include-ancestors)
-    then $query-nodes/ancestor-or-self::node()
-    else $query-nodes
-    )
-  let $query-document := document-uri(root($query))
-  let $query-id := util:node-id($query)
-  let $nodes :=
+  let $nodes := 
+    for $query in
+      (
+      if ($include-ancestors)
+      then $query-nodes/ancestor-or-self::node()
+      else $query-nodes
+      )
+    let $query-document := document-uri(root($query))
+    let $query-id := util:node-id($query)
     for $entry in 
       collection($ridx:ridx-path)//
         ridx:entry
@@ -270,7 +270,7 @@ declare function ridx:query-all(
     return
       util:node-by-id(doc($document-uri), $source-node)
   return
-    $nodes
+    $nodes | ()
 };
 
 
@@ -290,23 +290,23 @@ declare function ridx:query-document(
   $docs as item()*,
   $accept-same as xs:boolean
   ) as node()* {
-  for $doc in $docs
-  let $target-document-uri :=
-    document-uri(
-      typeswitch ($doc)
-      case node() return root($doc)
-      default return doc($doc)
-    )
-  let $entries :=
-    if ($accept-same)
-    then
-      collection($ridx:ridx-path)/
-        ridx:index[@document=$target-document-uri]/
-        ridx:entry[@target-doc=$target-document-uri]
-    else 
-      collection($ridx:ridx-path)//
-        ridx:entry[@target-doc=$target-document-uri]
   let $nodes :=
+    for $doc in $docs
+    let $target-document-uri :=
+      document-uri(
+        typeswitch ($doc)
+        case node() return root($doc)
+        default return doc($doc)
+      )
+    let $entries :=
+      if ($accept-same)
+      then
+        collection($ridx:ridx-path)/
+          ridx:index[@document=$target-document-uri]/
+          ridx:entry[@target-doc=$target-document-uri]
+      else 
+        collection($ridx:ridx-path)//
+          ridx:entry[@target-doc=$target-document-uri]
     for $entry in $entries
     return
       try {

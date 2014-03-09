@@ -483,7 +483,7 @@ declare %private function mirror:clear-collections(
   then
     let $tokens := tokenize($collection, "/")
     return (
-      xmldb:remove($collection),
+      system:as-user("admin", $magic:password, xmldb:remove($collection)),
       mirror:clear-collections(
         string-join(subsequence($tokens, 1, count($tokens) - 1), "/"),
         false()

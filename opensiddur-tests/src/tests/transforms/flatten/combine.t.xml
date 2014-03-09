@@ -22,6 +22,8 @@
       at "xmldb:exist:///db/apps/opensiddur-server/modules/mirror.xqm";
     import module namespace combine="http://jewishliturgy.org/transform/combine"
       at "xmldb:exist:///db/apps/opensiddur-server/transforms/combine.xqm";
+    import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/refindex.xqm";
   </imports>
   <asUser>testuser</asUser>
   <password>testuser</password>
@@ -116,6 +118,144 @@
         desc="incorporate destination in-place" 
         >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/tei:seg[@jf:id="seg1"])
       </xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>combine:tei-fs-to-map()</testName>
+    <test output="text">
+      <task>fs/f/symbol</task>
+      <code><![CDATA[
+        let $m := combine:tei-fs-to-map(
+          <tei:fs type="FS">
+            <tei:f name="FSYMBOL">
+              <tei:symbol value="SYMBOL"/>
+            </tei:f>
+          </tei:fs>
+        )
+        return $m("FS->FSYMBOL")
+      ]]></code>
+      <expected desc="map to symbol value">SYMBOL</expected>
+    </test>
+    <test output="text">
+      <task>fs/f/binary</task>
+      <code><![CDATA[
+        let $m := combine:tei-fs-to-map(
+          <tei:fs type="FS">
+            <tei:f name="FBINARY">
+              <tei:binary value="1"/>
+            </tei:f>
+          </tei:fs>
+        )
+        return $m("FS->FBINARY")
+      ]]></code>
+      <expected desc="map to normalized binary value">true</expected>
+    </test>
+    <test output="text">
+      <task>fs/f/yes</task>
+      <code><![CDATA[
+        let $m := combine:tei-fs-to-map(
+          <tei:fs type="FS">
+            <tei:f name="FYES">
+              <j:yes/>
+            </tei:f>
+          </tei:fs>
+        )
+        return $m("FS->FYES")
+      ]]></code>
+      <expected desc="map to yes value">YES</expected>
+    </test>
+    <test output="text">
+      <task>fs/f/string</task>
+      <code><![CDATA[
+        let $m := combine:tei-fs-to-map(
+          <tei:fs type="FS">
+            <tei:f name="FSTRING"><tei:string>string</tei:string></tei:f>
+          </tei:fs>
+        )
+        return $m("FS->FSTRING")
+      ]]></code>
+      <expected desc="map to string value">string</expected>
+    </test>
+    <test output="text">
+      <task>fs/f/text()</task>
+      <code><![CDATA[
+        let $m := combine:tei-fs-to-map(
+          <tei:fs type="FS">
+            <tei:f name="FTEXT">text</tei:f>
+          </tei:fs>
+        )
+        return $m("FS->FTEXT")
+      ]]></code>
+      <expected desc="map to text value">text</expected>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>combine:update-settings-from-standoff-markup()</testName>
+    <setup>
+      <code><![CDATA[
+        local:setup("combine-settings.xml"),
+        ridx:reindex(doc("/db/data/tests/combine-settings.xml"))
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+        local:tearDown("combine-settings.xml"),
+        ridx:remove("/db/data/tests", "combine-settings.xml")
+      ]]></code>
+    </tearDown>
+    <test output="text">
+      <task>update settings for segment with inbound link</task>
+      <code><![CDATA[
+        let $m :=
+        combine:update-settings-from-standoff-markup(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/combine-settings.xml")//tei:seg[@jf:id="seg1"],
+          map {
+            "combine:unmirrored-doc" := doc("/db/data/tests/combine-settings.xml"),
+            "combine:setting-links" := doc("/db/data/tests/combine-settings.xml")//tei:link[@type="set"]
+          },
+          false()
+        )
+        return $m("combine:settings")("FS1->F1")
+      ]]></code>
+      <expected desc="setting is set">ONE</expected>
+    </test>
+    <test output="text">
+      <task>update settings for segment with no inbound links</task>
+      <code><![CDATA[
+        let $m :=
+        combine:update-settings-from-standoff-markup(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/combine-settings.xml")//tei:seg[@jf:id="seg2"],
+          map {
+            "combine:unmirrored-doc" := doc("/db/data/tests/combine-settings.xml"),
+            "combine:setting-links" := doc("/db/data/tests/combine-settings.xml")//tei:link[@type="set"]
+          },
+          false()
+        )
+        return count(map:keys($m("combine:settings")))
+      ]]></code>
+      <expected desc="settings are empty">0</expected>
+    </test>
+    <test>
+      <task>update settings with ancestors for segment with inbound link</task>
+      <code><![CDATA[
+        let $m :=
+        combine:update-settings-from-standoff-markup(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/combine-settings.xml")//tei:seg[@jf:id="seg1"],
+          map {
+            "combine:unmirrored-doc" := doc("/db/data/tests/combine-settings.xml"),
+            "combine:setting-links" := doc("/db/data/tests/combine-settings.xml")//tei:link[@type="set"]
+          },
+          true()
+        )
+        return 
+          <values 
+            f1="{$m('combine:settings')('FS1->F1')}" 
+            f3="{$m('combine:settings')('FS1->F3')}" 
+            f2="{$m('combine:settings')('FS1->F2')}"/>
+      ]]></code>
+      <xpath desc="non-overridden setting from ancestor is retained">./@f2="THREE"</xpath>
+      <xpath desc="overridden setting from ancestor is overridden">./@f1="ONE"</xpath>
+      <xpath desc="non-overridden setting from this is retained">./@f3="FOUR"</xpath>
     </test>
   </TestSet>
 </TestSuite>
