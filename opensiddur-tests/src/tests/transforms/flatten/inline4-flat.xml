@@ -50,7 +50,7 @@
           jf:nchildren="0"
           jf:nlevels="0"
           jf:nprecedents="0"
-          jf:stream="stream"
+          jf:stream="/db/apps/opensiddur-tests/tests/transforms/flatten/inline4.xml#stream"
           jf:id="seg1"/>
         <tei:label
           jf:position="1"
@@ -66,7 +66,7 @@
           jf:nchildren="0"
           jf:nlevels="0"
           jf:nprecedents="0"
-          jf:stream="stream"
+          jf:stream="/db/apps/opensiddur-tests/tests/transforms/flatten/inline4.xml#stream"
           jf:id="seg2"/>
         <tei:label
           jf:position="2"

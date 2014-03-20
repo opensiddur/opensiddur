@@ -245,6 +245,21 @@ declare function flatten:identity(
   }
 };
 
+(:~ generate a stream id
+ : 
+ : because of parallel texts, a stream id has to uniquely define a stream across documents 
+ : @param $stream a streamText
+ : @return generated id
+ :)
+declare function flatten:stream-id(
+    $stream as element(j:streamText) 
+    ) as xs:string {
+    concat(
+        document-uri(root($stream)), "#", 
+        $stream/(@xml:id, @jf:id, flatten:generate-id(.))[1]
+    )
+};
+
 (:~ streamText within the transform: 
  : assure that the streamText has an xml:id
  :)
@@ -303,7 +318,7 @@ declare function flatten:write-placeholder(
     jf:nchildren="0"
     jf:nlevels="0"
     jf:nprecedents="0"
-    jf:stream="{$stream/(@xml:id, @jf:id, flatten:generate-id(.))[1]}"/> 
+    jf:stream="{flatten:stream-id($stream)}"/> 
 };
 
 (:~ flatten a ptr. 
@@ -342,7 +357,8 @@ declare function flatten:copy-attributes(
  : application of flatten:suspend-or-continue
  :)
 declare function flatten:rewrite-suspend-or-continue(
-  $nodes as node()*
+  $nodes as node()*,
+  $active-stream as xs:string
   ) as node()* {
   if (empty($nodes[@jf:suspend]))
   then
@@ -368,7 +384,7 @@ declare function flatten:rewrite-suspend-or-continue(
             - count(
               $node/
                 following-sibling::*
-                  [@jf:stream]
+                  [@jf:stream=$active-stream]
                   [. << $node/following-sibling::*[(@jf:suspend, @jf:end)=$start-node-id][1]]
             )
           },
@@ -383,7 +399,7 @@ declare function flatten:rewrite-suspend-or-continue(
             count(
               $node/
                 preceding-sibling::*
-                  [@jf:stream]
+                  [@jf:stream=$active-stream]
                   [. >> $node/preceding-sibling::*[(@jf:start, @jf:continue)=$start-node-id][1]]
             )
           },
@@ -410,7 +426,7 @@ declare function flatten:rewrite-suspend-or-continue(
               count(
                 $parent-node/                
                   following-sibling::*
-                    [@jf:stream]
+                    [@jf:stream=$active-stream]
                     [. << $parent-node/following-sibling::*[(@jf:suspend, @jf:end)=$start-node-id][1]]
               )
             },
@@ -428,9 +444,10 @@ declare function flatten:suspend-or-continue(
   $context as element(),
   $node-id as xs:string, 
   $flattened-nodes as node()*,
-  $start-node as element()
+  $start-node as element(),
+  $active-stream as xs:string
   ) as node()* {
-  let $stream-children := $flattened-nodes[@jf:stream]
+  let $stream-children := $flattened-nodes[@jf:stream=$active-stream]
   let $positions := $stream-children/@jf:position/number()
   for $fnode at $pos in $flattened-nodes
   return
@@ -474,12 +491,13 @@ declare function flatten:suspend-or-continue(
 };
 
 (:~ flatten element 
- : @param $params Expects "flatten:layer-id"
+ : @param $params Expects "flatten:layer-id", "flatten:stream-id"
  :)
 declare function flatten:element(
 	$context as element(),
 	$params as map
 	) as node()+ {
+    let $active-stream := $params("flatten:stream-id")
 	let $node-id := 
         string(
           $context/(
@@ -491,7 +509,7 @@ declare function flatten:element(
 	let $children := 
 	  flatten:flatten(
 	    $context/node(), 
-	    map:new(($params, map { "flatten:unit-id" := $node-id }))
+	    $params
 	  )
 	let $layer := $context/ancestor::j:layer
 	let $level := count($context/ancestor::*) - count($layer/ancestor::*)
@@ -500,7 +518,7 @@ declare function flatten:element(
 	return
 	  if (
 	    ($context/empty(./*|./text())) or
-      empty($children[@jf:stream])
+      empty($children[@jf:stream=$active-stream])
     )
     then
   	 	(: If an element is empty or has no children in the streamText
@@ -515,7 +533,7 @@ declare function flatten:element(
       }	
     else  
 	    (: element has children in the streamText :)
-  		let $stream-children := $children[@jf:stream]
+  		let $stream-children := $children[@jf:stream=$active-stream]
   		let $nchildren := count($stream-children)
   		let $start-node :=
   		  element { QName(namespace-uri($context), name($context)) }{
@@ -529,24 +547,25 @@ declare function flatten:element(
           attribute jf:layer-id { $params("flatten:layer-id") }
         }
   		return flatten:rewrite-suspend-or-continue((
-      	$start-node,
+      	    $start-node,
   			flatten:set-missing-attributes(
   			  $context,
   			  flatten:suspend-or-continue(
-  			    $context, $node-id, $children, $start-node
+  			    $context, $node-id, $children, $start-node, $active-stream
   			  ),
   			  $nchildren
   			),
   			element { QName(namespace-uri($context), name($context)) }{
-        	attribute jf:end { $node-id },
-        	$stream-children[last()]/@jf:position,
-          attribute jf:relative { 1 },
-          attribute jf:nchildren { $nchildren },
-          attribute jf:nlevels { -$level },
-          attribute jf:nprecedents { $nprecedents },
-          attribute jf:layer-id { $params("flatten:layer-id") }
-        }
-      ))
+        	    attribute jf:end { $node-id },
+        	    $stream-children[last()]/@jf:position,
+                attribute jf:relative { 1 },
+                attribute jf:nchildren { $nchildren },
+                attribute jf:nlevels { -$level },
+                attribute jf:nprecedents { $nprecedents },
+                attribute jf:layer-id { $params("flatten:layer-id") }
+            }
+        ), 
+        $active-stream)
 };
 
 declare function flatten:set-missing-attributes(
@@ -601,7 +620,7 @@ declare function flatten:generate-id(
 
 (:~ Convert j:layer (which may be a root element) 
  : to jf:layer.
- : Start sending the "flatten:layer-id" parameter
+ : Start sending the "flatten:layer-id" and "flatten:stream:id" parameters
  :)
 declare function flatten:j-layer(
 	$context as element(),
@@ -612,6 +631,7 @@ declare function flatten:j-layer(
       @xml:id, 
       flatten:generate-id(.)
     )[1]
+    let $stream-id := flatten:stream-id($context/../../j:streamText)
 	return 
     element jf:layer {
       $context/(@* except @xml:id),
@@ -623,7 +643,7 @@ declare function flatten:j-layer(
       flatten:order-flattened(
         flatten:flatten(
           $context/node(), 
-          map:new(($params, map { "flatten:layer-id" := $id } ))
+          map:new(($params, map { "flatten:layer-id" := $id, "flatten:stream-id" := $stream-id } ))
         )
       )
     }
