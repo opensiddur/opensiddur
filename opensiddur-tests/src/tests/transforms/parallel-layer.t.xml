@@ -63,8 +63,8 @@
             ]]></code>
             <xpath desc="produces one layer per linkGrp">count(.//j:parallelText/j:layer[@type="parallel"])=1</xpath>
             <xpath desc="layer references the domains">exists(.//j:parallelText/j:layer/@domains/string()[.])</xpath>
-            <xpath desc="produces one jf:parallel-group per link">count(.//j:layer/jf:parallel-group)=3</xpath>
-            <xpath desc="produces two jf:parallel[@domain][tei:ptr] per group">every $p in .//j:layer/jf:parallel-group satisfies count($p/jf:parallel[@domain][count(tei:ptr)=1])=2</xpath> 
+            <xpath desc="produces one jf:parallelGrp per link">count(.//j:layer/jf:parallelGrp)=3</xpath>
+            <xpath desc="produces two jf:parallel[@domain][tei:ptr] per group">every $p in .//j:layer/jf:parallelGrp satisfies count($p/jf:parallel[@domain][count(tei:ptr)=1])=2</xpath> 
         </test>
     </TestSet>
 </TestSuite>

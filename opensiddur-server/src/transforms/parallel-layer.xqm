@@ -64,7 +64,7 @@ declare function pla:tei-linkGrp(
         let $domains := tokenize($e/@domains, "\s+")
         for $link in $e/tei:link
         return 
-            element jf:parallel-group {
+            element jf:parallelGrp {
                 flatten:copy-attributes($link),
                 for $target at $nt in tokenize($link/@target, "\s+")
                 return
