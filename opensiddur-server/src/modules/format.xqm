@@ -223,7 +223,7 @@ declare function format:get-dependencies(
     <format:dependencies>{
       for $dep in uri:dependency($doc, ())
       let $transformable := 
-        matches($dep, "^/db/data/(original|tests)")
+        matches($dep, "^/db/data/(linkage|original|tests)")
         (: TODO: add other transformables here... :)
       return 
         <format:dependency>{
