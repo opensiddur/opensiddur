@@ -19,6 +19,8 @@ import module namespace common="http://jewishliturgy.org/transform/common"
   at "../modules/common.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
+import module namespace format="http://jewishliturgy.org/modules/format"
+  at "../modules/format.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -65,7 +67,7 @@ declare function flatten:merge-document(
   ) as document-node() {
   common:apply-at(
     $doc, 
-    $doc//(j:concurrent|j:streamText), 
+    $doc//(j:concurrent|j:streamText|j:parallelText), 
     flatten:merge-concurrent#2,
     $params  
   )
@@ -78,6 +80,8 @@ declare function flatten:merge-concurrent(
   typeswitch($e)
   case element(j:concurrent)
   return flatten:merge-j-concurrent($e, $params)
+  case element(j:parallelText)
+  return flatten:merge-j-parallelText($e, $params)
   default (: j:streamText :) 
   return (
     flatten:merge(
@@ -87,6 +91,39 @@ declare function flatten:merge-concurrent(
     ),
     $e
     )
+};
+
+declare function flatten:merge-j-parallelText(
+    $e as element(j:parallelText),
+    $params as map
+    ) as element(jf:parallelText) {
+    element jf:parallelText {
+      if ($e/(@jf:id|@xml:id))
+      then
+        attribute jf:id { $e/(@jf:id|@xml:id)/string() }
+      else (),
+      for $layer in $e/jf:layer
+      let $domain := $layer/@jf:domain      (: domain points to the streamText :)
+      let $flat-stream := uri:follow-cached-uri($domain, $layer, -1, $format:flatten-cache)
+      let $merged :=
+          flatten:merge(
+            flatten:flatten-streamText($flat-stream, $params),
+            ($layer, $flat-stream/../j:concurrent/jf:layer),
+            $params
+          )
+      return (
+        element jf:merged {
+          $layer/(@type, @jf:domain),
+          $merged/node()
+        },
+        element j:streamText {
+            attribute jf:domain { $domain },
+            attribute jf:id { $flat-stream/(@jf:id|@xml:id)/string() },
+            $flat-stream/(@* except @xml:id),
+            $flat-stream/node()
+        }
+      )
+    }
 };
 
 (:~ @return an element that records all the existing layers
