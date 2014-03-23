@@ -7,7 +7,7 @@ xquery version "3.0";
  :  resolve-stream REQUIRES that the document root be accessible.
  :
  : Open Siddur Project
- : Copyright 2009-2013 Efraim Feinstein 
+ : Copyright 2009-2014 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -205,7 +205,7 @@ declare function flatten:flatten-document(
   ) as document-node() {
   common:apply-at(
     $doc, 
-    $doc//(j:concurrent|j:streamText), 
+    $doc//(j:concurrent|j:streamText|j:parallelText), 
     flatten:flatten#2,
     $params
   ) 
@@ -221,9 +221,13 @@ declare function flatten:flatten(
 		case text() return $n
 		case comment() return $n
 		case processing-instruction() return $n
-		case element(j:layer) return flatten:j-layer($n, $params)
+		case element(j:layer) return 
+            if ($n/@type="parallel")
+            then flatten:parallel-j-layer($n, $params)
+            else flatten:j-layer($n, $params)
 		case element(tei:ptr) return flatten:tei-ptr($n, $params)
 		case element(j:concurrent) return flatten:identity($n, $params)
+        case element(j:parallelText) return flatten:identity($n, $params)
 		case element(j:streamText) return flatten:j-streamText($n, $params)
 		case element() return 
 		  if ($n is root($n)/*) 
@@ -276,6 +280,7 @@ declare function flatten:j-streamText(
     $e/node()
   }
 };
+
 
 (:~ flatten a streamtext. 
  : This is not part of the transform, rather, it should be used before merge
@@ -518,17 +523,17 @@ declare function flatten:element(
 	return
 	  if (
 	    ($context/empty(./*|./text())) or
-      empty($children[@jf:stream=$active-stream])
-    )
-    then
+        empty($children[@jf:stream=$active-stream])
+        )
+      then
   	 	(: If an element is empty or has no children in the streamText
   	 	 :)
     	element { QName(namespace-uri($context), name($context)) }{
     		$attributes,
     		((: position and relative are filled in later :)),
-        attribute jf:nlevels { $level },
-        attribute jf:nprecedents { $nprecedents },
-        attribute jf:layer-id { $params("flatten:layer-id") },
+            attribute jf:nlevels { $level },
+            attribute jf:nprecedents { $nprecedents },
+            attribute jf:layer-id { $params("flatten:layer-id") },
     		$context/node()
       }	
     else  
@@ -618,9 +623,26 @@ declare function flatten:generate-id(
   )
 };
 
+(:~ process layers that are for parallel texts :)
+declare function flatten:parallel-j-layer(
+    $context as element(j:layer),
+    $params as map
+    ) as element(jf:layer)+ {
+    for $domain in tokenize($context/@domains, "\s+")
+    let $stream-id := flatten:stream-id(uri:fast-follow($domain, $context, -1))
+    let $layer := flatten:j-layer($context, map:new(($params, map { "flatten:stream-id" := $stream-id })))
+    return
+        element jf:layer {
+            $layer/@*,
+            attribute jf:domain { $domain },
+            $layer/node()
+        }
+};
+
 (:~ Convert j:layer (which may be a root element) 
  : to jf:layer.
  : Start sending the "flatten:layer-id" and "flatten:stream:id" parameters
+ : If $params("flatten:stream-id") is already set, use the existing value.
  :)
 declare function flatten:j-layer(
 	$context as element(),
@@ -631,7 +653,10 @@ declare function flatten:j-layer(
       @xml:id, 
       flatten:generate-id(.)
     )[1]
-    let $stream-id := flatten:stream-id($context/../../j:streamText)
+    let $stream-id := 
+        if ($params("flatten:stream-id"))
+        then $params("flatten:stream-id")
+        else flatten:stream-id($context/../../j:streamText)
 	return 
     element jf:layer {
       $context/(@* except @xml:id),
