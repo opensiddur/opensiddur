@@ -28,15 +28,16 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
 declare variable $flatten:layer-order := map {
     "none" := 0,
-    "div" := 1,
-    "p"   := 2,
-    "lg"  := 3,
-    "s"   := 4,
-    "ab"  := 5,
-    "verse" := 6,
-    "l"   := 7,
-    "cit" := 8,
-    "choice" := 9
+    "parallel" := 1,
+    "div" := 2,
+    "p"   := 3,
+    "lg"  := 4,
+    "s"   := 5,
+    "ab"  := 6,
+    "verse" := 7,
+    "l"   := 8,
+    "cit" := 9,
+    "choice" := 10
   };
 
 (:~ order the given flattened nodes, using the information in 
@@ -120,7 +121,7 @@ declare function flatten:merge-j-parallelText(
             attribute jf:domain { $domain },
             attribute jf:id { $flat-stream/(@jf:id|@xml:id)/string() },
             $flat-stream/(@* except @xml:id),
-            $flat-stream/node()
+            flatten:copy($flat-stream/node(), $params)
         }
       )
     }
@@ -167,6 +168,7 @@ declare function flatten:merge(
 
 (:~ replace all references to jf:placeholder with 
  : their stream elements 
+ : @param $params passes itself the "flatten:resolve-stream" parameter to point to the stream being resolved
  :)
 declare function flatten:resolve-stream(
   $nodes as node()*,
@@ -177,9 +179,23 @@ declare function flatten:resolve-stream(
     typeswitch ($node)
     case element (j:streamText)
     return ()
+    case element (jf:merged)
+    return
+        element { QName(namespace-uri($node), name($node)) }{
+            $node/@*,
+            flatten:resolve-stream($node/node(), 
+                map:new((
+                    $params, 
+                    map { "flatten:resolve-stream" := 
+                        if ($node/@type="parallel")
+                        then root($node)//j:streamText[@jf:domain=$node/@jf:domain]
+                        else root($node)//j:streamText
+                    })))
+        }
     case element (jf:placeholder)
     return 
-      let $stream-element := root($node)/id($node/@jf:id)
+      let $stream := $params("flatten:resolve-stream")
+      let $stream-element := ($stream/id($node/@jf:id), $stream/*[@jf:id=$node/@jf:id])[1]
       return
         element { QName(namespace-uri($stream-element), name($stream-element)) }{
           $stream-element/(@* except @xml:id),
@@ -284,6 +300,23 @@ declare function flatten:identity(
     flatten:copy-attributes($e),
     flatten:flatten($e/node(), $params)
   }
+};
+
+(:~ identity - copy only and change xml:id->jf:id :)
+declare function flatten:copy(
+  $nodes as node()*,
+  $params as map
+  ) as node()* {
+  for $node in $nodes
+  return 
+    typeswitch($node)
+    case document-node() return document { flatten:copy($node/node(), $params) }
+    case element() return
+      element { QName(namespace-uri($node), name($node))}{
+        flatten:copy-attributes($node),
+        flatten:copy($node/node(), $params)
+      }
+    default return $node
 };
 
 (:~ generate a stream id
