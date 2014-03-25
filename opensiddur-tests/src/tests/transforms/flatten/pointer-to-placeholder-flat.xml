@@ -25,7 +25,7 @@
           jf:nchildren="0"
           jf:nlevels="0"
           jf:nprecedents="0"
-          jf:stream="stream"
+          jf:stream="/db/apps/opensiddur-tests/tests/transforms/flatten/pointer-to-placeholder.xml#stream"
           jf:id="seg1"/>
         <tei:div
           jf:end="div1"

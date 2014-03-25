@@ -3,7 +3,7 @@ xquery version "3.0";
  : Modes to reverse the flattening of a hierarchy.
  :
  : Open Siddur Project
- : Copyright 2013 Efraim Feinstein 
+ : Copyright 2013-2014 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -71,7 +71,7 @@ declare function reverse:construct-streamText(
   for $stream in distinct-values($e//@jf:stream)
   return
     element j:streamText {
-      attribute xml:id { $stream },
+      attribute xml:id { if (contains($stream, "#") then substring-after($stream, "#") else $stream },
       for $elem in $e/*[@jf:stream=$stream]
       return
         element { QName(namespace-uri($elem), name($elem)) }{

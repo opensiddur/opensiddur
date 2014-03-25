@@ -257,7 +257,7 @@ schemas, not as an independent unit
   <classSpec ident="att.global.facs" module="transcr" mode="delete" type="atts"/>
   <classSpec ident="att.pointing.group" module="tei" mode="change" type="atts">
     <attList>
-      <attDef ident="domains" mode="delete"/>
+      <!--attDef ident="domains" mode="delete"/-->
       <attDef ident="targFunc" mode="delete"/>
     </attList>
   </classSpec>

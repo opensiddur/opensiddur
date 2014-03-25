@@ -23,7 +23,7 @@
             <tei:date>2012-06-08</tei:date>
          </tei:publicationStmt>
          <tei:sourceDesc>
-            <tei:link type="bibl" target="#text /data/sources/Born%20Digital"/>
+            <tei:link type="bibl" target="#parallel /data/sources/Born%20Digital"/>
          </tei:sourceDesc>
       </tei:fileDesc>
       <tei:revisionDesc>
@@ -32,11 +32,10 @@
    </tei:teiHeader>
    <tei:text>
       <j:parallelText xml:id="parallel">
-         <j:parallelGrp>
-            <tei:ptr targetLang="he" xml:base="/data/original/Nonexistent"
-                     target="#v1_seg1 #v1_seg2"/>
-            <tei:ptr xml:base="/data/original/B-en" target="#v1_seg1 #v1_seg2"/>
-         </j:parallelGrp>
+        <tei:idno>Has Nonexistent</tei:idno>
+        <tei:linkGrp domains="/data/original/Nonexistent">
+            <tei:link target="/data/original/Nonexistent#range(v1_seg1,v1_seg2) /data/original/B-en#range(v1_seg1,v1_seg2)"/>
+        </tei:linkGrp>
       </j:parallelText>
       
    </tei:text>

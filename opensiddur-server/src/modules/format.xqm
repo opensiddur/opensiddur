@@ -15,6 +15,8 @@ import module namespace mirror="http://jewishliturgy.org/modules/mirror"
   at "mirror.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri" 
   at "follow-uri.xqm";
+import module namespace pla="http://jewishliturgy.org/transform/parallel-layer"
+  at "../transforms/parallel-layer.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "../transforms/flatten.xqm";
 import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
@@ -30,8 +32,13 @@ import module namespace translit="http://jewishliturgy.org/transform/translitera
 import module namespace reverse="http://jewishliturgy.org/transform/reverse"
   at "../transforms/reverse.xqm";
 
+declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
+
+
 declare variable $format:temp-dir := '.format';
 
+declare variable $format:parallel-layer-cache := "/db/cache/parallel-layer";
 declare variable $format:dependency-cache := "/db/cache/dependency";
 declare variable $format:flatten-cache := "/db/cache/flatten";
 declare variable $format:merge-cache := "/db/cache/merge";
@@ -41,6 +48,7 @@ declare variable $format:combine-cache := "/db/cache/combined";
 declare variable $format:compile-cache := "/db/cache/compiled";
 declare variable $format:html-cache := "/db/cache/html";
 declare variable $format:caches := (
+    $format:parallel-layer-cache,
     $format:dependency-cache,
     $format:flatten-cache,
     $format:merge-cache,
@@ -50,15 +58,6 @@ declare variable $format:caches := (
     $format:compile-cache,
     $format:html-cache
     );
-
-declare function local:wrap-document(
-  $node as node()
-  ) as document-node() {
-  if ($node instance of document-node())
-  then $node
-  else document {$node}
-};
-
 
 (:~ setup to allow format functions to work :)
 declare function format:setup(
@@ -87,6 +86,39 @@ declare function format:clear-caches(
       mirror:remove($cache, util:collection-name($doc), util:document-name($doc))
 };
 
+(:~ @return true() if the document requires special processing for parallel documents :)
+declare function format:is-parallel-document(
+    $doc as document-node()
+    ) as xs:boolean {
+    exists($doc//j:parallelText)
+};
+
+(:~ make a cached version of a parallel text document,
+ : and return it
+ : @param $doc The document to run parallel text transform on
+ : @param $params Parameters to send to the transform
+ : @param $original-doc The original document  
+ : @return The mirrored parallel text document
+ :) 
+declare function format:parallel-layer(
+  $doc as document-node(),
+  $params as map,
+  $original-doc as document-node()
+  ) as document-node() {
+  (: flatten the document's dependencies first so we can assume that the dependency
+   : flattened versions exist so they can be merged
+   :)
+  let $unflats := format:flatten-external-dependencies($original-doc, $params)
+  let $pla-transform := pla:parallel-layer-document(?, $params)
+  return
+    mirror:apply-if-outdated(
+      $format:parallel-layer-cache,
+      $doc,
+      $pla-transform,
+      $original-doc
+    )
+};
+
 (:~ make a cached version of a flattened document,
  : and return it
  : @param $doc The document to flatten
@@ -103,7 +135,10 @@ declare function format:flatten(
   return
     mirror:apply-if-outdated(
       $format:flatten-cache,
-      $doc,
+      if (format:is-parallel-document($original-doc))
+      then 
+        format:parallel-layer($doc, $params, $original-doc)
+      else $doc,
       $flatten-transform,
       $original-doc
     )
@@ -192,7 +227,7 @@ declare function format:get-dependencies(
     <format:dependencies>{
       for $dep in uri:dependency($doc, ())
       let $transformable := 
-        matches($dep, "^/db/data/(original|tests)")
+        matches($dep, "^/db/data/(linkage|original|tests)")
         (: TODO: add other transformables here... :)
       return 
         <format:dependency>{
@@ -225,6 +260,17 @@ declare function format:unflatten-dependencies(
   ) as document-node()+ {
   for $dep in format:dependencies($doc)//format:dependency[@transformable]
   return format:unflatten(doc($dep), $params, doc($dep))
+};
+
+(:~ flatten all transformable dependencies of a given document, excluding itself :)
+declare function format:flatten-external-dependencies(
+  $doc as document-node(),
+  $params as map
+  ) as document-node()+ {
+  for $dep in format:dependencies($doc)//format:dependency[@transformable]
+  let $dep-doc := doc($dep)
+  where not($dep-doc is $doc)
+  return format:flatten($dep-doc, $params, $dep-doc)
 };
   
 (:~ perform the transform up to the combine step 
