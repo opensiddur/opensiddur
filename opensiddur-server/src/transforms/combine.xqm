@@ -24,6 +24,8 @@ import module namespace ridx="http://jewishliturgy.org/modules/refindex"
   at "../modules/refindex.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
+import module namespace flatten="http://jewishliturgy.org/transform/flatten"
+  at "flatten.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -146,15 +148,27 @@ declare function combine:new-document-attributes(
   )
 };
 
+declare function combine:new-document-params(
+    $new-doc-nodes as node()*,
+    $params as map
+    ) as map {
+    combine:new-document-params($new-doc-nodes, $params, false())
+};
+
 (:~ change parameters as required for entry into a new document
  : manages "combine:unmirrored-doc", "combine:setting-links" 
+ : 
+ : @param $new-doc-nodes The newly active document
+ : @param $params Already active parameters
+ : @param $is-redirect If a redirect is going into force, then 2 documents' params will be simulataneously active.  : In that case, combine:unmirrored-doc is added to, not replaced. The redirect is always second.
  :)
 declare function combine:new-document-params(
   $new-doc-nodes as node()*,
-  $params as map
+  $params as map,
+  $is-redirect as xs:boolean
   ) as map {
     let $unmirrored-path := 
-        mirror:unmirror-path( (: 1/2db/3cache/4something/...:)
+        mirror:unmirror-path(
             $format:unflatten-cache, 
             document-uri(root($new-doc-nodes[1])))
     let $unmirrored-doc := doc($unmirrored-path)
@@ -163,7 +177,10 @@ declare function combine:new-document-params(
     let $new-params := map:new((
         $params,
         map { 
-            "combine:unmirrored-doc" := $unmirrored-doc,
+            "combine:unmirrored-doc" := 
+                if ($is-redirect)
+                then ($params("combine:unmirrored-doc"), $unmirrored-doc)
+                else $unmirrored-doc,
             "combine:setting-links" := $all-setting-links
         }
     ))
@@ -180,7 +197,7 @@ declare function combine:update-params(
 };
 
 (:~ update parameters with settings from standoff markup.
- : feature structures are represented by type->name->value
+ : feature structures are represented by type->name := value
  : @param $params uses the combine:setting-links parameter, maintains the combine:settings parameter
  : @param $new-context true() if this is a new context 
  :)
@@ -203,7 +220,18 @@ declare function combine:update-settings-from-standoff-markup(
                 map {
                     "combine:settings" := map:new((
                         $params("combine:settings"),
-                        let $unmirrored := $params("combine:unmirrored-doc")//id($base-context/@jf:id)
+                        let $unmirrored := 
+                            if (
+                                $base-context/self::jf:unflattened[@type="parallel"] 
+                                or $base-context/self::jf:parallelGrp
+                                or $base-context/self::jf:parallel 
+                            ) 
+                            then
+                                (: use the settings from the linkage file :) 
+                                $params("combine:unmirrored-doc")[2]//id($base-context/@jf:id) 
+                            else
+                                (: use the settings from the original file :) 
+                                $params("combine:unmirrored-doc")[1]//id($base-context/@jf:id)
                         for $standoff-link in 
                             ridx:query($params("combine:setting-links"), $unmirrored, 1, $new-context)
                         let $link-target := tokenize($standoff-link/(@target|@targets), '\s+')[2]
@@ -312,10 +340,53 @@ declare function combine:tei-ptr(
            )
           )
         else (
-          combine:new-document-attributes($e, $destination),
-          combine:combine($destination,
-            combine:new-document-params($destination, $params))
-        )
+            (: external pointer... determine if we need to redirect :)
+            let $active-translation := $params("combine:settings")("opensiddur->translation")
+            let $destination-stream := $destination[1]/ancestor-or-self::j:streamText
+            let $translated-stream-unmirrored := 
+                ridx:query(
+                    collection("/db/data/linkage")//j:parallelText[tei:idno=$active-translation]/tei:linkGrp[@domains], 
+                    $destination-stream) 
+            return
+                if (exists($translated-stream-unmirrored) 
+                    and not($e/parent::jf:parallel) (: special exception for the external pointers in the parallel construct :)
+                )
+                then
+                    (: there is a translation redirect :)
+                    let $destination-domain := 
+                        data:db-path-to-api(document-uri(root($destination-stream))) || "#" || 
+                            ($destination-stream/(@xml:id, @jf:id, flatten:generate-id(.)))[1]
+                    let $mirrored-translation-doc := 
+                        format:unflatten(root($translated-stream-unmirrored), map {}, root($translated-stream-unmirrored))
+                    let $destination-stream := $mirrored-translation-doc//jf:unflattened[@jf:domain=$destination-domain]
+                    let $redirect-begin := 
+                        $destination-stream/*[@jf:id=$destination[1]/@jf:id][1]/ancestor::jf:parallelGrp
+                    let $redirect-end :=
+                        $destination-stream/*[@jf:id=$destination[last()]/@jf:id][last()]/ancestor::jf:parallelGrp
+                    let $redirect := 
+                        $redirect-begin | 
+                        $redirect-begin/following-sibling::* intersect $redirect-end/preceding-sibling::* |
+                        $redirect-end
+                    return (
+                        combine:new-document-attributes($e, $destination),
+                        combine:combine(
+                            $redirect,
+                            (: new document params looks to the unmirrored doc, so it should go to the unredirected destination too :)
+                            combine:new-document-params(
+                                $redirect, combine:new-document-params($destination, $params)
+                            )
+                        )
+                    )
+                else
+                    (: no translation redirect :) 
+                    (
+                        combine:new-document-attributes($e, $destination),
+                        combine:combine(
+                            $destination,
+                            combine:new-document-params($destination, $params)
+                        )
+                    )
+            )
       }
 };
 
