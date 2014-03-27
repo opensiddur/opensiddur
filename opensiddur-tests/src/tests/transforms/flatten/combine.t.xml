@@ -66,7 +66,7 @@
       <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine1$")</xpath>
       <xpath 
         desc="acts as an identity transform for unflattened text" 
-        >exists(./tei:TEI/tei:text/jf:combined/tei:seg[@jf:id="seg1"][@jf:stream="stream"])
+        >exists(./tei:TEI/tei:text/jf:combined/tei:seg[@jf:id="seg1"][ends-with(@jf:stream,"#stream")])
       </xpath>
     </test>        
   </TestSet>
@@ -88,10 +88,10 @@
       <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine2$")</xpath>
       <xpath 
         desc="incorporate destination in-place" 
-        >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/tei:seg[@jf:id="seg1"])
+        >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
       </xpath>
       <xpath desc="no @jf:document attribute on jf:ptr">
-        empty(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/@jf:document)
+        empty(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/@jf:document)
       </xpath>
     </test>
   </TestSet>
@@ -116,7 +116,7 @@
       <xpath desc="has @jf:document on the included element">matches(./tei:TEI//jf:ptr[@jf:id="ptr1"]/@jf:document,"^(/exist/restxq)?/api/data/tests/combine1$")</xpath>
       <xpath 
         desc="incorporate destination in-place" 
-        >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/tei:seg[@jf:id="seg1"])
+        >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
       </xpath>
     </test>
   </TestSet>

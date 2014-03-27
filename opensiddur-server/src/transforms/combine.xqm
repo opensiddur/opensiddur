@@ -81,13 +81,27 @@ declare function combine:tei-TEI(
   }
 }; 
 
+(:~ equivalent of a streamText, check for redirects :)
 declare function combine:jf-unflattened(
   $e as element(jf:unflattened),
   $params as map
   ) as element(jf:combined) {
   element jf:combined {
     $e/@*,
-    combine:combine($e/node(), $params)
+    if ($e/@type="parallel")
+    then
+        (: parallel texts cannot be redirected :) 
+        combine:combine($e/node(), $params)
+    else 
+        (: determine if we need a translation redirect
+         : this code will only result in a redirect if the translation settings are 
+         : set in the same file as the streamText
+         :)
+        let $redirect := combine:translation-redirect($e, $e, $params)
+        return
+            if (exists($redirect))
+            then $redirect
+            else combine:combine($e/node(), $params)
   } 
 };
 
@@ -207,13 +221,16 @@ declare function combine:update-settings-from-standoff-markup(
     $new-context as xs:boolean
     ) as map {
     let $base-context :=
-        if ($e/@jf:id)
+        if ($new-context)
+        (: this is more complex --
+            need to handle overrides, so each of these ancestors has to be treated separately, and in document order
+         :)
+        then $e/ancestor-or-self::*[@jf:id|@xml:id][1]
+        else if (exists($e/(@jf:id|@xml:id)))
         then $e
-        else if ($new-context)
-        then $e/ancestor::*[@jf:id]
         else ()
     return
-        if ($base-context)
+        if (exists($base-context))
         then
             map:new((
                 $params,
@@ -222,16 +239,16 @@ declare function combine:update-settings-from-standoff-markup(
                         $params("combine:settings"),
                         let $unmirrored := 
                             if (
-                                $base-context/self::jf:unflattened[@type="parallel"] 
-                                or $base-context/self::jf:parallelGrp
-                                or $base-context/self::jf:parallel 
+                                exists($base-context/self::jf:unflattened[@type="parallel"]) 
+                                or exists($base-context/self::jf:parallelGrp)
+                                or exists($base-context/self::jf:parallel)
                             ) 
                             then
                                 (: use the settings from the linkage file :) 
-                                $params("combine:unmirrored-doc")[2]//id($base-context/@jf:id) 
+                                $params("combine:unmirrored-doc")[2]//id($base-context/(@xml:id, @jf:id)[1]) 
                             else
                                 (: use the settings from the original file :) 
-                                $params("combine:unmirrored-doc")[1]//id($base-context/@jf:id)
+                                $params("combine:unmirrored-doc")[1]//id($base-context/(@xml:id, @jf:id)[1])
                         for $standoff-link in 
                             ridx:query($params("combine:setting-links"), $unmirrored, 1, $new-context)
                         let $link-target := tokenize($standoff-link/(@target|@targets), '\s+')[2]
@@ -296,6 +313,60 @@ declare function combine:document-uri(
   )[1]
 };
 
+(:~ do a translation redirect, if necessary, from the context $e
+ : which may be the same or different from $destination
+ :
+ : @return the redirected data, or () if no redirect occurred
+ :)
+declare function combine:translation-redirect(
+    $e as element(),
+    $destination as node()*,
+    $params as map
+    ) as node()* {
+    let $active-translation := 
+        let $s := $params("combine:settings")
+        where exists($s)
+        return $s("opensiddur->translation")
+    let $destination-stream := $destination[1]/ancestor-or-self::j:streamText
+    let $translated-stream-unmirrored :=
+        if ($active-translation)
+        then  
+            ridx:query(
+                collection("/db/data/linkage")//j:parallelText[tei:idno=$active-translation]/tei:linkGrp[@domains], 
+                $destination-stream)
+        else () 
+    where (
+        exists($translated-stream-unmirrored) 
+        and not($e/parent::jf:parallel) (: special exception for the external pointers in the parallel construct :)
+        )
+    return
+        (: there is a translation redirect :)
+        let $destination-domain := 
+            data:db-path-to-api(document-uri(root($destination-stream))) || "#" || 
+                ($destination-stream/(@xml:id, @jf:id, flatten:generate-id(.)))[1]
+        let $mirrored-translation-doc := 
+            format:unflatten(root($translated-stream-unmirrored), map {}, root($translated-stream-unmirrored))
+        let $destination-stream := $mirrored-translation-doc//jf:unflattened[@jf:domain=$destination-domain]
+        let $redirect-begin := 
+            $destination-stream/*[@jf:id=$destination[1]/@jf:id][1]/ancestor::jf:parallelGrp
+        let $redirect-end :=
+            $destination-stream/*[@jf:id=$destination[last()]/@jf:id][last()]/ancestor::jf:parallelGrp
+        let $redirect := 
+            $redirect-begin | 
+            $redirect-begin/following-sibling::* intersect $redirect-end/preceding-sibling::* |
+            $redirect-end
+        return (
+            combine:new-document-attributes($e, $destination),
+            combine:combine(
+                $redirect,
+                (: new document params looks to the unmirrored doc, so it should go to the unredirected destination too :)
+                combine:new-document-params(
+                    $redirect, combine:new-document-params($destination, $params)
+                )
+            )
+        )
+};
+
 (:~ handle a pointer :)
 declare function combine:tei-ptr(
   $e as element(tei:ptr),
@@ -341,42 +412,10 @@ declare function combine:tei-ptr(
           )
         else (
             (: external pointer... determine if we need to redirect :)
-            let $active-translation := $params("combine:settings")("opensiddur->translation")
-            let $destination-stream := $destination[1]/ancestor-or-self::j:streamText
-            let $translated-stream-unmirrored := 
-                ridx:query(
-                    collection("/db/data/linkage")//j:parallelText[tei:idno=$active-translation]/tei:linkGrp[@domains], 
-                    $destination-stream) 
+            let $redirected := combine:translation-redirect($e, $destination, $params)
             return
-                if (exists($translated-stream-unmirrored) 
-                    and not($e/parent::jf:parallel) (: special exception for the external pointers in the parallel construct :)
-                )
-                then
-                    (: there is a translation redirect :)
-                    let $destination-domain := 
-                        data:db-path-to-api(document-uri(root($destination-stream))) || "#" || 
-                            ($destination-stream/(@xml:id, @jf:id, flatten:generate-id(.)))[1]
-                    let $mirrored-translation-doc := 
-                        format:unflatten(root($translated-stream-unmirrored), map {}, root($translated-stream-unmirrored))
-                    let $destination-stream := $mirrored-translation-doc//jf:unflattened[@jf:domain=$destination-domain]
-                    let $redirect-begin := 
-                        $destination-stream/*[@jf:id=$destination[1]/@jf:id][1]/ancestor::jf:parallelGrp
-                    let $redirect-end :=
-                        $destination-stream/*[@jf:id=$destination[last()]/@jf:id][last()]/ancestor::jf:parallelGrp
-                    let $redirect := 
-                        $redirect-begin | 
-                        $redirect-begin/following-sibling::* intersect $redirect-end/preceding-sibling::* |
-                        $redirect-end
-                    return (
-                        combine:new-document-attributes($e, $destination),
-                        combine:combine(
-                            $redirect,
-                            (: new document params looks to the unmirrored doc, so it should go to the unredirected destination too :)
-                            combine:new-document-params(
-                                $redirect, combine:new-document-params($destination, $params)
-                            )
-                        )
-                    )
+                if (exists($redirected))
+                then $redirected
                 else
                     (: no translation redirect :) 
                     (
