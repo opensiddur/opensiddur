@@ -157,6 +157,12 @@ declare function flatten:merge(
   $params as map
   ) as element(jf:merged) {
   element jf:merged {
+    (: jf:merged takes the place of streamText :)
+    $streamText/(@* except @xml:id),
+    if ($streamText/@xml:id)
+    then
+      attribute jf:id { $streamText/@xml:id }
+    else (),
     flatten:order-flattened(
       (
       $layers/(node() except jf:placeholder),
