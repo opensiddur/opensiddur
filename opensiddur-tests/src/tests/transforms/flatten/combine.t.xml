@@ -29,23 +29,34 @@
   <password>testuser</password>
   <functions><![CDATA[
     declare function local:setup($file as xs:string) {
+        local:setup($file, "tests")
+    };
+
+    declare function local:setup($file as xs:string, $collection as xs:string) {
       xmldb:copy(
         "/db/apps/opensiddur-tests/tests/transforms/flatten", 
-        "/db/data/tests", 
+        "/db/data/" || $collection, 
         $file),
-      let $doc := doc("/db/data/tests/" || $file)
-      return 
-        format:unflatten-dependencies($doc, map {})
+      let $doc := doc("/db/data/" || $collection || "/" || $file)
+      return ( 
+        format:unflatten-dependencies($doc, map {}),
+        ridx:reindex($doc)
+      )
+    };
+
+    declare function local:tearDown($file as xs:string) {
+      local:tearDown($file, "tests")
     };
     
-    declare function local:tearDown($file as xs:string) {
-      format:clear-caches("/db/data/tests/" || $file),
+    declare function local:tearDown($file as xs:string, $collection as xs:string) {
+      format:clear-caches("/db/data/" || $collection || "/" || $file),
       try {
-        xmldb:remove("/db/data/tests", $file)
+        xmldb:remove("/db/data/" || $collection, $file)
       }
       catch * {
         ()
-      }
+      },
+      ridx:remove("/db/data/" || $collection,  $file)
     };
   ]]></functions>
   <TestSet>
@@ -66,7 +77,7 @@
       <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine1$")</xpath>
       <xpath 
         desc="acts as an identity transform for unflattened text" 
-        >exists(./tei:TEI/tei:text/jf:combined/tei:seg[@jf:id="seg1"][@jf:stream="stream"])
+        >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/tei:seg[@jf:id="seg1"][ends-with(@jf:stream,"#stream")])
       </xpath>
     </test>        
   </TestSet>
@@ -88,10 +99,10 @@
       <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine2$")</xpath>
       <xpath 
         desc="incorporate destination in-place" 
-        >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/tei:seg[@jf:id="seg1"])
+        >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
       </xpath>
       <xpath desc="no @jf:document attribute on jf:ptr">
-        empty(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/@jf:document)
+        empty(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/@jf:document)
       </xpath>
     </test>
   </TestSet>
@@ -116,7 +127,7 @@
       <xpath desc="has @jf:document on the included element">matches(./tei:TEI//jf:ptr[@jf:id="ptr1"]/@jf:document,"^(/exist/restxq)?/api/data/tests/combine1$")</xpath>
       <xpath 
         desc="incorporate destination in-place" 
-        >exists(./tei:TEI/tei:text/jf:combined/jf:ptr[@jf:id="ptr1"][@jf:stream="stream"]/tei:seg[@jf:id="seg1"])
+        >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
       </xpath>
     </test>
   </TestSet>
@@ -193,14 +204,12 @@
     <testName>combine:update-settings-from-standoff-markup()</testName>
     <setup>
       <code><![CDATA[
-        local:setup("combine-settings.xml"),
-        ridx:reindex(doc("/db/data/tests/combine-settings.xml"))
+        local:setup("combine-settings.xml")
       ]]></code>
     </setup>
     <tearDown>
       <code><![CDATA[
-        local:tearDown("combine-settings.xml"),
-        ridx:remove("/db/data/tests", "combine-settings.xml")
+        local:tearDown("combine-settings.xml")
       ]]></code>
     </tearDown>
     <test output="text">
@@ -256,6 +265,112 @@
       <xpath desc="non-overridden setting from ancestor is retained">./@f2="THREE"</xpath>
       <xpath desc="overridden setting from ancestor is overridden">./@f1="ONE"</xpath>
       <xpath desc="non-overridden setting from this is retained">./@f3="FOUR"</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Parallel texts</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("parallel-simple-A.xml"),
+      local:setup("parallel-simple-B.xml"),
+      local:setup("include-simple-1.xml"),
+      local:setup("linkage-simple.xml", "linkage")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("include-simple-1.xml"),
+      local:tearDown("linkage-simple.xml", "linkage"),
+      local:tearDown("parallel-simple-A.xml"),
+      local:tearDown("parallel-simple-B.xml")
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Simple inclusion set inside the stream</task>
+      <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/include-simple-1.xml"),
+          map {})
+      ]]></code>
+      <xpath desc="the inclusion pointer is followed through a redirect">.//jf:ptr[@jf:id="inc3"]/jf:combined[@type="parallel"]</xpath>
+      <xpath desc="the correct domain is chosen">.//jf:ptr[@jf:id="inc3"]/jf:combined/@jf:domain="/data/tests/parallel-simple-A#stream"</xpath>
+      <xpath desc="the redirect includes the original text">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-simple-A#stream"]/tei:seg[.="A-1"]</xpath>
+      <xpath desc="the redirect includes the parallel text">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-simple-B#stream"]/jf:ptr/tei:seg[.="B-1"]</xpath>
+      
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Parallel texts: Set parallelism in the same document as it is used</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("parallel-same-A.xml"),
+      local:setup("parallel-simple-B.xml"),
+      local:setup("linkage-same.xml", "linkage")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("linkage-same.xml", "linkage"),
+      local:tearDown("parallel-same-A.xml"),
+      local:tearDown("parallel-simple-B.xml")
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Simple parallelism</task>
+      <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/parallel-same-A.xml"),
+          map {})
+      ]]></code>
+      <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/jf:combined[@type="parallel"])</xpath>
+      <xpath desc="the correct domain is chosen">.//jf:combined[@type="parallel"]/@jf:domain="/data/tests/parallel-same-A#stream"</xpath>
+      <xpath desc="the redirect includes the original text">.//jf:combined[@type="parallel"]/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-same-A#stream"]/tei:seg[.="A-1"]</xpath>
+      <xpath desc="the redirect includes the parallel text">.//jf:combined[@type="parallel"]/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-simple-B#stream"]/jf:ptr/tei:seg[.="B-1"]</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Parallel texts: Request a part of a parallel document</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("parallel-part-A.xml"),
+      local:setup("parallel-part-B.xml"),
+      local:setup("include-part-1.xml"),
+      local:setup("include-part-2.xml"),
+      local:setup("linkage-part.xml", "linkage")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("linkage-part.xml", "linkage"),
+      local:tearDown("parallel-part-A.xml"),
+      local:tearDown("parallel-part-B.xml"),
+      local:tearDown("include-part-1.xml"),
+      local:tearDown("include-part-2.xml")
+      ]]></code>
+    </tearDown>
+    <test>
+      <task>Include where the boundaries are the same as the boundaries of the parallelism</task>
+      <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/include-part-1.xml"),
+          map {})
+      ]]></code>
+      <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="inc1"]/jf:parallelGrp)</xpath>
+      <xpath desc="the correct domain is chosen">exists(.//jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg)</xpath>
+      <xpath desc="the redirect begins at the first requested part">.//jf:ptr[@jf:id="inc1"]/jf:parallelGrp[1]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[1]/@jf:id="A2"</xpath>
+      <xpath desc="the redirect ends at the last requested part">.//jf:ptr[@jf:id="inc1"]/jf:parallelGrp[last()]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[last()]/@jf:id="A7"</xpath>
+    </test>
+    <test>
+      <task>Include where the boundaries are different than the boundaries of the parallelism</task>
+      <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/include-part-2.xml"),
+          map {})
+      ]]></code>
+      <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="inc2"]/jf:parallelGrp)</xpath>
+      <xpath desc="the correct domain is chosen">exists(.//jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg)</xpath>
+      <xpath desc="the redirect begins at the first parallelGrp that includes the beginning of the first requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[1]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[1]/@jf:id="A2"</xpath>
+      <xpath desc="the redirect ends at the last parallelGrp that includes the end of the last requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[last()]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[last()]/@jf:id="A7"</xpath>
     </test>
   </TestSet>
 </TestSuite>
