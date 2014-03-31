@@ -327,7 +327,10 @@ declare function combine:translation-redirect(
         let $s := $params("combine:settings")
         where exists($s)
         return $s("opensiddur->translation")
-    let $destination-stream := $destination[1]/ancestor-or-self::j:streamText
+    let $destination-stream-mirrored := $destination[1]/ancestor-or-self::jf:unflattened
+    let $destination-stream := 
+        doc(mirror:unmirror-path($format:unflatten-cache, document-uri(root($destination-stream-mirrored))))/
+            id($destination-stream-mirrored/@jf:id)
     let $translated-stream-unmirrored :=
         if ($active-translation)
         then  
@@ -342,15 +345,21 @@ declare function combine:translation-redirect(
     return
         (: there is a translation redirect :)
         let $destination-domain := 
-            data:db-path-to-api(document-uri(root($destination-stream))) || "#" || 
-                ($destination-stream/(@xml:id, @jf:id, flatten:generate-id(.)))[1]
+            replace(
+                data:db-path-to-api(document-uri(root($destination-stream))) || "#" || 
+                    ($destination-stream/(@xml:id, @jf:id, flatten:generate-id(.)))[1],
+                "(/exist/restxq)?/api", "")
         let $mirrored-translation-doc := 
             format:unflatten(root($translated-stream-unmirrored), map {}, root($translated-stream-unmirrored))
-        let $destination-stream := $mirrored-translation-doc//jf:unflattened[@jf:domain=$destination-domain]
-        let $redirect-begin := 
-            $destination-stream/*[@jf:id=$destination[1]/@jf:id][1]/ancestor::jf:parallelGrp
+        let $destination-stream-domain := $mirrored-translation-doc//jf:unflattened[@jf:domain=$destination-domain]
+        let $redirect-begin :=
+            if ($destination[1] instance of element(jf:unflattened))
+            then $destination-stream-domain
+            else $destination-stream-domain//jf:parallel[@domain=$destination-domain]/*[@jf:id=$destination/@jf:id][1]/ancestor::jf:parallelGrp
         let $redirect-end :=
-            $destination-stream/*[@jf:id=$destination[last()]/@jf:id][last()]/ancestor::jf:parallelGrp
+            if ($destination[last()] instance of element(jf:unflattened))
+            then $destination-stream-domain
+            else $destination-stream-domain//jf:parallel[@domain=$destination-domain]/*[@jf:id=$destination/@jf:id][last()]/ancestor::jf:parallelGrp
         let $redirect := 
             $redirect-begin | 
             $redirect-begin/following-sibling::* intersect $redirect-end/preceding-sibling::* |
