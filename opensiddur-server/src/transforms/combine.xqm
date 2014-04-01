@@ -123,11 +123,10 @@ declare function combine:new-context-attributes(
   $context as node()?,
   $new-context-nodes as node()*
   ) as node()* {
+  let $new-lang-node := $new-context-nodes[not(@xml:lang)][1]
   let $new-language := (
-    $new-context-nodes[not(@xml:lang)][1]/@uri:lang,
-    let $new-lang-node := $new-context-nodes[not(@xml:lang)][1]
-    where $new-lang-node
-    return common:language($new-lang-node)
+    $new-lang-node/@uri:lang/string(),
+    if ($new-lang-node) then common:language($new-lang-node) else ()
   )[1]
   return
     if (
