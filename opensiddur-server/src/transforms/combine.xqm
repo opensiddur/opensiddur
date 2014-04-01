@@ -350,7 +350,9 @@ declare function combine:translation-redirect(
                     ($destination-stream/(@xml:id, @jf:id, flatten:generate-id(.)))[1],
                 "(/exist/restxq)?/api", "")
         let $mirrored-translation-doc := 
-            format:unflatten(root($translated-stream-unmirrored), map {}, root($translated-stream-unmirrored))
+            let $translated-stream-root := root($translated-stream-unmirrored)
+            let $deps := format:unflatten-dependencies($translated-stream-root, map {})
+            return format:unflatten($translated-stream-root, map {}, $translated-stream-root)
         let $destination-stream-domain := $mirrored-translation-doc//jf:unflattened[@jf:domain=$destination-domain]
         let $redirect-begin :=
             if ($destination[1] instance of element(jf:unflattened))
