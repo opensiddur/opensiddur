@@ -113,6 +113,29 @@
 .tei-biblStruct .tei-note * {
     display:inline;
 }
+
+/* parallel texts: this can use some love */
+.jf-parallelGrp {
+    width:100%;
+    float:left;
+    display:block;
+    clear:both;
+}
+
+.jf-parallel {
+    float:left;     /* float:right will switch the order */
+    width:45%;
+    padding-left:1%;
+    padding-right:1%;
+    margin:0;
+}
+
+.jf-parallelGrp > .jf-parallel:first-child {
+    width:60%;
+}
+.jf-parallelGrp > .jf-parallel:last-child {
+    width:30%;
+}
    ]]></j:stylesheet>
    <tei:text>
       <tei:body>

@@ -106,6 +106,7 @@ declare function flatten:merge-j-parallelText(
       for $layer in $e/jf:layer
       let $domain := $layer/@jf:domain      (: domain points to the streamText :)
       let $flat-stream := uri:follow-cached-uri($domain, $layer, -1, $format:flatten-cache)
+      let $lang := common:language($flat-stream)
       let $merged :=
           flatten:merge(
             flatten:flatten-streamText($flat-stream, $params),
@@ -115,6 +116,10 @@ declare function flatten:merge-j-parallelText(
       return (
         element jf:merged {
           $layer/(@type, @jf:domain),
+          (: each merged domain maintains the language of the primary stream it derives from :)
+          if ($lang) 
+          then attribute xml:lang { $lang }
+          else (),
           $merged/node()
         },
         element j:streamText {

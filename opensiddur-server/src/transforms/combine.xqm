@@ -123,11 +123,10 @@ declare function combine:new-context-attributes(
   $context as node()?,
   $new-context-nodes as node()*
   ) as node()* {
+  let $new-lang-node := $new-context-nodes[not(@xml:lang)][1]
   let $new-language := (
-    $new-context-nodes[not(@xml:lang)][1]/@uri:lang,
-    let $new-lang-node := $new-context-nodes[not(@xml:lang)][1]
-    where $new-lang-node
-    return common:language($new-lang-node)
+    $new-lang-node/@uri:lang/string(),
+    if ($new-lang-node) then common:language($new-lang-node) else ()
   )[1]
   return
     if (
@@ -350,7 +349,9 @@ declare function combine:translation-redirect(
                     ($destination-stream/(@xml:id, @jf:id, flatten:generate-id(.)))[1],
                 "(/exist/restxq)?/api", "")
         let $mirrored-translation-doc := 
-            format:unflatten(root($translated-stream-unmirrored), map {}, root($translated-stream-unmirrored))
+            let $translated-stream-root := root($translated-stream-unmirrored)
+            let $deps := format:unflatten-dependencies($translated-stream-root, map {})
+            return format:unflatten($translated-stream-root, map {}, $translated-stream-root)
         let $destination-stream-domain := $mirrored-translation-doc//jf:unflattened[@jf:domain=$destination-domain]
         let $redirect-begin :=
             if ($destination[1] instance of element(jf:unflattened))
