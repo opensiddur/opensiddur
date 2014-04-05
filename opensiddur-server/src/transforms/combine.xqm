@@ -47,8 +47,6 @@ declare function combine:combine(
     typeswitch($node)
     case document-node() 
     return document { combine:combine($node/node(), $params)}
-    case element(tei:TEI)
-    return combine:tei-TEI($node, $params)
     case element(tei:teiHeader)
     return $node
     case element()
@@ -56,6 +54,8 @@ declare function combine:combine(
         let $updated-params := combine:update-settings-from-standoff-markup($node, $params, false())
         return
             typeswitch($node)
+            case element(tei:TEI)
+            return combine:tei-TEI($node, $params)
             case element(tei:ptr)
             return combine:tei-ptr($node, $updated-params)
             (: TODO: add other model.resourceLike elements above :)
