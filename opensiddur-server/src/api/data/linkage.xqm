@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+(: Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Linkage data API
@@ -126,7 +126,7 @@ declare function lnk:query-function(
     $query as xs:string
   ) as element()* {
   for $doc in
-      collection($lnk:path-base)//(tei:title|tei:front|tei:back)[ft:query(.,$query)]
+      collection($lnk:path-base)//(tei:title|tei:idno|tei:front|tei:back)[ft:query(.,$query)]
   order by $doc//tei:title[@type="main"] ascending
   return $doc
 };
