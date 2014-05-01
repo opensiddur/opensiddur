@@ -162,6 +162,14 @@ schemas, not as an independent unit
       </constraint>
     </constraintSpec>
   </elementSpec>
+  <elementSpec ident="revisionDesc" module="header" mode="change">
+    <!-- remove list from revisionDesc -->
+    <content>
+      <rng:oneOrMore xmlns:rng="http://relaxng.org/ns/structure/1.0">
+        <rng:ref name="change"/>
+      </rng:oneOrMore>
+    </content>
+  </elementSpec>
   <elementSpec ident="teiHeader" module="header" mode="change">
     <attList>
       <attDef ident="type" mode="delete"/>
@@ -170,8 +178,9 @@ schemas, not as an independent unit
       <attDef ident="rendition" mode="delete"/>
       <attDef ident="xml:space" mode="delete"/>
     </attList>
-  </elementSpec>
-  
+  </elementSpec>  
+
+
   <classSpec ident="att.global" mode="change" module="tei" type="atts">
     <attList>
       <attDef ident="xml:space" mode="delete"/>
