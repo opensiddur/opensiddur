@@ -71,7 +71,11 @@ declare function reverse:construct-streamText(
   for $stream in distinct-values($e//@jf:stream)
   return
     element j:streamText {
-      attribute xml:id { if (contains($stream, "#") then substring-after($stream, "#") else $stream },
+      attribute xml:id { 
+        if (contains($stream, "#")) 
+        then substring-after($stream, "#") 
+        else $stream 
+      },
       for $elem in $e/*[@jf:stream=$stream]
       return
         element { QName(namespace-uri($elem), name($elem)) }{
