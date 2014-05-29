@@ -58,8 +58,9 @@
 			<arg value="installer"/>
 			<arg value="-Dizpack.dir=${lib.dir}/IzPack"/>
 			<arg value="-Dinclude.module.scheduler=true"/>
-			<arg value="-Dinclude.feature.security.oauth=true"/>
-			<arg value="-Dinclude.feature.security.openid=true"/>
+            <!-- not using these yet -->
+			<arg value="-Dinclude.feature.security.oauth=false"/>
+			<arg value="-Dinclude.feature.security.openid=false"/>
 		</exec>
 	</target>
 	
@@ -225,7 +226,7 @@ cacheSize=${cache.size}
 ^/db/refindex
 ^/db/system/config
 ^/db/system/security/exist/(accounts|groups)/removed
-^/db/system/security/exist/accounts/(admin|guest).xml$
+^/db/system/security/exist/accounts/(admin|guest)\.xml$
 ^/db/data/tests
         </echo>
         <exec input="${exist.backup.remove.file}"
@@ -244,7 +245,7 @@ cacheSize=${cache.size}
             <arg value="-p"/>
             <arg value="${adminpassword}"/>
             <arg value="-r"/>
-            <arg value="${backup.directory}/db"/>
+            <arg value="${backup.directory}"/>
             <arg value="-ouri=xmldb:exist://"/>
             <!-- DEBUG_OPTS seems to be the only way to force options after java.endorsed.dirs -->
             <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>

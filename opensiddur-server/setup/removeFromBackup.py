@@ -22,7 +22,7 @@ def loadRegexps(f):
 def shouldRemove(pth, removeRegexps, elem):
     # return true if the file or collection referenced should be removed
     return (
-        (pth.startswith("/db/data/") is not None and "owner" in elem.attrib and elem.attrib["owner"]=="SYSTEM")    # this is a clue that the file was autoinstalled
+        (pth.startswith("/db/data/") and "owner" in elem.attrib and elem.attrib["owner"]=="SYSTEM")    # this is a clue that the file was autoinstalled
         or removeRegexps.match(pth) is not None
     )
 
@@ -31,8 +31,10 @@ def removeFromBackup(pathToContentXml, removeRegexps):
     contentXml = etree.parse(contentPath)
     # find all subcollection and resource elements
     for candidate in contentXml.findall('.//{'+exNS+'}resource')+contentXml.findall('.//{'+exNS+'}subcollection'):
-        if shouldRemove(os.path.join(re.sub("^.*/db", "/db", pathToContentXml), candidate.attrib["name"]), removeRegexps, candidate):
+        dbPath = re.sub("^.*/db", "/db", pathToContentXml)
+        if shouldRemove(os.path.join(dbPath, candidate.attrib["name"]), removeRegexps, candidate):
             # if shouldRemove, remove it
+            #print >>sys.stderr, "Removing: ", os.path.join(dbPath, candidate.attrib["name"])
             candidate.getparent().remove(candidate)
         elif candidate.tag == "{"+exNS+"}subcollection":
             # if not and subcollection, recurse to that directory
