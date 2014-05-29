@@ -196,5 +196,75 @@ cacheSize=${cache.size}
         <sleep seconds="5"/>
         <delete dir="${installdir}"/>
     </target>
+    
+    <target name="backup"
+        description="back up an existing database into $backup.directory">
+        <property environment="env"/>
+        <exec
+            executable="${installdir}/bin/backup.sh">
+            <arg value="-u"/>
+            <arg value="admin"/>
+            <arg value="-p"/>
+            <arg value="${adminpassword}"/>
+            <arg value="-b"/>
+            <arg value="/db"/>
+            <arg value="-d"/>
+            <arg value="${backup.directory}"/>
+            <arg value="-ouri=xmldb:exist://"/>
+            <!-- DEBUG_OPTS seems to be the only way to force options after java.endorsed.dirs -->
+            <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
+        </exec>    
+    </target>
+    <target name="backup-for-upgrade"
+        depends="backup"
+        description="edit the backup in $backup.directory, removing things that we do not want restored">
+        <echo file="/tmp/exist-backup-remove" append="true">
+^/db/apps
+^/db/cache
+^/db/refindex
+^/db/system/config
+^/db/system/security/exist/(accounts|groups)/removed
+^/db/system/security/exist/accounts/(admin|guest).xml$
+^/db/data/tests
+        </echo>
+        <exec input="/tmp/exist-backup-remove"
+            executable="python">
+            <arg value="opensiddur-server/setup/removeFromBackup.py"/>
+            <arg value="${backup.directory}/db"/>
+        </exec>
+    </target>
+    <target name="restore"
+        description="restore the database from (modified) backup, rerun refindex update">
+        <property environment="env"/>
+        <exec
+            executable="${installdir}/bin/backup.sh">
+            <arg value="-u"/>
+            <arg value="admin"/>
+            <arg value="-p"/>
+            <arg value="${adminpassword}"/>
+            <arg value="-r"/>
+            <arg value="${backup.directory}/db"/>
+            <arg value="-ouri=xmldb:exist://"/>
+            <!-- DEBUG_OPTS seems to be the only way to force options after java.endorsed.dirs -->
+            <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
+        </exec>
+        <!-- reindex -->    
+        <exec
+            executable="${installdir}/bin/client.sh"
+            dir="${installdir}"
+            inputstring="xquery version '3.0';
+            import module namespace ridx='http://jewishliturgy.org/modules/refindex'
+            at 'xmldb:exist:///db/apps/opensiddur-server/modules/refindex.xqm'; 
+            ridx:reindex(collection('/db/data'))"
+            >
+            <arg value="-qls"/>
+            <arg value="-u"/>
+            <arg value="admin"/>
+            <arg value="-P"/>
+            <arg value="${adminpassword}"/>
+            <arg value="-x"/>
+            <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed:${installdir}/lib/user"/>
+        </exec>
+    </target>
 </project>
 
