@@ -218,7 +218,8 @@ cacheSize=${cache.size}
     <target name="backup-for-upgrade"
         depends="backup"
         description="edit the backup in $backup.directory, removing things that we do not want restored">
-        <echo file="/tmp/exist-backup-remove" append="true">
+        <tempfile property="exist.backup.remove.file" destDir="${java.io.tmpdir}" deleteonexit="true"/>
+        <echo file="${exist.backup.remove.file}">
 ^/db/apps
 ^/db/cache
 ^/db/refindex
@@ -227,7 +228,7 @@ cacheSize=${cache.size}
 ^/db/system/security/exist/accounts/(admin|guest).xml$
 ^/db/data/tests
         </echo>
-        <exec input="/tmp/exist-backup-remove"
+        <exec input="${exist.backup.remove.file}"
             executable="python">
             <arg value="opensiddur-server/setup/removeFromBackup.py"/>
             <arg value="${backup.directory}/db"/>
