@@ -15,10 +15,13 @@
             <text qname="j:streamText"/>
             <text qname="tei:seg"/>
         </lucene>
+        <!-- for searching by translation name -->
+        <create qname="tei:idno" type="xs:string"/>  
+      
         <!-- for responsibility indexes -->
         <create qname="@resp" type="xs:string"/>
         <create qname="@locus" type="xs:string"/>
-        
+
         <!-- for searches of feature structures and declarations -->
         <create qname="@name" type="xs:string"/>
 

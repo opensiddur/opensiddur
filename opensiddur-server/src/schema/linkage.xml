@@ -68,7 +68,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
         <schemaSpec ident="linkage" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
           <moduleRef key="core" include="choice cit corr date divGen foreign head hi item l label lg list name note orig p ptr q quote ref reg resp respStmt sic title"/>
           <moduleRef key="tei"/>
-          <moduleRef key="header" include="availability change distributor fileDesc licence publicationStmt revisionDesc sourceDesc teiHeader titleStmt"/>
+          <moduleRef key="header" include="availability change distributor fileDesc idno licence publicationStmt revisionDesc sourceDesc teiHeader titleStmt"/>
           <moduleRef key="textstructure" include="TEI back body div docAuthor docDate docEdition docImprint docTitle front text titlePage titlePart"/>
           <moduleRef key="analysis" include="c pc phr s w"/>
           <moduleRef key="certainty" include="respons"/>
@@ -79,26 +79,11 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <moduleRef key="transcr" include="sourceDoc"/>
           <specGrpRef target="#common-specs"/>
           <specGrpRef target="#conditional-common"/>
-          <elementSpec ident="parallelGrp" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-parallel">
-            <desc>A special type of <gi>linkGrp</gi> that groups units of parallel text by language. The <gi>ptr</gi> 
-            elements must have <att>targetLang</att> attributes</desc>
-            <classes>
-              <memberOf key="att.global"/>
-            </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:oneOrMore>
-                <rng:ref name="ptr"/>
-              </rng:oneOrMore>
-            </content>
-            <constraintSpec ident="parallelGrp-1" scheme="isoschematron">
-              <constraint>
-                <sch:assert test="empty(tei:ptr[not(@targetLang)])">Every tei:ptr inside a parallelGrp requires @targetLang.</sch:assert>
-              </constraint>
-            </constraintSpec>
-          </elementSpec>
           <elementSpec ident="parallelText" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-parallel">
             <desc>The main body element for a text that consists of a parallelization of multiple texts. 
-            Multiple parallelizations of the same text may be in the same document.</desc>
+            Multiple parallelizations of the same text may be in the same document. The parallelization is
+            identified by one or more tei:idno elements (the database identifier[s] of the translation, for example), 
+            and accomplished by tei:linkGrp elements</desc>
             <attList>
               <attDef ident="level" mode="add" usage="opt">
                 <desc>The segmentation level at which the parallelization is done, for example, segment, verse, paragraph, line-group, line, etc. Use one of the recommended values unless none of them makes sense.</desc>
@@ -122,9 +107,27 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
             </classes>
             <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
               <rng:oneOrMore>
-                <rng:ref name="parallelGrp"/>
+                <rng:ref name="idno"/>
+              </rng:oneOrMore>
+              <rng:oneOrMore>
+                <rng:ref name="linkGrp"/>
               </rng:oneOrMore>
             </content>
+            <constraintSpec ident="parallelText-2" scheme="isoschematron">
+              <constraint>
+                <sch:assert test="empty(tei:linkGrp[not(@domains)])">tei:parallelText/tei:linkGrp must specify domains that point to j:streamText elements</sch:assert>
+              </constraint>
+            </constraintSpec>
+            <constraintSpec ident="parallelText-3" scheme="isoschematron">
+              <constraint>
+                <sch:assert test="  
+                    not(false()=(
+                    for $linkGrp in tei:linkGrp, 
+                        $n in count(tokenize($linkGrp/@domains, '\s+'))
+                    return (every $link in $linkGrp/tei:link satisfies count(tokenize($link/@target, '\s+'))=$n)))
+                    ">every link must have an equal number of links to its parent linkGrp's @domains</sch:assert>
+              </constraint>
+            </constraintSpec>
           </elementSpec>
           <elementSpec ident="text" module="textstructure" mode="change">
             <classes mode="replace">

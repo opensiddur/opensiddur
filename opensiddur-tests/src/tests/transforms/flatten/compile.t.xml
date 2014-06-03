@@ -66,7 +66,7 @@
       ]]></code>
       <xpath 
         desc="acts as an identity transform for unflattened text" 
-        >exists(./tei:TEI/tei:text/jf:combined/tei:seg[@jf:id="seg1"][@jf:stream="stream"])
+        >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/tei:seg[@jf:id="seg1"][ends-with(@jf:stream,"#stream")])
       </xpath>
       <xpath 
         desc="a license statement is added"

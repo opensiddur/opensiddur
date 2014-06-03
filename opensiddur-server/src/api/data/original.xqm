@@ -128,8 +128,8 @@ declare function orig:validate-changes(
             $doc//tei:publicationStmt/
             (* except (
               if ($can-change-license) 
-              then () 
-              else tei:licence
+              then tei:availability
+              else ()
             ))
           )
         }</x>, 
@@ -138,8 +138,8 @@ declare function orig:validate-changes(
             $old-doc//tei:publicationStmt/
             (* except (
               if ($can-change-license) 
-              then () 
-              else tei:licence
+              then tei:availability 
+              else ()
             ))
           )
         }</x>)

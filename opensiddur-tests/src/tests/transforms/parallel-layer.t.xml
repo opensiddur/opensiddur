@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
+  >
+    <suiteName>Parallel-to-layer transform</suiteName>
+    <description>
+      <p>Tests of transform that converts parallel texts to layers</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2014 Efraim Feinstein
+      Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+    </description>
+    <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+    <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+    <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
+    <imports>
+        import module namespace pla="http://jewishliturgy.org/transform/parallel-layer"
+          at "xmldb:exist:///db/apps/opensiddur-server/transforms/parallel-layer.xqm";
+    </imports>
+    <asUser>testuser</asUser>
+    <password>testuser</password>
+    <TestSet>
+        <testName>No parallel text</testName>
+        <test>
+            <task>acts as an identity transform</task>
+            <code><![CDATA[
+              pla:parallel-layer-document(
+                doc("/db/apps/opensiddur-tests/tests/transforms/identity.xml"),
+                map {}
+              )
+            ]]></code>
+          <expected desc="acts as an identity transform" href="identity.xml"/>
+      </test>
+    </TestSet>
+    <TestSet>
+        <testName>With parallel text</testName>
+        <setup>
+            <copy 
+                source="/db/apps/opensiddur-tests/tests/transforms"
+                name="parA.xml"
+                destination="/db/data/tests"/>
+            <copy 
+                source="/db/apps/opensiddur-tests/tests/transforms"
+                name="parB.xml"
+                destination="/db/data/tests"/>
+            <copy 
+                source="/db/apps/opensiddur-tests/tests/transforms"
+                name="par.xml"
+                destination="/db/data/tests"/>
+        </setup>
+        <tearDown>
+            <remove-document collection="/db/data/tests" name="par.xml"/> 
+            <remove-document collection="/db/data/tests" name="parA.xml"/> 
+            <remove-document collection="/db/data/tests" name="parB.xml"/> 
+        </tearDown>
+        <test>
+            <task>parallel layer</task>
+            <code><![CDATA[
+                pla:parallel-layer-document(doc("/db/data/tests/par.xml"), map {})
+            ]]></code>
+            <xpath desc="produces one layer per linkGrp">count(.//j:parallelText/j:layer[@type="parallel"])=1</xpath>
+            <xpath desc="layer references the domains">exists(.//j:parallelText/j:layer/@domains/string()[.])</xpath>
+            <xpath desc="produces one jf:parallelGrp per link">count(.//j:layer/jf:parallelGrp)=3</xpath>
+            <xpath desc="produces two jf:parallel[@domain][tei:ptr] per group">every $p in .//j:layer/jf:parallelGrp satisfies count($p/jf:parallel[@domain][count(tei:ptr)=1])=2</xpath> 
+        </test>
+    </TestSet>
+</TestSuite>

@@ -7,7 +7,7 @@ xquery version "3.0";
  :  resolve-stream REQUIRES that the document root be accessible.
  :
  : Open Siddur Project
- : Copyright 2009-2013 Efraim Feinstein 
+ : Copyright 2009-2014 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -19,6 +19,8 @@ import module namespace common="http://jewishliturgy.org/transform/common"
   at "../modules/common.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
+import module namespace format="http://jewishliturgy.org/modules/format"
+  at "../modules/format.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -26,15 +28,16 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
 declare variable $flatten:layer-order := map {
     "none" := 0,
-    "div" := 1,
-    "p"   := 2,
-    "lg"  := 3,
-    "s"   := 4,
-    "ab"  := 5,
-    "verse" := 6,
-    "l"   := 7,
-    "cit" := 8,
-    "choice" := 9
+    "parallel" := 1,
+    "div" := 2,
+    "p"   := 3,
+    "lg"  := 4,
+    "s"   := 5,
+    "ab"  := 6,
+    "verse" := 7,
+    "l"   := 8,
+    "cit" := 9,
+    "choice" := 10
   };
 
 (:~ order the given flattened nodes, using the information in 
@@ -65,7 +68,7 @@ declare function flatten:merge-document(
   ) as document-node() {
   common:apply-at(
     $doc, 
-    $doc//(j:concurrent|j:streamText), 
+    $doc//(j:concurrent|j:streamText|j:parallelText), 
     flatten:merge-concurrent#2,
     $params  
   )
@@ -78,6 +81,8 @@ declare function flatten:merge-concurrent(
   typeswitch($e)
   case element(j:concurrent)
   return flatten:merge-j-concurrent($e, $params)
+  case element(j:parallelText)
+  return flatten:merge-j-parallelText($e, $params)
   default (: j:streamText :) 
   return (
     flatten:merge(
@@ -87,6 +92,44 @@ declare function flatten:merge-concurrent(
     ),
     $e
     )
+};
+
+declare function flatten:merge-j-parallelText(
+    $e as element(j:parallelText),
+    $params as map
+    ) as element(jf:parallelText) {
+    element jf:parallelText {
+      if ($e/(@jf:id|@xml:id))
+      then
+        attribute jf:id { $e/(@jf:id|@xml:id)/string() }
+      else (),
+      for $layer in $e/jf:layer
+      let $domain := $layer/@jf:domain      (: domain points to the streamText :)
+      let $flat-stream := uri:follow-cached-uri($domain, $layer, -1, $format:flatten-cache)
+      let $lang := common:language($flat-stream)
+      let $merged :=
+          flatten:merge(
+            flatten:flatten-streamText($flat-stream, $params),
+            ($layer, $flat-stream/../j:concurrent/jf:layer),
+            $params
+          )
+      return (
+        element jf:merged {
+          $layer/(@type, @jf:domain),
+          (: each merged domain maintains the language of the primary stream it derives from :)
+          if ($lang) 
+          then attribute xml:lang { $lang }
+          else (),
+          $merged/node()
+        },
+        element j:streamText {
+            attribute jf:domain { $domain },
+            attribute jf:id { $flat-stream/(@jf:id|@xml:id)/string() },
+            $flat-stream/(@* except @xml:id),
+            flatten:copy($flat-stream/node(), $params)
+        }
+      )
+    }
 };
 
 (:~ @return an element that records all the existing layers
@@ -119,6 +162,12 @@ declare function flatten:merge(
   $params as map
   ) as element(jf:merged) {
   element jf:merged {
+    (: jf:merged takes the place of streamText :)
+    $streamText/(@* except @xml:id),
+    if ($streamText/@xml:id)
+    then
+      attribute jf:id { $streamText/@xml:id }
+    else (),
     flatten:order-flattened(
       (
       $layers/(node() except jf:placeholder),
@@ -130,6 +179,7 @@ declare function flatten:merge(
 
 (:~ replace all references to jf:placeholder with 
  : their stream elements 
+ : @param $params passes itself the "flatten:resolve-stream" parameter to point to the stream being resolved
  :)
 declare function flatten:resolve-stream(
   $nodes as node()*,
@@ -140,9 +190,23 @@ declare function flatten:resolve-stream(
     typeswitch ($node)
     case element (j:streamText)
     return ()
+    case element (jf:merged)
+    return
+        element { QName(namespace-uri($node), name($node)) }{
+            $node/@*,
+            flatten:resolve-stream($node/node(), 
+                map:new((
+                    $params, 
+                    map { "flatten:resolve-stream" := 
+                        if ($node/@type="parallel")
+                        then root($node)//j:streamText[@jf:domain=$node/@jf:domain]
+                        else root($node)//j:streamText
+                    })))
+        }
     case element (jf:placeholder)
     return 
-      let $stream-element := root($node)/id($node/@jf:id)
+      let $stream := $params("flatten:resolve-stream")
+      let $stream-element := ($stream/id($node/@jf:id), $stream/*[@jf:id=$node/@jf:id])[1]
       return
         element { QName(namespace-uri($stream-element), name($stream-element)) }{
           $stream-element/(@* except @xml:id),
@@ -205,7 +269,7 @@ declare function flatten:flatten-document(
   ) as document-node() {
   common:apply-at(
     $doc, 
-    $doc//(j:concurrent|j:streamText), 
+    $doc//(j:concurrent|j:streamText|j:parallelText), 
     flatten:flatten#2,
     $params
   ) 
@@ -221,9 +285,13 @@ declare function flatten:flatten(
 		case text() return $n
 		case comment() return $n
 		case processing-instruction() return $n
-		case element(j:layer) return flatten:j-layer($n, $params)
+		case element(j:layer) return 
+            if ($n/@type="parallel")
+            then flatten:parallel-j-layer($n, $params)
+            else flatten:j-layer($n, $params)
 		case element(tei:ptr) return flatten:tei-ptr($n, $params)
 		case element(j:concurrent) return flatten:identity($n, $params)
+        case element(j:parallelText) return flatten:identity($n, $params)
 		case element(j:streamText) return flatten:j-streamText($n, $params)
 		case element() return 
 		  if ($n is root($n)/*) 
@@ -245,6 +313,38 @@ declare function flatten:identity(
   }
 };
 
+(:~ identity - copy only and change xml:id->jf:id :)
+declare function flatten:copy(
+  $nodes as node()*,
+  $params as map
+  ) as node()* {
+  for $node in $nodes
+  return 
+    typeswitch($node)
+    case document-node() return document { flatten:copy($node/node(), $params) }
+    case element() return
+      element { QName(namespace-uri($node), name($node))}{
+        flatten:copy-attributes($node),
+        flatten:copy($node/node(), $params)
+      }
+    default return $node
+};
+
+(:~ generate a stream id
+ : 
+ : because of parallel texts, a stream id has to uniquely define a stream across documents 
+ : @param $stream a streamText
+ : @return generated id
+ :)
+declare function flatten:stream-id(
+    $stream as element(j:streamText) 
+    ) as xs:string {
+    concat(
+        document-uri(root($stream)), "#", 
+        $stream/(@xml:id, @jf:id, flatten:generate-id(.))[1]
+    )
+};
+
 (:~ streamText within the transform: 
  : assure that the streamText has an xml:id
  :)
@@ -261,6 +361,7 @@ declare function flatten:j-streamText(
     $e/node()
   }
 };
+
 
 (:~ flatten a streamtext. 
  : This is not part of the transform, rather, it should be used before merge
@@ -303,7 +404,7 @@ declare function flatten:write-placeholder(
     jf:nchildren="0"
     jf:nlevels="0"
     jf:nprecedents="0"
-    jf:stream="{$stream/(@xml:id, @jf:id, flatten:generate-id(.))[1]}"/> 
+    jf:stream="{flatten:stream-id($stream)}"/> 
 };
 
 (:~ flatten a ptr. 
@@ -342,7 +443,8 @@ declare function flatten:copy-attributes(
  : application of flatten:suspend-or-continue
  :)
 declare function flatten:rewrite-suspend-or-continue(
-  $nodes as node()*
+  $nodes as node()*,
+  $active-stream as xs:string
   ) as node()* {
   if (empty($nodes[@jf:suspend]))
   then
@@ -368,7 +470,7 @@ declare function flatten:rewrite-suspend-or-continue(
             - count(
               $node/
                 following-sibling::*
-                  [@jf:stream]
+                  [@jf:stream=$active-stream]
                   [. << $node/following-sibling::*[(@jf:suspend, @jf:end)=$start-node-id][1]]
             )
           },
@@ -383,7 +485,7 @@ declare function flatten:rewrite-suspend-or-continue(
             count(
               $node/
                 preceding-sibling::*
-                  [@jf:stream]
+                  [@jf:stream=$active-stream]
                   [. >> $node/preceding-sibling::*[(@jf:start, @jf:continue)=$start-node-id][1]]
             )
           },
@@ -410,7 +512,7 @@ declare function flatten:rewrite-suspend-or-continue(
               count(
                 $parent-node/                
                   following-sibling::*
-                    [@jf:stream]
+                    [@jf:stream=$active-stream]
                     [. << $parent-node/following-sibling::*[(@jf:suspend, @jf:end)=$start-node-id][1]]
               )
             },
@@ -428,9 +530,10 @@ declare function flatten:suspend-or-continue(
   $context as element(),
   $node-id as xs:string, 
   $flattened-nodes as node()*,
-  $start-node as element()
+  $start-node as element(),
+  $active-stream as xs:string
   ) as node()* {
-  let $stream-children := $flattened-nodes[@jf:stream]
+  let $stream-children := $flattened-nodes[@jf:stream=$active-stream]
   let $positions := $stream-children/@jf:position/number()
   for $fnode at $pos in $flattened-nodes
   return
@@ -474,12 +577,13 @@ declare function flatten:suspend-or-continue(
 };
 
 (:~ flatten element 
- : @param $params Expects "flatten:layer-id"
+ : @param $params Expects "flatten:layer-id", "flatten:stream-id"
  :)
 declare function flatten:element(
 	$context as element(),
 	$params as map
 	) as node()+ {
+    let $active-stream := $params("flatten:stream-id")
 	let $node-id := 
         string(
           $context/(
@@ -491,7 +595,7 @@ declare function flatten:element(
 	let $children := 
 	  flatten:flatten(
 	    $context/node(), 
-	    map:new(($params, map { "flatten:unit-id" := $node-id }))
+	    $params
 	  )
 	let $layer := $context/ancestor::j:layer
 	let $level := count($context/ancestor::*) - count($layer/ancestor::*)
@@ -500,22 +604,22 @@ declare function flatten:element(
 	return
 	  if (
 	    ($context/empty(./*|./text())) or
-      empty($children[@jf:stream])
-    )
-    then
+        empty($children[@jf:stream=$active-stream])
+        )
+      then
   	 	(: If an element is empty or has no children in the streamText
   	 	 :)
     	element { QName(namespace-uri($context), name($context)) }{
     		$attributes,
     		((: position and relative are filled in later :)),
-        attribute jf:nlevels { $level },
-        attribute jf:nprecedents { $nprecedents },
-        attribute jf:layer-id { $params("flatten:layer-id") },
+            attribute jf:nlevels { $level },
+            attribute jf:nprecedents { $nprecedents },
+            attribute jf:layer-id { $params("flatten:layer-id") },
     		$context/node()
       }	
     else  
 	    (: element has children in the streamText :)
-  		let $stream-children := $children[@jf:stream]
+  		let $stream-children := $children[@jf:stream=$active-stream]
   		let $nchildren := count($stream-children)
   		let $start-node :=
   		  element { QName(namespace-uri($context), name($context)) }{
@@ -529,24 +633,25 @@ declare function flatten:element(
           attribute jf:layer-id { $params("flatten:layer-id") }
         }
   		return flatten:rewrite-suspend-or-continue((
-      	$start-node,
+      	    $start-node,
   			flatten:set-missing-attributes(
   			  $context,
   			  flatten:suspend-or-continue(
-  			    $context, $node-id, $children, $start-node
+  			    $context, $node-id, $children, $start-node, $active-stream
   			  ),
   			  $nchildren
   			),
   			element { QName(namespace-uri($context), name($context)) }{
-        	attribute jf:end { $node-id },
-        	$stream-children[last()]/@jf:position,
-          attribute jf:relative { 1 },
-          attribute jf:nchildren { $nchildren },
-          attribute jf:nlevels { -$level },
-          attribute jf:nprecedents { $nprecedents },
-          attribute jf:layer-id { $params("flatten:layer-id") }
-        }
-      ))
+        	    attribute jf:end { $node-id },
+        	    $stream-children[last()]/@jf:position,
+                attribute jf:relative { 1 },
+                attribute jf:nchildren { $nchildren },
+                attribute jf:nlevels { -$level },
+                attribute jf:nprecedents { $nprecedents },
+                attribute jf:layer-id { $params("flatten:layer-id") }
+            }
+        ), 
+        $active-stream)
 };
 
 declare function flatten:set-missing-attributes(
@@ -599,9 +704,26 @@ declare function flatten:generate-id(
   )
 };
 
+(:~ process layers that are for parallel texts :)
+declare function flatten:parallel-j-layer(
+    $context as element(j:layer),
+    $params as map
+    ) as element(jf:layer)+ {
+    for $domain in tokenize($context/@domains, "\s+")
+    let $stream-id := flatten:stream-id(uri:fast-follow($domain, $context, -1))
+    let $layer := flatten:j-layer($context, map:new(($params, map { "flatten:stream-id" := $stream-id })))
+    return
+        element jf:layer {
+            $layer/@*,
+            attribute jf:domain { $domain },
+            $layer/node()
+        }
+};
+
 (:~ Convert j:layer (which may be a root element) 
  : to jf:layer.
- : Start sending the "flatten:layer-id" parameter
+ : Start sending the "flatten:layer-id" and "flatten:stream:id" parameters
+ : If $params("flatten:stream-id") is already set, use the existing value.
  :)
 declare function flatten:j-layer(
 	$context as element(),
@@ -612,6 +734,10 @@ declare function flatten:j-layer(
       @xml:id, 
       flatten:generate-id(.)
     )[1]
+    let $stream-id := 
+        if ($params("flatten:stream-id"))
+        then $params("flatten:stream-id")
+        else flatten:stream-id($context/../../j:streamText)
 	return 
     element jf:layer {
       $context/(@* except @xml:id),
@@ -623,7 +749,7 @@ declare function flatten:j-layer(
       flatten:order-flattened(
         flatten:flatten(
           $context/node(), 
-          map:new(($params, map { "flatten:layer-id" := $id } ))
+          map:new(($params, map { "flatten:layer-id" := $id, "flatten:stream-id" := $stream-id } ))
         )
       )
     }

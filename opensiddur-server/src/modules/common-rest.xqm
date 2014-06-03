@@ -18,8 +18,12 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "data.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "jvalidate.xqm";
+import module namespace mirror="http://jewishliturgy.org/modules/mirror"
+  at "mirror.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "paths.xqm";
+import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+  at "refindex.xqm";
 
 import module namespace magic="http://jewishliturgy.org/magic"
   at "../magic/magic.xqm";
@@ -346,6 +350,7 @@ declare function crest:delete(
         then (
           (: TODO: check for references! :)
           xmldb:remove($collection, $resource),
+          ridx:remove($collection, $resource),
           <rest:response>
             <output:serialization-parameters>
               <output:method value="text"/>
@@ -375,6 +380,7 @@ declare function crest:delete(
  : Other effects: 
  : * A change record is added to the resource
  : * The new resource is owned by the current user, group owner=current user, and mode is 664
+ : * A reference index is created for the resource
  :)
 declare function crest:post(
     $data-path as xs:string,
@@ -414,12 +420,16 @@ declare function crest:post(
               <http:response status="201">
                 {
                   let $uri := xs:anyURI($db-path)
-                  let $change-record := crest:record-change(doc($db-path), "created")
-                  return system:as-user("admin", $magic:password, (
-                    sm:chown($uri, $user),
-                    sm:chgrp($uri, "everyone"),
-                    sm:chmod($uri, "rw-rw-r--")
-                  ))
+                  let $doc := doc($db-path)
+                  let $change-record := crest:record-change($doc, "created")
+                  return (
+                    system:as-user("admin", $magic:password, (
+                        sm:chown($uri, $user),
+                        sm:chgrp($uri, "everyone"),
+                        sm:chmod($uri, "rw-rw-r--")
+                    )),
+                    ridx:reindex($doc)
+                  )
                 }
                 <http:header 
                   name="Location" 
@@ -435,6 +445,7 @@ declare function crest:post(
 };
 
 (:~ Edit/replace a document in the database
+ : Side effect: update the reference index
  : @param $data-type data type of document
  : @param $name Name of the document to replace
  : @param $body New document
@@ -475,7 +486,11 @@ declare function crest:put(
             then 
               <rest:response>
                 {
-                  crest:record-change(doc($uri), "edited")
+                  let $doc := doc($uri)
+                  return (
+                    crest:record-change($doc, "edited"),
+                    ridx:reindex($doc)
+                  )
                 }
                 <output:serialization-parameters>
                   <output:method value="text"/>
@@ -526,6 +541,7 @@ declare function crest:get-access(
 };
 
 (:~ Set access/sharing data for a document
+ : Side effect: change access of refindex.
  : @param $name Name of document
  : @param $body New sharing rights, as an a:access structure 
  : @return HTTP 204 No data, access rights changed
@@ -541,11 +557,16 @@ declare function crest:put-access(
   ) as item()+ {
   let $doc := data:doc($data-type, $name)
   let $access := $body/*
+  let $uri := document-uri($doc)
   return
     if ($doc)
     then 
       try {
         acc:set-access($doc, $access),
+        let $ridx-uri :=  mirror:mirror-path($ridx:ridx-path, $uri)
+        where doc($ridx-uri)
+        return
+            mirror:mirror-permissions($ridx:ridx-path, $uri, $ridx-uri), 
         <rest:response>
           <output:serialization-parameters>
             <output:method value="text"/>
