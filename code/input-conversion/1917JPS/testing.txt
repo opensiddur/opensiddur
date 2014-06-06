@@ -1,0 +1,17 @@
+* Basic flow of text
+* Flow of verses across columns and pages
+* Paragraphs (prose) - example?
+* Paragraphs (poetry) including within verses - example?
+* Parsha names
+* Section, books, minor books
+* Chapter numbers 
+** including multi-digit
+* Verse numbers
+* Verse number 1 (not explicitly shown)
+* Hebrew words
+* Small caps
+* Italics
+* Footnotes
+** footnotes in only one column
+** footnote reference numbers/links
+** Footnotes like a-text-a (or is that just 1985?)

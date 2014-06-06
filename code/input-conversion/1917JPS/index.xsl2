@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+index.xsl2 for the OpenSiddur project.
+Copyright 2011-2013 Marc Stober and licensed under the GNU LGPL.
+
+Outputs HTML from an interim XML format.
+
+colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
+
+TODO: refactor to share stuff w/test-html.xsl2
+TODO: not everything is a link
+TODO: fix underscores (fix the files, not this)
+-->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+	<xsl:output method="html" indent="yes" />
+
+	<!-- Pick up any extra text nodes - 
+		what's left of identity template, not sure if this is needed --> 
+  <xsl:template match="text()">
+	  <xsl:copy>
+	  </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="bible">
+	  <div>
+		  <!-- outline: This is intentionally similar to "The Order of the Books"
+				on page xvi of the 1919 printing. -->
+			<!-- TODO: fixed? -->
+			<ul>
+				<xsl:for-each select="section">
+					<li><a>
+							<xsl:attribute name="href">
+								<xsl:value-of select="@id" />
+								<xsl:text>.html</xsl:text>
+							</xsl:attribute>
+							<xsl:value-of select="@id" />
+					</a></li>
+					<ul>
+						<xsl:for-each select="book|subsection">
+							<li>
+								<a>
+									<xsl:attribute name="href">
+										<xsl:value-of select="@id" />
+										<xsl:text>.html</xsl:text>
+									</xsl:attribute>
+									<xsl:value-of select="@id" />
+								</a>
+							</li>
+							<ul>
+								<xsl:for-each select="book">
+									<li><a>
+											<xsl:attribute name="href">
+												<xsl:value-of select="@id" />
+												<xsl:text>.html</xsl:text>
+											</xsl:attribute>
+											<xsl:value-of select="@id" />
+									</a></li>
+								</xsl:for-each>
+							</ul>
+						</xsl:for-each>
+					</ul>
+				</xsl:for-each>
+			</ul>
+
+			<xsl:apply-templates select="* | text()"/>
+		</div>
+	</xsl:template>
+
+	<xsl:template match="section">
+		<!-- TODO get the name from the text rather than from the outline -->
+		<h1>
+			<xsl:attribute name="id">
+				<xsl:value-of select="@id"/>
+			</xsl:attribute>
+			<xsl:value-of select="@id"/>
+		</h1>
+		<xsl:apply-templates/>
+	</xsl:template>
+
+	<xsl:template match="book">
+		<a>
+			<xsl:attribute name="id">
+				<xsl:value-of select="@id"/>
+			</xsl:attribute>
+		</a>
+		<xsl:apply-templates/>
+	</xsl:template>
+
+	<!-- TODO want book title separate for Torah? And this lower down? -->
+	<xsl:template match="parashah-title">
+		<div class="parashah-title">
+			<!-- unicode 261E TODO make sure this works everywhere -->
+			☞ A weekly reading, 
+			<i>Parashat </i>
+			<xsl:value-of select="."/>, begins here.
+		</div>
+	</xsl:template>
+
+	<xsl:template match="book-title">
+		<h2>
+			<xsl:value-of select="."/>
+		</h2>
+	</xsl:template>
+
+	<!-- TODO (in XML, really) verse 1 -->
+	<xsl:template match="chapter-number">
+		<h3>
+			Chapter <xsl:value-of select="."/>
+		</h3>
+	</xsl:template>
+
+	<xsl:template match="@*">
+		<xsl:text> </xsl:text>
+		<xsl:value-of select="local-name()" />
+		<xsl:text>=</xsl:text>
+		<xsl:value-of select="." />  
+	</xsl:template>
+
+	<!-- supress empty text nodes -->
+	<!-- priority to prevent ambiguous matches -->
+	<xsl:template match="text[normalize-space() = '']" priority="1">
+	</xsl:template>
+
+	<xsl:template match="paragraph-break">
+		<div class="paragraph-break"><xsl:text>&#182;</xsl:text></div>
+	</xsl:template>
+
+	<!-- regular text -->
+	<xsl:template match="text[not(@size) and not(@font)]">
+		<xsl:apply-templates select="node()" />
+	</xsl:template>
+
+	<!-- verse-number -->
+	<xsl:template match="verse-number">
+		<span class="verse-number"><xsl:apply-templates select="node()" /></span>
+	</xsl:template>
+
+	<!-- TODO working/needed? -->
+	<xsl:template match="text[@size='10.046' and @font='Times New Roman,Italic']">
+		<i><xsl:apply-templates select="node()" /></i>
+	</xsl:template>
+
+	<xsl:template match="small-caps">
+		<span class="small-caps"><xsl:apply-templates select="node()" /></span>
+	</xsl:template>
+
+</xsl:stylesheet>

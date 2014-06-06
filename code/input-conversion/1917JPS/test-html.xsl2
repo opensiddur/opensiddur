@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+test-html.xsl2 for the OpenSiddur project.
+Copyright 2011-2013 Marc Stober and shared under the GNU LGPL.
+
+Outputs HTML from an interim XML format.
+
+colors: http://colorschemedesigner.com/#3k31TK-hWpBpB
+
+TODO: not "test"
+-->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+	<xsl:output method="html" indent="yes" />
+
+<!-- default identity template, in case we need it again
+<xsl:template match="@* | node()">
+<xsl:copy>
+<xsl:apply-templates select="@* | node()"/>
+</xsl:copy>
+</xsl:template-->
+
+<!-- Pick up any extra text nodes - 
+what's left of identity template, not sure if this is needed --> 
+<xsl:template match="text()">
+	<xsl:copy>
+	</xsl:copy>
+</xsl:template>
+
+<xsl:template match="bible">
+<!-- HTML5 DOCTYPE -->
+<xsl:text disable-output-escaping="yes">&lt;!DOCTYPE html&gt;&#xA;</xsl:text>
+<html>
+	<head>
+		<link href='http://fonts.googleapis.com/css?family=Gentium+Book+Basic:400,400italic,700,700italic' rel='stylesheet' type='text/css' />
+<!-- make sure browsers see this as UTF-8 -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<!-- Make sure iPhone reflows the text to its screen size 
+(otherwise it defaults to a zoomed-out 980px viewport). 
+See: http://developer.apple.com/library/IOs/#documentation/AppleApplications/Reference/SafariWebContent/UsingtheViewport/UsingtheViewport.html  -->
+<!-- TODO cf what normalizer did -->
+<meta name = "viewport" content = "initial-scale = 1.0" />
+<link rel="stylesheet" href="static/normalize.min.css" />
+<link rel="stylesheet" href="static/style.css" />
+<!-- Google Analytics -->
+<script type="text/javascript">
+
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-32130708-1']);
+	_gaq.push(['_setDomainName', 'marcstober.com']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+
+</script>
+</head>
+<body>
+											<div id="container">
+	<header>
+<a href=".">
+	The Hebrew Bible:
+	A new digital edition of the 
+	JPS 1917 translation<sup>beta</sup></a>
+											</header>
+												<!-- outline: This is intentionally similar to "The Order of the Books"
+											on page xvi of the 1919 printing. -->
+											<!-- TODO: fixed? -->
+											<ul>
+												<xsl:for-each select="section">
+													<li><a>
+															<xsl:attribute name="href">
+																<xsl:text>#</xsl:text>
+																<xsl:value-of select="@id" />
+															</xsl:attribute>
+															<xsl:value-of select="@id" />
+													</a></li>
+													<ul>
+														<xsl:for-each select="book|subsection">
+															<li>
+																<a>
+																	<xsl:attribute name="href">
+																		<xsl:text>#</xsl:text>
+																		<xsl:value-of select="@id" />
+																	</xsl:attribute>
+																	<xsl:value-of select="@id" />
+																</a>
+															</li>
+															<ul>
+																<xsl:for-each select="book">
+																	<li><a>
+																			<xsl:attribute name="href">
+																				<xsl:text>#</xsl:text>
+																				<xsl:value-of select="@id" />
+																			</xsl:attribute>
+																			<xsl:value-of select="@id" />
+																	</a></li>
+																</xsl:for-each>
+															</ul>
+														</xsl:for-each>
+													</ul>
+												</xsl:for-each>
+											</ul>
+
+											<xsl:apply-templates select="* | text()"/>
+										<hr/>
+										<div>
+			Original English translation published by the Jewish Publication Society in 1917
+			now in the public domain. This digital edition created and shared by 
+			Marc Stober (<a href="http://www.twitter.com/j_hacker">@J_Hacker</a>)
+			with a <a href="http://creativecommons.org/publicdomain/zero/1.0/">CC0</a> declaration.
+										</div>
+										</div>
+									</body>
+								</html>
+							</xsl:template>
+
+							<!-- Temporary formatting for elements that don't have it yet -->
+							<xsl:template match="*">
+								<div style="border: solid 1px #0ff; margin-bottom: 4px; font-family: sans-serif">
+									<div style="background-color: #0ff; padding: 4px">
+										<strong><xsl:value-of select="local-name()" /></strong>
+										<xsl:apply-templates select="@*" />
+									</div>
+									<div style="padding: 5px">
+										<xsl:apply-templates select="node()" />
+									</div>
+								</div>
+							</xsl:template>
+
+							<xsl:template match="section">
+								<!-- TODO get the name from the text rather than from the outline -->
+								<h1>
+									<xsl:attribute name="id">
+										<xsl:value-of select="@id"/>
+									</xsl:attribute>
+									<xsl:value-of select="@id"/>
+								</h1>
+								<xsl:apply-templates/>
+							</xsl:template>
+
+							<xsl:template match="book">
+								<a>
+									<xsl:attribute name="id">
+										<xsl:value-of select="@id"/>
+									</xsl:attribute>
+								</a>
+								<xsl:apply-templates/>
+							</xsl:template>
+
+							<!-- TODO want book title separate for Torah? And this lower down? -->
+							<xsl:template match="parashah-title">
+								<div class="parashah-title">
+									<!-- unicode 261E TODO make sure this works everywhere -->
+									☞ A weekly reading, 
+									<i>Parashat </i>
+									<xsl:value-of select="."/>, begins here.
+								</div>
+							</xsl:template>
+
+							<xsl:template match="book-title">
+								<h2>
+									<xsl:value-of select="."/>
+								</h2>
+							</xsl:template>
+
+							<!-- TODO (in XML, really) verse 1 -->
+							<xsl:template match="chapter-number">
+								<h3>
+									Chapter <xsl:value-of select="."/>
+								</h3>
+							</xsl:template>
+
+							<xsl:template match="@*">
+								<xsl:text> </xsl:text>
+								<xsl:value-of select="local-name()" />
+								<xsl:text>=</xsl:text>
+								<xsl:value-of select="." />  
+							</xsl:template>
+
+							<!-- supress empty text nodes -->
+							<!-- priority to prevent ambiguous matches -->
+							<xsl:template match="text[normalize-space() = '']" priority="1">
+							</xsl:template>
+
+							<xsl:template match="paragraph-break">
+								<div class="paragraph-break"><xsl:text>&#182;</xsl:text></div>
+							</xsl:template>
+
+							<!-- regular text -->
+							<xsl:template match="text[not(@size) and not(@font)]">
+								<xsl:apply-templates select="node()" />
+							</xsl:template>
+
+							<!-- verse-number -->
+							<xsl:template match="verse-number">
+								<span class="verse-number"><xsl:apply-templates select="node()" /></span>
+							</xsl:template>
+
+							<!-- TODO working/needed? -->
+							<xsl:template match="text[@size='10.046' and @font='Times New Roman,Italic']">
+								<i><xsl:apply-templates select="node()" /></i>
+							</xsl:template>
+
+							<xsl:template match="small-caps">
+								<span class="small-caps"><xsl:apply-templates select="node()" /></span>
+							</xsl:template>
+
+						</xsl:stylesheet>
