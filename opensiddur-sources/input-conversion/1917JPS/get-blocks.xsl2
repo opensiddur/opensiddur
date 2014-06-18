@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+get-blocks.xsl2 for the Open Siddur project.
+Copyright 2011-12 Marc Stober and licensed under the GNU LGPL.
+
+Sort each page into columns (i.e.,  columns, header, footer, and footnotes).
+This is done by analyzing the position of the text relative
+to the vertical line separating the columns.
+-->
+<xsl:stylesheet version="2.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+	xmlns:str="http://exslt.org/strings"
+	xmlns:my="https://github.com/marcstober/opensiddur/blob/master/code/input-conversion/1917JPS/my">
+	<xsl:output method="xml" version="1.0" indent="yes" />
+
+	<!-- TODO
+See how pages without columns (front matter, etc.) output.
+"Spell check" against a dictionary?
+Tidy?
+Extract Toc outline?
+	Make sure Hebrew is output
+Split columns (in progress)
+	"Spell check" against a dictionary.
+	Paragraphs.
+	Poetry?
+	xmllint - -format - -encode UTF-8 1917JPS.xml | less
+	-->
+
+	<xsl:template match="@*|*">
+		<!-- TODO still need this param? -->
+		<xsl:param name="column-after" />
+		<xsl:copy>
+			<xsl:apply-templates select="*|@*|node()">
+				<xsl:with-param name="columnSplit" select="$column-after" />
+			</xsl:apply-templates>
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="page">
+
+		<!-- select the vertical rect that divides columns -->
+		<xsl:variable name="splitter" select="rect[@w &lt; 2][1]" />
+
+		<xsl:copy>
+			<xsl:apply-templates select="@id" />
+
+			<!-- If no splitter, just output it all as one column.
+				For example, front matter.
+				I'm sure this will break something but we'll fix it... -->
+			<xsl:if test="not($splitter)">
+				<xsl:call-template name="column">
+					<xsl:with-param name="nodes" select="*" />
+				</xsl:call-template>
+			</xsl:if>
+			<!-- TODO: don't to the rest if no splitter -->
+
+			<!-- output it as "splitter" element for convenience -->
+			<xsl:element name="splitter">
+				<xsl:apply-templates select="$splitter/@*[local-name() != 'linewidth']" />
+			</xsl:element>    
+
+			<xsl:variable name="splitter-top" select="$splitter/@y + $splitter/@h" />
+			<xsl:element name="header">
+				<xsl:apply-templates select="*[@y &gt; $splitter-top]" />
+			</xsl:element>
+
+			<!-- left column -->
+			<xsl:call-template name="column">
+				<xsl:with-param name="nodes" select="*[(@y &lt;= $splitter-top) and 
+					(@y &gt;= number($splitter/@y)) and 
+					(@x &lt;= number($splitter/@x))]" />
+			</xsl:call-template>
+
+			<!-- right column -->
+			<xsl:call-template name="column">
+				<xsl:with-param name="nodes" select="*[(@y &lt;= $splitter-top) and 
+					(@y &gt;= number($splitter/@y)) and 
+					(@x &gt; number($splitter/@x))]" />
+			</xsl:call-template>
+
+			<xsl:element name="footer">
+				<xsl:apply-templates select="*[@y &lt; number($splitter/@y)]" />
+			</xsl:element>
+
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template name="column">
+		<xsl:param name="nodes" />
+		<xsl:element name="column">
+			<xsl:variable name="footnote-splitter-y">
+				<xsl:choose>
+					<xsl:when test="$nodes[(name() = 'rect') and (@w &gt; 2)]">
+						<xsl:value-of select="$nodes[(name() = 'rect') and (@w &gt; 2)]/@y" />
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>0</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:variable>
+			<xsl:apply-templates select="$nodes[@y &gt; number($footnote-splitter-y)]" />
+			<xsl:element name="footnotes">
+				<xsl:apply-templates select="$nodes[@y &lt; number($footnote-splitter-y)]" />
+			</xsl:element>
+		</xsl:element>
+	</xsl:template>
+
+	<!-- TODO reuse this -->
+	<xsl:template match="zzztext">
+		<!-- don't output if empty or whitespace only -->
+		<!-- xsl:if test="normalize-space()" -->
+		<xsl:choose>
+			<xsl:when test="@size = 10.035" >
+				<!-- "normal" text -->
+				<xsl:value-of select="." />
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:apply-templates select="@size" />
+					<xsl:value-of select="." />
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+</xsl:stylesheet>

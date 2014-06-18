@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+small-caps.xsl2 for the Open Siddur project.
+Copyright 2012 Marc Stober and licensed under the GNU LGPL.
+-->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"> 
+
+	<xsl:output method="xml" indent="yes"/>
+	<xsl:strip-space elements="*" />
+	<xsl:preserve-space elements="text" />
+
+<!-- default identity template -->
+<xsl:template match="@* | node()">
+	<xsl:copy>
+		<xsl:apply-templates select="@* | node()" />
+	</xsl:copy>
+</xsl:template>
+
+<!-- Small caps, usually the "ord" of "Lord",
+	plus a special case of "od" of "God". -->
+	<xsl:template match="text[normalize-space() != '']
+		[(@font='Times New Roman,Bold' and @size='6.215') or
+		(@size='6.327' and string(number(normalize-space()))='NaN')]">
+		<xsl:element name="small-caps">
+			<!-- Take last character of previous text; probably first of word. 
+				See corresponding rule in final.xsl2. -->
+			<xsl:value-of select="substring(preceding-sibling::text[1], string-length(preceding-sibling::text[1]))"/>
+			<!-- small caps actually lowercase with a style -->
+			<xsl:value-of select="lower-case(.)"/>
+			<!-- "apostrope s" at end of small caps should also be small caps;
+				this is wrong in some instances in PDF (correct in real original) -->
+			<xsl:if test="substring(following-sibling::text[1], 1, 2) = '’S'">
+				<xsl:text>’s</xsl:text>
+			</xsl:if>
+		</xsl:element>
+	</xsl:template>
+
+	<!-- Suppress "apostrophe s" handled above -->
+	<xsl:template match="text[substring(., 1, 2) = '’S']">
+	<xsl:copy>
+		<xsl:apply-templates select="@*" />
+		<xsl:value-of select="substring(., 3)"/>
+	</xsl:copy>
+	</xsl:template>
+</xsl:stylesheet>

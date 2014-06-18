@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bible>
+   <section id="THE ORDER OF THE BOOKS">
+      xv <book-title>THE ORDER OF THE BOOKS</book-title>
+      <paragraph-break/>
+      <other-text size="14.508" y="427.693"> Genesis        Micah  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="409.333"> Exodus       Nahum   </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="390.973"> Leviticus       Habakkuk  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="372.463"> Numbers       Zephaniah  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="354.103"> Deuteronomy       Haggai  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="335.743"> Joshua       Zechariah  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="317.263"> Judges       Malachi  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="298.903"> I Samuel  Psalms  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="280.543"> II Samuel  Proverbs  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="262.043"> I Kings  Job  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="243.683"> II Kings  Song of Songs  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="225.323"> Isaiah  Ruth  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="206.843"> Jeremiah  Lamentations  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="188.483"> Ezekiel  Ecclesiastes  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="170.123"> The Twelve  Esther  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="151.643">      Hosea  Daniel  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="133.253">      Joel  Ezra  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="114.893">      Amos  Nehemiah  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="96.417">      Obadiah  I Chronicles  </other-text>
+      <paragraph-break/>
+      <other-text size="14.508" y="78.057">      Jonah  II Chronicles </other-text>
+      
+      
+      
+      
+   </section>
+</bible>

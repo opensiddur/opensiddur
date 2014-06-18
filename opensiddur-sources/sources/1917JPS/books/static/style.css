@@ -1,0 +1,55 @@
+/* more readable body size and line height 
+   see http://www.alistapart.com/articles/howtosizetextincss */
+body { /*font-size: 16px;*/ 
+	margin: 0 0.5em 0.5em;
+	line-height: 1.6;
+	font-family: Gentium Book Basic;
+}
+
+@media all and (min-width: 800px) 
+{
+	#container
+	{
+		width: 40em;
+		margin: auto;
+	}
+}
+header
+{
+	background-color: #DDD; 
+	padding: 0.4em 0.2em 0.2em;
+}
+h1, h2, h3 
+{ 
+	text-align: center; 
+	color: #8F0700;
+}
+h1 
+{
+	border: 3px double #8F0700;
+}
+h2 
+{ 
+	font-size: 32px; 
+border: 1px solid #8F0700;
+}
+h3 { font-size: 24px; }
+
+.parashah-title
+{
+padding: 1em 2em;
+color: #20909A;	
+}
+.verse-number 
+{ 
+color: #BBB;
+	   font-size: 75%;
+	   vertical-align: 10%;
+	   margin-right: .25em;
+}
+.paragraph-break
+{
+color: #BBB;
+	   font-size: 75%;
+}
+.small-caps { font-variant: small-caps; }

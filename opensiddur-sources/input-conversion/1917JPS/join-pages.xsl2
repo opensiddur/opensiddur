@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+join-pages.xsl2 for the OpenSiddur project.
+Copyright 2012 Marc Stober and licensed under the GNU LGPL.
+
+Flatten page elements and recognize footnotes.
+-->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"> 
+
+	<xsl:output method="xml" indent="yes"/>
+	<xsl:strip-space elements="*" />
+	<xsl:preserve-space elements="text" />
+
+	<!-- default identity template -->
+	<xsl:template match="@* | node()" name="identity">
+		<xsl:copy>
+			<xsl:apply-templates select="@* | node()" />
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="pages">
+		<xsl:element name="bible">
+			<xsl:apply-templates select="@* | node()" />
+		</xsl:element>
+	</xsl:template>
+
+	<xsl:template match="page">
+		<xsl:apply-templates select="node()" />
+	</xsl:template>
+
+	<!-- Need to recognize footnotes while still have page context -->
+	<xsl:template match="column/text[@size='6.327' and 
+		string-length(normalize-space())=1 and 
+		string(number(normalize-space()))='NaN' and
+		abs(number(@y - preceding-sibling::text[1]/@y)) > 1.0]">
+		debugging: <xsl:value-of select="@y - preceding-sibling::text[1]/@y"/>
+		debugging: <xsl:value-of select="(@y - preceding-sibling::text[1]/@y) > 1.0"/>
+		<xsl:element name="note">
+			<xsl:attribute name="mark">
+				<xsl:value-of select="normalize-space()" />
+			</xsl:attribute>
+			<xsl:attribute name="ref">
+				<xsl:text>note-</xsl:text>
+				<xsl:value-of select="ancestor::page/@id" />
+				<xsl:text>-</xsl:text>
+				<xsl:value-of select="normalize-space()" />
+			</xsl:attribute>
+		</xsl:element>
+	</xsl:template>
+
+	<xsl:template match="footnotes/text[@size='6.327']">
+		<xsl:element name="note">
+			<xsl:attribute name="mark">
+				<xsl:value-of select="normalize-space()" />
+			</xsl:attribute>
+			<xsl:attribute name="id">
+				<xsl:text>note-</xsl:text>
+				<xsl:value-of select="ancestor::page/@id" />
+				<xsl:text>-</xsl:text>
+				<xsl:value-of select="normalize-space()" />
+			</xsl:attribute>
+			<xsl:for-each select="following-sibling::*[1]/self::text">
+				<xsl:call-template name="join-same" />
+			</xsl:for-each>
+		</xsl:element>
+	</xsl:template>
+
+	<xsl:template name="join-same">
+		<xsl:call-template name="identity" />
+		<xsl:for-each select="following-sibling::*[1]/self::text[not(@size) or @size!='6.327']">
+			<xsl:call-template name="join-same" />
+		</xsl:for-each>
+	</xsl:template>
+
+	<!-- Suppress footnote text nodes picked up by recursive rule above. -->
+	<xsl:template match="footnotes/text[not(@size='6.327') and 
+		preceding-sibling::text[@size='6.327']]">
+	</xsl:template>
+
+</xsl:stylesheet>

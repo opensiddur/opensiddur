@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+join-text.xsl2 for the OpenSiddur project.
+Copyright 2012 Marc Stober and licensed under the GNU LGPL.
+
+Make sure apsostrophe-s is same font/size as rest of word.
+Particularly an issue with small caps.
+Also fix opening quotes that are in the wrong direction.
+Lamentations is a good test text for for these 
+(but slightly different issues elsewhere, too).
+-->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+	xmlns:my="https://github.com/marcstober/opensiddur/blob/master/code/input-conversion/1917JPS/join-text.xsl2/my">
+
+	<xsl:output method="xml" indent="yes"/>
+	<xsl:strip-space elements="*" />
+	<xsl:preserve-space elements="text" />
+
+	<!-- default identity template -->
+	<xsl:template match="@* | node()">
+		<xsl:copy>
+			<xsl:apply-templates select="@* | node()"/>
+		</xsl:copy>
+	</xsl:template>
+
+	<!-- If a right single quote follows a number, it's probably supposed to
+		be a left quote following a verse number.
+		I'm guessing MS Word's smart quotes were used to prepare the text. -->
+	<xsl:template match="text[text() = codepoints-to-string((8217)) and
+			string(number(preceding-sibling::text[1])) != 'NaN']">
+		<xsl:copy>
+			<xsl:apply-templates select="@*"/>
+			<xsl:value-of select="codepoints-to-string((8216))"/>	
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="text[text() = codepoints-to-string((8217)) and
+			following-sibling::*[1][local-name() = 'text' and text() = 'S'] and
+			string(number(preceding-sibling::text[1])) = 'NaN']">
+		<xsl:copy>
+			<xsl:attribute name="font">
+				<xsl:value-of select="preceding-sibling::text[1]/@font"/>
+			</xsl:attribute>
+			<xsl:attribute name="size">
+				<xsl:value-of select="preceding-sibling::text[1]/@size"/>
+			</xsl:attribute>
+			<xsl:apply-templates/>
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="text[text() = 'S' and
+			preceding-sibling::*[1][local-name() = 'text' and text() = codepoints-to-string((8217))] and
+			string(number(preceding-sibling::text[2])) = 'NaN']">
+		<xsl:copy>
+			<xsl:attribute name="font">
+				<xsl:value-of select="preceding-sibling::text[2]/@font"/>
+			</xsl:attribute>
+			<xsl:attribute name="size">
+				<xsl:value-of select="preceding-sibling::text[2]/@size"/>
+			</xsl:attribute>
+			<xsl:apply-templates/>
+		</xsl:copy>
+	</xsl:template>
+
+</xsl:stylesheet>

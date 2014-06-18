@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Used by outline.py to generate an XSLT file.
+For the 1917 JPS PDF extract project for the Open Siddur Project.
+Copyright 2012 Marc Stober and licensed under the LGPL.
+-->
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+	<xsl:output method="xml" indent="yes"/>
+
+<!-- default identity template -->
+<xsl:template match="@* | node()">
+	<xsl:copy>
+		<xsl:apply-templates select="@* | node()"/>
+	</xsl:copy>
+</xsl:template>
+
+<!--
+	Note: special divisions in certain sections:
+
+	section: the prophets
+		subsection: the twelve
+			book: hosea
+	section: the writings
+		book: psalms
+			subsection: book... 
+-->
+
+<xsl:template match="pages">
+	<xsl:copy>
+		<!-- GENERATE CODE HERE -->
+	</xsl:copy>
+</xsl:template>
+
+</xsl:stylesheet>
