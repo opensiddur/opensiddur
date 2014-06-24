@@ -260,6 +260,28 @@ declare function combine:update-settings-from-standoff-markup(
         else $params 
 };
 
+declare %private function combine:tei-featureVal-to-map(
+    $fnodes as node()*
+    ) as element(tei:string)* {
+    for $node in $fnodes
+    return 
+        typeswitch ($node)
+        case element(j:yes) return element tei:string { "YES" }
+        case element(j:no) return element tei:string { "NO" }
+        case element(j:maybe) return element tei:string { "MAYBE" }
+        case element(j:on) return element tei:string { "ON" }
+        case element(j:off) return element tei:string { "OFF" }
+        case element(tei:binary) return element tei:string { string($node/@value=(1, "true")) }
+        case element(tei:string) return $node
+        case element(tei:vColl) return combine:tei-featureVal-to-map($node/element())
+        case element() return element tei:string { $node/@value/string() }
+        case text() return element tei:string { string($node) }
+        default return ()
+}; 
+
+(:~ convert a tei:fs to an XQuery map
+ : The key is fsname->fname. The value is always one or more tei:string elements.
+ :)
 declare function combine:tei-fs-to-map(
     $e as element(tei:fs)
     ) as map {
@@ -278,25 +300,13 @@ declare function combine:tei-fs-to-map(
                         then $f/@name/string()
                         else ("anonymous:" || common:generate-id($f))
                     ),
-                    if ($f/@fVal)
-                    then uri:fast-follow($f/@fVal, $f, -1)
-                    else (
-                        for $node in $f/node()
-                        return 
-                            typeswitch ($f/node())
-                            case element(j:yes) return "YES"
-                            case element(j:no) return "NO"
-                            case element(j:maybe) return "MAYBE"
-                            case element(j:on) return "ON"
-                            case element(j:off) return "OFF"
-                            case element(tei:binary) return string($node/@value=(1, "true"))
-                            case element(tei:string) return $node/string()
-                            case element() return $node/@value/string()
-                            case text() return string($node)
-                            default return ()
-                    )[.][1]
-                    (: TODO: default values :) 
-                )
+                    combine:tei-featureVal-to-map(
+                        if ($f/@fVal)
+                        then uri:fast-follow($f/@fVal, $f, -1)
+                        else $f/node()
+                    )[.]
+                    (: TODO: default values :)
+                ) 
         )
 };
 
@@ -310,6 +320,26 @@ declare function combine:document-uri(
     [(@jf:document-uri|@uri:document-uri)][1]/
       (@jf:document-uri, @uri:document-uri)[1]/string()
   )[1]
+};
+
+(: opensiddur->translation contains an ordered list of translations. 
+ : return the first existing match of a translation of $destination-stream from that list 
+ :)
+declare %private function combine:get-first-active-translation(
+    $destination-stream as element(),
+    $active-translations as element(tei:string)*
+    ) as element(tei:linkGrp)? {
+    let $this-test := $active-translations[1]/string()
+    where exists($this-test)
+    return
+        let $this-translation :=
+            ridx:query(
+                collection("/db/data/linkage")//j:parallelText[tei:idno=$this-test]/tei:linkGrp[@domains], 
+                $destination-stream)[1]     (: what should happen if more than 1 value is returned?  :)
+        return
+            if (exists($this-translation))
+            then $this-translation
+            else combine:get-first-active-translation($destination-stream, subsequence($active-translations, 2))
 };
 
 (:~ do a translation redirect, if necessary, from the context $e
@@ -331,12 +361,7 @@ declare function combine:translation-redirect(
         doc(mirror:unmirror-path($format:unflatten-cache, document-uri(root($destination-stream-mirrored))))/
             id($destination-stream-mirrored/@jf:id)
     let $translated-stream-unmirrored :=
-        if ($active-translation)
-        then  
-            ridx:query(
-                collection("/db/data/linkage")//j:parallelText[tei:idno=$active-translation]/tei:linkGrp[@domains], 
-                $destination-stream)
-        else () 
+        combine:get-first-active-translation($destination-stream, $active-translation)
     where (
         exists($translated-stream-unmirrored) 
         and not($e/parent::jf:parallel) (: special exception for the external pointers in the parallel construct :)

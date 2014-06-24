@@ -20,6 +20,25 @@ into a complete schema
       <memberOf key="model.conditionContent"/>
     </classes>
   </elementSpec>
+    
+  <elementSpec ident="vColl" module="iso-fs" mode="change">
+    <attList>
+      <attDef ident="org" mode="delete"/>   <!-- always a list -->
+    </attList>
+    <content>
+      <!-- remove fs -->
+      <rng:zeroOrMore>
+        <!--<rng:ref name="model.featureVal.single"/> but not including conditional-type values like yes -->
+        <rng:choice>
+            <rng:ref name="binary"/>
+            <rng:ref name="default"/>
+            <rng:ref name="numeric"/>
+            <rng:ref name="string"/>
+            <rng:ref name="symbol"/>
+        </rng:choice>
+      </rng:zeroOrMore>
+    </content>
+  </elementSpec>
   
   <elementSpec ident="condition" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
     <desc>Holds a single condition</desc>

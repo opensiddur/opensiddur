@@ -133,7 +133,7 @@
   </TestSet>
   <TestSet>
     <testName>combine:tei-fs-to-map()</testName>
-    <test output="text">
+    <test>
       <task>fs/f/symbol</task>
       <code><![CDATA[
         let $m := combine:tei-fs-to-map(
@@ -145,9 +145,9 @@
         )
         return $m("FS->FSYMBOL")
       ]]></code>
-      <expected desc="map to symbol value">SYMBOL</expected>
+      <expected desc="map to symbol value"><tei:string>SYMBOL</tei:string></expected>
     </test>
-    <test output="text">
+    <test>
       <task>fs/f/binary</task>
       <code><![CDATA[
         let $m := combine:tei-fs-to-map(
@@ -159,9 +159,9 @@
         )
         return $m("FS->FBINARY")
       ]]></code>
-      <expected desc="map to normalized binary value">true</expected>
+      <expected desc="map to normalized binary value"><tei:string>true</tei:string></expected>
     </test>
-    <test output="text">
+    <test>
       <task>fs/f/yes</task>
       <code><![CDATA[
         let $m := combine:tei-fs-to-map(
@@ -173,9 +173,9 @@
         )
         return $m("FS->FYES")
       ]]></code>
-      <expected desc="map to yes value">YES</expected>
+      <expected desc="map to yes value"><tei:string>YES</tei:string></expected>
     </test>
-    <test output="text">
+    <test>
       <task>fs/f/string</task>
       <code><![CDATA[
         let $m := combine:tei-fs-to-map(
@@ -185,9 +185,9 @@
         )
         return $m("FS->FSTRING")
       ]]></code>
-      <expected desc="map to string value">string</expected>
+      <expected desc="map to string value"><tei:string>string</tei:string></expected>
     </test>
-    <test output="text">
+    <test>
       <task>fs/f/text()</task>
       <code><![CDATA[
         let $m := combine:tei-fs-to-map(
@@ -197,7 +197,31 @@
         )
         return $m("FS->FTEXT")
       ]]></code>
-      <expected desc="map to text value">text</expected>
+      <expected desc="map to text value"><tei:string>text</tei:string></expected>
+    </test>
+    <test>
+      <task>fs/f/vColl</task>
+      <code><![CDATA[
+        let $m := combine:tei-fs-to-map(
+          <tei:fs type="FS">
+            <tei:f name="FVCOLL">
+              <tei:vColl>
+                <tei:symbol value="S1"/>
+                <tei:symbol value="S2"/>
+                <tei:symbol value="S3"/>
+              </tei:vColl>
+            </tei:f>
+          </tei:fs>
+        )
+        return element x { $m("FS->FVCOLL") }
+      ]]></code>
+      <expected desc="map to sequence of strings">
+        <x>
+            <tei:string>S1</tei:string>
+            <tei:string>S2</tei:string>
+            <tei:string>S3</tei:string>
+        </x>
+      </expected>
     </test>
   </TestSet>
   <TestSet>
