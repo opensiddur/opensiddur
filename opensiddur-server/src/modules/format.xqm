@@ -17,6 +17,8 @@ import module namespace uri="http://jewishliturgy.org/transform/uri"
   at "follow-uri.xqm";
 import module namespace pla="http://jewishliturgy.org/transform/parallel-layer"
   at "../transforms/parallel-layer.xqm";
+import module namespace phony="http://jewishliturgy.org/transform/phony-layer"
+  at "../transforms/phony-layer.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "../transforms/flatten.xqm";
 import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
@@ -39,6 +41,7 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare variable $format:temp-dir := '.format';
 
 declare variable $format:parallel-layer-cache := "/db/cache/parallel-layer";
+declare variable $format:phony-layer-cache := "/db/cache/phony-layer";
 declare variable $format:dependency-cache := "/db/cache/dependency";
 declare variable $format:flatten-cache := "/db/cache/flatten";
 declare variable $format:merge-cache := "/db/cache/merge";
@@ -49,6 +52,7 @@ declare variable $format:compile-cache := "/db/cache/compiled";
 declare variable $format:html-cache := "/db/cache/html";
 declare variable $format:caches := (
     $format:parallel-layer-cache,
+    $format:phony-layer-cache,
     $format:dependency-cache,
     $format:flatten-cache,
     $format:merge-cache,
@@ -119,6 +123,28 @@ declare function format:parallel-layer(
     )
 };
 
+(:~ make a cached version of a phony layer text document,
+ : and return it
+ : @param $doc The document to run phony layer transform on
+ : @param $params Parameters to send to the transform
+ : @param $original-doc The original document  
+ : @return The mirrored phony layer document
+ :) 
+declare function format:phony-layer(
+  $doc as document-node(),
+  $params as map,
+  $original-doc as document-node()
+  ) as document-node() {
+  let $pho-transform := phony:phony-layer-document(?, $params)
+  return
+    mirror:apply-if-outdated(
+      $format:phony-layer-cache,
+      $doc,
+      $pho-transform,
+      $original-doc
+    )
+};
+
 (:~ make a cached version of a flattened document,
  : and return it
  : @param $doc The document to flatten
@@ -138,7 +164,8 @@ declare function format:flatten(
       if (format:is-parallel-document($original-doc))
       then 
         format:parallel-layer($doc, $params, $original-doc)
-      else $doc,
+      else 
+        format:phony-layer($doc, $params, $original-doc),
       $flatten-transform,
       $original-doc
     )
