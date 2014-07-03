@@ -24,6 +24,8 @@ import module namespace ridx="http://jewishliturgy.org/modules/refindex"
   at "../modules/refindex.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
+import module namespace cond="http://jewishliturgy.org/transform/conditionals"
+  at "conditionals.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "flatten.xqm";
 
@@ -253,7 +255,7 @@ declare function combine:update-settings-from-standoff-markup(
                         let $link-target := tokenize($standoff-link/(@target|@targets), '\s+')[2]
                         let $link-dest := uri:fast-follow($link-target, $unmirrored, uri:follow-steps($unmirrored))
                         where $link-dest instance of element(tei:fs)
-                        return combine:tei-fs-to-map($link-dest)
+                        return combine:tei-fs-to-map($link-dest, $params)
                     ))
                 } 
             ))
@@ -261,7 +263,8 @@ declare function combine:update-settings-from-standoff-markup(
 };
 
 declare %private function combine:tei-featureVal-to-map(
-    $fnodes as node()*
+    $fnodes as node()*,
+    $params as map
     ) as element(tei:string)* {
     for $node in $fnodes
     return 
@@ -272,8 +275,10 @@ declare %private function combine:tei-featureVal-to-map(
         case element(j:on) return element tei:string { "ON" }
         case element(j:off) return element tei:string { "OFF" }
         case element(tei:binary) return element tei:string { string($node/@value=(1, "true")) }
+        case element(tei:numeric) return element tei:string { $node/string() }
         case element(tei:string) return $node
-        case element(tei:vColl) return combine:tei-featureVal-to-map($node/element())
+        case element(tei:vColl) return combine:tei-featureVal-to-map($node/element(), $params)
+        case element(tei:default) return element tei:string { cond:evaluate($node, $params) }
         case element() return element tei:string { $node/@value/string() }
         case text() return element tei:string { string($node) }
         default return ()
@@ -283,7 +288,8 @@ declare %private function combine:tei-featureVal-to-map(
  : The key is fsname->fname. The value is always one or more tei:string elements.
  :)
 declare function combine:tei-fs-to-map(
-    $e as element(tei:fs)
+    $e as element(tei:fs),
+    $params as map
     ) as map {
     let $fsname := 
         if ($e/@type) 
@@ -303,9 +309,9 @@ declare function combine:tei-fs-to-map(
                     combine:tei-featureVal-to-map(
                         if ($f/@fVal)
                         then uri:fast-follow($f/@fVal, $f, -1)
-                        else $f/node()
+                        else $f/node(),
+                        $params
                     )[.]
-                    (: TODO: default values :)
                 ) 
         )
 };
