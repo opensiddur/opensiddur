@@ -79,17 +79,17 @@
             <xpath desc="3 layers of type phony added">count(.//j:concurrent/j:layer[@type="phony"])=3</xpath>
             <xpath desc="each of the layers has a @xml:id attribute">every $l in .//j:concurrent/j:layer[@type="phony"] satisfies $l/@xml:id/string()</xpath>
             <expected desc="one layer represents the first conditional" xpath=".//j:concurrent/j:layer[@type='phony'][1]/jf:conditional">
-                <jf:conditional condition="#cond1">
+                <jf:conditional jf:conditional="#cond1">
                     <tei:ptr target="#seg1"/>
                 </jf:conditional>
             </expected>
             <expected desc="one layer represents the second conditional" xpath=".//j:concurrent/j:layer[@type='phony'][2]/jf:conditional">
-                <jf:conditional condition="#cond1">
+                <jf:conditional jf:conditional="#cond1">
                     <tei:ptr target="#range(seg2,seg3)"/>
                 </jf:conditional>
             </expected>
             <expected desc="one layer represents the third conditional, references the instruction" xpath=".//j:concurrent/j:layer[@type='phony'][3]/jf:conditional">
-                <jf:conditional condition="#cond1" instruction="#instruction">
+                <jf:conditional jf:conditional="#cond1" jf:conditional-instruction="#instruction">
                     <tei:ptr target="#seg4"/>
                 </jf:conditional>
             </expected>

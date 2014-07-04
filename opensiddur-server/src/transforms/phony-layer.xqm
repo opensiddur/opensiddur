@@ -177,9 +177,9 @@ declare function phony:phony-layer-from-conditionals(
                 attribute type { "phony" },
                 attribute xml:id { "phony-conditional-" || string(count($n)) },
                 element jf:conditional {
-                    attribute condition { $targets[2] },
+                    attribute jf:conditional { $targets[2] },
                     if ($targets[3])
-                    then attribute instruction { $targets[3] }
+                    then attribute jf:conditional-instruction { $targets[3] }
                     else (),
                     element tei:ptr { attribute target { $targets[1] } }
                 }
