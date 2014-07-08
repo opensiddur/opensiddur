@@ -78,6 +78,7 @@
             <xpath desc="new concurrent section added">exists(.//j:concurrent[j:layer])</xpath>
             <xpath desc="3 layers of type phony added">count(.//j:concurrent/j:layer[@type="phony"])=3</xpath>
             <xpath desc="each of the layers has a @xml:id attribute">every $l in .//j:concurrent/j:layer[@type="phony"] satisfies $l/@xml:id/string()</xpath>
+            <xpath desc="the first layer has an xml:id that is different from the second">not(.//j:concurrent/j:layer[@type='phony'][1]/@xml:id/string()=.//j:concurrent/j:layer[@type="phony"][2]/@xml:id/string())</xpath>
             <expected desc="one layer represents the first conditional" xpath=".//j:concurrent/j:layer[@type='phony'][1]/jf:conditional">
                 <jf:conditional jf:conditional="#cond1">
                     <tei:ptr target="#seg1"/>

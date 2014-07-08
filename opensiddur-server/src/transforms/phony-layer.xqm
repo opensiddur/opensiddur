@@ -175,7 +175,7 @@ declare function phony:phony-layer-from-conditionals(
         return
             element j:layer {
                 attribute type { "phony" },
-                attribute xml:id { "phony-conditional-" || string(count($n)) },
+                attribute xml:id { "phony-conditional-" || string($n) },
                 element jf:conditional {
                     attribute jf:conditional { $targets[2] },
                     if ($targets[3])
