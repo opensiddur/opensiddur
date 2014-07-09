@@ -209,12 +209,28 @@ declare function ridx:query(
       else util:node-id($source-node)
     for $entry in 
       collection($ridx:ridx-path)/
-        ridx:index[@document=$source-document]/
+        ridx:index[@document=$source-document]/(
           ridx:entry
             [@target-doc=$query-document]
             [@target-node=$query-id]
-            [empty($source-node) or @source-node=$source-node-id]
-            [empty($position) or @position=$position]
+            [empty($source-node)]
+            [empty($position)]|
+          ridx:entry
+            [@target-doc=$query-document]
+            [@target-node=$query-id]
+            [empty($source-node)]
+            [@position=$position]|
+          ridx:entry
+            [@target-doc=$query-document]
+            [@target-node=$query-id]
+            [@source-node=$source-node-id]
+            [empty($position)]|
+          ridx:entry
+            [@target-doc=$query-document]
+            [@target-node=$query-id]
+            [@source-node=$source-node-id]
+            [@position=$position]
+        )
     group by 
       $document-uri := string(root($entry)/*/@document),
       $entry-source-node := string($entry/@source-node)
@@ -259,11 +275,16 @@ declare function ridx:query-all(
     let $query-document := document-uri(root($query))
     let $query-id := util:node-id($query)
     for $entry in 
-      collection($ridx:ridx-path)//
+      collection($ridx:ridx-path)//(
         ridx:entry
           [@target-doc=$query-document]
           [@target-node=$query-id]
-          [empty($position) or @position=$position]
+          [empty($position)]|
+        ridx:entry
+          [@target-doc=$query-document]
+          [@target-node=$query-id]
+          [@position=$position]
+        )
     group by 
       $document-uri := root($entry)/*/@document/string(),
       $source-node := $entry/@source-node/string()
