@@ -188,9 +188,7 @@ into a complete schema
       <memberOf key="model.conditionContent"/>
     </classes>
     <content>
-      <rng:oneOrMore>
-        <rng:ref name="model.conditionContent"/>
-      </rng:oneOrMore>
+      <rng:ref name="model.conditionContent"/>
     </content>
   </elementSpec>
 </specGrp>

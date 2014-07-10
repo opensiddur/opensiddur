@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestSuite
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
+  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
+  >
+    <suiteName>Phony (conditional) layer transform</suiteName>
+    <description>
+      <p>Tests of conditional evaluation</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2014 Efraim Feinstein
+      Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+    </description>
+    <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+    <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+    <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
+    <imports>
+      import module namespace phony="http://jewishliturgy.org/transform/phony-layer"
+        at "xmldb:exist:///db/apps/opensiddur-server/transforms/phony-layer.xqm";
+      import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+        at "xmldb:exist:///db/apps/opensiddur-server/modules/refindex.xqm";
+    </imports>
+    <asUser>testuser</asUser>
+    <password>testuser</password>
+    <TestSet>
+        <testName>No conditionals</testName>
+        <setup>
+            <copy source="/db/apps/opensiddur-tests/tests/transforms"
+                name="phony1.xml"
+                destination="/db/data/original"/>
+            <code><![CDATA[
+            ridx:reindex(doc("/db/data/original/phony1.xml"))
+            ]]></code>
+        </setup>
+        <tearDown>
+            <remove-document collection="/db/data/original" name="phony1.xml"/>
+            <code><![CDATA[
+            ridx:remove("/db/data/original", "phony1.xml")
+            ]]></code>
+        </tearDown>
+        <test>
+            <task>no conditionals</task>
+            <code><![CDATA[
+            phony:phony-layer-document(
+                doc("/db/data/original/phony1.xml"),
+                map {}
+            )
+            ]]></code>
+            <expected desc="identity transform" href="/db/apps/opensiddur-tests/tests/transforms/phony1.xml"></expected>
+        </test>
+    </TestSet>
+    <TestSet>
+        <testName>Conditionals, no concurrent</testName>
+        <setup>
+            <copy source="/db/apps/opensiddur-tests/tests/transforms"
+                name="phony2.xml"
+                destination="/db/data/original"/>
+            <code><![CDATA[
+            ridx:reindex(doc("/db/data/original/phony2.xml"))
+            ]]></code>
+        </setup>
+        <tearDown>
+            <remove-document collection="/db/data/original" name="phony2.xml"/>
+            <code><![CDATA[
+            ridx:remove("/db/data/original", "phony2.xml")
+            ]]></code>
+        </tearDown>
+        <test>
+            <task>conditionals with streamText only</task>
+            <code><![CDATA[
+            phony:phony-layer-document(
+                doc("/db/data/original/phony2.xml"),
+                map {}
+            )
+            ]]></code>
+            <xpath desc="j:streamText has a @jf:conditional attribute">.//j:streamText/@jf:conditional="#cond1"</xpath>
+            <xpath desc="new concurrent section added">exists(.//j:concurrent[j:layer])</xpath>
+            <xpath desc="3 layers of type phony added">count(.//j:concurrent/j:layer[@type="phony"])=3</xpath>
+            <xpath desc="each of the layers has a @xml:id attribute">every $l in .//j:concurrent/j:layer[@type="phony"] satisfies $l/@xml:id/string()</xpath>
+            <xpath desc="the first layer has an xml:id that is different from the second">not(.//j:concurrent/j:layer[@type='phony'][1]/@xml:id/string()=.//j:concurrent/j:layer[@type="phony"][2]/@xml:id/string())</xpath>
+            <expected desc="one layer represents the first conditional" xpath=".//j:concurrent/j:layer[@type='phony'][1]/jf:conditional">
+                <jf:conditional jf:conditional="#cond1">
+                    <tei:ptr target="#seg1"/>
+                </jf:conditional>
+            </expected>
+            <expected desc="one layer represents the second conditional" xpath=".//j:concurrent/j:layer[@type='phony'][2]/jf:conditional">
+                <jf:conditional jf:conditional="#cond1">
+                    <tei:ptr target="#range(seg2,seg3)"/>
+                </jf:conditional>
+            </expected>
+            <expected desc="one layer represents the third conditional, references the instruction" xpath=".//j:concurrent/j:layer[@type='phony'][3]/jf:conditional">
+                <jf:conditional jf:conditional="#cond1" jf:conditional-instruction="#instruction">
+                    <tei:ptr target="#seg4"/>
+                </jf:conditional>
+            </expected>
+            <xpath desc="first j:option has conditional attributes with no instruction">.//j:option[@xml:id="opt1"]/(@jf:conditional="#cond1" and empty(@jf:conditional-instruction))</xpath>
+            <xpath desc="second j:option has conditional attributes and instruction">.//j:option[@xml:id="opt2"]/(@jf:conditional="#cond2" and @jf:conditional-instruction="#instruction")</xpath>
+        </test>
+    </TestSet>
+    <TestSet>
+        <testName>Conditionals with layers</testName>
+        <setup>
+            <copy source="/db/apps/opensiddur-tests/tests/transforms"
+                name="phony3.xml"
+                destination="/db/data/original"/>
+            <code><![CDATA[
+            ridx:reindex(doc("/db/data/original/phony3.xml"))
+            ]]></code>
+        </setup>
+        <tearDown>
+            <remove-document collection="/db/data/original" name="phony3.xml"/>
+            <code><![CDATA[
+            ridx:remove("/db/data/original", "phony3.xml")
+            ]]></code>
+        </tearDown>
+        <test>
+            <task>conditionals with layers</task>
+            <code><![CDATA[
+            phony:phony-layer-document(
+                doc("/db/data/original/phony3.xml"),
+                map {}
+            )
+            ]]></code>
+            <xpath desc="1 layer of type phony added">count(.//j:concurrent/j:layer[@type="phony"])=1</xpath>
+            <xpath desc="concurrent condition appears as an attribute on all divs in the layer">count(.//j:layer/tei:div[contains(@jf:conditional, "#cond2")])=2</xpath>
+            <xpath desc="concurrent condition does not appear as an attribute on any elements that are not direct descendents of j:layer">count(*[contains(@jf:conditional, "#cond2")][not(parent::j:layer)])=0</xpath>
+            <xpath desc="range reference results in @jf:conditional">every $ab in .//tei:ab[@xml:id=("ab1","ab2")] satisfies $ab/@jf:conditional="#cond1"</xpath>
+            <xpath desc="direct reference results in @jf:conditional, along with concurrent condition">contains(.//tei:div[@xml:id="div2"]/@jf:conditional, "#cond1")</xpath>
+            <xpath desc="@jf:conditional is not added when there is no condition">empty(.//tei:ab[@xml:id="ab3"]/@jf:conditional)</xpath>
+            <xpath desc="@jf:conditional is not added for j:layer">empty(.//j:layer/@jf:conditional)</xpath>
+        </test>
+    </TestSet>
+</TestSuite>

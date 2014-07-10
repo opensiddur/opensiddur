@@ -248,16 +248,19 @@ declare function common:apply-at(
  : $item is a reference, not a value
  :)
 declare function common:following(
-  $item as item(),
+  $item as item()?,
   $sequence as item()*
   ) as item()* {
-  subsequence(
-    $sequence,
-    (: there may be a better way to do this! :) 
-    (for $s at $i in $sequence 
-    where $s is $item 
-    return $i + 1)[1]
-  )
+  if (exists($item))
+  then
+    subsequence(
+      $sequence,
+      (: there may be a better way to do this! :) 
+      (for $s at $i in $sequence 
+      where $s is $item 
+      return $i + 1)[1]
+    )
+  else ()
 };
 
 (:~ simulate preceding-sibling::* in sequences
@@ -265,17 +268,20 @@ declare function common:following(
  : $item is a reference, not a value
  :)
 declare function common:preceding(
-  $item as item(),
+  $item as item()?,
   $sequence as item()*
   ) as item()* {
-  subsequence(
-    $sequence,
-    1,
-    (: there may be a better way to do this! :) 
-    (for $s at $i in $sequence 
-    where $s is $item 
-    return $i - 1)[1]
-  )
+  if (exists($item))
+  then
+    subsequence(
+      $sequence,
+      1,
+      (: there may be a better way to do this! :) 
+      (for $s at $i in $sequence 
+      where $s is $item 
+      return $i - 1)[1]
+    )
+  else ()
 };
 
 (:~ given a language code, determine its direction

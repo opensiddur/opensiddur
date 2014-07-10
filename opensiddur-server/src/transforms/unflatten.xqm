@@ -16,6 +16,17 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
+(:~ exclude attributes added by flattening :)
+declare %private function unflatten:attributes-except-flatten(
+    $e as element()
+    ) as node()* {
+    $e/@* except (
+        $e/@jf:start, $e/@jf:end, $e/@jf:continue, $e/@jf:suspend,
+        $e/@jf:position, $e/@jf:relative, $e/@jf:nchildren, 
+        $e/@jf:nlevels, $e/@jf:nprecedents
+    )
+};
+
 (:~ a list of elements that are closed in $sequence, 
  : but not opened :)
 declare function unflatten:unopened-tags(
@@ -131,9 +142,7 @@ declare function unflatten:lone-element(
   $params as map
   ) as element() {
   element { QName(namespace-uri($s), name($s)) }{
-    $s/(
-      (@* except @*[namespace-uri(.)="http://jewishliturgy.org/ns/jlptei/flat/1.0"])|
-      (@jf:id, @jf:layer-id, @jf:stream)),
+    unflatten:attributes-except-flatten($s),
     $s/node()
   }
 };
@@ -176,9 +185,9 @@ declare function unflatten:start(
       then text { "Intentionally left blank" }
       else
         element { QName(namespace-uri($s), name($s)) }{
-          $s/(
-            (@* except @*[namespace-uri(.)="http://jewishliturgy.org/ns/jlptei/flat/1.0"])
-            |(@jf:id[exists($s/@jf:start)], @jf:layer-id)
+          (
+            (unflatten:attributes-except-flatten($s) except $s/@jf:id)
+            |($s/@jf:id[exists($s/@jf:start)])
           ),
           if (
             exists($s/@jf:continue) or 

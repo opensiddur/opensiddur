@@ -24,6 +24,8 @@ import module namespace ridx="http://jewishliturgy.org/modules/refindex"
   at "../modules/refindex.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
+import module namespace cond="http://jewishliturgy.org/transform/conditionals"
+  at "conditionals.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "flatten.xqm";
 
@@ -52,17 +54,49 @@ declare function combine:combine(
     case element()
     return
         let $updated-params := combine:update-settings-from-standoff-markup($node, $params, false())
+        let $updated-params := combine:evaluate-conditions($node, $updated-params)
+        let $conditional-layer-id := combine:get-conditional-layer-id($node, $updated-params)
+        let $instruction := $updated-params("combine:conditional-instruction")
+        let $updated-params := map:remove($updated-params, "combine:conditional-instruction")
+        (: handling conditionals:
+            if $e/@jf:layer-id and combine:conditional-layers = OFF, NO, combine:combine($node/node(), $updated-params)
+            else if combine:conditional-result = OFF, NO -> () MAYBE -> evaluate instruction and add it
+        :)
         return
-            typeswitch($node)
-            case element(tei:TEI)
-            return combine:tei-TEI($node, $params)
-            case element(tei:ptr)
-            return combine:tei-ptr($node, $updated-params)
-            (: TODO: add other model.resourceLike elements above :)
-            case element(jf:unflattened)
-            return combine:jf-unflattened($node, $updated-params)
-            default (: other element :) 
-            return combine:element($node, $updated-params) 
+            if (
+                $node/@jf:layer-id 
+                and $updated-params("combine:conditional-layers")($conditional-layer-id)=("NO", "OFF")
+            )
+            then
+                if ($node/descendant::*[@jf:stream])
+                then combine:combine($node/node(), $updated-params)
+                else ()
+            else if (not($updated-params("combine:conditional-result") = ("OFF", "NO")))
+            then
+                let $ret := 
+                    typeswitch($node)
+                    case element(tei:TEI)
+                    return combine:tei-TEI($node, $params)
+                    case element(tei:ptr)
+                    return combine:tei-ptr($node, $updated-params)
+                    (: TODO: add other model.resourceLike elements above :)
+                    case element(jf:unflattened)
+                    return combine:jf-unflattened($node, $updated-params)
+                    default (: other element :) 
+                    return combine:element($node, $updated-params)
+                return
+                    if (exists($instruction))
+                    then
+                        (: add conditional instruction :)
+                        element {QName(namespace-uri($ret), name($ret))}{
+                            $ret/@*,
+                            combine:follow-pointer($node, $instruction, $updated-params, 
+                                element jf:annotation { attribute type { "instruction" } }
+                            ),
+                            $ret/node()
+                        }
+                    else $ret 
+            else ()
     default return $node
 };
 
@@ -169,7 +203,7 @@ declare function combine:new-document-params(
 };
 
 (:~ change parameters as required for entry into a new document
- : manages "combine:unmirrored-doc", "combine:setting-links" 
+ : manages "combine:unmirrored-doc", "combine:setting-links", resets "combine:conditional-layers" 
  : 
  : @param $new-doc-nodes The newly active document
  : @param $params Already active parameters
@@ -194,7 +228,8 @@ declare function combine:new-document-params(
                 if ($is-redirect)
                 then ($params("combine:unmirrored-doc"), $unmirrored-doc)
                 else $unmirrored-doc,
-            "combine:setting-links" := $all-setting-links
+            "combine:setting-links" := $all-setting-links,
+            "combine:conditional-layers" := ()
         }
     ))
     return
@@ -253,7 +288,7 @@ declare function combine:update-settings-from-standoff-markup(
                         let $link-target := tokenize($standoff-link/(@target|@targets), '\s+')[2]
                         let $link-dest := uri:fast-follow($link-target, $unmirrored, uri:follow-steps($unmirrored))
                         where $link-dest instance of element(tei:fs)
-                        return combine:tei-fs-to-map($link-dest)
+                        return combine:tei-fs-to-map($link-dest, $params)
                     ))
                 } 
             ))
@@ -261,7 +296,8 @@ declare function combine:update-settings-from-standoff-markup(
 };
 
 declare %private function combine:tei-featureVal-to-map(
-    $fnodes as node()*
+    $fnodes as node()*,
+    $params as map
     ) as element(tei:string)* {
     for $node in $fnodes
     return 
@@ -272,8 +308,10 @@ declare %private function combine:tei-featureVal-to-map(
         case element(j:on) return element tei:string { "ON" }
         case element(j:off) return element tei:string { "OFF" }
         case element(tei:binary) return element tei:string { string($node/@value=(1, "true")) }
+        case element(tei:numeric) return element tei:string { $node/string() }
         case element(tei:string) return $node
-        case element(tei:vColl) return combine:tei-featureVal-to-map($node/element())
+        case element(tei:vColl) return combine:tei-featureVal-to-map($node/element(), $params)
+        case element(tei:default) return element tei:string { cond:evaluate($node, $params) }
         case element() return element tei:string { $node/@value/string() }
         case text() return element tei:string { string($node) }
         default return ()
@@ -283,7 +321,8 @@ declare %private function combine:tei-featureVal-to-map(
  : The key is fsname->fname. The value is always one or more tei:string elements.
  :)
 declare function combine:tei-fs-to-map(
-    $e as element(tei:fs)
+    $e as element(tei:fs),
+    $params as map
     ) as map {
     let $fsname := 
         if ($e/@type) 
@@ -303,9 +342,9 @@ declare function combine:tei-fs-to-map(
                     combine:tei-featureVal-to-map(
                         if ($f/@fVal)
                         then uri:fast-follow($f/@fVal, $f, -1)
-                        else $f/node()
+                        else $f/node(),
+                        $params
                     )[.]
-                    (: TODO: default values :)
                 ) 
         )
 };
@@ -402,19 +441,17 @@ declare function combine:translation-redirect(
         )
 };
 
-(:~ handle a pointer :)
-declare function combine:tei-ptr(
-  $e as element(tei:ptr),
-  $params as map
-  ) as element()+ {
-  if ($e/@type = "url")
-  then combine:element($e, $params)
-  else
+declare function combine:follow-pointer(
+    $e as element(),
+    $destination-ptr as xs:string,
+    $params as map,
+    $wrapping-element as element()
+    ) as element() {
     (: pointer to follow. 
-     : This will naturally result in more than one jf:ptr per
-     : tei:ptr if it has more than one @target, but that's OK.
+     : This will naturally result in more than one wrapper per
+     : context element if it has more than one @target, but that's OK.
      :)
-    let $targets := tokenize($e/@target, '\s+')
+    let $targets := tokenize($destination-ptr, '\s+')
     for $target in $targets
     let $destination := 
       uri:fast-follow(
@@ -431,8 +468,8 @@ declare function combine:tei-ptr(
         )
       )
     return
-      element jf:ptr {
-        $e/(@* except @target),  (: @target can be inferred :)
+      element {QName(namespace-uri($wrapping-element), name($wrapping-element))} {
+        $wrapping-element/@*,
         if (
           combine:document-uri($e) = combine:document-uri($destination[1])
         )
@@ -462,5 +499,109 @@ declare function combine:tei-ptr(
                     )
             )
       }
+
+};
+
+(:~ handle a pointer :)
+declare function combine:tei-ptr(
+  $e as element(tei:ptr),
+  $params as map
+  ) as element()+ {
+  if ($e/@type = "url")
+  then combine:element($e, $params)
+  else 
+    combine:follow-pointer(
+        $e, $e/@target/string(), $params, 
+        element jf:ptr {
+            $e/(@* except @target)
+        }
+    )
+};
+
+declare function combine:get-conditional-layer-id(
+    $e as element(),
+    $params as map
+    ) as xs:string? {
+    $params("combine:unmirrored-doc")[1] || "#" || $e/@jf:layer-id
+};
+
+(:~ evaluate any conditions involving the current element, which can occur if:
+ :  * the element itself is jf:conditional
+ :  * the element has an @jf:conditional attribute
+ :  * the element derives from a layer that is subject to a condition 
+ :  * the element is j:option/@xml:id and the opensiddur:option/[document]#[xmlid] feature exists 
+ :
+ : @return an updated parameter map with the following parameters updated:
+ :  combine:conditional-result: YES, NO, MAYBE, ON, OFF if the element is subject to a conditional; empty if not
+ :  combine:conditional-layers: a map of document#layer-id->conditional result
+ :  combine:conditional-instruction: a pointer to the instruction
+ :)
+declare function combine:evaluate-conditions(
+    $e as element(),
+    $params as map
+    ) as map {
+    let $this-element-condition-result :=
+        let $conditions := (
+            for $condition in tokenize($e/@jf:conditional, '\s+')
+            return uri:fast-follow($condition, $e, uri:follow-steps($e)),
+            if ($e instance of element(j:option) and $e/@jf:id and not($e/@jf:conditional))
+            then 
+                let $option-feature-name := $params("combine:unmirrored-document")[1] || "#" || $e/@jf:id/string()
+                let $feature-value := cond:get-feature-value($params, "opensiddur:option", $option-feature-name)
+                where exists($feature-value)
+                return
+                    <tei:fs type="opensiddur:option">
+                        <tei:f name="{$option-feature-name}"><j:yes/></tei:f>
+                    </tei:fs>
+            else ()
+            )
+        where exists($conditions)
+        return
+            cond:evaluate(
+                if (count($conditions) > 1)
+                then element j:all { $conditions }
+                else $conditions,
+                $params
+            )
+    let $conditional-layer-id := combine:get-conditional-layer-id($e, $params)
+    let $conditional-layer-result :=
+        if (not($e instance of element(jf:conditional) 
+                or $e instance of element(j:option)) 
+            and $e/@jf:layer-id)
+        then 
+            let $conditional-layer := $params("combine:conditional-layers")
+            where exists($conditional-layer)
+            return $conditional-layer($conditional-layer-id)
+        else ()
+    return 
+        map:new((
+            $params,
+            map {
+                (: if a layer is not ON/YES, then the layer result takes precedence :)
+                "combine:conditional-result" := (
+                    $conditional-layer-result,
+                    $this-element-condition-result
+                )[1],
+                "combine:conditional-instruction" := 
+                    $e/@jf:conditional-instruction/string()
+            },
+            (: record if the layer is being turned off :)
+            if (not($e instance of element(jf:conditional) 
+                    or $e instance of element(j:option)) 
+                and $e/@jf:layer-id)
+            then
+                map {
+                    "combine:conditional-layers" := map:new((
+                        $params("combine:conditional-layers"), 
+                        map {
+                            $conditional-layer-id := (
+                                $conditional-layer-result, 
+                                $this-element-condition-result[not(.=("YES","ON"))]
+                            )[1]
+                        }
+                    ))
+                }
+            else ()
+        ))
 };
 
