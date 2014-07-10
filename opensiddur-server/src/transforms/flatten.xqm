@@ -215,7 +215,7 @@ declare function flatten:resolve-stream(
             attribute jf:id { $stream-element/@xml:id }
           else (),
           $node/@jf:stream,
-          $stream-element/node()
+          flatten:resolve-copy($stream-element/node(), $params)
         }
     case element()
     return 
@@ -229,6 +229,26 @@ declare function flatten:resolve-stream(
         flatten:resolve-stream($node/node(), $params) 
       }
     default return $node
+};
+
+(:~ copy with xml:id->jf:id for elements inside streamText segments during the resolve stage :)
+declare function flatten:resolve-copy(
+    $nodes as node()*,
+    $params as map
+    ) as node()* {
+    for $node in $nodes
+    return
+        typeswitch ($node)
+        case element() return
+            element { QName(namespace-uri($node), name($node)) } {
+                $node/(@* except @xml:id),
+                if ($node/@xml:id)
+                then
+                    attribute jf:id { $node/@xml:id/string() }
+                else (),
+                flatten:resolve-copy($node/node(), $params)
+            }
+        default return $node
 };
 
 (:~ prepare a "display" version of a flattened or merged document
