@@ -15,12 +15,19 @@
         <tei:f name="shabbat"><j:yes/></tei:f>
       </tei:fs>
     </j:condition>
+    <j:condition xml:id="cond2">
+      <tei:fs type="opensiddur:time">
+        <tei:f name="shabbat"><j:no/></tei:f>
+      </tei:fs>
+    </j:condition>
   </j:conditions>
   <j:links>
     <tei:link type="condition" target="#stream #cond1"/>
     <tei:link type="condition" target="#seg1 #cond1"/>
     <tei:link type="condition" target="#range(seg2,seg3) #cond1"/>
     <tei:link type="condition" target="#seg4 #cond1 #instruction"/>
+    <tei:link type="condition" target="#opt1 #cond1"/>
+    <tei:link type="condition" target="#opt2 #cond2 #instruction"/>
   </j:links>
   <tei:text>
     <j:streamText xml:id="stream">
@@ -28,6 +35,12 @@
       <tei:seg xml:id="seg2">B.</tei:seg>
       <tei:seg xml:id="seg3">C.</tei:seg>
       <tei:seg xml:id="seg4">D.</tei:seg>
+      <tei:seg xml:id="seg5">
+        <tei:choice>
+            <j:option xml:id="opt1">E</j:option>
+            <j:option xml:id="opt2">F</j:option>
+        </tei:choice>
+      </tei:seg>
     </j:streamText>
   </tei:text>
 </tei:TEI>

@@ -49,7 +49,7 @@ declare function phony:phony-layer(
         case element(tei:text) return phony:tei-text($node, $params)
         case element(j:concurrent) return phony:j-concurrent($node, $params)
         case element(j:streamText) return phony:j-streamText($node, $params)
-        case element() return phony:element($node, $params)
+        case element() return phony:element($node, $params, phony:phony-layer#2)
         default return phony:phony-layer($node/node(), $params) 
 };
 
@@ -88,19 +88,39 @@ declare function phony:j-streamText(
                     }
             )
             else (),
-            $e/node()
+            phony:inside-streamText($e/node(), $params)
         }
 };
 
-(:~ activates on elements inside layers :)
+declare function phony:inside-streamText(
+    $nodes as node()*,
+    $params as map
+    ) as node()* {
+    for $node in $nodes
+    return
+        typeswitch ($node)
+        case element(j:option) return phony:element($node, $params, phony:inside-streamText#2)
+        case element() return 
+            element { QName(namespace-uri($node), name($node)) }{
+                $node/@*,
+                phony:inside-streamText($node/node(), $params)
+            }
+        case text() return $node
+        case comment() return $node
+        case document-node() return document { phony:inside-streamText($node/node(), $params) }
+        default return phony:inside-streamText($node/node(), $params)
+};
+
+(:~ activates on elements inside layers or j:option inside streamText, which is treated the same way :)
 declare function phony:element(
     $e as element(),
-    $params as map
+    $params as map,
+    $caller as function(node()*, map) as node()*
     ) as element() {
     let $layer-ancestor := $e/ancestor::j:layer
     let $concurrent-ancestor := $layer-ancestor/parent::j:concurrent
     let $conditions := 
-        if (exists($layer-ancestor))
+        if (exists($layer-ancestor) or $e instance of element(j:option))
         then 
             (: if a condition applies to the whole layer/concurrent section, it applies to all its constituents :)
             ridx:query(phony:doc-condition-links($e), 
@@ -112,16 +132,25 @@ declare function phony:element(
         element {QName(namespace-uri($e), name($e))}{
             $e/@*,
             if (exists($conditions))
-            then
+            then (
                 attribute jf:conditional {
                     string-join(
                         for $link in $conditions
                         return tokenize($link/@target, '\s+')[2],
                         ' '
                     )
-                }
+                },
+                let $instructions := 
+                    for $link in $conditions 
+                    return tokenize($link/@target, '\s+')[3]
+                where exists($instructions[.])
+                return
+                    attribute jf:conditional-instruction {
+                        string-join($instructions, ' ')
+                    }
+            )
             else (),
-            phony:phony-layer($e/node(), $params)
+            $caller($e/node(), $params)
         }
 };
 
@@ -171,7 +200,9 @@ declare function phony:phony-layer-from-conditionals(
     return
         let $targets := tokenize($link/@target, '\s+')
         let $dest := uri:fast-follow($targets[1], $link, uri:follow-steps($link))
-        where exists($dest[1]/ancestor::j:streamText)
+        where exists($dest[1]/ancestor::j:streamText) and (
+            every $d in $dest satisfies not($d instance of element(j:option))
+        )
         return
             element j:layer {
                 attribute type { "phony" },

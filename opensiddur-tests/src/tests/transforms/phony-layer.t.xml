@@ -94,6 +94,8 @@
                     <tei:ptr target="#seg4"/>
                 </jf:conditional>
             </expected>
+            <xpath desc="first j:option has conditional attributes with no instruction">.//j:option[@xml:id="opt1"]/(@jf:conditional="#cond1" and empty(@jf:conditional-instruction))</xpath>
+            <xpath desc="second j:option has conditional attributes and instruction">.//j:option[@xml:id="opt2"]/(@jf:conditional="#cond2" and @jf:conditional-instruction="#instruction")</xpath>
         </test>
     </TestSet>
     <TestSet>
