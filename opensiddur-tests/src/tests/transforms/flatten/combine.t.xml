@@ -39,8 +39,8 @@
         $file),
       let $doc := doc("/db/data/" || $collection || "/" || $file)
       return ( 
-        format:unflatten-dependencies($doc, map {}),
-        ridx:reindex($doc)
+        ridx:reindex($doc),
+        format:unflatten-dependencies($doc, map {})
       )
     };
 
@@ -141,7 +141,8 @@
             <tei:f name="FSYMBOL">
               <tei:symbol value="SYMBOL"/>
             </tei:f>
-          </tei:fs>
+          </tei:fs>,
+          map {}
         )
         return $m("FS->FSYMBOL")
       ]]></code>
@@ -155,7 +156,8 @@
             <tei:f name="FBINARY">
               <tei:binary value="1"/>
             </tei:f>
-          </tei:fs>
+          </tei:fs>,
+          map {}
         )
         return $m("FS->FBINARY")
       ]]></code>
@@ -169,7 +171,8 @@
             <tei:f name="FYES">
               <j:yes/>
             </tei:f>
-          </tei:fs>
+          </tei:fs>,
+          map {}
         )
         return $m("FS->FYES")
       ]]></code>
@@ -181,7 +184,8 @@
         let $m := combine:tei-fs-to-map(
           <tei:fs type="FS">
             <tei:f name="FSTRING"><tei:string>string</tei:string></tei:f>
-          </tei:fs>
+          </tei:fs>,
+          map {}
         )
         return $m("FS->FSTRING")
       ]]></code>
@@ -193,7 +197,8 @@
         let $m := combine:tei-fs-to-map(
           <tei:fs type="FS">
             <tei:f name="FTEXT">text</tei:f>
-          </tei:fs>
+          </tei:fs>,
+          map {}
         )
         return $m("FS->FTEXT")
       ]]></code>
@@ -211,7 +216,8 @@
                 <tei:symbol value="S3"/>
               </tei:vColl>
             </tei:f>
-          </tei:fs>
+          </tei:fs>,
+          map {}
         )
         return element x { $m("FS->FVCOLL") }
       ]]></code>
@@ -396,5 +402,94 @@
       <xpath desc="the redirect begins at the first parallelGrp that includes the beginning of the first requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[1]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[1]/@jf:id="A2"</xpath>
       <xpath desc="the redirect ends at the last parallelGrp that includes the end of the last requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[last()]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[last()]/@jf:id="A7"</xpath>
     </test>
+  </TestSet>
+  <TestSet>
+    <testName>Conditionals during combine that affect the streamText</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("combine-cond1.xml")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("combine-cond1.xml")
+      ]]></code>
+    </tearDown>
+    <test>
+        <task>conditionals affecting inside a streamText</task>
+        <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/combine-cond1.xml"),
+          map {})
+        ]]></code>
+        <xpath desc="seg1 exists and is directly enclosed in a jf:conditional">exists(.//*[@jf:id="seg1"]/parent::jf:conditional)</xpath>
+        <xpath desc="seg2 does not exist at all">empty(.//*[@jf:id="seg2"])</xpath>
+        <xpath desc="seg3 has an instruction added">exists(.//*[@jf:id="seg3"]/parent::jf:conditional[jf:annotation])</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Conditionals during combine that affect layers</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("combine-cond2.xml")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("combine-cond2.xml")
+      ]]></code>
+    </tearDown>
+    <test>
+        <task>conditionals affecting a layer</task>
+        <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/combine-cond2.xml"),
+          map {})
+        ]]></code>
+        <xpath desc="on condition has a @jf:conditional and exists">exists(.//*[@jf:id="div1"][@jf:conditional])</xpath>
+        <xpath desc="off condition: layer element that is off is not present ">empty(.//*[@jf:id="div2"])</xpath>
+        <xpath desc="off condition: layer-based child of element that is off is not present">empty(.//*[@jf:id="ab2"])</xpath>
+        <xpath desc="off condition: layer element without xml:id is not present">empty(.//tei:head[.="Heading2"])</xpath>
+        <xpath desc="off condition: other layers are unaffected">exists(.//*[@jf:id="ab_wrapper"])</xpath>
+        <xpath desc="off condition: segments are present">exists(.//*[@jf:id="seg3"]) and exists(.//*[@jf:id="seg4"])</xpath>
+    </test>
+<!--
+    <test>
+        <task>no conditional affecting a layer followed by inclusion of a document that has a layer of the same name</task>
+    </test>
+-->
+  </TestSet>
+  <TestSet>
+    <testName>Conditionals with j:option</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("combine-cond3.xml")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("combine-cond3.xml")
+      ]]></code>
+    </tearDown>
+    <test>
+        <task>conditionals with j:option</task>
+        <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/tests/combine-cond3.xml"),
+          map {})
+        ]]></code>
+        <xpath desc="no jf:conditional elements have been added">empty(.//jf:conditional)</xpath>
+        <xpath desc="opt1 and seg1 exist">exists(.//j:option[@jf:id="opt1"][@jf:conditional]) and exists(.//tei:seg[@jf:id="seg1"])</xpath>
+        <xpath desc="opt2 and seg2 removed">empty(.//j:option[@jf:id="opt2"]) and empty(.//tei:seg[@jf:id="seg2"])</xpath>
+        <xpath desc="opt3 and seg3 exist, an instruction has been added">exists(.//j:option[@jf:id="opt3"][@jf:conditional][@jf:conditional-instruction][descendant::jf:annotation]) and exists(.//tei:seg[@jf:id="seg3"])</xpath>
+        <xpath desc="opt4 exists">exists(.//j:option[@jf:id="opt4"][@jf:conditional][tei:w])</xpath>
+        <xpath desc="opt5 removed">empty(.//j:option[@jf:id="opt5"]) and empty(.//tei:w[.="E"])</xpath>
+        <xpath desc="opt6 exists, an instruction has been added">exists(.//j:option[@jf:id="opt6"][@jf:conditional][@jf:conditional-instruction][jf:annotation][tei:w])</xpath>
+    </test>
+<!--
+    <test>
+        <task>no conditional affecting a layer followed by inclusion of a document that has a layer of the same name</task>
+    </test>
+-->
   </TestSet>
 </TestSuite>
