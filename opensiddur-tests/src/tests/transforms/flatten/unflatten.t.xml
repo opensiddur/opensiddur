@@ -19,7 +19,11 @@
   <imports>
     import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
       at "xmldb:exist:///db/apps/opensiddur-server/transforms/unflatten.xqm";
+    import module namespace format="http://jewishliturgy.org/modules/format"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/format.xqm";
   </imports>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
   <TestSet>
     <testName>unflatten:unopened-tags()</testName>
     <test output="text">
@@ -167,6 +171,29 @@
       ]]></code>
       <expected desc="unflattened hierarchies with automated suspension/continuation" 
         href="unflatten4-unflat.xml"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Regression test: repetition of an an element</testName>
+    <setup>
+        <copy source="/db/apps/opensiddur-tests/tests/transforms/flatten"
+              name="unflatten-order-bug.xml"
+              destination="/db/data/tests"/>
+    </setup>
+    <tearDown>
+        <code><![CDATA[
+            format:clear-caches(doc("/db/data/tests/unflatten-order-bug.xml"))
+        ]]></code>
+        <remove-document collection="/db/data/tests" name="unflatten-order-bug.xml" />
+    </tearDown>
+    <test>
+      <task>unflatten...</task>
+      <code><![CDATA[
+          let $d := doc("/db/data/tests/unflatten-order-bug.xml")
+          format:unflatten($d, map {}, $d)
+      ]]></code>
+      <xpath desc="tei:head is not a descendant of tei:ab">empty(.//tei:head[ancestor::tei:ab])</xpath>
+      <xpath desc="tei:ab[id=ab2] is not a descendant of itself">empty(.//tei:ab[@jf:id="ab2"][ancestor::tei:ab[@jf:id="ab2"]])</xpath>
     </test>
   </TestSet>
 </TestSuite>

@@ -3,7 +3,7 @@ xquery version "3.0";
  : Modes to unflatten a flattened hierarchy.
  :
  : Open Siddur Project
- : Copyright 2013 Efraim Feinstein 
+ : Copyright 2013-2014 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -34,9 +34,9 @@ declare function unflatten:unopened-tags(
   ) as element()* {
   for $node in $sequence[@jf:suspend|@jf:end]
   let $id := $node/(@jf:suspend, @jf:end)
+  let $prec := common:preceding($node, $sequence)
   where empty(
-    $node/preceding-sibling::*[(@jf:start, @jf:continue)=$id][1]
-    intersect $sequence
+    $prec[(@jf:start,@jf:continue)=$id]
     )
   return $node
 };
@@ -49,12 +49,13 @@ declare function unflatten:unclosed-tags(
   ) as element()* {
   for $node in $sequence[@jf:start|@jf:continue]
   let $id := $node/(@jf:start, @jf:continue)
+  let $fol := common:following($node, $sequence) 
   where empty(
-    $node/following-sibling::*[(@jf:suspend, @jf:end)=$id][1]
-    intersect $sequence
+    $fol[(@jf:suspend,@jf:end)=$id]
   )
   return $node
 };
+
 
 declare function unflatten:continue-or-suspend(
   $tags as element()*,
@@ -111,13 +112,13 @@ declare function unflatten:sequence(
     then 
       let $start-return := unflatten:start($s, $sequence, $params)
       return (
-        if ($start-return[1] instance of element())
-        then $start-return[1]
-        else (),
+        $start-return("start"),
         unflatten:sequence(
           (
-            subsequence($start-return, 3),
-            common:following($start-return[2], $sequence)
+            if (exists($start-return("end")))
+            then $start-return("continue")
+            else (),
+            common:following($start-return("end"), $sequence)
           ),
           $params
         )
@@ -148,16 +149,16 @@ declare function unflatten:lone-element(
 };
 
 (:~ process a start element.
- : return value: 
- :  [1] The start element or a text node
- :  [2] The end element
- :  [3+] Any continued unclosed tags
+ : return value: A map containing:
+ :  "start" := The start element, processed
+ :  "end" := The end element
+ :  "continue" := Any continued unclosed tags
  :)
 declare function unflatten:start(
   $s as element(),
   $sequence as node()*,
   $params as map
-  ) as node()* {
+  ) as map {
   let $following := common:following($s, $sequence)
   let $end := 
     $following[(@jf:end|@jf:suspend)=$s/(@jf:start, @jf:continue)][1]
@@ -180,27 +181,30 @@ declare function unflatten:start(
         ),
         $params
       )
-    return (
-      if (empty($processed-inside-sequence))
-      then text { "Intentionally left blank" }
-      else
-        element { QName(namespace-uri($s), name($s)) }{
-          (
-            (unflatten:attributes-except-flatten($s) except $s/@jf:id)
-            |($s/@jf:id[exists($s/@jf:start)])
-          ),
-          if (
-            exists($s/@jf:continue) or 
-            exists($end/@jf:suspend) or 
-            empty($end) (: automatic suspend :) )
-          then
-            attribute jf:part {
-              ($s/@jf:continue, $end/@jf:suspend, $s/@jf:start)[1]
-            }
-          else (),
-          $processed-inside-sequence
-        },
+    return map {
+      "start" := 
+        if (empty($processed-inside-sequence))
+        then () 
+        else
+          element { QName(namespace-uri($s), name($s)) }{
+            (
+              (unflatten:attributes-except-flatten($s) except $s/@jf:id)
+              |($s/@jf:id[exists($s/@jf:start)])
+            ),
+            if (
+              exists($s/@jf:continue) or 
+              exists($end/@jf:suspend) or 
+              empty($end) (: automatic suspend :) )
+            then
+              attribute jf:part {
+                ($s/@jf:continue, $end/@jf:suspend, $s/@jf:start)[1]
+              }
+            else (),
+            $processed-inside-sequence
+          },
+      "end" :=
         ($end, $inside-sequence[last()])[1],
+      "continue" :=
         unflatten:continue-or-suspend($unclosed-tags, "continue")
-      )
+    }
 };
