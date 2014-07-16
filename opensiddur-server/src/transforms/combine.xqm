@@ -229,7 +229,7 @@ declare function combine:new-document-params(
                 then ($params("combine:unmirrored-doc"), $unmirrored-doc)
                 else $unmirrored-doc,
             "combine:setting-links" := $all-setting-links,
-            "combine:conditional-layers" := ()
+            "combine:conditional-layers" := map {}
         }
     ))
     return
