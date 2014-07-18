@@ -114,6 +114,11 @@
     display:inline;
 }
 
+/* conditionals */
+.jf-conditional {
+    display:inline;
+}
+
 /* parallel texts: this can use some love */
 .jf-parallelGrp {
     width:100%;
