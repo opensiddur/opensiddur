@@ -1,3 +1,4 @@
+xquery version "3.0";
 (:~
  : XQuery functions to output a given XML file in a format.
  : 
@@ -311,6 +312,13 @@ declare function format:combine(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
+  let $no-dependencies-require-combine :=
+    (: need to determine if any dependencies are out of date before unflattening 
+     : if even 1 dependency is out of date, then we need to re-combine
+     :)
+    every $dep in format:dependencies($doc)//format:dependency[@transformable]
+    satisfies mirror:is-up-to-date($format:unflatten-cache, $dep)
+  let $override-apply := function($s as xs:string, $i as item()) as xs:boolean { $no-dependencies-require-combine } 
   let $unflats := format:unflatten-dependencies($doc, $params)
   let $cmb := combine:combine-document(?, $params)
   return
@@ -318,7 +326,8 @@ declare function format:combine(
       $format:combine-cache,
       mirror:doc($format:unflatten-cache, document-uri($doc)),
       $cmb,
-      $original-doc
+      $original-doc,
+      $override-apply
     )
 };
 
@@ -334,12 +343,18 @@ declare function format:compile(
   $original-doc as document-node()
   ) as document-node() {
   let $cmp := compile:compile-document(?, $params)
+  let $combined := format:combine($doc, $params, $original-doc)
+  let $up-to-date-function := mirror:is-up-to-date-cache(?, ?, $format:combine-cache)
   return
+    (: compile has to check if the compile cache is outdated against the updated combine cache,
+     : not the original document
+     :)
     mirror:apply-if-outdated(
       $format:compile-cache,
-      format:combine($doc, $params, $original-doc),
+      $combined,
       $cmp,
-      $original-doc
+      $original-doc,
+      $up-to-date-function
     )
 };
 
@@ -357,6 +372,10 @@ declare function format:html(
   $transclude as xs:boolean
   ) as document-node() {
   let $html := tohtml:tohtml-document(?, $params)
+  let $up-to-date-function := 
+    if ($transclude)
+    then mirror:is-up-to-date-cache(?, ?, $format:compile-cache)
+    else ()
   return
     mirror:apply-if-outdated(
       $format:html-cache,
@@ -364,7 +383,8 @@ declare function format:html(
       then format:compile($doc, $params, $original-doc)
       else format:unflatten($doc, $params, $original-doc),
       $html,
-      $original-doc
+      $original-doc,
+      $up-to-date-function
     )
 };
 
