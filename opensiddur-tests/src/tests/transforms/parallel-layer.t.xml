@@ -61,10 +61,14 @@
             <code><![CDATA[
                 pla:parallel-layer-document(doc("/db/data/tests/par.xml"), map {})
             ]]></code>
-            <xpath desc="produces one layer per linkGrp">count(.//j:parallelText/j:layer[@type="parallel"])=1</xpath>
-            <xpath desc="layer references the domains">exists(.//j:parallelText/j:layer/@domains/string()[.])</xpath>
-            <xpath desc="produces one jf:parallelGrp per link">count(.//j:layer/jf:parallelGrp)=3</xpath>
-            <xpath desc="produces two jf:parallel[@domain][tei:ptr] per group">every $p in .//j:layer/jf:parallelGrp satisfies count($p/jf:parallel[@domain][count(tei:ptr)=1])=2</xpath> 
+            <xpath desc="produces one jf:parallel-document">exists(./jf:parallel-document[tei:idno='Test'])</xpath>
+            <xpath desc="all xml:ids have been converted into @jf:id">count(.//@xml:id)=0 and count(.//@jf:id)>0</xpath>
+            <xpath desc="two tei:TEI elements exist">count(./jf:parallel-document/tei:TEI)=2</xpath>
+            <xpath desc="each tei:TEI element has a @jf:document">contains(./jf:parallel-document/tei:TEI[1]/@jf:document, "/parA") and contains(./jf:parallel-document/tei:TEI[2]/@jf:document, "/parB")</xpath>
+            <xpath desc="a j:concurrent and j:layer have been added to parA">exists(./jf:parallel-document/tei:TEI[1]//j:concurrent[count(j:layer)=1]/j:layer[@type='parallel'])</xpath>
+            <xpath desc="a j:layer has been added to parB">exists(./jf:parallel-document/tei:TEI[2]//j:concurrent[count(j:layer)=2]/j:layer[@type='parallel'])</xpath>
+            <xpath desc="the added layer contains the same number of tei:ptr as the parallel document contains links">every $layer in .//j:concurrent/j:layer[@type='parallel'] satisfies count($layer/jf:parallelGrp/jf:parallel/tei:ptr)=3</xpath>
+            <xpath desc="Each tei:ptr is a local ptr">every $ptr in .//j:concurrent/j:layer[@type='parallel']/jf:parallelGrp/jf:parallel/tei:ptr satisfies starts-with($ptr/@target, '#') and string-length($ptr/@target)>1</xpath>
         </test>
     </TestSet>
 </TestSuite>

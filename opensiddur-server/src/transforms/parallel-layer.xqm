@@ -10,6 +10,8 @@ module namespace pla="http://jewishliturgy.org/transform/parallel-layer";
 
 import module namespace common="http://jewishliturgy.org/transform/common"
     at "../modules/common.xqm";
+import module namespace data="http://jewishliturgy.org/modules/data"
+    at "../modules/data.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
     at "flatten.xqm";
 
@@ -21,36 +23,55 @@ declare function pla:parallel-layer-document(
     $doc as document-node(),
     $params as map 
     ) as document-node() {
-    common:apply-at(
-        $doc,
-        $doc//j:parallelText,
-        pla:parallel-layer#2,
-        $params
-    )
+    document {
+        let $pt := $doc//j:parallelText
+        return
+            if (exists($pt))
+            then
+                element jf:parallel-document {
+                    attribute jf:id { ($pt/@xml:id, flatten:generate-id($pt))[1] },
+                    $pt/(@* except @xml:id, tei:idno),
+                    for $domain in tokenize($doc//j:parallelText/tei:linkGrp/@domains, '\s+')
+                    let $domain-doc-uri := substring-before($domain, '#')
+                    let $domain-document := data:doc($domain-doc-uri)
+                    let $params := map { "pla:domain" := $domain }
+                    let $layer := pla:tei-linkGrp($pt/tei:linkGrp, $params)
+                    return pla:add-layer($domain-document, $layer, $params)
+                }
+            else $doc/*
+    }
 };
 
-declare function pla:parallel-layer(
+declare function pla:add-layer(
     $nodes as node()*,
+    $layer as element(j:layer),
     $params as map
     ) as node()* {
-    for $n in $nodes
+    for $node in $nodes
     return
-        typeswitch($n)
-        case element(j:parallelText) return pla:j-parallelText($n, $params)
-        case element(tei:linkGrp) return pla:tei-linkGrp($n, $params)
-        case text() return $n
-        default return pla:parallel-layer($n/node(), $params)
-};
-
-declare function pla:j-parallelText(
-    $e as element(j:parallelText),
-    $params as map
-    ) as element(j:parallelText) {
-    element j:parallelText {
-        attribute xml:id { ($e/@xml:id, flatten:generate-id($e))[1] },
-        $e/(@* except @xml:id, tei:idno),
-        pla:parallel-layer($e/tei:linkGrp, $params)
-    }
+        typeswitch($node)
+        case document-node() return pla:add-layer($node/node(), $layer, $params)
+        case element() return
+            element { QName(namespace-uri($node), name($node)) } {
+                $node/(@* except @xml:id),
+                if ($node/@xml:id)
+                then attribute jf:id { $node/@xml:id/string() }
+                else (),
+                if ($node instance of element(tei:TEI))
+                then attribute jf:document { substring-before($params("pla:domain"), '#') }
+                else (),
+                pla:add-layer($node/node(), $layer, $params),
+                if ($node instance of element(j:concurrent)) 
+                then $layer
+                else if ($node instance of element(tei:text)
+                        and empty($node/j:concurrent))
+                then
+                    element j:concurrent {
+                        $layer
+                    }
+                else ()
+            }
+        default return $node
 };
 
 declare function pla:tei-linkGrp(
@@ -59,19 +80,21 @@ declare function pla:tei-linkGrp(
     ) as element(j:layer) {
     element j:layer {
         attribute type { "parallel" },
-        attribute xml:id { ($e/@xml:id, flatten:generate-id($e))[1]  },
+        attribute jf:id { ($e/@xml:id, flatten:generate-id($e))[1]  },
         $e/(@* except @xml:id),
         let $domains := tokenize($e/@domains, "\s+")
+        let $this-domain := index-of($domains, $params("pla:domain"))
         for $link in $e/tei:link
         return 
             element jf:parallelGrp {
                 flatten:copy-attributes($link),
                 for $target at $nt in tokenize($link/@target, "\s+")
+                where $nt = $this-domain
                 return
                     element jf:parallel {
                         attribute domain { $domains[$nt] },
                         element tei:ptr {
-                            attribute target { $target }
+                            attribute target { '#' || substring-after($target, '#') }
                         }
                     }
             }

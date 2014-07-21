@@ -25,6 +25,7 @@
     </tei:teiHeader>
     <tei:text>
         <j:parallelText xml:id="parallel">
+            <tei:idno>Test</tei:idno>
             <tei:linkGrp domains="/data/tests/parA#stream /data/tests/parB#stream">
                 <!-- A-1 is not part of the parallelism -->
                 <!-- link without range -->
