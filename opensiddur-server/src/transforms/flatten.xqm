@@ -360,7 +360,7 @@ declare function flatten:stream-id(
     $stream as element(j:streamText) 
     ) as xs:string {
     concat(
-        document-uri(root($stream)), "#", 
+        common:original-document-path($stream), "#", 
         $stream/(@xml:id, @jf:id, flatten:generate-id(.))[1]
     )
 };
