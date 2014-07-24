@@ -164,7 +164,7 @@ declare function flatten:merge(
   element jf:merged {
     (: jf:merged takes the place of streamText :)
     $streamText/(@* except @xml:id),
-    if ($streamText/@xml:id)
+    if ($streamText/@xml:id and not($streamText/@jf:id))
     then
       attribute jf:id { $streamText/@xml:id }
     else (),
@@ -210,7 +210,7 @@ declare function flatten:resolve-stream(
       return
         element { QName(namespace-uri($stream-element), name($stream-element)) }{
           $stream-element/(@* except @xml:id),
-          if ($stream-element/@xml:id)
+          if ($stream-element/@xml:id and not($stream-element/@jf:id))
           then
             attribute jf:id { $stream-element/@xml:id }
           else (),
@@ -242,7 +242,7 @@ declare function flatten:resolve-copy(
         case element() return
             element { QName(namespace-uri($node), name($node)) } {
                 $node/(@* except @xml:id),
-                if ($node/@xml:id)
+                if ($node/@xml:id and not($node/@jf:id))
                 then
                     attribute jf:id { $node/@xml:id/string() }
                 else (),
@@ -289,7 +289,7 @@ declare function flatten:flatten-document(
   ) as document-node() {
   common:apply-at(
     $doc, 
-    $doc//(j:concurrent|j:streamText|j:parallelText), 
+    $doc//(j:concurrent|j:streamText), 
     flatten:flatten#2,
     $params
   ) 
@@ -305,16 +305,12 @@ declare function flatten:flatten(
 		case text() return $n
 		case comment() return $n
 		case processing-instruction() return $n
-		case element(j:layer) return 
-            if ($n/@type="parallel")
-            then flatten:parallel-j-layer($n, $params)
-            else flatten:j-layer($n, $params)
+		case element(j:layer) return flatten:j-layer($n, $params)
 		case element(tei:ptr) return flatten:tei-ptr($n, $params)
 		case element(j:concurrent) return flatten:identity($n, $params)
-        case element(j:parallelText) return flatten:identity($n, $params)
 		case element(j:streamText) return flatten:j-streamText($n, $params)
 		case element() return 
-		  if ($n is root($n)/*) 
+		  if ($n is common:TEI-root($n)) 
 		  then flatten:identity($n, $params) (: special treatment for root elements :)
 		  else flatten:element($n, $params)
 		case document-node() return document { flatten:flatten($n/node(), $params) }
@@ -366,18 +362,18 @@ declare function flatten:stream-id(
 };
 
 (:~ streamText within the transform: 
- : assure that the streamText has an xml:id
+ : assure that the streamText has a jf:id
  :)
 declare function flatten:j-streamText(
   $e as element(j:streamText),
   $params as map
   ) {
   element j:streamText {
-    if (empty($e/@xml:id))
+    if (empty($e/@jf:id))
     then 
-      attribute xml:id { flatten:generate-id($e) }
+      attribute jf:id { $e/(@xml:id, flatten:generate-id(.))[1] }
     else (),
-    $e/@*,
+    $e/(@* except @xml:id),
     $e/node()
   }
 };
@@ -393,8 +389,8 @@ declare function flatten:flatten-streamText(
   $params as map
   ) as element(jf:streamText) {
   element jf:streamText {
-    attribute jf:id { $st/(@xml:id, flatten:generate-id(.))[1] },
-    $st/(@* except @xml:id), 
+    attribute jf:id { $st/(@xml:id, @jf:id, flatten:generate-id(.))[1] },
+    $st/(@* except (@xml:id, @jf:id)), 
     for $node in $st/node()
     return
       typeswitch($node)
@@ -418,7 +414,7 @@ declare function flatten:write-placeholder(
     layer-id = which layer derived from
    :)
   <jf:placeholder 
-    jf:id="{$e/(@xml:id, flatten:generate-id(.))[1]}" 
+    jf:id="{$e/(@xml:id, @jf:id, flatten:generate-id(.))[1]}" 
     jf:position="{count($e/preceding-sibling::*) + 1}"
     jf:relative="0"
     jf:nchildren="0"
@@ -451,7 +447,7 @@ declare function flatten:copy-attributes(
   if ($context/ancestor-or-self::j:layer)
   then (
     $context/(@* except @xml:id),
-    if ($context/@xml:id)
+    if ($context/@xml:id and not($context/@jf:id))
     then
       attribute jf:id { $context/@xml:id }
     else ()
@@ -724,22 +720,6 @@ declare function flatten:generate-id(
   )
 };
 
-(:~ process layers that are for parallel texts :)
-declare function flatten:parallel-j-layer(
-    $context as element(j:layer),
-    $params as map
-    ) as element(jf:layer)+ {
-    for $domain in tokenize($context/@domains, "\s+")
-    let $stream-id := flatten:stream-id(uri:fast-follow($domain, $context, -1))
-    let $layer := flatten:j-layer($context, map:new(($params, map { "flatten:stream-id" := $stream-id })))
-    return
-        element jf:layer {
-            $layer/@*,
-            attribute jf:domain { $domain },
-            $layer/node()
-        }
-};
-
 (:~ Convert j:layer (which may be a root element) 
  : to jf:layer.
  : Start sending the "flatten:layer-id" and "flatten:stream:id" parameters
@@ -752,24 +732,26 @@ declare function flatten:j-layer(
 	let $id := 
 	  $context/(
       @xml:id, 
+      @jf:id,
       flatten:generate-id(.)
     )[1]
     let $stream-id := 
         if ($params("flatten:stream-id"))
         then $params("flatten:stream-id")
         else flatten:stream-id($context/../../j:streamText)
+    let $layer-id := common:original-document-path($context) || "#" || $id 
 	return 
     element jf:layer {
       $context/(@* except @xml:id),
-      if ($context/@xml:id)
+      if ($context/@xml:id and not($context/@jf:id))
       then
         attribute jf:id { $context/@xml:id }
       else (),
-      attribute jf:layer-id { $id },
+      attribute jf:layer-id { $layer-id },
       flatten:order-flattened(
         flatten:flatten(
           $context/node(), 
-          map:new(($params, map { "flatten:layer-id" := $id, "flatten:stream-id" := $stream-id } ))
+          map:new(($params, map { "flatten:layer-id" := $layer-id, "flatten:stream-id" := $stream-id } ))
         )
       )
     }
