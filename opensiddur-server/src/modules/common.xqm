@@ -245,6 +245,16 @@ declare function common:original-document-path(
             return replace($api-path, "^(/exist/restxq)?(/api)?", "") 
 };
 
+(:~ return the effective TEI root of a document.
+ : In most cases, it's the same as the document-node()/tei:TEI
+ : however, in cases of parallel documents, it may be one of many tei:TEI elements
+ :)
+declare function common:TEI-root(
+    $node as node()
+    ) as element(tei:TEI) {
+    $node/ancestor-or-self::tei:TEI[1]
+};
+
 (:~ apply an identity transform until reaching
  : a node in $transition-nodes, then apply
  : $transform 
