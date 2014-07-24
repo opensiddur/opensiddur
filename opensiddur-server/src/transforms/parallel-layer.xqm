@@ -58,7 +58,12 @@ declare function pla:add-layer(
                 then attribute jf:id { $node/@xml:id/string() }
                 else (),
                 if ($node instance of element(tei:TEI))
-                then attribute jf:document { substring-before($params("pla:domain"), '#') }
+                then 
+                    let $domain-doc := substring-before($params("pla:domain"), '#') 
+                    return ( 
+                        attribute jf:document { $domain-doc },
+                        attribute xml:base { $domain-doc }
+                    )
                 else (),
                 pla:add-layer($node/node(), $layer, $params),
                 if ($node instance of element(j:concurrent)) 
