@@ -219,12 +219,12 @@
         ]]></code>
         <xpath desc="parA reproduces its own streamText">.//tei:TEI[contains(@jf:document, '/flatten-parA')]//j:streamText/tei:seg[@jf:id="A1"]="A-1"</xpath>
         <xpath desc="parA has 1 flattened parallel layer">.//tei:TEI[contains(@jf:document, '/flatten-parA')]//j:concurrent[count(jf:layer)=1]/jf:layer[@type="parallel"]</xpath>
-        <xpath desc="parA layer has flattened parallelGrps">.//tei:TEI[contains(@jf:document, '/flatten-parA')]//j:concurrent/jf:layer[@type="parallel"][count(jf:parallelGrp[@jf:start])=3][count(jf:parallel[@jf:start])=3][count(jf:placeholder[@jf:stream="/db/data/tests/flatten-parA#stream"])=9]</xpath>
+        <xpath desc="parA layer has flattened parallelGrps">.//tei:TEI[contains(@jf:document, '/flatten-parA')]//j:concurrent/jf:layer[@type="parallel"][count(jf:parallelGrp[@jf:start])=3][count(jf:parallel[@jf:start])=3][count(jf:placeholder[@jf:stream="/data/tests/flatten-parA#stream"])=6]</xpath>
         <xpath desc="parA layer placeholders point to their segs">every $ph in .//tei:TEI[contains(@jf:document, '/flatten-parA')]//j:concurrent/jf:layer[@type="parallel"]/jf:placeholder satisfies starts-with($ph/@jf:id, "A")</xpath>
         <xpath desc="parB reproduces its own streamText">.//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:streamText/tei:seg[@jf:id="A1"]="B-1"</xpath>
-        <xpath desc="parB has 1 flattened parallel layer and 2 flattened layers">.//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent[count(jf:layer)=1]/jf:layer[@type="parallel"]</xpath>
-        <xpath desc="one parB layer has flattened parallelGrps">.//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent/jf:layer[@type="parallel"][count(jf:parallelGrp[@jf:start])=3][count(jf:parallel[@jf:start])=3][count(jf:placeholder[@jf:stream="/db/data/tests/flatten-parB#stream"])=9]</xpath>
-        <xpath desc="one parB layer has flattened paragraphs">.//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent/jf:layer[@type="p"][count(tei:p[@jf:start])=1][count(jf:placeholder[@jf:stream="/db/data/tests/flatten-parB#stream"])=9]</xpath>
+        <xpath desc="parB has 1 flattened parallel layer and 2 flattened layers">.//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent[count(jf:layer)=2]/jf:layer[@type="parallel"]</xpath>
+        <xpath desc="one parB layer has flattened parallelGrps">.//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent/jf:layer[@type="parallel"][count(jf:parallelGrp[@jf:start])=3][count(jf:parallel[@jf:start])=3][count(jf:placeholder[@jf:stream="/data/tests/flatten-parB#stream"])=7]</xpath>
+        <xpath desc="one parB layer has flattened paragraphs">.//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent/jf:layer[@type="p"][count(tei:p[@jf:start])=1][count(jf:placeholder[@jf:stream="/data/tests/flatten-parB#stream"])=9]</xpath>
         <xpath desc="parB layer placeholders point to their segs">every $ph in .//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent/jf:layer[@type="parallel"]/jf:placeholder satisfies starts-with($ph/@jf:id, "A")</xpath>
     </test>
   </TestSet>
