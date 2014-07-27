@@ -226,6 +226,7 @@
         <xpath desc="one parB layer has flattened parallelGrps">.//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent/jf:layer[@type="parallel"][count(jf:parallelGrp[@jf:start])=3][count(jf:parallel[@jf:start])=3][count(jf:placeholder[@jf:stream="/data/tests/flatten-parB#stream"])=7]</xpath>
         <xpath desc="one parB layer has flattened paragraphs">.//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent/jf:layer[@type="p"][count(tei:p[@jf:start])=1][count(jf:placeholder[@jf:stream="/data/tests/flatten-parB#stream"])=9]</xpath>
         <xpath desc="parB layer placeholders point to their segs">every $ph in .//tei:TEI[contains(@jf:document, '/flatten-parB')]//j:concurrent/jf:layer[@type="parallel"]/jf:placeholder satisfies starts-with($ph/@jf:id, "A")</xpath>
+        <xpath desc="parallel elements are prioritized">every $pe in .//jf:parallelGrp|.//jf:parallel satisfies $pe/@jf:nchildren=(-19,19)</xpath>
     </test>
   </TestSet>
   <TestSet>

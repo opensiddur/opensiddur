@@ -68,7 +68,7 @@ declare function flatten:merge-document(
   ) as document-node() {
   common:apply-at(
     $doc, 
-    $doc//(j:concurrent|j:streamText|j:parallelText), 
+    $doc//(j:concurrent|j:streamText), 
     flatten:merge-concurrent#2,
     $params  
   )
@@ -81,8 +81,6 @@ declare function flatten:merge-concurrent(
   typeswitch($e)
   case element(j:concurrent)
   return flatten:merge-j-concurrent($e, $params)
-  case element(j:parallelText)
-  return flatten:merge-j-parallelText($e, $params)
   default (: j:streamText :) 
   return (
     flatten:merge(
@@ -636,7 +634,11 @@ declare function flatten:element(
     else  
 	    (: element has children in the streamText :)
   		let $stream-children := $children[@jf:stream=$active-stream]
-  		let $nchildren := count($stream-children)
+  		let $nchildren := 
+                    if ($context instance of element(jf:parallelGrp) or
+                        $context instance of element(jf:parallel))
+                    then count(root($context)//j:streamText/element())+1   (: parallel elements are always prioritized :)
+                    else count($stream-children)
   		let $start-node :=
   		  element { QName(namespace-uri($context), name($context)) }{
           $attributes,
@@ -726,15 +728,15 @@ declare function flatten:generate-id(
  : If $params("flatten:stream-id") is already set, use the existing value.
  :)
 declare function flatten:j-layer(
-	$context as element(),
-	$params as map
-	) as element(jf:layer) {
-	let $id := 
-	  $context/(
+    $context as element(),
+    $params as map
+    ) as element(jf:layer) {
+    let $id := 
+      $context/(
       @xml:id, 
       @jf:id,
       flatten:generate-id(.)
-    )[1]
+      )[1]
     let $stream-id := 
         if ($params("flatten:stream-id"))
         then $params("flatten:stream-id")
