@@ -196,9 +196,7 @@ declare function flatten:resolve-stream(
                 map:new((
                     $params, 
                     map { "flatten:resolve-stream" := 
-                        if ($node/@type="parallel")
-                        then root($node)//j:streamText[@jf:domain=$node/@jf:domain]
-                        else root($node)//j:streamText
+                        common:TEI-root($node)//j:streamText
                     })))
         }
     case element (jf:placeholder)

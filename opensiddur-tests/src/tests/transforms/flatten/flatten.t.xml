@@ -241,6 +241,16 @@
         <xpath desc="parB merged element contains all the elements from the parB streamText">count(.//tei:TEI[contains(@jf:document, '/flatten-parB')]//jf:merged/jf:placeholder[contains(@jf:stream,'parB')][starts-with(@jf:id,'A')])=9</xpath>
         <xpath desc="parB has a concurrent element that makes reference to its layers">every $layer in .//tei:TEI[contains(@jf:document, '/flatten-parB')]//jf:concurrent[count(jf:layer)=2]/jf:layer satisfies count($layer/node())=0</xpath>
     </test>
+    <test> 
+        <task>Resolve a document with parallels</task>
+        <code><![CDATA[
+            let $d := doc("/db/data/tests/flatten-par.xml")
+            return format:resolve($d, map {}, $d)
+        ]]></code>
+        <xpath desc="streamText has been removed">empty(.//j:streamText)</xpath>
+        <xpath desc="parA merged element contains all the seg elements from the parA streamText">count(.//tei:TEI[contains(@jf:document, '/flatten-parA')]//jf:merged/tei:seg[contains(@jf:stream, 'parA')][starts-with(.,'A-')])=9</xpath>
+        <xpath desc="parB merged element contains all the seg elements from the parB streamText">count(.//tei:TEI[contains(@jf:document, '/flatten-parB')]//jf:merged/tei:seg[contains(@jf:stream,'parB')][starts-with(.,'B-')])=9</xpath>
+    </test>
   </TestSet>
   <TestSet>
     <testName>flatten:resolve-stream()</testName>
