@@ -56,6 +56,93 @@ declare function unflatten:unclosed-tags(
   return $node
 };
 
+(: if the merged element contains a parallel structure, 
+ : initiate a transform to suspend open elements at parallel boundaries
+ : and continue them inside
+ :)
+declare function unflatten:parallel-suspend-and-continue(
+    $e as element(jf:merged),
+    $params as map
+    ) as element(jf:merged) {
+    if (exists($e/jf:parallelGrp))
+    then 
+        element jf:merged {
+            $e/@*,
+            unflatten:iterate-parallel-suspend-and-continue(
+                $e/node(),
+                (),
+                (),
+                $params
+            )
+        }
+    else $e
+};
+
+declare function unflatten:iterate-parallel-suspend-and-continue(
+    $sequence as node()*,
+    $opened-elements as element()*,
+    $suspended-elements as element()*,
+    $params as map
+    ) as node()* {
+    let $s := $sequence[1]
+    where exists($s)
+    return (
+        typeswitch($s)
+        case element()
+        return 
+            if ($s/self::jf:parallelGrp[@jf:start|@jf:continue]
+                or $s/self::jf:parallel[@jf:end|@jf:suspend])
+            then (
+                unflatten:continue-or-suspend($opened-elements, "suspend"),
+                $s,
+                unflatten:iterate-parallel-suspend-and-continue(
+                    subsequence($sequence, 2),
+                    (),
+                    $opened-elements,   (: open elements are now suspended :)
+                    $params
+                )
+            )
+            else if ($s/self::jf:parallelGrp[@jf:end|@jf:suspend]
+                    or $s/self::jf:parallel[@jf:start|@jf:continue])
+            then (
+                $s,
+                unflatten:continue-or-suspend($suspended-elements, "continue"),
+                unflatten:iterate-parallel-suspend-and-continue(
+                    subsequence($sequence, 2),
+                    $suspended-elements,    (: suspended elements are now open :)
+                    (),
+                    $params
+                )
+            )
+            else (: other element :)
+                let $next-opened-elements :=
+                    if ($s/@jf:start|$s/@jf:continue) 
+                    then ($opened-elements, $s) 
+                    else if ($s/@jf:end|$s/@jf:suspend)
+                    then 
+                        remove($opened-elements, 
+                            index-of($opened-elements, $opened-elements[(@jf:start,@jf:continue)=$s/(@jf:suspend, @jf:end)])
+                        )
+                    else $opened-elements
+                return ($s,
+                    unflatten:iterate-parallel-suspend-and-continue(
+                        subsequence($sequence, 2),
+                        $next-opened-elements,
+                        $suspended-elements,
+                        $params
+                    )
+                )
+        default 
+        return ($s, 
+            unflatten:iterate-parallel-suspend-and-continue(
+                subsequence($sequence, 2),
+                $opened-elements,
+                $suspended-elements,
+                $params
+            )
+        )
+    )
+};
 
 declare function unflatten:continue-or-suspend(
   $tags as element()*,
@@ -95,7 +182,10 @@ declare function unflatten:unflatten(
   ) as element(jf:unflattened) {
   element jf:unflattened {
     $flattened/@*,
-    unflatten:sequence($flattened/node(), $params)
+    unflatten:sequence(
+        unflatten:parallel-suspend-and-continue($flattened, $params)/node(), 
+        $params
+    )
   }
 };
 

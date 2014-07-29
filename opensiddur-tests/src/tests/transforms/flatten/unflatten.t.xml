@@ -196,4 +196,79 @@
       <xpath desc="tei:ab[id=ab2] is not a descendant of itself">empty(.//tei:ab[@jf:id="ab2"][ancestor::tei:ab[@jf:id="ab2"]])</xpath>
     </test>
   </TestSet>
+  <TestSet>
+    <testName>Unflatten a parallel document</testName>
+    <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/transforms"
+            destination="/db/data/tests"
+            name="unflatten-parA.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/transforms"
+            destination="/db/data/tests"
+            name="unflatten-parB.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/transforms"
+            destination="/db/data/tests"
+            name="unflatten-par.xml"/>
+    </setup>
+    <tearDown>
+      <remove-document
+            collection="/db/data/tests"
+            name="unflatten-parA.xml"/>
+      <remove-document
+            collection="/db/data/tests"
+            name="unflatten-parB.xml"/>
+      <remove-document
+            collection="/db/data/tests"
+            name="unflatten-par.xml"/>
+    </tearDown>
+    <test>
+        <task>Unflatten a parallel document</task>
+        <code><![CDATA[
+            let $d := doc("/db/data/tests/unflatten-par.xml")
+            return format:unflatten($d, map {}, $d)
+        ]]></code>
+    <xpath desc="p1 is entirely contained in a single parallel element">count(.//tei:TEI[contains(@jf:document, '/unflatten-parA')]//jf:unflattened//tei:p[@jf:id="p1"][count(descendant::tei:seg)=3]/ancestor::jf:parallel)=1</xpath>
+    <xpath desc="p2 (break at beginning) is partially contained outside parallel and partially inside it"><![CDATA[
+        let $p := .//tei:TEI[contains(@jf:document, '/unflatten-parA')]//jf:unflattened//tei:p[@jf:part="p2"]
+        return
+            count($p)=2
+            and not($p[1]/ancestor::jf:parallel)
+            and $p[1]/descendant::tei:seg[@jf:id="A4"]
+            and count($p[2]/ancestor::jf:parallel)=1
+            and $p[2]/count(descendant::tei:seg)=2
+            and $p[1]/@jf:part
+            and $p[2]/@jf:part
+    ]]></xpath>
+    <xpath desc="p3 (break at end) is partially contained outside parallel and partially inside it"><![CDATA[
+        let $p := .//tei:TEI[contains(@jf:document, '/unflatten-parA')]//jf:unflattened//tei:p[@jf:part="p3"]
+        return
+            count($p)=2
+            and count($p[1]/ancestor::jf:parallel)=1
+            and count($p[1]/descendant::tei:seg)=2
+            and count($p[2]/ancestor::jf:parallel)=0
+            and count($p[2]/descendant::tei:seg)=1
+            and $p[1]/@jf:part
+            and $p[2]/@jf:part
+    ]]></xpath>
+    <xpath desc="p4 (break at beginning and end) is partially contained outside parallel and partially inside it"><![CDATA[
+        let $p := .//tei:TEI[contains(@jf:document, '/unflatten-parA')]//jf:unflattened//tei:p[@jf:part="p4"]
+        return
+            count($p)=3
+            and $p[1]/descendant::tei:seg/@jf:id="A10"
+            and count($p[2]/descendant::tei:seg)=2
+            and count($p[2]/ancestor::jf:parallel)=1
+            and $p[3]/descendant::tei:seg/@jf:id="A13"
+            and (every $pp in $p satisfies $pp/@jf:part)
+    ]]></xpath>
+    <xpath desc="p5 (broken up in the middle) is entirely contained within 2 parallel groups"><![CDATA[
+        let $p := .//tei:TEI[contains(@jf:document, '/unflatten-parA')]//jf:unflattened//tei:p[@jf:part="p5"]
+        return
+            count($p)=2
+            and (every $pp in $p satisfies count($pp/ancestor::jf:parallel)=1 and count($pp/ancestor::jf:parallelGrp)=1)
+            and not($p[1]/ancestor::jf:parallelGrp is $p[2]/ancestor::jf:parallelGrp)
+            and count($p[1]/descendant::tei:seg)=2
+            and count($p[2]/descendant::tei:seg)=2
+            and (every $pp in $p satisfies $pp/@jf:part)
+    ]]></xpath>
+    </test>
+  </TestSet>
 </TestSuite>
