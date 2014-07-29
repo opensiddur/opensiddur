@@ -932,7 +932,7 @@ declare function local:result-details(
                   if ($test/@pass='false')
                   then
                     <pre>{
-                      util:serialize($test/result/node(), "indent='yes'")
+                      util:serialize($test/result/node(), "indent=yes method=xml")
                     }</pre>
                   else ()
                 }</td>
