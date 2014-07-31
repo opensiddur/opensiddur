@@ -322,10 +322,10 @@
           mirror:doc($format:unflatten-cache, "/db/data/tests/include-simple-1.xml"),
           map {})
       ]]></code>
-      <xpath desc="the inclusion pointer is followed through a redirect">.//jf:ptr[@jf:id="inc3"]/jf:combined[@type="parallel"]</xpath>
-      <xpath desc="the correct domain is chosen">.//jf:ptr[@jf:id="inc3"]/jf:combined/@jf:domain="/data/tests/parallel-simple-A#stream"</xpath>
+      <xpath desc="the inclusion pointer is followed through a redirect">.//jf:ptr[@jf:id="inc3"]/jf:combined[jf:parallelGrp]</xpath>
+      <xpath desc="the correct domain is chosen">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel/@domain="/data/tests/parallel-simple-A#stream"</xpath>
       <xpath desc="the redirect includes the original text">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-simple-A#stream"]/tei:seg[.="A-1"]</xpath>
-      <xpath desc="the redirect includes the parallel text">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-simple-B#stream"]/jf:ptr/tei:seg[.="B-1"]</xpath>
+      <xpath desc="the redirect includes the parallel text">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-simple-B#stream"]/tei:seg[.="B-1"]</xpath>
       
     </test>
   </TestSet>
@@ -352,10 +352,10 @@
           mirror:doc($format:unflatten-cache, "/db/data/tests/parallel-same-A.xml"),
           map {})
       ]]></code>
-      <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/jf:combined[@type="parallel"])</xpath>
-      <xpath desc="the correct domain is chosen">.//jf:combined[@type="parallel"]/@jf:domain="/data/tests/parallel-same-A#stream"</xpath>
-      <xpath desc="the redirect includes the original text">.//jf:combined[@type="parallel"]/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-same-A#stream"]/tei:seg[.="A-1"]</xpath>
-      <xpath desc="the redirect includes the parallel text">.//jf:combined[@type="parallel"]/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-simple-B#stream"]/jf:ptr/tei:seg[.="B-1"]</xpath>
+      <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/jf:combined[jf:parallelGrp])</xpath>
+      <xpath desc="the correct domain is chosen">.//jf:combined/jf:parallelGrp[starts-with(@jf:layer-id, "/data/tests/parallel-same-A")]</xpath>
+      <xpath desc="the redirect includes the original text">.//jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-same-A#stream"]/tei:seg[.="A-1"]</xpath>
+      <xpath desc="the redirect includes the parallel text">.//jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/tests/parallel-simple-B#stream"]/tei:seg[.="B-1"]</xpath>
     </test>
   </TestSet>
   <TestSet>
@@ -386,7 +386,7 @@
           map {})
       ]]></code>
       <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="inc1"]/jf:parallelGrp)</xpath>
-      <xpath desc="the correct domain is chosen">exists(.//jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg)</xpath>
+      <xpath desc="the correct domain is chosen">exists(.//jf:parallelGrp[starts-with(@jf:layer-id,"/data/tests/parallel-part-A")])</xpath>
       <xpath desc="the redirect begins at the first requested part">.//jf:ptr[@jf:id="inc1"]/jf:parallelGrp[1]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[1]/@jf:id="A2"</xpath>
       <xpath desc="the redirect ends at the last requested part">.//jf:ptr[@jf:id="inc1"]/jf:parallelGrp[last()]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[last()]/@jf:id="A7"</xpath>
     </test>
@@ -398,7 +398,7 @@
           map {})
       ]]></code>
       <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="inc2"]/jf:parallelGrp)</xpath>
-      <xpath desc="the correct domain is chosen">exists(.//jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg)</xpath>
+      <xpath desc="the correct domain is chosen">exists(.//jf:parallelGrp[starts-with(@jf:layer-id,"/data/tests/parallel-part-A")])</xpath>
       <xpath desc="the redirect begins at the first parallelGrp that includes the beginning of the first requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[1]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[1]/@jf:id="A2"</xpath>
       <xpath desc="the redirect ends at the last parallelGrp that includes the end of the last requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[last()]/jf:parallel[@domain="/data/tests/parallel-part-A#stream"]/tei:seg[last()]/@jf:id="A7"</xpath>
     </test>
