@@ -17,8 +17,12 @@
     <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
     <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
     <imports>
+        import module namespace format="http://jewishliturgy.org/modules/format"
+        at "xmldb:exist:///db/apps/opensiddur-server/modules/format.xqm";
         import module namespace pla="http://jewishliturgy.org/transform/parallel-layer"
           at "xmldb:exist:///db/apps/opensiddur-server/transforms/parallel-layer.xqm";
+        import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+          at "xmldb:exist:///db/apps/opensiddur-server/modules/refindex.xqm";
     </imports>
     <asUser>testuser</asUser>
     <password>testuser</password>
@@ -41,25 +45,37 @@
             <copy 
                 source="/db/apps/opensiddur-tests/tests/transforms"
                 name="parA.xml"
-                destination="/db/data/tests"/>
+                destination="/db/data/original"/>
             <copy 
                 source="/db/apps/opensiddur-tests/tests/transforms"
                 name="parB.xml"
-                destination="/db/data/tests"/>
+                destination="/db/data/original"/>
             <copy 
                 source="/db/apps/opensiddur-tests/tests/transforms"
                 name="par.xml"
-                destination="/db/data/tests"/>
+                destination="/db/data/linkage"/>
+            <code>
+                ridx:reindex(doc("/db/data/original/parA.xml")),
+                ridx:reindex(doc("/db/data/original/parB.xml"))
+            </code>
         </setup>
         <tearDown>
-            <remove-document collection="/db/data/tests" name="par.xml"/> 
-            <remove-document collection="/db/data/tests" name="parA.xml"/> 
-            <remove-document collection="/db/data/tests" name="parB.xml"/> 
+            <code><![CDATA[
+            format:clear-caches("/db/data/linkage/par.xml"),
+            format:clear-caches("/db/data/original/parA.xml"),
+            format:clear-caches("/db/data/original/parB.xml"),
+            ridx:remove("/db/data/original","parA.xml"),
+            ridx:remove("/db/data/original","parB.xml")
+                ]]></code>
+            <remove-document collection="/db/data/linkage" name="par.xml"/> 
+            <remove-document collection="/db/data/original" name="parA.xml"/> 
+            <remove-document collection="/db/data/original" name="parB.xml"/> 
         </tearDown>
         <test>
             <task>parallel layer</task>
             <code><![CDATA[
-                pla:parallel-layer-document(doc("/db/data/tests/par.xml"), map {})
+                let $d := doc("/db/data/linkage/par.xml")
+                return format:parallel-layer($d, map {}, $d)
             ]]></code>
             <xpath desc="produces one jf:parallel-document">exists(./jf:parallel-document[tei:idno='Test'])</xpath>
             <xpath desc="all xml:ids have been converted into @jf:id">count(.//@xml:id)=0 and count(.//@jf:id)>0</xpath>

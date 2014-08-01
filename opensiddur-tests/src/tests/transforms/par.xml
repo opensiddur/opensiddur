@@ -26,15 +26,15 @@
     <tei:text>
         <j:parallelText xml:id="parallel">
             <tei:idno>Test</tei:idno>
-            <tei:linkGrp domains="/data/tests/parA#stream /data/tests/parB#stream">
+            <tei:linkGrp domains="/data/original/parA#stream /data/original/parB#stream">
                 <!-- A-1 is not part of the parallelism -->
                 <!-- link without range -->
-                <tei:link target="/data/tests/parA#A2 /data/tests/parB#B1"/>
+                <tei:link target="/data/original/parA#A2 /data/original/parB#B1"/>
                 <!-- link with range, same size -->
-                <tei:link target="/data/tests/parA#range(A3,A5) /data/tests/parB#range(B2,B4)"/>
+                <tei:link target="/data/original/parA#range(A3,A5) /data/original/parB#range(B2,B4)"/>
                 <!-- skip both A6 and B5 -->
                 <!-- link with range, different sizes -->
-                <tei:link target="/data/tests/parA#range(A7,A8) /data/tests/parB#range(B6,B8)"/>
+                <tei:link target="/data/original/parA#range(A7,A8) /data/original/parB#range(B6,B8)"/>
                 <!-- A9 and B9 are not part of the parallelism -->
             </tei:linkGrp>
         </j:parallelText>

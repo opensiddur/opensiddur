@@ -1,6 +1,7 @@
 xquery version "3.0";
 (:~ parallel to layer transform
  : convert j:parallelText/tei:linkGrp into layers that can be flattened and merged 
+ : assumes that external dependencies are flattened/phony-layered 
  :
  : Open Siddur Project
  : Copyright 2014 Efraim Feinstein, efraim@opensiddur.org
@@ -12,6 +13,10 @@ import module namespace common="http://jewishliturgy.org/transform/common"
     at "../modules/common.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
     at "../modules/data.xqm";
+import module namespace format="http://jewishliturgy.org/modules/format"
+    at "../modules/format.xqm";
+import module namespace mirror="http://jewishliturgy.org/modules/mirror"
+    at "../modules/mirror.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
     at "flatten.xqm";
 
@@ -32,8 +37,8 @@ declare function pla:parallel-layer-document(
                     attribute jf:id { ($pt/@xml:id, flatten:generate-id($pt))[1] },
                     $pt/(@* except @xml:id, tei:idno),
                     for $domain in tokenize($doc//j:parallelText/tei:linkGrp/@domains, '\s+')
-                    let $domain-doc-uri := substring-before($domain, '#')
-                    let $domain-document := data:doc($domain-doc-uri)
+                    let $domain-doc-orig := data:doc(substring-before($domain, '#'))
+                    let $domain-document := format:phony-layer($domain-doc-orig, $params, $domain-doc-orig)
                     let $params := map { "pla:domain" := $domain }
                     let $layer := pla:tei-linkGrp($pt/tei:linkGrp, $params)
                     return pla:add-layer($domain-document, $layer, $params)

@@ -110,10 +110,6 @@ declare function format:parallel-layer(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  (: flatten the document's dependencies first so we can assume that the dependency
-   : flattened versions exist so they can be merged
-   :)
-  let $unflats := format:flatten-external-dependencies($original-doc, $params)
   let $pla-transform := pla:parallel-layer-document(?, $params)
   return
     mirror:apply-if-outdated(
