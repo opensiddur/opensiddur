@@ -206,15 +206,16 @@ declare function combine:new-document-attributes(
         (: parallel documents are guaranteed to have a @jf:document attribute :)
         $new-doc-nodes[1]/ancestor::*[@jf:document][1]/@jf:document/string()
     else
-        data:db-path-to-api(
-            mirror:unmirror-path(
-              $format:unflatten-cache,
-              ( 
-                document-uri(root($new-doc-nodes[1])), 
-                ($new-doc-nodes[1]/@uri:document-uri)
-              )[1]
-            )
-        )
+        replace(
+            data:db-path-to-api(
+                mirror:unmirror-path(
+                  $format:unflatten-cache,
+                  ( 
+                    document-uri(root($new-doc-nodes[1])), 
+                    ($new-doc-nodes[1]/@uri:document-uri)
+                  )[1]
+                )
+            ), "^(/exist/restxq)?/api", "")
   return (
     (: document (as API source ), base URI?, language, source(?), 
      : license, contributors :)

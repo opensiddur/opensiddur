@@ -74,7 +74,7 @@
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine1.xml"),
           map {})
       ]]></code>
-      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine1$")</xpath>
+      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine1$")</xpath>
       <xpath 
         desc="acts as an identity transform for unflattened text" 
         >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/tei:seg[@jf:id="seg1"][ends-with(@jf:stream,"#stream")])
@@ -96,7 +96,7 @@
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine2.xml"),
           map {})
       ]]></code>
-      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine2$")</xpath>
+      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine2$")</xpath>
       <xpath 
         desc="incorporate destination in-place" 
         >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
@@ -123,8 +123,8 @@
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine3.xml"),
           map {})
       ]]></code>
-      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^(/exist/restxq)?/api/data/tests/combine3$")</xpath>
-      <xpath desc="has @jf:document on the included element">matches(./tei:TEI//jf:ptr[@jf:id="ptr1"]/@jf:document,"^(/exist/restxq)?/api/data/tests/combine1$")</xpath>
+      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine3$")</xpath>
+      <xpath desc="has @jf:document on the included element">matches(./tei:TEI//jf:ptr[@jf:id="ptr1"]/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine1$")</xpath>
       <xpath 
         desc="incorporate destination in-place" 
         >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
@@ -491,5 +491,43 @@
         <task>no conditional affecting a layer followed by inclusion of a document that has a layer of the same name</task>
     </test>
 -->
+  </TestSet>
+  <TestSet>
+      <testName>Conditionals and parallel texts</testName>
+      <setup>
+          <code><![CDATA[
+              local:setup("combine-cond-parA.xml", "original"),
+              local:setup("combine-cond-parB.xml", "original"),
+              local:setup("combine-cond-incl.xml", "original"),
+              local:setup("combine-cond-par.xml", "linkage")
+        ]]></code>
+      </setup>
+      <tearDown>
+          <code><![CDATA[
+              local:tearDown("combine-cond-par.xml", "linkage"),
+              local:tearDown("combine-cond-incl.xml", "original"),
+              local:tearDown("combine-cond-parB.xml", "original"),
+              local:tearDown("combine-cond-parA.xml", "original")
+        ]]></code>
+      </tearDown>
+    <test>
+        <task>combine a text with conditionals and parallel texts</task>
+        <code><![CDATA[
+            combine:combine-document(
+                mirror:doc($format:unflatten-cache, "/db/data/original/combine-cond-incl.xml"),
+                map {})
+        ]]></code>
+    <xpath desc="in parA, present is present">exists(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/tei:seg[@jf:id="present"])</xpath>
+        <xpath desc="in parA, segment turned off externally is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/descendant::tei:seg[@jf:id="offAext"])</xpath>
+        <xpath desc="in parA, segment turned off internally at streamText is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/descendant::tei:seg[@jf:id="offAint"])</xpath>
+        <xpath desc="in parA, segment turned off internally within stream is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/descendant::tei:seg[@jf:id="offAintSetInt"])</xpath>
+        <xpath desc="in parA, segment turned off externally in parB with the same id is present">exists(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/descendant::tei:seg[@jf:id="offBext"])</xpath>
+        <xpath desc="in parA, segment turned off internally in parB with the same id is present">exists(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/descendant::tei:seg[@jf:id="offBint"])</xpath>
+        <xpath desc="in parA, segment turned off internally within stream in parB is present">exists(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/descendant::tei:seg[@jf:id="offBintSetInt"])</xpath>
+        <xpath desc="in parB, present is present">exists(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/tei:seg[@jf:id="present"])</xpath>
+        <xpath desc="in parB, segment turned off externally is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBext"])</xpath>
+        <xpath desc="in parB, segment turned off internally at streamText is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBint"])</xpath>
+        <xpath desc="in parB, segment turned off internally within stream is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBintSetInt"])</xpath>
+    </test>
   </TestSet>
 </TestSuite>
