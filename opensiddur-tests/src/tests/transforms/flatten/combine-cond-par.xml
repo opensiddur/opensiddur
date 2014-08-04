@@ -5,7 +5,7 @@
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
-                <tei:title type="main">Linkage A to B</tei:title>
+                <tei:title type="main">Parallel texts A and B</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
                 <tei:distributor>
@@ -25,12 +25,9 @@
     </tei:teiHeader>
     <tei:text>
         <j:parallelText xml:id="parallel">
-            <tei:idno>AB</tei:idno>
-            <tei:linkGrp domains="/data/original/parallel-part-A#stream /data/original/parallel-part-B#stream">
-                <tei:link target="/data/original/parallel-part-A#A1 /data/original/parallel-part-B#B1"/>
-                <tei:link target="/data/original/parallel-part-A#range(A2,A4) /data/original/parallel-part-B#range(B2,B4)"/>
-                <tei:link target="/data/original/parallel-part-A#range(A5,A7) /data/original/parallel-part-B#range(B5,B7)"/>
-                <tei:link target="/data/original/parallel-part-A#range(A8,A9) /data/original/parallel-part-B#range(B8,B9)"/>
+            <tei:idno>Test</tei:idno>
+            <tei:linkGrp domains="/data/original/combine-cond-parA#stream /data/original/combine-cond-parB#stream">
+                <tei:link target="/data/original/combine-cond-parA#range(beginA,endA) /data/original/combine-cond-parB#range(beginB,endB)"/>
             </tei:linkGrp>
         </j:parallelText>
    </tei:text>

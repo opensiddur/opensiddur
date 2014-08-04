@@ -1,9 +1,9 @@
 xquery version "3.0";
 (:~
- : Act on conditional links:
+ : Act on "condition" and "set" links:
  : This must be run on the original data because it relies on having the reference index
- : If the condition applies inside the streamText, make a new phony layer of jf:conditional elements per condition
- : If the condition applies inside j:layer or on j:streamText, put an @jf:conditional attribute on the element
+ : If the condition/setting applies inside the streamText, make a new phony layer of jf:conditional/jf:set elements per condition
+ : If the condition applies inside j:layer or on j:streamText, put an @jf:conditional/@jf:set attribute on the element
  :
  : This transform only makes sense on original text documents. Otherwise, it acts as an identity transform.
  : 
@@ -53,12 +53,12 @@ declare function phony:phony-layer(
         default return phony:phony-layer($node/node(), $params) 
 };
 
-(:~ return the condition links that apply to the document :)
+(:~ return the condition/set links that apply to the document :)
 declare function phony:doc-condition-links(
     $n as node()
     ) as element(tei:link)* {
-    root($n)//j:links/tei:link[@type="condition"]|
-        root($n)//j:links/tei:linkGrp[@type="condition"]/tei:link[not(@type)]
+    root($n)//j:links/tei:link[@type=("condition","set")]|
+        root($n)//j:links/tei:linkGrp[@type=("condition","set")]/tei:link[not(@type)]
 };
 
 declare function phony:j-streamText(
@@ -66,20 +66,22 @@ declare function phony:j-streamText(
     $params as map
     ) as element(j:streamText) {
     let $conditions := ridx:query(phony:doc-condition-links($e), $e, 1, false())
+    let $conditionals := $conditions[@type="condition"]
+    let $settings := $conditions[@type="set"]
     return
         element j:streamText {
             $e/@*,
-            if (exists($conditions))
+            if (exists($conditionals))
             then ( 
                 attribute jf:conditional {
                     string-join(
-                        for $link in $conditions
+                        for $link in $conditionals
                         return tokenize($link/@target, '\s+')[2],
                         ' '
                     )
                 },
                 let $instructions := 
-                    for $link in $conditions
+                    for $link in $conditionals
                     return tokenize($link/@target, '\s+')[3]
                 where exists($instructions)
                 return
@@ -87,6 +89,16 @@ declare function phony:j-streamText(
                         string-join($instructions, ' ')
                     }
             )
+            else (),
+            if (exists($settings))
+            then
+                attribute jf:set {
+                    string-join(
+                        for $link in $settings
+                        return tokenize($link/@target, '\s+')[2],
+                        ' '
+                    )
+                }
             else (),
             phony:inside-streamText($e/node(), $params)
         }
@@ -100,11 +112,14 @@ declare function phony:inside-streamText(
     return
         typeswitch ($node)
         case element(j:option) return phony:element($node, $params, phony:inside-streamText#2)
-        case element() return 
-            element { QName(namespace-uri($node), name($node)) }{
-                $node/@*,
-                phony:inside-streamText($node/node(), $params)
-            }
+        case element() return
+            if ($node/parent::j:streamText)
+            then 
+                element { QName(namespace-uri($node), name($node)) }{
+                    $node/@*,
+                    phony:inside-streamText($node/node(), $params)
+                }
+            else phony:element($node, $params, phony:inside-streamText#2)
         case text() return $node
         case comment() return $node
         case document-node() return document { phony:inside-streamText($node/node(), $params) }
@@ -118,9 +133,10 @@ declare function phony:element(
     $caller as function(node()*, map) as node()*
     ) as element() {
     let $layer-ancestor := $e/ancestor::j:layer
+    let $stream-ancestor := $e/ancestor::j:streamText[not(. is $e/parent::*)]
     let $concurrent-ancestor := $layer-ancestor/parent::j:concurrent
     let $conditions := 
-        if (exists($layer-ancestor) or $e instance of element(j:option))
+        if (exists($layer-ancestor) or exists($stream-ancestor) or $e instance of element(j:option))
         then 
             (: if a condition applies to the whole layer/concurrent section, it applies to all its constituents :)
             ridx:query(phony:doc-condition-links($e), 
@@ -128,20 +144,22 @@ declare function phony:element(
                     if ($e/parent::j:layer) then ($concurrent-ancestor, $layer-ancestor) else ()
                 ), 1, false())
         else ()
+    let $conditionals := $conditions[@type="condition"]
+    let $settings := $conditions[@type="set"]
     return
         element {QName(namespace-uri($e), name($e))}{
             $e/@*,
-            if (exists($conditions))
+            if (exists($conditionals))
             then (
                 attribute jf:conditional {
                     string-join(
-                        for $link in $conditions
+                        for $link in $conditionals
                         return tokenize($link/@target, '\s+')[2],
                         ' '
                     )
                 },
                 let $instructions := 
-                    for $link in $conditions 
+                    for $link in $conditionals 
                     return tokenize($link/@target, '\s+')[3]
                 where exists($instructions[.])
                 return
@@ -149,6 +167,16 @@ declare function phony:element(
                         string-join($instructions, ' ')
                     }
             )
+            else (),
+            if (exists($settings))
+            then
+                attribute jf:set {
+                    string-join(
+                        for $link in $settings
+                        return tokenize($link/@target, '\s+')[2],
+                        ' '
+                    )
+                }
             else (),
             $caller($e/node(), $params)
         }
@@ -166,9 +194,13 @@ declare function phony:tei-text(
         phony:phony-layer($e/node(), $params),
         if (empty($e/j:concurrent))
         then
-            let $phony-layers := 
+            let $condition-links := phony:doc-condition-links($e)
+            let $phony-layers := ( 
                 phony:phony-layer-from-conditionals(
-                    phony:doc-condition-links($e), $params)
+                    $condition-links[@type="condition"], $params, "conditional"),
+                phony:phony-layer-from-conditionals(
+                    $condition-links[@type="set"], $params, "set")
+            )
             where exists($phony-layers)
             return 
                 element j:concurrent {
@@ -187,29 +219,34 @@ declare function phony:j-concurrent(
     element j:concurrent {
         $e/@*,
         phony:phony-layer($e/node(), $params),
-        phony:phony-layer-from-conditionals(phony:doc-condition-links($e), $params)
+        let $condition-links := phony:doc-condition-links($e)
+        let $conditional-links := $condition-links[@type="condition"]
+        let $settings-links := $condition-links[@type="set"]
+        return (
+            phony:phony-layer-from-conditionals($conditional-links, $params, "conditional"),
+            phony:phony-layer-from-conditionals($settings-links, $params, "set")
+        )
     }
 };
 
 declare function phony:phony-layer-from-conditionals(
     $e as element(tei:link)*,
-    $params as map
+    $params as map,
+    $phony-type as xs:string
     ) as element(j:layer)* {
     for $link at $n in $e
-    where $link/@type="condition"
+    where $link/@type=("condition","set")
     return
         let $targets := tokenize($link/@target, '\s+')
-        let $dest := uri:fast-follow($targets[1], $link, uri:follow-steps($link))
-        where exists($dest[1]/ancestor::j:streamText) and (
-            every $d in $dest satisfies not($d instance of element(j:option))
-        )
+        let $dest := uri:fast-follow($targets[1], $link, 0) (: follow only 1 step -- dest might be a ptr :)
+        where exists($dest[1]/parent::j:streamText) 
         return
             element j:layer {
-                attribute type { "phony" },
-                attribute xml:id { "phony-conditional-" || string($n) },
-                element jf:conditional {
-                    attribute jf:conditional { $targets[2] },
-                    if ($targets[3])
+                attribute type { "phony-" || $phony-type },
+                attribute xml:id { "phony-" || $phony-type || "-" || string($n) },
+                element {"jf:" || $phony-type } {
+                    attribute { "jf:" || $phony-type } { $targets[2] },
+                    if ($phony-type="conditional" and $targets[3])
                     then attribute jf:conditional-instruction { $targets[3] }
                     else (),
                     element tei:ptr { attribute target { $targets[1] } }

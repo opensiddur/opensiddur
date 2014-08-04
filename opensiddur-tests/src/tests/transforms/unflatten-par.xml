@@ -5,7 +5,7 @@
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
-                <tei:title type="main">Linkage A to B</tei:title>
+                <tei:title type="main">Parallel texts A and B</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
                 <tei:distributor>
@@ -25,12 +25,14 @@
     </tei:teiHeader>
     <tei:text>
         <j:parallelText xml:id="parallel">
-            <tei:idno>AB</tei:idno>
-            <tei:linkGrp domains="/data/original/parallel-part-A#stream /data/original/parallel-part-B#stream">
-                <tei:link target="/data/original/parallel-part-A#A1 /data/original/parallel-part-B#B1"/>
-                <tei:link target="/data/original/parallel-part-A#range(A2,A4) /data/original/parallel-part-B#range(B2,B4)"/>
-                <tei:link target="/data/original/parallel-part-A#range(A5,A7) /data/original/parallel-part-B#range(B5,B7)"/>
-                <tei:link target="/data/original/parallel-part-A#range(A8,A9) /data/original/parallel-part-B#range(B8,B9)"/>
+            <tei:idno>Test</tei:idno>
+            <tei:linkGrp domains="/data/tests/unflatten-parA#stream /data/tests/unflatten-parB#stream">
+                <tei:link target="/data/tests/unflatten-parA#range(A1,A3) /data/tests/unflatten-parB#B1"/>
+                <tei:link target="/data/tests/unflatten-parA#range(A5,A6) /data/tests/unflatten-parB#B2"/>
+                <tei:link target="/data/tests/unflatten-parA#range(A7,A8) /data/tests/unflatten-parB#B3"/>
+                <tei:link target="/data/tests/unflatten-parA#range(A11,A12) /data/tests/unflatten-parB#B4"/>
+                <tei:link target="/data/tests/unflatten-parA#range(A14,A15) /data/tests/unflatten-parB#B5"/>
+                <tei:link target="/data/tests/unflatten-parA#range(A16,A17) /data/tests/unflatten-parB#B6"/>
             </tei:linkGrp>
         </j:parallelText>
    </tei:text>

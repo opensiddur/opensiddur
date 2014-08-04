@@ -210,7 +210,7 @@
         orig:get-combined-html("HasTransclude", true())
       ]]></code> 
       <xpath desc="Returns an HTML resource">exists(./html:html)</xpath>
-      <xpath desc="The returned resource is combined">exists(./html:html//html:div[matches(@data-document,"^(/exist/restxq)?/api/data/original/Transcluded$")])</xpath>
+      <xpath desc="The returned resource is combined">exists(./html:html//html:div[matches(@data-document,"^((/exist/restxq)?/api)?/data/original/Transcluded$")])</xpath>
       <xpath desc="Transcluded section is there">exists(./html:html//html:div[contains(@class,"id-tr_seg1")])</xpath>
     </test>
     <test>

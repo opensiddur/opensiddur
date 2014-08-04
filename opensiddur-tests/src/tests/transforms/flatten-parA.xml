@@ -5,7 +5,7 @@
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
-                <tei:title type="main">Linkage A to B</tei:title>
+                <tei:title type="main">Parallel text A</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
                 <tei:distributor>
@@ -17,22 +17,23 @@
                 <tei:date>2014-03-19</tei:date>
             </tei:publicationStmt>
             <tei:sourceDesc>
-                <tei:link type="bibl" target="#parallel /data/sources/Born%20Digital"/>
+                <tei:link type="bibl" target="#stream /data/sources/Born%20Digital"/>
             </tei:sourceDesc>
         </tei:fileDesc>
         <tei:revisionDesc>
         </tei:revisionDesc>
     </tei:teiHeader>
     <tei:text>
-        <j:parallelText xml:id="parallel">
-            <tei:idno>AB</tei:idno>
-            <tei:linkGrp domains="/data/original/parallel-part-A#stream /data/original/parallel-part-B#stream">
-                <tei:link target="/data/original/parallel-part-A#A1 /data/original/parallel-part-B#B1"/>
-                <tei:link target="/data/original/parallel-part-A#range(A2,A4) /data/original/parallel-part-B#range(B2,B4)"/>
-                <tei:link target="/data/original/parallel-part-A#range(A5,A7) /data/original/parallel-part-B#range(B5,B7)"/>
-                <tei:link target="/data/original/parallel-part-A#range(A8,A9) /data/original/parallel-part-B#range(B8,B9)"/>
-            </tei:linkGrp>
-        </j:parallelText>
+        <j:streamText xml:id="stream">
+            <tei:seg xml:id="A1">A-1</tei:seg>
+            <tei:seg xml:id="A2">A-2</tei:seg>
+            <tei:seg xml:id="A3">A-3</tei:seg>
+            <tei:seg xml:id="A4">A-4</tei:seg>
+            <tei:seg xml:id="A5">A-5</tei:seg>
+            <tei:seg xml:id="A6">A-6</tei:seg>
+            <tei:seg xml:id="A7">A-7</tei:seg>
+            <tei:seg xml:id="A8">A-8</tei:seg>
+            <tei:seg xml:id="A9">A-9</tei:seg>
+        </j:streamText>
    </tei:text>
 </tei:TEI>
-

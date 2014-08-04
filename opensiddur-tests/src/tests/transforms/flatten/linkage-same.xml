@@ -26,8 +26,8 @@
     <tei:text>
         <j:parallelText xml:id="parallel">
             <tei:idno>AB</tei:idno>
-            <tei:linkGrp domains="/data/tests/parallel-same-A#stream /data/tests/parallel-simple-B#stream">
-                <tei:link target="/data/tests/parallel-same-A#A1 /data/tests/parallel-simple-B#B1"/>
+            <tei:linkGrp domains="/data/original/parallel-same-A#stream /data/original/parallel-simple-B#stream">
+                <tei:link target="/data/original/parallel-same-A#A1 /data/original/parallel-simple-B#B1"/>
             </tei:linkGrp>
         </j:parallelText>
    </tei:text>

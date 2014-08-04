@@ -9,7 +9,7 @@
   </tei:teiHeader>  
   <tei:text>
     <j:concurrent>
-      <jf:layer type="div" jf:id="div-layer" jf:layer-id="div-layer">
+      <jf:layer type="div" jf:id="div-layer" jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/inline1.xml#div-layer">
         <tei:div
           jf:start="div1"
           jf:position="1"
@@ -17,7 +17,7 @@
           jf:nchildren="-1"
           jf:nlevels="1"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/inline1.xml#div-layer"
           jf:id="div1"/>
         <tei:head
           jf:position="1"
@@ -25,7 +25,7 @@
           jf:nchildren="-1"
           jf:nlevels="2"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/inline1.xml#div-layer"
           >title</tei:head>
         <tei:ab
           jf:start="..."
@@ -34,7 +34,7 @@
           jf:nchildren="-1"
           jf:nlevels="2"
           jf:nprecedents="2"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/inline1.xml#div-layer"
           />
         <tei:label
           jf:position="1"
@@ -42,7 +42,7 @@
           jf:nchildren="-1"
           jf:nlevels="3"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/inline1.xml#div-layer"
           >Label</tei:label>
         <jf:placeholder
           jf:position="1"
@@ -59,7 +59,7 @@
           jf:nchildren="1"
           jf:nlevels="-2"
           jf:nprecedents="2"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/inline1.xml#div-layer"
           />
         <tei:div
           jf:end="div1"
@@ -68,11 +68,11 @@
           jf:nchildren="1"
           jf:nlevels="-1"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/inline1.xml#div-layer"
           />
       </jf:layer>
     </j:concurrent>
-    <j:streamText xml:id="stream">
+    <j:streamText jf:id="stream">
       <tei:seg xml:id="seg1">One segment</tei:seg>
     </j:streamText>
   </tei:text>

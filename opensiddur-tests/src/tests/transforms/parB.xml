@@ -35,5 +35,12 @@
             <tei:seg xml:id="B8">B-8</tei:seg>
             <tei:seg xml:id="B9">B-9</tei:seg>
         </j:streamText>
+        <j:concurrent>
+            <j:layer type="p">
+                <tei:p>
+                    <tei:ptr target="#range(B1,B9)"/>
+                </tei:p>
+            </j:layer>
+        </j:concurrent>
    </tei:text>
 </tei:TEI>

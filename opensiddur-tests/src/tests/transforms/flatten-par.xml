@@ -5,7 +5,7 @@
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
-                <tei:title type="main">Linkage A to B</tei:title>
+                <tei:title type="main">Parallel texts A and B</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
                 <tei:distributor>
@@ -25,12 +25,17 @@
     </tei:teiHeader>
     <tei:text>
         <j:parallelText xml:id="parallel">
-            <tei:idno>AB</tei:idno>
-            <tei:linkGrp domains="/data/original/parallel-part-A#stream /data/original/parallel-part-B#stream">
-                <tei:link target="/data/original/parallel-part-A#A1 /data/original/parallel-part-B#B1"/>
-                <tei:link target="/data/original/parallel-part-A#range(A2,A4) /data/original/parallel-part-B#range(B2,B4)"/>
-                <tei:link target="/data/original/parallel-part-A#range(A5,A7) /data/original/parallel-part-B#range(B5,B7)"/>
-                <tei:link target="/data/original/parallel-part-A#range(A8,A9) /data/original/parallel-part-B#range(B8,B9)"/>
+            <tei:idno>Test</tei:idno>
+            <tei:linkGrp domains="/data/tests/flatten-parA#stream /data/tests/flatten-parB#stream">
+                <!-- A-1 is not part of the parallelism -->
+                <!-- link without range -->
+                <tei:link target="/data/tests/flatten-parA#A2 /data/tests/flatten-parB#A1"/>
+                <!-- link with range, same size -->
+                <tei:link target="/data/tests/flatten-parA#range(A3,A5) /data/tests/flatten-parB#range(A2,A4)"/>
+                <!-- skip both A#A6 and B#A5 -->
+                <!-- link with range, different sizes -->
+                <tei:link target="/data/tests/flatten-parA#range(A7,A8) /data/tests/flatten-parB#range(A6,A8)"/>
+                <!-- A9 and B9 are not part of the parallelism -->
             </tei:linkGrp>
         </j:parallelText>
    </tei:text>

@@ -82,6 +82,8 @@ declare function combine:combine(
                     (: TODO: add other model.resourceLike elements above :)
                     case element(jf:unflattened)
                     return combine:jf-unflattened($node, $updated-params)
+                    case element(jf:parallelGrp)
+                    return combine:jf-parallelGrp($node, $updated-params)
                     default (: other element :) 
                     return combine:element($node, $updated-params)
                 return
@@ -122,7 +124,7 @@ declare function combine:jf-unflattened(
   ) as element(jf:combined) {
   element jf:combined {
     $e/@*,
-    if ($e/@type="parallel")
+    if ($e/ancestor::jf:parallel-document)
     then
         (: parallel texts cannot be redirected :) 
         combine:combine($e/node(), $params)
@@ -152,6 +154,26 @@ declare function combine:element(
   }
 };
 
+(:~ a parallelGrp has to align the parallel from here and from the other parallel file :)
+declare function combine:jf-parallelGrp(
+    $e as element(jf:parallelGrp),
+    $params as map
+    ) as element(jf:parallelGrp) {
+    element jf:parallelGrp {
+        $e/@*,
+        combine:combine($e/node(), $params),
+        let $this-parallelGrp := count($e/preceding-sibling::jf:parallelGrp) + 1
+        let $other-parallel-doc := root($e)/*/tei:TEI[not(. is $e/ancestor::tei:TEI)]
+        for $parallel in $other-parallel-doc//jf:unflattened/jf:parallelGrp[$this-parallelGrp]/jf:parallel
+        return
+            element jf:parallel {
+                combine:new-document-attributes($e, $parallel),
+                $parallel/@*,
+                combine:combine($parallel/node(), combine:new-document-params($parallel, $params))
+            }
+    }
+};
+
 (:~ attributes that change on any context switch :)
 declare function combine:new-context-attributes(
   $context as node()?,
@@ -178,19 +200,27 @@ declare function combine:new-document-attributes(
   $context as node()?,
   $new-doc-nodes as node()*
   ) as node()* {
-  let $document-uri := 
-    mirror:unmirror-path(
-      $format:unflatten-cache,
-      ( 
-        document-uri(root($new-doc-nodes[1])), 
-        ($new-doc-nodes[1]/@uri:document-uri)
-      )[1]
-    )
+  let $document-path := 
+    if ($new-doc-nodes[1]/ancestor::jf:parallel-document)
+    then
+        (: parallel documents are guaranteed to have a @jf:document attribute :)
+        $new-doc-nodes[1]/ancestor::*[@jf:document][1]/@jf:document/string()
+    else
+        replace(
+            data:db-path-to-api(
+                mirror:unmirror-path(
+                  $format:unflatten-cache,
+                  ( 
+                    document-uri(root($new-doc-nodes[1])), 
+                    ($new-doc-nodes[1]/@uri:document-uri)
+                  )[1]
+                )
+            ), "^(/exist/restxq)?/api", "")
   return (
     (: document (as API source ), base URI?, language, source(?), 
      : license, contributors :)
-    attribute jf:document { data:db-path-to-api($document-uri) },
-    attribute jf:license { root($new-doc-nodes[1])//tei:licence/@target },
+    attribute jf:document { $document-path },
+    attribute jf:license { common:TEI-root($new-doc-nodes[1])//tei:licence/@target },
     combine:new-context-attributes($context, $new-doc-nodes)
   )
 };
@@ -214,11 +244,16 @@ declare function combine:new-document-params(
   $params as map,
   $is-redirect as xs:boolean
   ) as map {
-    let $unmirrored-path := 
-        mirror:unmirror-path(
-            $format:unflatten-cache, 
-            document-uri(root($new-doc-nodes[1])))
-    let $unmirrored-doc := doc($unmirrored-path)
+    let $unmirrored-doc := 
+        if ($new-doc-nodes[1]/ancestor::jf:parallel-document)
+        then
+            data:doc($new-doc-nodes[1]/ancestor::tei:TEI/@jf:document)
+        else 
+            doc(
+                mirror:unmirror-path(
+                    $format:unflatten-cache, 
+                    document-uri(root($new-doc-nodes[1])))
+            )
     let $new-setting-links := $unmirrored-doc//tei:link[@type="set"]
     let $all-setting-links := ($params("combine:setting-links"), $new-setting-links)
     let $new-params := map:new((
@@ -259,8 +294,8 @@ declare function combine:update-settings-from-standoff-markup(
         (: this is more complex --
             need to handle overrides, so each of these ancestors has to be treated separately, and in document order
          :)
-        then $e/ancestor-or-self::*[@jf:id|@xml:id][1]
-        else if (exists($e/(@jf:id|@xml:id)))
+        then $e/ancestor-or-self::*[@jf:set]
+        else if (exists($e/(@jf:set)))
         then $e
         else ()
     return
@@ -271,22 +306,9 @@ declare function combine:update-settings-from-standoff-markup(
                 map {
                     "combine:settings" := map:new((
                         $params("combine:settings"),
-                        let $unmirrored := 
-                            if (
-                                exists($base-context/self::jf:unflattened[@type="parallel"]) 
-                                or exists($base-context/self::jf:parallelGrp)
-                                or exists($base-context/self::jf:parallel)
-                            ) 
-                            then
-                                (: use the settings from the linkage file :) 
-                                $params("combine:unmirrored-doc")[2]//id($base-context/(@xml:id, @jf:id)[1]) 
-                            else
-                                (: use the settings from the original file :) 
-                                $params("combine:unmirrored-doc")[1]//id($base-context/(@xml:id, @jf:id)[1])
-                        for $standoff-link in 
-                            ridx:query($params("combine:setting-links"), $unmirrored, 1, $new-context)
-                        let $link-target := tokenize($standoff-link/(@target|@targets), '\s+')[2]
-                        let $link-dest := uri:fast-follow($link-target, $unmirrored, uri:follow-steps($unmirrored))
+                        for $context in $base-context,
+                            $setting in tokenize($context/@jf:set, '\s+')
+                        let $link-dest := uri:fast-follow($setting, $context, uri:follow-steps($context))
                         where $link-dest instance of element(tei:fs)
                         return combine:tei-fs-to-map($link-dest, $params)
                     ))
@@ -407,6 +429,10 @@ declare function combine:translation-redirect(
         )
     return
         (: there is a translation redirect :)
+        let $destination-doc :=
+            replace(
+                data:db-path-to-api(document-uri(root($destination-stream))),
+                "(/exist/restxq)?/api", "")
         let $destination-domain := 
             replace(
                 data:db-path-to-api(document-uri(root($destination-stream))) || "#" || 
@@ -416,15 +442,15 @@ declare function combine:translation-redirect(
             let $translated-stream-root := root($translated-stream-unmirrored)
             let $deps := format:unflatten-dependencies($translated-stream-root, map {})
             return format:unflatten($translated-stream-root, map {}, $translated-stream-root)
-        let $destination-stream-domain := $mirrored-translation-doc//jf:unflattened[@jf:domain=$destination-domain]
+        let $destination-stream-domain := $mirrored-translation-doc//tei:TEI[@jf:document=$destination-doc]//jf:unflattened
         let $redirect-begin :=
             if ($destination[1] instance of element(jf:unflattened))
             then $destination-stream-domain
-            else $destination-stream-domain//jf:parallel[@domain=$destination-domain]/*[@jf:id=$destination/@jf:id][1]/ancestor::jf:parallelGrp
+            else $destination-stream-domain//jf:parallel/*[@jf:id=$destination/@jf:id][1]/ancestor::jf:parallelGrp
         let $redirect-end :=
             if ($destination[last()] instance of element(jf:unflattened))
             then $destination-stream-domain
-            else $destination-stream-domain//jf:parallel[@domain=$destination-domain]/*[@jf:id=$destination/@jf:id][last()]/ancestor::jf:parallelGrp
+            else $destination-stream-domain//jf:parallel/*[@jf:id=$destination/@jf:id][last()]/ancestor::jf:parallelGrp
         let $redirect := 
             $redirect-begin | 
             $redirect-begin/following-sibling::* intersect $redirect-end/preceding-sibling::* |

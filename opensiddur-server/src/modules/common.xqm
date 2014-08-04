@@ -3,7 +3,7 @@ xquery version "3.0";
  : Common functions for the transform
  :
  : Open Siddur Project
- : Copyright 2011-2013 Efraim Feinstein 
+ : Copyright 2011-2014 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :)
@@ -11,12 +11,17 @@ module namespace common="http://jewishliturgy.org/transform/common";
 
 import module namespace debug="http://jewishliturgy.org/transform/debug"
 	at "debug.xqm";
+import module namespace data="http://jewishliturgy.org/modules/data"
+	at "data.xqm";
+import module namespace mirror="http://jewishliturgy.org/modules/mirror"
+	at "mirror.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri" 
 	at "follow-uri.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
+declare namespace error="http://jewishliturgy.org/errors";
 
 (:~ generate a unique, persistent id for a node. replace with xsl:generate-id()
  : @param $node node to create an id for
@@ -206,6 +211,48 @@ declare function common:original-document-uri(
       )
   return    
     ($closest-jf-document-uri, $document-uri)[1]
+};
+
+(:~ return the original path from which a node derives. The path generally begins with /data.
+ : The search path is:
+ :  * If @jf:document exists in an ancestor, return its value
+ :  * If the node is in a cached document, unmirror it
+ :  * Otherwise, return the API path (without /api prefixing)
+ :  * If an API path does not exist (as happens in tests), return the document URI
+ :)
+declare function common:original-document-path(
+    $node as node()
+    ) as xs:string {
+    let $document-uri := document-uri(root($node))
+    let $jf-document := $node/ancestor-or-self::*[@jf:document][1]/@jf:document/string()
+    return
+        if ($jf-document)
+        then $jf-document
+        else 
+            let $api-path := 
+                try {
+                    data:db-path-to-api(
+                        if (starts-with($document-uri, "/db/cache"))
+                        then (: (1) / (2) db / (3) cache / (4) type / (5) path... :)
+                            let $cache-type := string-join(subsequence(tokenize($document-uri, "/"), 1, 4), "/")
+                            return mirror:unmirror-path($cache-type, $document-uri)
+                        else $document-uri
+                    )
+                }
+                catch error:NOTIMPLEMENTED {
+                    $document-uri
+                }
+            return replace($api-path, "^(/exist/restxq)?(/api)?", "") 
+};
+
+(:~ return the effective TEI root of a document.
+ : In most cases, it's the same as the document-node()/tei:TEI
+ : however, in cases of parallel documents, it may be one of many tei:TEI elements
+ :)
+declare function common:TEI-root(
+    $node as node()
+    ) as element(tei:TEI) {
+    $node/ancestor-or-self::tei:TEI[1]
 };
 
 (:~ apply an identity transform until reaching
