@@ -483,7 +483,7 @@
     </test>
 -->
   </TestSet>
-  <TestSet ignore="yes">
+  <TestSet>
       <testName>Conditionals and parallel texts</testName>
       <setup>
           <code><![CDATA[

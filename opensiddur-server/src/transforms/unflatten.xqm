@@ -120,9 +120,7 @@ declare function unflatten:iterate-parallel-suspend-and-continue(
                     then ($opened-elements, $s) 
                     else if ($s/@jf:end|$s/@jf:suspend)
                     then 
-                        remove($opened-elements, 
-                            index-of($opened-elements, $opened-elements[(@jf:start,@jf:continue)=$s/(@jf:suspend, @jf:end)])
-                        )
+                        $opened-elements[not((@jf:start,@jf:continue)=$s/(@jf:suspend, @jf:end))]
                     else $opened-elements
                 return ($s,
                     unflatten:iterate-parallel-suspend-and-continue(
