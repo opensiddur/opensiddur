@@ -76,26 +76,68 @@
             ]]></code>
             <xpath desc="j:streamText has a @jf:conditional attribute">.//j:streamText/@jf:conditional="#cond1"</xpath>
             <xpath desc="new concurrent section added">exists(.//j:concurrent[j:layer])</xpath>
-            <xpath desc="3 layers of type phony added">count(.//j:concurrent/j:layer[@type="phony"])=3</xpath>
-            <xpath desc="each of the layers has a @xml:id attribute">every $l in .//j:concurrent/j:layer[@type="phony"] satisfies $l/@xml:id/string()</xpath>
-            <xpath desc="the first layer has an xml:id that is different from the second">not(.//j:concurrent/j:layer[@type='phony'][1]/@xml:id/string()=.//j:concurrent/j:layer[@type="phony"][2]/@xml:id/string())</xpath>
-            <expected desc="one layer represents the first conditional" xpath=".//j:concurrent/j:layer[@type='phony'][1]/jf:conditional">
+            <xpath desc="3 layers of type phony added">count(.//j:concurrent/j:layer[@type="phony-conditional"])=3</xpath>
+            <xpath desc="each of the layers has a @xml:id attribute">every $l in .//j:concurrent/j:layer[@type="phony-conditional"] satisfies $l/@xml:id/string()</xpath>
+            <xpath desc="the first layer has an xml:id that is different from the second">not(.//j:concurrent/j:layer[@type='phony-conditional'][1]/@xml:id/string()=.//j:concurrent/j:layer[@type="phony-conditional"][2]/@xml:id/string())</xpath>
+            <expected desc="one layer represents the first conditional" xpath=".//j:concurrent/j:layer[@type='phony-conditional'][1]/jf:conditional">
                 <jf:conditional jf:conditional="#cond1">
                     <tei:ptr target="#seg1"/>
                 </jf:conditional>
             </expected>
-            <expected desc="one layer represents the second conditional" xpath=".//j:concurrent/j:layer[@type='phony'][2]/jf:conditional">
+            <expected desc="one layer represents the second conditional" xpath=".//j:concurrent/j:layer[@type='phony-conditional'][2]/jf:conditional">
                 <jf:conditional jf:conditional="#cond1">
                     <tei:ptr target="#range(seg2,seg3)"/>
                 </jf:conditional>
             </expected>
-            <expected desc="one layer represents the third conditional, references the instruction" xpath=".//j:concurrent/j:layer[@type='phony'][3]/jf:conditional">
+            <expected desc="one layer represents the third conditional, references the instruction" xpath=".//j:concurrent/j:layer[@type='phony-conditional'][3]/jf:conditional">
                 <jf:conditional jf:conditional="#cond1" jf:conditional-instruction="#instruction">
                     <tei:ptr target="#seg4"/>
                 </jf:conditional>
             </expected>
             <xpath desc="first j:option has conditional attributes with no instruction">.//j:option[@xml:id="opt1"]/(@jf:conditional="#cond1" and empty(@jf:conditional-instruction))</xpath>
             <xpath desc="second j:option has conditional attributes and instruction">.//j:option[@xml:id="opt2"]/(@jf:conditional="#cond2" and @jf:conditional-instruction="#instruction")</xpath>
+        </test>
+    </TestSet>
+    <TestSet>
+        <testName>Settings, no concurrent</testName>
+        <setup>
+            <copy source="/db/apps/opensiddur-tests/tests/transforms"
+                name="phony4.xml"
+                destination="/db/data/original"/>
+            <code><![CDATA[
+            ridx:reindex(doc("/db/data/original/phony4.xml"))
+            ]]></code>
+        </setup>
+        <tearDown>
+            <remove-document collection="/db/data/original" name="phony4.xml"/>
+            <code><![CDATA[
+            ridx:remove("/db/data/original", "phony4.xml")
+            ]]></code>
+        </tearDown>
+        <test>
+            <task>settings with streamText only</task>
+            <code><![CDATA[
+            phony:phony-layer-document(
+                doc("/db/data/original/phony4.xml"),
+                map {}
+            )
+            ]]></code>
+            <xpath desc="j:streamText has a @jf:set attribute">.//j:streamText/@jf:set="#set1"</xpath>
+            <xpath desc="new concurrent section added">exists(.//j:concurrent[j:layer])</xpath>
+            <xpath desc="2 layers of type phony-set added">count(.//j:concurrent/j:layer[@type="phony-set"])=2</xpath>
+            <xpath desc="each of the layers has a @xml:id attribute">every $l in .//j:concurrent/j:layer[@type="phony-set"] satisfies $l/@xml:id/string()</xpath>
+            <xpath desc="the first layer has an xml:id that is different from the second">not(.//j:concurrent/j:layer[@type='phony-set'][1]/@xml:id/string()=.//j:concurrent/j:layer[@type="phony-set"][2]/@xml:id/string())</xpath>
+            <expected desc="one layer represents the first setting" xpath=".//j:concurrent/j:layer[@type='phony-set'][1]/jf:set">
+                <jf:set jf:set="#set1">
+                    <tei:ptr target="#seg1"/>
+                </jf:set>
+            </expected>
+            <expected desc="one layer represents the second setting" xpath=".//j:concurrent/j:layer[@type='phony-set'][2]/jf:set">
+                <jf:set jf:set="#set1">
+                    <tei:ptr target="#range(seg2,seg3)"/>
+                </jf:set>
+            </expected>
+            <xpath desc="a setting referenced inside a streamText element results in @jf:set">.//tei:w[@xml:id="w1"]/@jf:set="#set2"</xpath>
         </test>
     </TestSet>
     <TestSet>
@@ -122,13 +164,46 @@
                 map {}
             )
             ]]></code>
-            <xpath desc="1 layer of type phony added">count(.//j:concurrent/j:layer[@type="phony"])=1</xpath>
+            <xpath desc="1 layer of type phony added">count(.//j:concurrent/j:layer[@type="phony-conditional"])=1</xpath>
             <xpath desc="concurrent condition appears as an attribute on all divs in the layer">count(.//j:layer/tei:div[contains(@jf:conditional, "#cond2")])=2</xpath>
             <xpath desc="concurrent condition does not appear as an attribute on any elements that are not direct descendents of j:layer">count(*[contains(@jf:conditional, "#cond2")][not(parent::j:layer)])=0</xpath>
             <xpath desc="range reference results in @jf:conditional">every $ab in .//tei:ab[@xml:id=("ab1","ab2")] satisfies $ab/@jf:conditional="#cond1"</xpath>
             <xpath desc="direct reference results in @jf:conditional, along with concurrent condition">contains(.//tei:div[@xml:id="div2"]/@jf:conditional, "#cond1")</xpath>
             <xpath desc="@jf:conditional is not added when there is no condition">empty(.//tei:ab[@xml:id="ab3"]/@jf:conditional)</xpath>
             <xpath desc="@jf:conditional is not added for j:layer">empty(.//j:layer/@jf:conditional)</xpath>
+        </test>
+    </TestSet>
+    <TestSet>
+        <testName>Settings with layers</testName>
+        <setup>
+            <copy source="/db/apps/opensiddur-tests/tests/transforms"
+                name="phony5.xml"
+                destination="/db/data/original"/>
+            <code><![CDATA[
+            ridx:reindex(doc("/db/data/original/phony5.xml"))
+            ]]></code>
+        </setup>
+        <tearDown>
+            <remove-document collection="/db/data/original" name="phony5.xml"/>
+            <code><![CDATA[
+            ridx:remove("/db/data/original", "phony5.xml")
+            ]]></code>
+        </tearDown>
+        <test>
+            <task>conditionals with layers</task>
+            <code><![CDATA[
+            phony:phony-layer-document(
+                doc("/db/data/original/phony5.xml"),
+                map {}
+            )
+            ]]></code>
+            <xpath desc="1 layer of type phony added">count(.//j:concurrent/j:layer[@type="phony-set"])=1</xpath>
+            <xpath desc="concurrent setting appears as an attribute on all divs in the layer">count(.//j:layer/tei:div[contains(@jf:set, "#set2")])=2</xpath>
+            <xpath desc="concurrent setting does not appear as an attribute on any elements that are not direct descendents of j:layer">count(*[contains(@jf:set, "#set2")][not(parent::j:layer)])=0</xpath>
+            <xpath desc="range reference results in @jf:set">every $ab in .//tei:ab[@xml:id=("ab1","ab2")] satisfies $ab/@jf:set="#set1"</xpath>
+            <xpath desc="direct reference results in @jf:set, along with concurrent condition">contains(.//tei:div[@xml:id="div2"]/@jf:set, "#set1")</xpath>
+            <xpath desc="@jf:set is not added when there is no condition">empty(.//tei:ab[@xml:id="ab3"]/@jf:set)</xpath>
+            <xpath desc="@jf:set is not added for j:layer">empty(.//j:layer/@jf:set)</xpath>
         </test>
     </TestSet>
 </TestSuite>
