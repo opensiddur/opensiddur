@@ -29,15 +29,17 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 declare variable $flatten:layer-order := map {
     "none" := 0,
     "parallel" := 1,
-    "div" := 2,
-    "p"   := 3,
-    "lg"  := 4,
-    "s"   := 5,
-    "ab"  := 6,
-    "verse" := 7,
-    "l"   := 8,
-    "cit" := 9,
-    "choice" := 10
+    "phony-set" := 2,
+    "phony-conditional" := 3,
+    "div" := 4,
+    "p"   := 5,
+    "lg"  := 6,
+    "s"   := 7,
+    "ab"  := 8,
+    "verse" := 9,
+    "l"   := 10,
+    "cit" := 11,
+    "choice" := 12
   };
 
 (:~ order the given flattened nodes, using the information in 
