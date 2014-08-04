@@ -34,17 +34,17 @@
     <j:conditions>
         <j:condition xml:id="offExt">
             <tei:fs type="SET1">
-                <tei:f name="OFF"><j:yes/></tei:f>
+                <tei:f name="OFF"><j:no/></tei:f>
             </tei:fs>
         </j:condition>
         <j:condition xml:id="offInA">
             <tei:fs type="SET2">
-                <tei:f name="OFF"><j:yes/></tei:f>
+                <tei:f name="OFF"><j:no/></tei:f>
             </tei:fs>
         </j:condition>
         <j:condition xml:id="offInASetA">
             <tei:fs type="SET4">
-                <tei:f name="OFF"><j:yes/></tei:f>
+                <tei:f name="OFF"><j:no/></tei:f>
             </tei:fs>
         </j:condition>
     </j:conditions>

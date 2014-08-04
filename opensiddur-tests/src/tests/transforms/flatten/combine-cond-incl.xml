@@ -25,7 +25,7 @@
     </tei:teiHeader>
     <j:settings>
         <tei:fs xml:id="set1" type="SET1">
-            <tei:f name="OFF"><j:no/></tei:f>
+            <tei:f name="OFF"><j:yes/></tei:f>
         </tei:fs>
         <tei:fs xml:id="tr" type="opensiddur">
             <tei:f name="translation">Test</tei:f>
