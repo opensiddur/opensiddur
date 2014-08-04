@@ -294,8 +294,8 @@ declare function combine:update-settings-from-standoff-markup(
         (: this is more complex --
             need to handle overrides, so each of these ancestors has to be treated separately, and in document order
          :)
-        then $e/ancestor-or-self::*[@jf:id|@xml:id][1]
-        else if (exists($e/(@jf:id|@xml:id)))
+        then $e/ancestor-or-self::*[@jf:set]
+        else if (exists($e/(@jf:set)))
         then $e
         else ()
     return
@@ -306,25 +306,9 @@ declare function combine:update-settings-from-standoff-markup(
                 map {
                     "combine:settings" := map:new((
                         $params("combine:settings"),
-                        let $unmirrored := 
-                            if (
-                                exists($base-context/self::jf:parallelGrp)
-                                or exists($base-context/self::jf:parallel)
-                            ) 
-                            then
-                                (: use the settings from the linkage file :) 
-                                $params("combine:unmirrored-doc")[2]//id($base-context/(@xml:id, @jf:id)[1]) 
-                            else if ($base-context/ancestor::jf:parallel-document)
-                            then
-                                (: use settings from the active original file :)
-                                data:doc($base-context/ancestor-or-self::tei:TEI/@jf:document)//id($base-context/(@xml:id, @jf:id)[1])
-                            else
-                                (: use the settings from the original file :) 
-                                $params("combine:unmirrored-doc")[1]//id($base-context/(@xml:id, @jf:id)[1])
-                        for $standoff-link in 
-                            ridx:query($params("combine:setting-links"), $unmirrored, 1, $new-context)
-                        let $link-target := tokenize($standoff-link/(@target|@targets), '\s+')[2]
-                        let $link-dest := uri:fast-follow($link-target, $unmirrored, uri:follow-steps($unmirrored))
+                        for $context in $base-context,
+                            $setting in tokenize($context/@jf:set, '\s+')
+                        let $link-dest := uri:fast-follow($setting, $context, uri:follow-steps($context))
                         where $link-dest instance of element(tei:fs)
                         return combine:tei-fs-to-map($link-dest, $params)
                     ))

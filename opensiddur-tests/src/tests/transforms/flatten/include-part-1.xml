@@ -33,7 +33,7 @@
     </j:links>
     <tei:text>
         <j:streamText xml:id="stream">
-            <tei:ptr xml:id="inc1" target="/data/tests/parallel-part-A#range(A2,A7)"/>
+            <tei:ptr xml:id="inc1" target="/data/original/parallel-part-A#range(A2,A7)"/>
         </j:streamText>
    </tei:text>
 </tei:TEI>

@@ -24,10 +24,10 @@
         </tei:revisionDesc>
     </tei:teiHeader>
     <j:settings>
-        <tei:fs xml:id="set3" name="SET3">
+        <tei:fs xml:id="set3" type="SET3">
             <tei:f name="OFF"><j:yes/></tei:f>
         </tei:fs>
-        <tei:fs xml:id="set5" name="SET5">
+        <tei:fs xml:id="set5" type="SET5">
             <tei:f name="OFF"><j:yes/></tei:f>
         </tei:fs>
     </j:settings>
