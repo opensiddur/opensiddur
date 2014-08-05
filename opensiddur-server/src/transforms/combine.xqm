@@ -492,7 +492,7 @@ declare function combine:follow-pointer(
           (: Already in the cache, no need to try to 
           find a cache of a cached document :) 
         )
-      )
+      )[1]  (: TODO: this will cause an issue with broken up elements, but it necessary for when there are duplicates from repetition :)
     return
       element {QName(namespace-uri($wrapping-element), name($wrapping-element))} {
         $wrapping-element/@*,
