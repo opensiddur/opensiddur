@@ -233,7 +233,7 @@ declare function combine:new-document-params(
 };
 
 (:~ change parameters as required for entry into a new document
- : manages "combine:unmirrored-doc", "combine:setting-links", resets "combine:conditional-layers" 
+ : manages "combine:unmirrored-doc", resets "combine:conditional-layers" 
  : 
  : @param $new-doc-nodes The newly active document
  : @param $params Already active parameters
@@ -254,8 +254,6 @@ declare function combine:new-document-params(
                     $format:unflatten-cache, 
                     document-uri(root($new-doc-nodes[1])))
             )
-    let $new-setting-links := $unmirrored-doc//tei:link[@type="set"]
-    let $all-setting-links := ($params("combine:setting-links"), $new-setting-links)
     let $new-params := map:new((
         $params,
         map { 
@@ -263,7 +261,6 @@ declare function combine:new-document-params(
                 if ($is-redirect)
                 then ($params("combine:unmirrored-doc"), $unmirrored-doc)
                 else $unmirrored-doc,
-            "combine:setting-links" := $all-setting-links,
             "combine:conditional-layers" := map {}
         }
     ))
@@ -281,7 +278,7 @@ declare function combine:update-params(
 
 (:~ update parameters with settings from standoff markup.
  : feature structures are represented by type->name := value
- : @param $params uses the combine:setting-links parameter, maintains the combine:settings parameter
+ : @param $params maintains the combine:settings parameter
  : @param $new-context true() if this is a new context 
  :)
 declare function combine:update-settings-from-standoff-markup(
@@ -446,11 +443,11 @@ declare function combine:translation-redirect(
         let $redirect-begin :=
             if ($destination[1] instance of element(jf:unflattened))
             then $destination-stream-domain
-            else $destination-stream-domain//jf:parallel/*[@jf:id=$destination/@jf:id][1]/ancestor::jf:parallelGrp
+            else $destination-stream-domain//jf:parallel/descendant::*[@jf:id=$destination/@jf:id][1]/ancestor::jf:parallelGrp
         let $redirect-end :=
             if ($destination[last()] instance of element(jf:unflattened))
             then $destination-stream-domain
-            else $destination-stream-domain//jf:parallel/*[@jf:id=$destination/@jf:id][last()]/ancestor::jf:parallelGrp
+            else $destination-stream-domain//jf:parallel/descendant::*[@jf:id=$destination/@jf:id][last()]/ancestor::jf:parallelGrp
         let $redirect := 
             $redirect-begin | 
             $redirect-begin/following-sibling::* intersect $redirect-end/preceding-sibling::* |
@@ -492,7 +489,7 @@ declare function combine:follow-pointer(
           (: Already in the cache, no need to try to 
           find a cache of a cached document :) 
         )
-      )[1]  (: TODO: this will cause an issue with broken up elements, but it necessary for when there are duplicates from repetition :)
+      )
     return
       element {QName(namespace-uri($wrapping-element), name($wrapping-element))} {
         $wrapping-element/@*,
@@ -503,9 +500,9 @@ declare function combine:follow-pointer(
           ((: internal pointer, partial context switch necessary:
             : lang, but not document-uri
            :)
-           combine:new-context-attributes($e, $destination),
+           combine:new-context-attributes($e, $destination[1]),
            combine:combine($destination,
-              combine:update-params($destination, $params)
+              combine:update-params($destination[1], $params)
            )
           )
         else (
@@ -517,10 +514,10 @@ declare function combine:follow-pointer(
                 else
                     (: no translation redirect :) 
                     (
-                        combine:new-document-attributes($e, $destination),
+                        combine:new-document-attributes($e, $destination[1]),
                         combine:combine(
                             $destination,
-                            combine:new-document-params($destination, $params)
+                            combine:new-document-params($destination[1], $params)
                         )
                     )
             )

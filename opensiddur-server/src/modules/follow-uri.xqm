@@ -202,13 +202,13 @@ declare function uri:fast-follow(
           then 
             let $left :=
               let $left-ptr := substring-before(substring-after($fragment, "("), ",")
-              return uri:id($left-ptr, $document)
+              return uri:id($left-ptr, $document)[1]
             let $right := 
               let $right-ptr := substring-before(substring-after($fragment, ","), ")")
-              return uri:id($right-ptr, $document)
+              return uri:id($right-ptr, $document)[1]
             return uri:range($left, $right, $allow-copies)
           else 
-            uri:id($fragment,$document), 
+            uri:id($fragment,$document)[1], 
           $steps, $cache, true(), 
           $intermediate-ptrs
         )
