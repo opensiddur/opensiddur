@@ -107,6 +107,34 @@
     </test>
   </TestSet>
   <TestSet>
+    <testName>Local pointer with multiple repeats</testName>
+    <setup><code><![CDATA[
+    local:setup("combine-repeat.xml","original")
+    ]]></code></setup>
+    <tearDown><code><![CDATA[
+    local:tearDown("combine-repeat.xml","original")
+    ]]></code></tearDown>
+    <test>
+      <task>one segment</task>
+      <code><![CDATA[
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/original/combine-repeat.xml"),
+          map {})
+      ]]></code>
+      <xpath 
+        desc="incorporate destination in-place once each time it is referenced" 
+        >count(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="repeated"])=3
+      </xpath>
+      <xpath 
+        desc="incorporate destination in-place once each time it is referenced" 
+        >every $repeat in ./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[ends-with(@jf:stream,"#stream")] satisfies count($repeat/tei:seg[@jf:id="repeated"])=1
+      </xpath>
+      <xpath desc="no @jf:document attribute on any jf:ptr">
+        empty(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr/@jf:document)
+      </xpath>
+    </test>
+  </TestSet>
+  <TestSet>
     <testName>External pointer</testName>
     <setup><code><![CDATA[
     local:setup("combine1.xml"),
