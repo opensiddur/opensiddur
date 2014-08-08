@@ -435,8 +435,8 @@ declare function combine:translation-redirect(
                 data:db-path-to-api(document-uri(root($destination-stream))) || "#" || 
                     ($destination-stream/(@xml:id, @jf:id, flatten:generate-id(.)))[1],
                 "(/exist/restxq)?/api", "")
+        let $translated-stream-root := root($translated-stream-unmirrored)
         let $mirrored-translation-doc := 
-            let $translated-stream-root := root($translated-stream-unmirrored)
             let $deps := format:unflatten-dependencies($translated-stream-root, map {})
             return format:unflatten($translated-stream-root, map {}, $translated-stream-root)
         let $destination-stream-domain := $mirrored-translation-doc//tei:TEI[@jf:document=$destination-doc]//jf:unflattened
@@ -454,6 +454,12 @@ declare function combine:translation-redirect(
             $redirect-end
         return (
             combine:new-document-attributes($e, $destination),
+            (: make reference to the linkage document :)
+            attribute jf:linkage-document { 
+                replace(
+                    data:db-path-to-api(document-uri($translated-stream-root)),
+                    "(/exist/restxq)?/api", ""
+                ) },
             combine:combine(
                 $redirect,
                 (: new document params looks to the unmirrored doc, so it should go to the unredirected destination too :)

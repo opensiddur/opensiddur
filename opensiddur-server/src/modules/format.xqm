@@ -12,6 +12,8 @@ declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
+import module namespace data="http://jewishliturgy.org/modules/data" 
+  at "data.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror" 
   at "mirror.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri" 
@@ -37,7 +39,7 @@ import module namespace reverse="http://jewishliturgy.org/transform/reverse"
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
-
+declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
 declare variable $format:temp-dir := '.format';
 
@@ -244,15 +246,20 @@ declare function format:unflatten(
     )
 };
 
+declare function format:dependency-is-transformable(
+    $dep-uri as xs:string
+    ) as xs:boolean {
+    (: TODO: add other transformables here... :)
+    matches($dep-uri, "^/db/data/(linkage|original|tests)")
+};
+
 declare function format:get-dependencies(
   $doc as document-node()
   ) as document-node() {
   document {
     <format:dependencies>{
       for $dep in uri:dependency($doc, ())
-      let $transformable := 
-        matches($dep, "^/db/data/(linkage|original|tests)")
-        (: TODO: add other transformables here... :)
+      let $transformable := format:dependency-is-transformable($dep)
       return 
         <format:dependency>{
           if ($transformable)
@@ -296,7 +303,35 @@ declare function format:flatten-external-dependencies(
   where not($dep-doc is $doc)
   return format:flatten($dep-doc, $params, $dep-doc)
 };
-  
+
+(:~ combine may have dependencies on translations as well as directly referenced documents 
+ : fortunately, if a combine cached document exists, it already references all of its dependencies
+ :)
+declare function format:combine-dependencies-up-to-date(
+    $mirror-path as xs:string,
+    $original as item()
+    ) as xs:boolean {
+    let $combine-mirrored :=
+      mirror:doc($mirror-path, 
+          typeswitch($original)
+          case document-node() return document-uri($original)
+          default return $original
+      )
+    let $dependencies := 
+        distinct-values((
+                        $combine-mirrored//@jf:document/string(), 
+                        $combine-mirrored//@jf:linkage-document/string()
+        ))
+    return
+        every $dependency in $dependencies
+        satisfies 
+            let $path := data:api-path-to-db($dependency)
+            return
+                if (format:dependency-is-transformable($path))
+                then mirror:is-up-to-date($format:unflatten-cache, $path)
+                else true() 
+};
+ 
 (:~ perform the transform up to the combine step 
  : @param $doc The document to be transformed
  : @param $params Parameters to pass to the transforms
@@ -308,13 +343,6 @@ declare function format:combine(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  let $no-dependencies-require-combine :=
-    (: need to determine if any dependencies are out of date before unflattening 
-     : if even 1 dependency is out of date, then we need to re-combine
-     :)
-    every $dep in format:dependencies($doc)//format:dependency[@transformable]
-    satisfies mirror:is-up-to-date($format:unflatten-cache, $dep)
-  let $override-apply := function($s as xs:string, $i as item()) as xs:boolean { $no-dependencies-require-combine } 
   let $unflats := format:unflatten-dependencies($doc, $params)
   let $cmb := combine:combine-document(?, $params)
   return
@@ -323,7 +351,7 @@ declare function format:combine(
       mirror:doc($format:unflatten-cache, document-uri($doc)),
       $cmb,
       $original-doc,
-      $override-apply
+      format:combine-dependencies-up-to-date#2
     )
 };
 
