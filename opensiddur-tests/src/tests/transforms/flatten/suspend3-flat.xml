@@ -9,7 +9,7 @@
   </tei:teiHeader>  
   <tei:text>
     <j:concurrent>
-      <jf:layer type="div" jf:id="div-layer" jf:layer-id="div-layer">
+      <jf:layer type="div" jf:id="div-layer" jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/suspend3.xml#div-layer">
         <tei:div
           jf:start="div1"
           jf:position="1"
@@ -17,7 +17,7 @@
           jf:nchildren="-1"
           jf:nlevels="1"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/suspend3.xml#div-layer"
           jf:id="div1"/>
         <tei:ab
           jf:start="ab1"
@@ -27,7 +27,7 @@
           jf:nchildren="-1"
           jf:nlevels="2"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/suspend3.xml#div-layer"
           />
         <jf:placeholder
           jf:position="1"
@@ -44,7 +44,7 @@
           jf:nchildren="1"
           jf:nlevels="-2"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/suspend3.xml#div-layer"
           />
         <tei:div
           jf:suspend="div1"
@@ -53,7 +53,7 @@
           jf:nchildren="1"
           jf:nlevels="-1"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/suspend3.xml#div-layer"
           />
         <tei:div
           jf:continue="div1"
@@ -62,7 +62,7 @@
           jf:nchildren="-1"
           jf:nlevels="1"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/suspend3.xml#div-layer"
           />
         <jf:placeholder
           jf:position="3"
@@ -79,11 +79,11 @@
           jf:nchildren="1"
           jf:nlevels="-1"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/suspend3.xml#div-layer"
           />
       </jf:layer>
     </j:concurrent>
-    <j:streamText xml:id="stream">
+    <j:streamText jf:id="stream">
       <tei:seg xml:id="seg1">One segment</tei:seg>
       <tei:seg xml:id="seg2">Two segments</tei:seg>
       <tei:seg xml:id="seg3">Three segments</tei:seg>

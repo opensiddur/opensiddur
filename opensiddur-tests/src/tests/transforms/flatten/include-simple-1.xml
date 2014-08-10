@@ -33,9 +33,9 @@
     </j:links>
     <tei:text>
         <j:streamText xml:id="stream">
-            <tei:ptr xml:id="inc1" target="/data/tests/parallel-simple-A#stream"/>
-            <tei:ptr xml:id="inc2" target="/data/tests/parallel-simple-B#stream"/>
-            <tei:ptr xml:id="inc3" target="/data/tests/parallel-simple-A#stream"/>
+            <tei:ptr xml:id="inc1" target="/data/original/parallel-simple-A#stream"/>
+            <tei:ptr xml:id="inc2" target="/data/original/parallel-simple-B#stream"/>
+            <tei:ptr xml:id="inc3" target="/data/original/parallel-simple-A#stream"/>
         </j:streamText>
    </tei:text>
 </tei:TEI>

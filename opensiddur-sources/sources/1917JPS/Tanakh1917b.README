@@ -1,0 +1,92 @@
+From: John Isett <isett@aol.com>
+Date: Thu, May 26, 2011 at 6:36 PM
+Subject: [opensiddur-tech] Re: 1917 JPS conversion: Request for help
+To: opensiddur-tech <opensiddur-tech@googlegroups.com>
+
+
+Hi Efraim, Aharon, Ze'ev and others,
+
+Thanks so much for your helpful notes re: the 1917 Tanakh. We are
+looking forward to seeing this excellent work back in use without
+copyright restrictions.
+
+I was able to do some work this week and you are welcome to adapt and
+pass on the files:
+
+http://biblosmedia.com/Tanakh1917/
+
+I uploaded an excel and a text file. I mostly work with excel tables
+and do the programming tasks via sorting and excel formulas. The text
+you converted from the pdf was very clean and nice to work with.
+
+I am fairly confident in the accuracy of the text. I did compare to
+one of my old Nelson texts and corrected / noted obvious typos, with
+other variants noted for checking.
+
+The footnotes were generally well separated from the rest of the text,
+and I should have caught any stray phrases via the Nelson cross
+comparison.
+
+The Hebrew headings are not yet included and at this point will
+probably be easiest to just cut and paste from the original pdf.
+
+Paragraph and poetry formatting were somewhat more subjective and a I
+did insert a fair number of line breaks that were not clear from the
+text file (Most poetry breaks, but not all, had been double spaced in
+the original text file).
+
+The paragraph and poetic formatting is marked as follows:
+
+<p> New Paragraph
+<po1> Poetry line 1 (of verse)
+<po2> Poetry line 2, etc...
+<rt> Right Justified text
+{footnotes}
+
+Here is the list of major text corrections and variants from Nelson:
+
+Genesis 49:6 Nelson: glory not be united
+Deuteronomy 32:8 Nelson: gave to the nations "their inheritance"
+Judges 5:16 Nelson: Sheep-folds not hyphenated
+2 Samuel 3:33 Corrected: Question Mark added
+2 Samuel 22:8 Corrected "Tey were shaken"
+Isaiah 13:8 Nelson: take hold them
+Isaiah 17:3 Corrected: Sith the LORD
+Isaiah 19:4 Corrected: "linto" the hand
+Isaiah 30:24 Corrected:  Wwhich hath been
+Isaiah 33:6 Nelson: which is His "treasurer"
+Isaiah 65:12 Corrected: "Ehen" I spoke
+Isaiah 66:24 Nelson does not have ending
+Jeremiah 9:17 Nelson: "And" let them make haste
+Jeremiah 23:20 Corrected:"lin" the end of days
+Jeremiah 39:3 Corrected:  aRab-mag
+Jeremiah 51:52 Corrected: Aand through all
+Ezekiel 21:4 Nelson: "And" all flesh
+Ezekiel 21:8 Nelson: "and" say to the land
+Psalm 18:6 Should this footnote repeat from the previous verse?
+Psalm 47:1 Nelson: a Psalm "for" the sons
+Psalm 51:11 Corrected from "Aand blot out"
+Psalm 55:3 Nelson: Attend unto me, and "hear" me
+Psalm 100:3 Nelson: we "our" His
+Psalm 119:41 Nelson: VAV
+Psalm 119:66 Nelson: have believed Thy commandments
+Psalm 119:73 Nelson: JOD
+Psalm 119:142 Nelson: Thy law is "the" truth
+Psalm 119:161 Nelson: SCHIN
+Psalm 119:169 Nelson: TAV
+Psalm 124:6 Corrected: Wo hath not given
+Proverbs 17:11 Nelson: "An" rebellious man
+Proverbs 31:11 Corrected: aafely trust in her
+Job 6:3 Corrected: t Herefore are my words broken
+Job 27:19 Nelson: there shall be not to gather
+Daniel 2:1 Nelson: Nebuchadnezzar, Nebuchadnezzar
+
+Thanks again for making this text available!
+
+John
+
+--
+You received this message because you are subscribed to the Google Groups "opensiddur-tech" group.
+To post to this group, send email to opensiddur-tech@googlegroups.com.
+To unsubscribe from this group, send email to opensiddur-tech+unsubscribe@googlegroups.com.
+For more options, visit this group at http://groups.google.com/group/opensiddur-tech?hl=en.

@@ -73,7 +73,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <moduleRef key="analysis" include="c pc phr s w"/>
           <moduleRef key="certainty" include="respons"/>
           <moduleRef key="gaiji" include="g"/>
-          <moduleRef key="iso-fs" except="fsDecl fsdDecl fsdLink fsDescr fDescr fDecl vAlt vColl vDefault vLabel vRange if iff then cond fsConstraints bicond"/>
+          <moduleRef key="iso-fs" except="fsDecl fsdDecl fsdLink fsDescr fDescr fDecl vAlt vDefault vLabel vRange if iff then cond fsConstraints bicond"/>
           <moduleRef key="linking" include="ab anchor link linkGrp seg"/>
           <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
           <moduleRef key="transcr" include="sourceDoc"/>

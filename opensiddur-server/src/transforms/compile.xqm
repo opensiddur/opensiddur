@@ -68,7 +68,7 @@ declare function compile:tei-text(
       $text-output/(* except tei:back),
       element tei:back {
         $text-output/tei:back/(@*|node()),
-        let $api-documents := $text-output//@jf:document
+        let $api-documents := ($text-output//@jf:document, $text-output//@jf:linkage-document)
         let $unique-documents-db := distinct-values((
                 mirror:unmirror-path(       (: this document :)
                   $format:combine-cache,

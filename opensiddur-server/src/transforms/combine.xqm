@@ -24,6 +24,8 @@ import module namespace ridx="http://jewishliturgy.org/modules/refindex"
   at "../modules/refindex.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
+import module namespace cond="http://jewishliturgy.org/transform/conditionals"
+  at "conditionals.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "flatten.xqm";
 
@@ -52,17 +54,51 @@ declare function combine:combine(
     case element()
     return
         let $updated-params := combine:update-settings-from-standoff-markup($node, $params, false())
+        let $updated-params := combine:evaluate-conditions($node, $updated-params)
+        let $conditional-layer-id := combine:get-conditional-layer-id($node, $updated-params)
+        let $instruction := $updated-params("combine:conditional-instruction")
+        let $updated-params := map:remove($updated-params, "combine:conditional-instruction")
+        (: handling conditionals:
+            if $e/@jf:layer-id and combine:conditional-layers = OFF, NO, combine:combine($node/node(), $updated-params)
+            else if combine:conditional-result = OFF, NO -> () MAYBE -> evaluate instruction and add it
+        :)
         return
-            typeswitch($node)
-            case element(tei:TEI)
-            return combine:tei-TEI($node, $params)
-            case element(tei:ptr)
-            return combine:tei-ptr($node, $updated-params)
-            (: TODO: add other model.resourceLike elements above :)
-            case element(jf:unflattened)
-            return combine:jf-unflattened($node, $updated-params)
-            default (: other element :) 
-            return combine:element($node, $updated-params) 
+            if (
+                $node/@jf:layer-id 
+                and $updated-params("combine:conditional-layers")($conditional-layer-id)=("NO", "OFF")
+            )
+            then
+                if ($node/descendant::*[@jf:stream])
+                then combine:combine($node/node(), $updated-params)
+                else ()
+            else if (not($updated-params("combine:conditional-result") = ("OFF", "NO")))
+            then
+                let $ret := 
+                    typeswitch($node)
+                    case element(tei:TEI)
+                    return combine:tei-TEI($node, $params)
+                    case element(tei:ptr)
+                    return combine:tei-ptr($node, $updated-params)
+                    (: TODO: add other model.resourceLike elements above :)
+                    case element(jf:unflattened)
+                    return combine:jf-unflattened($node, $updated-params)
+                    case element(jf:parallelGrp)
+                    return combine:jf-parallelGrp($node, $updated-params)
+                    default (: other element :) 
+                    return combine:element($node, $updated-params)
+                return
+                    if (exists($instruction))
+                    then
+                        (: add conditional instruction :)
+                        element {QName(namespace-uri($ret), name($ret))}{
+                            $ret/@*,
+                            combine:follow-pointer($node, $instruction, $updated-params, 
+                                element jf:annotation { attribute type { "instruction" } }
+                            ),
+                            $ret/node()
+                        }
+                    else $ret 
+            else ()
     default return $node
 };
 
@@ -88,7 +124,7 @@ declare function combine:jf-unflattened(
   ) as element(jf:combined) {
   element jf:combined {
     $e/@*,
-    if ($e/@type="parallel")
+    if ($e/ancestor::jf:parallel-document)
     then
         (: parallel texts cannot be redirected :) 
         combine:combine($e/node(), $params)
@@ -118,6 +154,26 @@ declare function combine:element(
   }
 };
 
+(:~ a parallelGrp has to align the parallel from here and from the other parallel file :)
+declare function combine:jf-parallelGrp(
+    $e as element(jf:parallelGrp),
+    $params as map
+    ) as element(jf:parallelGrp) {
+    element jf:parallelGrp {
+        $e/@*,
+        combine:combine($e/node(), $params),
+        let $this-parallelGrp := count($e/preceding-sibling::jf:parallelGrp) + 1
+        let $other-parallel-doc := root($e)/*/tei:TEI[not(. is $e/ancestor::tei:TEI)]
+        for $parallel in $other-parallel-doc//jf:unflattened/jf:parallelGrp[$this-parallelGrp]/jf:parallel
+        return
+            element jf:parallel {
+                combine:new-document-attributes($e, $parallel),
+                $parallel/@*,
+                combine:combine($parallel/node(), combine:new-document-params($parallel, $params))
+            }
+    }
+};
+
 (:~ attributes that change on any context switch :)
 declare function combine:new-context-attributes(
   $context as node()?,
@@ -144,19 +200,27 @@ declare function combine:new-document-attributes(
   $context as node()?,
   $new-doc-nodes as node()*
   ) as node()* {
-  let $document-uri := 
-    mirror:unmirror-path(
-      $format:unflatten-cache,
-      ( 
-        document-uri(root($new-doc-nodes[1])), 
-        ($new-doc-nodes[1]/@uri:document-uri)
-      )[1]
-    )
+  let $document-path := 
+    if ($new-doc-nodes[1]/ancestor::jf:parallel-document)
+    then
+        (: parallel documents are guaranteed to have a @jf:document attribute :)
+        $new-doc-nodes[1]/ancestor::*[@jf:document][1]/@jf:document/string()
+    else
+        replace(
+            data:db-path-to-api(
+                mirror:unmirror-path(
+                  $format:unflatten-cache,
+                  ( 
+                    document-uri(root($new-doc-nodes[1])), 
+                    ($new-doc-nodes[1]/@uri:document-uri)
+                  )[1]
+                )
+            ), "^(/exist/restxq)?/api", "")
   return (
     (: document (as API source ), base URI?, language, source(?), 
      : license, contributors :)
-    attribute jf:document { data:db-path-to-api($document-uri) },
-    attribute jf:license { root($new-doc-nodes[1])//tei:licence/@target },
+    attribute jf:document { $document-path },
+    attribute jf:license { common:TEI-root($new-doc-nodes[1])//tei:licence/@target },
     combine:new-context-attributes($context, $new-doc-nodes)
   )
 };
@@ -169,7 +233,7 @@ declare function combine:new-document-params(
 };
 
 (:~ change parameters as required for entry into a new document
- : manages "combine:unmirrored-doc", "combine:setting-links" 
+ : manages "combine:unmirrored-doc", resets "combine:conditional-layers" 
  : 
  : @param $new-doc-nodes The newly active document
  : @param $params Already active parameters
@@ -180,13 +244,16 @@ declare function combine:new-document-params(
   $params as map,
   $is-redirect as xs:boolean
   ) as map {
-    let $unmirrored-path := 
-        mirror:unmirror-path(
-            $format:unflatten-cache, 
-            document-uri(root($new-doc-nodes[1])))
-    let $unmirrored-doc := doc($unmirrored-path)
-    let $new-setting-links := $unmirrored-doc//tei:link[@type="set"]
-    let $all-setting-links := ($params("combine:setting-links"), $new-setting-links)
+    let $unmirrored-doc := 
+        if ($new-doc-nodes[1]/ancestor::jf:parallel-document)
+        then
+            data:doc($new-doc-nodes[1]/ancestor::tei:TEI/@jf:document)
+        else 
+            doc(
+                mirror:unmirror-path(
+                    $format:unflatten-cache, 
+                    document-uri(root($new-doc-nodes[1])))
+            )
     let $new-params := map:new((
         $params,
         map { 
@@ -194,7 +261,7 @@ declare function combine:new-document-params(
                 if ($is-redirect)
                 then ($params("combine:unmirrored-doc"), $unmirrored-doc)
                 else $unmirrored-doc,
-            "combine:setting-links" := $all-setting-links
+            "combine:conditional-layers" := map {}
         }
     ))
     return
@@ -211,7 +278,7 @@ declare function combine:update-params(
 
 (:~ update parameters with settings from standoff markup.
  : feature structures are represented by type->name := value
- : @param $params uses the combine:setting-links parameter, maintains the combine:settings parameter
+ : @param $params maintains the combine:settings parameter
  : @param $new-context true() if this is a new context 
  :)
 declare function combine:update-settings-from-standoff-markup(
@@ -224,8 +291,8 @@ declare function combine:update-settings-from-standoff-markup(
         (: this is more complex --
             need to handle overrides, so each of these ancestors has to be treated separately, and in document order
          :)
-        then $e/ancestor-or-self::*[@jf:id|@xml:id][1]
-        else if (exists($e/(@jf:id|@xml:id)))
+        then $e/ancestor-or-self::*[@jf:set]
+        else if (exists($e/(@jf:set)))
         then $e
         else ()
     return
@@ -236,32 +303,45 @@ declare function combine:update-settings-from-standoff-markup(
                 map {
                     "combine:settings" := map:new((
                         $params("combine:settings"),
-                        let $unmirrored := 
-                            if (
-                                exists($base-context/self::jf:unflattened[@type="parallel"]) 
-                                or exists($base-context/self::jf:parallelGrp)
-                                or exists($base-context/self::jf:parallel)
-                            ) 
-                            then
-                                (: use the settings from the linkage file :) 
-                                $params("combine:unmirrored-doc")[2]//id($base-context/(@xml:id, @jf:id)[1]) 
-                            else
-                                (: use the settings from the original file :) 
-                                $params("combine:unmirrored-doc")[1]//id($base-context/(@xml:id, @jf:id)[1])
-                        for $standoff-link in 
-                            ridx:query($params("combine:setting-links"), $unmirrored, 1, $new-context)
-                        let $link-target := tokenize($standoff-link/(@target|@targets), '\s+')[2]
-                        let $link-dest := uri:fast-follow($link-target, $unmirrored, uri:follow-steps($unmirrored))
+                        for $context in $base-context,
+                            $setting in tokenize($context/@jf:set, '\s+')
+                        let $link-dest := uri:fast-follow($setting, $context, uri:follow-steps($context))
                         where $link-dest instance of element(tei:fs)
-                        return combine:tei-fs-to-map($link-dest)
+                        return combine:tei-fs-to-map($link-dest, $params)
                     ))
                 } 
             ))
         else $params 
 };
 
+declare %private function combine:tei-featureVal-to-map(
+    $fnodes as node()*,
+    $params as map
+    ) as element(tei:string)* {
+    for $node in $fnodes
+    return 
+        typeswitch ($node)
+        case element(j:yes) return element tei:string { "YES" }
+        case element(j:no) return element tei:string { "NO" }
+        case element(j:maybe) return element tei:string { "MAYBE" }
+        case element(j:on) return element tei:string { "ON" }
+        case element(j:off) return element tei:string { "OFF" }
+        case element(tei:binary) return element tei:string { string($node/@value=(1, "true")) }
+        case element(tei:numeric) return element tei:string { $node/string() }
+        case element(tei:string) return $node
+        case element(tei:vColl) return combine:tei-featureVal-to-map($node/element(), $params)
+        case element(tei:default) return element tei:string { cond:evaluate($node, $params) }
+        case element() return element tei:string { $node/@value/string() }
+        case text() return element tei:string { string($node) }
+        default return ()
+}; 
+
+(:~ convert a tei:fs to an XQuery map
+ : The key is fsname->fname. The value is always one or more tei:string elements.
+ :)
 declare function combine:tei-fs-to-map(
-    $e as element(tei:fs)
+    $e as element(tei:fs),
+    $params as map
     ) as map {
     let $fsname := 
         if ($e/@type) 
@@ -278,25 +358,13 @@ declare function combine:tei-fs-to-map(
                         then $f/@name/string()
                         else ("anonymous:" || common:generate-id($f))
                     ),
-                    if ($f/@fVal)
-                    then uri:fast-follow($f/@fVal, $f, -1)
-                    else (
-                        for $node in $f/node()
-                        return 
-                            typeswitch ($f/node())
-                            case element(j:yes) return "YES"
-                            case element(j:no) return "NO"
-                            case element(j:maybe) return "MAYBE"
-                            case element(j:on) return "ON"
-                            case element(j:off) return "OFF"
-                            case element(tei:binary) return string($node/@value=(1, "true"))
-                            case element(tei:string) return $node/string()
-                            case element() return $node/@value/string()
-                            case text() return string($node)
-                            default return ()
-                    )[.][1]
-                    (: TODO: default values :) 
-                )
+                    combine:tei-featureVal-to-map(
+                        if ($f/@fVal)
+                        then uri:fast-follow($f/@fVal, $f, -1)
+                        else $f/node(),
+                        $params
+                    )[.]
+                ) 
         )
 };
 
@@ -310,6 +378,26 @@ declare function combine:document-uri(
     [(@jf:document-uri|@uri:document-uri)][1]/
       (@jf:document-uri, @uri:document-uri)[1]/string()
   )[1]
+};
+
+(: opensiddur->translation contains an ordered list of translations. 
+ : return the first existing match of a translation of $destination-stream from that list 
+ :)
+declare %private function combine:get-first-active-translation(
+    $destination-stream as element(),
+    $active-translations as element(tei:string)*
+    ) as element(tei:linkGrp)? {
+    let $this-test := $active-translations[1]/string()
+    where exists($this-test)
+    return
+        let $this-translation :=
+            ridx:query(
+                collection("/db/data/linkage")//j:parallelText[tei:idno=$this-test]/tei:linkGrp[@domains], 
+                $destination-stream)[1]     (: what should happen if more than 1 value is returned?  :)
+        return
+            if (exists($this-translation))
+            then $this-translation
+            else combine:get-first-active-translation($destination-stream, subsequence($active-translations, 2))
 };
 
 (:~ do a translation redirect, if necessary, from the context $e
@@ -331,42 +419,47 @@ declare function combine:translation-redirect(
         doc(mirror:unmirror-path($format:unflatten-cache, document-uri(root($destination-stream-mirrored))))/
             id($destination-stream-mirrored/@jf:id)
     let $translated-stream-unmirrored :=
-        if ($active-translation)
-        then  
-            ridx:query(
-                collection("/db/data/linkage")//j:parallelText[tei:idno=$active-translation]/tei:linkGrp[@domains], 
-                $destination-stream)
-        else () 
+        combine:get-first-active-translation($destination-stream, $active-translation)
     where (
         exists($translated-stream-unmirrored) 
         and not($e/parent::jf:parallel) (: special exception for the external pointers in the parallel construct :)
         )
     return
         (: there is a translation redirect :)
+        let $destination-doc :=
+            replace(
+                data:db-path-to-api(document-uri(root($destination-stream))),
+                "(/exist/restxq)?/api", "")
         let $destination-domain := 
             replace(
                 data:db-path-to-api(document-uri(root($destination-stream))) || "#" || 
                     ($destination-stream/(@xml:id, @jf:id, flatten:generate-id(.)))[1],
                 "(/exist/restxq)?/api", "")
+        let $translated-stream-root := root($translated-stream-unmirrored)
         let $mirrored-translation-doc := 
-            let $translated-stream-root := root($translated-stream-unmirrored)
             let $deps := format:unflatten-dependencies($translated-stream-root, map {})
             return format:unflatten($translated-stream-root, map {}, $translated-stream-root)
-        let $destination-stream-domain := $mirrored-translation-doc//jf:unflattened[@jf:domain=$destination-domain]
+        let $destination-stream-domain := $mirrored-translation-doc//tei:TEI[@jf:document=$destination-doc]//jf:unflattened
         let $redirect-begin :=
             if ($destination[1] instance of element(jf:unflattened))
             then $destination-stream-domain
-            else $destination-stream-domain//jf:parallel[@domain=$destination-domain]/*[@jf:id=$destination/@jf:id][1]/ancestor::jf:parallelGrp
+            else $destination-stream-domain//jf:parallel/descendant::*[@jf:id=$destination/@jf:id][1]/ancestor::jf:parallelGrp
         let $redirect-end :=
             if ($destination[last()] instance of element(jf:unflattened))
             then $destination-stream-domain
-            else $destination-stream-domain//jf:parallel[@domain=$destination-domain]/*[@jf:id=$destination/@jf:id][last()]/ancestor::jf:parallelGrp
+            else $destination-stream-domain//jf:parallel/descendant::*[@jf:id=$destination/@jf:id][last()]/ancestor::jf:parallelGrp
         let $redirect := 
             $redirect-begin | 
             $redirect-begin/following-sibling::* intersect $redirect-end/preceding-sibling::* |
             $redirect-end
         return (
             combine:new-document-attributes($e, $destination),
+            (: make reference to the linkage document :)
+            attribute jf:linkage-document { 
+                replace(
+                    data:db-path-to-api(document-uri($translated-stream-root)),
+                    "(/exist/restxq)?/api", ""
+                ) },
             combine:combine(
                 $redirect,
                 (: new document params looks to the unmirrored doc, so it should go to the unredirected destination too :)
@@ -377,19 +470,17 @@ declare function combine:translation-redirect(
         )
 };
 
-(:~ handle a pointer :)
-declare function combine:tei-ptr(
-  $e as element(tei:ptr),
-  $params as map
-  ) as element()+ {
-  if ($e/@type = "url")
-  then combine:element($e, $params)
-  else
+declare function combine:follow-pointer(
+    $e as element(),
+    $destination-ptr as xs:string,
+    $params as map,
+    $wrapping-element as element()
+    ) as element() {
     (: pointer to follow. 
-     : This will naturally result in more than one jf:ptr per
-     : tei:ptr if it has more than one @target, but that's OK.
+     : This will naturally result in more than one wrapper per
+     : context element if it has more than one @target, but that's OK.
      :)
-    let $targets := tokenize($e/@target, '\s+')
+    let $targets := tokenize($destination-ptr, '\s+')
     for $target in $targets
     let $destination := 
       uri:fast-follow(
@@ -406,8 +497,8 @@ declare function combine:tei-ptr(
         )
       )
     return
-      element jf:ptr {
-        $e/(@* except @target),  (: @target can be inferred :)
+      element {QName(namespace-uri($wrapping-element), name($wrapping-element))} {
+        $wrapping-element/@*,
         if (
           combine:document-uri($e) = combine:document-uri($destination[1])
         )
@@ -415,9 +506,9 @@ declare function combine:tei-ptr(
           ((: internal pointer, partial context switch necessary:
             : lang, but not document-uri
            :)
-           combine:new-context-attributes($e, $destination),
+           combine:new-context-attributes($e, $destination[1]),
            combine:combine($destination,
-              combine:update-params($destination, $params)
+              combine:update-params($destination[1], $params)
            )
           )
         else (
@@ -429,13 +520,117 @@ declare function combine:tei-ptr(
                 else
                     (: no translation redirect :) 
                     (
-                        combine:new-document-attributes($e, $destination),
+                        combine:new-document-attributes($e, $destination[1]),
                         combine:combine(
                             $destination,
-                            combine:new-document-params($destination, $params)
+                            combine:new-document-params($destination[1], $params)
                         )
                     )
             )
       }
+
+};
+
+(:~ handle a pointer :)
+declare function combine:tei-ptr(
+  $e as element(tei:ptr),
+  $params as map
+  ) as element()+ {
+  if ($e/@type = "url")
+  then combine:element($e, $params)
+  else 
+    combine:follow-pointer(
+        $e, $e/@target/string(), $params, 
+        element jf:ptr {
+            $e/(@* except @target)
+        }
+    )
+};
+
+declare function combine:get-conditional-layer-id(
+    $e as element(),
+    $params as map
+    ) as xs:string? {
+    $params("combine:unmirrored-doc")[1] || "#" || $e/@jf:layer-id
+};
+
+(:~ evaluate any conditions involving the current element, which can occur if:
+ :  * the element itself is jf:conditional
+ :  * the element has an @jf:conditional attribute
+ :  * the element derives from a layer that is subject to a condition 
+ :  * the element is j:option/@xml:id and the opensiddur:option/[document]#[xmlid] feature exists 
+ :
+ : @return an updated parameter map with the following parameters updated:
+ :  combine:conditional-result: YES, NO, MAYBE, ON, OFF if the element is subject to a conditional; empty if not
+ :  combine:conditional-layers: a map of document#layer-id->conditional result
+ :  combine:conditional-instruction: a pointer to the instruction
+ :)
+declare function combine:evaluate-conditions(
+    $e as element(),
+    $params as map
+    ) as map {
+    let $this-element-condition-result :=
+        let $conditions := (
+            for $condition in tokenize($e/@jf:conditional, '\s+')
+            return uri:fast-follow($condition, $e, uri:follow-steps($e)),
+            if ($e instance of element(j:option) and $e/@jf:id and not($e/@jf:conditional))
+            then 
+                let $option-feature-name := $params("combine:unmirrored-document")[1] || "#" || $e/@jf:id/string()
+                let $feature-value := cond:get-feature-value($params, "opensiddur:option", $option-feature-name)
+                where exists($feature-value)
+                return
+                    <tei:fs type="opensiddur:option">
+                        <tei:f name="{$option-feature-name}"><j:yes/></tei:f>
+                    </tei:fs>
+            else ()
+            )
+        where exists($conditions)
+        return
+            cond:evaluate(
+                if (count($conditions) > 1)
+                then element j:all { $conditions }
+                else $conditions,
+                $params
+            )
+    let $conditional-layer-id := combine:get-conditional-layer-id($e, $params)
+    let $conditional-layer-result :=
+        if (not($e instance of element(jf:conditional) 
+                or $e instance of element(j:option)) 
+            and $e/@jf:layer-id)
+        then 
+            let $conditional-layer := $params("combine:conditional-layers")
+            where exists($conditional-layer)
+            return $conditional-layer($conditional-layer-id)
+        else ()
+    return 
+        map:new((
+            $params,
+            map {
+                (: if a layer is not ON/YES, then the layer result takes precedence :)
+                "combine:conditional-result" := (
+                    $conditional-layer-result,
+                    $this-element-condition-result
+                )[1],
+                "combine:conditional-instruction" := 
+                    $e/@jf:conditional-instruction/string()
+            },
+            (: record if the layer is being turned off :)
+            if (not($e instance of element(jf:conditional) 
+                    or $e instance of element(j:option)) 
+                and $e/@jf:layer-id)
+            then
+                map {
+                    "combine:conditional-layers" := map:new((
+                        $params("combine:conditional-layers"), 
+                        map {
+                            $conditional-layer-id := (
+                                $conditional-layer-result, 
+                                $this-element-condition-result[not(.=("YES","ON"))]
+                            )[1]
+                        }
+                    ))
+                }
+            else ()
+        ))
 };
 

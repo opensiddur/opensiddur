@@ -1,3 +1,4 @@
+xquery version "3.0";
 (:~
  : XQuery functions to output a given XML file in a format.
  : 
@@ -11,12 +12,16 @@ declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
+import module namespace data="http://jewishliturgy.org/modules/data" 
+  at "data.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror" 
   at "mirror.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri" 
   at "follow-uri.xqm";
 import module namespace pla="http://jewishliturgy.org/transform/parallel-layer"
   at "../transforms/parallel-layer.xqm";
+import module namespace phony="http://jewishliturgy.org/transform/phony-layer"
+  at "../transforms/phony-layer.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "../transforms/flatten.xqm";
 import module namespace unflatten="http://jewishliturgy.org/transform/unflatten"
@@ -34,11 +39,12 @@ import module namespace reverse="http://jewishliturgy.org/transform/reverse"
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
-
+declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
 declare variable $format:temp-dir := '.format';
 
 declare variable $format:parallel-layer-cache := "/db/cache/parallel-layer";
+declare variable $format:phony-layer-cache := "/db/cache/phony-layer";
 declare variable $format:dependency-cache := "/db/cache/dependency";
 declare variable $format:flatten-cache := "/db/cache/flatten";
 declare variable $format:merge-cache := "/db/cache/merge";
@@ -49,6 +55,7 @@ declare variable $format:compile-cache := "/db/cache/compiled";
 declare variable $format:html-cache := "/db/cache/html";
 declare variable $format:caches := (
     $format:parallel-layer-cache,
+    $format:phony-layer-cache,
     $format:dependency-cache,
     $format:flatten-cache,
     $format:merge-cache,
@@ -105,16 +112,34 @@ declare function format:parallel-layer(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  (: flatten the document's dependencies first so we can assume that the dependency
-   : flattened versions exist so they can be merged
-   :)
-  let $unflats := format:flatten-external-dependencies($original-doc, $params)
   let $pla-transform := pla:parallel-layer-document(?, $params)
   return
     mirror:apply-if-outdated(
       $format:parallel-layer-cache,
       $doc,
       $pla-transform,
+      $original-doc
+    )
+};
+
+(:~ make a cached version of a phony layer text document,
+ : and return it
+ : @param $doc The document to run phony layer transform on
+ : @param $params Parameters to send to the transform
+ : @param $original-doc The original document  
+ : @return The mirrored phony layer document
+ :) 
+declare function format:phony-layer(
+  $doc as document-node(),
+  $params as map,
+  $original-doc as document-node()
+  ) as document-node() {
+  let $pho-transform := phony:phony-layer-document(?, $params)
+  return
+    mirror:apply-if-outdated(
+      $format:phony-layer-cache,
+      $doc,
+      $pho-transform,
       $original-doc
     )
 };
@@ -138,7 +163,8 @@ declare function format:flatten(
       if (format:is-parallel-document($original-doc))
       then 
         format:parallel-layer($doc, $params, $original-doc)
-      else $doc,
+      else 
+        format:phony-layer($doc, $params, $original-doc),
       $flatten-transform,
       $original-doc
     )
@@ -220,15 +246,20 @@ declare function format:unflatten(
     )
 };
 
+declare function format:dependency-is-transformable(
+    $dep-uri as xs:string
+    ) as xs:boolean {
+    (: TODO: add other transformables here... :)
+    matches($dep-uri, "^/db/data/(linkage|original|tests)")
+};
+
 declare function format:get-dependencies(
   $doc as document-node()
   ) as document-node() {
   document {
     <format:dependencies>{
       for $dep in uri:dependency($doc, ())
-      let $transformable := 
-        matches($dep, "^/db/data/(linkage|original|tests)")
-        (: TODO: add other transformables here... :)
+      let $transformable := format:dependency-is-transformable($dep)
       return 
         <format:dependency>{
           if ($transformable)
@@ -272,7 +303,57 @@ declare function format:flatten-external-dependencies(
   where not($dep-doc is $doc)
   return format:flatten($dep-doc, $params, $dep-doc)
 };
-  
+
+(:~ combine may have dependencies on translations as well as directly referenced documents 
+ : fortunately, if a combine cached document exists, it already references all of its dependencies
+ :)
+declare function format:combine-dependencies-up-to-date(
+    $mirror-path as xs:string,
+    $original as item()
+    ) as xs:boolean {
+    let $combine-mirrored :=
+      mirror:doc($mirror-path, 
+          typeswitch($original)
+          case document-node() return document-uri($original)
+          default return $original
+      )
+    let $dependencies := 
+        distinct-values((
+                        $combine-mirrored//@jf:document/string(), 
+                        $combine-mirrored//@jf:linkage-document/string()
+        ))
+    return
+        every $dependency in $dependencies
+        satisfies 
+            let $path := data:api-path-to-db($dependency)
+            return
+                if (format:dependency-is-transformable($path))
+                then mirror:is-up-to-date($format:unflatten-cache, $path)
+                else 
+                    (: check if the non-transformable dependency is up to date
+                     : with respect to the cached version of the document :) 
+                    let $collection := util:collection-name($path)
+                    let $resource := util:document-name($path)
+                    let $mirror-collection := util:collection-name($combine-mirrored)
+                    let $mirror-resource := util:document-name($combine-mirrored)
+                    let $last-modified := 
+                        try {
+                            xmldb:last-modified($collection, $resource)
+                        }
+                        catch * { () }
+                    let $mirror-last-modified := 
+                        try {
+                            xmldb:last-modified($mirror-collection, $mirror-resource)
+                        }
+                        catch * { () } 
+                    return
+                        not(
+                            empty($last-modified) or 
+                            empty($mirror-last-modified) or 
+                            ($last-modified > $mirror-last-modified)
+                        )
+};
+ 
 (:~ perform the transform up to the combine step 
  : @param $doc The document to be transformed
  : @param $params Parameters to pass to the transforms
@@ -291,7 +372,8 @@ declare function format:combine(
       $format:combine-cache,
       mirror:doc($format:unflatten-cache, document-uri($doc)),
       $cmb,
-      $original-doc
+      $original-doc,
+      format:combine-dependencies-up-to-date#2
     )
 };
 
@@ -307,12 +389,18 @@ declare function format:compile(
   $original-doc as document-node()
   ) as document-node() {
   let $cmp := compile:compile-document(?, $params)
+  let $combined := format:combine($doc, $params, $original-doc)
+  let $up-to-date-function := mirror:is-up-to-date-cache(?, ?, $format:combine-cache)
   return
+    (: compile has to check if the compile cache is outdated against the updated combine cache,
+     : not the original document
+     :)
     mirror:apply-if-outdated(
       $format:compile-cache,
-      format:combine($doc, $params, $original-doc),
+      $combined,
       $cmp,
-      $original-doc
+      $original-doc,
+      $up-to-date-function
     )
 };
 
@@ -330,6 +418,10 @@ declare function format:html(
   $transclude as xs:boolean
   ) as document-node() {
   let $html := tohtml:tohtml-document(?, $params)
+  let $up-to-date-function := 
+    if ($transclude)
+    then mirror:is-up-to-date-cache(?, ?, $format:compile-cache)
+    else ()
   return
     mirror:apply-if-outdated(
       $format:html-cache,
@@ -337,7 +429,8 @@ declare function format:html(
       then format:compile($doc, $params, $original-doc)
       else format:unflatten($doc, $params, $original-doc),
       $html,
-      $original-doc
+      $original-doc,
+      $up-to-date-function
     )
 };
 

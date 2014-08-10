@@ -3,7 +3,7 @@ xquery version "3.0";
  : Modes to unflatten a flattened hierarchy.
  :
  : Open Siddur Project
- : Copyright 2013 Efraim Feinstein 
+ : Copyright 2013-2014 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -16,6 +16,17 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
+(:~ exclude attributes added by flattening :)
+declare %private function unflatten:attributes-except-flatten(
+    $e as element()
+    ) as node()* {
+    $e/@* except (
+        $e/@jf:start, $e/@jf:end, $e/@jf:continue, $e/@jf:suspend,
+        $e/@jf:position, $e/@jf:relative, $e/@jf:nchildren, 
+        $e/@jf:nlevels, $e/@jf:nprecedents
+    )
+};
+
 (:~ a list of elements that are closed in $sequence, 
  : but not opened :)
 declare function unflatten:unopened-tags(
@@ -23,9 +34,9 @@ declare function unflatten:unopened-tags(
   ) as element()* {
   for $node in $sequence[@jf:suspend|@jf:end]
   let $id := $node/(@jf:suspend, @jf:end)
+  let $prec := common:preceding($node, $sequence)
   where empty(
-    $node/preceding-sibling::*[(@jf:start, @jf:continue)=$id][1]
-    intersect $sequence
+    $prec[(@jf:start,@jf:continue)=$id]
     )
   return $node
 };
@@ -38,11 +49,97 @@ declare function unflatten:unclosed-tags(
   ) as element()* {
   for $node in $sequence[@jf:start|@jf:continue]
   let $id := $node/(@jf:start, @jf:continue)
+  let $fol := common:following($node, $sequence) 
   where empty(
-    $node/following-sibling::*[(@jf:suspend, @jf:end)=$id][1]
-    intersect $sequence
+    $fol[(@jf:suspend,@jf:end)=$id]
   )
   return $node
+};
+
+(: if the merged element contains a parallel structure, 
+ : initiate a transform to suspend open elements at parallel boundaries
+ : and continue them inside
+ :)
+declare function unflatten:parallel-suspend-and-continue(
+    $e as element(jf:merged),
+    $params as map
+    ) as element(jf:merged) {
+    if (exists($e/jf:parallelGrp))
+    then 
+        element jf:merged {
+            $e/@*,
+            unflatten:iterate-parallel-suspend-and-continue(
+                $e/node(),
+                (),
+                (),
+                $params
+            )
+        }
+    else $e
+};
+
+declare function unflatten:iterate-parallel-suspend-and-continue(
+    $sequence as node()*,
+    $opened-elements as element()*,
+    $suspended-elements as element()*,
+    $params as map
+    ) as node()* {
+    let $s := $sequence[1]
+    where exists($s)
+    return (
+        typeswitch($s)
+        case element()
+        return 
+            if ($s/self::jf:parallelGrp[@jf:start|@jf:continue]
+                or $s/self::jf:parallel[@jf:end|@jf:suspend])
+            then (
+                unflatten:continue-or-suspend($opened-elements, "suspend"),
+                $s,
+                unflatten:iterate-parallel-suspend-and-continue(
+                    subsequence($sequence, 2),
+                    (),
+                    $opened-elements,   (: open elements are now suspended :)
+                    $params
+                )
+            )
+            else if ($s/self::jf:parallelGrp[@jf:end|@jf:suspend]
+                    or $s/self::jf:parallel[@jf:start|@jf:continue])
+            then (
+                $s,
+                unflatten:continue-or-suspend($suspended-elements, "continue"),
+                unflatten:iterate-parallel-suspend-and-continue(
+                    subsequence($sequence, 2),
+                    $suspended-elements,    (: suspended elements are now open :)
+                    (),
+                    $params
+                )
+            )
+            else (: other element :)
+                let $next-opened-elements :=
+                    if ($s/@jf:start|$s/@jf:continue) 
+                    then ($opened-elements, $s) 
+                    else if ($s/@jf:end|$s/@jf:suspend)
+                    then 
+                        $opened-elements[not((@jf:start,@jf:continue)=$s/(@jf:suspend, @jf:end))]
+                    else $opened-elements
+                return ($s,
+                    unflatten:iterate-parallel-suspend-and-continue(
+                        subsequence($sequence, 2),
+                        $next-opened-elements,
+                        $suspended-elements,
+                        $params
+                    )
+                )
+        default 
+        return ($s, 
+            unflatten:iterate-parallel-suspend-and-continue(
+                subsequence($sequence, 2),
+                $opened-elements,
+                $suspended-elements,
+                $params
+            )
+        )
+    )
 };
 
 declare function unflatten:continue-or-suspend(
@@ -83,7 +180,10 @@ declare function unflatten:unflatten(
   ) as element(jf:unflattened) {
   element jf:unflattened {
     $flattened/@*,
-    unflatten:sequence($flattened/node(), $params)
+    unflatten:sequence(
+        unflatten:parallel-suspend-and-continue($flattened, $params)/node(), 
+        $params
+    )
   }
 };
 
@@ -100,13 +200,13 @@ declare function unflatten:sequence(
     then 
       let $start-return := unflatten:start($s, $sequence, $params)
       return (
-        if ($start-return[1] instance of element())
-        then $start-return[1]
-        else (),
+        $start-return("start"),
         unflatten:sequence(
           (
-            subsequence($start-return, 3),
-            common:following($start-return[2], $sequence)
+            if (exists($start-return("end")))
+            then $start-return("continue")
+            else (),
+            common:following($start-return("end"), $sequence)
           ),
           $params
         )
@@ -131,24 +231,22 @@ declare function unflatten:lone-element(
   $params as map
   ) as element() {
   element { QName(namespace-uri($s), name($s)) }{
-    $s/(
-      (@* except @*[namespace-uri(.)="http://jewishliturgy.org/ns/jlptei/flat/1.0"])|
-      (@jf:id, @jf:layer-id, @jf:stream)),
+    unflatten:attributes-except-flatten($s),
     $s/node()
   }
 };
 
 (:~ process a start element.
- : return value: 
- :  [1] The start element or a text node
- :  [2] The end element
- :  [3+] Any continued unclosed tags
+ : return value: A map containing:
+ :  "start" := The start element, processed
+ :  "end" := The end element
+ :  "continue" := Any continued unclosed tags
  :)
 declare function unflatten:start(
   $s as element(),
   $sequence as node()*,
   $params as map
-  ) as node()* {
+  ) as map {
   let $following := common:following($s, $sequence)
   let $end := 
     $following[(@jf:end|@jf:suspend)=$s/(@jf:start, @jf:continue)][1]
@@ -171,27 +269,30 @@ declare function unflatten:start(
         ),
         $params
       )
-    return (
-      if (empty($processed-inside-sequence))
-      then text { "Intentionally left blank" }
-      else
-        element { QName(namespace-uri($s), name($s)) }{
-          $s/(
-            (@* except @*[namespace-uri(.)="http://jewishliturgy.org/ns/jlptei/flat/1.0"])
-            |(@jf:id[exists($s/@jf:start)], @jf:layer-id)
-          ),
-          if (
-            exists($s/@jf:continue) or 
-            exists($end/@jf:suspend) or 
-            empty($end) (: automatic suspend :) )
-          then
-            attribute jf:part {
-              ($s/@jf:continue, $end/@jf:suspend, $s/@jf:start)[1]
-            }
-          else (),
-          $processed-inside-sequence
-        },
+    return map {
+      "start" := 
+        if (empty($processed-inside-sequence))
+        then () 
+        else
+          element { QName(namespace-uri($s), name($s)) }{
+            (
+              (unflatten:attributes-except-flatten($s) except $s/@jf:id)
+              |($s/@jf:id[exists($s/@jf:start)])
+            ),
+            if (
+              exists($s/@jf:continue) or 
+              exists($end/@jf:suspend) or 
+              empty($end) (: automatic suspend :) )
+            then
+              attribute jf:part {
+                ($s/@jf:continue, $end/@jf:suspend, $s/@jf:start)[1]
+              }
+            else (),
+            $processed-inside-sequence
+          },
+      "end" :=
         ($end, $inside-sequence[last()])[1],
+      "continue" :=
         unflatten:continue-or-suspend($unclosed-tags, "continue")
-      )
+    }
 };

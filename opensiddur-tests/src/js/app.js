@@ -25,8 +25,8 @@ var parseDetails = function(testSuite) {
     passed = 0;
     failed = 0;
     ignored = 0;
-    
-    $("testSet", testSuite).each(function() {
+    testSuite = $.parseXML(testSuite); 
+    $("TestSet", testSuite).each(function() {
         var thisSet = $(this);
         var testSet = {};
         var tests = [];

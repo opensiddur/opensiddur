@@ -26,11 +26,11 @@
     <tei:text>
         <j:parallelText xml:id="parallel">
             <tei:idno>AB</tei:idno>
-            <tei:linkGrp domains="/data/tests/parallel-part-A#stream /data/tests/parallel-part-B#stream">
-                <tei:link target="/data/tests/parallel-part-A#A1 /data/tests/parallel-part-B#B1"/>
-                <tei:link target="/data/tests/parallel-part-A#range(A2,A4) /data/tests/parallel-part-B#range(B2,B4)"/>
-                <tei:link target="/data/tests/parallel-part-A#range(A5,A7) /data/tests/parallel-part-B#range(B5,B7)"/>
-                <tei:link target="/data/tests/parallel-part-A#range(A8,A9) /data/tests/parallel-part-B#range(B8,B9)"/>
+            <tei:linkGrp domains="/data/original/parallel-part-A#stream /data/original/parallel-part-B#stream">
+                <tei:link target="/data/original/parallel-part-A#A1 /data/original/parallel-part-B#B1"/>
+                <tei:link target="/data/original/parallel-part-A#range(A2,A4) /data/original/parallel-part-B#range(B2,B4)"/>
+                <tei:link target="/data/original/parallel-part-A#range(A5,A7) /data/original/parallel-part-B#range(B5,B7)"/>
+                <tei:link target="/data/original/parallel-part-A#range(A8,A9) /data/original/parallel-part-B#range(B8,B9)"/>
             </tei:linkGrp>
         </j:parallelText>
    </tei:text>

@@ -7,7 +7,7 @@ xquery version "3.0";
  :
  : @author Efraim Feinstein
  : Open Siddur Project
- : Copyright 2011-2013 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2014 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace mirror = 'http://jewishliturgy.org/modules/mirror';
@@ -305,7 +305,8 @@ declare function mirror:mirror-permissions(
  : @param $mirror the name of the mirror collection
  : @param $original original document as document-node() or path
  : @param $up-to-date-function A function that determines additional
- :    up to date information and returns an xs:boolean
+ :    up to date information and returns an xs:boolean ; The up-to-date function 
+ :    will not be called when the mirror is already known to be out of date
  :)
 declare function mirror:is-up-to-date(
   $mirror-path as xs:string, 
@@ -336,14 +337,14 @@ declare function mirror:is-up-to-date(
     }
     catch * { () } 
   return
-    (
-      empty($up-to-date-function)
-      or $up-to-date-function($mirror-path, $original)
-    ) and
     not(
       empty($last-modified) or 
       empty($mirror-last-modified) or 
       ($last-modified > $mirror-last-modified)
+    ) and
+    (
+      empty($up-to-date-function)
+      or $up-to-date-function($mirror-path, $original)
     )
 };
 
@@ -354,12 +355,59 @@ declare function mirror:is-up-to-date(
   mirror:is-up-to-date($mirror-path, $original, ())
 };
 
+(:~ determine if a cache is up to date with respect to another cache 
+ : @param $mirror-path the cache to be determined
+ : @param $original pointer to the original document or original document
+ : @param $prev-mirror-path the cache to compare to
+ : @return a boolean
+ :)
+declare function mirror:is-up-to-date-cache(
+  $mirror-path as xs:string,
+  $original as item(),
+  $prev-mirror-path as xs:string
+  ) as xs:boolean {
+  let $doc :=
+    typeswitch($original)
+    case document-node() return $original
+    default return doc($original)
+  let $collection := util:collection-name($doc)
+  let $mirror-collection := mirror:mirror-path($mirror-path, $collection)
+  let $prev-collection := mirror:mirror-path($prev-mirror-path, $collection)
+  let $resource := util:document-name($doc)
+  let $mirror-resource-name := mirror:map-resource-name($mirror-path, $resource)
+  let $prev-resource-name := mirror:map-resource-name($prev-mirror-path, $resource)
+  let $mirror-last-modified :=
+    try {
+        xmldb:last-modified($mirror-collection, $mirror-resource-name) 
+    }
+    catch * { () }
+  let $prev-last-modified :=
+    try {
+        xmldb:last-modified($prev-collection, $prev-resource-name) 
+    }
+    catch * { () }
+  return not(
+    empty($mirror-last-modified) or
+    empty($prev-last-modified) or
+    ($mirror-last-modified < $prev-last-modified)
+    )
+};
+
 declare function mirror:apply-if-outdated(
   $mirror-path as xs:string,
   $transformee as item(),
   $transform as function(node()*) as node()*
   ) as document-node()? {
-  mirror:apply-if-outdated($mirror-path, $transformee, $transform, $transformee)
+  mirror:apply-if-outdated($mirror-path, $transformee, $transform, $transformee, ())
+};
+
+declare function mirror:apply-if-outdated(
+  $mirror-path as xs:string,
+  $transformee as item(),
+  $transform as function(node()*) as node()*,
+  $original as item()
+  ) as document-node()? {
+  mirror:apply-if-outdated($mirror-path, $transformee, $transform, $original, ())
 };
 
 (:~ apply a function or transform to the original, if the mirror is out of date,
@@ -367,15 +415,17 @@ declare function mirror:apply-if-outdated(
  : @param $mirror-path Base of the mirror
  : @param $transformee Path or resource node to be transformed
  : @param $transform The transform to run, use a partial function to pass parameters
- : @param $original If $transformee is the result of intermediate processing, this should point to the actual original document 
+ : @param $original If $transformee is the result of intermediate processing, this should point to the actual original document
+ : @param $up-to-date-function Additional function to pass to mirror:is-up-to-date 
  :) 
 declare function mirror:apply-if-outdated(
   $mirror-path as xs:string,
   $transformee as item(),
   $transform as function(node()*) as node()*,
-  $original as item()
+  $original as item(),
+  $up-to-date-function as (function(xs:string, item()) as xs:boolean)?
   ) as document-node()? {
-  if (mirror:is-up-to-date($mirror-path, $original))
+  if (mirror:is-up-to-date($mirror-path, $original, $up-to-date-function))
   then 
     mirror:doc(
       $mirror-path, 

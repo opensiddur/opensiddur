@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tei:biblStruct xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+   <tei:monogr>
+      <tei:title xml:lang="en" type="main">The Holy Scriptures</tei:title>
+      <tei:title xml:lang="en" type="sub">According to the Masoretic Text: A New Translation With the Aid of Previous Versions and With Constant Consulation of Jewish Authorities</tei:title> 
+      <tei:title xml:lang="he" type="alt">תורה נביאים וכתובים</tei:title>
+      <tei:editor>
+         <tei:name>Max Margolis</tei:name>
+      </tei:editor>
+      <tei:imprint>
+         <tei:publisher>The Jewish Publication Society of America</tei:publisher>
+         <tei:pubPlace>Philadelphia, PA</tei:pubPlace>
+         <tei:date>1917</tei:date>
+         <tei:distributor>
+            <tei:name>The Jewish Publication Society of America</tei:name>
+            <tei:ref target="http://jewishpub.org/product.php?id=473#A">Downloadable e-book</tei:ref>
+            <tei:date type="access">2014-06-06</tei:date>
+         </tei:distributor>
+      </tei:imprint>
+   </tei:monogr>
+</tei:biblStruct>

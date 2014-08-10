@@ -256,7 +256,7 @@ declare function crest:do-query(
     for $result in  
         subsequence($all-results, $start, $count)
       group by $document-uri := document-uri(root($result))
-      order by max(for $r in $result return ft:score($r))
+      order by max(for $r in $result return ft:score($r)) descending
       return
         let $doc := doc($document-uri)
         let $api-name := replace(util:document-name($doc), "\.xml$", "")

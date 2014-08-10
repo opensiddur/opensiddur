@@ -9,7 +9,7 @@
   </tei:teiHeader>  
   <tei:text>
     <j:concurrent>
-      <jf:layer type="div" jf:id="div-layer" jf:layer-id="div-layer">
+      <jf:layer type="div" jf:id="div-layer" jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/pointer-to-placeholder.xml#div-layer">
         <tei:div
           jf:start="div1"
           jf:position="1"
@@ -17,7 +17,7 @@
           jf:nchildren="-1"
           jf:nlevels="1"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/pointer-to-placeholder.xml#div-layer"
           jf:id="div1"/>
         <jf:placeholder
           jf:position="1"
@@ -34,11 +34,11 @@
           jf:nchildren="1"
           jf:nlevels="-1"
           jf:nprecedents="1"
-          jf:layer-id="div-layer"
+          jf:layer-id="/db/apps/opensiddur-tests/tests/transforms/flatten/pointer-to-placeholder.xml#div-layer"
           />
       </jf:layer>
     </j:concurrent>
-    <j:streamText xml:id="stream">
+    <j:streamText jf:id="stream">
       <tei:seg xml:id="seg1">No layers!</tei:seg>
     </j:streamText>
   </tei:text>

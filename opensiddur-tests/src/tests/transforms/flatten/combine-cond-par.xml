@@ -1,0 +1,35 @@
+<tei:TEI 
+    xmlns:tei="http://www.tei-c.org/ns/1.0" 
+    xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+    xml:lang="en">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title type="main">Parallel texts A and B</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:distributor>
+                    <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+                </tei:distributor>
+                <tei:availability status="free">
+                    <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+                </tei:availability>
+                <tei:date>2014-03-19</tei:date>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:link type="bibl" target="#parallel /data/sources/Born%20Digital"/>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+        <tei:revisionDesc>
+        </tei:revisionDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <j:parallelText xml:id="parallel">
+            <tei:idno>Test</tei:idno>
+            <tei:linkGrp domains="/data/original/combine-cond-parA#stream /data/original/combine-cond-parB#stream">
+                <tei:link target="/data/original/combine-cond-parA#range(beginA,endA) /data/original/combine-cond-parB#range(beginB,endB)"/>
+            </tei:linkGrp>
+        </j:parallelText>
+   </tei:text>
+</tei:TEI>
+

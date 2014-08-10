@@ -77,6 +77,10 @@
     display:inherit;
 }
 
+.j-divineName {
+    display:inline;
+}
+
 .j-written {
     display:inline;    
     color:red;
@@ -114,6 +118,19 @@
     display:inline;
 }
 
+.tei-reg {
+    display:inline;
+}
+
+.tei-orig {
+    display:none;
+}
+
+/* conditionals */
+.jf-conditional {
+    display:inline;
+}
+
 /* parallel texts: this can use some love */
 .jf-parallelGrp {
     width:100%;
@@ -135,6 +152,12 @@
 }
 .jf-parallelGrp > .jf-parallel:last-child {
     width:30%;
+}
+
+/* inclusions */
+.jf-combine,
+.jf-ptr {
+    display:inline;
 }
    ]]></j:stylesheet>
    <tei:text>

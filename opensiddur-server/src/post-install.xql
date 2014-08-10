@@ -17,6 +17,12 @@ declare variable $dir external;
 declare variable $target external;
 
 util:log-system-out("starting post-install..."),
+util:log-system-out("removing caches..."),
+for $cache in $format:caches
+where xmldb:collection-available($cache)
+return
+    try { xmldb:remove($cache) }
+    catch * { util:log-system-out(("Error removing ", $cache)) },
 util:log-system-out("setup format..."),
 format:setup(),
 util:log-system-out("setup refindex..."),
