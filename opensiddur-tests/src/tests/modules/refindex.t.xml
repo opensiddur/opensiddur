@@ -190,7 +190,7 @@
         1
       )
       ]]></code>
-      <xpath desc="the link is returned">util:log-system-out(("$$$1:",$output)), self::tei:link[@type="note"]</xpath>
+      <xpath desc="the link is returned">self::tei:link[@type="note"]</xpath>
     </test>
     <test>
       <task>position=2, where the query is in position 2</task>
@@ -255,7 +255,7 @@
           false()
       )
       ]]></code>
-      <xpath desc="there are 3 results">util:log-system-out(("$$$",count($output)," results=", $output)),count($output)=3</xpath>
+      <xpath desc="there are 3 results">count($output)=3</xpath>
       <xpath desc="all results are tei:ptr">count($output/self::tei:ptr)=3</xpath>
     </test>
     <test>
@@ -579,7 +579,7 @@
         true()
       )
       ]]></code>
-      <xpath desc="returns 5 results">util:log-system-out(("1:query-document:", $output)),count($output)=5</xpath>
+      <xpath desc="returns 5 results">count($output)=5</xpath>
       <xpath desc="one result is a link">count($output/self::tei:link)=1</xpath>
       <xpath desc="the rest are ptr">count($output/self::tei:ptr)=4</xpath>
     </test>
