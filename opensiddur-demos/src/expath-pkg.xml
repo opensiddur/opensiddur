@@ -3,7 +3,7 @@
   xmlns="http://expath.org/ns/pkg" 
   name="http://jewishliturgy.org/apps/opensiddur-demos" 
   abbrev="opensiddur-demos" 
-  version="0.7.3" 
+  version="0.7.4" 
   spec="1.0">
     <title>Open Siddur Pre-Client Demos</title>
     <dependency package="http://jewishliturgy.org/apps/opensiddur-server" semver-min="0.7.1"/>

@@ -305,7 +305,8 @@ declare function mirror:mirror-permissions(
  : @param $mirror the name of the mirror collection
  : @param $original original document as document-node() or path
  : @param $up-to-date-function A function that determines additional
- :    up to date information and returns an xs:boolean
+ :    up to date information and returns an xs:boolean ; The up-to-date function 
+ :    will not be called when the mirror is already known to be out of date
  :)
 declare function mirror:is-up-to-date(
   $mirror-path as xs:string, 
@@ -336,14 +337,14 @@ declare function mirror:is-up-to-date(
     }
     catch * { () } 
   return
-    (
-      empty($up-to-date-function)
-      or $up-to-date-function($mirror-path, $original)
-    ) and
     not(
       empty($last-modified) or 
       empty($mirror-last-modified) or 
       ($last-modified > $mirror-last-modified)
+    ) and
+    (
+      empty($up-to-date-function)
+      or $up-to-date-function($mirror-path, $original)
     )
 };
 
