@@ -87,14 +87,18 @@ declare function combine:combine(
                     default (: other element :) 
                     return combine:element($node, $updated-params)
                 return
-                    if (exists($instruction))
+                    if (exists(($instruction, $node/@jf:annotation)))
                     then
-                        (: add conditional instruction :)
                         element {QName(namespace-uri($ret), name($ret))}{
                             $ret/@*,
-                            combine:follow-pointer($node, $instruction, $updated-params, 
-                                element jf:annotation { attribute type { "instruction" } }
-                            ),
+                            for $an in ($instruction, tokenize($node/@jf:annotation, "\s+"))
+                            return 
+                                combine:follow-pointer($node, $an, $updated-params, 
+                                    element jf:annotated { () },
+                                    if ($an=$instruction) 
+                                    then () 
+                                    else combine:include-annotation#3
+                                ),
                             $ret/node()
                         }
                     else $ret 
@@ -470,12 +474,46 @@ declare function combine:translation-redirect(
         )
 };
 
+(:~ @return true() if the given annotation should be included, false() otherwise :)
+declare function combine:include-annotation(
+    $node as element(), 
+    $annotation as element()*,
+    $params as map
+    ) as xs:boolean {
+    let $a := $annotation[1]
+    let $annotation-ids := $a/ancestor::j:annotations/tei:idno
+    let $selected-annotation-ids :=
+        let $s := $params("combine:settings")
+        where exists($s)
+        return $s("opensiddur->annotation")
+    return $annotation-ids/string()=$selected-annotation-ids/string()
+};
+
 declare function combine:follow-pointer(
     $e as element(),
     $destination-ptr as xs:string,
     $params as map,
     $wrapping-element as element()
     ) as element() {
+    combine:follow-pointer($e, $destination-ptr, $params, $wrapping-element, ())
+};
+
+
+(:~ follow a pointer in the context of the combine operation
+ : @param $e The context element from which the pointer is being followed
+ : @param $destination-ptr The pointer
+ : @param $params Active parameters
+ : @param $wrapping-element The element that should wrap the followed pointer and added attributes
+ : @param $include-function A function that, given context, a followed pointer, and parameters will determine whether the pointer should indeed be followed (optional) 
+ : @return $wrapping-element with attributes and content added or empty sequence if $include-function returns false()
+ :)
+declare function combine:follow-pointer(
+    $e as element(),
+    $destination-ptr as xs:string,
+    $params as map,
+    $wrapping-element as element(),
+    $include-function as (function(element(), element()*, map) as xs:boolean)?
+    ) as element()? {
     (: pointer to follow. 
      : This will naturally result in more than one wrapper per
      : context element if it has more than one @target, but that's OK.
@@ -496,6 +534,7 @@ declare function combine:follow-pointer(
           find a cache of a cached document :) 
         )
       )
+    where empty($include-function) or $include-function($e, $destination, $params)
     return
       element {QName(namespace-uri($wrapping-element), name($wrapping-element))} {
         $wrapping-element/@*,

@@ -443,7 +443,7 @@
         ]]></code>
         <xpath desc="seg1 exists and is directly enclosed in a jf:conditional">exists(.//*[@jf:id="seg1"]/parent::jf:conditional)</xpath>
         <xpath desc="seg2 does not exist at all">empty(.//*[@jf:id="seg2"])</xpath>
-        <xpath desc="seg3 has an instruction added">exists(.//*[@jf:id="seg3"]/parent::jf:conditional[jf:annotation])</xpath>
+        <xpath desc="seg3 has an instruction added">exists(.//*[@jf:id="seg3"]/parent::jf:conditional[jf:annotated])</xpath>
     </test>
   </TestSet>
   <TestSet>
@@ -500,10 +500,10 @@
         <xpath desc="no jf:conditional elements have been added">empty(.//jf:conditional)</xpath>
         <xpath desc="opt1 and seg1 exist">exists(.//j:option[@jf:id="opt1"][@jf:conditional]) and exists(.//tei:seg[@jf:id="seg1"])</xpath>
         <xpath desc="opt2 and seg2 removed">empty(.//j:option[@jf:id="opt2"]) and empty(.//tei:seg[@jf:id="seg2"])</xpath>
-        <xpath desc="opt3 and seg3 exist, an instruction has been added">exists(.//j:option[@jf:id="opt3"][@jf:conditional][@jf:conditional-instruction][descendant::jf:annotation]) and exists(.//tei:seg[@jf:id="seg3"])</xpath>
+        <xpath desc="opt3 and seg3 exist, an instruction has been added">exists(.//j:option[@jf:id="opt3"][@jf:conditional][@jf:conditional-instruction][descendant::jf:annotated]) and exists(.//tei:seg[@jf:id="seg3"])</xpath>
         <xpath desc="opt4 exists">exists(.//j:option[@jf:id="opt4"][@jf:conditional][tei:w])</xpath>
         <xpath desc="opt5 removed">empty(.//j:option[@jf:id="opt5"]) and empty(.//tei:w[.="E"])</xpath>
-        <xpath desc="opt6 exists, an instruction has been added">exists(.//j:option[@jf:id="opt6"][@jf:conditional][@jf:conditional-instruction][jf:annotation][tei:w])</xpath>
+        <xpath desc="opt6 exists, an instruction has been added">exists(.//j:option[@jf:id="opt6"][@jf:conditional][@jf:conditional-instruction][jf:annotated][tei:w])</xpath>
     </test>
 <!--
     <test>
