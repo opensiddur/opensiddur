@@ -288,7 +288,7 @@ declare function format:dependencies(
 declare function format:unflatten-dependencies(
   $doc as document-node(),
   $params as map
-  ) as document-node()+ {
+  ) as document-node()* {
   for $dep in format:dependencies($doc)//format:dependency[@transformable]
   return format:unflatten(doc($dep), $params, doc($dep))
 };
