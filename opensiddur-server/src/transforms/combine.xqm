@@ -482,11 +482,12 @@ declare function combine:include-annotation(
     ) as xs:boolean {
     let $a := $annotation[1]
     let $annotation-ids := $a/ancestor::j:annotations/tei:idno
-    let $selected-annotation-ids :=
-        let $s := $params("combine:settings")
-        where exists($s)
-        return $s("opensiddur->annotation")
-    return $annotation-ids/string()=$selected-annotation-ids/string()
+    let $s := $params("combine:settings")
+    return
+        exists($s) and (
+            some $annotation-id in $annotation-ids/string()
+            satisfies $s("opensiddur:annotation->" || $annotation-id)=("YES","ON")
+        )
 };
 
 declare function combine:follow-pointer(
@@ -552,7 +553,12 @@ declare function combine:follow-pointer(
           )
         else (
             (: external pointer... determine if we need to redirect :)
-            let $redirected := combine:translation-redirect($e, $destination, $params)
+            let $redirected := 
+                if ($destination[1]/ancestor-or-self::jf:unflattened)
+                then
+                    (: only unflattened can have a parallel text :) 
+                    combine:translation-redirect($e, $destination, $params)
+                else ()
             return
                 if (exists($redirected))
                 then $redirected

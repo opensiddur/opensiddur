@@ -549,4 +549,34 @@
         <xpath desc="in parB, segment turned off internally within stream is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBintSetInt"])</xpath>
     </test>
   </TestSet>
+  <TestSet>
+    <testName>Annotations in a single text</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("combine-ann-notes.xml", "notes"),
+      local:setup("combine-ann1.xml", "original")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("combine-ann1.xml", "original"),
+      local:tearDown("combine-ann-notes.xml", "notes")
+      ]]></code>
+    </tearDown>
+    <test>
+        <task>notes of all types</task>
+        <code><![CDATA[
+        let $d := doc("/db/data/original/combine-ann1.xml")
+        return
+            format:combine($d, map {}, $d)
+        ]]></code>
+        <xpath desc="stream note is present">exists(.//jf:combined[@jf:id="stream"][@jf:annotation]/jf:annotated/tei:note[@jf:id="stream_note"])</xpath>
+        <xpath desc="single note is present">exists(.//jf:annotation[tei:seg[@jf:id="single"]]/jf:annotated/tei:note[@jf:id="single_note"])</xpath>
+        <xpath desc="range note is present">exists(.//jf:annotation[tei:seg[@jf:id="range1"] and tei:seg[@jf:id="range2"]]/jf:annotated/tei:note[@jf:id="range_note"])</xpath>
+        <xpath desc="off note is not present">empty(.//tei:note[@jf:id="off_note"])</xpath>
+        <xpath desc="layer note is not present">exists(.//tei:ab[@jf:id="ab1"][@jf:annotation]/jf:annotated/tei:note[@jf:id="layer_note"])</xpath>
+        <xpath desc="word note is not present">exists(.//tei:w[@jf:id="word"][@jf:annotation]/jf:annotated/tei:note[@jf:id="word_note"])</xpath>
+        <xpath desc="annotations reference the document they came from and its license">every $annotated in .//jf:annotated satisfies contains($annotated/@jf:document, "/combine-ann-notes") and $annotated/@jf:license="http://www.creativecommons.org/licenses/by/3.0"</xpath>
+    </test>
+  </TestSet>
 </TestSuite>
