@@ -179,7 +179,7 @@ declare function flatten:merge(
 };
 
 (:~ replace all references to jf:placeholder with 
- : their stream elements 
+ : their stream elements; replace remaining @xml:id with @jf:id 
  : @param $params passes itself the "flatten:resolve-stream" parameter to point to the stream being resolved
  :)
 declare function flatten:resolve-stream(
@@ -219,7 +219,11 @@ declare function flatten:resolve-stream(
     case element()
     return 
       element { QName(namespace-uri($node), name($node)) }{
-        $node/@*,
+        $node/(@* except @xml:id),
+        if ($node/@xml:id and not($node/@jf:id))
+        then
+            attribute jf:id { $node/@xml:id/string() }
+        else (),
         flatten:resolve-stream($node/node(), $params)
       }
     case document-node()
