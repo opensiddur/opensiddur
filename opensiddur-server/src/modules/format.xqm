@@ -250,7 +250,7 @@ declare function format:dependency-is-transformable(
     $dep-uri as xs:string
     ) as xs:boolean {
     (: TODO: add other transformables here... :)
-    matches($dep-uri, "^/db/data/(linkage|original|tests)")
+    matches($dep-uri, "^/db/data/(linkage|notes|original|tests)")
 };
 
 declare function format:get-dependencies(
