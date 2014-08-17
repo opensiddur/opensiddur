@@ -86,16 +86,24 @@ declare function combine:combine(
                     return combine:jf-parallelGrp($node, $updated-params)
                     default (: other element :) 
                     return combine:element($node, $updated-params)
+                let $annotation-sources := (
+                    $instruction,
+                    $node/@jf:annotation,
+                    $node/self::jf:unflattened/ancestor::jf:parallel-document//jf:unflattened[not(. is $node)]/@jf:annotation
+                )
                 return
-                    if (exists(($instruction, $node/@jf:annotation)))
+                    if (exists($annotation-sources))
                     then
                         element {QName(namespace-uri($ret), name($ret))}{
                             $ret/@*,
-                            for $an in ($instruction, tokenize($node/@jf:annotation, "\s+"))
+                            for $al in $annotation-sources,
+                                $an in tokenize($al, "\s+")
                             return 
-                                combine:follow-pointer($node, $an, $updated-params, 
+                                combine:follow-pointer(
+                                    $al/parent::*, 
+                                    $an, $updated-params, 
                                     element jf:annotated { () },
-                                    if ($an=$instruction) 
+                                    if ($al is $instruction) 
                                     then () 
                                     else combine:include-annotation#3
                                 ),
@@ -130,7 +138,7 @@ declare function combine:jf-unflattened(
     $e/@*,
     if ($e/ancestor::jf:parallel-document)
     then
-        (: parallel texts cannot be redirected :) 
+        (: parallel texts cannot be redirected :)
         combine:combine($e/node(), $params)
     else 
         (: determine if we need a translation redirect
@@ -608,7 +616,7 @@ declare function combine:get-conditional-layer-id(
  : @return an updated parameter map with the following parameters updated:
  :  combine:conditional-result: YES, NO, MAYBE, ON, OFF if the element is subject to a conditional; empty if not
  :  combine:conditional-layers: a map of document#layer-id->conditional result
- :  combine:conditional-instruction: a pointer to the instruction
+ :  combine:conditional-instruction: the attribute node that points to the instruction
  :)
 declare function combine:evaluate-conditions(
     $e as element(),
@@ -657,7 +665,7 @@ declare function combine:evaluate-conditions(
                     $this-element-condition-result
                 )[1],
                 "combine:conditional-instruction" := 
-                    $e/@jf:conditional-instruction/string()
+                    $e/@jf:conditional-instruction
             },
             (: record if the layer is being turned off :)
             if (not($e instance of element(jf:conditional) 
