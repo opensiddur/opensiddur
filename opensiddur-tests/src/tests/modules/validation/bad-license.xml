@@ -1,0 +1,32 @@
+<tei:TEI 
+    xmlns:tei="http://www.tei-c.org/ns/1.0" 
+    xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+    xml:lang="en">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title type="main" xml:lang="en">Bad license</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:distributor>
+                    <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+                </tei:distributor>
+                <tei:availability status="restricted">
+                    <tei:licence target="http://www.creativecommons.org/lic/by/4.0"/><!-- wrong URL -->
+                </tei:availability>
+                <tei:date>2014-01-01</tei:date>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:link type="bibl" target="#stream /data/sources/Born%20Digital"/>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+        <tei:revisionDesc>
+            <tei:change>Nothing</tei:change>
+        </tei:revisionDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <j:streamText xml:id="stream">
+            <tei:seg xml:id="seg1">S1</tei:seg>
+        </j:streamText>
+   </tei:text>
+</tei:TEI>
