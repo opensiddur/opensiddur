@@ -617,4 +617,28 @@
     </test>
   </TestSet>
 
+  <TestSet>
+    <testName>Annotations that are broken up by concurrency</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("combine-ann-notes.xml", "notes"),
+      local:setup("combine-ann2.xml", "original")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("combine-ann2.xml", "original"),
+      local:tearDown("combine-ann-notes.xml", "notes")
+      ]]></code>
+    </tearDown>
+    <test>
+        <task>note where annotation crosses hierarchies</task>
+        <code><![CDATA[
+        let $d := doc("/db/data/original/combine-ann2.xml")
+        return
+            format:combine($d, map {}, $d)
+        ]]></code>
+        <xpath desc="single note is present exactly once">count(.//jf:annotated/tei:note[@jf:id="single_note"])=1</xpath>
+    </test>
+  </TestSet>
 </TestSuite>

@@ -92,7 +92,8 @@ declare function combine:combine(
                     $node/self::jf:unflattened/ancestor::jf:parallel-document//jf:unflattened[not(. is $node)]/@jf:annotation
                 )
                 return
-                    if (exists($annotation-sources))
+                    if (exists($annotation-sources) and 
+                        not($node[@jf:part]/preceding::*[@jf:part=$node/@jf:part]))
                     then
                         element {QName(namespace-uri($ret), name($ret))}{
                             $ret/@*,
