@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI 
+    xmlns:tei="http://www.tei-c.org/ns/1.0"
+    xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+    <tei:teiHeader>
+      <tei:publicationStmt>
+        <tei:availability status="free">
+          <tei:licence target="http://www.creativecommons.org/licenses/by/3.0"/>
+        </tei:availability> 
+      </tei:publicationStmt>
+    </tei:teiHeader>
+    <j:settings>
+        <tei:fs xml:id="set_notes_on" type="opensiddur:annotation">
+            <tei:f name="Test"><j:on/></tei:f>
+        </tei:fs>
+    </j:settings>
+    <j:links>
+        <tei:link type="set" target="#stream #set_notes_on"/>
+        <tei:link type="note" target="#range(r2,r3) /data/notes/combine-ann-notes#single_note"/>
+    </j:links>
+    <tei:text>
+      <j:streamText xml:id="stream">
+        <tei:anchor xml:id="anchor1"/>
+        <tei:seg xml:id="r1">1</tei:seg>
+        <tei:seg xml:id="r2">2</tei:seg>
+        <tei:anchor xml:id="anchor2"/>
+        <tei:anchor xml:id="anchor3"/>
+        <tei:seg xml:id="r3">3</tei:seg>
+        <tei:seg xml:id="r4">4</tei:seg>
+        <tei:anchor xml:id="anchor4"/>
+      </j:streamText>
+      <j:concurrent xml:id="concurrent">
+          <j:layer type="p" xml:id="p_layer">
+                <tei:p>
+                    <tei:ptr target="#range(anchor1,anchor2)"/>
+                </tei:p>
+                <tei:p>
+                    <tei:ptr target="#range(anchor3,anchor4)"/>
+                </tei:p>
+          </j:layer>
+      </j:concurrent>
+    </tei:text>
+</tei:TEI>
