@@ -443,7 +443,7 @@
         ]]></code>
         <xpath desc="seg1 exists and is directly enclosed in a jf:conditional">exists(.//*[@jf:id="seg1"]/parent::jf:conditional)</xpath>
         <xpath desc="seg2 does not exist at all">empty(.//*[@jf:id="seg2"])</xpath>
-        <xpath desc="seg3 has an instruction added">exists(.//*[@jf:id="seg3"]/parent::jf:conditional[jf:annotation])</xpath>
+        <xpath desc="seg3 has an instruction added">exists(.//*[@jf:id="seg3"]/parent::jf:conditional[jf:annotated])</xpath>
     </test>
   </TestSet>
   <TestSet>
@@ -500,10 +500,10 @@
         <xpath desc="no jf:conditional elements have been added">empty(.//jf:conditional)</xpath>
         <xpath desc="opt1 and seg1 exist">exists(.//j:option[@jf:id="opt1"][@jf:conditional]) and exists(.//tei:seg[@jf:id="seg1"])</xpath>
         <xpath desc="opt2 and seg2 removed">empty(.//j:option[@jf:id="opt2"]) and empty(.//tei:seg[@jf:id="seg2"])</xpath>
-        <xpath desc="opt3 and seg3 exist, an instruction has been added">exists(.//j:option[@jf:id="opt3"][@jf:conditional][@jf:conditional-instruction][descendant::jf:annotation]) and exists(.//tei:seg[@jf:id="seg3"])</xpath>
+        <xpath desc="opt3 and seg3 exist, an instruction has been added">exists(.//j:option[@jf:id="opt3"][@jf:conditional][@jf:conditional-instruction][descendant::jf:annotated]) and exists(.//tei:seg[@jf:id="seg3"])</xpath>
         <xpath desc="opt4 exists">exists(.//j:option[@jf:id="opt4"][@jf:conditional][tei:w])</xpath>
         <xpath desc="opt5 removed">empty(.//j:option[@jf:id="opt5"]) and empty(.//tei:w[.="E"])</xpath>
-        <xpath desc="opt6 exists, an instruction has been added">exists(.//j:option[@jf:id="opt6"][@jf:conditional][@jf:conditional-instruction][jf:annotation][tei:w])</xpath>
+        <xpath desc="opt6 exists, an instruction has been added">exists(.//j:option[@jf:id="opt6"][@jf:conditional][@jf:conditional-instruction][jf:annotated][tei:w])</xpath>
     </test>
 <!--
     <test>
@@ -547,6 +547,98 @@
         <xpath desc="in parB, segment turned off externally is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBext"])</xpath>
         <xpath desc="in parB, segment turned off internally at streamText is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBint"])</xpath>
         <xpath desc="in parB, segment turned off internally within stream is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBintSetInt"])</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Annotations in a single text</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("combine-ann-notes.xml", "notes"),
+      local:setup("combine-ann1.xml", "original")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("combine-ann1.xml", "original"),
+      local:tearDown("combine-ann-notes.xml", "notes")
+      ]]></code>
+    </tearDown>
+    <test>
+        <task>notes of all types</task>
+        <code><![CDATA[
+        let $d := doc("/db/data/original/combine-ann1.xml")
+        return
+            format:combine($d, map {}, $d)
+        ]]></code>
+        <xpath desc="stream note is present">exists(.//jf:combined[@jf:id="stream"][@jf:annotation]/jf:annotated/tei:note[@jf:id="stream_note"])</xpath>
+        <xpath desc="single note is present">exists(.//jf:annotation[tei:seg[@jf:id="single"]]/jf:annotated/tei:note[@jf:id="single_note"])</xpath>
+        <xpath desc="range note is present">exists(.//jf:annotation[tei:seg[@jf:id="range1"] and tei:seg[@jf:id="range2"]]/jf:annotated/tei:note[@jf:id="range_note"])</xpath>
+        <xpath desc="off note is not present">empty(.//tei:note[@jf:id="off_note"])</xpath>
+        <xpath desc="layer note is not present">exists(.//tei:ab[@jf:id="ab1"][@jf:annotation]/jf:annotated/tei:note[@jf:id="layer_note"])</xpath>
+        <xpath desc="word note is not present">exists(.//tei:w[@jf:id="word"][@jf:annotation]/jf:annotated/tei:note[@jf:id="word_note"])</xpath>
+        <xpath desc="annotations reference the document they came from and its license">every $annotated in .//jf:annotated satisfies contains($annotated/@jf:document, "/combine-ann-notes") and $annotated/@jf:license="http://www.creativecommons.org/licenses/by/3.0"</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>Annotations in a parallel text</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("combine-ann-notes.xml", "notes"),
+      local:setup("combine-ann-parA.xml", "original"),
+      local:setup("combine-ann-parB.xml", "original"),
+      local:setup("combine-ann-par.xml", "linkage"),
+      local:setup("combine-ann-incl.xml", "original")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("combine-ann-notes.xml", "notes"),
+      local:tearDown("combine-ann-parA.xml", "original"),
+      local:tearDown("combine-ann-parB.xml", "original"),
+      local:tearDown("combine-ann-par.xml", "linkage"),
+      local:tearDown("combine-ann-incl.xml", "original")
+      ]]></code>
+    </tearDown>
+    <test>
+        <task>notes of all types</task>
+        <code><![CDATA[
+        let $d := doc("/db/data/original/combine-ann-incl.xml")
+        return
+            format:combine($d, map {}, $d)
+        ]]></code>
+        <xpath desc="stream annotation from parA is present">exists(.//jf:ptr[@jf:id="ptr2"]/jf:combined[@jf:id="stream"][@jf:annotation]/jf:annotated/tei:note[@jf:id="stream_note"])</xpath>
+        <xpath desc="single annotation from parA is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parA")]/descendant::jf:annotation[tei:seg[@jf:id="single"]]/jf:annotated/tei:note[@jf:id="single_note"])</xpath>
+        <xpath desc="range annotation from parA is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parA")]/descendant::jf:annotation[tei:seg[@jf:id="range1"] and tei:seg[@jf:id="range2"]]/jf:annotated/tei:note[@jf:id="range_note"])</xpath>
+        <xpath desc="word annotation from parA is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parA")]/descendant::tei:seg[@jf:id="with_word"]/tei:w[@jf:annotation]/jf:annotated/tei:note[@jf:id="word_note"])</xpath>
+        <xpath desc="stream annotation from parB is present">count(.//jf:ptr[@jf:id="ptr2"]/jf:combined[@jf:id="stream"][@jf:annotation]/jf:annotated/tei:note[@jf:id="stream_note"])=2</xpath>
+        <xpath desc="single annotation from parB is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parB")]/descendant::jf:annotation[tei:seg[@jf:id="single"]]/jf:annotated/tei:note[@jf:id="single_note"])</xpath>
+        <xpath desc="range annotation from parB is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parB")]/descendant::jf:annotation[tei:seg[@jf:id="range1"] and tei:seg[@jf:id="range2"]]/jf:annotated/tei:note[@jf:id="range_note"])</xpath>
+        <xpath desc="word annotation from parB is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parB")]/descendant::tei:seg[@jf:id="with_word"]/tei:w[@jf:annotation]/jf:annotated/tei:note[@jf:id="word_note"])</xpath>
+    </test>
+  </TestSet>
+
+  <TestSet>
+    <testName>Annotations that are broken up by concurrency</testName>
+    <setup>
+      <code><![CDATA[
+      local:setup("combine-ann-notes.xml", "notes"),
+      local:setup("combine-ann2.xml", "original")
+      ]]></code>
+    </setup>
+    <tearDown>
+      <code><![CDATA[
+      local:tearDown("combine-ann2.xml", "original"),
+      local:tearDown("combine-ann-notes.xml", "notes")
+      ]]></code>
+    </tearDown>
+    <test>
+        <task>note where annotation crosses hierarchies</task>
+        <code><![CDATA[
+        let $d := doc("/db/data/original/combine-ann2.xml")
+        return
+            format:combine($d, map {}, $d)
+        ]]></code>
+        <xpath desc="single note is present exactly once">count(.//jf:annotated/tei:note[@jf:id="single_note"])=1</xpath>
     </test>
   </TestSet>
 </TestSuite>

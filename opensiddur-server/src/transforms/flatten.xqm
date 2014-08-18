@@ -31,15 +31,16 @@ declare variable $flatten:layer-order := map {
     "parallel" := 1,
     "phony-set" := 2,
     "phony-conditional" := 3,
-    "div" := 4,
-    "p"   := 5,
-    "lg"  := 6,
-    "s"   := 7,
-    "ab"  := 8,
-    "verse" := 9,
-    "l"   := 10,
-    "cit" := 11,
-    "choice" := 12
+    "phony-annotation" := 4,
+    "div" := 5,
+    "p"   := 6,
+    "lg"  := 7,
+    "s"   := 8,
+    "ab"  := 9,
+    "verse" := 10,
+    "l"   := 11,
+    "cit" := 12,
+    "choice" := 13
   };
 
 (:~ order the given flattened nodes, using the information in 
@@ -178,7 +179,7 @@ declare function flatten:merge(
 };
 
 (:~ replace all references to jf:placeholder with 
- : their stream elements 
+ : their stream elements; replace remaining @xml:id with @jf:id 
  : @param $params passes itself the "flatten:resolve-stream" parameter to point to the stream being resolved
  :)
 declare function flatten:resolve-stream(
@@ -218,7 +219,11 @@ declare function flatten:resolve-stream(
     case element()
     return 
       element { QName(namespace-uri($node), name($node)) }{
-        $node/@*,
+        $node/(@* except @xml:id),
+        if ($node/@xml:id and not($node/@jf:id))
+        then
+            attribute jf:id { $node/@xml:id/string() }
+        else (),
         flatten:resolve-stream($node/node(), $params)
       }
     case document-node()

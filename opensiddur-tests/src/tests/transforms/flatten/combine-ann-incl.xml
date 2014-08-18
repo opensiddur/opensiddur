@@ -1,0 +1,45 @@
+<tei:TEI 
+    xmlns:tei="http://www.tei-c.org/ns/1.0" 
+    xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+    xml:lang="en">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title type="main">Includer</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:distributor>
+                    <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+                </tei:distributor>
+                <tei:availability status="free">
+                    <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+                </tei:availability>
+                <tei:date>2014-03-19</tei:date>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:link type="bibl" target="#stream /data/sources/Born%20Digital"/>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+        <tei:revisionDesc>
+        </tei:revisionDesc>
+    </tei:teiHeader>
+    <j:settings>
+        <tei:fs xml:id="set1" type="opensiddur:annotation">
+            <tei:f name="Test"><j:on/></tei:f>
+        </tei:fs>
+        <tei:fs xml:id="tr" type="opensiddur">
+            <tei:f name="translation">Test</tei:f>
+        </tei:fs>
+    </j:settings>
+    <j:links>
+        <tei:link type="set" target="#stream #set1"/>
+        <tei:link type="set" target="#ptr2 #tr"/>
+    </j:links>
+    <tei:text>
+        <j:streamText xml:id="stream">
+            <tei:seg xml:id="seg1">From includer 1</tei:seg>
+            <tei:ptr xml:id="ptr2" target="/data/original/combine-ann-parA#stream"/>
+            <tei:seg xml:id="seg3">From includer 2</tei:seg>
+        </j:streamText>
+   </tei:text>
+</tei:TEI>
