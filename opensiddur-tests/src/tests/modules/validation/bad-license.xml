@@ -11,7 +11,7 @@
                 <tei:distributor>
                     <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
                 </tei:distributor>
-                <tei:availability status="restricted">
+                <tei:availability>
                     <tei:licence target="http://www.creativecommons.org/lic/by/4.0"/><!-- wrong URL -->
                 </tei:availability>
                 <tei:date>2014-01-01</tei:date>
