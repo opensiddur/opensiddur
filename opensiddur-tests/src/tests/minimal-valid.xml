@@ -5,7 +5,7 @@
                 <tei:title xml:lang="en">Minimal valid JLPTEI</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
-                <tei:availability status="free">
+                <tei:availability>
                     <tei:p xml:lang="en">To the extent possible under law, 
      the contributors who associated  
      <tei:ref type="license" target="licenses/cc0/1.0">Creative Commons Zero</tei:ref> 

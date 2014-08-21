@@ -4,7 +4,7 @@
   xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
   <tei:teiHeader>
     <tei:publicationStmt>
-      <tei:availability status="free">
+      <tei:availability>
         <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
       </tei:availability> 
     </tei:publicationStmt>

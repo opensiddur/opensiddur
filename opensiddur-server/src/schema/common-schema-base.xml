@@ -100,6 +100,11 @@ schemas, not as an independent unit
       <attDef ident="part" mode="delete"/>
     </attList>
   </elementSpec>
+  <elementSpec ident="availability" module="header" mode="change">
+    <attList>
+      <attDef ident="status" mode="delete"/>
+    </attList>
+  </elementSpec>
   <elementSpec ident="p" module="core" mode="change">
     <classes mode="replace">
       <memberOf key="model.pLike"/>

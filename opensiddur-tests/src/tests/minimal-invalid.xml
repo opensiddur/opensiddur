@@ -2,7 +2,7 @@
   <!-- missing header parts -->
     <tei:teiHeader>
       <tei:publicationStmt>
-        <tei:availability status="free">
+        <tei:availability>
           <!-- this is here to set off the header Schematron -->
         </tei:availability>
       </tei:publicationStmt>
