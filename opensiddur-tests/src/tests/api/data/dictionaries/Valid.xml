@@ -31,7 +31,7 @@
       </tei:revisionDesc>
    </tei:teiHeader>
    <tei:text>
-      <tei:body>
+      <tei:body xml:id="text">
         <tei:entry xml:id="H1">
             <tei:form>
                <tei:orth xml:lang="he">אָב</tei:orth>
