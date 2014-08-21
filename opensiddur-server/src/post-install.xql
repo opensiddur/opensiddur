@@ -16,6 +16,14 @@ declare variable $dir external;
 (: the target collection into which the app is deployed :)
 declare variable $target external;
 
+declare namespace tei="http://www.tei-c.org/ns/1.0";
+
+(:~ update for local schema changes :)
+declare function local:schema-changes-0-7-5(
+    ) {
+    update delete collection("/data")//tei:availability/@status
+};
+
 util:log-system-out("starting post-install..."),
 util:log-system-out("removing caches..."),
 for $cache in $format:caches
@@ -41,4 +49,6 @@ xmldb:store(
     "generic.xml",
     doc($target || "/data/styles/en/generic.xml")
     ),
+util:log-system-out("upgrades: update existing JLPTEI for schema changes"),
+local:schema-changes-0-7-5(),
 util:log-system-out("done")
