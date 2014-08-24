@@ -8,6 +8,8 @@ import module namespace src="http://jewishliturgy.org/api/data/sources"
   at "api/data/sources.xqm";
 import module namespace sty="http://jewishliturgy.org/api/data/styles"
   at "api/data/styles.xqm";
+
+declare namespace tei="http://www.tei-c.org/ns/1.0";
   
 (: file path pointing to the exist installation directory :)
 declare variable $home external;
@@ -15,6 +17,12 @@ declare variable $home external;
 declare variable $dir external;
 (: the target collection into which the app is deployed :)
 declare variable $target external;
+
+(:~ update for local schema changes :)
+declare function local:schema-changes-0-7-5(
+    ) {
+    update delete collection("/db/data")//tei:availability/@status
+};
 
 util:log-system-out("starting post-install..."),
 util:log-system-out("removing caches..."),
@@ -41,4 +49,6 @@ xmldb:store(
     "generic.xml",
     doc($target || "/data/styles/en/generic.xml")
     ),
+util:log-system-out("upgrades: update existing JLPTEI for schema changes..."),
+local:schema-changes-0-7-5(),
 util:log-system-out("done")

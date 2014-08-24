@@ -69,7 +69,7 @@
             </tei:titleStmt>
             <tei:publicationStmt>
               <tei:distributor><tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref></tei:distributor>
-              <tei:availability status="free">
+              <tei:availability>
                 <xsl:sequence select="$license"/>
               </tei:availability>
               <tei:date><xsl:sequence select="format-date(current-date(), '[Y0001]-[M01]-[D01]')"/></tei:date>

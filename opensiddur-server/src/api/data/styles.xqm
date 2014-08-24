@@ -233,6 +233,7 @@ declare
     case element(j:stylesheet)
     return
       <j:stylesheet scheme="{$scheme}">{
+        $n/(@* except @scheme),
         $replacement
       }</j:stylesheet>
     case element()

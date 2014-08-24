@@ -100,6 +100,11 @@ schemas, not as an independent unit
       <attDef ident="part" mode="delete"/>
     </attList>
   </elementSpec>
+  <elementSpec ident="availability" module="header" mode="change">
+    <attList>
+      <attDef ident="status" mode="delete"/>
+    </attList>
+  </elementSpec>
   <elementSpec ident="p" module="core" mode="change">
     <classes mode="replace">
       <memberOf key="model.pLike"/>
@@ -108,10 +113,37 @@ schemas, not as an independent unit
       <memberOf key="model.availabilityPart" mode="delete"/>
     </classes>
   </elementSpec>
-  <elementSpec ident="link" module="linking" mode="change">
+  <elementSpec ident="licence" module="header" mode="change">
     <attList>
-      <attDef ident="targets" mode="delete"/>
+      <attDef ident="target" mode="change" usage="rwa">
+        <desc>Pointer to the license that applies to the text, which must be in the list of licenses approved for use in the project.</desc>
+        <datatype minOccurs="1" maxOccurs="1">
+          <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
+        </datatype>
+        <valList type="closed" mode="add">
+          <valItem ident="http://www.creativecommons.org/publicdomain/zero/1.0">
+            <gloss>Creative Commons Zero (Public Domain Dedication)</gloss>
+          </valItem>
+          <valItem ident="http://creativecommons.org/publicdomain/mark/1.0">
+            <gloss>Creative Commons Public Domain Mark (for works known to be in the public domain and without post-PD modification)</gloss>
+          </valItem>
+          <valItem ident="http://www.creativecommons.org/licenses/by/3.0">
+            <gloss>Creative Commons Attribution 3.0 Unported</gloss>
+          </valItem>
+          <valItem ident="http://www.creativecommons.org/licenses/by/4.0">
+            <gloss>Creative Commons Attribution 4.0 International</gloss>
+          </valItem>
+          <valItem ident="http://www.creativecommons.org/licenses/by-sa/3.0">
+            <gloss>Creative Commons Attribution-ShareAlike 3.0 Unported</gloss>
+          </valItem>
+          <valItem ident="http://www.creativecommons.org/licenses/by-sa/4.0">
+            <gloss>Creative Commons Attribution-ShareAlike 4.0 International</gloss>
+          </valItem>
+        </valList>        
+      </attDef>
     </attList>
+  </elementSpec>
+  <elementSpec ident="link" module="linking" mode="change">
     <classes mode="replace">
       <memberOf key="model.global"/>
       <memberOf key="model.global.meta"/>
@@ -120,6 +152,54 @@ schemas, not as an independent unit
       <memberOf key="att.pointing"/>
       <memberOf key="att.typed"/>
     </classes>
+    <!-- TODO: the constraints on link and ptr/@target are the same -->
+    <constraintSpec scheme="isoschematron" ident="link-j-1">
+      <desc>Test that internal #range pointers point to a reasonable range</desc>
+      <constraint>
+        <sch:assert
+          test="
+          @xml:base or not(contains(@target, '#range')) or 
+          (
+          every $result in (
+            for 
+              $token in tokenize(@target, '\s+')[starts-with(., '#range(')],
+              $lptr in substring-after(substring-before($token, ','), '('),
+              $rptr in substring-before(substring-after($token, ','), ')')
+            return 
+              exists(/id($lptr)) and
+              exists(/id($rptr)) and
+              /id($lptr) &lt;&lt; /id($rptr)
+          ) satisfies $result
+          )
+            ">
+          In a #range(lptr,rptr) XPath expression, the left pointer must precede the right pointer.  
+        </sch:assert>
+      </constraint>
+    </constraintSpec>
+    <constraintSpec scheme="isoschematron" ident="link-j-2">
+      <desc>Test that internal shorthand pointers point to an existing target</desc>
+      <constraint>
+        <sch:assert
+          test="
+          @xml:base or (
+          every $ptr-result in (
+            for 
+              $token in tokenize(@target, '\s+')
+                [not(starts-with(., '#range('))]
+                [starts-with(.,'#')],
+              $ptr in substring-after($token, '#')
+            return 
+              exists(/id($ptr))
+          ) satisfies $ptr-result
+          )
+            ">
+          In a local shorthand pointer, the target node must exist.  
+        </sch:assert>
+      </constraint>
+    </constraintSpec>
+    <attList>
+      <attDef ident="targets" mode="delete"/>
+    </attList>
   </elementSpec>
   <elementSpec ident="linkGrp" module="linking" mode="change">
     <classes mode="replace">
