@@ -73,13 +73,13 @@ TODO:
     Subdirectory of $result-directory to place tanach original files in
   </xd:doc>
   <xsl:param name="result-subdirectory" as="xs:string"
-    select="'original/he'"/>
+    select="'original'"/>
 
   <xd:doc>
     Notes file name (base of name without extension)
   </xd:doc>
   <xsl:param name="notes-file-name" as="xs:string"
-    select="concat('notes/he/', encode-for-uri('Notes from the Westminster Leningrad Codex'))"/>
+    select="concat('notes/', encode-for-uri('Notes from the Westminster Leningrad Codex'))"/>
 
   <xd:doc>
     Contributor list entry file name (base w/o extension)
@@ -372,11 +372,6 @@ TODO:
     <xd:short>Turn WLC x into a link for a tei:note</xd:short>
   </xd:doc>
   <xsl:template match="x" mode="link-notes">
-    <xsl:variable name="file" as="xs:string"
-      select="concat('/data/original/',
-        func:bookref-to-uri(
-        ancestor::book/names/name,
-        ancestor::c/@n))"/>
     <xsl:variable name="link-to-id" as="xs:string?"
       select="if (parent::tei:w) 
         then func:make-word-xmlid(parent::tei:w)
@@ -384,7 +379,7 @@ TODO:
         then func:make-word-xmlid(following-sibling::*[1])
         else func:debug(('note I do not know what to link it to', parent::*), 'x', $debug-error)"/>
     <tei:link type="note" target="{string-join(
-      ($file,'#',$link-to-id, ' #note_',.),'')}"/>
+      ('#',$link-to-id, ' /data/',$notes-file-name,'#note_',.),'')}"/>
   </xsl:template>
 	
   <xsl:template match="text()" mode="link-notes"/>
@@ -427,8 +422,6 @@ TODO:
         <tei:resp key="trc">Transcribed by</tei:resp> 
         <tei:name ref="/{$contributors-file-name}">Christopher Kimball</tei:name>
       </tei:respStmt>
-    </xsl:variable>
-    <xsl:variable name="links-content" as="element(j:links)?">
     </xsl:variable>
 
     <!-- produce the whole-tanach file -->
@@ -772,7 +765,11 @@ TODO:
             <xsl:with-param name="respons" 
               as="element(tei:respStmt)+" select="$responsGrp-content" />
             <xsl:with-param name="links" 
-              as="element(j:links)?" select="$links-content" />
+              as="element(j:links)?" >
+                <j:links>
+                    <xsl:apply-templates select="." mode="link-notes"/> 
+                </j:links>
+            </xsl:with-param>
           </xsl:call-template>
         </xsl:result-document>
       </xsl:for-each>
@@ -795,20 +792,15 @@ TODO:
         <xsl:with-param name="annotations"
           as="element(j:annotations)">
           <j:annotations>
-            <xsl:attribute name="xml:id" select="'main'" />
+            <xsl:attribute name="xml:id" select="'ann'" />
+            <tei:idno>WLC</tei:idno>
             <xsl:apply-templates select="$tanach-as-xml//notes"
               mode="notes-annotation" />
           </j:annotations>
         </xsl:with-param>
         <xsl:with-param name="license" as="element()+" select="$license-content" />
         <xsl:with-param name="bibliography" as="element(tei:link)">
-          <tei:link type="bibl" target="#text /data/{$bibliography-file-name}"/>          
-        </xsl:with-param>
-        <xsl:with-param name="links"  as="element(j:links)">
-          <j:links>
-            <xsl:apply-templates select="$tanach-as-xml//tanach"
-              mode="link-notes" />
-          </j:links>
+          <tei:link type="bibl" target="#ann /data/{$bibliography-file-name}"/>          
         </xsl:with-param>
       </xsl:call-template>
     </xsl:result-document>
