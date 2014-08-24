@@ -778,6 +778,7 @@ TODO:
     <xsl:result-document
       href="{$result-directory}/{$notes-file-name}{$extension}">
       <xsl:call-template name="fill-template">
+        <xsl:with-param name="xmllang" as="xs:string" select="'en'"/>
         <xsl:with-param name="title"
           as="element(tei:title)+">
           <tei:title type="main" xml:lang="en">Notes from the Westminster Leningrad Codex</tei:title>
