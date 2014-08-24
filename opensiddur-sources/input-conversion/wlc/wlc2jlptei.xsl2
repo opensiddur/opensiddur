@@ -69,21 +69,17 @@ TODO:
   <xsl:param name="result-directory-from-catalog" as="xs:string"
     select="'../text'" />
   
-  <xd:doc>Year/Month directory</xd:doc>
-  <xsl:param name="date-dir" as="xs:string" 
-    select="format-date(current-date(), '[Y4]/[M02]')"/>
-  
   <xd:doc>
     Subdirectory of $result-directory to place tanach original files in
   </xd:doc>
   <xsl:param name="result-subdirectory" as="xs:string"
-    select="concat('original/he/', $date-dir)"/>
+    select="'original/he'"/>
 
   <xd:doc>
     Notes file name (base of name without extension)
   </xd:doc>
   <xsl:param name="notes-file-name" as="xs:string"
-    select="concat('notes/he/', $date-dir, '/', encode-for-uri('Notes from the Westminster Leningrad Codex'))"/>
+    select="concat('notes/he/', encode-for-uri('Notes from the Westminster Leningrad Codex'))"/>
 
   <xd:doc>
     Contributor list entry file name (base w/o extension)
