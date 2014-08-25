@@ -93,6 +93,35 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
               </rng:oneOrMore>
             </content>
           </elementSpec>
+          <elementSpec ident="note" mode="change" module="core">
+            <attList>
+                <attDef ident="targetEnd" mode="delete"/>
+                <attDef ident="type" usage="req" mode="change">
+                    <gloss>The type of note</gloss>
+                    <valList type="closed" mode="add">
+                        <valItem ident="comment">
+                            <gloss>The note presents some kind of commentary on the source text.</gloss>
+                        </valItem>
+                        <valItem ident="editorial">
+                            <gloss>The note is about how the text was edited.</gloss>
+                        </valItem>
+                        <valItem ident="inline">
+                            <gloss>The note is an annotation that is not part of the normal text stream,
+                            but it must appear inline to the text. Prefer "instruction" or "comment". Use sparingly.</gloss>
+                        </valItem>
+                        <valItem ident="instruction">
+                            <gloss>The note indicates instructional text</gloss>
+                        </valItem>
+                        <valItem ident="transcription">
+                            <gloss>The note is about how the text was transcribed, and is not part of the original text.</gloss>
+                        </valItem>
+                        <valItem ident="translation">
+                            <gloss>The note is by the translator, commenting specifically on some aspect of the translation and not on the text itself.</gloss>
+                        </valItem>
+                    </valList>
+                </attDef>
+            </attList>
+          </elementSpec>
         </schemaSpec>
       </div>
     </body>

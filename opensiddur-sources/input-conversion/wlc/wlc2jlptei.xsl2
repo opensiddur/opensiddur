@@ -306,6 +306,7 @@ TODO:
   <xsl:template match="tei:note" mode="notes-annotation">
     <xsl:copy copy-namespaces="no">
       <xsl:copy-of select="@*" copy-namespaces="no"/>
+      <xsl:attribute name="type">editorial</xsl:attribute>
       <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
