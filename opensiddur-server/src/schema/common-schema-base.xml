@@ -85,7 +85,7 @@ schemas, not as an independent unit
     </attList>
     <content>
       <rng:oneOrMore xmlns:rng="http://relaxng.org/ns/structure/1.0">
-        <rng:ref name="model.sourceDescPart"/>
+        <rng:ref name="bibl"/>
       </rng:oneOrMore>
     </content>
   </elementSpec>
@@ -147,7 +147,6 @@ schemas, not as an independent unit
     <classes mode="replace">
       <memberOf key="model.global"/>
       <memberOf key="model.global.meta"/>
-      <memberOf key="model.sourceDescPart" mode="add"/>
       <memberOf key="att.global"/>
       <memberOf key="att.pointing"/>
       <memberOf key="att.typed"/>
@@ -205,7 +204,6 @@ schemas, not as an independent unit
     <classes mode="replace">
       <memberOf key="model.global"/>
       <memberOf key="model.global.meta"/>
-      <memberOf key="model.sourceDescPart" mode="add"/>
       <memberOf key="att.global"/>
       <!--memberOf key="att.pointing"/-->
       <memberOf key="att.pointing.group"/>

@@ -256,8 +256,9 @@ cacheSize=${cache.size}
             executable="${installdir}/bin/client.sh"
             dir="${installdir}"
             inputstring="xquery version '3.0';
-            declare namespace tei='http://www.tei-c.org/ns/1.0';
-            update delete collection('/db/data')//tei:availability/@status
+            import module namespace upg='http://jewishliturgy.org/modules/upgrade'
+                at 'xmldb:exist:///apps/opensiddur-server/modules/upgrade.xqm';
+            upg:all-schema-changes()
             ">
             <arg value="-qls"/>
             <arg value="-u"/>
