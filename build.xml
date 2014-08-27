@@ -251,6 +251,22 @@ cacheSize=${cache.size}
             <!-- DEBUG_OPTS seems to be the only way to force options after java.endorsed.dirs -->
             <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
         </exec>
+        <!-- schema update -->    
+        <exec
+            executable="${installdir}/bin/client.sh"
+            dir="${installdir}"
+            inputstring="xquery version '3.0';
+            declare namespace tei='http://www.tei-c.org/ns/1.0';
+            update delete collection('/db/data')//tei:availability/@status
+            ">
+            <arg value="-qls"/>
+            <arg value="-u"/>
+            <arg value="admin"/>
+            <arg value="-P"/>
+            <arg value="${adminpassword}"/>
+            <arg value="-x"/>
+            <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed:${installdir}/lib/user"/>
+        </exec>
         <!-- reindex -->    
         <exec
             executable="${installdir}/bin/client.sh"
