@@ -4,6 +4,6 @@
   
   </tei:teiHeader>
   <tei:text>
-    <tei:ptr target="/data/tests/dep-root"/>
+      <tei:ptr target="/data/tests/dep-root"/>
   </tei:text>
 </tei:TEI>

@@ -4,9 +4,9 @@
   
   </tei:teiHeader>
   <tei:text>
-    <tei:ptr target="http://www.creativecommons.org"/>
-    <tei:ptr target="https://www.gmail.com"/>
-    <tei:ptr target="#seg1"/>
-    <tei:seg xml:id="seg1">seg1</tei:seg>
+      <tei:ptr target="http://www.creativecommons.org"/>
+      <tei:ptr target="https://www.gmail.com"/>
+      <tei:ptr target="#seg1"/>
+      <tei:seg xml:id="seg1">seg1</tei:seg>
   </tei:text>
 </tei:TEI>

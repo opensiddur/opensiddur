@@ -4,7 +4,7 @@
   
   </tei:teiHeader>
   <tei:text>
-    <tei:ptr target="/data/tests/dep-tree1"/>
-    <tei:ptr target="/data/tests/dep-tree2#seg1 /data/tests/dep-tree3"/>
+      <tei:ptr target="/data/tests/dep-tree1"/>
+      <tei:ptr target="/data/tests/dep-tree2#seg1 /data/tests/dep-tree3"/>
   </tei:text>
 </tei:TEI>

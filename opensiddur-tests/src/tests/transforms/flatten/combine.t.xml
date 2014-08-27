@@ -1,15 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TestSuite
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  xmlns:tei="http://www.tei-c.org/ns/1.0"
-  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
-  >
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
   <suiteName>Combine transform</suiteName>
   <description>
-    <p>Tests of combine transform</p>
-    <author>Efraim Feinstein</author>
-    <copyright>Copyright 2013-2014 Efraim Feinstein
+      <p>Tests of combine transform</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2013-2014 Efraim Feinstein
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -27,7 +22,7 @@
   </imports>
   <asUser>testuser</asUser>
   <password>testuser</password>
-  <functions><![CDATA[
+  <functions>
     declare function local:setup($file as xs:string) {
         local:setup($file, "tests")
     };
@@ -58,234 +53,250 @@
       },
       ridx:remove("/db/data/" || $collection,  $file)
     };
-  ]]></functions>
+  </functions>
   <TestSet>
-    <testName>No pointers</testName>
-    <setup><code><![CDATA[
+      <testName>No pointers</testName>
+      <setup>
+         <code>
     local:setup("combine1.xml")
-    ]]></code></setup>
-    <tearDown><code><![CDATA[
+    </code>
+      </setup>
+      <tearDown>
+         <code>
     local:tearDown("combine1.xml")
-    ]]></code></tearDown>
-    <test>
-      <task>acts as an identity transform</task>
-      <code><![CDATA[
+    </code>
+      </tearDown>
+      <test>
+         <task>acts as an identity transform</task>
+         <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine1.xml"),
           map {})
-      ]]></code>
-      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine1$")</xpath>
-      <xpath 
-        desc="acts as an identity transform for unflattened text" 
-        >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/tei:seg[@jf:id="seg1"][ends-with(@jf:stream,"#stream")])
+      </code>
+         <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine1$")</xpath>
+         <xpath desc="acts as an identity transform for unflattened text">exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/tei:seg[@jf:id="seg1"][ends-with(@jf:stream,"#stream")])
       </xpath>
-    </test>        
+      </test>        
   </TestSet>
   <TestSet>
-    <testName>Local pointer</testName>
-    <setup><code><![CDATA[
+      <testName>Local pointer</testName>
+      <setup>
+         <code>
     local:setup("combine2.xml")
-    ]]></code></setup>
-    <tearDown><code><![CDATA[
+    </code>
+      </setup>
+      <tearDown>
+         <code>
     local:tearDown("combine2.xml")
-    ]]></code></tearDown>
-    <test>
-      <task>one segment</task>
-      <code><![CDATA[
+    </code>
+      </tearDown>
+      <test>
+         <task>one segment</task>
+         <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine2.xml"),
           map {})
-      ]]></code>
-      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine2$")</xpath>
-      <xpath 
-        desc="incorporate destination in-place" 
-        >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
+      </code>
+         <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine2$")</xpath>
+         <xpath desc="incorporate destination in-place">exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
       </xpath>
-      <xpath desc="no @jf:document attribute on jf:ptr">
+         <xpath desc="no @jf:document attribute on jf:ptr">
         empty(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/@jf:document)
       </xpath>
-    </test>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>Local pointer with multiple repeats</testName>
-    <setup><code><![CDATA[
+      <testName>Local pointer with multiple repeats</testName>
+      <setup>
+         <code>
     local:setup("combine-repeat.xml","original")
-    ]]></code></setup>
-    <tearDown><code><![CDATA[
+    </code>
+      </setup>
+      <tearDown>
+         <code>
     local:tearDown("combine-repeat.xml","original")
-    ]]></code></tearDown>
-    <test>
-      <task>one segment</task>
-      <code><![CDATA[
+    </code>
+      </tearDown>
+      <test>
+         <task>one segment</task>
+         <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/original/combine-repeat.xml"),
           map {})
-      ]]></code>
-      <xpath 
-        desc="incorporate destination in-place once each time it is referenced" 
-        >count(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="repeated"])=3
+      </code>
+         <xpath desc="incorporate destination in-place once each time it is referenced">count(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="repeated"])=3
       </xpath>
-      <xpath 
-        desc="incorporate destination in-place once each time it is referenced" 
-        >every $repeat in ./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[ends-with(@jf:stream,"#stream")] satisfies count($repeat/tei:seg[@jf:id="repeated"])=1
+         <xpath desc="incorporate destination in-place once each time it is referenced">every $repeat in ./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[ends-with(@jf:stream,"#stream")] satisfies count($repeat/tei:seg[@jf:id="repeated"])=1
       </xpath>
-      <xpath desc="no @jf:document attribute on any jf:ptr">
+         <xpath desc="no @jf:document attribute on any jf:ptr">
         empty(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr/@jf:document)
       </xpath>
-    </test>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>External pointer</testName>
-    <setup><code><![CDATA[
+      <testName>External pointer</testName>
+      <setup>
+         <code>
     local:setup("combine1.xml"),
     local:setup("combine3.xml")
-    ]]></code></setup>
-    <tearDown><code><![CDATA[
+    </code>
+      </setup>
+      <tearDown>
+         <code>
     local:tearDown("combine3.xml"),
     local:tearDown("combine1.xml")
-    ]]></code></tearDown>
-    <test>
-      <task>combine with inclusion</task>
-      <code><![CDATA[
+    </code>
+      </tearDown>
+      <test>
+         <task>combine with inclusion</task>
+         <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine3.xml"),
           map {})
-      ]]></code>
-      <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine3$")</xpath>
-      <xpath desc="has @jf:document on the included element">matches(./tei:TEI//jf:ptr[@jf:id="ptr1"]/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine1$")</xpath>
-      <xpath 
-        desc="incorporate destination in-place" 
-        >exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
+      </code>
+         <xpath desc="has @jf:document on root element">matches(./tei:TEI/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine3$")</xpath>
+         <xpath desc="has @jf:document on the included element">matches(./tei:TEI//jf:ptr[@jf:id="ptr1"]/@jf:document,"^((/exist/restxq)?/api)?/data/tests/combine1$")</xpath>
+         <xpath desc="incorporate destination in-place">exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
       </xpath>
-    </test>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>combine:tei-fs-to-map()</testName>
-    <test>
-      <task>fs/f/symbol</task>
-      <code><![CDATA[
+      <testName>combine:tei-fs-to-map()</testName>
+      <test>
+         <task>fs/f/symbol</task>
+         <code>
         let $m := combine:tei-fs-to-map(
-          <tei:fs type="FS">
-            <tei:f name="FSYMBOL">
-              <tei:symbol value="SYMBOL"/>
-            </tei:f>
-          </tei:fs>,
+          &lt;tei:fs type="FS"&gt;
+            &lt;tei:f name="FSYMBOL"&gt;
+              &lt;tei:symbol value="SYMBOL"/&gt;
+            &lt;/tei:f&gt;
+          &lt;/tei:fs&gt;,
           map {}
         )
-        return $m("FS->FSYMBOL")
-      ]]></code>
-      <expected desc="map to symbol value"><tei:string>SYMBOL</tei:string></expected>
-    </test>
-    <test>
-      <task>fs/f/binary</task>
-      <code><![CDATA[
+        return $m("FS-&gt;FSYMBOL")
+      </code>
+         <expected desc="map to symbol value">
+            <tei:string xmlns:tei="http://www.tei-c.org/ns/1.0">SYMBOL</tei:string>
+         </expected>
+      </test>
+      <test>
+         <task>fs/f/binary</task>
+         <code>
         let $m := combine:tei-fs-to-map(
-          <tei:fs type="FS">
-            <tei:f name="FBINARY">
-              <tei:binary value="1"/>
-            </tei:f>
-          </tei:fs>,
+          &lt;tei:fs type="FS"&gt;
+            &lt;tei:f name="FBINARY"&gt;
+              &lt;tei:binary value="1"/&gt;
+            &lt;/tei:f&gt;
+          &lt;/tei:fs&gt;,
           map {}
         )
-        return $m("FS->FBINARY")
-      ]]></code>
-      <expected desc="map to normalized binary value"><tei:string>true</tei:string></expected>
-    </test>
-    <test>
-      <task>fs/f/yes</task>
-      <code><![CDATA[
+        return $m("FS-&gt;FBINARY")
+      </code>
+         <expected desc="map to normalized binary value">
+            <tei:string xmlns:tei="http://www.tei-c.org/ns/1.0">true</tei:string>
+         </expected>
+      </test>
+      <test>
+         <task>fs/f/yes</task>
+         <code>
         let $m := combine:tei-fs-to-map(
-          <tei:fs type="FS">
-            <tei:f name="FYES">
-              <j:yes/>
-            </tei:f>
-          </tei:fs>,
+          &lt;tei:fs type="FS"&gt;
+            &lt;tei:f name="FYES"&gt;
+              &lt;j:yes/&gt;
+            &lt;/tei:f&gt;
+          &lt;/tei:fs&gt;,
           map {}
         )
-        return $m("FS->FYES")
-      ]]></code>
-      <expected desc="map to yes value"><tei:string>YES</tei:string></expected>
-    </test>
-    <test>
-      <task>fs/f/string</task>
-      <code><![CDATA[
+        return $m("FS-&gt;FYES")
+      </code>
+         <expected desc="map to yes value">
+            <tei:string xmlns:tei="http://www.tei-c.org/ns/1.0">YES</tei:string>
+         </expected>
+      </test>
+      <test>
+         <task>fs/f/string</task>
+         <code>
         let $m := combine:tei-fs-to-map(
-          <tei:fs type="FS">
-            <tei:f name="FSTRING"><tei:string>string</tei:string></tei:f>
-          </tei:fs>,
+          &lt;tei:fs type="FS"&gt;
+            &lt;tei:f name="FSTRING"&gt;&lt;tei:string&gt;string&lt;/tei:string&gt;&lt;/tei:f&gt;
+          &lt;/tei:fs&gt;,
           map {}
         )
-        return $m("FS->FSTRING")
-      ]]></code>
-      <expected desc="map to string value"><tei:string>string</tei:string></expected>
-    </test>
-    <test>
-      <task>fs/f/text()</task>
-      <code><![CDATA[
+        return $m("FS-&gt;FSTRING")
+      </code>
+         <expected desc="map to string value">
+            <tei:string xmlns:tei="http://www.tei-c.org/ns/1.0">string</tei:string>
+         </expected>
+      </test>
+      <test>
+         <task>fs/f/text()</task>
+         <code>
         let $m := combine:tei-fs-to-map(
-          <tei:fs type="FS">
-            <tei:f name="FTEXT">text</tei:f>
-          </tei:fs>,
+          &lt;tei:fs type="FS"&gt;
+            &lt;tei:f name="FTEXT"&gt;text&lt;/tei:f&gt;
+          &lt;/tei:fs&gt;,
           map {}
         )
-        return $m("FS->FTEXT")
-      ]]></code>
-      <expected desc="map to text value"><tei:string>text</tei:string></expected>
-    </test>
-    <test>
-      <task>fs/f/vColl</task>
-      <code><![CDATA[
+        return $m("FS-&gt;FTEXT")
+      </code>
+         <expected desc="map to text value">
+            <tei:string xmlns:tei="http://www.tei-c.org/ns/1.0">text</tei:string>
+         </expected>
+      </test>
+      <test>
+         <task>fs/f/vColl</task>
+         <code>
         let $m := combine:tei-fs-to-map(
-          <tei:fs type="FS">
-            <tei:f name="FVCOLL">
-              <tei:vColl>
-                <tei:symbol value="S1"/>
-                <tei:symbol value="S2"/>
-                <tei:symbol value="S3"/>
-              </tei:vColl>
-            </tei:f>
-          </tei:fs>,
+          &lt;tei:fs type="FS"&gt;
+            &lt;tei:f name="FVCOLL"&gt;
+              &lt;tei:vColl&gt;
+                &lt;tei:symbol value="S1"/&gt;
+                &lt;tei:symbol value="S2"/&gt;
+                &lt;tei:symbol value="S3"/&gt;
+              &lt;/tei:vColl&gt;
+            &lt;/tei:f&gt;
+          &lt;/tei:fs&gt;,
           map {}
         )
-        return element x { $m("FS->FVCOLL") }
-      ]]></code>
-      <expected desc="map to sequence of strings">
-        <x>
-            <tei:string>S1</tei:string>
-            <tei:string>S2</tei:string>
-            <tei:string>S3</tei:string>
-        </x>
-      </expected>
-    </test>
+        return element x { $m("FS-&gt;FVCOLL") }
+      </code>
+         <expected desc="map to sequence of strings">
+            <x>
+               <tei:string xmlns:tei="http://www.tei-c.org/ns/1.0">S1</tei:string>
+               <tei:string xmlns:tei="http://www.tei-c.org/ns/1.0">S2</tei:string>
+               <tei:string xmlns:tei="http://www.tei-c.org/ns/1.0">S3</tei:string>
+            </x>
+         </expected>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>combine:update-settings-from-standoff-markup()</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>combine:update-settings-from-standoff-markup()</testName>
+      <setup>
+         <code>
         local:setup("combine-settings.xml")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
         local:tearDown("combine-settings.xml")
-      ]]></code>
-    </tearDown>
-    <test output="text">
-      <task>update settings for segment with inbound link</task>
-      <code><![CDATA[
+      </code>
+      </tearDown>
+      <test output="text">
+         <task>update settings for segment with inbound link</task>
+         <code>
         let $m :=
         combine:update-settings-from-standoff-markup(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine-settings.xml")//tei:seg[@jf:id="seg1"]/parent::jf:set,
           map { "combine:settings" := map {} },
           false()
         )
-        return $m("combine:settings")("FS1->F1")
-      ]]></code>
-      <expected desc="setting is set">ONE</expected>
-    </test>
-    <test output="text">
-      <task>update settings for segment with no inbound links</task>
-      <code><![CDATA[
+        return $m("combine:settings")("FS1-&gt;F1")
+      </code>
+         <expected desc="setting is set">ONE</expected>
+      </test>
+      <test output="text">
+         <task>update settings for segment with no inbound links</task>
+         <code>
         let $m :=
         combine:update-settings-from-standoff-markup(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine-settings.xml")//tei:seg[@jf:id="seg2"],
@@ -293,12 +304,12 @@
           false()
         )
         return count(map:keys($m("combine:settings")))
-      ]]></code>
-      <expected desc="settings are empty">0</expected>
-    </test>
-    <test>
-      <task>update settings with ancestors for segment with inbound link</task>
-      <code><![CDATA[
+      </code>
+         <expected desc="settings are empty">0</expected>
+      </test>
+      <test>
+         <task>update settings with ancestors for segment with inbound link</task>
+         <code>
         let $m :=
         combine:update-settings-from-standoff-markup(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine-settings.xml")//tei:seg[@jf:id="seg1"]/parent::jf:set,
@@ -306,197 +317,197 @@
           true()
         )
         return 
-          <values 
-            f1="{$m('combine:settings')('FS1->F1')}" 
-            f3="{$m('combine:settings')('FS1->F3')}" 
-            f2="{$m('combine:settings')('FS1->F2')}"/>
-      ]]></code>
-      <xpath desc="non-overridden setting from ancestor is retained">./@f2="THREE"</xpath>
-      <xpath desc="overridden setting from ancestor is overridden">./@f1="ONE"</xpath>
-      <xpath desc="non-overridden setting from this is retained">./@f3="FOUR"</xpath>
-    </test>
+          &lt;values 
+            f1="{$m('combine:settings')('FS1-&gt;F1')}" 
+            f3="{$m('combine:settings')('FS1-&gt;F3')}" 
+            f2="{$m('combine:settings')('FS1-&gt;F2')}"/&gt;
+      </code>
+         <xpath desc="non-overridden setting from ancestor is retained">./@f2="THREE"</xpath>
+         <xpath desc="overridden setting from ancestor is overridden">./@f1="ONE"</xpath>
+         <xpath desc="non-overridden setting from this is retained">./@f3="FOUR"</xpath>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>Parallel texts</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>Parallel texts</testName>
+      <setup>
+         <code>
       local:setup("parallel-simple-A.xml", "original"),
       local:setup("parallel-simple-B.xml", "original"),
       local:setup("include-simple-1.xml", "original"),
       local:setup("linkage-simple.xml", "linkage")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
       local:tearDown("include-simple-1.xml", "original"),
       local:tearDown("linkage-simple.xml", "linkage"),
       local:tearDown("parallel-simple-A.xml", "original"),
       local:tearDown("parallel-simple-B.xml", "original")
-      ]]></code>
-    </tearDown>
-    <test>
-      <task>Simple inclusion set inside the stream</task>
-      <code><![CDATA[
+      </code>
+      </tearDown>
+      <test>
+         <task>Simple inclusion set inside the stream</task>
+         <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/original/include-simple-1.xml"),
           map {})
-      ]]></code>
-      <xpath desc="the inclusion pointer is followed through a redirect">.//jf:ptr[@jf:id="inc3"]/jf:combined[jf:parallelGrp]</xpath>
-      <xpath desc="the correct domain is chosen">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel/@domain="/data/original/parallel-simple-A#stream"</xpath>
-      <xpath desc="the redirect includes the original text">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/original/parallel-simple-A#stream"]/tei:seg[.="A-1"]</xpath>
-      <xpath desc="the redirect includes the parallel text">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/original/parallel-simple-B#stream"]/tei:seg[.="B-1"]</xpath>
+      </code>
+         <xpath desc="the inclusion pointer is followed through a redirect">.//jf:ptr[@jf:id="inc3"]/jf:combined[jf:parallelGrp]</xpath>
+         <xpath desc="the correct domain is chosen">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel/@domain="/data/original/parallel-simple-A#stream"</xpath>
+         <xpath desc="the redirect includes the original text">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/original/parallel-simple-A#stream"]/tei:seg[.="A-1"]</xpath>
+         <xpath desc="the redirect includes the parallel text">.//jf:ptr[@jf:id="inc3"]/jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/original/parallel-simple-B#stream"]/tei:seg[.="B-1"]</xpath>
       
-    </test>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>Parallel texts: Set parallelism in the same document as it is used</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>Parallel texts: Set parallelism in the same document as it is used</testName>
+      <setup>
+         <code>
       local:setup("parallel-same-A.xml", "original"),
       local:setup("parallel-simple-B.xml", "original"),
       local:setup("linkage-same.xml", "linkage")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
       local:tearDown("linkage-same.xml", "linkage"),
       local:tearDown("parallel-same-A.xml", "original"),
       local:tearDown("parallel-simple-B.xml", "original")
-      ]]></code>
-    </tearDown>
-    <test>
-      <task>Simple parallelism</task>
-      <code><![CDATA[
+      </code>
+      </tearDown>
+      <test>
+         <task>Simple parallelism</task>
+         <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/original/parallel-same-A.xml"),
           map {})
-      ]]></code>
-      <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/jf:combined[jf:parallelGrp])</xpath>
-      <xpath desc="the correct domain is chosen">.//jf:combined/jf:parallelGrp[starts-with(@jf:layer-id, "/data/original/parallel-same-A")]</xpath>
-      <xpath desc="the redirect includes the original text">.//jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/original/parallel-same-A#stream"]/tei:seg[.="A-1"]</xpath>
-      <xpath desc="the redirect includes the parallel text">.//jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/original/parallel-simple-B#stream"]/tei:seg[.="B-1"]</xpath>
-    </test>
+      </code>
+         <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/jf:combined[jf:parallelGrp])</xpath>
+         <xpath desc="the correct domain is chosen">.//jf:combined/jf:parallelGrp[starts-with(@jf:layer-id, "/data/original/parallel-same-A")]</xpath>
+         <xpath desc="the redirect includes the original text">.//jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/original/parallel-same-A#stream"]/tei:seg[.="A-1"]</xpath>
+         <xpath desc="the redirect includes the parallel text">.//jf:combined/jf:parallelGrp/jf:parallel[@domain="/data/original/parallel-simple-B#stream"]/tei:seg[.="B-1"]</xpath>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>Parallel texts: Request a part of a parallel document</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>Parallel texts: Request a part of a parallel document</testName>
+      <setup>
+         <code>
       local:setup("parallel-part-A.xml", "original"),
       local:setup("parallel-part-B.xml", "original"),
       local:setup("include-part-1.xml", "original"),
       local:setup("include-part-2.xml", "original"),
       local:setup("linkage-part.xml", "linkage")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
       local:tearDown("linkage-part.xml", "linkage"),
       local:tearDown("parallel-part-A.xml", "original"),
       local:tearDown("parallel-part-B.xml", "original"),
       local:tearDown("include-part-1.xml", "original"),
       local:tearDown("include-part-2.xml", "original")
-      ]]></code>
-    </tearDown>
-    <test>
-      <task>Include where the boundaries are the same as the boundaries of the parallelism</task>
-      <code><![CDATA[
+      </code>
+      </tearDown>
+      <test>
+         <task>Include where the boundaries are the same as the boundaries of the parallelism</task>
+         <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/original/include-part-1.xml"),
           map {})
-      ]]></code>
-      <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/descendant::jf:ptr[@jf:id="inc1"]/jf:parallelGrp)</xpath>
-      <xpath desc="the correct domain is chosen">exists(.//jf:parallelGrp[starts-with(@jf:layer-id,"/data/original/parallel-part-A")])</xpath>
-      <xpath desc="the redirect begins at the first requested part">.//jf:ptr[@jf:id="inc1"]/jf:parallelGrp[1]/jf:parallel[@domain="/data/original/parallel-part-A#stream"]/tei:seg[1]/@jf:id="A2"</xpath>
-      <xpath desc="the redirect ends at the last requested part">.//jf:ptr[@jf:id="inc1"]/jf:parallelGrp[last()]/jf:parallel[@domain="/data/original/parallel-part-A#stream"]/tei:seg[last()]/@jf:id="A7"</xpath>
-    </test>
-    <test>
-      <task>Include where the boundaries are different than the boundaries of the parallelism</task>
-      <code><![CDATA[
+      </code>
+         <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/descendant::jf:ptr[@jf:id="inc1"]/jf:parallelGrp)</xpath>
+         <xpath desc="the correct domain is chosen">exists(.//jf:parallelGrp[starts-with(@jf:layer-id,"/data/original/parallel-part-A")])</xpath>
+         <xpath desc="the redirect begins at the first requested part">.//jf:ptr[@jf:id="inc1"]/jf:parallelGrp[1]/jf:parallel[@domain="/data/original/parallel-part-A#stream"]/tei:seg[1]/@jf:id="A2"</xpath>
+         <xpath desc="the redirect ends at the last requested part">.//jf:ptr[@jf:id="inc1"]/jf:parallelGrp[last()]/jf:parallel[@domain="/data/original/parallel-part-A#stream"]/tei:seg[last()]/@jf:id="A7"</xpath>
+      </test>
+      <test>
+         <task>Include where the boundaries are different than the boundaries of the parallelism</task>
+         <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/original/include-part-2.xml"),
           map {})
-      ]]></code>
-      <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/descendant::jf:ptr[@jf:id="inc2"]/jf:parallelGrp)</xpath>
-      <xpath desc="the correct domain is chosen">exists(.//jf:parallelGrp[starts-with(@jf:layer-id,"/data/original/parallel-part-A")])</xpath>
-      <xpath desc="the redirect begins at the first parallelGrp that includes the beginning of the first requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[1]/jf:parallel[@domain="/data/original/parallel-part-A#stream"]/tei:seg[1]/@jf:id="A2"</xpath>
-      <xpath desc="the redirect ends at the last parallelGrp that includes the end of the last requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[last()]/jf:parallel[@domain="/data/original/parallel-part-A#stream"]/tei:seg[last()]/@jf:id="A7"</xpath>
-    </test>
+      </code>
+         <xpath desc="the stream is redirected">exists(.//tei:text/jf:combined[@jf:id="stream"]/descendant::jf:ptr[@jf:id="inc2"]/jf:parallelGrp)</xpath>
+         <xpath desc="the correct domain is chosen">exists(.//jf:parallelGrp[starts-with(@jf:layer-id,"/data/original/parallel-part-A")])</xpath>
+         <xpath desc="the redirect begins at the first parallelGrp that includes the beginning of the first requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[1]/jf:parallel[@domain="/data/original/parallel-part-A#stream"]/tei:seg[1]/@jf:id="A2"</xpath>
+         <xpath desc="the redirect ends at the last parallelGrp that includes the end of the last requested part">.//jf:ptr[@jf:id="inc2"]/jf:parallelGrp[last()]/jf:parallel[@domain="/data/original/parallel-part-A#stream"]/tei:seg[last()]/@jf:id="A7"</xpath>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>Conditionals during combine that affect the streamText</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>Conditionals during combine that affect the streamText</testName>
+      <setup>
+         <code>
       local:setup("combine-cond1.xml")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
       local:tearDown("combine-cond1.xml")
-      ]]></code>
-    </tearDown>
-    <test>
+      </code>
+      </tearDown>
+      <test>
         <task>conditionals affecting inside a streamText</task>
-        <code><![CDATA[
+        <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine-cond1.xml"),
           map {})
-        ]]></code>
+        </code>
         <xpath desc="seg1 exists and is directly enclosed in a jf:conditional">exists(.//*[@jf:id="seg1"]/parent::jf:conditional)</xpath>
         <xpath desc="seg2 does not exist at all">empty(.//*[@jf:id="seg2"])</xpath>
         <xpath desc="seg3 has an instruction added">exists(.//*[@jf:id="seg3"]/parent::jf:conditional[jf:annotated])</xpath>
-    </test>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>Conditionals during combine that affect layers</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>Conditionals during combine that affect layers</testName>
+      <setup>
+         <code>
       local:setup("combine-cond2.xml")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
       local:tearDown("combine-cond2.xml")
-      ]]></code>
-    </tearDown>
-    <test>
+      </code>
+      </tearDown>
+      <test>
         <task>conditionals affecting a layer</task>
-        <code><![CDATA[
+        <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine-cond2.xml"),
           map {})
-        ]]></code>
+        </code>
         <xpath desc="on condition has a @jf:conditional and exists">exists(.//*[@jf:id="div1"][@jf:conditional])</xpath>
         <xpath desc="off condition: layer element that is off is not present ">empty(.//*[@jf:id="div2"])</xpath>
         <xpath desc="off condition: layer-based child of element that is off is not present">empty(.//*[@jf:id="ab2"])</xpath>
         <xpath desc="off condition: layer element without xml:id is not present">empty(.//tei:head[.="Heading2"])</xpath>
         <xpath desc="off condition: other layers are unaffected">exists(.//*[@jf:id="ab_wrapper"])</xpath>
         <xpath desc="off condition: segments are present">exists(.//*[@jf:id="seg3"]) and exists(.//*[@jf:id="seg4"])</xpath>
-    </test>
-<!--
+      </test>
+      <!--
     <test>
         <task>no conditional affecting a layer followed by inclusion of a document that has a layer of the same name</task>
     </test>
 -->
   </TestSet>
   <TestSet>
-    <testName>Conditionals with j:option</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>Conditionals with j:option</testName>
+      <setup>
+         <code>
       local:setup("combine-cond3.xml")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
       local:tearDown("combine-cond3.xml")
-      ]]></code>
-    </tearDown>
-    <test>
+      </code>
+      </tearDown>
+      <test>
         <task>conditionals with j:option</task>
-        <code><![CDATA[
+        <code>
         combine:combine-document(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine-cond3.xml"),
           map {})
-        ]]></code>
+        </code>
         <xpath desc="no jf:conditional elements have been added">empty(.//jf:conditional)</xpath>
         <xpath desc="opt1 and seg1 exist">exists(.//j:option[@jf:id="opt1"][@jf:conditional]) and exists(.//tei:seg[@jf:id="seg1"])</xpath>
         <xpath desc="opt2 and seg2 removed">empty(.//j:option[@jf:id="opt2"]) and empty(.//tei:seg[@jf:id="seg2"])</xpath>
@@ -504,8 +515,8 @@
         <xpath desc="opt4 exists">exists(.//j:option[@jf:id="opt4"][@jf:conditional][tei:w])</xpath>
         <xpath desc="opt5 removed">empty(.//j:option[@jf:id="opt5"]) and empty(.//tei:w[.="E"])</xpath>
         <xpath desc="opt6 exists, an instruction has been added">exists(.//j:option[@jf:id="opt6"][@jf:conditional][@jf:conditional-instruction][jf:annotated][tei:w])</xpath>
-    </test>
-<!--
+      </test>
+      <!--
     <test>
         <task>no conditional affecting a layer followed by inclusion of a document that has a layer of the same name</task>
     </test>
@@ -514,29 +525,29 @@
   <TestSet>
       <testName>Conditionals and parallel texts</testName>
       <setup>
-          <code><![CDATA[
+          <code>
               local:setup("combine-cond-parA.xml", "original"),
               local:setup("combine-cond-parB.xml", "original"),
               local:setup("combine-cond-incl.xml", "original"),
               local:setup("combine-cond-par.xml", "linkage")
-        ]]></code>
+        </code>
       </setup>
       <tearDown>
-          <code><![CDATA[
+          <code>
               local:tearDown("combine-cond-par.xml", "linkage"),
               local:tearDown("combine-cond-incl.xml", "original"),
               local:tearDown("combine-cond-parB.xml", "original"),
               local:tearDown("combine-cond-parA.xml", "original")
-        ]]></code>
+        </code>
       </tearDown>
-    <test>
+      <test>
         <task>combine a text with conditionals and parallel texts</task>
-        <code><![CDATA[
+        <code>
             combine:combine-document(
                 mirror:doc($format:unflatten-cache, "/db/data/original/combine-cond-incl.xml"),
                 map {})
-        ]]></code>
-    <xpath desc="in parA, present is present">exists(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/tei:seg[@jf:id="present"])</xpath>
+        </code>
+         <xpath desc="in parA, present is present">exists(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/tei:seg[@jf:id="present"])</xpath>
         <xpath desc="in parA, segment turned off externally is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/descendant::tei:seg[@jf:id="offAext"])</xpath>
         <xpath desc="in parA, segment turned off internally at streamText is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/descendant::tei:seg[@jf:id="offAint"])</xpath>
         <xpath desc="in parA, segment turned off internally within stream is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parA")]/descendant::tei:seg[@jf:id="offAintSetInt"])</xpath>
@@ -547,29 +558,29 @@
         <xpath desc="in parB, segment turned off externally is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBext"])</xpath>
         <xpath desc="in parB, segment turned off internally at streamText is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBint"])</xpath>
         <xpath desc="in parB, segment turned off internally within stream is not present">empty(.//jf:parallel[starts-with(@jf:layer-id, "/data/original/combine-cond-parB")]/descendant::tei:seg[@jf:id="offBintSetInt"])</xpath>
-    </test>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>Annotations in a single text</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>Annotations in a single text</testName>
+      <setup>
+         <code>
       local:setup("combine-ann-notes.xml", "notes"),
       local:setup("combine-ann1.xml", "original")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
       local:tearDown("combine-ann1.xml", "original"),
       local:tearDown("combine-ann-notes.xml", "notes")
-      ]]></code>
-    </tearDown>
-    <test>
+      </code>
+      </tearDown>
+      <test>
         <task>notes of all types</task>
-        <code><![CDATA[
+        <code>
         let $d := doc("/db/data/original/combine-ann1.xml")
         return
             format:combine($d, map {}, $d)
-        ]]></code>
+        </code>
         <xpath desc="stream note is present">exists(.//jf:combined[@jf:id="stream"][@jf:annotation]/jf:annotated/tei:note[@jf:id="stream_note"])</xpath>
         <xpath desc="single note is present">exists(.//jf:annotation[tei:seg[@jf:id="single"]]/jf:annotated/tei:note[@jf:id="single_note"])</xpath>
         <xpath desc="range note is present">exists(.//jf:annotation[tei:seg[@jf:id="range1"] and tei:seg[@jf:id="range2"]]/jf:annotated/tei:note[@jf:id="range_note"])</xpath>
@@ -577,35 +588,35 @@
         <xpath desc="layer note is not present">exists(.//tei:ab[@jf:id="ab1"][@jf:annotation]/jf:annotated/tei:note[@jf:id="layer_note"])</xpath>
         <xpath desc="word note is not present">exists(.//tei:w[@jf:id="word"][@jf:annotation]/jf:annotated/tei:note[@jf:id="word_note"])</xpath>
         <xpath desc="annotations reference the document they came from and its license">every $annotated in .//jf:annotated satisfies contains($annotated/@jf:document, "/combine-ann-notes") and $annotated/@jf:license="http://www.creativecommons.org/licenses/by/3.0"</xpath>
-    </test>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>Annotations in a parallel text</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>Annotations in a parallel text</testName>
+      <setup>
+         <code>
       local:setup("combine-ann-notes.xml", "notes"),
       local:setup("combine-ann-parA.xml", "original"),
       local:setup("combine-ann-parB.xml", "original"),
       local:setup("combine-ann-par.xml", "linkage"),
       local:setup("combine-ann-incl.xml", "original")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
       local:tearDown("combine-ann-notes.xml", "notes"),
       local:tearDown("combine-ann-parA.xml", "original"),
       local:tearDown("combine-ann-parB.xml", "original"),
       local:tearDown("combine-ann-par.xml", "linkage"),
       local:tearDown("combine-ann-incl.xml", "original")
-      ]]></code>
-    </tearDown>
-    <test>
+      </code>
+      </tearDown>
+      <test>
         <task>notes of all types</task>
-        <code><![CDATA[
+        <code>
         let $d := doc("/db/data/original/combine-ann-incl.xml")
         return
             format:combine($d, map {}, $d)
-        ]]></code>
+        </code>
         <xpath desc="stream annotation from parA is present">exists(.//jf:ptr[@jf:id="ptr2"]/jf:combined[@jf:id="stream"][@jf:annotation]/jf:annotated/tei:note[@jf:id="stream_note"])</xpath>
         <xpath desc="single annotation from parA is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parA")]/descendant::jf:annotation[tei:seg[@jf:id="single"]]/jf:annotated/tei:note[@jf:id="single_note"])</xpath>
         <xpath desc="range annotation from parA is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parA")]/descendant::jf:annotation[tei:seg[@jf:id="range1"] and tei:seg[@jf:id="range2"]]/jf:annotated/tei:note[@jf:id="range_note"])</xpath>
@@ -614,31 +625,31 @@
         <xpath desc="single annotation from parB is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parB")]/descendant::jf:annotation[tei:seg[@jf:id="single"]]/jf:annotated/tei:note[@jf:id="single_note"])</xpath>
         <xpath desc="range annotation from parB is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parB")]/descendant::jf:annotation[tei:seg[@jf:id="range1"] and tei:seg[@jf:id="range2"]]/jf:annotated/tei:note[@jf:id="range_note"])</xpath>
         <xpath desc="word annotation from parB is present">exists(.//jf:ptr[@jf:id="ptr2"]/descendant::jf:parallel[contains(@domain, "/combine-ann-parB")]/descendant::tei:seg[@jf:id="with_word"]/tei:w[@jf:annotation]/jf:annotated/tei:note[@jf:id="word_note"])</xpath>
-    </test>
+      </test>
   </TestSet>
 
   <TestSet>
-    <testName>Annotations that are broken up by concurrency</testName>
-    <setup>
-      <code><![CDATA[
+      <testName>Annotations that are broken up by concurrency</testName>
+      <setup>
+         <code>
       local:setup("combine-ann-notes.xml", "notes"),
       local:setup("combine-ann2.xml", "original")
-      ]]></code>
-    </setup>
-    <tearDown>
-      <code><![CDATA[
+      </code>
+      </setup>
+      <tearDown>
+         <code>
       local:tearDown("combine-ann2.xml", "original"),
       local:tearDown("combine-ann-notes.xml", "notes")
-      ]]></code>
-    </tearDown>
-    <test>
+      </code>
+      </tearDown>
+      <test>
         <task>note where annotation crosses hierarchies</task>
-        <code><![CDATA[
+        <code>
         let $d := doc("/db/data/original/combine-ann2.xml")
         return
             format:combine($d, map {}, $d)
-        ]]></code>
+        </code>
         <xpath desc="single note is present exactly once">count(.//jf:annotated/tei:note[@jf:id="single_note"])=1</xpath>
-    </test>
+      </test>
   </TestSet>
 </TestSuite>

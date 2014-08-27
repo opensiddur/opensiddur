@@ -1,46 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<TEI xmlns="http://www.tei-c.org/ns/1.0" 
-  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-  xml:lang="en">
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:lang="en">
   <teiHeader>
-    <fileDesc>
-      <titleStmt>
-        <title type="main">Null</title>
-      </titleStmt>
-      <publicationStmt>
-        <availability>
-          <licence target="http://creativecommons.org/publicdomain/zero/1.0"/>
-        </availability>
-        <distributor>Open Siddur Project</distributor>
-        <date when="2012">2012-06-27</date>
-      </publicationStmt>
-      <sourceDesc>
-        <link type="bibl" target="#text /data/sources/Born%20Digital"/>
-      </sourceDesc>
-    </fileDesc>
+      <fileDesc>
+         <titleStmt>
+            <title type="main">Null</title>
+         </titleStmt>
+         <publicationStmt>
+            <availability>
+               <licence target="http://creativecommons.org/publicdomain/zero/1.0"/>
+            </availability>
+            <distributor>Open Siddur Project</distributor>
+            <date when="2012">2012-06-27</date>
+         </publicationStmt>
+         <sourceDesc>
+            <tei:bibl xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns="">
+               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl-content" target="#text"/>
+            </tei:bibl>
+         </sourceDesc>
+      </fileDesc>
   </teiHeader>
   <text>
-    <j:streamText xml:id="text">
-      <seg xml:id="seg1">Segment 1</seg>
-      <seg xml:id="seg2">Segment 2</seg>
-      <seg xml:id="seg3">Segment 3</seg>
-      <seg xml:id="seg4">Segment 4</seg>
-      <anchor xml:id="an5"/>
-    </j:streamText>
-    <j:concurrent>
-      <j:layer type="p" xml:id="layer-p">
-        <p xml:id="p1">
-          <label n="test">test</label>
-          <s xml:id="s1">
-            <ptr target="#seg1"/>
-          </s>
-        </p>
-        <p>
-          <s>
-            <ptr target="#range(seg2,an5)"/>
-          </s>
-        </p>
-      </j:layer>
-    </j:concurrent>
+      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="text">
+         <seg xml:id="seg1">Segment 1</seg>
+         <seg xml:id="seg2">Segment 2</seg>
+         <seg xml:id="seg3">Segment 3</seg>
+         <seg xml:id="seg4">Segment 4</seg>
+         <anchor xml:id="an5"/>
+      </j:streamText>
+      <j:concurrent xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+         <j:layer type="p" xml:id="layer-p">
+            <p xml:id="p1">
+               <label n="test">test</label>
+               <s xml:id="s1">
+                  <ptr target="#seg1"/>
+               </s>
+            </p>
+            <p>
+               <s>
+                  <ptr target="#range(seg2,an5)"/>
+               </s>
+            </p>
+         </j:layer>
+      </j:concurrent>
   </text>
 </TEI>

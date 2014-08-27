@@ -1,14 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
   <tei:teiHeader/>
   <tei:text>
-    <tei:body>
-      <tei:div>
-        <tei:ab>
-          <tei:seg xml:id="f2_destination">Final destination in file 2</tei:seg>
-          <tei:ptr xml:id="f2_one" target="#f2_destination"/>
-        </tei:ab>
-      </tei:div>
-    </tei:body>
+      <tei:body>
+         <tei:div>
+            <tei:ab>
+               <tei:seg xml:id="f2_destination">Final destination in file 2</tei:seg>
+               <tei:ptr xml:id="f2_one" target="#f2_destination"/>
+            </tei:ab>
+         </tei:div>
+      </tei:body>
   </tei:text>
 </tei:TEI>
-
