@@ -1,42 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TestSuite
-  xmlns:tei="http://www.tei-c.org/ns/1.0"
-  xmlns:a="http://jewishliturgy.org/ns/access/1.0"
-  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-  xmlns:http="http://expath.org/ns/http-client">
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
   <suiteName>Annotation data API</suiteName>
   <description>
-    <p>Test annotation data API</p>
-    <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012-2013 Efraim Feinstein,
+      <p>Test annotation data API</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2012-2013 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <asUser>testuser</asUser>
   <password>testuser</password>
   <setup>
     <!-- put all tests into en/1900/01 -->
-    <create-collection parent="/db/data/notes/en" name="1900" />
-    <create-collection parent="/db/data/notes/en/1900" name="01"/>
-    <!-- support files required for validity -->
+    <create-collection parent="/db/data/notes/en" name="1900"/>
+      <create-collection parent="/db/data/notes/en/1900" name="01"/>
+      <!-- support files required for validity -->
     <store collection="/db/data/user" name="testuser.xml">
-      <j:contributor>
-        <tei:idno>testuser</tei:idno>
-        <tei:name>Test User</tei:name>
-      </j:contributor>
-    </store>
-    <!-- existing resource with read/write access for testuser -->
-    <copy source="/db/apps/opensiddur-tests/tests/api/data/notes" name="Existing.xml" 
-      destination="/db/data/notes/en/1900/01" />
-    <!-- Query result -->
-    <copy source="/db/apps/opensiddur-tests/tests/api/data/notes" name="Query.xml" 
-      destination="/db/data/notes/en/1900/01" />
-    <!-- and with no read/write access -->
-    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Existing.xml" 
-      destination="/db/data/notes/en/1900/01" destination-name="NoAccess.xml" />
-    <!-- and with read only access -->
-    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Existing.xml" 
-      destination="/db/data/notes/en/1900/01" destination-name="NoWriteAccess.xml" />
-    <code><![CDATA[
+         <j:contributor xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+            <tei:idno xmlns:tei="http://www.tei-c.org/ns/1.0">testuser</tei:idno>
+            <tei:name xmlns:tei="http://www.tei-c.org/ns/1.0">Test User</tei:name>
+         </j:contributor>
+      </store>
+      <!-- existing resource with read/write access for testuser -->
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/notes" name="Existing.xml"
+            destination="/db/data/notes/en/1900/01"/>
+      <!-- Query result -->
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/notes" name="Query.xml"
+            destination="/db/data/notes/en/1900/01"/>
+      <!-- and with no read/write access -->
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Existing.xml"
+            destination="/db/data/notes/en/1900/01"
+            destination-name="NoAccess.xml"/>
+      <!-- and with read only access -->
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/original" name="Existing.xml"
+            destination="/db/data/notes/en/1900/01"
+            destination-name="NoWriteAccess.xml"/>
+      <code>
       system:as-user("admin", $magic:password,
         let $collections := ("/db/data/notes/en/1900", "/db/data/notes/en/1900/01") 
         let $existing-uri := xs:anyURI("/db/data/notes/en/1900/01/Existing.xml")
@@ -64,10 +62,10 @@
           sm:chgrp($no-write-access-uri, "everyone"),
           sm:chmod($no-write-access-uri, "rw-r--r--")
       ))
-    ]]></code>
+    </code>
   </setup>
   <tearDown>
-    <remove-collection collection="/db/data/notes/en/1900"/>
+      <remove-collection collection="/db/data/notes/en/1900"/>
   </tearDown>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -80,95 +78,95 @@
       at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
   <TestSet>
-    <testName>notes:get()</testName>
-    <test>
-      <task>Get an existing resource</task>
-      <code><![CDATA[
+      <testName>notes:get()</testName>
+      <test>
+         <task>Get an existing resource</task>
+         <code>
       notes:get("Existing")
-      ]]></code> 
-      <xpath desc="Returns a TEI resource">exists(./tei:TEI)</xpath>
-    </test>
-    <test>
-      <task>Get a nonexisting resource</task>
-      <code><![CDATA[
+      </code> 
+         <xpath desc="Returns a TEI resource">exists(./tei:TEI)</xpath>
+      </test>
+      <test>
+         <task>Get a nonexisting resource</task>
+         <code>
       notes:get("DoesNotExist")
-      ]]></code> 
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
-    <test>
-      <task>Get a resource with no read access</task>
-      <code><![CDATA[
+      </code> 
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>Get a resource with no read access</task>
+         <code>
       notes:get("NoAccess")
-      ]]></code> 
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
+      </code> 
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>notes:list()</testName>
-    <test>
-      <task>List all note resources</task>
-      <code><![CDATA[
+      <testName>notes:list()</testName>
+      <test>
+         <task>List all note resources</task>
+         <code>
         notes:list("", 1, 100)
-      ]]></code>
-      <xpath desc="returns at least 1 result">count(.//html:li[@class="result"])&gt;=1</xpath>
-      <xpath desc="results include a pointer to access API">
+      </code>
+         <xpath desc="returns at least 1 result">count(.//html:li[@class="result"])&gt;=1</xpath>
+         <xpath desc="results include a pointer to access API">
         every $li in .//html:li[@class="result"] 
         satisfies exists($li/html:a[@class="alt"][@property="access"])
       </xpath>
-      <class href="../common.t.incl.xml#SearchResults"/>
-    </test>
-    <test>
-      <task>List some resources</task>
-      <code><![CDATA[
+         <class href="../common.t.incl.xml#SearchResults"/>
+      </test>
+      <test>
+         <task>List some resources</task>
+         <code>
         notes:list("", 1, 2)
-      ]]></code>
-      <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
-      <class href="../common.t.incl.xml#SearchResults"/>
-    </test>
-    <test>
-      <task>Respond to a query</task>
-      <code><![CDATA[
+      </code>
+         <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
+         <class href="../common.t.incl.xml#SearchResults"/>
+      </test>
+      <test>
+         <task>Respond to a query</task>
+         <code>
         notes:list("query", 1, 100)
-      ]]></code>
-      <xpath desc="returns 1 results">count(.//html:ol[@class="results"]/html:li)=1</xpath>
-      <class href="../common.t.incl.xml#SearchResults"/>
-    </test>
+      </code>
+         <xpath desc="returns 1 results">count(.//html:ol[@class="results"]/html:li)=1</xpath>
+         <class href="../common.t.incl.xml#SearchResults"/>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>notes:delete()</testName>
-    <test>
-      <task>Remove an existing resource</task>
-      <code><![CDATA[
+      <testName>notes:delete()</testName>
+      <test>
+         <task>Remove an existing resource</task>
+         <code>
       notes:delete("Existing")
-      ]]></code>
-      <class href="../common.t.incl.xml#NoData"/>
-    </test>
-    <test>
-      <task>Remove a nonexisting resource</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#NoData"/>
+      </test>
+      <test>
+         <task>Remove a nonexisting resource</task>
+         <code>
       notes:delete("DoesNotExist")
-      ]]></code>
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
-    <test>
-      <task>Remove a resource without write access</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>Remove a resource without write access</task>
+         <code>
       notes:delete("NoWriteAccess")
-      ]]></code>
-      <class href="../common.t.incl.xml#Forbidden"/>
-    </test>
-    <test ignore="yes">
-      <task>Remove a resource that has external references</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#Forbidden"/>
+      </test>
+      <test ignore="yes">
+         <task>Remove a resource that has external references</task>
+         <code>
       notes:delete("ExternalReference")
-      ]]></code>
-      <class href="../common.t.incl.xml#BadRequest"/>
-    </test>
+      </code>
+         <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>notes:post()</testName>
-    <tearDown>
-      <code><![CDATA[
+      <testName>notes:post()</testName>
+      <tearDown>
+         <code>
       let $document := 
         collection("/data/notes")//tei:titleStmt/tei:title[@type="main"][.="Valid"]/root(.)
       where exists($document)
@@ -176,220 +174,220 @@
         util:collection-name($document),
         util:document-name($document)
         )
-      ]]></code>
-    </tearDown>
-    <test>
-      <task>Post a valid resource</task>
-      <code><![CDATA[
+      </code>
+      </tearDown>
+      <test>
+         <task>Post a valid resource</task>
+         <code>
       notes:post(doc("/db/apps/opensiddur-tests/tests/api/data/notes/Valid.xml"))
-      ]]></code>
-      <class href="../common.t.incl.xml#Created"/>
-      <expected 
-        desc="a change record has been added"
-        xpath="collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Valid']]//tei:revisionDesc/tei:change[1]">
-        <tei:change type="created" who="/user/testuser" when="..."/>
-      </expected>
-    </test>
-    <test>
-      <task>Post an invalid resource</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#Created"/>
+         <expected desc="a change record has been added"
+                   xpath="collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Valid']]//tei:revisionDesc/tei:change[1]">
+            <tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="created" who="/user/testuser"
+                        when="..."/>
+         </expected>
+      </test>
+      <test>
+         <task>Post an invalid resource</task>
+         <code>
       notes:post(doc("/db/apps/opensiddur-tests/tests/api/data/notes/Invalid.xml"))
-      ]]></code>
-      <class href="../common.t.incl.xml#BadRequest"/>
-    </test>
+      </code>
+         <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>notes:put()</testName>
-    <test>
-      <task>Put a valid resource to an existing resource</task>
-      <code><![CDATA[
+      <testName>notes:put()</testName>
+      <test>
+         <task>Put a valid resource to an existing resource</task>
+         <code>
       notes:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Existing-After-Put.xml"))
-      ]]></code>
-      <class href="../common.t.incl.xml#NoData"/>
-      <expected 
-        desc="a change record has been added"
-        xpath="(collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
-        <tei:change type="edited" who="/user/testuser" when="..."/>
-      </expected>
-    </test>
-    <test>
-      <task>Put a valid resource to a nonexisting resource</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#NoData"/>
+         <expected desc="a change record has been added"
+                   xpath="(collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
+            <tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="edited" who="/user/testuser"
+                        when="..."/>
+         </expected>
+      </test>
+      <test>
+         <task>Put a valid resource to a nonexisting resource</task>
+         <code>
       notes:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Valid.xml"))
-      ]]></code>
-    </test>
-    <test>
-      <task>Put an invalid resource</task>
-      <code><![CDATA[
+      </code>
+      </test>
+      <test>
+         <task>Put an invalid resource</task>
+         <code>
       notes:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Invalid.xml"))
-      ]]></code>
-      <class href="../common.t.incl.xml#BadRequest"/>
-    </test>
-    <test>
-      <task>Put a valid resource that is invalidated by an illegal change</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
+      <test>
+         <task>Put a valid resource that is invalidated by an illegal change</task>
+         <code>
       notes:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Invalid-After-Put-Illegal-RevisionDesc.xml"))
-      ]]></code>
-    </test>
+      </code>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>Unauthenticated</testName>
-    <asUser/>
-    <password/>
-    <test>
-      <task>notes:get(): Get an existing resource</task>
-      <code><![CDATA[
+      <testName>Unauthenticated</testName>
+      <asUser/>
+      <password/>
+      <test>
+         <task>notes:get(): Get an existing resource</task>
+         <code>
       notes:get("Existing")
-      ]]></code> 
-      <xpath desc="Returns a TEI resource">exists(./tei:TEI)</xpath>
-    </test>
-    <test>
-      <task>notes:get(): Get an existing resource with no read access</task>
-      <code><![CDATA[
+      </code> 
+         <xpath desc="Returns a TEI resource">exists(./tei:TEI)</xpath>
+      </test>
+      <test>
+         <task>notes:get(): Get an existing resource with no read access</task>
+         <code>
       notes:get("NoAccess")
-      ]]></code> 
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
-    <test>
-      <task>notes:get(): Get a nonexisting resource</task>
-      <code><![CDATA[
+      </code> 
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>notes:get(): Get a nonexisting resource</task>
+         <code>
       notes:get("DoesNotExist")
-      ]]></code> 
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
-    <test>
-      <task>notes:list(): Get a list of all resources</task>
-      <code><![CDATA[
+      </code> 
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>notes:list(): Get a list of all resources</task>
+         <code>
       notes:list("", 1, 100)
-      ]]></code>
-      <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
-      <xpath desc="does not list resource with no read access">empty(.//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])</xpath>
-      <class href="../common.t.incl.xml#SearchResults"/>
-    </test>
-    <test>
-      <task>notes:delete(): Remove an existing resource</task>
-      <code><![CDATA[
+      </code>
+         <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
+         <xpath desc="does not list resource with no read access">empty(.//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])</xpath>
+         <class href="../common.t.incl.xml#SearchResults"/>
+      </test>
+      <test>
+         <task>notes:delete(): Remove an existing resource</task>
+         <code>
       notes:delete("Existing")
-      ]]></code>
-      <class href="../common.t.incl.xml#Unauthorized"/>
-    </test>
-    <test>
-      <task>notes:delete(): Remove a nonexisting resource</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#Unauthorized"/>
+      </test>
+      <test>
+         <task>notes:delete(): Remove a nonexisting resource</task>
+         <code>
       notes:delete("DoesNotExist")
-      ]]></code>
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
-    <test>
-      <task>notes:post(): Post a resource</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>notes:post(): Post a resource</task>
+         <code>
       notes:post(doc("/db/apps/opensiddur-tests/tests/api/data/notes/Valid.xml"))
-      ]]></code>
-      <class href="../common.t.incl.xml#Unauthorized"/>
-    </test>
-    <test>
-      <task>notes:put(): Put an existing resource</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#Unauthorized"/>
+      </test>
+      <test>
+         <task>notes:put(): Put an existing resource</task>
+         <code>
       notes:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Existing.xml"))
-      ]]></code>
-      <class href="../common.t.incl.xml#Unauthorized"/>
-    </test>
-    <test>
-      <task>notes:put(): Put a nonexisting resource</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#Unauthorized"/>
+      </test>
+      <test>
+         <task>notes:put(): Put a nonexisting resource</task>
+         <code>
       notes:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/notes/Existing.xml"))
-      ]]></code>
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
-    <test>
-      <task>notes:get-access()</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>notes:get-access()</task>
+         <code>
       notes:get-access("Existing", ())
-      ]]></code>
-      <xpath desc="an access structure is returned">self::a:access</xpath>
-    </test>
-    <test>
-      <task>notes:put-access()</task>
-      <code><![CDATA[
+      </code>
+         <xpath desc="an access structure is returned">self::a:access</xpath>
+      </test>
+      <test>
+         <task>notes:put-access()</task>
+         <code>
       notes:put-access("Existing", document{
-        <a:access>
-          <a:owner>testuser</a:owner>
-          <a:group write="false">everyone</a:group>
-          <a:world read="false" write="false"/>
-        </a:access>
+        &lt;a:access&gt;
+          &lt;a:owner&gt;testuser&lt;/a:owner&gt;
+          &lt;a:group write="false"&gt;everyone&lt;/a:group&gt;
+          &lt;a:world read="false" write="false"/&gt;
+        &lt;/a:access&gt;
         })
-      ]]></code>
-      <class href="../common.t.incl.xml#Unauthorized"/>
-    </test>
+      </code>
+         <class href="../common.t.incl.xml#Unauthorized"/>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>notes:get-access()</testName>
-    <test>
-      <task>For an existing resource</task>
-      <code><![CDATA[
+      <testName>notes:get-access()</testName>
+      <test>
+         <task>For an existing resource</task>
+         <code>
       notes:get-access("Existing", ())
-      ]]></code>
-      <xpath desc="returns an access structure">exists(./self::a:access)</xpath>
-    </test>
-    <test>
-      <task>For a nonexistent resource</task>
-      <code><![CDATA[
+      </code>
+         <xpath desc="returns an access structure">exists(./self::a:access)</xpath>
+      </test>
+      <test>
+         <task>For a nonexistent resource</task>
+         <code>
       notes:get-access("DoesNotExist", ())
-      ]]></code>
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
+      </code>
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>notes:put-access()</testName>
-    <test>
-      <task>Set with a valid access structure</task>
-      <code><![CDATA[
+      <testName>notes:put-access()</testName>
+      <test>
+         <task>Set with a valid access structure</task>
+         <code>
       notes:put-access("Existing", document{
-        <a:access>
-          <a:owner>testuser</a:owner>
-          <a:group write="true">everyone</a:group>
-          <a:world write="true" read="true"/>
-        </a:access>
+        &lt;a:access&gt;
+          &lt;a:owner&gt;testuser&lt;/a:owner&gt;
+          &lt;a:group write="true"&gt;everyone&lt;/a:group&gt;
+          &lt;a:world write="true" read="true"/&gt;
+        &lt;/a:access&gt;
       })
-      ]]></code>
-      <class href="../common.t.incl.xml#NoData"/>
-    </test>
-    <test>
-      <task>With an invalid access structure</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#NoData"/>
+      </test>
+      <test>
+         <task>With an invalid access structure</task>
+         <code>
       notes:put-access("Existing", document{
-        <a:access>
-          <a:invalid/>
-        </a:access>
+        &lt;a:access&gt;
+          &lt;a:invalid/&gt;
+        &lt;/a:access&gt;
       })
-      ]]></code>
-      <class href="../common.t.incl.xml#BadRequest"/>
-    </test>
-    <test>
-      <task>For a resource with no write access</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
+      <test>
+         <task>For a resource with no write access</task>
+         <code>
       notes:put-access("NoWriteAccess", document{
-        <a:access>
-          <a:owner>testuser</a:owner>
-          <a:group write="false">testuser</a:group>
-          <a:world write="false" read="false"/>
-        </a:access>
+        &lt;a:access&gt;
+          &lt;a:owner&gt;testuser&lt;/a:owner&gt;
+          &lt;a:group write="false"&gt;testuser&lt;/a:group&gt;
+          &lt;a:world write="false" read="false"/&gt;
+        &lt;/a:access&gt;
       })
-      ]]></code>
-      <class href="../common.t.incl.xml#Forbidden"/>
-    </test>
-    <test>
-      <task>For a nonexistent resource</task>
-      <code><![CDATA[
+      </code>
+         <class href="../common.t.incl.xml#Forbidden"/>
+      </test>
+      <test>
+         <task>For a nonexistent resource</task>
+         <code>
       notes:put-access("DoesNotExist", document{
-        <a:access>
-          <a:owner>testuser</a:owner>
-          <a:group write="false">testuser</a:group>
-          <a:world write="false" read="false"/>
-        </a:access>
+        &lt;a:access&gt;
+          &lt;a:owner&gt;testuser&lt;/a:owner&gt;
+          &lt;a:group write="false"&gt;testuser&lt;/a:group&gt;
+          &lt;a:world write="false" read="false"/&gt;
+        &lt;/a:access&gt;
       })
-      ]]></code>
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
+      </code>
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
   </TestSet>
 </TestSuite>

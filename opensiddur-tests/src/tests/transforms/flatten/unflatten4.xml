@@ -3,13 +3,32 @@
     <tei:text>
         <j:concurrent xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
             <jf:merged xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0">
-                <div xmlns="http://www.tei-c.org/ns/1.0" jf:id="div1" jf:start="div1" jf:position="1" jf:relative="-1" jf:nchildren="-2" jf:nlevels="1" jf:nprecedents="1" jf:layer-id="div-layer"/>
+                <div xmlns="http://www.tei-c.org/ns/1.0" jf:id="div1" jf:start="div1" jf:position="1"
+                 jf:relative="-1"
+                 jf:nchildren="-2"
+                 jf:nlevels="1"
+                 jf:nprecedents="1"
+                 jf:layer-id="div-layer"/>
                 <tei:seg jf:id="seg1" jf:stream="stream">one</tei:seg>
-                <ab xmlns="http://www.tei-c.org/ns/1.0" jf:id="ab1" jf:start="ab1" jf:position="2" jf:relative="-1" jf:nchildren="-2" jf:nlevels="1" jf:nprecedents="1" jf:layer-id="ab-layer"/>
+                <ab xmlns="http://www.tei-c.org/ns/1.0" jf:id="ab1" jf:start="ab1" jf:position="2"
+                jf:relative="-1"
+                jf:nchildren="-2"
+                jf:nlevels="1"
+                jf:nprecedents="1"
+                jf:layer-id="ab-layer"/>
                 <tei:seg jf:id="seg2" jf:stream="stream">two</tei:seg>
-                <div xmlns="http://www.tei-c.org/ns/1.0" jf:end="div1" jf:position="2" jf:relative="1" jf:nchildren="2" jf:nlevels="-1" jf:nprecedents="1" jf:layer-id="div-layer"/>
+                <div xmlns="http://www.tei-c.org/ns/1.0" jf:end="div1" jf:position="2"
+                 jf:relative="1"
+                 jf:nchildren="2"
+                 jf:nlevels="-1"
+                 jf:nprecedents="1"
+                 jf:layer-id="div-layer"/>
                 <tei:seg jf:id="seg3" jf:stream="stream">three</tei:seg>
-                <ab xmlns="http://www.tei-c.org/ns/1.0" jf:end="ab1" jf:position="3" jf:relative="1" jf:nchildren="2" jf:nlevels="-1" jf:nprecedents="1" jf:layer-id="ab-layer"/>
+                <ab xmlns="http://www.tei-c.org/ns/1.0" jf:end="ab1" jf:position="3" jf:relative="1"
+                jf:nchildren="2"
+                jf:nlevels="-1"
+                jf:nprecedents="1"
+                jf:layer-id="ab-layer"/>
             </jf:merged>
         </j:concurrent>
     </tei:text>

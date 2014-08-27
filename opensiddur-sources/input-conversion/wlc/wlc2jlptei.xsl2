@@ -411,8 +411,11 @@ TODO:
     <xsl:variable name="bibliography-file-name" as="xs:string" 
       select="concat('sources/',encode-for-uri($tanach-as-xml//fileDesc//title[@level='s' and @type='main']))"/>
     
-    <xsl:variable name="bibl-content" as="element(tei:link)">
-      <tei:link type="bibl" target="#text /data/{$bibliography-file-name}"/>
+    <xsl:variable name="bibl-content" as="element(tei:bibl)">
+      <tei:bibl>
+        <tei:ptr type="bibl" target="/data/{$bibliography-file-name}"/>
+        <tei:ptr type="bibl-content" target="#text"/>
+      </tei:bibl>
     </xsl:variable>
     <xsl:variable name="license-content" as="element()+">
       <tei:licence 
@@ -480,7 +483,7 @@ TODO:
         </xsl:with-param>
         <xsl:with-param name="license" as="element()+" select="$license-content" />
         <xsl:with-param name="bibliography"
-          as="element(tei:link)" select="$bibl-content" />
+          as="element(tei:bibl)" select="$bibl-content" />
         <xsl:with-param name="respons"
           as="element(tei:respStmt)" select="$responsGrp-content"/>
       </xsl:call-template>
@@ -553,7 +556,7 @@ TODO:
             </j:concurrent>
           </xsl:with-param>
           <xsl:with-param name="license" as="element()+" select="$license-content" />
-          <xsl:with-param name="bibliography" as="element(tei:link)" select="$bibl-content" />
+          <xsl:with-param name="bibliography" as="element(tei:bibl)" select="$bibl-content" />
         </xsl:call-template>
       </xsl:result-document>
     </xsl:for-each>
@@ -762,7 +765,7 @@ TODO:
             <xsl:with-param name="license" 
               as="element()+" select="$license-content" />
             <xsl:with-param name="bibliography" 
-              as="element(tei:link)" select="$bibl-content" />
+              as="element(tei:bibl)" select="$bibl-content" />
             <xsl:with-param name="respons" 
               as="element(tei:respStmt)+" select="$responsGrp-content" />
             <xsl:with-param name="links" 
@@ -801,8 +804,11 @@ TODO:
           </j:annotations>
         </xsl:with-param>
         <xsl:with-param name="license" as="element()+" select="$license-content" />
-        <xsl:with-param name="bibliography" as="element(tei:link)">
-          <tei:link type="bibl" target="#ann /data/{$bibliography-file-name}"/>          
+        <xsl:with-param name="bibliography" as="element(tei:bibl)">
+            <tei:bibl>
+                <tei:ptr type="bibl" target="/data/{$bibliography-file-name}"/>
+                <tei:ptr type="bibl-content" target="#ann"/>
+            </tei:bibl>
         </xsl:with-param>
       </xsl:call-template>
     </xsl:result-document>

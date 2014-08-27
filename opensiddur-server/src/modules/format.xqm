@@ -250,7 +250,7 @@ declare function format:dependency-is-transformable(
     $dep-uri as xs:string
     ) as xs:boolean {
     (: TODO: add other transformables here... :)
-    matches($dep-uri, "^/db/data/(linkage|original|tests)")
+    matches($dep-uri, "^/db/data/(linkage|notes|original|tests)")
 };
 
 declare function format:get-dependencies(
@@ -326,32 +326,34 @@ declare function format:combine-dependencies-up-to-date(
         every $dependency in $dependencies
         satisfies 
             let $path := data:api-path-to-db($dependency)
+            let $up-to-date-relative :=
+                  (: check if the dependency has changed since 
+                   : the combined document was cached :) 
+                  let $collection := util:collection-name($path)
+                  let $resource := util:document-name($path)
+                  let $mirror-collection := util:collection-name($combine-mirrored)
+                  let $mirror-resource := util:document-name($combine-mirrored)
+                  let $last-modified := 
+                      try {
+                          xmldb:last-modified($collection, $resource)
+                      }
+                      catch * { () }
+                  let $mirror-last-modified := 
+                      try {
+                          xmldb:last-modified($mirror-collection, $mirror-resource)
+                      }
+                      catch * { () } 
+                  return
+                      not(
+                          empty($last-modified) or 
+                          empty($mirror-last-modified) or 
+                          ($last-modified > $mirror-last-modified)
+                      )
             return
-                if (format:dependency-is-transformable($path))
-                then mirror:is-up-to-date($format:unflatten-cache, $path)
-                else 
-                    (: check if the non-transformable dependency is up to date
-                     : with respect to the cached version of the document :) 
-                    let $collection := util:collection-name($path)
-                    let $resource := util:document-name($path)
-                    let $mirror-collection := util:collection-name($combine-mirrored)
-                    let $mirror-resource := util:document-name($combine-mirrored)
-                    let $last-modified := 
-                        try {
-                            xmldb:last-modified($collection, $resource)
-                        }
-                        catch * { () }
-                    let $mirror-last-modified := 
-                        try {
-                            xmldb:last-modified($mirror-collection, $mirror-resource)
-                        }
-                        catch * { () } 
-                    return
-                        not(
-                            empty($last-modified) or 
-                            empty($mirror-last-modified) or 
-                            ($last-modified > $mirror-last-modified)
-                        )
+                $up-to-date-relative and (
+                    (not(format:dependency-is-transformable($path)))
+                    or mirror:is-up-to-date($format:unflatten-cache, $path)
+                )
 };
  
 (:~ perform the transform up to the combine step 

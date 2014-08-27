@@ -200,11 +200,11 @@ declare function compile:name-sort-key(
 declare function compile:source-list(
     $documents as document-node()*
     ) as element(tei:div)? {
-    let $source-link-elements := $documents//tei:link[@type="bibl"]
+    let $source-link-elements := $documents//tei:sourceDesc/tei:bibl/tei:ptr[@type="bibl"]
     let $source-links := 
         distinct-values(
             for $link-element in $source-link-elements
-            return tokenize($link-element/@target, '\s+')[2][.]
+            return tokenize($link-element/@target, '\s+')
         )
     where exists($source-links)
     return

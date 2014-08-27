@@ -4,6 +4,6 @@
   
   </tei:teiHeader>
   <tei:text>
-    <tei:seg xml:id="seg1">No dependencies</tei:seg>
+      <tei:seg xml:id="seg1">No dependencies</tei:seg>
   </tei:text>
 </tei:TEI>

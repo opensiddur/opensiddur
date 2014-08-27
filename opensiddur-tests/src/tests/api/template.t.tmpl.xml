@@ -1,14 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TestSuite
-  xmlns:tei="http://www.tei-c.org/ns/1.0"
-  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
-  xmlns:http="http://expath.org/ns/http-client">
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
   <suiteName>NAME ME</suiteName>
   <description>
-    <p>Test SOMETHING</p>
-    <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012 Efraim Feinstein,
+      <p>Test SOMETHING</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2012 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <setup/>
@@ -22,18 +18,18 @@
       at "xmldb:exist:///code/{PATH}.xqm";
   </imports>
   <TestSet>
-    <testName>{NAME}</testName>
-    <setup/>
-    <imports>
+      <testName>{NAME}</testName>
+      <setup/>
+      <imports>
     </imports>
-    <functions>
+      <functions>
     </functions>
-    <tearDown/>
-    <test>
-      <task>PUT</task>
-      <code><![CDATA[
+      <tearDown/>
+      <test>
+         <task>PUT</task>
+         <code>
         apitest:delete("***", ())
-      ]]></code> 
-    </test>
+      </code> 
+      </test>
   </TestSet>
 </TestSuite>

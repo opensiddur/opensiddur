@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tei:TEI 
-    xmlns:tei="http://www.tei-c.org/ns/1.0"
-    xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
     <tei:teiHeader>
       <tei:publicationStmt>
         <tei:availability>
-          <tei:licence target="http://www.creativecommons.org/licenses/by/3.0"/>
+            <tei:licence target="http://www.creativecommons.org/licenses/by/3.0"/>
         </tei:availability> 
       </tei:publicationStmt>
     </tei:teiHeader>
-    <j:links>
+    <j:links xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
         <tei:link type="note" target="#stream /data/notes/combine-ann-notes#stream_note"/>
         <tei:link type="note" target="#single /data/notes/combine-ann-notes#single_note"/>
-        <tei:link type="note" target="#range(range1,range2) /data/notes/combine-ann-notes#range_note"/>
+        <tei:link type="note"
+                target="#range(range1,range2) /data/notes/combine-ann-notes#range_note"/>
         <tei:link type="note" target="#ab1 /data/notes/combine-ann-notes#layer_note"/>
         <tei:link type="note" target="#word /data/notes/combine-ann-notes#word_note"/>
     </j:links>
     <tei:text>
-      <j:streamText xml:id="stream">
+      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
         <tei:anchor xml:id="anchor1"/>
         <tei:seg xml:id="single">A A.</tei:seg>
         <tei:seg xml:id="range1">A B.</tei:seg>
         <tei:seg xml:id="range2">A C.</tei:seg>
-        <tei:seg xml:id="with_word"><tei:w xml:id="word">A E.</tei:w></tei:seg>
+        <tei:seg xml:id="with_word">
+            <tei:w xml:id="word">A E.</tei:w>
+         </tei:seg>
         <tei:anchor xml:id="anchor2"/>
       </j:streamText>
-      <j:concurrent xml:id="concurrent">
+      <j:concurrent xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="concurrent">
           <j:layer type="div" xml:id="div_layer">
               <tei:div xml:id="div1">
                   <tei:head>Heading</tei:head>

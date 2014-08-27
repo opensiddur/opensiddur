@@ -1,11 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TestSuite
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  xmlns:tei="http://www.tei-c.org/ns/1.0"
-  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
-  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
-  >
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
     <suiteName>Parallel-to-layer transform</suiteName>
     <description>
       <p>Tests of transform that converts parallel texts to layers</p>
@@ -30,62 +24,56 @@
         <testName>No parallel text</testName>
         <test>
             <task>acts as an identity transform</task>
-            <code><![CDATA[
+            <code>
               pla:parallel-layer-document(
                 doc("/db/apps/opensiddur-tests/tests/transforms/identity.xml"),
                 map {}
               )
-            ]]></code>
+            </code>
           <expected desc="acts as an identity transform" href="identity.xml"/>
       </test>
     </TestSet>
     <TestSet>
         <testName>With parallel text</testName>
         <setup>
-            <copy 
-                source="/db/apps/opensiddur-tests/tests/transforms"
-                name="parA.xml"
-                destination="/db/data/original"/>
-            <copy 
-                source="/db/apps/opensiddur-tests/tests/transforms"
-                name="parB.xml"
-                destination="/db/data/original"/>
-            <copy 
-                source="/db/apps/opensiddur-tests/tests/transforms"
-                name="par.xml"
-                destination="/db/data/linkage"/>
+            <copy source="/db/apps/opensiddur-tests/tests/transforms" name="parA.xml"
+               destination="/db/data/original"/>
+            <copy source="/db/apps/opensiddur-tests/tests/transforms" name="parB.xml"
+               destination="/db/data/original"/>
+            <copy source="/db/apps/opensiddur-tests/tests/transforms" name="par.xml"
+               destination="/db/data/linkage"/>
             <code>
                 ridx:reindex(doc("/db/data/original/parA.xml")),
                 ridx:reindex(doc("/db/data/original/parB.xml"))
             </code>
         </setup>
         <tearDown>
-            <code><![CDATA[
+            <code>
             format:clear-caches("/db/data/linkage/par.xml"),
             format:clear-caches("/db/data/original/parA.xml"),
             format:clear-caches("/db/data/original/parB.xml"),
             ridx:remove("/db/data/original","parA.xml"),
             ridx:remove("/db/data/original","parB.xml")
-                ]]></code>
+                </code>
             <remove-document collection="/db/data/linkage" name="par.xml"/> 
             <remove-document collection="/db/data/original" name="parA.xml"/> 
             <remove-document collection="/db/data/original" name="parB.xml"/> 
         </tearDown>
         <test>
             <task>parallel layer</task>
-            <code><![CDATA[
+            <code>
                 let $d := doc("/db/data/linkage/par.xml")
                 return format:parallel-layer($d, map {}, $d)
-            ]]></code>
+            </code>
             <xpath desc="produces one jf:parallel-document">exists(./jf:parallel-document[tei:idno='Test'])</xpath>
-            <xpath desc="all xml:ids have been converted into @jf:id">count(.//@xml:id)=0 and count(.//@jf:id)>0</xpath>
+            <xpath desc="all xml:ids have been converted into @jf:id">count(.//@xml:id)=0 and count(.//@jf:id)&gt;0</xpath>
             <xpath desc="two tei:TEI elements exist">count(./jf:parallel-document/tei:TEI)=2</xpath>
             <xpath desc="each tei:TEI element has a @jf:document">contains(./jf:parallel-document/tei:TEI[1]/@jf:document, "/parA") and contains(./jf:parallel-document/tei:TEI[2]/@jf:document, "/parB")</xpath>
             <xpath desc="each tei:TEI element has an @xml:base">contains(./jf:parallel-document/tei:TEI[1]/@xml:base, "/parA") and contains(./jf:parallel-document/tei:TEI[2]/@xml:base, "/parB")</xpath>
             <xpath desc="a j:concurrent and j:layer have been added to parA">exists(./jf:parallel-document/tei:TEI[1]//j:concurrent[count(j:layer)=1]/j:layer[@type='parallel'])</xpath>
             <xpath desc="a j:layer has been added to parB">exists(./jf:parallel-document/tei:TEI[2]//j:concurrent[count(j:layer)=2]/j:layer[@type='parallel'])</xpath>
             <xpath desc="the added layer contains the same number of tei:ptr as the parallel document contains links">every $layer in .//j:concurrent/j:layer[@type='parallel'] satisfies count($layer/jf:parallelGrp/jf:parallel/tei:ptr)=3</xpath>
-            <xpath desc="Each tei:ptr is a local ptr">every $ptr in .//j:concurrent/j:layer[@type='parallel']/jf:parallelGrp/jf:parallel/tei:ptr satisfies starts-with($ptr/@target, '#') and string-length($ptr/@target)>1</xpath>
+            <xpath desc="Each tei:ptr is a local ptr">every $ptr in .//j:concurrent/j:layer[@type='parallel']/jf:parallelGrp/jf:parallel/tei:ptr satisfies starts-with($ptr/@target, '#') and string-length($ptr/@target)&gt;1</xpath>
         </test>
     </TestSet>
 </TestSuite>

@@ -1,15 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TestSuite
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  xmlns:tei="http://www.tei-c.org/ns/1.0"
-  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-  xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
-  >
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
   <suiteName>Conditional evaluations transform</suiteName>
   <description>
-    <p>Tests of conditional evaluation</p>
-    <author>Efraim Feinstein</author>
-    <copyright>Copyright 2014 Efraim Feinstein
+      <p>Tests of conditional evaluation</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2014 Efraim Feinstein
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -21,7 +16,7 @@
   </imports>
   <asUser>testuser</asUser>
   <password>testuser</password>
-  <functions><![CDATA[
+  <functions>
     declare function local:wrap-result(
         $str as xs:string*
         ) as element() {
@@ -31,469 +26,541 @@
                   element result { $s }
             }
     };
-  ]]></functions>
+  </functions>
     <TestSet>
         <testName>tei:fs and tei:f</testName>
         <test>
             <task>condition checking 1 true value</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                       cond:evaluate(
-                          <tei:fs type="FS">
-                              <tei:f name="ONE"><j:yes/></tei:f>
-                          </tei:fs>, 
+                          &lt;tei:fs type="FS"&gt;
+                              &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                          &lt;/tei:fs&gt;, 
                           $settings
                       ) 
                     )
-            ]]></code>
-            <expected desc="one yes result"><results><result>YES</result></results></expected>
+            </code>
+            <expected desc="one yes result">
+            <results>
+               <result>YES</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>condition checking 1 false value</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result(
                       cond:evaluate(
-                          <tei:fs type="FS">
-                              <tei:f name="ONE"><j:no/></tei:f>
-                          </tei:fs>, 
+                          &lt;tei:fs type="FS"&gt;
+                              &lt;tei:f name="ONE"&gt;&lt;j:no/&gt;&lt;/tei:f&gt;
+                          &lt;/tei:fs&gt;, 
                           $settings
                       ) 
                     )
-            ]]></code>
-            <expected desc="one no result"><results><result>NO</result></results></expected>
+            </code>
+            <expected desc="one no result">
+            <results>
+               <result>NO</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>condition checking 1 maybe value</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>MAYBE</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result(
                       cond:evaluate(
-                          <tei:fs type="FS">
-                              <tei:f name="ONE"><j:yes/></tei:f>
-                          </tei:fs>, 
+                          &lt;tei:fs type="FS"&gt;
+                              &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                          &lt;/tei:fs&gt;, 
                           $settings
                       ) 
                     )
-            ]]></code>
-            <expected desc="one maybe result"><results><result>MAYBE</result></results></expected>
+            </code>
+            <expected desc="one maybe result">
+            <results>
+               <result>MAYBE</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>condition checking 1 true and 1 false value</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>,
-                        "FS->TWO" := <tei:string>NO</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result(
                       cond:evaluate(
-                          <tei:fs type="FS">
-                              <tei:f name="ONE"><j:yes/></tei:f>
-                              <tei:f name="TWO"><j:yes/></tei:f>
-                          </tei:fs>, 
+                          &lt;tei:fs type="FS"&gt;
+                              &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                              &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                          &lt;/tei:fs&gt;, 
                           $settings
                       ) 
                     )
-            ]]></code>
-            <expected desc="two results"><results><result>YES</result><result>NO</result></results></expected>
+            </code>
+            <expected desc="two results">
+            <results>
+               <result>YES</result>
+               <result>NO</result>
+            </results>
+         </expected>
         </test>
     </TestSet>
     <TestSet>
         <testName>j:all</testName>
         <test>
             <task>all are YES</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>,
-                        "FS->TWO" := <tei:string>YES</tei:string>,
-                        "FS->THREE" := <tei:string>YES</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:all>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:all>,
+                            &lt;j:all&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:all&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="yes result"><results><result>YES</result></results></expected>
+            </code>
+            <expected desc="yes result">
+            <results>
+               <result>YES</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>one NO</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>,
-                        "FS->TWO" := <tei:string>YES</tei:string>,
-                        "FS->THREE" := <tei:string>NO</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:all>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:all>,
+                            &lt;j:all&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:all&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="no result"><results><result>NO</result></results></expected>
+            </code>
+            <expected desc="no result">
+            <results>
+               <result>NO</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>one MAYBE</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>,
-                        "FS->TWO" := <tei:string>YES</tei:string>,
-                        "FS->THREE" := <tei:string>MAYBE</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:all>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:all>,
+                            &lt;j:all&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:all&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="maybe result"><results><result>MAYBE</result></results></expected>
+            </code>
+            <expected desc="maybe result">
+            <results>
+               <result>MAYBE</result>
+            </results>
+         </expected>
         </test>
     </TestSet>
     <TestSet>
         <testName>j:any</testName>
         <test>
             <task>all are YES</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>,
-                        "FS->TWO" := <tei:string>YES</tei:string>,
-                        "FS->THREE" := <tei:string>YES</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:any>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:any>,
+                            &lt;j:any&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:any&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="yes result"><results><result>YES</result></results></expected>
+            </code>
+            <expected desc="yes result">
+            <results>
+               <result>YES</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>one YES</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>,
-                        "FS->TWO" := <tei:string>NO</tei:string>,
-                        "FS->THREE" := <tei:string>NO</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:any>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:any>,
+                            &lt;j:any&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:any&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="yes result"><results><result>YES</result></results></expected>
+            </code>
+            <expected desc="yes result">
+            <results>
+               <result>YES</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>one MAYBE</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>MAYBE</tei:string>,
-                        "FS->TWO" := <tei:string>YES</tei:string>,
-                        "FS->THREE" := <tei:string>NO</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:any>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:any>,
+                            &lt;j:any&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:any&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="maybe result"><results><result>MAYBE</result></results></expected>
+            </code>
+            <expected desc="maybe result">
+            <results>
+               <result>MAYBE</result>
+            </results>
+         </expected>
         </test>
     </TestSet>
     <TestSet>
         <testName>j:oneOf</testName>
         <test>
             <task>all are YES</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>,
-                        "FS->TWO" := <tei:string>YES</tei:string>,
-                        "FS->THREE" := <tei:string>YES</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:oneOf>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:oneOf>,
+                            &lt;j:oneOf&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:oneOf&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="no result"><results><result>NO</result></results></expected>
+            </code>
+            <expected desc="no result">
+            <results>
+               <result>NO</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>all are NO</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>NO</tei:string>,
-                        "FS->TWO" := <tei:string>NO</tei:string>,
-                        "FS->THREE" := <tei:string>NO</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:oneOf>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:oneOf>,
+                            &lt;j:oneOf&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:oneOf&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="no result"><results><result>NO</result></results></expected>
+            </code>
+            <expected desc="no result">
+            <results>
+               <result>NO</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>one YES</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>,
-                        "FS->TWO" := <tei:string>NO</tei:string>,
-                        "FS->THREE" := <tei:string>NO</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:oneOf>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:oneOf>,
+                            &lt;j:oneOf&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:oneOf&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="yes result"><results><result>YES</result></results></expected>
+            </code>
+            <expected desc="yes result">
+            <results>
+               <result>YES</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>one MAYBE</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>MAYBE</tei:string>,
-                        "FS->TWO" := <tei:string>NO</tei:string>,
-                        "FS->THREE" := <tei:string>NO</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:oneOf>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:oneOf>,
+                            &lt;j:oneOf&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:oneOf&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="maybe result"><results><result>MAYBE</result></results></expected>
+            </code>
+            <expected desc="maybe result">
+            <results>
+               <result>MAYBE</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>one YES, one MAYBE</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>MAYBE</tei:string>,
-                        "FS->TWO" := <tei:string>YES</tei:string>,
-                        "FS->THREE" := <tei:string>NO</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:oneOf>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                    <tei:f name="TWO"><j:yes/></tei:f>
-                                    <tei:f name="THREE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:oneOf>,
+                            &lt;j:oneOf&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="TWO"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                    &lt;tei:f name="THREE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:oneOf&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="no result"><results><result>NO</result></results></expected>
+            </code>
+            <expected desc="no result">
+            <results>
+               <result>NO</result>
+            </results>
+         </expected>
         </test>
     </TestSet>
     <TestSet>
         <testName>j:not</testName>
         <test>
             <task>not YES</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>YES</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:not>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:not>,
+                            &lt;j:not&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:not&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="no result"><results><result>NO</result></results></expected>
+            </code>
+            <expected desc="no result">
+            <results>
+               <result>NO</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>not NO</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>NO</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:not>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:not>,
+                            &lt;j:not&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:not&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="yes result"><results><result>YES</result></results></expected>
+            </code>
+            <expected desc="yes result">
+            <results>
+               <result>YES</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>not MAYBE</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "FS->ONE" := <tei:string>MAYBE</tei:string>
+                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <j:not>
-                                <tei:fs type="FS">
-                                    <tei:f name="ONE"><j:yes/></tei:f>
-                                </tei:fs>
-                            </j:not>,
+                            &lt;j:not&gt;
+                                &lt;tei:fs type="FS"&gt;
+                                    &lt;tei:f name="ONE"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                                &lt;/tei:fs&gt;
+                            &lt;/j:not&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="maybe result"><results><result>MAYBE</result></results></expected>
+            </code>
+            <expected desc="maybe result">
+            <results>
+               <result>MAYBE</result>
+            </results>
+         </expected>
         </test>
     </TestSet>
     <TestSet>
         <testName>Default values</testName>
         <setup>
-            <copy source="/db/apps/opensiddur-tests/tests/transforms" 
-                  name="conditional1.xml" 
-                  destination="/db/data/conditionals" /> 
+            <copy source="/db/apps/opensiddur-tests/tests/transforms" name="conditional1.xml"
+               destination="/db/data/conditionals"/> 
         </setup>
         <tearDown>
-            <remove-document collection="/db/data/conditionals" name="conditional1.xml" />
+            <remove-document collection="/db/data/conditionals" name="conditional1.xml"/>
         </tearDown>
         <test>
             <task>Literal default value</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
                     }
@@ -501,54 +568,66 @@
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <tei:fs type="test:FS">
-                                <tei:f name="DEFAULT_YES"><tei:default/></tei:f>
-                            </tei:fs>,
+                            &lt;tei:fs type="test:FS"&gt;
+                                &lt;tei:f name="DEFAULT_YES"&gt;&lt;tei:default/&gt;&lt;/tei:f&gt;
+                            &lt;/tei:fs&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="default value yes"><results><result>YES</result></results></expected>
+            </code>
+            <expected desc="default value yes">
+            <results>
+               <result>YES</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>Conditional default value, condition evaluates true</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "test:FS->CONTROL" := <tei:string>NO</tei:string>
+                        "test:FS-&gt;CONTROL" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <tei:fs type="test:FS">
-                                <tei:f name="DEFAULT_IF"><j:yes/></tei:f>
-                            </tei:fs>,
+                            &lt;tei:fs type="test:FS"&gt;
+                                &lt;tei:f name="DEFAULT_IF"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                            &lt;/tei:fs&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="default value yes"><results><result>YES</result></results></expected>
+            </code>
+            <expected desc="default value yes">
+            <results>
+               <result>YES</result>
+            </results>
+         </expected>
         </test>
         <test>
             <task>Conditional default value, condition evaluates false</task>
-            <code><![CDATA[
+            <code>
                 let $settings := map {
                     "combine:settings" := map {
-                        "test:FS->CONTROL" := <tei:string>YES</tei:string>
+                        "test:FS-&gt;CONTROL" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
                     local:wrap-result( 
                         cond:evaluate(
-                            <tei:fs type="test:FS">
-                                <tei:f name="DEFAULT_IF"><j:yes/></tei:f>
-                            </tei:fs>,
+                            &lt;tei:fs type="test:FS"&gt;
+                                &lt;tei:f name="DEFAULT_IF"&gt;&lt;j:yes/&gt;&lt;/tei:f&gt;
+                            &lt;/tei:fs&gt;,
                             $settings
                         )
                     )
-            ]]></code>
-            <expected desc="default value no"><results><result>NO</result></results></expected>
+            </code>
+            <expected desc="default value no">
+            <results>
+               <result>NO</result>
+            </results>
+         </expected>
         </test>
     </TestSet>
 </TestSuite>

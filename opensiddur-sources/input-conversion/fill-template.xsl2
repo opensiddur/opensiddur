@@ -46,7 +46,7 @@
     <xsl:param name="respons" as="element(tei:respStmt)+" />
     <xsl:param name="title" as="element(tei:title)+"  />
     <xsl:param name="license" as="element(tei:licence)+"  />
-    <xsl:param name="bibliography" as="element(tei:link)+" />
+    <xsl:param name="bibliography" as="element(tei:bibl)+" />
     <!-- the body element may be (streamText,concurrent*)|parallelText -->
     <xsl:param name="body" as="element()*" />
     <xsl:param name="links" as="element(j:links)?" />

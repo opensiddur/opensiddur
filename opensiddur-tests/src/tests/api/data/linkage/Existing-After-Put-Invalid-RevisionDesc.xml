@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
-         xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-         xml:lang="">
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="">
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
@@ -23,7 +21,10 @@
             <tei:date>2012-06-08</tei:date>
          </tei:publicationStmt>
          <tei:sourceDesc>
-            <tei:link type="bibl" target="#parallel /data/sources/Born%20Digital"/>
+            <tei:bibl>
+               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl-content" target="#parallel"/>
+            </tei:bibl>
          </tei:sourceDesc>
       </tei:fileDesc>
       <tei:revisionDesc>
@@ -37,7 +38,7 @@
             <tei:p>Query result</tei:p>
         </tei:div>
       </tei:front>
-      <j:parallelText xml:id="parallel">
+      <j:parallelText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="parallel">
          <tei:idno>Test Translation</tei:idno>
          <tei:linkGrp domains="/data/original/A-he /data/original/B-en">
             <tei:link target="/data/original/A-he#range(v1_seg1,v1_seg2) /data/original/B-en#range(v1_seg1,v1_seg2)"/>

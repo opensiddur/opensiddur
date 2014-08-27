@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tei:TEI 
-  xmlns:tei="http://www.tei-c.org/ns/1.0"
-  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-  xml:lang="en">
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
   <tei:teiHeader>
     <!-- leaving it blank... -->
   </tei:teiHeader>  
   <tei:text>
-    <j:streamText>
-      <tei:seg xml:id="seg1">No layers!</tei:seg>
-    </j:streamText>
+      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+         <tei:seg xml:id="seg1">No layers!</tei:seg>
+      </j:streamText>
   </tei:text>
 </tei:TEI>
