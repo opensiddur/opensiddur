@@ -164,6 +164,7 @@ declare function tohtml:tei-ref-license(
             element object {
                 attribute data { $icons($license-type) },
                 attribute type { "image/svg+xml" },
+                attribute width { "300px" },
                 text { if ($license-type="zero") then "No rights reserved" else "Some rights reserved" }
             }
         else ()

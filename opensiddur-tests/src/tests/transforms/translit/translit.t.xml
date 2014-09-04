@@ -1,10 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TestSuite
-    xmlns:tei="http://www.tei-c.org/ns/1.0"
-    xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-    xmlns:tr="http://jewishliturgy.org/ns/tr/1.0"
-    xmlns:xxml="http://jewishliturgy.org/ns/xml-alias"
-    >
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
     <suiteName>Transliteration transform</suiteName>
     <description>
         <p>Tests of transliteration transform</p>
@@ -26,10 +21,10 @@
       <testName>No table</testName>
       <test>
           <task>no transliteration table specified</task>
-          <code><![CDATA[
+          <code>
             let $doc := doc("/db/apps/opensiddur-tests/tests/transforms/translit/no-translit-context.xml")
             return translit:transliterate-document($doc, map {})
-          ]]></code>
+          </code>
           <expected desc="acts as an identity transform" href="no-translit-context.xml"/>
       </test>        
     </TestSet>
@@ -37,38 +32,48 @@
       <testName>transliterations</testName>
       <test>
           <task>one word transliteration</task>
-          <code><![CDATA[
-            translit:transliterate(<tei:w n="2">אֶפְרָיִם</tei:w>, map { "translit:table" := $table })
-          ]]></code>
-          <expected desc="word is transliterated, element and attributes are preserved"><tei:w n="2">ʾefrayim</tei:w></expected>
+          <code>
+            translit:transliterate(&lt;tei:w n="2"&gt;אֶפְרָיִם&lt;/tei:w&gt;, map { "translit:table" := $table })
+          </code>
+          <expected desc="word is transliterated, element and attributes are preserved">
+            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0" n="2">ʾefrayim</tei:w>
+         </expected>
       </test>
       <test>
           <task>maleh vowel</task>
-          <code><![CDATA[
-            translit:transliterate(<tei:w>רִית</tei:w>, map { "translit:table" := $table })
-          ]]></code>
-          <expected desc="word is transliterated"><tei:w>riyt</tei:w></expected>
+          <code>
+            translit:transliterate(&lt;tei:w&gt;רִית&lt;/tei:w&gt;, map { "translit:table" := $table })
+          </code>
+          <expected desc="word is transliterated">
+            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">riyt</tei:w>
+         </expected>
       </test>
       <test>
           <task>Tetragrammaton 1</task>
-          <code><![CDATA[
-            translit:transliterate(<tei:w>יְהוָה</tei:w>, map { "translit:table" := $table })
-          ]]></code>
-          <expected desc="replaced"><tei:w>ʾadonay</tei:w></expected>
+          <code>
+            translit:transliterate(&lt;tei:w&gt;יְהוָה&lt;/tei:w&gt;, map { "translit:table" := $table })
+          </code>
+          <expected desc="replaced">
+            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">ʾadonay</tei:w>
+         </expected>
       </test>
       <test>
           <task>Tetragrammaton 2</task>
-          <code><![CDATA[
-            translit:transliterate(<tei:w>יֱהוִה</tei:w>, map { "translit:table" := $table })
-          ]]></code>
-          <expected desc="replaced"><tei:w>ʾelohim</tei:w></expected>
+          <code>
+            translit:transliterate(&lt;tei:w&gt;יֱהוִה&lt;/tei:w&gt;, map { "translit:table" := $table })
+          </code>
+          <expected desc="replaced">
+            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">ʾelohim</tei:w>
+         </expected>
       </test>
       <test>
           <task>Tetragrammaton 3</task>
-          <code><![CDATA[
-            translit:transliterate(<tei:w>יְיָ</tei:w>, map { "translit:table" := $table })
-          ]]></code>
-          <expected desc="replaced"><tei:w>ʾadonay</tei:w></expected>
+          <code>
+            translit:transliterate(&lt;tei:w&gt;יְיָ&lt;/tei:w&gt;, map { "translit:table" := $table })
+          </code>
+          <expected desc="replaced">
+            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">ʾadonay</tei:w>
+         </expected>
       </test>
     </TestSet>
     <TestSet ignore="yes">
@@ -77,19 +82,22 @@
         <task>j:segGen</task>
         <xslt/>
         <context href="translit-segGen-context.xml"/>
-        <expected desc="j:segGen is replaced by a tei:seg transliterated text" href="translit-segGen-expect.xml"/>
+        <expected desc="j:segGen is replaced by a tei:seg transliterated text"
+                   href="translit-segGen-expect.xml"/>
       </test>
       <test>
         <task>tei:seg</task>
         <xslt/>
         <context href="translit-seg-context.xml"/>
-        <expected desc="tei:seg is replaced by j:parallelGrp including j:parallel[@type='transliteration']" href="translit-seg-expect.xml"/>
+        <expected desc="tei:seg is replaced by j:parallelGrp including j:parallel[@type='transliteration']"
+                   href="translit-seg-expect.xml"/>
       </test>
       <test>
         <task>pre-existing j:parallelGrp</task>
         <xslt/>
         <context href="translit-parallelGrp-context.xml"/>
-        <expected desc="j:parallel[@type='transliteration'] is added to the existing j:parallelGrp" href="translit-parallelGrp-expect.xml"/>
+        <expected desc="j:parallel[@type='transliteration'] is added to the existing j:parallelGrp"
+                   href="translit-parallelGrp-expect.xml"/>
       </test>
     </TestSet>
     <TestSet ignore="yes">
@@ -98,13 +106,15 @@
         <task>tei:p and tei:seg</task>
         <xslt/>
         <context href="translit-p-context.xml"/>
-        <expected desc="tei:p is replaced by j:parallelGrp including j:parallel[@type='transliteration']" href="translit-p-expect.xml"/>
+        <expected desc="tei:p is replaced by j:parallelGrp including j:parallel[@type='transliteration']"
+                   href="translit-p-expect.xml"/>
       </test> 
       <test>
         <task>tei:p and pre-existing j:parallelGrp</task>
         <xslt/>
         <context href="translit-p-parallelGrp-context.xml"/>
-        <expected desc="j:parallel[@type='transliteration'] is added to the existing j:parallelGrp" href="translit-p-parallelGrp-expect.xml"/>
+        <expected desc="j:parallel[@type='transliteration'] is added to the existing j:parallelGrp"
+                   href="translit-p-parallelGrp-expect.xml"/>
       </test>
     </TestSet>
 </TestSuite>

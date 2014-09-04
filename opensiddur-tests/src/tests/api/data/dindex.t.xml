@@ -1,15 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TestSuite
-  xmlns:tei="http://www.tei-c.org/ns/1.0"
-  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0"
-  xmlns:jx="http://jewishliturgy.org/ns/jlp-processor"
-  xmlns:o="http://a9.com/-/spec/opensearch/1.1/"
-  xmlns:http="http://expath.org/ns/http-client">
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
   <suiteName>Data API index test</suiteName>
   <description>
-    <p>Test the data API index</p>
-    <author>Efraim Feinstein</author>
-    <copyright>Copyright 2012-2013 Efraim Feinstein,
+      <p>Test the data API index</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2012-2013 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <setup/>
@@ -20,24 +15,24 @@
       at "xmldb:exist:///db/apps/opensiddur-server/api/data/dindex.xqm";
   </imports>
   <TestSet>
-    <testName>dindex:list()</testName>
-    <test>
-      <task>GET</task>
-      <code><![CDATA[
+      <testName>dindex:list()</testName>
+      <test>
+         <task>GET</task>
+         <code>
       dindex:list()
-      ]]></code>
-      <class href="../common.t.incl.xml#SerializeHTML5"/>
-      <class href="../common.t.incl.xml#DiscoveryAPI"/>
-    </test>
+      </code>
+         <class href="../common.t.incl.xml#SerializeHTML5"/>
+         <class href="../common.t.incl.xml#DiscoveryAPI"/>
+      </test>
   </TestSet>
   <TestSet>
-    <testName>dindex:open-search()</testName>
-    <test>
-      <task>GET, no source</task>
-      <code><![CDATA[
+      <testName>dindex:open-search()</testName>
+      <test>
+         <task>GET, no source</task>
+         <code>
       dindex:open-search("")
-      ]]></code>
-      <xpath desc="An OpenSearch description is returned">self::o:OpenSearchDescription</xpath>
-    </test>
+      </code>
+         <xpath desc="An OpenSearch description is returned">self::o:OpenSearchDescription</xpath>
+      </test>
   </TestSet>
 </TestSuite>

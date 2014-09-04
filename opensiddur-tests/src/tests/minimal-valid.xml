@@ -1,11 +1,13 @@
-<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xmlns:cc="http://web.resource.org/cc/" xml:base="http://jewishliturgy.org/base/text/contributors">
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+         xml:base="http://jewishliturgy.org/base/text/contributors">
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
                 <tei:title xml:lang="en">Minimal valid JLPTEI</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
-                <tei:availability status="free">
+                <tei:availability>
                     <tei:p xml:lang="en">To the extent possible under law, 
      the contributors who associated  
      <tei:ref type="license" target="licenses/cc0/1.0">Creative Commons Zero</tei:ref> 
@@ -14,8 +16,9 @@
      A list of contributors is available at 
      <tei:ref type="attribution" target="http://jewishliturgy.org/base/text/contributors">http://jewishliturgy.org/base/text/contributors</tei:ref>.
      </tei:p>
-                    <rdf:RDF>
-                        <cc:License rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+                    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+                        <cc:License xmlns:cc="http://web.resource.org/cc/"
+                              rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
                             <cc:legalcode rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/legalcode"/>
                             <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
                             <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>

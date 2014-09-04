@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+    <tei:teiHeader>
+      <tei:publicationStmt>
+        <tei:availability>
+            <tei:licence target="http://www.creativecommons.org/licenses/by/3.0"/>
+        </tei:availability> 
+      </tei:publicationStmt>
+    </tei:teiHeader>
+    <j:annotations xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+        <tei:idno>Test</tei:idno>
+        <tei:note xml:id="stream_note" type="instruction">Stream</tei:note>
+        <tei:note xml:id="single_note" type="instruction">Single</tei:note>
+        <tei:note xml:id="range_note" type="instruction">Range</tei:note>
+        <tei:note xml:id="off_note" type="instruction">Off</tei:note>
+        <tei:note xml:id="layer_note" type="instruction">Layer</tei:note>
+        <tei:note xml:id="word_note" type="instruction">Word</tei:note>
+    </j:annotations>
+</tei:TEI>

@@ -8,6 +8,10 @@ import module namespace src="http://jewishliturgy.org/api/data/sources"
   at "api/data/sources.xqm";
 import module namespace sty="http://jewishliturgy.org/api/data/styles"
   at "api/data/styles.xqm";
+import module namespace upg="http://jewishliturgy.org/modules/upgrade"
+  at "modules/upgrade.xqm";
+
+declare namespace tei="http://www.tei-c.org/ns/1.0";
   
 (: file path pointing to the exist installation directory :)
 declare variable $home external;
@@ -41,4 +45,6 @@ xmldb:store(
     "generic.xml",
     doc($target || "/data/styles/en/generic.xml")
     ),
+util:log-system-out("upgrades: update existing JLPTEI for schema changes..."),
+upg:schema-changes-0-7-5(),
 util:log-system-out("done")

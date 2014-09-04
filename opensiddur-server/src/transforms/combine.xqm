@@ -86,15 +86,28 @@ declare function combine:combine(
                     return combine:jf-parallelGrp($node, $updated-params)
                     default (: other element :) 
                     return combine:element($node, $updated-params)
+                let $annotation-sources := (
+                    $instruction,
+                    $node/@jf:annotation,
+                    $node/self::jf:unflattened/ancestor::jf:parallel-document//jf:unflattened[not(. is $node)]/@jf:annotation
+                )
                 return
-                    if (exists($instruction))
+                    if (exists($annotation-sources) and 
+                        not($node[@jf:part]/preceding::*[@jf:part=$node/@jf:part]))
                     then
-                        (: add conditional instruction :)
                         element {QName(namespace-uri($ret), name($ret))}{
                             $ret/@*,
-                            combine:follow-pointer($node, $instruction, $updated-params, 
-                                element jf:annotation { attribute type { "instruction" } }
-                            ),
+                            for $al in $annotation-sources,
+                                $an in tokenize($al, "\s+")
+                            return 
+                                combine:follow-pointer(
+                                    $al/parent::*, 
+                                    $an, $updated-params, 
+                                    element jf:annotated { () },
+                                    if ($al is $instruction) 
+                                    then () 
+                                    else combine:include-annotation#3
+                                ),
                             $ret/node()
                         }
                     else $ret 
@@ -126,7 +139,7 @@ declare function combine:jf-unflattened(
     $e/@*,
     if ($e/ancestor::jf:parallel-document)
     then
-        (: parallel texts cannot be redirected :) 
+        (: parallel texts cannot be redirected :)
         combine:combine($e/node(), $params)
     else 
         (: determine if we need a translation redirect
@@ -470,12 +483,47 @@ declare function combine:translation-redirect(
         )
 };
 
+(:~ @return true() if the given annotation should be included, false() otherwise :)
+declare function combine:include-annotation(
+    $node as element(), 
+    $annotation as element()*,
+    $params as map
+    ) as xs:boolean {
+    let $a := $annotation[1]
+    let $annotation-ids := $a/ancestor::j:annotations/tei:idno
+    let $s := $params("combine:settings")
+    return
+        exists($s) and (
+            some $annotation-id in $annotation-ids/string()
+            satisfies $s("opensiddur:annotation->" || $annotation-id)=("YES","ON")
+        )
+};
+
 declare function combine:follow-pointer(
     $e as element(),
     $destination-ptr as xs:string,
     $params as map,
     $wrapping-element as element()
     ) as element() {
+    combine:follow-pointer($e, $destination-ptr, $params, $wrapping-element, ())
+};
+
+
+(:~ follow a pointer in the context of the combine operation
+ : @param $e The context element from which the pointer is being followed
+ : @param $destination-ptr The pointer
+ : @param $params Active parameters
+ : @param $wrapping-element The element that should wrap the followed pointer and added attributes
+ : @param $include-function A function that, given context, a followed pointer, and parameters will determine whether the pointer should indeed be followed (optional) 
+ : @return $wrapping-element with attributes and content added or empty sequence if $include-function returns false()
+ :)
+declare function combine:follow-pointer(
+    $e as element(),
+    $destination-ptr as xs:string,
+    $params as map,
+    $wrapping-element as element(),
+    $include-function as (function(element(), element()*, map) as xs:boolean)?
+    ) as element()? {
     (: pointer to follow. 
      : This will naturally result in more than one wrapper per
      : context element if it has more than one @target, but that's OK.
@@ -496,6 +544,7 @@ declare function combine:follow-pointer(
           find a cache of a cached document :) 
         )
       )
+    where empty($include-function) or $include-function($e, $destination, $params)
     return
       element {QName(namespace-uri($wrapping-element), name($wrapping-element))} {
         $wrapping-element/@*,
@@ -513,7 +562,12 @@ declare function combine:follow-pointer(
           )
         else (
             (: external pointer... determine if we need to redirect :)
-            let $redirected := combine:translation-redirect($e, $destination, $params)
+            let $redirected := 
+                if ($destination[1]/ancestor-or-self::jf:unflattened)
+                then
+                    (: only unflattened can have a parallel text :) 
+                    combine:translation-redirect($e, $destination, $params)
+                else ()
             return
                 if (exists($redirected))
                 then $redirected
@@ -563,7 +617,7 @@ declare function combine:get-conditional-layer-id(
  : @return an updated parameter map with the following parameters updated:
  :  combine:conditional-result: YES, NO, MAYBE, ON, OFF if the element is subject to a conditional; empty if not
  :  combine:conditional-layers: a map of document#layer-id->conditional result
- :  combine:conditional-instruction: a pointer to the instruction
+ :  combine:conditional-instruction: the attribute node that points to the instruction
  :)
 declare function combine:evaluate-conditions(
     $e as element(),
@@ -612,7 +666,7 @@ declare function combine:evaluate-conditions(
                     $this-element-condition-result
                 )[1],
                 "combine:conditional-instruction" := 
-                    $e/@jf:conditional-instruction/string()
+                    $e/@jf:conditional-instruction
             },
             (: record if the layer is being turned off :)
             if (not($e instance of element(jf:conditional) 

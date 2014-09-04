@@ -1,57 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tei:TEI 
-    xmlns:tei="http://www.tei-c.org/ns/1.0"
-    xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
     <tei:teiHeader>
       <tei:publicationStmt>
-        <tei:availability status="free">
-          <tei:licence target="http://www.creativecommons.org/licenses/by/3.0"/>
+        <tei:availability>
+            <tei:licence target="http://www.creativecommons.org/licenses/by/3.0"/>
         </tei:availability> 
       </tei:publicationStmt>
     </tei:teiHeader>
-    <j:settings>
+    <j:settings xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
         <tei:fs xml:id="set1" type="test:A">
-            <tei:f name="switch"><j:yes/></tei:f>
+            <tei:f name="switch">
+            <j:yes/>
+         </tei:f>
         </tei:fs>
         <tei:fs xml:id="set3" type="test:A">
-            <tei:f name="switch"><j:maybe/></tei:f>
+            <tei:f name="switch">
+            <j:maybe/>
+         </tei:f>
         </tei:fs>
     </j:settings>
-    <j:conditions>
+    <j:conditions xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
         <j:condition xml:id="cond1">
             <tei:fs type="test:A">
-                <tei:f name="switch"><j:yes/></tei:f>
+                <tei:f name="switch">
+               <j:yes/>
+            </tei:f>
             </tei:fs>
         </j:condition>
         <j:condition xml:id="cond2">
             <tei:fs type="test:A">
-                <tei:f name="switch"><j:no/></tei:f>
+                <tei:f name="switch">
+               <j:no/>
+            </tei:f>
             </tei:fs>
         </j:condition>
         <j:condition xml:id="cond3">
             <tei:fs type="test:A">
-                <tei:f name="switch"><j:yes/></tei:f>
+                <tei:f name="switch">
+               <j:yes/>
+            </tei:f>
             </tei:fs>
         </j:condition>
     </j:conditions>
-    <j:links>
+    <j:links xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
         <tei:link type="set" target="#stream #set1"/>
         <tei:link type="set" target="#seg3 #set3"/>
         <tei:link type="condition" target="#seg1 #cond1"/>
         <tei:link type="condition" target="#seg2 #cond2"/>
         <tei:link type="condition" target="#seg3 #cond3 #inst1"/>
     </j:links>
-    <j:notes>
+    <j:notes xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
         <tei:note xml:id="inst1" type="instruction">Instruction.</tei:note>
     </j:notes>
     <tei:text>
-      <j:streamText xml:id="stream">
+      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
         <tei:seg xml:id="seg1">A.</tei:seg>
         <tei:seg xml:id="seg2">B.</tei:seg>
         <tei:seg xml:id="seg3">C.</tei:seg>
         <tei:seg xml:id="seg4">D.</tei:seg>
       </j:streamText>
-      <j:concurrent xml:id="concurrent">
+      <j:concurrent xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="concurrent">
           <j:layer type="div" xml:id="div_layer">
               <tei:div xml:id="div1">
                   <tei:head>Heading</tei:head>

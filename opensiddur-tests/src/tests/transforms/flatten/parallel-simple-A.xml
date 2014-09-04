@@ -1,7 +1,5 @@
-<tei:TEI 
-    xmlns:tei="http://www.tei-c.org/ns/1.0" 
-    xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
-    xml:lang="en">
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
@@ -11,20 +9,23 @@
                 <tei:distributor>
                     <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
                 </tei:distributor>
-                <tei:availability status="free">
+                <tei:availability>
                     <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
                 </tei:availability>
                 <tei:date>2014-03-19</tei:date>
             </tei:publicationStmt>
             <tei:sourceDesc>
-                <tei:link type="bibl" target="#stream /data/sources/Born%20Digital"/>
+                <tei:bibl>
+               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl-content" target="#stream"/>
+            </tei:bibl>
             </tei:sourceDesc>
         </tei:fileDesc>
         <tei:revisionDesc>
         </tei:revisionDesc>
     </tei:teiHeader>
     <tei:text>
-        <j:streamText xml:id="stream">
+        <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
             <tei:seg xml:id="A1">A-1</tei:seg>
         </j:streamText>
    </tei:text>

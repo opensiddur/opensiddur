@@ -120,32 +120,10 @@ declare function orig:validate-changes(
     then <message>You may not alter the existing revision history. You may add one change log entry.</message>
     else (),
     let $can-change-license := 
-      acc:can-relicense($doc, app:auth-user())
+        acc:can-relicense($doc, app:auth-user())
+    where (not($can-change-license) and not($doc//tei:availability/tei:licence/@target=$old-doc//tei:availability/tei:licence/@target))
     return
-      if (not(xmldiff:compare(
-        <x>{
-          orig:remove-whitespace(
-            $doc//tei:publicationStmt/
-            (* except (
-              if ($can-change-license) 
-              then tei:availability
-              else ()
-            ))
-          )
-        }</x>, 
-        <x>{
-          orig:remove-whitespace(
-            $old-doc//tei:publicationStmt/
-            (* except (
-              if ($can-change-license) 
-              then tei:availability 
-              else ()
-            ))
-          )
-        }</x>)
-      ))
-      then <message>The information in the tei:publicationStmt is immutable and only the original author can change the text's license.</message>
-      else ()
+        <message>Only the original author can change a text's license</message>
     )
   let $is-valid := empty($messages)
   return

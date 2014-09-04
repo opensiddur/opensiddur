@@ -42,7 +42,7 @@ declare function jvalidate:validate-relaxng(
  : @return The result of the validation as:
  : <report>
  :  <status>valid|invalid</status>
- :  <message><!-- a SVRL document --></message>
+ :  <message location=""><!-- text --></message>+
  : </report>
  :)
 declare function jvalidate:validate-iso-schematron-svrl(
@@ -67,9 +67,14 @@ declare function jvalidate:validate-iso-schematron-svrl(
         then 'invalid'
         else 'valid'
       }</status>
-      <message>{
-        $result-transform
-      }</message>
+      {
+        for $failure in $result-transform/svrl:failed-assert | $result-transform/svrl:successful-report
+        return
+            <message>{
+                $failure/@location,
+                $failure/svrl:text/node()
+            }</message>
+      }
     </report>
   )
 };
