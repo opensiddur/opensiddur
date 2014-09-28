@@ -130,28 +130,53 @@ declare function combine:tei-TEI(
   }
 }; 
 
-(:~ equivalent of a streamText, check for redirects :)
+(:~ styles are set using the opensiddur->style parameter
+ : the content points to a style document
+ : @return a @jf:style attribute if the opensiddur->style parameter is set and 
+ : something to prevent every element from having jf:style
+ :)
+declare function combine:associate-style(
+    $e as element(),
+    $params as map
+    ) as node()? {
+    let $s := $params("combine:settings")
+    where empty($params("combine:styled")) and exists($s) and $s("opensiddur->style")
+    return
+        attribute jf:style { normalize-space($s("opensiddur->style")) }
+};
+
+(: call this after associate-style :)
+declare function combine:unset-style(
+    $params as map
+    ) as map {
+    map:new(($params, map { "combine:styled" := 1 }))
+};
+
+(:~ equivalent of a streamText, check for redirects, add style if necessary :)
 declare function combine:jf-unflattened(
   $e as element(jf:unflattened),
   $params as map
   ) as element(jf:combined) {
-  element jf:combined {
-    $e/@*,
-    if ($e/ancestor::jf:parallel-document)
-    then
-        (: parallel texts cannot be redirected :)
-        combine:combine($e/node(), $params)
-    else 
-        (: determine if we need a translation redirect
-         : this code will only result in a redirect if the translation settings are 
-         : set in the same file as the streamText
-         :)
-        let $redirect := combine:translation-redirect($e, $e, $params)
-        return
-            if (exists($redirect))
-            then $redirect
-            else combine:combine($e/node(), $params)
-  } 
+  let $new-params := combine:unset-style($params)
+  return
+    element jf:combined {
+      $e/@*,
+      combine:associate-style($e, $params),
+      if ($e/ancestor::jf:parallel-document)
+      then
+          (: parallel texts cannot be redirected :)
+          combine:combine($e/node(), $new-params)
+      else 
+          (: determine if we need a translation redirect
+           : this code will only result in a redirect if the translation settings are 
+           : set in the same file as the streamText
+           :)
+          let $redirect := combine:translation-redirect($e, $e, $new-params)
+          return
+              if (exists($redirect))
+              then $redirect
+              else combine:combine($e/node(), $new-params)
+    } 
 };
 
 declare function combine:element(
