@@ -1,8 +1,10 @@
 <collection xmlns="http://exist-db.org/collection-config/1.0">
     <index xmlns:jf="http://jewishliturgy.org/ns/jlptei/1.0/flat">
       <!-- range indexes -->
-      <create qname="@jf:id" type="xs:string"/>
-      <create qname="@xml:id" type="xs:string"/>
+      <range>
+        <create qname="@jf:id" type="xs:string"/>
+        <create qname="@xml:id" type="xs:string"/>
+      </range>
     </index>
     <triggers>
       <trigger class="org.exist.extensions.exquery.restxq.impl.RestXqTrigger"/>

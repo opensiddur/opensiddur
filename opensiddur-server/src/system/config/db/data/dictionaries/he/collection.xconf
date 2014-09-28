@@ -16,14 +16,15 @@
             <text qname="tei:entry"/>
             <text qname="tei:seg"/>
         </lucene>
-        <!-- for responsibility indexes -->
-        <create qname="@resp" type="xs:string"/>
-        <create qname="@locus" type="xs:string"/>
-        
-        <!-- for searches of feature structures and declarations -->
-        <create qname="@name" type="xs:string"/>
+        <range>
+            <!-- for responsibility indexes -->
+            <create qname="@resp" type="xs:string"/>
+            
+            <!-- for searches of feature structures and declarations -->
+            <create qname="@name" type="xs:string"/>
 
-        <!-- for various types of searches -->
-        <create qname="@type" type="xs:string"/>
+            <!-- for various types of searches -->
+            <create qname="@type" type="xs:string"/>
+        </range>
     </index>
 </collection>

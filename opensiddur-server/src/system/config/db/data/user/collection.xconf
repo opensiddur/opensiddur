@@ -5,7 +5,9 @@
       >
       <fulltext default="none" attributes="no"/>
       <!-- range indexes -->
-      <create qname="tei:idno" type="xs:string"/>
+      <range>
+        <create qname="tei:idno" type="xs:string"/>
+      </range>
       <!-- instead of indexing everything separately, just
       index the whole thing, because that is how it will be 
       searched -->
