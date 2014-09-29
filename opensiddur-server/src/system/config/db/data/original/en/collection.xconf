@@ -6,7 +6,7 @@
         <fulltext default="none" attributes="no"/>
         <lucene>
             <!-- the main text index -->
-            <text qname="tei:TEI">
+            <text qname="tei:text">
                 <ignore qname="tei:title"/>
             </text>
 

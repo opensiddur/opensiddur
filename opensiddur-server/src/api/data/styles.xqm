@@ -129,10 +129,8 @@ declare
 declare function sty:query-function(
   $query as xs:string
   ) as element()* {
-  for $doc in
-      collection($sty:path-base)//(tei:title|tei:text)[ft:query(.,$query)]
-  order by $doc//tei:title[@type="main"] ascending
-  return $doc
+  let $c := collection($sty:path-base)
+  return $c//tei:title[ft:query(.,$query)]|$c//tei:text[ft:query(.,$query)]
 };
 
 (: support function for list :) 

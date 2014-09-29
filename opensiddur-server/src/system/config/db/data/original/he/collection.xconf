@@ -7,7 +7,7 @@
         <lucene>
             <analyzer class="org.apache.lucene.analysis.hebrew.MorphAnalyzer"/>
             <!-- the main text index -->
-            <text qname="tei:TEI">
+            <text qname="tei:text">
                 <ignore qname="tei:title"/>
             </text>
 

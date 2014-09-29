@@ -7,14 +7,14 @@
         <lucene>
             <analyzer class="org.apache.lucene.analysis.hebrew.MorphAnalyzer"/>
             <inline qname="tei:c"/>
-            <inline qname="tei:pc"/>
+            <ignore qname="tei:pc"/>
             <inline qname="j:divineName"/>
 
-            <text qname="tei:title"/>
-            <text qname="tei:front"/>
-            <text qname="tei:back"/>
-            <text qname="tei:entry"/>
-            <text qname="tei:seg"/>
+            <text qname="tei:title" boost="2.0"/>
+            <text qname="tei:text">
+                <ignore qname="tei:teiHeader"/>
+                <ignore qname="tei:title"/>
+            </text>
         </lucene>
         <range>
             <!-- for responsibility indexes -->

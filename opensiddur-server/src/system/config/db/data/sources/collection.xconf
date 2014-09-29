@@ -11,10 +11,12 @@
             <inline qname="tei:roleName"/>
             <inline qname="tei:nameLink"/>
 
-            <text qname="tei:title"/>
+            <text qname="tei:title" boost="2.0"/>
             <text qname="tei:author"/>
             <text qname="tei:editor"/>
-            <text qname="tei:biblStruct"/>
+            <text qname="tei:biblStruct">
+                <ignore qname="tei:title"/>
+            </text>
         </lucene>
     </index>
 </collection>

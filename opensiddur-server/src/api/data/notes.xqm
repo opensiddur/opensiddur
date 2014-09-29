@@ -112,10 +112,9 @@ declare
 declare function notes:query-function(
     $query as xs:string
   ) as element()* {
-  for $doc in
-    collection($notes:path-base)//(tei:title|j:annotations)[ft:query(.,$query)]
-  order by $doc//(tei:title[@type="main"]|tei:title[not(@type)])[1] ascending
-  return $doc
+  let $c := collection($notes:path-base)
+  return 
+    $c//tei:title[ft:query(.,$query)]|$c/tei:text[ft:query(.,$query)]
 };
 
 declare function notes:list-function(

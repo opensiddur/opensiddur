@@ -187,7 +187,7 @@ declare function orig:query-function(
   $query as xs:string
   ) as element()* {
     let $c := collection($orig:path-base)
-    return $c//tei:TEI[ft:query(.,$query)]|$c//tei:title[ft:query(.,$query)]
+    return $c//tei:text[ft:query(.,$query)]|$c//tei:title[ft:query(.,$query)]
 };
 
 (: support function for list :) 
