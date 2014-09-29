@@ -186,10 +186,8 @@ declare
 declare function orig:query-function(
   $query as xs:string
   ) as element()* {
-  for $doc in
-      collection($orig:path-base)//(tei:title|tei:front|tei:back|j:streamText)[ft:query(.,$query)]
-  order by $doc//tei:title[@type="main"] ascending
-  return $doc
+    let $c := collection($orig:path-base)
+    return $c//tei:TEI[ft:query(.,$query)]|$c//tei:title[ft:query(.,$query)]
 };
 
 (: support function for list :) 
