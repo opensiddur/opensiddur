@@ -5,7 +5,7 @@
       xmlns:html="http://www.w3.org/1999/xhtml">
         <fulltext default="none" attributes="no"/>
         <lucene>
-            <text qname="tei:title"/>
+            <text qname="tei:title" boost="2.0"/>
             <text qname="tei:fsDescr"/>
             <text qname="tei:fDescr"/>
         </lucene>

@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+(: Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Dictionary data API
@@ -111,10 +111,9 @@ declare
 declare function dict:query-function(
   $query as xs:string
   ) as element()* {
-  for $doc in
-      collection($dict:path-base)//(tei:title|tei:front|tei:back|tei:entry)[ft:query(.,$query)]
-  order by $doc//tei:title[@type="main"] ascending
-  return $doc
+  let $c := collection($dict:path-base)
+  return $c//tei:title[ft:query(., $query)]|
+        $c//tei:text[ft:query(.,$query)]
 };
 
 (: support function for list :) 

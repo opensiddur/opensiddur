@@ -5,16 +5,15 @@
       xmlns:html="http://www.w3.org/1999/xhtml">
         <fulltext default="none" attributes="no"/>
         <lucene>
+            <text qname="tei:text">
+                <ignore qname="tei:title"/>
+                <ignore qname="tei:teiHeader"/>
+            </text>
             <inline qname="tei:c"/>
-            <inline qname="tei:pc"/>
+            <ignore qname="tei:pc"/>
             <inline qname="j:divineName"/>
 
-            <text qname="tei:title"/>
-            <text qname="j:annotations"/>
-            <text qname="tei:note"/>
-            <text qname="tei:fs"/>
-            <text qname="tei:interp"/>
-            <text qname="tei:seg"/>
+            <text qname="tei:title" boost="2.0"/>
         </lucene>
         <range>
             <!-- for responsibility indexes -->

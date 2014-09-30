@@ -3,6 +3,8 @@
       <!-- range indexes -->
       <range>
         <create qname="@jf:id" type="xs:string"/>
+        <create qname="@jf:part" type="xs:string"/>
+        <create qname="@type" type="xs:string"/>
         <create qname="@xml:id" type="xs:string"/>
       </range>
     </index>

@@ -6,10 +6,12 @@
         <fulltext default="none" attributes="no"/>
         <lucene>
             <inline qname="tei:c"/>
-            <inline qname="tei:pc"/>
+            <ignore qname="tei:pc"/>
 
-            <text qname="tei:title"/>
-            <text qname="tei:text"/>
+            <text qname="tei:title" boost="2.0"/>
+            <text qname="tei:text">
+                <ignore qname="tei:title"/>
+            </text>
         </lucene>
         <range>
             <!-- for responsibility indexes -->
