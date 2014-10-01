@@ -35,12 +35,13 @@ div {
     border-right:1px solid black;
     border-left:1px solid black;
     padding:2px;
+    font-size:16pt;
 }
 
 
 /* default fonts for text by language */
 :lang(he) {
-    font-family:"David";
+    font-family:"David", "Taamey Frank CLM", "Frank Ruehl CLM", "Ezra SIL", serif;
 }
 
 :lang(en) {
@@ -51,22 +52,15 @@ div {
     white-space: nowrap;    /* prevent dates from wrapping */
 }
 
-.tei-head {
-    min-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 10px;
-    text-align: center;
-}
 
-.tei-ab{
-  
+/* poetry and biblical verses */
+.tei-lg{
     display: block;
     max-width: 100%;
     min-width: 400px;
     margin-right:auto;
     margin-left:auto;
-    
+    margin-bottom:10px;
 }
 
 .tei-ab.type-verse {
@@ -78,104 +72,62 @@ div {
     
 }
 
-.tei-ab > .tei-p{
-
-    margin-bottom: 25px;
-   
-}
-
-.tei-ab .type-verse > .tei-seg {
-
-  line-height: 200%;
-
-}
-
 .tei-div{
-  
+    display:block;
     width:100%;
     position: relative;
 }
 
-.tei-label.n-chapter + .tei-ab{
-  
+/* 
+.tei-label.n-chapter + .tei-ab{ 
     display: block;
     max-width: 70%;
     min-width: 400px;  
 }
+*/
 
-.tei-div {
-    display:block;
-}
-
-.tei-p {
-
-    display:block;
-}
-
-.tei-p > .tei-ab.type-verse{
-
-    position: relative;
-
-}
-
-.tei-anchor {
-
-    display:none;
-}
-
-.tei-lg {
-  
-    margin-bottom: 10px;
-  
- }
-
-/* Tehillim */
-.tei-lg > .tei-ab.type-verse > .tei-label.n-verse{
-  
-    width:100%;
-    display: block;
-    float: right;
-    text-align: center;
-    margin-bottom: 5px;
-}
-
- .tei-l{
-  
-    text-align:center;
-    margin-bottom: 5px;
-  
-}
-
-.tei-seg {
-
+.tei-lg .tei-p {
     display:inline;
+}
+
+.tei-lg .tei-ab.type-verse .tei-label.n-verse{
+    float: right;
+}
+
+.tei-lg .tei-l {
+    display:block;
+    text-align:center;
+    line-height:200%;
+    margin-bottom: 5px; 
 }
 
 .tei-label.n-chapter{
-  
     display:block;
     text-align: center;
     margin-bottom: 10px;
 }
 
-.tei-p > .tei-ab.type-verse > .tei-label.n-verse {
-    
-    display:inline;
-    width: 100%;
-    font-size:small;
-    vertical-align:super;
 
+/* prose text */
+.tei-p {
+    display:block;
+    margin-bottom: 10px;
 }
 
- .tei-label.n-verse {
-    
-    display:block;
-    width: 100%;
+.tei-p .tei-ab.type-verse{
+    position: relative;
+}
+
+.tei-p .tei-ab.type-verse .tei-label.n-verse {
+    display:inline;
     font-size:small;
     vertical-align:super;
-    text-align: center;
-    
-} 
+}
+
+/* others */
+.tei-anchor {
+    display:none;
+}
 
 .tei-choice {
     display:inherit;
@@ -233,7 +185,15 @@ div {
 /* headings */
 .tei-head {
     display:block;
+    font-size:125%;
+    font-weight:bold;
+    min-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    text-align: center;
 }
+
 
 /* notes */
 .jf-annotated {
@@ -311,3 +271,4 @@ div {
       </tei:body>
    </tei:text>
 </tei:TEI>  
+
