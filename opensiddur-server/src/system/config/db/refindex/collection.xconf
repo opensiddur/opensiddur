@@ -1,9 +1,18 @@
 <collection xmlns="http://exist-db.org/collection-config/1.0">
     <index>
-      <!-- range indexes -->
-      <create qname="@document" type="xs:string"/>
-      <create qname="@source-node" type="xs:string"/>
-      <create qname="@target-doc" type="xs:string"/>
-      <create qname="@target-node" type="xs:string"/>
+      <range>
+          <!-- range indexes -->
+          <create qname="@document" type="xs:string"/>
+          <create qname="@source-node" type="xs:string"/>
+          <create qname="@target-doc" type="xs:string"/>
+          <create qname="@target-node" type="xs:string"/>
+          <create qname="@position" type="xs:integer"/>
+          <create qname="ridx:entry">
+            <field name="entry-target-doc" match="@target-doc" type="xs:string"/>
+            <field name="entry-target-node" match="@target-node" type="xs:string"/>
+            <field name="entry-source-node" match="@source-node" type="xs:string"/>
+            <field name="entry-position" match="@position" type="xs:integer"/>
+          </create>
+      </range>
     </index>
 </collection>

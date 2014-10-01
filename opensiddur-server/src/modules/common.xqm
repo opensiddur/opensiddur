@@ -252,7 +252,11 @@ declare function common:original-document-path(
 declare function common:TEI-root(
     $node as node()
     ) as element(tei:TEI) {
-    $node/ancestor-or-self::tei:TEI[1]
+    if ($node/@uri:document-uri)
+    then
+        (: this came from a copy, so the root node is in the original :)
+        doc($node/@uri:document-uri)//tei:TEI[1]
+    else $node/ancestor-or-self::tei:TEI[1]
 };
 
 (:~ apply an identity transform until reaching

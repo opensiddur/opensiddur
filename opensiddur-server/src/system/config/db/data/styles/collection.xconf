@@ -6,19 +6,22 @@
         <fulltext default="none" attributes="no"/>
         <lucene>
             <inline qname="tei:c"/>
-            <inline qname="tei:pc"/>
+            <ignore qname="tei:pc"/>
 
-            <text qname="tei:title"/>
-            <text qname="tei:text"/>
+            <text qname="tei:title" boost="2.0"/>
+            <text qname="tei:text">
+                <ignore qname="tei:title"/>
+            </text>
         </lucene>
-        <!-- for responsibility indexes -->
-        <create qname="@resp" type="xs:string"/>
-        <create qname="@locus" type="xs:string"/>
-        
-        <!-- for searches of feature structures and declarations -->
-        <create qname="@name" type="xs:string"/>
+        <range>
+            <!-- for responsibility indexes -->
+            <create qname="@resp" type="xs:string"/>
+            
+            <!-- for searches of feature structures and declarations -->
+            <create qname="@name" type="xs:string"/>
 
-        <!-- for various types of searches -->
-        <create qname="@type" type="xs:string"/>
+            <!-- for various types of searches -->
+            <create qname="@type" type="xs:string"/>
+        </range>
     </index>
 </collection>

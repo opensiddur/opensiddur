@@ -652,4 +652,30 @@
         <xpath desc="single note is present exactly once">count(.//jf:annotated/tei:note[@jf:id="single_note"])=1</xpath>
       </test>
   </TestSet>
+
+  <TestSet>
+      <testName>Styling</testName>
+      <setup>
+         <code>
+      local:setup("combine-style-2.xml", "original"),
+      local:setup("combine-style-1.xml", "original")
+      </code>
+      </setup>
+      <tearDown>
+         <code>
+      local:tearDown("combine-style-1.xml", "original"),
+      local:tearDown("combine-style-2.xml", "original")
+      </code>
+      </tearDown>
+      <test>
+        <task>styling a document with inclusions</task>
+        <code>
+        let $d := doc("/db/data/original/combine-style-1.xml")
+        return
+            format:combine($d, map {}, $d)
+        </code>
+        <xpath desc="only one @jf:style attribute is added">count(.//*[@jf:style])=1</xpath>
+        <xpath desc="the attribute points to the style in the opensiddur->style feature">.//@jf:style[1]="/data/styles/test_style"</xpath>
+      </test>
+  </TestSet>
 </TestSuite>

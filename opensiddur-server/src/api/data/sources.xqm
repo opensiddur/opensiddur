@@ -98,10 +98,8 @@ declare
 declare function src:query-function(
     $query as xs:string
     ) as element()* {
-  for $doc in
-    collection($src:path-base)//tei:biblStruct[ft:query(.,$query)]
-  order by src:title-function(root($doc)) ascending
-  return $doc
+  let $c := collection($src:path-base)
+  return $c//tei:biblStruct[ft:query(.,$query)]|$c//tei:title[ft:query(.,$query)]
 };
 
 declare function src:list-function(

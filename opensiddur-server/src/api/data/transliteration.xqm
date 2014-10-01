@@ -88,10 +88,8 @@ declare
 declare function tran:query-function(
     $query as xs:string
   ) as element()* {
-  for $doc in collection($tran:path-base)//(tr:title|tr:description)
-        [ft:query(.,$query)]
-  order by $doc//tr:title ascending
-  return $doc
+  let $c := collection($tran:path-base)
+  return $c//tr:title[ft:query(., $query)]|$c//tr:description[ft:query(.,$query)]
 };
 
 declare function tran:list-function(

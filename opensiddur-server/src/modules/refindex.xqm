@@ -211,24 +211,24 @@ declare function ridx:query(
       collection($ridx:ridx-path)/
         ridx:index[@document=$source-document]/(
           ridx:entry
-            [@target-doc=$query-document]
+            [empty($source-node-id)]
+            [empty($position)]
             [@target-node=$query-id]
-            [empty($source-node)]
-            [empty($position)]|
+            [@target-doc=$query-document]|
           ridx:entry
-            [@target-doc=$query-document]
+            [empty($source-node-id)]
             [@target-node=$query-id]
-            [empty($source-node)]
+            [@target-doc=$query-document]
             [@position=$position]|
           ridx:entry
-            [@target-doc=$query-document]
+            [empty($position)]
             [@target-node=$query-id]
             [@source-node=$source-node-id]
-            [empty($position)]|
+            [@target-doc=$query-document]|
           ridx:entry
-            [@target-doc=$query-document]
             [@target-node=$query-id]
             [@source-node=$source-node-id]
+            [@target-doc=$query-document]
             [@position=$position]
         )
     group by 

@@ -292,7 +292,7 @@ declare function tohtml:tei-TEI(
       }, 
       element link { 
         attribute rel { "stylesheet" },
-        attribute href { ($params("tohtml:style"), api:uri-of($tohtml:default-style))[1] },
+        attribute href { api:uri-of(($e//@jf:style/string()[.], $tohtml:default-style)[1]) },
         attribute type { "text/css" }
       },
       tohtml:header-title($e/tei:teiHeader, $params)

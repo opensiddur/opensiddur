@@ -6,24 +6,30 @@
         <fulltext default="none" attributes="no"/>
         <lucene>
             <analyzer class="org.apache.lucene.analysis.hebrew.MorphAnalyzer"/>
+            <!-- the main text index -->
+            <text qname="tei:text">
+                <ignore qname="tei:title"/>
+            </text>
+
+            <ignore qname="tei:teiHeader"/>
             <inline qname="tei:c"/>
-            <inline qname="tei:pc"/>
+            <ignore qname="tei:pc"/>
             <inline qname="j:divineName"/>
-
-            <text qname="tei:title"/>
-            <text qname="tei:front"/>
-            <text qname="tei:back"/>
-            <text qname="j:streamText"/>
-            <text qname="tei:seg"/>
+            <inline qname="tei:seg"/>
+            
+            <!-- titles occupy a special place -->
+            <text qname="tei:title" boost="2.0"/>
         </lucene>
-        <!-- for responsibility indexes -->
-        <create qname="@resp" type="xs:string"/>
-        <create qname="@locus" type="xs:string"/>
-        
-        <!-- for searches of feature structures and declarations -->
-        <create qname="@name" type="xs:string"/>
 
-        <!-- for various types of searches -->
-        <create qname="@type" type="xs:string"/>
+        <range>
+            <!-- for responsibility indexes -->
+            <create qname="@resp" type="xs:string"/>
+            
+            <!-- for searches of feature structures and declarations -->
+            <create qname="@name" type="xs:string"/>
+
+            <!-- for various types of searches -->
+            <create qname="@type" type="xs:string"/>
+        </range>
     </index>
 </collection>
