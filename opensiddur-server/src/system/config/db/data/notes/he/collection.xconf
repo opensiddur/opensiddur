@@ -10,11 +10,11 @@
                 <ignore qname="tei:title"/>
                 <ignore qname="tei:teiHeader"/>
             </text>
+            <text qname="tei:title" boost="2.0"/>
+
             <inline qname="tei:c"/>
             <ignore qname="tei:pc"/>
             <inline qname="j:divineName"/>
-
-            <text qname="tei:title" boost="2.0"/>
         </lucene>
         <range>
             <!-- for responsibility indexes -->
@@ -25,6 +25,12 @@
 
             <!-- for various types of searches -->
             <create qname="@type" type="xs:string"/>
+
+            <!-- recent changes searches -->
+            <create qname="tei:change">
+                <field name="change-who" match="@who" type="xs:string"/>
+                <field name="change-when" match="@when" type="xs:string"/>
+            </create>
         </range>
     </index>
 </collection>

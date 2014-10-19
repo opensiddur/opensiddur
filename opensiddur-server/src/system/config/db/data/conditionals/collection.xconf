@@ -18,6 +18,12 @@
 
             <!-- for various types of searches -->
             <create qname="@type" type="xs:string"/>
+
+            <!-- recent changes searches -->
+            <create qname="tei:change">
+                <field name="change-who" match="@who" type="xs:string"/>
+                <field name="change-when" match="@when" type="xs:string"/>
+            </create>
         </range>
     </index>
 </collection>
