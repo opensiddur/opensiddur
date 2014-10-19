@@ -3,12 +3,14 @@
       xmlns:tei="http://www.tei-c.org/ns/1.0" 
       xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
       xmlns:html="http://www.w3.org/1999/xhtml">
-        <fulltext default="none" attributes="no"/>
+        <fulltext default="none" attributes="false"/>
         <lucene>
             <!-- the main text index -->
             <text qname="tei:text">
                 <ignore qname="tei:title"/>
             </text>
+            <!-- titles occupy a special place -->
+            <text qname="tei:title" boost="2.0"/>
 
             <ignore qname="tei:teiHeader"/>
             <inline qname="tei:c"/>
@@ -16,8 +18,6 @@
             <inline qname="j:divineName"/>
             <inline qname="tei:seg"/>
             
-            <!-- titles occupy a special place -->
-            <text qname="tei:title" boost="2.0"/>
         </lucene>
         <range>
             <!-- for responsibility indexes -->
@@ -28,6 +28,12 @@
 
             <!-- for various types of searches -->
             <create qname="@type" type="xs:string"/>
+
+            <!-- recent changes searches -->
+            <create qname="tei:change">
+                <field name="change-who" match="@who" type="xs:string"/>
+                <field name="change-when" match="@when" type="xs:string"/>
+            </create>
         </range>
     </index>
 </collection>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
+  <suiteName>Recent changes API</suiteName>
+  <description>
+      <p>Test the recent changes API</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2014 Efraim Feinstein,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <functions><![CDATA[
+    declare function local:dt-range(
+        $begin as xs:dateTime,
+        $end as xs:dateTime,
+        $interval) {
+        if ($begin <= $end)
+        then (
+            $begin,
+            local:dt-range($begin + $interval, $end, $interval)
+        )
+        else ()
+    };
+
+    (: whos = xs:string[2+] = created by, edited by, edited by 
+     : 1 record on the first of each month
+     :)
+    declare function local:make-changes-file(
+        $title as xs:string,
+        $whos as xs:string+,
+        $begin as xs:dateTime,
+        $end as xs:dateTime
+        ) as document-node() {
+        document {
+            <tei:TEI>
+                <tei:teiHeader>
+                    <tei:fileDesc>
+                        <tei:titleStmt>
+                            <tei:title>{$title}</tei:title>
+                        </tei:titleStmt>
+                    </tei:fileDesc>
+                    <tei:revisionDesc>{
+                        let $interval := xs:yearMonthDuration("P0Y1M")
+                        for $when at $n in local:dt-range($begin, $end, $interval)
+                        return
+                            <tei:change 
+                                type="{if ($n = 1) then 'created' else 'edited'}"
+                                who="{$whos[($n mod count($whos)) + 1]}"
+                                when="{$when}">message {$n}</tei:change>
+                    }</tei:revisionDesc>
+                </tei:teiHeader>
+                <tei:text/>
+            </tei:TEI>
+        }
+    };
+
+    declare function local:save-changes-file(
+        $title as xs:string,
+        $changes-file as document-node()
+    ) {
+        xmldb:store("/db/data/original", encode-for-uri($title) || ".xml", $changes-file)
+    };
+
+    declare function local:teardown-changes-file(
+        $title as xs:string
+    ) {
+        try {
+            xmldb:remove("/db/data/original", encode-for-uri($title) || ".xml")
+        }
+        catch * { () }
+    };
+  ]]></functions>
+  <setup>
+      <!-- generate files, one per year for changes between 1980 and 2000
+        even years, created by testuser; odd years created by testuser2
+      -->
+      <code><![CDATA[
+      for $year in 1980 to 2000
+      let $title := "File_" || $year 
+      return 
+        local:save-changes-file($title, 
+            local:make-changes-file(
+            $title,
+            if (($year mod 2) = 0) then "testuser" else "testuser2",
+            xs:dateTime($year || "-01-01T00:00:00"),
+            xs:dateTime($year || "-12-31T23:59:00")
+            ))
+      ]]></code>
+  </setup>
+  <tearDown>
+    <code><![CDATA[
+    for $year in 1980 to 2000
+    let $title := "File_" || $year
+    return
+        local:teardown-changes-file($title)
+    ]]></code>
+  </tearDown>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
+  <imports>
+    import module namespace chg="http://jewishliturgy.org/api/changes"
+      at "xmldb:exist:///db/apps/opensiddur-server/api/changes.xqm";
+  </imports>
+  <TestSet>
+      <testName>chg:list()</testName>
+      <test>
+        <task>Return all recent changes</task>
+        <code>
+            chg:list((), (), (), (), 1, 100)[2]
+        </code>
+        <xpath desc="an HTML API results document is returned"><![CDATA[exists(self::html[descendant::ul[@class="results"]])]]></xpath>
+        <xpath desc="at least one result is returned"><![CDATA[count(.//li[@class="result"]) >= 1]]></xpath> 
+        <xpath desc="at most max-results are returned"><![CDATA[count(.//li[@class="result"]) <= 100]]></xpath> 
+      </test>
+      <test>
+        <task>A nonexistent type returns an error</task>
+        <code>
+            chg:list("typo", "testuser", (), (), 1, 100)[2]
+        </code>
+        <xpath desc="an error is returned"><![CDATA[exists(self::error)]]></xpath>
+      </test>
+      <test>
+        <task>Return recent changes by the given user in type original, where changes were made</task>
+        <code>
+            chg:list("original", "testuser", (), (), 1, 100)[2]
+        </code>
+        <xpath desc="an HTML API results document is returned"><![CDATA[exists(self::html[descendant::ul[@class="results"]])]]></xpath>
+        <xpath desc="at least one result is returned"><![CDATA[count(.//li[@class="result"]) >= 1]]></xpath> 
+        <xpath desc="at most max-results are returned"><![CDATA[count(.//li[@class="result"]) <= 100]]></xpath> 
+      </test>
+      <test>
+        <task>Return all recent changes by a given user in type notes, where none were made</task>
+        <code>
+            chg:list("notes", "testuser", (), (), 1, 100)[2]
+        </code>
+        <xpath desc="an HTML API results document is returned"><![CDATA[exists(self::html[descendant::ul[@class="results"]])]]></xpath>
+        <xpath desc="no results is returned"><![CDATA[count(.//li[@class="result"]) = 0]]></xpath> 
+      </test>
+      <test>
+         <task>Return all recent changes made by a particular user</task>
+         <code>
+            chg:list((), "testuser", (), (), 1, 1000)[2]
+         </code> 
+         <xpath desc="returns results for 11 files">count(.//li[@class="result"])=11</xpath>
+         <xpath desc="returns created entry for 11 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="created"]]])=11</xpath>
+         <xpath desc="returns edited entries for 11 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]])=11</xpath>
+         <xpath desc="files are sorted in descending order"><![CDATA[.//li[1]/ol/li[1]/span[@class="when"]/string() > .//li[2]/ol/li[1]/span[@class="when"]/string() ]]></xpath>
+         <xpath desc="change records per file are sorted in descending order"><![CDATA[.//li[1]/ol/li[1]/span[@class="when"]/string() > .//li[1]/ol/li[2]/span[@class="when"]/string() ]]></xpath>
+      </test>
+      <test>
+         <task>Return all recent changes made by a particular user with a date begin range</task>
+         <code>
+            chg:list((), "testuser", "1986-06-01T00:00:00", (), 1, 1000)[2] 
+         </code>
+         <xpath desc="returns results for 8 files">count(.//li[@class="result"])=8</xpath>
+         <xpath desc="returns created entry for 7 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="created"]]])=7</xpath>
+         <xpath desc="returns only entries after the breakpoint"><![CDATA[every $entry in .//ul[@class="results"][a[.="File_1986"]]/li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]] satisfies $entry/span[@class="when"] >= "1986-06-01T00:00:00"]]></xpath>
+      </test>
+      <test>
+         <task>Return all recent changes made by a particular user with a date end range</task>
+         <code>
+            chg:list((), "testuser", (), "1986-06-01T00:00:00", 1, 1000)[2] 
+         </code>
+         <xpath desc="returns results for 4 files">count(.//li[@class="result"])=4</xpath>
+         <xpath desc="returns created entry for 4 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="created"]]])=4</xpath>
+         <xpath desc="returns only entries before the breakpoint"><![CDATA[every $entry in .//ul[@class="results"][a[.="File_1986"]]/li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]] satisfies $entry/span[@class="when"] <= "1986-06-01T00:00:00"]]></xpath>
+      </test>
+      <test>
+         <task>Return all recent changes made by a particular user with date begin and end ranges</task>
+         <code>
+            chg:list((), "testuser", "1982-06-01T00:00:00", "1990-06-01T00:00:00", 1, 1000)[2] 
+         </code>
+         <xpath desc="returns results for 5 files">count(.//li[@class="result"])=5</xpath>
+         <xpath desc="returns created entry for 4 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="created"]]])=4</xpath>
+         <xpath desc="returns only entries after the breakpoint for the start date"><![CDATA[every $entry in .//ul[@class="results"][a[.="File_1982"]]/li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]] satisfies $entry/span[@class="when"] >= "1982-06-01T00:00:00"]]></xpath>
+         <xpath desc="returns only entries before the breakpoint for the end date"><![CDATA[every $entry in .//ul[@class="results"][a[.="File_1990"]]/li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]] satisfies $entry/span[@class="when"] <= "1990-06-01T00:00:00"]]></xpath>
+      </test>
+  </TestSet>
+</TestSuite>

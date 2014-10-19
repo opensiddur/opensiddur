@@ -5,13 +5,13 @@
       xmlns:html="http://www.w3.org/1999/xhtml">
         <fulltext default="none" attributes="no"/>
         <lucene>
-            <inline qname="tei:c"/>
-            <ignore qname="tei:pc"/>
-
             <text qname="tei:title" boost="2.0"/>
             <text qname="tei:text">
                 <ignore qname="tei:title"/>
             </text>
+
+            <inline qname="tei:c"/>
+            <ignore qname="tei:pc"/>
         </lucene>
         <range>
             <!-- for responsibility indexes -->
@@ -22,6 +22,12 @@
 
             <!-- for various types of searches -->
             <create qname="@type" type="xs:string"/>
+
+            <!-- recent changes searches -->
+            <create qname="tei:change">
+                <field name="change-who" match="@who" type="xs:string"/>
+                <field name="change-when" match="@when" type="xs:string"/>
+            </create> 
         </range>
     </index>
 </collection>
