@@ -95,7 +95,7 @@ declare
             <ul class="results">{
                 for $change in 
                     subsequence(
-                        for $ch in chg:get-recent-changes($type[1], $by[1], $from[1], $to[1])
+                        for $ch in chg:get-recent-changes($type[.][1], $by[.][1], $from[.][1], $to[.][1])
                         order by $ch/@when/string() descending
                         return $ch, ($start, 1)[1], ($max-results, 100)[1])
                 group by $doc := document-uri(root($change))
