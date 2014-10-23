@@ -18,7 +18,7 @@
             </tei:sourceDesc>
         </tei:fileDesc>
         <tei:revisionDesc>
-            <tei:change type="create" when="2013-07-09-04:00">Document created from template</tei:change>
+            <tei:change type="create" when="2013-07-09T20:00:00-04:00">Document created from template</tei:change>
         </tei:revisionDesc>
     </tei:teiHeader>
     <j:stylesheet scheme="css" xml:id="style"><![CDATA[
