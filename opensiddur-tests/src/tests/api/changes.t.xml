@@ -45,7 +45,7 @@
                         return
                             <tei:change 
                                 type="{if ($n = 1) then 'created' else 'edited'}"
-                                who="{$whos[($n mod count($whos)) + 1]}"
+                                who="/user/{$whos[($n mod count($whos)) + 1]}"
                                 when="{$when}">message {$n}</tei:change>
                     }</tei:revisionDesc>
                 </tei:teiHeader>

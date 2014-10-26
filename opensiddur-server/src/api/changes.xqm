@@ -41,14 +41,14 @@ declare function chg:get-recent-changes(
         then $c//tei:change[@when ge $from][@when le $to]
         (: $from empty :)
         else if (empty($from) and empty($to))
-        then $c//tei:change[contains(@who,$username)]
+        then $c//tei:change[@who="/user/" || $username]
         else if (empty($from))
-        then $c//tei:change[contains(@who,$username)][@when le $to]
+        then $c//tei:change[@who="/user/" || $username][@when le $to]
         (: $to empty :)
         else if (empty($to))
-        then $c//tei:change[contains(@who,$username)][@when ge $from]
+        then $c//tei:change[@who="/user/" || $username][@when ge $from]
         (: no empty :)
-        else $c//tei:change[contains(@who,$username)][@when ge $from][@when le $to]
+        else $c//tei:change[@who="/user/" || $username][@when ge $from][@when le $to]
 };
 
 (:~ List all recent changes 
