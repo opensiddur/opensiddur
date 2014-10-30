@@ -108,7 +108,7 @@ declare
                             for $ch in $change
                             order by $ch/@when descending
                             return 
-                                <li class="change"><span class="who">{$ch/@who/string()}</span>:<span class="type">{$ch/@type/string()}</span>:<span class="when">{$ch/@when/string()}</span>:<span class="message">{string-join($ch//text(), ' ')}</span></li>
+                                <li class="change"><span class="who">{replace($ch/@who/string(), "^/user/", "")}</span>:<span class="type">{$ch/@type/string()}</span>:<span class="when">{$ch/@when/string()}</span>:<span class="message">{string-join($ch//text(), ' ')}</span></li>
                         }</ol>
                     </li>
             }</ul>
