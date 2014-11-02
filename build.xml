@@ -3,7 +3,7 @@
         Build file for opensiddur
     </description>
     <property name="lib.dir" location="lib"/>
-	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-2.2-rev.jar"/>
+	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-2.2-opensiddur.jar"/>
 	<property name="build" location="build"/>
     <property name="dist" location="dist"/>
 
@@ -146,8 +146,17 @@ cacheSize=${cache.size}
                 <!-- hebmorph is being installed directly, not as a xar -->
                 <exclude name="hebmorph-exist.xar"/>
 			</fileset>
+            <fileset dir="${lib.dir}/exist/autodeploy">
+                <include name="dashboard*.xar"/>
+                <include name="eXide*.xar"/>
+            </fileset>
 		</copy>
     </target>
+
+	<target name="autodeploy-with-restore" 
+		depends="install-exist,restore,autoupgrade"
+		description="set up eXist, restore from backup, and built xars for autodeployment">
+	</target>
     	
 	<target name="autodeploy" 
 		depends="install-exist,autoupgrade"
@@ -227,7 +236,8 @@ cacheSize=${cache.size}
 ^/db/system/config
 ^/db/system/security/exist/(accounts|groups)/removed
 ^/db/system/security/exist/accounts/(admin|guest|testuser|testuser2)\.xml$
-^/db/system/security/exist/groups/(testuser|testuser2|everyone)\.xml$
+^/db/system/security/exist/groups/(dba|testuser|testuser2)\.xml$
+^/db/data/user/(testuser|testuser2)\.xml$
 ^/db/data/tests
         </echo>
         <exec input="${exist.backup.remove.file}"
@@ -249,9 +259,10 @@ cacheSize=${cache.size}
             <arg value="${backup.directory}"/>
             <arg value="-ouri=xmldb:exist://"/>
             <!-- DEBUG_OPTS seems to be the only way to force options after java.endorsed.dirs -->
-            <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
+            <env key="DEBUG_OPTS" value="-Dexist.autodeploy=off -Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
         </exec>
         <!-- schema update -->    
+        <!--
         <exec
             executable="${installdir}/bin/client.sh"
             dir="${installdir}"
@@ -266,9 +277,12 @@ cacheSize=${cache.size}
             <arg value="-P"/>
             <arg value="${adminpassword}"/>
             <arg value="-x"/>
+            <arg value="-Dexist.autodeploy=off"/>
             <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed:${installdir}/lib/user"/>
         </exec>
-        <!-- reindex -->    
+        -->
+        <!-- reindex --> 
+        <!--   
         <exec
             executable="${installdir}/bin/client.sh"
             dir="${installdir}"
@@ -285,6 +299,7 @@ cacheSize=${cache.size}
             <arg value="-x"/>
             <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed:${installdir}/lib/user"/>
         </exec>
+        -->
     </target>
 </project>
 
