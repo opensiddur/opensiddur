@@ -139,6 +139,24 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
               </rng:optional>
             </content>
           </elementSpec>
+          <elementSpec ident="vDefault" module="iso-fs" mode="change">
+            <content>
+               <rng:choice>
+                <rng:oneOrMore>
+                 <rng:ref name="model.featureVal"/>
+                </rng:oneOrMore>
+                <rng:group>
+                  <rng:oneOrMore>
+                   <rng:ref name="if"/>
+                  </rng:oneOrMore>
+                  <rng:optional>
+                   <rng:ref name="model.featureVal"/>
+                  </rng:optional>
+                </rng:group>
+               </rng:choice>
+            </content>
+            <remarks><p>In Open Siddur, unlike standard TEI, if no condition matches, an additional, optional default value may be specified after all the if elements</p></remarks>
+          </elementSpec>
           <elementSpec ident="vSwitch" ns="http://jewishliturgy.org/ns/jlptei/1.0" module="opensiddur">
             <desc>Declares a feature as a switch</desc>
             <content>

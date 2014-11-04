@@ -4,7 +4,7 @@
   <description>
       <p>Tests for the reference index implementation</p>
       <author>Efraim Feinstein</author>
-      <copyright>Copyright 2012-2013 Efraim Feinstein,
+      <copyright>Copyright 2012-2014 Efraim Feinstein,
     Open Siddur Project,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
@@ -146,6 +146,8 @@
       ridx:reindex("/db/data/tests", "reference-source.xml")
       </code>
          <xpath desc="reference document created">doc-available("/db/refindex/tests/reference-source.xml")</xpath>      
+         <xpath desc="reference document has some index entries">count(doc("/db/refindex/tests/reference-source.xml")//ridx:entry) > 1</xpath>      
+         <xpath desc="reference document has 2 broken links">count(doc("/db/refindex/tests/reference-source.xml")//ridx:broken)=2</xpath>      
       </test>
       <test>
          <task>index the target document</task>

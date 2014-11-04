@@ -5,27 +5,36 @@
       xmlns:html="http://www.w3.org/1999/xhtml">
         <fulltext default="none" attributes="no"/>
         <lucene>
+            <text qname="tei:text">
+                <ignore qname="tei:teiHeader"/>
+                <ignore qname="tei:title"/>
+                <ignore qname="tei:idno"/>
+            </text>
+            <text qname="tei:title" boost="2.0"/>
+            <text qname="tei:idno" boost="2.0"/>
+
             <inline qname="tei:c"/>
-            <inline qname="tei:pc"/>
+            <ignore qname="tei:pc"/>
             <inline qname="j:divineName"/>
-
-            <text qname="tei:title"/>
-            <text qname="tei:front"/>
-            <text qname="tei:back"/>
-            <text qname="j:streamText"/>
-            <text qname="tei:seg"/>
         </lucene>
-        <!-- for searching by translation name -->
-        <create qname="tei:idno" type="xs:string"/>  
-      
-        <!-- for responsibility indexes -->
-        <create qname="@resp" type="xs:string"/>
-        <create qname="@locus" type="xs:string"/>
+        <range>
+            <!-- for searching by translation name -->
+            <create qname="tei:idno" type="xs:string"/>  
+          
+            <!-- for responsibility indexes -->
+            <create qname="@resp" type="xs:string"/>
 
-        <!-- for searches of feature structures and declarations -->
-        <create qname="@name" type="xs:string"/>
+            <!-- for searches of feature structures and declarations -->
+            <create qname="@name" type="xs:string"/>
 
-        <!-- for various types of searches -->
-        <create qname="@type" type="xs:string"/>
+            <!-- for various types of searches -->
+            <create qname="@type" type="xs:string"/>
+
+            <!-- recent changes searches -->
+            <create qname="tei:change">
+                <field name="change-who" match="@who" type="xs:string"/>
+                <field name="change-when" match="@when" type="xs:string"/>
+            </create>
+        </range>
     </index>
 </collection>

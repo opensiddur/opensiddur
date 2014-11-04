@@ -49,6 +49,9 @@ declare
         let $api-base := api:uri-of("/api")
         return (
           <li class="api">
+            <a class="discovery" href="{$api-base}/changes">Recent changes</a>
+          </li>,
+          <li class="api">
             <a class="discovery" href="{$api-base}/data">Data</a>
           </li>,
           index:if-installed(

@@ -149,10 +149,10 @@ declare
 declare function cnd:query-function(
     $query as xs:string
   ) as element()* {
-  for $doc in
-      collection($cnd:path-base)//(tei:title|tei:fsDescr|tei:fDescr)[ft:query(.,$query)]
-  order by $doc//tei:title[@type="main"] ascending
-  return $doc
+  let $c := collection($cnd:path-base)
+  return $c//tei:title[ft:query(.,$query)]|
+        $c//tei:fsDescr[ft:query(.,$query)]|
+        $c//tei:fDescr[ft:query(.,$query)]
 };
 
 declare function cnd:list-function(

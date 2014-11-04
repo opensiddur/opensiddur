@@ -3,7 +3,7 @@
     xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
     <fulltext default="none" attributes="no"/>
     <lucene>
-      <text qname="tr:title"/>
+      <text qname="tr:title" boost="2.0"/>
       <text qname="tr:description"/>
     </lucene>
   </index>

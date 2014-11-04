@@ -90,6 +90,19 @@ declare function local:make-index-collection(
   )
 };
 
+(:~ @return false() if the indexed document has any ridx:broken elements, otherwise true(). :)
+declare function ridx:up-to-date-function(
+    $mirror-path as xs:string,
+    $original as item()
+    ) as xs:boolean {
+    let $ridx-doc := mirror:doc($mirror-path,
+        typeswitch ($original)
+        case document-node() return document-uri($original) 
+        default return $original
+        )
+    return exists($ridx-doc) and empty($ridx-doc//ridx:broken)
+};
+
 (:~ index or reindex a document from the given document node
  : which may be specified as a node or an xs:anyURI or xs:string
  :)
@@ -120,7 +133,7 @@ declare function ridx:reindex(
       let $resource := util:document-name($doc)
       let $make-mirror-collection :=
         local:make-index-collection($collection)
-      where not(mirror:is-up-to-date($ridx:ridx-path, $doc-uri))
+      where not(mirror:is-up-to-date($ridx:ridx-path, $doc-uri, ridx:up-to-date-function#2))
       return
         if (mirror:store($ridx:ridx-path, $collection, $resource, 
           element ridx:index {
@@ -142,7 +155,7 @@ declare function ridx:remove(
 
 declare %private function ridx:make-index-entries(
   $reference-attributes as attribute()*
-  ) as element(ridx:entry)* {
+  ) as element()* {
   for $rattr in $reference-attributes
   let $element := $rattr/parent::element()
   let $source-node-id := util:node-id($element)
@@ -150,17 +163,31 @@ declare %private function ridx:make-index-entries(
   let $returned := 
     if (matches($follow, "^http[s]?://"))
     then ()
-    else uri:fast-follow($follow, $element, uri:follow-steps($element), true())
+    else 
+        let $r := uri:fast-follow($follow, $element, uri:follow-steps($element), true())
+        return
+            if (exists($r))
+            then $r
+            else 
+                element ridx:broken {
+                    attribute source-node { $source-node-id },
+                    attribute position { $position },
+                    attribute target { $follow }
+                }
   for $followed in $returned
-  let $target-document := document-uri(root($followed))
-  let $target-node-id := util:node-id($followed)
   return
-    element ridx:entry {
-      attribute source-node { $source-node-id },
-      attribute target-doc { $target-document },
-      attribute target-node { $target-node-id },
-      attribute position { $position }
-    }
+    if ($followed instance of element(ridx:broken))
+    then $followed
+    else
+        let $target-document := document-uri(root($followed))
+        let $target-node-id := util:node-id($followed)
+        return
+          element ridx:entry {
+            attribute source-node { $source-node-id },
+            attribute target-doc { $target-document },
+            attribute target-node { $target-node-id },
+            attribute position { $position }
+          }
 };
 
 declare function ridx:query(
@@ -211,24 +238,24 @@ declare function ridx:query(
       collection($ridx:ridx-path)/
         ridx:index[@document=$source-document]/(
           ridx:entry
-            [@target-doc=$query-document]
+            [empty($source-node-id)]
+            [empty($position)]
             [@target-node=$query-id]
-            [empty($source-node)]
-            [empty($position)]|
+            [@target-doc=$query-document]|
           ridx:entry
-            [@target-doc=$query-document]
+            [empty($source-node-id)]
             [@target-node=$query-id]
-            [empty($source-node)]
+            [@target-doc=$query-document]
             [@position=$position]|
           ridx:entry
-            [@target-doc=$query-document]
+            [empty($position)]
             [@target-node=$query-id]
             [@source-node=$source-node-id]
-            [empty($position)]|
+            [@target-doc=$query-document]|
           ridx:entry
-            [@target-doc=$query-document]
             [@target-node=$query-id]
             [@source-node=$source-node-id]
+            [@target-doc=$query-document]
             [@position=$position]
         )
     group by 

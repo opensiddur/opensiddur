@@ -1,8 +1,21 @@
 <collection xmlns="http://exist-db.org/collection-config/1.0">
-    <index xmlns:jf="http://jewishliturgy.org/ns/jlptei/1.0/flat">
+    <index
+        xmlns:tei="http://www.tei-c.org/ns/1.0" 
+        xmlns:jf="http://jewishliturgy.org/ns/jlptei/1.0/flat">
       <!-- range indexes -->
-      <create qname="@jf:id" type="xs:string"/>
-      <create qname="@xml:id" type="xs:string"/>
+      <range>
+        <create qname="@jf:id" type="xs:string"/>
+        <create qname="@jf:part" type="xs:string"/>
+        <create qname="@type" type="xs:string"/>
+        <create qname="@xml:id" type="xs:string"/>
+
+        <!-- recent changes searches -->
+        <create qname="tei:change">
+            <field name="change-who" match="@who" type="xs:string"/>
+            <field name="change-when" match="@when" type="xs:string"/>
+        </create>
+
+      </range>
     </index>
     <triggers>
       <trigger class="org.exist.extensions.exquery.restxq.impl.RestXqTrigger"/>

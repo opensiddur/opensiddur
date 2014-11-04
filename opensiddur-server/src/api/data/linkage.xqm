@@ -125,10 +125,8 @@ declare
 declare function lnk:query-function(
     $query as xs:string
   ) as element()* {
-  for $doc in
-      collection($lnk:path-base)//(tei:title|tei:idno|tei:front|tei:back)[ft:query(.,$query)]
-  order by $doc//tei:title[@type="main"] ascending
-  return $doc
+  let $c := collection($lnk:path-base)
+  return $c//tei:title[ft:query(.,$query)]|$c//tei:idno[ft:query(.,$query)]|$c//tei:text[ft:query(.,$query)]
 };
 
 declare function lnk:list-function(

@@ -130,28 +130,53 @@ declare function combine:tei-TEI(
   }
 }; 
 
-(:~ equivalent of a streamText, check for redirects :)
+(:~ styles are set using the opensiddur->style parameter
+ : the content points to a style document
+ : @return a @jf:style attribute if the opensiddur->style parameter is set and 
+ : something to prevent every element from having jf:style
+ :)
+declare function combine:associate-style(
+    $e as element(),
+    $params as map
+    ) as node()? {
+    let $s := $params("combine:settings")
+    where empty($params("combine:styled")) and exists($s) and $s("opensiddur->style")
+    return
+        attribute jf:style { normalize-space($s("opensiddur->style")) }
+};
+
+(: call this after associate-style :)
+declare function combine:unset-style(
+    $params as map
+    ) as map {
+    map:new(($params, map { "combine:styled" := 1 }))
+};
+
+(:~ equivalent of a streamText, check for redirects, add style if necessary :)
 declare function combine:jf-unflattened(
   $e as element(jf:unflattened),
   $params as map
   ) as element(jf:combined) {
-  element jf:combined {
-    $e/@*,
-    if ($e/ancestor::jf:parallel-document)
-    then
-        (: parallel texts cannot be redirected :)
-        combine:combine($e/node(), $params)
-    else 
-        (: determine if we need a translation redirect
-         : this code will only result in a redirect if the translation settings are 
-         : set in the same file as the streamText
-         :)
-        let $redirect := combine:translation-redirect($e, $e, $params)
-        return
-            if (exists($redirect))
-            then $redirect
-            else combine:combine($e/node(), $params)
-  } 
+  let $new-params := combine:unset-style($params)
+  return
+    element jf:combined {
+      $e/@*,
+      combine:associate-style($e, $params),
+      if ($e/ancestor::jf:parallel-document)
+      then
+          (: parallel texts cannot be redirected :)
+          combine:combine($e/node(), $new-params)
+      else 
+          (: determine if we need a translation redirect
+           : this code will only result in a redirect if the translation settings are 
+           : set in the same file as the streamText
+           :)
+          let $redirect := combine:translation-redirect($e, $e, $new-params)
+          return
+              if (exists($redirect))
+              then $redirect
+              else combine:combine($e/node(), $new-params)
+    } 
 };
 
 declare function combine:element(
@@ -265,7 +290,8 @@ declare function combine:new-document-params(
             doc(
                 mirror:unmirror-path(
                     $format:unflatten-cache, 
-                    document-uri(root($new-doc-nodes[1])))
+                    (document-uri(root($new-doc-nodes[1])), 
+                     $new-doc-nodes[1]/@uri:document-uri)[1])
             )
     let $new-params := map:new((
         $params,
@@ -299,14 +325,19 @@ declare function combine:update-settings-from-standoff-markup(
     $params as map,
     $new-context as xs:boolean
     ) as map {
+    let $real-context :=
+        (: if there's a @uri:document-uri, we need to load the real context-equivalent :)
+        if ($e/@uri:document-uri)
+        then doc($e/@uri:document-uri)//*[@jf:id=$e/@jf:id][1] 
+        else $e
     let $base-context :=
         if ($new-context)
         (: this is more complex --
             need to handle overrides, so each of these ancestors has to be treated separately, and in document order
          :)
-        then $e/ancestor-or-self::*[@jf:set]
-        else if (exists($e/(@jf:set)))
-        then $e
+        then $real-context/ancestor-or-self::*[@jf:set]
+        else if (exists($real-context/(@jf:set)))
+        then $real-context
         else ()
     return
         if (exists($base-context))
@@ -427,7 +458,11 @@ declare function combine:translation-redirect(
         let $s := $params("combine:settings")
         where exists($s)
         return $s("opensiddur->translation")
-    let $destination-stream-mirrored := $destination[1]/ancestor-or-self::jf:unflattened
+    let $destination-stream-mirrored := 
+        (: check if we're in a copied segment :)
+        if ($destination[1]/@uri:document-uri)
+        then doc($destination[1]/@uri:document-uri)//jf:unflattened
+        else $destination[1]/ancestor-or-self::jf:unflattened
     let $destination-stream := 
         doc(mirror:unmirror-path($format:unflatten-cache, document-uri(root($destination-stream-mirrored))))/
             id($destination-stream-mirrored/@jf:id)
@@ -562,8 +597,12 @@ declare function combine:follow-pointer(
           )
         else (
             (: external pointer... determine if we need to redirect :)
+            let $unflattened :=
+                if ($destination[1]/@uri:document-uri)
+                then doc($destination[1]/@uri:document-uri)//jf:unflattened
+                else $destination[1]/ancestor-or-self::jf:unflattened
             let $redirected := 
-                if ($destination[1]/ancestor-or-self::jf:unflattened)
+                if ($unflattened)
                 then
                     (: only unflattened can have a parallel text :) 
                     combine:translation-redirect($e, $destination, $params)

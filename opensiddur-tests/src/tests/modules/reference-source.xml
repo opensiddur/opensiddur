@@ -13,10 +13,12 @@
          <tei:seg xml:id="ancestor">
             <tei:w xml:id="child">child of a local target</tei:w>
          </tei:seg>
+         <tei:ptr xml:id="external_broken" target="/data/tests/no-target#seg1"/>
          <tei:ptr xml:id="external" target="/data/tests/reference-target#seg1"/>
          <tei:ptr xml:id="external_range" target="/data/tests/reference-target#range(seg2,seg4)"/>
          <tei:ptr xml:id="ptr_to_seg" target="#segA"/>
          <tei:ptr xml:id="ptr_to_range" target="#range(segB,segC)"/>
+         <tei:ptr xml:id="internal_broken" target="#broken"/>
          <tei:ptr target="#outside"/>
          <tei:ptr xml:id="ptr_to_ancestor" target="#ancestor"/>
       </j:textStream>
