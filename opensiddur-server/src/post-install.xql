@@ -47,4 +47,8 @@ xmldb:store(
     ),
 util:log-system-out("upgrades: update existing JLPTEI for schema changes..."),
 upg:schema-changes-0-7-5(),
+util:log-system-out("upgrades: reindex reference index"),
+ridx:reindex(collection("/db/data")),
+util:log-system-out("reindex all data collections"),
+xmldb:reindex("/db/data"),
 util:log-system-out("done")

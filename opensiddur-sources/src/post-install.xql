@@ -20,6 +20,8 @@ import module namespace tran="http://jewishliturgy.org/api/transliteration"
     at "xmldb:exist:///db/apps/opensiddur-server/api/data/transliteration.xqm";
 import module namespace user="http://jewishliturgy.org/api/user"
     at "xmldb:exist:///db/apps/opensiddur-server/api/user.xqm";
+import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+    at "xmldb:exist:///db/apps/opensiddur-server/modules/refindex.xqm";
 
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -124,4 +126,6 @@ declare function local:install-data(
 
 util:log-system-out("Starting installation of sources..."),
 local:install-data(),
+util:log-system-out("Reindexing reference index..."),
+ridx:reindex(collection("/db/data")),
 util:log-system-out("Done.")
