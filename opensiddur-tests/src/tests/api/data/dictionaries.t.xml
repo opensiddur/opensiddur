@@ -149,13 +149,6 @@
       </code>
          <class href="../common.t.incl.xml#Forbidden"/>
       </test>
-      <test ignore="yes">
-         <task>Remove a resource that has external references</task>
-         <code>
-      dict:delete("ExternalReference")
-      </code>
-         <class href="../common.t.incl.xml#BadRequest"/>
-      </test>
   </TestSet>
   <TestSet>
       <testName>dict:post()</testName>
