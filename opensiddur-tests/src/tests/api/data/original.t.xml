@@ -75,6 +75,8 @@
       at "xmldb:exist:///db/apps/opensiddur-server/modules/format.xqm";
     import module namespace crest="http://jewishliturgy.org/modules/common-rest"
       at "xmldb:exist:///db/apps/opensiddur-server/api/modules/common-rest.xqm";
+    import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+      at "xmldb:exist:///db/apps/opensiddur-server/api/modules/refindex.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
       at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
   </imports>
@@ -284,13 +286,79 @@
       </code>
          <class href="../common.t.incl.xml#Forbidden"/>
       </test>
-      <test ignore="yes">
-         <task>Remove a resource that has external references</task>
-         <code>
-      orig:delete("ExternalReference")
-      </code>
-         <class href="../common.t.incl.xml#BadRequest"/>
-      </test>
+  </TestSet>
+  <TestSet>
+    <testName>orig:delete() with internal reference</testName>
+    <setup>
+        <copy source="/db/apps/opensiddur-tests/tests/api/data/original"
+            name="ExternalReference.xml"
+            destination="/db/data/original/en/1900/01"/>
+        <code>
+          system:as-user("admin", $magic:password,
+            let $er-uri := xs:anyURI("/db/data/original/en/1900/01/ExternalReference.xml")
+            return (
+              sm:chown($er-uri, "testuser"),
+              sm:chgrp($er-uri, "everyone"),
+              sm:chmod($er-uri, "rw-r--r--"),
+              ridx:reindex(doc("/db/data/original/en/1900/01/ExternalReference.xml"))
+          ))
+        </code>
+    </setup>
+    <tearDown>
+        <code>
+            system:as-user("admin", $magic:password, 
+                ridx:remove("/db/data/original/en/1900/01", "ExternalReference.xml")
+            )
+        </code>
+    </tearDown>
+    <test>
+      <task>Delete a resource with only an internal reference</task>
+      <code>orig:delete("ExternalReference")</code>
+      <class href="../common.t.incl.xml#NoData"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>orig:delete() with external reference</testName>
+    <setup>
+        <copy source="/db/apps/opensiddur-tests/tests/api/data/original"
+            name="ExternalReference.xml"
+            destination="/db/data/original/en/1900/01"/>
+        <copy source="/db/apps/opensiddur-tests/tests/api/data/original"
+            name="MakesExternalReference.xml"
+            destination="/db/data/original/en/1900/01"/>
+        <code>
+          system:as-user("admin", $magic:password,
+            let $er-uri := xs:anyURI("/db/data/original/en/1900/01/ExternalReference.xml")
+            let $mer-uri := xs:anyURI("/db/data/original/en/1900/01/MakesExternalReference.xml")
+            return (
+              sm:chown($er-uri, "testuser"),
+              sm:chgrp($er-uri, "everyone"),
+              sm:chmod($er-uri, "rw-r--r--"),
+              sm:chown($mer-uri, "testuser"),
+              sm:chgrp($mer-uri, "everyone"),
+              sm:chmod($mer-uri, "rw-r--r--"),
+              ridx:reindex(doc("/db/data/original/en/1900/01/ExternalReference.xml")),
+              ridx:reindex(doc("/db/data/original/en/1900/01/MakesExternalReference.xml"))
+          ))
+        </code>
+    </setup>
+    <tearDown>
+        <code>
+            system:as-user("admin", $magic:password, (
+                ridx:remove("/db/data/original/en/1900/01", "ExternalReference.xml"),
+                ridx:remove("/db/data/original/en/1900/01", "MakesExternalReference.xml")
+                )
+            )
+        </code>
+    </tearDown>
+    <test>
+      <task>Delete a resource with an external reference</task>
+      <code>orig:delete("ExternalReference")</code>
+      <class href="../common.t.incl.xml#BadRequest"/>
+      <xpath desc="error message returns a reference to the document where the external reference is">
+        count(.//documents/document)=1 and ends-with(.//documents/document,"/data/original/MakesExternalReference")
+      </xpath> 
+    </test>
   </TestSet>
   <TestSet>
       <testName>orig:post()</testName>
