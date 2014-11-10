@@ -41,14 +41,14 @@ declare function chg:get-recent-changes(
         then $c//tei:change[@when ge $from][@when le $to]
         (: $from empty :)
         else if (empty($from) and empty($to))
-        then $c//tei:change[@who=$username]
+        then $c//tei:change[@who="/user/" || $username]
         else if (empty($from))
-        then $c//tei:change[@who=$username][@when le $to]
+        then $c//tei:change[@who="/user/" || $username][@when le $to]
         (: $to empty :)
         else if (empty($to))
-        then $c//tei:change[@who=$username][@when ge $from]
+        then $c//tei:change[@who="/user/" || $username][@when ge $from]
         (: no empty :)
-        else $c//tei:change[@who=$username][@when ge $from][@when le $to]
+        else $c//tei:change[@who="/user/" || $username][@when ge $from][@when le $to]
 };
 
 (:~ List all recent changes 
@@ -95,7 +95,7 @@ declare
             <ul class="results">{
                 for $change in 
                     subsequence(
-                        for $ch in chg:get-recent-changes($type[1], $by[1], $from[1], $to[1])
+                        for $ch in chg:get-recent-changes($type[.][1], $by[.][1], $from[.][1], $to[.][1])
                         order by $ch/@when/string() descending
                         return $ch, ($start, 1)[1], ($max-results, 100)[1])
                 group by $doc := document-uri(root($change))
@@ -108,7 +108,7 @@ declare
                             for $ch in $change
                             order by $ch/@when descending
                             return 
-                                <li class="change"><span class="who">{$ch/@who/string()}</span>:<span class="type">{$ch/@type/string()}</span>:<span class="when">{$ch/@when/string()}</span>:<span class="message">{string-join($ch//text(), ' ')}</span></li>
+                                <li class="change"><span class="who">{replace($ch/@who/string(), "^/user/", "")}</span>:<span class="type">{$ch/@type/string()}</span>:<span class="when">{$ch/@when/string()}</span>:<span class="message">{string-join($ch//text(), ' ')}</span></li>
                         }</ol>
                     </li>
             }</ul>
