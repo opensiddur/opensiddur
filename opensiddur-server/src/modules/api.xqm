@@ -33,8 +33,8 @@ declare function api:rest-error(
     </output:serialization-parameters>
     <http:response status="{$status-code}"/>
   </rest:response>,
-  element { if ($status-code lt 400) then "info" else "error" } {
-    <path>{
+  element { QName("", if ($status-code lt 400) then "info" else "error") } {
+    element { QName("", "path") } {
       if (request:exists())
       then request:get-uri()
       else 
@@ -44,11 +44,11 @@ declare function api:rest-error(
         catch rerr:RQDY0101 { (: called from non-RESTXQ context :)
             ""
         }
-    }</path>,
-    <message>{$message}</message>,
+    },
+    element { QName("", "message") } {$message},
     if (exists($object))
     then
-      <object>{$object}</object>
+      element { QName("", "object") }{$object}
     else ()
   }
 };
