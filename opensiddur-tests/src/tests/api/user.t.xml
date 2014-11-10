@@ -4,7 +4,7 @@
   <description>
       <p>Test the user and contributor profile API</p>
       <author>Efraim Feinstein</author>
-      <copyright>Copyright 2012-2013 Efraim Feinstein,
+      <copyright>Copyright 2012-2014 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <asUser>testuser</asUser>
@@ -66,6 +66,8 @@
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
   <imports>
+    import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/refindex.xqm";
     import module namespace user="http://jewishliturgy.org/api/user"
       at "xmldb:exist:///db/apps/opensiddur-server/api/user.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
@@ -539,12 +541,96 @@
       </code>
          <xpath desc="profile removed">not(doc-available("/db/data/user/notauser.xml"))</xpath>      
       </test>
-      <test ignore="yes">
-         <task>Delete a profile that has a reference elsewhere</task>
+  </TestSet>
+  <TestSet>
+      <testName>user:delete(): authenticated and an external reference exists</testName>
+      <setup>
+         <copy source="/db/apps/opensiddur-tests/tests/api/user" name="Reference.xml" 
+            destination="/db/data/original"/>
          <code>
-        user:delete("withreference")
+      system:as-user("admin", $magic:password, (
+        let $u := sm:create-account("testuser3", "testuser3", "everyone")
+        let $s := xmldb:store("/db/data/user", "testuser3.xml",
+          &lt;j:contributor&gt;
+            &lt;tei:idno&gt;testuser3&lt;/tei:idno&gt;
+          &lt;/j:contributor&gt;
+          )
+        let $uri := xs:anyURI("/db/data/user/testuser3.xml")
+        let $doc-uri := xs:anyURI("/db/data/original/Reference.xml")
+        let $ch := (
+          sm:chown($uri, "testuser3"),
+          sm:chgrp($uri, "testuser3"),
+          sm:chmod($uri, "rw-r--r--"),
+          sm:chown($doc-uri, "testuser3"),
+          sm:chgrp($doc-uri, "testuser3"),
+          sm:chmod($doc-uri, "rw-rw-r--"),
+          ridx:reindex(doc("/db/data/original/Reference.xml"))
+        )
+        return ()
+      ))
       </code>
-         <class href="common.t.incl.xml#BadRequest"/>
+      </setup>
+      <tearDown>
+         <remove-document collection="/db/data/original" name="Reference.xml"/>
+         <code>
+      system:as-user("admin", $magic:password, (
+        if (doc-available("/db/data/user/testuser3.xml"))
+        then xmldb:remove("/db/data/user", "testuser3.xml")
+        else (),
+        try { 
+          if (sm:group-exists("testuser3"))
+          then sm:remove-group("testuser3")
+          else ()
+        } 
+        catch * { () },
+        if (sm:user-exists("testuser3"))
+        then sm:remove-account("testuser3")
+        else ()
+      ))
+      </code>
+      </tearDown>
+      <test>
+         <task>Delete your own profile</task>
+         <code>
+      system:as-user("testuser3","testuser3", (
+        user:delete("testuser3")
+      ))
+      </code>
+         <xpath desc="status code is 200">self::rest:response/http:response/@status = 200</xpath>
+         <xpath desc="returns an info element with the referenced document">ends-with(self::info//documents/document, "/api/data/original/Reference")</xpath>
+         <xpath desc="user account removed">not(sm:user-exists("testuser3"))</xpath>
+         <xpath desc="group removed">not(sm:get-groups()="testuser3")</xpath>
+         <xpath desc="profile changed to anonymous profile">exists(doc("/db/data/user/testuser3.xml")/j:contributor[tei:idno="testuser3"][tei:name="Deleted user"])</xpath>
+         <xpath desc="profile owned by admin">sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/@owner="admin"</xpath>
+         <xpath desc="profile owned by group everyone">sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/@group="everyone"</xpath>
+         <xpath desc="profile permissions are 664">sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/@mode="rw-rw-r--"</xpath>
+      </test>
+      <test>
+         <task>Delete another user's profile</task>
+         <code>
+      system:as-user("testuser","testuser", (
+        user:delete("testuser3")
+      ))
+      </code>
+         <class href="common.t.incl.xml#Forbidden"/>
+      </test>
+      <test>
+         <task>Delete a non-existent profile</task>
+         <code>
+      system:as-user("testuser","testuser", (
+        user:delete("doesnotexist")
+      ))
+      </code>
+         <class href="common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>Delete a non-user profile</task>
+         <code>
+      system:as-user("testuser","testuser", (
+        user:delete("notauser")
+      ))
+      </code>
+         <xpath desc="profile removed">not(doc-available("/db/data/user/notauser.xml"))</xpath>      
       </test>
   </TestSet>
   <TestSet>
