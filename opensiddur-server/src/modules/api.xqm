@@ -2,7 +2,7 @@ xquery version "3.0";
 (:~ general support functions for the REST API
  :
  : Open Siddur Project
- : Copyright 2011-2013 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :) 
@@ -20,6 +20,7 @@ declare variable $api:default-max-results := 50;
  : @param $status-code return status
  : @param $message return message (text preferred, but may contain XML)
  : @param $object (optional) error object
+ : @return an error element if the status code >= 400, otherwise an info element
  :)
 declare function api:rest-error(
   $status-code as xs:integer?,
@@ -32,8 +33,8 @@ declare function api:rest-error(
     </output:serialization-parameters>
     <http:response status="{$status-code}"/>
   </rest:response>,
-  <error xmlns="">
-    <path>{
+  element { QName("", if ($status-code lt 400) then "info" else "error") } {
+    element { QName("", "path") } {
       if (request:exists())
       then request:get-uri()
       else 
@@ -43,15 +44,13 @@ declare function api:rest-error(
         catch rerr:RQDY0101 { (: called from non-RESTXQ context :)
             ""
         }
-    }</path>
-    <message>{$message}</message>
-    {
-      if (exists($object))
-      then
-        <object>{$object}</object>
-      else ()
-    }
-  </error>
+    },
+    element { QName("", "message") } {$message},
+    if (exists($object))
+    then
+      element { QName("", "object") }{$object}
+    else ()
+  }
 };
 
 declare function api:rest-error(

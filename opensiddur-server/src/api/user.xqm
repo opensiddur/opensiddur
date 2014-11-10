@@ -1,7 +1,7 @@
 xquery version "3.0";
 (:~ User management API
  :
- : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace user="http://jewishliturgy.org/api/user";
@@ -14,6 +14,8 @@ import module namespace app="http://jewishliturgy.org/modules/app"
   at "../modules/app.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "../modules/common-rest.xqm";
+import module namespace data="http://jewishliturgy.org/modules/data"
+  at "../modules/data.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
@@ -24,6 +26,8 @@ import module namespace name="http://jewishliturgy.org/modules/name"
   at "../modules/name.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "../modules/paths.xqm";
+import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+  at "../modules/refindex.xqm";
 import module namespace kwic="http://exist-db.org/xquery/kwic";
   
 declare namespace html="http://www.w3.org/1999/xhtml";
@@ -319,8 +323,8 @@ declare
 (:~ Delete a contributor or contributor profile
  : @param $name Profile to remove
  : @return 
+ :  200 (OK): The profile is referenced elsewhere. All the information in it was deleted. A list of referencing documents is returned.
  :  204 (no data): The profile was successfully deleted 
- :  400 (bad request): The profile is referenced elsewhere and cannot be deleted. A list of references is returned
  :  401 (not authorized): You are not authenticated 
  :  403 (forbidden): You are authenticated as a different user
  :)
@@ -350,27 +354,54 @@ declare
     else if (not($user))
     then api:rest-error(401, "Unauthorized")
     else if ($user = $name)
-    then (
-      (: TODO: check for references!!! :)
-      xmldb:remove($user:path, $resource-name),
-      system:as-user("admin", $magic:password, (
-        try {
-          for $member in sm:get-group-members($name)
-          return sm:remove-group-member($name, $member),
-          for $manager in sm:get-group-managers($name)
-          return sm:remove-group-manager($name, $manager),
-          sm:remove-account($name),
-          sm:remove-group($name), (: TODO: successor group is guest! until remove-group#2 exists@ :)
-          $return-success
-        }
-        catch * {
-          api:rest-error(500, "Internal error: Cannot delete the user or group!", 
-            debug:print-exception("user", 
-              $err:line-number, $err:column-number,
-              $err:code, $err:value, $err:description))
-        }
+    then 
+      let $user-doc := doc($resource)
+      let $user-references := ridx:query-document($user-doc)[not(root(.) is doc)]
+      let $removal-return := 
+        if (empty($user-references))
+        then 
+            let $null := xmldb:remove($user:path, $resource-name)
+            return $return-success
+        else 
+            (: the user is referenced externally.
+               the profile should be replaced with a basic deleted user profile 
+             :)
+            let $store := xmldb:store($user:path, $resource-name, 
+                <j:contributor>{
+                    $user-doc/j:contributor/tei:idno,
+                    <tei:name>Deleted user</tei:name>
+                }</j:contributor>
+            )
+            let $chown := system:as-user("admin", $magic:password, (
+                sm:chown(xs:anyURI($resource), "admin"),
+                sm:chgrp(xs:anyURI($resource), "everyone"),
+                sm:chmod(xs:anyURI($resource), "rw-rw-r--")
+            ))
+            return 
+                api:rest-error(200, "The user account was removed, but external references prevented the user profile from being removed. It has been replaced by the profile of a deleted user, and will continue to exist as an empty third-party profile.", 
+                    <documents>{
+                        for $udoc in $user-references
+                        group by $uuri := document-uri(root($udoc))
+                        return <document>{data:db-path-to-api($uuri)}</document>
+                    }</documents>)
+      return
+        system:as-user("admin", $magic:password, (
+          try {
+            for $member in sm:get-group-members($name)
+            return sm:remove-group-member($name, $member),
+            for $manager in sm:get-group-managers($name)
+            return sm:remove-group-manager($name, $manager),
+            sm:remove-account($name),
+            sm:remove-group($name), (: TODO: successor group is guest! until remove-group#2 exists@ :)
+            $removal-return
+          }
+          catch * {
+            api:rest-error(500, "Internal error: Cannot delete the user or group!", 
+              debug:print-exception("user", 
+                $err:line-number, $err:column-number,
+                $err:code, $err:value, $err:description))
+          }
       ))
-    )
     else if ($is-non-user-profile)
     then (
       (: non-user profile -- check for references! :)
