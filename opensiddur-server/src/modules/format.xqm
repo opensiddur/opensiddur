@@ -96,32 +96,45 @@ declare function format:clear-caches(
       mirror:remove($cache, util:collection-name($doc), util:document-name($doc))
 };
 
+(:~ add a format:status-resource parameter pointing to the document whose status
+ : should be updated and format:stage-number to $params if they do not already exist  :)
+declare function format:status-param(
+    $params as map,
+    $original-doc as document-node()
+    ) as map {
+    map:new((
+        $params,
+        map { 
+            "format:status-resource" := ($params("format:status-resource"), $original-doc)[1], 
+            "format:stage-number" := ($params("format:stage-number") + 1, 0)[1] 
+        }
+    ))
+};
+
 declare function format:log-stage(
     $stage-function as function(node()*, map) as node()*,
     $current-resource as document-node(),
     $stage as xs:string,
-    $params as map
+    $params as map,
+    $original-doc as document-node()
     ) as node()* {
-    let $status-resource := ($params("format:status-resource"), $current-resource)[1]
+    let $status-resource := ($params("format:status-resource"), $original-doc)[1]
     let $is-first := 
+        (: if the status document does not exist, it should be created :)
         let $sd := status:doc($status-resource)
         return empty($sd) or exists($sd/*/@status:completed)
-    let $next-params := map:new(
-        $params,
-        map { "format:status-resource" := $status-resource }
-    )
     return
         try {
             let $job-start :=
                 if ($is-first)
                 then status:start-job($status-resource)
                 else ()
-            let $stage-start := status:start($status-resource, $current-resource, $stage)
-            let $result := $stage-function($current-resource, $next-params),
-            let $stage-finish := status:finish($status-resource, $current-resource, $stage),
+            let $stage-start := status:start($status-resource, $original-doc, $stage)
+            let $result := $stage-function($current-resource, $params)
+            let $stage-finish := status:finish($status-resource, $original-doc, $stage)
             let $job-end := 
-                if ($is-first)
-                then status:complete-job($status-resource, $result)
+                if ($params("format:stage-number") = 0)
+                then status:complete-job($status-resource, document-uri($original-doc))
                 else ()
             return $result
         }
@@ -133,7 +146,7 @@ declare function format:log-stage(
                     ": "[$err:description], $err:description
                 )
             return (
-                status:fail($status-resource, $current-resource, $stage, $error-message),
+                status:fail-job($status-resource, $original-doc, $stage, $error-message),
                 error($err:code, $error-message)    (: rethrow the exception :)
             )
         }
@@ -158,7 +171,8 @@ declare function format:parallel-layer(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  let $pla-transform := format:log-stage(pla:parallel-layer-document#2, ?, "parallel-layer", $params)
+  let $params := format:status-param($params, $original-doc)
+  let $pla-transform := format:log-stage(pla:parallel-layer-document#2, ?, "parallel-layer", $params, $original-doc)
   return
     mirror:apply-if-outdated(
       $format:parallel-layer-cache,
@@ -180,7 +194,8 @@ declare function format:phony-layer(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  let $pho-transform := format:log-stage(phony:phony-layer-document#2, ?, "phony-layer", $params)
+  let $params := format:status-param($params, $original-doc)
+  let $pho-transform := format:log-stage(phony:phony-layer-document#2, ?, "phony-layer", $params, $original-doc)
   return
     mirror:apply-if-outdated(
       $format:phony-layer-cache,
@@ -202,7 +217,8 @@ declare function format:flatten(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  let $flatten-transform := format:log-stage(flatten:flatten-document#2, ?, "flatten", $params)
+  let $params := format:status-param($params, $original-doc)
+  let $flatten-transform := format:log-stage(flatten:flatten-document#2, ?, "flatten", $params, $original-doc)
   return
     mirror:apply-if-outdated(
       $format:flatten-cache,
@@ -227,7 +243,8 @@ declare function format:merge(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  let $merge-transform := format:log-stage(flatten:merge-document#2, ?, "merge", $params)
+  let $params := format:status-param($params, $original-doc)
+  let $merge-transform := format:log-stage(flatten:merge-document#2, ?, "merge", $params, $original-doc)
   return
     mirror:apply-if-outdated(
       $format:merge-cache,
@@ -248,7 +265,8 @@ declare function format:resolve(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  let $resolve-transform := format:log-stage(flatten:resolve-stream#2, ?, "resolve", $params)
+  let $params := format:status-param($params, $original-doc)
+  let $resolve-transform := format:log-stage(flatten:resolve-stream#2, ?, "resolve", $params, $original-doc)
   return
     mirror:apply-if-outdated(
       $format:resolve-cache,
@@ -282,7 +300,8 @@ declare function format:unflatten(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  let $unflatten-transform := format:log-stage(unflatten:unflatten-document#2, ?, "unflatten", $params)
+  let $params := format:status-param($params, $original-doc)
+  let $unflatten-transform := format:log-stage(unflatten:unflatten-document#2, ?, "unflatten", $params, $original-doc)
   return
     mirror:apply-if-outdated(
       $format:unflatten-cache,
@@ -413,8 +432,9 @@ declare function format:combine(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
+  let $params := format:status-param($params, $original-doc)
   let $unflats := format:unflatten-dependencies($doc, $params)
-  let $cmb := format:log-stage(combine:combine-document#2, ?, "combine", $params)
+  let $cmb := format:log-stage(combine:combine-document#2, ?, "combine", $params, $original-doc)
   return
     mirror:apply-if-outdated(
       $format:combine-cache,
@@ -436,7 +456,8 @@ declare function format:compile(
   $params as map,
   $original-doc as document-node()
   ) as document-node() {
-  let $cmp := format:log-stage(compile:compile-document#2, ?, "compile", $params)
+  let $params := format:status-param($params, $original-doc)
+  let $cmp := format:log-stage(compile:compile-document#2, ?, "compile", $params, $original-doc)
   let $combined := format:combine($doc, $params, $original-doc)
   let $up-to-date-function := mirror:is-up-to-date-cache(?, ?, $format:combine-cache)
   return
@@ -465,7 +486,8 @@ declare function format:html(
   $original-doc as document-node(),
   $transclude as xs:boolean
   ) as document-node() {
-  let $html := format:log-stage(tohtml:tohtml-document#2, ?, "html", $params)
+  let $params := format:status-param($params, $original-doc)
+  let $html := format:log-stage(tohtml:tohtml-document#2, ?, "html", $params, $original-doc)
   let $up-to-date-function := 
     if ($transclude)
     then mirror:is-up-to-date-cache(?, ?, $format:compile-cache)

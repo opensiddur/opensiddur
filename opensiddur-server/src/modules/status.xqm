@@ -19,7 +19,7 @@ declare function status:setup(
     ) {
     if (xmldb:collection-available($status:status-collection))
     then ()
-    else mirror:create($status:status-collection, "/db/data/original")
+    else mirror:create($status:status-collection, "/db/data", true())
 };
 
 (:~ clear all jobs :)
@@ -54,7 +54,7 @@ declare function status:start-job(
             $collection,
             $resource,
             element status:job {
-                attribute started {current-dateTime()},
+                attribute started { util:system-dateTime()},
                 attribute state { "working" },
                 attribute resource {data:db-path-to-api(string-join(($collection, $resource), '/'))}
             }
@@ -69,10 +69,10 @@ declare function status:complete-job(
     let $sj := status:doc($origin-doc)/status:job
     return (
         update value $sj/@state with "complete",
-        update insert attribute completed { current-dateTime() } into $sj,
+        update insert attribute completed { util:system-dateTime() } into $sj,
         update insert element status:complete {
-            attribute timestamp { current-dateTime() },
-            attribute resource { $result-path }
+            attribute timestamp { util:system-dateTime() },
+            attribute resource { data:db-path-to-api($result-path) }
         } into $sj
     )
 };
@@ -80,21 +80,23 @@ declare function status:complete-job(
 declare function status:fail-job(
     $origin-doc as item(),
     $resource as item(),
+    $stage as xs:string?,
     $error as item()
     ) as empty-sequence() {
     let $sj := status:doc($origin-doc)/status:job
     let $res :=
-        data:db-to-api-path(
+        data:db-path-to-api(
             typeswitch($resource)
             case document-node() return document-uri($resource)
             default return $resource
         )
     return (
         update value $sj/@state with "failed",
-        update insert attribute failed { current-dateTime() } into $sj,
+        update insert attribute failed { util:system-dateTime() } into $sj,
         update insert element status:fail {
-            attribute timestamp { current-dateTime() },
+            attribute timestamp { util:system-dateTime() },
             attribute resource { $res },
+            if ($stage) then attribute stage { $stage } else (),
             $error
         } into $sj
     )
@@ -107,14 +109,14 @@ declare function  status:start(
     ) as empty-sequence() {
     let $sj := status:doc($origin-doc)/status:job
     let $res :=
-        data:db-to-api-path(
+        data:db-path-to-api(
             typeswitch($resource)
             case document-node() return document-uri($resource)
             default return $resource
         )
     return (
         update insert element status:start {
-            attribute timestamp { current-dateTime() },
+            attribute timestamp { util:system-dateTime() },
             attribute resource { $res },
             attribute stage { $stage }
         } into $sj
@@ -128,14 +130,14 @@ declare function  status:finish(
     ) as empty-sequence() {
     let $sj := status:doc($origin-doc)/status:job
     let $res :=
-        data:db-to-api-path(
+        data:db-path-to-api(
             typeswitch($resource)
             case document-node() return document-uri($resource)
             default return $resource
         )
     return (
         update insert element status:finish {
-            attribute timestamp { current-dateTime() },
+            attribute timestamp { util:system-dateTime() },
             attribute resource { $res },
             attribute stage { $stage }
         } into $sj
@@ -146,13 +148,13 @@ declare function  status:log(
     $origin-doc as item(),
     $resource as item()?,
     $stage as xs:string?,
-    $message as item()*,
+    $message as item()*
     ) as empty-sequence() {
     let $sj := status:doc($origin-doc)/status:job
     let $res :=
         if (exists($resource))
         then
-            data:db-to-api-path(
+            data:db-path-to-api(
                 typeswitch($resource)
                 case document-node() return document-uri($resource)
                 default return $resource
@@ -160,7 +162,7 @@ declare function  status:log(
         else ""
     return (
         update insert element status:log {
-            attribute timestamp { current-dateTime() },
+            attribute timestamp { util:system-dateTime() },
             attribute resource { $res },
             attribute stage { $stage },
             $message
