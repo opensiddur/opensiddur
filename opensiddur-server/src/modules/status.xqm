@@ -38,7 +38,7 @@ declare function status:clear-jobs(
 declare function status:get-job-id(
     $doc as document-node()
     ) as xs:string {
-    let $query-document-id := string(util:absolute-resource-id(doc("/db/data/original/he/2014/08/Kaddish%20example.xml")))
+    let $query-document-id := string(util:absolute-resource-id($doc))
     let $query-time := string((current-dateTime() - xs:dateTime("1970-01-01T00:00:00-00:00")) div xs:dayTimeDuration('PT0.001S'))
     return $query-document-id || "-" || $query-time
 };
