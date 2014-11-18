@@ -96,7 +96,7 @@ declare function format:clear-caches(
       mirror:remove($cache, util:collection-name($doc), util:document-name($doc))
 };
 
-(:~ add a format:status-resource parameter pointing to the document whose status
+(:~ add a format:status-job-id parameter pointing to the job where status should be updated
  : should be updated and format:stage-number to $params if they do not already exist  :)
 declare function format:status-param(
     $params as map,
@@ -105,7 +105,7 @@ declare function format:status-param(
     map:new((
         $params,
         map { 
-            "format:status-resource" := ($params("format:status-resource"), $original-doc)[1], 
+            "format:status-job-id" := ($params("format:status-job-id"), status:get-job-id($original-doc))[1], 
             "format:stage-number" := ($params("format:stage-number") + 1, 0)[1] 
         }
     ))
@@ -118,7 +118,7 @@ declare function format:log-stage(
     $params as map,
     $original-doc as document-node()
     ) as node()* {
-    let $status-resource := ($params("format:status-resource"), $original-doc)[1]
+    let $status-resource := ($params("format:status-job-id"), status:get-job-id($original-doc))[1]
     let $is-first := 
         (: if the status document does not exist, it should be created :)
         let $sd := status:doc($status-resource)
@@ -127,7 +127,7 @@ declare function format:log-stage(
         try {
             let $job-start :=
                 if ($is-first)
-                then status:start-job($status-resource)
+                then status:start-job($original-doc)
                 else ()
             let $stage-start := status:start($status-resource, $original-doc, $stage)
             let $result := $stage-function($current-resource, $params)

@@ -12,10 +12,14 @@
       at "xmldb:exist:///db/apps/opensiddur-server/modules/status.xqm";
   </imports>
   <functions>
-    declare function local:job-document-name() {
+    declare function local:job-id() {
         let $resource-id := util:absolute-resource-id(doc("/db/data/original/en/1900/01/test.xml"))
         let $timestamp :=  string((current-dateTime() - xs:dateTime("1970-01-01T00:00:00-00:00")) div xs:dayTimeDuration('PT0.001S'))
-        let $status-document := $resource-id || "-" || $timestamp || ".status.xml" 
+        return $resource-id || "-" || $timestamp
+    };
+
+    declare function local:job-document-name() {
+        let $status-document := local:job-id() || ".status.xml" 
         return $status-document
     }; 
 
@@ -64,7 +68,7 @@
             <code>
                 let $doc := doc("/db/data/original/en/1900/01/test.xml")
                 let $start := status:start-job($doc)
-                return doc($status:status-collection || "/" || local:job-document-name())
+                return doc($status:status-collection || "/" || $start || ".status.xml")
             </code>
             <xpath desc="a status document has been created">exists(.//status:job)</xpath>
             <xpath desc="the document references the user">.//status:job/@user = "testuser"</xpath>
@@ -83,7 +87,7 @@
       <test>
          <task>complete a job</task>
          <code>
-            let $c := status:complete-job(local:tei-document(), document-uri(local:tei-document()))
+            let $c := status:complete-job(local:job-id(), document-uri(local:tei-document()))
             return local:job-document()
          </code>
          <xpath desc="completion element has been added">exists(.//status:job/status:complete)</xpath>
@@ -101,7 +105,7 @@
       <test>
          <task>fail a job</task>
          <code>
-            let $c := status:fail-job(local:tei-document(), document-uri(local:tei-document()), "testing", "ERROR")
+            let $c := status:fail-job(local:job-id(), document-uri(local:tei-document()), "testing", "ERROR")
             return local:job-document()
          </code>
          <xpath desc="fail element has been added">exists(.//status:job/status:fail)</xpath>
@@ -121,7 +125,7 @@
       <test>
          <task>start a stage</task>
          <code>
-            let $c := status:start(local:tei-document(), local:tei-document(), "testing")
+            let $c := status:start(local:job-id(), local:tei-document(), "testing")
             return local:job-document()
          </code>
          <xpath desc="start element has been added">count(.//status:job/status:start)=1</xpath>
@@ -134,14 +138,14 @@
       <setup>
         <code> 
             let $j := status:start-job(local:tei-document())
-            let $s := status:start(local:tei-document(), local:tei-document(), "testing")
+            let $s := status:start($j, local:tei-document(), "testing")
             return ()
         </code>
       </setup>
       <test>
          <task>finish a stage</task>
          <code>
-            let $c := status:finish(local:tei-document(), local:tei-document(), "testing")
+            let $c := status:finish(local:job-id(), local:tei-document(), "testing")
             return local:job-document()
          </code>
          <xpath desc="finish element has been added">count(.//status:job/status:finish)=1</xpath>
@@ -160,7 +164,7 @@
       <test>
          <task>log a message</task>
          <code>
-            let $c := status:log(local:tei-document(), local:tei-document(), "testing", "MESSAGE")
+            let $c := status:log(local:job-id(), local:tei-document(), "testing", "MESSAGE")
             return local:job-document()
          </code>
          <xpath desc="log element has been added">count(.//status:job/status:log)=1</xpath>

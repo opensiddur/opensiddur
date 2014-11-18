@@ -45,32 +45,31 @@ declare function status:get-job-id(
 
 (:~ @return the name of the job document :)
 declare function status:job-doc-name(
-    $doc as document-node()
+    $job-id as xs:string
     ) as xs:string {
-    status:get-job-id($doc) || ".status.xml"
+    $job-id || ".status.xml"
 };
 
 (:~ get the status document for a given origin document 
- : @param $origin-doc origin document node or path string
+ : @param $job-id the job identifier
  :)
 declare function status:doc(
-    $origin-doc as item()
+    $job-id as xs:string
     ) as document-node()? {
-    let $origin :=
-        typeswitch($origin-doc)
-        case document-node() return $origin-doc
-        default return data:doc($origin-doc)
-    let $id := status:job-doc-name($origin-doc)
-    return doc($status:status-collection || "/" || $id)
+    let $job-doc := status:job-doc-name($job-id)
+    return doc($status:status-collection || "/" || $job-doc)
 };
 
-(:~ start a job :)
+(:~ start a job in this query with $origin-doc, 
+ : @return the job-id of the job
+ :)
 declare function status:start-job(
     $origin-doc as document-node()
-    ) as empty-sequence() {
+    ) as xs:string {
     let $collection := util:collection-name($origin-doc)
     let $resource := util:document-name($origin-doc)
-    let $status-resource := status:job-doc-name($origin-doc)
+    let $job-id := status:get-job-id($origin-doc)
+    let $status-resource := status:job-doc-name($job-id)
     let $path := 
         xmldb:store(
             $status:status-collection,
@@ -86,14 +85,14 @@ declare function status:start-job(
         $path,
         sm:get-permissions(document-uri($origin-doc)))
     let $universal := sm:chmod(xs:anyURI($path), "rw-rw-rw-")
-    return ()
+    return $job-id
 };
 
 declare function status:complete-job(
-    $origin-doc as item(),
+    $job-id as xs:string,
     $result-path as xs:string
     ) as empty-sequence() {
-    let $sj := status:doc($origin-doc)/status:job
+    let $sj := status:doc($job-id)/status:job
     return (
         update value $sj/@state with "complete",
         update insert attribute completed { util:system-dateTime() } into $sj,
@@ -105,12 +104,12 @@ declare function status:complete-job(
 };
 
 declare function status:fail-job(
-    $origin-doc as item(),
+    $job-id as xs:string,
     $resource as item(),
     $stage as xs:string?,
     $error as item()
     ) as empty-sequence() {
-    let $sj := status:doc($origin-doc)/status:job
+    let $sj := status:doc($job-id)/status:job
     let $res :=
         data:db-path-to-api(
             typeswitch($resource)
@@ -130,11 +129,11 @@ declare function status:fail-job(
 };
 
 declare function  status:start(
-    $origin-doc as item(),
+    $job-id as xs:string,
     $resource as item(),
     $stage as xs:string
     ) as empty-sequence() {
-    let $sj := status:doc($origin-doc)/status:job
+    let $sj := status:doc($job-id)/status:job
     let $res :=
         data:db-path-to-api(
             typeswitch($resource)
@@ -151,11 +150,11 @@ declare function  status:start(
 };
 
 declare function  status:finish(
-    $origin-doc as item(),
+    $job-id as xs:string,
     $resource as item(),
     $stage as xs:string
     ) as empty-sequence() {
-    let $sj := status:doc($origin-doc)/status:job
+    let $sj := status:doc($job-id)/status:job
     let $res :=
         data:db-path-to-api(
             typeswitch($resource)
@@ -172,12 +171,12 @@ declare function  status:finish(
 };
 
 declare function  status:log(
-    $origin-doc as item(),
+    $job-id as xs:string,
     $resource as item()?,
     $stage as xs:string?,
     $message as item()*
     ) as empty-sequence() {
-    let $sj := status:doc($origin-doc)/status:job
+    let $sj := status:doc($job-id)/status:job
     let $res :=
         if (exists($resource))
         then
