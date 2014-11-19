@@ -13,8 +13,11 @@ import module namespace data="http://jewishliturgy.org/modules/data"
     at "data.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror"
     at "mirror.xqm";
+import module namespace magic="http://jewishliturgy.org/magic"
+    at "../magic/magic.xqm";
 
 declare variable $status:status-collection := "/db/cache/status";
+declare variable $status:bg-scheduler := "scheduler.xml";
 
 (:~ initial setup :)
 declare function status:setup(
@@ -24,7 +27,7 @@ declare function status:setup(
     else 
         let $cp := app:make-collection-path($status:status-collection, "/", sm:get-permissions(xs:anyURI("/db/data")))
         let $ch := sm:chmod(xs:anyURI($status:status-collection), "rwxrwxrwx")
-        return ()
+        return status:setup-scheduler()
 };
 
 (:~ clear all jobs :)
@@ -196,3 +199,31 @@ declare function  status:log(
     ) 
 };
 
+
+(: these functions are for the background task processor, which can be eliminated when util:eval-async works :)
+
+declare function status:setup-scheduler() {
+    let $scheduler := 
+        xmldb:store($status:status-collection, $status:bg-scheduler,
+            <status:scheduler>
+            </status:scheduler>
+        )
+    let $chmod := sm:chmod(xs:anyURI($scheduler), "rw-rw-rw-")
+    return ()
+};
+
+declare function status:submit(
+    $xquery as xs:string
+    ) {
+    let $sch := doc($status:status-collection || "/" || $status:bg-scheduler)/status:scheduler
+    return update insert <status:task>{$xquery}</status:task> into $sch 
+};
+
+declare function status:run(
+    ) {
+    let $sch := doc($status:status-collection || "/" || $status:bg-scheduler)/status:scheduler
+    let $next-task := string($sch/status:task[1])
+    let $del := update delete $sch/status:task[1]
+    where $next-task
+    return system:as-user("admin", $magic:password, util:eval($next-task))
+};
