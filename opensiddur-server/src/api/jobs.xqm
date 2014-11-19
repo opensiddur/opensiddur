@@ -44,13 +44,13 @@ declare function job:get-jobs(
             $c//status:job
                 [@started ge $from]
                 [@started le $to]
-                [@state=$state]
+                [$state=@state]
         else
             $c//status:job
                 [@user=$user]
                 [@started ge $from]
                 [@started le $to]
-                [@state=$state]
+                [$state=@state]
 };
 
 (:~ List all jobs
@@ -112,7 +112,7 @@ declare
                         {
                             if ($job/@state=("complete", "failed"))
                             then
-                                <span class="{$job/*/@state/string()}">{$job/(@completed,@failed)/string()}</span>
+                                <span class="{$job/@state/string()}">{$job/(@completed,@failed)/string()}</span>
                             else ()
                         }
                     </li>
