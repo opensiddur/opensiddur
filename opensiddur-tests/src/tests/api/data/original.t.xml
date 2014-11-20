@@ -233,6 +233,38 @@
       </test>
   </TestSet>  
   <TestSet>
+      <testName>orig:post-combined-job()</testName>
+      <test>
+         <task>Post a job on an existing document, transclude=false()</task>
+         <code>
+            orig:post-combined-job("Existing", false(), "html")
+        </code> 
+         <xpath desc="Returns status code 202">self::rest:response/http:response/@status=202</xpath>
+         <xpath desc="Returns an HTTP Location header with a job-id">self::rest:response/http:response/http:header[@name='Location'][matches(@value, '/api/jobs/\d+-\d+')]</xpath>
+      </test>
+      <test>
+         <task>Post a job for a nonexisting document</task>
+         <code>
+            orig:post-combined-job("DoesNotExist", false(), "html")
+         </code> 
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>Post a job with an invalid format</task>
+         <code>
+            orig:post-combined-job("Existing", false(), "invalid")
+         </code> 
+         <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
+      <test>
+         <task>Post a job for a resource with no read access</task>
+         <code>
+            orig:post-combined-job("NoAccess", false(), "html")
+      </code> 
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+  </TestSet>  
+  <TestSet>
       <testName>orig:list()</testName>
       <test>
          <task>List all resources</task>
