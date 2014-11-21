@@ -103,6 +103,15 @@ cacheSize=${cache.size}
             	<include name="icu4j-*"/>
             </fileset>
         </copy>
+        <!-- edit conf.xml -->
+        <xslt in="${installdir}/conf.xml"
+             out="${installdir}/conf.out.xml"
+             style="setup/setup-conf-xml.xsl"
+             processor="trax"
+             classpath="${lib.dir}/saxonhe-9.2.1.5.jar">
+             <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+        </xslt>
+        <move file="${installdir}/conf.out.xml" tofile="${installdir}/conf.xml"/> 
     </target>
 	
 	<target name="exist-clean">
