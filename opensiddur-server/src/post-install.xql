@@ -51,4 +51,9 @@ util:log-system-out("upgrades: reindex reference index"),
 ridx:reindex(collection("/db/data")),
 util:log-system-out("reindex all data collections"),
 xmldb:reindex("/db/data"),
+util:log-system-out("schedule background processor"),
+scheduler:schedule-xquery-periodic-job(
+    "/db/apps/opensiddur-server/modules/bg.xql", 
+    1000, "bg-compile", (), 5000, -1),
 util:log-system-out("done")
+

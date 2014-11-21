@@ -64,6 +64,9 @@ declare
             <a class="discovery" href="{$api-base}/group">Group</a>
           </li>,
           <li class="api">
+            <a class="discovery" href="{$api-base}/jobs">Jobs (compilation)</a>
+          </li>,
+          <li class="api">
             <a class="discovery" href="{$api-base}/login">Login</a>
           </li>,
           <li class="api">
