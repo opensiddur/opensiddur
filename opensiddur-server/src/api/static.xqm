@@ -52,22 +52,29 @@ declare
 declare 
     %rest:GET
     %rest:path("/api/static/{$name}")
+    %output:method("xml")
+    %rest:produces("image/svg+xml", "application/xml", "text/xml")
+    %output:media-type("image/svg+xml")
     function static:get(
         $name as xs:string
     ) as item()+ {
     let $collection := $paths:repo-base || "/static"
-    let $resource-uri := $collection || "/" || $name
+    let $resource-uri := $collection || "/" || $name 
     let $doc :=
         if (util:is-binary-doc($resource-uri))
         then util:binary-doc($resource-uri)
         else doc($resource-uri)
-    return (
-        <rest:response>
-            <output:serialization-parameters>
-              <output:media-type value="{xmldb:get-mime-type(xs:anyURI($resource-uri))}"/>
-              <output:method value="{if (util:is-binary-doc($resource-uri)) then 'binary' else 'xml'}"/>  
-            </output:serialization-parameters>
-        </rest:response>,
-        $doc
-    )
+    return
+        if ($doc)
+        then 
+        (
+          <rest:response>
+              <output:serialization-parameters>
+                <output:media-type value="{xmldb:get-mime-type(xs:anyURI($resource-uri))}"/>
+                <output:method value="{if (util:is-binary-doc($resource-uri)) then 'binary' else 'xml'}"/>  
+              </output:serialization-parameters>
+          </rest:response>,
+          $doc
+        )
+        else api:rest-error(404, "Not Found", $name)
 };
