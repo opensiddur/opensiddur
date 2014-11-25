@@ -214,6 +214,7 @@ div {
 }
 
 
+.jf-annotated .tei-note.type-audio,
 .jf-annotated .tei-note.type-comment,
 .jf-annotated .tei-note.type-editorial,
 .jf-annotated .tei-note.type-transcription,
