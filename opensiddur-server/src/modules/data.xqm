@@ -89,7 +89,7 @@ declare function local:resource-name-from-title-and-number(
   ) as xs:string {
   string-join(
     ( (: remove diacritics in resource names :)
-      encode-for-uri(replace($title, "\p{M}", "")), 
+      encode-for-uri(replace(normalize-space($title), "\p{M}", "")), 
       if ($number)
       then ("-", string($number))
       else (), ".xml"
