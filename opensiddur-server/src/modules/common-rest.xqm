@@ -234,7 +234,12 @@ declare function crest:list(
 declare function crest:tei-title-function(
   $doc as document-node()
   ) as xs:string {
-  $doc//tei:titleStmt/tei:title[@type="main"]/string()
+  normalize-space(
+    $doc//tei:titleStmt/string-join((
+        tei:title[@type="main"]/string(), 
+        tei:title[@type="sub"]/string()
+        ), ": ")
+  )
 };
 
 (: @return (list, start, count, n-results) :) 
