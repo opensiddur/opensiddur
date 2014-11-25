@@ -112,7 +112,10 @@ declare function src:list-function(
 declare function src:title-function(
   $doc as document-node()
   ) as xs:string {
-  ($doc//tei:monogr, $doc//tei:analytic, $doc//tei:series)[1]/(tei:title[@type="main"],tei:title[not(@type)])[1]/string()
+  ($doc//tei:monogr, $doc//tei:analytic, $doc//tei:series)[1]/(
+        normalize-space(string-join((
+            (tei:title[@type="main"],tei:title[not(@type)])[1],
+            tei:title[@type="sub"]), ": ")))
 };
 
 (:~ Delete a bibliographic entry text
