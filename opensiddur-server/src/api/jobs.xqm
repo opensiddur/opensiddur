@@ -9,6 +9,8 @@ module namespace job='http://jewishliturgy.org/api/jobs';
 
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "../modules/api.xqm";
+import module namespace crest="http://jewishliturgy.org/modules/common-rest"
+  at "../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "../modules/data.xqm";
 import module namespace status="http://jewishliturgy.org/modules/status"
@@ -106,6 +108,13 @@ declare
                     <li class="result"><a href="{api:uri-of('/api/jobs')}/{$job-id}">{
                         $job/@resource/string()
                         }</a>:
+                        <span class="title">{
+                            let $doc := data:doc($job/@resource/string())
+                            return
+                                if (exists($doc))
+                                then crest:tei-title-function($doc)
+                                else "(deleted)"
+                        }</span>:
                         <span class="user">{$job/@user/string()}</span>:
                         <span class="state">{$job/@state/string()}</span>:
                         <span class="started">{$job/@started/string()}</span>-
