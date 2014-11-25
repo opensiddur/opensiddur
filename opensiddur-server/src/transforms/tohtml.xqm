@@ -406,7 +406,6 @@ declare function tohtml:add-additional-license-notes(
             (: any more external credits? :) 
         )
     }
-:)
 };
 
 declare function tohtml:tei-listBibl(
