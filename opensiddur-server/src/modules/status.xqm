@@ -84,10 +84,13 @@ declare function status:start-job(
                 attribute resource {data:db-path-to-api(string-join(($collection, $resource), '/'))}
             }
         )
-    let $permissions := app:copy-permissions(
-        $path,
-        sm:get-permissions(document-uri($origin-doc)))
-    let $universal := sm:chmod(xs:anyURI($path), "rw-rw-rw-")
+    let $permissions := 
+        system:as-user("admin", $magic:password, (
+            app:copy-permissions(
+                $path,
+                sm:get-permissions(document-uri($origin-doc))),
+            sm:chmod(xs:anyURI($path), "rw-rw-rw-")
+        ))
     return $job-id
 };
 

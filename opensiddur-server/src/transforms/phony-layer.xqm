@@ -102,7 +102,7 @@ declare function phony:j-streamText(
     $e as element(j:streamText),
     $params as map
     ) as element(j:streamText) {
-    let $phonies := ridx:query(phony:doc-phony-links($e), $e, 1, false())
+    let $phonies := ridx:query(phony:doc-phony-links($e), $e, 1, false())[self::tei:link]
     return
         element j:streamText {
             $e/@*,
@@ -149,7 +149,7 @@ declare function phony:element(
             ridx:query(phony:doc-phony-links($e), 
                 $e|(
                     if ($e/parent::j:layer) then ($concurrent-ancestor, $layer-ancestor) else ()
-                ), 1, false())
+                ), 1, false())[self::tei:link]
         else ()
     return
         element {QName(namespace-uri($e), name($e))}{
