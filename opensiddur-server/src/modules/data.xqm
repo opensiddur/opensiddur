@@ -2,7 +2,7 @@ xquery version "3.0";
 (:~ support functions for the REST API for data retrieval
  :
  : Open Siddur Project
- : Copyright 2011-2013 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :) 
@@ -88,8 +88,11 @@ declare function local:resource-name-from-title-and-number(
   $number as xs:integer
   ) as xs:string {
   string-join(
-    ( (: remove diacritics in resource names :)
-      encode-for-uri(replace(normalize-space($title), "\p{M}", "")), 
+    ( (: remove diacritics in resource names and replace some special characters 
+       : like strings of ,;= with dashes. The latter characters have special 
+       : meanings in some URIs and are not always properly encoded on the client side
+       :)
+      encode-for-uri(replace(replace(normalize-space($title), "\p{M}", ""), "[,;-]+", "-")), 
       if ($number)
       then ("-", string($number))
       else (), ".xml"

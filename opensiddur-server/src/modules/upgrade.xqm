@@ -31,6 +31,22 @@ declare function upg:schema-changes-0-7-5(
             }
 };
 
+(: not strictly speaking a schema change:
+ : any resource in /db/data with a name containing ,;= will be renamed.
+ : NOTE: if we expected any links to such files, the links would also have to be changed.
+ : Fortunately, we do not expect external links. If they are found, they will have to 
+ : be manually corrected.
+ :)
+declare function upg:schema-changes-0-8-0() {
+    for $document in collection("/db/data")[matches(util:document-name(.), "%(2C|3B|3D)")]
+    let $collection := util:collection-name($document)
+    let $resource := util:document-name($document)
+    let $new-name := replace($resource, "(%(2C|3B|3D))+", "-")
+    return
+        xmldb:rename($collection, $resource, $new-name)
+};
+
 declare function upg:all-schema-changes() {
-    upg:schema-changes-0-7-5()
+    upg:schema-changes-0-7-5(),
+    upg:schema-changes-0-8-0()
 };
