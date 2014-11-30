@@ -110,7 +110,7 @@ declare
   function user:get(
     $name as xs:string
   ) as item()+ {
-  let $resource := concat($user:path, "/", encode-for-uri($name), ".xml")
+  let $resource := concat($user:path, "/", $name, ".xml")
   return
     if (doc-available($resource))
     then doc($resource)
@@ -154,11 +154,11 @@ declare
     $user as xs:string*,
     $password as xs:string*
   ) as item()+ {
-  let $name := $user[1]
+  let $name := xmldb:decode($user[1])
   let $password := $password[1] 
   return
-    if (matches($name, "[,;=()]"))
-    then api:rest-error(400, "User name contains illegal characters: parenthesis, comma, semicolon, or equals")
+    if (matches($name, "[,;=()/]"))
+    then api:rest-error(400, "User name contains illegal characters: parenthesis, comma, semicolon, slash, or equals")
     else if (not($name) or not($password))
     then api:rest-error(400, "Missing user or password")
     else
@@ -197,7 +197,7 @@ declare
               let $null := sm:create-account($name, $password, "everyone")
               let $stored := 
                 xmldb:store($user:path, 
-                  concat(encode-for-uri($name), ".xml"),
+                  concat($name, ".xml"),
                   <j:contributor>
                     <tei:idno>{$name}</tei:idno>
                   </j:contributor>
@@ -280,8 +280,9 @@ declare
     $name as xs:string,
     $body as document-node()
   ) as item()+ {
+  let $name := xmldb:decode($name)
   let $user := app:auth-user()
-  let $resource := concat($user:path, "/", encode-for-uri($name), ".xml")
+  let $resource := concat($user:path, "/", $name, ".xml")
   let $resource-exists := doc-available($resource)
   let $is-non-user-profile := 
     not($user = $name) and 
@@ -337,7 +338,7 @@ declare
     $name as xs:string
   ) as item()+ {
   let $user := app:auth-user()
-  let $resource-name := concat(encode-for-uri($name), ".xml")
+  let $resource-name := concat($name, ".xml")
   let $resource := concat($user:path, "/", $resource-name)
   let $resource-exists := doc-available($resource)
   let $is-non-user-profile := 
