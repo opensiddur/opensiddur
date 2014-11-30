@@ -215,6 +215,18 @@
          <class href="common.t.incl.xml#BadRequest"/> 
       </test>
       <test>
+         <task>Create a new user with a username containing an illegal character</task>
+         <code>
+      user:post-xml(document {
+        &lt;new&gt;
+          &lt;user&gt;test,user3&lt;/user&gt;
+          &lt;password&gt;testuser3&lt;/password&gt;
+        &lt;/new&gt;
+      })
+      </code>
+         <class href="common.t.incl.xml#BadRequest"/> 
+      </test>
+      <test>
          <task>Create a new user when the user already exists</task>
          <code>
       user:post-xml(document {

@@ -157,7 +157,9 @@ declare
   let $name := $user[1]
   let $password := $password[1] 
   return
-    if (not($name) or not($password))
+    if (matches($name, "[,;=()]"))
+    then api:rest-error(400, "User name contains illegal characters: parenthesis, comma, semicolon, or equals")
+    else if (not($name) or not($password))
     then api:rest-error(400, "Missing user or password")
     else
       let $user := app:auth-user()
