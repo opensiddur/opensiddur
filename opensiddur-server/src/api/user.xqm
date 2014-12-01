@@ -157,8 +157,8 @@ declare
   let $name := xmldb:decode($user[1])
   let $password := $password[1] 
   return
-    if (matches($name, "[,;=()/]"))
-    then api:rest-error(400, "User name contains illegal characters: parenthesis, comma, semicolon, slash, or equals")
+    if (matches($name, "[,;:=()/\s]"))
+    then api:rest-error(400, "User name contains illegal characters: whitespace, parenthesis, comma, semicolon, colon, slash, or equals")
     else if (not($name) or not($password))
     then api:rest-error(400, "Missing user or password")
     else
@@ -216,7 +216,7 @@ declare
                       sm:chgrp($uri, $name)
                     }
                     <http:response status="201">
-                      <http:header name="Location" value="{api:uri-of('/api/user')}/{encode-for-uri($name)}"/>
+                      <http:header name="Location" value="{api:uri-of('/api/user')}/{$name}"/>
                     </http:response>
                   </rest:response>
                 else 
@@ -313,7 +313,7 @@ declare
               then <http:response status="204"/>
               else 
                 <http:response status="201">
-                  <http:header name="Location" value="{api:uri-of('/api/user')}/{encode-for-uri($name)}"/>
+                  <http:header name="Location" value="{api:uri-of('/api/user')}/{$name}"/>
                 </http:response>
             }
           </rest:response>
