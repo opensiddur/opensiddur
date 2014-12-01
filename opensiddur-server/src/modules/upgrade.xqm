@@ -38,10 +38,10 @@ declare function upg:schema-changes-0-7-5(
  : be manually corrected.
  :)
 declare function upg:schema-changes-0-8-0() {
-    for $document in collection("/db/data")[matches(util:document-name(.), "%(2C|3B|3D)")]
+    for $document in collection("/db/data")[matches(util:document-name(.), "%(24|2C|3A|3B|3D)")]
     let $collection := util:collection-name($document)
     let $resource := util:document-name($document)
-    let $new-name := replace($resource, "(%(2C|3B|3D))+", "-")
+    let $new-name := replace($resource, "(%(24|2C|3A|3B|3D))+", "-")
     return
         xmldb:rename($collection, $resource, $new-name)
 };

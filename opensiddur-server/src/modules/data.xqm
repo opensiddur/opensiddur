@@ -89,10 +89,10 @@ declare function local:resource-name-from-title-and-number(
   ) as xs:string {
   string-join(
     ( (: remove diacritics in resource names and replace some special characters 
-       : like strings of ,;= with dashes. The latter characters have special 
+       : like strings of ,;=$:@ with dashes. The latter characters have special 
        : meanings in some URIs and are not always properly encoded on the client side
        :)
-      encode-for-uri(replace(replace(normalize-space($title), "\p{M}", ""), "[,;-]+", "-")), 
+      encode-for-uri(replace(replace(normalize-space($title), "\p{M}", ""), "[,;:$=@]+", "-")), 
       if ($number)
       then ("-", string($number))
       else (), ".xml"
