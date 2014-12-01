@@ -83,7 +83,7 @@ declare function data:user-api-path(
     )
 };
 
-declare function local:resource-name-from-title-and-number(
+declare function data:resource-name-from-title-and-number(
   $title as xs:string,
   $number as xs:integer
   ) as xs:string {
@@ -100,16 +100,16 @@ declare function local:resource-name-from-title-and-number(
   "")
 };
 
-declare function local:find-duplicate-number(
+declare function data:find-duplicate-number(
   $type as xs:string,
   $title as xs:string,
   $n as xs:integer
   ) as xs:integer {
   if (exists(collection(concat($data:path-base, "/", $type))
     [util:document-name(.)=
-      local:resource-name-from-title-and-number($title, $n)]
+      data:resource-name-from-title-and-number($title, $n)]
     ))
-  then local:find-duplicate-number($type, $title, $n + 1)
+  then data:find-duplicate-number($type, $title, $n + 1)
   else $n
 };
 
@@ -124,8 +124,8 @@ declare function data:new-path-to-resource(
   ) as xs:string+ {
   let $date := current-date()
   let $resource-name := 
-    local:resource-name-from-title-and-number($title, 
-      local:find-duplicate-number($type, $title, 0))
+    data:resource-name-from-title-and-number($title, 
+      data:find-duplicate-number($type, $title, 0))
   return (
     (: WARNING: the format-date() function works differently 
      : from the XSLT spec!
