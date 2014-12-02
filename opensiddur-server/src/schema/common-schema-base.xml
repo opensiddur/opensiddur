@@ -214,16 +214,20 @@ schemas, not as an independent unit
     <attList>
       <attDef ident="ref" mode="delete"/>
       <attDef ident="key" mode="change" usage="req">
-        <desc>Responsibility type, indicated using one of the allowed MARC relator codes, as defined at http://www
-          aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), pfr (proofreader), spn, (sponsor)</desc>
+        <desc>Responsibility type, indicated using one of the allowed MARC relator codes, as defined at 
+        http://www.loc.gov/marc/relators/relaterm.html. The valid codes are:
+          ann (annotator), aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), mrk (markup editor), pfr (proofreader), spn (sponsor),
+            trl (translator), and trc (transcriber)</desc>
         <datatype minOccurs="1" maxOccurs="1">
           <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
         </datatype>
         <valList type="closed">
+          <valItem ident="ann"/>
           <valItem ident="aut"/>
           <valItem ident="edt"/>
           <valItem ident="fac"/>
           <valItem ident="fnd"/>
+          <valItem ident="mrk"/>
           <valItem ident="pfr"/>
           <valItem ident="spn"/>
           <valItem ident="trl"/>

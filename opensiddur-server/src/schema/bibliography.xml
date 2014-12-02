@@ -77,7 +77,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
       <div>
         <head>Formal declaration</head>
         <schemaSpec ident="bibliography" start="biblStruct" xml:lang="en">
-          <moduleRef key="core" include="analytic author biblScope biblStruct date editor imprint monogr name note ptr pubPlace publisher ref relatedItem series textLang title"/>
+          <moduleRef key="core" include="analytic author biblScope biblStruct date editor imprint monogr name note ptr pubPlace publisher ref relatedItem resp respStmt series textLang title"/>
           <moduleRef key="tei"/>
           <moduleRef key="header" include="distributor edition extent idno"/>
           <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
