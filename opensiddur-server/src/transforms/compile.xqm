@@ -145,7 +145,9 @@ declare variable $compile:contributor-types :=
         "mrk" := "Markup editor",
         "oth" := "Other",
         "pfr" := "Proofreader",
-        "trc" := "Transcriber"
+        "spn" := "Sponsor",
+        "trc" := "Transcriber",
+        "trl" := "Translator"
     };
 
 declare function compile:contributor-list(
@@ -222,10 +224,13 @@ declare function compile:source-list(
                         for $e in (
                             tei:analytic/tei:author/tei:name,
                             tei:analytic/tei:editor/tei:name,
+                            tei:analytic/tei:respStmt/tei:name,
                             tei:monogr/tei:author/tei:name,
                             tei:monogr/tei:editor/tei:name, 
+                            tei:monogr/tei:respStmt/tei:name,
                             tei:series/tei:author/tei:name,
-                            tei:series/tei:editor/tei:name
+                            tei:series/tei:editor/tei:name,
+                            tei:series/tei:respStmt/tei:name
                         ) 
                         return compile:name-sort-key($e),
                         tei:analytic/tei:title,

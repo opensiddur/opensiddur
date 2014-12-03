@@ -22,6 +22,8 @@ import module namespace api="http://jewishliturgy.org/modules/api"
   at "../modules/api.xqm";
 import module namespace common="http://jewishliturgy.org/transform/common"
   at "../modules/common.xqm";
+import module namespace compile="http://jewishliturgy.org/transform/compile"
+  at "compile.xqm";
 
 declare variable $tohtml:default-style := "/api/data/styles/generic.css";
 
@@ -436,6 +438,8 @@ declare function tohtml:bibliography(
         return tohtml:bibl-tei-author-or-editor($node, $params)
         case element(tei:editor)
         return tohtml:bibl-tei-author-or-editor($node, $params)
+        case element(tei:respStmt)
+        return tohtml:bibl-tei-author-or-editor($node, $params)
         case element(tei:surname)
         return tohtml:bibl-tei-surname($node, $params)
         case element(tei:forename)
@@ -503,11 +507,16 @@ declare function tohtml:bibl-tei-author-or-editor(
     ) as node()* {
     if (not($e/@corresp)) 
     then    (: do not include translations :)
-        let $n-following := count($e/following-sibling::*[name()=$e/name()][not(@corresp)])
+        let $n-following := 
+            if ($e instance of element(tei:respStmt))
+            then count($e/following-sibling::tei:respStmt[tei:resp/@key=$e/tei:resp/@key][not(@corresp)])
+            else count($e/following-sibling::*[name()=$e/name()][not(@corresp)])
         return (
             element div {
                 tohtml:attributes($e, $params),
-                tohtml:bibliography($e/node(), $params)
+                tohtml:bibliography(
+                    if ($e instance of element(tei:respStmt)) then $e/(node() except tei:resp) 
+                    else $e/node(), $params)
             },
             text {
                 if ($e instance of element(tei:author) and $n-following=0)
@@ -517,6 +526,12 @@ declare function tohtml:bibl-tei-author-or-editor(
                     " (ed",
                     if ($e/preceding-sibling::tei:editor) then "s" else (),
                     ".) "), "") (: editor :)
+                else if ($e instance of element(tei:respStmt) and $n-following=0) (: other responsibility :)
+                then string-join((" (",
+                                  $compile:contributor-types(($e/tei:resp/@key/string(), "edt")[1]),
+                                  if ($e/preceding-sibling::tei:respStmt[tei:resp/@key=$e/tei:resp/@key]) 
+                                  then "s" else (),
+                                  ")"), "") 
                 else if ($n-following=1)
                 then " and " (: penultimate in list :)
                 else ", " (: first or middle name in a list :)
