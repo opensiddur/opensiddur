@@ -5,6 +5,7 @@
   xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
   xmlns:rng="http://relaxng.org/ns/structure/1.0"
   xmlns:s="http://purl.oclc.org/dsdl/schematron"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
   xml:lang="en">
   <teiHeader>
     <fileDesc>
@@ -76,7 +77,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
       </div>  
       <div>
         <head>Formal declaration</head>
-        <schemaSpec ident="bibliography" start="biblStruct" xml:lang="en">
+        <schemaSpec ident="bibliography" start="biblStruct" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
           <moduleRef key="core" include="analytic author biblScope biblStruct date editor imprint monogr name note ptr pubPlace publisher ref relatedItem resp respStmt series textLang title"/>
           <moduleRef key="tei"/>
           <moduleRef key="header" include="distributor edition extent idno"/>
@@ -116,6 +117,34 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
                 <datatype minOccurs="1" maxOccurs="1">
                   <rng:text xmlns:rng="http://relaxng.org/ns/structure/1.0"/>
                 </datatype>
+              </attDef>
+            </attList>
+          </elementSpec>
+            <!-- definition of resp, duplicated from common-schema-base -->
+          <elementSpec ident="resp" module="core" mode="change">
+            <!-- require @key in resp -->
+            <attList>
+              <attDef ident="ref" mode="delete"/>
+              <attDef ident="key" mode="change" usage="req">
+                <desc>Responsibility type, indicated using one of the allowed MARC relator codes, as defined at 
+                http://www.loc.gov/marc/relators/relaterm.html. The valid codes are:
+                  ann (annotator), aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), mrk (markup editor), pfr (proofreader), spn (sponsor),
+                    trl (translator), and trc (transcriber)</desc>
+                <datatype minOccurs="1" maxOccurs="1">
+                  <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
+                </datatype>
+                <valList type="closed" mode="change">
+                  <valItem ident="ann"/>
+                  <valItem ident="aut"/>
+                  <valItem ident="edt"/>
+                  <valItem ident="fac"/>
+                  <valItem ident="fnd"/>
+                  <valItem ident="mrk"/>
+                  <valItem ident="pfr"/>
+                  <valItem ident="spn"/>
+                  <valItem ident="trl"/>
+                  <valItem ident="trc"/>
+                </valList>        
               </attDef>
             </attList>
           </elementSpec>

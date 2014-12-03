@@ -221,7 +221,7 @@ schemas, not as an independent unit
         <datatype minOccurs="1" maxOccurs="1">
           <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
         </datatype>
-        <valList type="closed">
+        <valList type="closed" mode="add">
           <valItem ident="ann"/>
           <valItem ident="aut"/>
           <valItem ident="edt"/>
