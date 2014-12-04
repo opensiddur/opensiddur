@@ -154,7 +154,7 @@ declare
     $user as xs:string*,
     $password as xs:string*
   ) as item()+ {
-  let $name := xmldb:decode($user[1])
+  let $name := xmldb:decode($user[1] || "")
   let $password := $password[1] 
   return
     if (matches($name, "[,;:=()/\s]"))
