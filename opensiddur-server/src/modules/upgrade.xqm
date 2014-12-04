@@ -13,7 +13,7 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
     at "common-rest.xqm";
 import module namespace src="http://jewishliturgy.org/api/data/sources"
     at "../api/data/sources.xqm";
-import module namespace tran="http://jewishliturgy.org/api/data/transliteration"
+import module namespace tran="http://jewishliturgy.org/api/transliteration"
     at "../api/data/transliteration.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -63,7 +63,7 @@ declare function upg:schema-changes-0-8-0() {
     let $new-name := 
         string-join((
             encode-for-uri(replace(replace(normalize-space($title), "\p{M}", ""), "[,;:$=@]+", "-")),
-            $n), "-") || ".xml"
+            $resource-number), "-") || ".xml"
     where not($resource = $new-name)
     return (
         util:log-system-out("Renaming: " || $collection || "/" || $resource || " -> " || $new-name),
