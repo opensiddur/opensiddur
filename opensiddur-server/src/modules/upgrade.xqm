@@ -50,10 +50,11 @@ declare function upg:schema-changes-0-8-0() {
     for $document in collection("/db/data")
     let $collection := util:collection-name($document)
     let $resource := util:document-name($document)
+    let $decoded := xmldb:decode($resource)
     let $resource-number := 
-        let $n := tokenize($resource, '-')[last()]
-        where matches($n, "\d+\.xml")
-        return $n
+        let $n := tokenize($decoded, '-')[last()]
+        where matches($decoded, "-\d+\.xml$") and matches($n, "\d+\.xml")
+        return substring-before($n, '.xml')
     let $title := 
         if (starts-with($collection, "/db/data/sources"))
         then src:title-function($document)
@@ -64,9 +65,11 @@ declare function upg:schema-changes-0-8-0() {
         string-join((
             encode-for-uri(replace(replace(normalize-space($title), "\p{M}", ""), "[,;:$=@]+", "-")),
             $resource-number), "-") || ".xml"
-    where not($resource = $new-name)
+    where not(starts-with($collection,"/db/data/user"))
+        and not($resource = $new-name) 
+        and not($resource = "Born%20Digital.xml")
     return (
-        util:log-system-out("Renaming: " || $collection || "/" || $resource || " -> " || $new-name),
+        util:log-system-out("Renaming: " || $collection || "/" || $resource || " -> " || $new-name || "&#x0a;using title=" || $title),
         xmldb:rename($collection, $resource, $new-name)
     )
 };
