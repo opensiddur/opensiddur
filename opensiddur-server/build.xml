@@ -25,6 +25,7 @@
         <sequential>
             <mkdir dir="@{temp.dir}"/>
             <exec executable="${roma}">
+                <arg value="--xsl=${lib.dir}/tei/Stylesheets"/>
                 <arg value="--nodtd"/>
                 <arg value="--noxsd"/>
                 <arg value="--isoschematron"/>
