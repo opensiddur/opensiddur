@@ -528,7 +528,7 @@ declare function tohtml:bibl-tei-author-or-editor(
                     ".) "), "") (: editor :)
                 else if ($e instance of element(tei:respStmt) and $n-following=0) (: other responsibility :)
                 then string-join((" (",
-                                  $compile:contributor-types(($e/tei:resp/@key/string(), "edt")[1]),
+                                  lower-case($compile:contributor-types(($e/tei:resp/@key/string(), "edt")[1])),
                                   if ($e/preceding-sibling::tei:respStmt[tei:resp/@key=$e/tei:resp/@key]) 
                                   then "s" else (),
                                   ")"), "") 

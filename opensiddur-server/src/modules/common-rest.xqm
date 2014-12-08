@@ -236,8 +236,8 @@ declare function crest:tei-title-function(
   ) as xs:string {
   normalize-space(
     $doc//tei:titleStmt/string-join((
-        tei:title[@type="main"]/string(), 
-        tei:title[@type="sub"]/string()
+        tei:title["main"=@type]/string(), 
+        tei:title["sub"=@type]/string()
         ), ": ")
   )
 };

@@ -3,13 +3,14 @@
 # given a path to a backup, remove a selected set of files/directories by regexp
 # 
 # Open Siddur Project
-# Copyright 2010-2013 Efraim Feinstein
+# Copyright 2010-2014 Efraim Feinstein
 # Licensed under the GNU Lesser General Public License, version 3 or later
 #
 import sys
 import copy
 import re
 import os
+import shutil
 import getopt
 import time
 from lxml import etree
@@ -26,6 +27,13 @@ def shouldRemove(pth, removeRegexps, elem):
         or removeRegexps.match(pth) is not None
     )
 
+def removeFromFilesystem(directory, filename):
+    fullPath = os.path.join(directory, filename)
+    try:
+        os.remove(fullPath)
+    except OSError: # it's a directory
+        shutil.rmtree(fullPath)
+
 def removeFromBackup(pathToContentXml, removeRegexps):
     contentPath = os.path.join(pathToContentXml, "__contents__.xml") 
     contentXml = etree.parse(contentPath)
@@ -36,6 +44,7 @@ def removeFromBackup(pathToContentXml, removeRegexps):
             # if shouldRemove, remove it
             #print >>sys.stderr, "Removing: ", os.path.join(dbPath, candidate.attrib["name"])
             candidate.getparent().remove(candidate)
+            removeFromFilesystem(pathToContentXml, candidate.attrib["filename"])
         elif candidate.tag == "{"+exNS+"}subcollection":
             # if not and subcollection, recurse to that directory
             removeFromBackup(os.path.join(pathToContentXml, candidate.attrib["filename"]), removeRegexps)

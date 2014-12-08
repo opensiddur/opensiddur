@@ -114,8 +114,8 @@ declare %private function src:title-part(
     ) as xs:string? {
     $tp/
         normalize-space(string-join((
-            (tei:title[@type="main"],tei:title[not(@type)])[1],
-            tei:title[@type="sub"]), ": "))
+            (tei:title["main"=@type],tei:title[not(@type)])[1],
+            tei:title["sub"=@type]), ": "))
 };
 
 declare function src:title-function(

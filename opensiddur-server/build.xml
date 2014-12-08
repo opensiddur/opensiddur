@@ -96,49 +96,49 @@
             <mapper type="glob" from="*.isosch" to="*.xsl2"/>
         </xslt>
     </target>
-    <target name="jlptei-schema" depends="schema-dir">
+    <target name="jlptei-schema" depends="schema-dir" unless="schema.uptodate">
 		<generate-schema 
             input.file="${src}/schema/jlptei.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
     </target>
-    <target name="linkage-schema" depends="schema-dir">
+    <target name="linkage-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/linkage.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
     </target>
-    <target name="contributor-schema" depends="schema-dir">
+    <target name="contributor-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/contributor.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
     </target>
-    <target name="bibliography-schema" depends="schema-dir">
+    <target name="bibliography-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/bibliography.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
     </target>
-    <target name="annotation-schema" depends="schema-dir">
+    <target name="annotation-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/annotation.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
     </target>
-    <target name="conditional-schema" depends="schema-dir">
+    <target name="conditional-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/conditional.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
     </target>
-    <target name="dictionary-schema" depends="schema-dir">
+    <target name="dictionary-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/dictionary.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
     </target>
-    <target name="style-schema" depends="schema-dir">
+    <target name="style-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/style.xml" 
             output.dir="${build}/schema" 

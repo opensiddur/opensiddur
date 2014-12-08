@@ -256,9 +256,9 @@ cacheSize=${cache.size}
 ^/db/refindex
 ^/db/system/config
 ^/db/system/security/exist/(accounts|groups)/removed
-^/db/system/security/exist/accounts/(admin|guest|testuser|testuser2)\.xml$
-^/db/system/security/exist/groups/(dba|testuser|testuser2)\.xml$
-^/db/data/user/(testuser|testuser2)\.xml$
+^/db/system/security/exist/accounts/(admin|guest|testuser|testuser.)\.xml$
+^/db/system/security/exist/groups/(dba|testuser|testuser2|grouptests|grouptests.)\.xml$
+^/db/data/user/(testuser|testuser.)\.xml$
 ^/db/data/tests
         </echo>
         <exec input="${exist.backup.remove.file}"
