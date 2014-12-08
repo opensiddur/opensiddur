@@ -26,6 +26,8 @@ import module namespace format="http://jewishliturgy.org/modules/format"
   at "../../modules/format.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "../../modules/paths.xqm";
+import module namespace status="http://jewishliturgy.org/modules/status"
+  at "../../modules/status.xqm";
 
 declare variable $orig:data-type := "original";
 declare variable $orig:schema := concat($paths:schema-base, "/jlptei.rnc");
@@ -413,6 +415,82 @@ declare
       format:html($doc, map {}, $doc, ($transclude, false())[1])
     else $doc
 };
+
+(:~ Background compile an original data resource with combined hierarchies in HTML.
+ : @param $name The resource to background compile
+ : @param $format output format: may be 'xml' or 'html' (default).
+ : @param $transclude if true(), transclude all pointers, otherwise (default), return the pointers only.
+ : @return HTTP 202 A Location header pointing to the job status API
+ : @error HTTP 400 Bad output format
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare 
+  %rest:POST
+  %rest:path("/api/data/original/{$name}/combined")
+  %rest:query-param("transclude", "{$transclude}")
+  %rest:query-param("format", "{$format}")
+  %rest:produces("text/plain")
+  %output:method("xml")
+  %output:indent("yes")
+  function orig:post-combined-job(
+    $name as xs:string,
+    $transclude as xs:boolean*,
+    $format as xs:string*
+  ) as item()+ {
+  let $doc := crest:get($orig:data-type, $name)
+  let $format := 
+    if (exists($format))
+    then $format[1]
+    else 'html'
+  return
+    if (not($format=('html','xml')))
+    then api:rest-error(400, "Bad format. Must be one of 'xml' or 'html'", $format) 
+    else if ($doc instance of document-node())
+    then
+      let $doc-path := "doc('" || document-uri($doc) || "')"
+      let $transclude-string := string(($transclude, false())[1]) || "()"
+      let $job-id := status:start-job($doc)
+      let $params-string := "map { 'format:status-job-id' := '" || $job-id || "' }"
+      let $preamble := "xquery version '3.0';
+            import module namespace format='http://jewishliturgy.org/modules/format' at '/db/apps/opensiddur-server/modules/format.xqm';
+    let $b :=
+" 
+      let $postamble := "
+return util:log-system-out(('compiled ', document-uri($b)))"
+      let $async := 
+        if ($format = 'html')
+        then (:util:eval-async("format:html($doc, map {}, $doc, ($transclude, false())[1])"):)
+            status:submit($preamble ||
+            "format:html(" || $doc-path || ", " || $params-string || ", " || $doc-path || ", " || $transclude-string || ")" || $postamble)
+        else 
+            if ($transclude[1])
+            then status:submit($preamble || 
+                "format:compile(" || $doc-path || ", " || $params-string || ", " || $doc-path || ")" || 
+                $postamble)
+            else status:submit($preamble ||
+                "format:unflatten(" || $doc-path || ", " || $params-string || ", " || $doc-path || ")" || 
+                $postamble)
+(:
+          util:eval-async("
+            if ($transclude[1])
+            then
+              format:compile($doc, map {}, $doc)
+            else
+              format:unflatten($doc, map {}, $doc)
+            ")
+:)
+      return 
+        <rest:response>
+            <output:serialization-parameters>
+                <output:method value="text"/>
+            </output:serialization-parameters>
+            <http:response status="202">
+                <http:header name="Location" value="{api:uri-of('/api/jobs')}/{$job-id}"/>
+            </http:response> 
+        </rest:response>
+    else $doc
+};
+
 
 (:~ for debugging only :)
 declare 

@@ -234,7 +234,12 @@ declare function crest:list(
 declare function crest:tei-title-function(
   $doc as document-node()
   ) as xs:string {
-  $doc//tei:titleStmt/tei:title[@type="main"]/string()
+  normalize-space(
+    $doc//tei:titleStmt/string-join((
+        tei:title["main"=@type]/string(), 
+        tei:title["sub"=@type]/string()
+        ), ": ")
+  )
 };
 
 (: @return (list, start, count, n-results) :) 
@@ -347,17 +352,30 @@ declare function crest:delete(
           sm:has-access(xs:anyURI($collection), "w") and 
           sm:has-access($path, "w")
           )
-        then (
-          (: TODO: check for references! :)
-          xmldb:remove($collection, $resource),
-          ridx:remove($collection, $resource),
-          <rest:response>
-            <output:serialization-parameters>
-              <output:method value="text"/>
-            </output:serialization-parameters>
-            <http:response status="204"/>
-          </rest:response>
-        )
+        then
+            let $doc-references := ridx:query-document($doc)[not(root(.) is $doc)]
+            return
+                if (exists($doc-references))
+                then 
+                    api:rest-error(400, "The document cannot be deleted because other documents reference this document.",
+                      <documents>{
+                          for $other-doc in $doc-references
+                          group by $other-doc-uri := document-uri(root($other-doc))
+                          return
+                              <document>{data:db-path-to-api($other-doc-uri)}</document>
+                      }</documents>)
+                else
+                    (
+                      (: TODO: check for references! :)
+                      xmldb:remove($collection, $resource),
+                      ridx:remove($collection, $resource),
+                      <rest:response>
+                        <output:serialization-parameters>
+                          <output:method value="text"/>
+                        </output:serialization-parameters>
+                        <http:response status="204"/>
+                      </rest:response>
+                    )
         else
           crest:no-access()
     else

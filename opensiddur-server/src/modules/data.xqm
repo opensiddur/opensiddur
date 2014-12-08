@@ -2,7 +2,7 @@ xquery version "3.0";
 (:~ support functions for the REST API for data retrieval
  :
  : Open Siddur Project
- : Copyright 2011-2013 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :) 
@@ -83,13 +83,16 @@ declare function data:user-api-path(
     )
 };
 
-declare function local:resource-name-from-title-and-number(
+declare function data:resource-name-from-title-and-number(
   $title as xs:string,
   $number as xs:integer
   ) as xs:string {
   string-join(
-    ( (: remove diacritics in resource names :)
-      encode-for-uri(replace($title, "\p{M}", "")), 
+    ( (: remove diacritics in resource names and replace some special characters 
+       : like strings of ,;=$:@ with dashes. The latter characters have special 
+       : meanings in some URIs and are not always properly encoded on the client side
+       :)
+      encode-for-uri(replace(replace(normalize-space($title), "\p{M}", ""), "[,;:$=@]+", "-")), 
       if ($number)
       then ("-", string($number))
       else (), ".xml"
@@ -97,16 +100,16 @@ declare function local:resource-name-from-title-and-number(
   "")
 };
 
-declare function local:find-duplicate-number(
+declare function data:find-duplicate-number(
   $type as xs:string,
   $title as xs:string,
   $n as xs:integer
   ) as xs:integer {
   if (exists(collection(concat($data:path-base, "/", $type))
     [util:document-name(.)=
-      local:resource-name-from-title-and-number($title, $n)]
+      data:resource-name-from-title-and-number($title, $n)]
     ))
-  then local:find-duplicate-number($type, $title, $n + 1)
+  then data:find-duplicate-number($type, $title, $n + 1)
   else $n
 };
 
@@ -121,8 +124,8 @@ declare function data:new-path-to-resource(
   ) as xs:string+ {
   let $date := current-date()
   let $resource-name := 
-    local:resource-name-from-title-and-number($title, 
-      local:find-duplicate-number($type, $title, 0))
+    data:resource-name-from-title-and-number($title, 
+      data:find-duplicate-number($type, $title, 0))
   return (
     (: WARNING: the format-date() function works differently 
      : from the XSLT spec!

@@ -485,8 +485,8 @@ declare function combine:translation-redirect(
                 "(/exist/restxq)?/api", "")
         let $translated-stream-root := root($translated-stream-unmirrored)
         let $mirrored-translation-doc := 
-            let $deps := format:unflatten-dependencies($translated-stream-root, map {})
-            return format:unflatten($translated-stream-root, map {}, $translated-stream-root)
+            let $deps := format:unflatten-dependencies($translated-stream-root, $params)
+            return format:unflatten($translated-stream-root, $params, $translated-stream-root)
         let $destination-stream-domain := $mirrored-translation-doc//tei:TEI[@jf:document=$destination-doc]//jf:unflattened
         let $redirect-begin :=
             if ($destination[1] instance of element(jf:unflattened))

@@ -25,6 +25,7 @@
         <sequential>
             <mkdir dir="@{temp.dir}"/>
             <exec executable="${roma}">
+                <arg value="--xsl=${lib.dir}/tei/Stylesheets"/>
                 <arg value="--nodtd"/>
                 <arg value="--noxsd"/>
                 <arg value="--isoschematron"/>
@@ -73,10 +74,7 @@
 	<target name="dist" depends="init,xar"
 		description="build everything"/>
 
-	<target name="schema" 
-		depends="init"
-		description="generate XML schemas"
-		unless="schema.uptodate">
+    <target name="schema-dir" depends="init">
         <mkdir dir="${build}/schema"/>
         <mkdir dir="${build}/temp"/>
 		<!-- pre-generated rnc -->
@@ -85,6 +83,9 @@
                 <include name="*.rnc"/>
             </fileset>
         </copy>
+    </target>
+
+    <target name="pregen-schema" depends="schema-dir">
 		<!-- pre-generated iso schematron -->
     	<xslt
             classpath="${lib.dir}/saxonhe-9.2.1.5.jar"
@@ -94,38 +95,59 @@
             <factory name="net.sf.saxon.TransformerFactoryImpl" />
             <mapper type="glob" from="*.isosch" to="*.xsl2"/>
         </xslt>
+    </target>
+    <target name="jlptei-schema" depends="schema-dir" unless="schema.uptodate">
 		<generate-schema 
             input.file="${src}/schema/jlptei.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
+    </target>
+    <target name="linkage-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/linkage.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
+    </target>
+    <target name="contributor-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/contributor.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
+    </target>
+    <target name="bibliography-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/bibliography.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
+    </target>
+    <target name="annotation-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/annotation.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
+    </target>
+    <target name="conditional-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/conditional.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
+    </target>
+    <target name="dictionary-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/dictionary.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
+    </target>
+    <target name="style-schema" depends="schema-dir" unless="schema.uptodate">
         <generate-schema 
             input.file="${src}/schema/style.xml" 
             output.dir="${build}/schema" 
             temp.dir="${build}/temp" />
+    </target>
+	<target name="schema" 
+		depends="init,schema-dir,pregen-schema,jlptei-schema,linkage-schema,contributor-schema,bibliography-schema,annotation-schema,conditional-schema,dictionary-schema,style-schema"
+		description="generate XML schemas"
+		unless="schema.uptodate">
         <delete dir="${build}/temp"/>
 	</target>
 	

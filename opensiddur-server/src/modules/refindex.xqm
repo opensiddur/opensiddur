@@ -138,7 +138,7 @@ declare function ridx:reindex(
         if (mirror:store($ridx:ridx-path, $collection, $resource, 
           element ridx:index {
             attribute document { $doc-uri },
-            ridx:make-index-entries($doc//@target|$doc//@targets|$doc//@ref|$doc//@domains)
+            ridx:make-index-entries($doc//@target|$doc//@targets|$doc//@ref|$doc//@domains|$doc//@who)
           }
         ))
         then ()
@@ -234,25 +234,22 @@ declare function ridx:query(
       if ($source-node instance of document-node())
       then ()
       else util:node-id($source-node)
-    for $entry in 
-      collection($ridx:ridx-path)/
-        ridx:index[@document=$source-document]/(
-          ridx:entry
-            [empty($source-node-id)]
-            [empty($position)]
-            [@target-node=$query-id]
-            [@target-doc=$query-document]|
-          ridx:entry
-            [empty($source-node-id)]
+    for $entry in (
+        if (empty($source-node-id) and empty($position))
+        then collection($ridx:ridx-path)/ridx:index[@document=$source-document]/ridx:entry
             [@target-node=$query-id]
             [@target-doc=$query-document]
-            [@position=$position]|
-          ridx:entry
-            [empty($position)]
+        else if (empty($source-node-id))
+        then collection($ridx:ridx-path)/ridx:index[@document=$source-document]/ridx:entry
+            [@target-node=$query-id]
+            [@target-doc=$query-document]
+            [@position=$position]
+        else if (empty($position))
+        then collection($ridx:ridx-path)/ridx:index[@document=$source-document]/ridx:entry
             [@target-node=$query-id]
             [@source-node=$source-node-id]
-            [@target-doc=$query-document]|
-          ridx:entry
+            [@target-doc=$query-document]
+        else collection($ridx:ridx-path)/ridx:index[@document=$source-document]/ridx:entry
             [@target-node=$query-id]
             [@source-node=$source-node-id]
             [@target-doc=$query-document]
@@ -301,12 +298,13 @@ declare function ridx:query-all(
       )
     let $query-document := document-uri(root($query))
     let $query-id := util:node-id($query)
-    for $entry in 
-      collection($ridx:ridx-path)//(
+    for $entry in (
+      if (empty($position))
+      then collection($ridx:ridx-path)//
         ridx:entry
           [@target-doc=$query-document]
           [@target-node=$query-id]
-          [empty($position)]|
+      else collection($ridx:ridx-path)//
         ridx:entry
           [@target-doc=$query-document]
           [@target-node=$query-id]

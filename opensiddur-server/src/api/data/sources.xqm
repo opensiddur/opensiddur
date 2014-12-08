@@ -109,10 +109,21 @@ declare function src:list-function(
   return $doc
 };
 
+declare %private function src:title-part(
+    $tp as element()*
+    ) as xs:string? {
+    $tp/
+        normalize-space(string-join((
+            (tei:title["main"=@type],tei:title[not(@type)])[1],
+            tei:title["sub"=@type]), ": "))
+};
+
 declare function src:title-function(
   $doc as document-node()
   ) as xs:string {
-  ($doc//tei:monogr, $doc//tei:analytic, $doc//tei:series)[1]/(tei:title[@type="main"],tei:title[not(@type)])[1]/string()
+    normalize-space(string-join(
+        for $e in ($doc//tei:analytic, $doc//tei:monogr, $doc//tei:series) 
+        return src:title-part($e), "-"))
 };
 
 (:~ Delete a bibliographic entry text

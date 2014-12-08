@@ -99,6 +99,9 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
                 <attDef ident="type" usage="req" mode="change">
                     <gloss>The type of note</gloss>
                     <valList type="closed" mode="add">
+                        <valItem ident="audio">
+                            <gloss>This note presents a link (in the form of a tei:ptr or tei:ref) that will be interpreted as an audio representation of the annotated text, and (optionally) textual information about the audio.</gloss>
+                        </valItem>
                         <valItem ident="comment">
                             <gloss>The note presents some kind of commentary on the source text.</gloss>
                         </valItem>

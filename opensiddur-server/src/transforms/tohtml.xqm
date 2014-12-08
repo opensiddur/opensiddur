@@ -22,6 +22,8 @@ import module namespace api="http://jewishliturgy.org/modules/api"
   at "../modules/api.xqm";
 import module namespace common="http://jewishliturgy.org/transform/common"
   at "../modules/common.xqm";
+import module namespace compile="http://jewishliturgy.org/transform/compile"
+  at "compile.xqm";
 
 declare variable $tohtml:default-style := "/api/data/styles/generic.css";
 
@@ -51,7 +53,9 @@ declare function tohtml:tohtml(
     case element(tei:div)
     return
         if ($node/@type="licensing")
-        then tohtml:div-with-header($node, $params, "Licensing")
+        then tohtml:div-with-header((
+                tohtml:add-additional-license-notes($node, $params)
+            ), $params, "Licensing")
         else if ($node/@type="contributors")
         then tohtml:div-with-header($node, $params, "Contributors")
         else tohtml:element($node, $params)
@@ -61,6 +65,8 @@ declare function tohtml:tohtml(
     return tohtml:span-element($node, $params)
     case element(tei:list)
     return tohtml:span-element($node, $params)
+    case element(tei:ptr)
+    return tohtml:tei-ptr($node, $params)
     case element(tei:ref)
     return tohtml:tei-ref($node, $params)
     case element(tei:roleName)
@@ -133,6 +139,22 @@ declare function tohtml:tei-pc(
   }
 };
 
+(:~ convert any remaining tei:ptr after processing to an a[href] :)
+declare function tohtml:tei-ptr(
+    $e as element(tei:ptr),
+    $params as map
+    ) as node()+ {
+    element a {
+        attribute href { $e/@target },
+        tohtml:attributes($e, $params),
+        if ($e/ancestor::tei:note[@type="audio"])
+        then tohtml:tei-ref-audio($e, $params)
+        else text { "." } (: give the ptr some substance :),
+        tohtml:tohtml($e/node(), $params)
+    },
+    tohtml:space($e, $params)
+};
+
 declare function tohtml:tei-ref(
     $e as element(tei:ref),
     $params as map
@@ -140,7 +162,9 @@ declare function tohtml:tei-ref(
     element a {
         attribute href { $e/@target },
         tohtml:attributes($e, $params),
-        if ($e/ancestor::tei:div[@type="license-statement"])
+        if (exists($e/ancestor::tei:note["audio"=@type]))
+        then tohtml:tei-ref-audio($e, $params)
+        else if (exists($e/ancestor::tei:div[@type="license-statement"]))
         then tohtml:tei-ref-license($e, $params)
         else (),
         tohtml:tohtml($e/node(), $params)
@@ -172,6 +196,19 @@ declare function tohtml:tei-ref-license(
         attribute rel { "license" },
         $img
     )
+};
+
+(:~ add an audio icon :)
+declare function tohtml:tei-ref-audio(
+    $e as element(),
+    $params as map
+    ) as node()+ {
+    element object {
+        attribute data { "/api/static/Speaker_Icon.svg" },
+        attribute type { "image/svg+xml" },
+        attribute width { "20px" },
+        attribute text { "Play audio" }
+    }
 };
 
 declare function tohtml:wrap-in-link(
@@ -348,6 +385,31 @@ declare function tohtml:div-with-header(
     }
 };
 
+(:~ add additional license notes, if necessary :)
+declare function tohtml:add-additional-license-notes(
+    $e as element(),
+    $params as map
+    ) as element() {
+    element { QName(namespace-uri($e), name($e)) } {
+        $e/@*,
+        $e/node(),
+        if (exists(root($e)//tei:note[@type="audio"]))
+        then
+            element tei:div {
+                attribute type { "license-statement" },
+                text { "Audio icon downloaded from " },
+                element tei:ref {
+                    attribute target { "http://commons.wikimedia.org/wiki/File:Speaker_Icon.svg" },
+                    text { "Wikimedia Commons" }
+                },
+                text { " dedicated to the public domain by its authors." }
+            }
+        else (
+            (: any more external credits? :) 
+        )
+    }
+};
+
 declare function tohtml:tei-listBibl(
     $e as element(tei:listBibl),
     $params as map
@@ -375,6 +437,8 @@ declare function tohtml:bibliography(
         case element(tei:author)
         return tohtml:bibl-tei-author-or-editor($node, $params)
         case element(tei:editor)
+        return tohtml:bibl-tei-author-or-editor($node, $params)
+        case element(tei:respStmt)
         return tohtml:bibl-tei-author-or-editor($node, $params)
         case element(tei:surname)
         return tohtml:bibl-tei-surname($node, $params)
@@ -443,11 +507,16 @@ declare function tohtml:bibl-tei-author-or-editor(
     ) as node()* {
     if (not($e/@corresp)) 
     then    (: do not include translations :)
-        let $n-following := count($e/following-sibling::*[name()=$e/name()][not(@corresp)])
+        let $n-following := 
+            if ($e instance of element(tei:respStmt))
+            then count($e/following-sibling::tei:respStmt[tei:resp/@key=$e/tei:resp/@key][not(@corresp)])
+            else count($e/following-sibling::*[name()=$e/name()][not(@corresp)])
         return (
             element div {
                 tohtml:attributes($e, $params),
-                tohtml:bibliography($e/node(), $params)
+                tohtml:bibliography(
+                    if ($e instance of element(tei:respStmt)) then $e/(node() except tei:resp) 
+                    else $e/node(), $params)
             },
             text {
                 if ($e instance of element(tei:author) and $n-following=0)
@@ -457,6 +526,12 @@ declare function tohtml:bibl-tei-author-or-editor(
                     " (ed",
                     if ($e/preceding-sibling::tei:editor) then "s" else (),
                     ".) "), "") (: editor :)
+                else if ($e instance of element(tei:respStmt) and $n-following=0) (: other responsibility :)
+                then string-join((" (",
+                                  lower-case($compile:contributor-types(($e/tei:resp/@key/string(), "edt")[1])),
+                                  if ($e/preceding-sibling::tei:respStmt[tei:resp/@key=$e/tei:resp/@key]) 
+                                  then "s" else (),
+                                  ")"), "") 
                 else if ($n-following=1)
                 then " and " (: penultimate in list :)
                 else ", " (: first or middle name in a list :)

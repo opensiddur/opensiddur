@@ -1,0 +1,15 @@
+<collection xmlns="http://exist-db.org/collection-config/1.0">
+    <index 
+      xmlns:status="http://jewishliturgy.org/modules/status">
+        <fulltext default="none" attributes="false"/>
+        <range>
+            <!-- job status searches -->
+            <create qname="status:job">
+                <field name="status-user" match="@user" type="xs:string"/>
+                <field name="status-started" match="@started" type="xs:string"/>
+                <field name="status-state" match="@state" type="xs:string"/>
+                <field name="status-resource" match="@resource" type="xs:string"/>
+            </create>
+        </range>
+    </index>
+</collection>

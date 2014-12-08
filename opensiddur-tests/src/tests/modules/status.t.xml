@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
+  <suiteName>Status module</suiteName>
+  <description>
+      <p>Test the status module</p>
+      <author>Efraim Feinstein</author>
+  </description>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <imports>
+    import module namespace status="http://jewishliturgy.org/modules/status"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/status.xqm";
+  </imports>
+  <functions>
+    declare function local:job-id() {
+        let $resource-id := util:absolute-resource-id(doc("/db/data/original/en/1900/01/test.xml"))
+        let $timestamp :=  string((current-dateTime() - xs:dateTime("1970-01-01T00:00:00-00:00")) div xs:dayTimeDuration('PT0.001S'))
+        return $resource-id || "-" || $timestamp
+    };
+
+    declare function local:job-document-name() {
+        let $status-document := local:job-id() || ".status.xml" 
+        return $status-document
+    }; 
+
+    declare function local:job-document() {
+        doc($status:status-collection || "/" || local:job-document-name())
+    };
+
+    declare function local:tei-document() {
+        doc("/db/data/original/en/1900/01/test.xml")
+    };
+  </functions>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+    <setup>
+       <create-collection parent="/db/data/original/en" name="1900"/>
+       <create-collection parent="/db/data/original/en/1900" name="01"/>
+       <!-- store a document in original so we have something to work with as $doc. -->
+       <store collection="/db/data/original/en/1900/01" name="test.xml">
+          <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+             <tei:teiHeader>
+                <tei:fileSpec>
+                   <tei:titleStmt>
+                      <tei:title>test</tei:title>
+                   </tei:titleStmt>
+                </tei:fileSpec>
+             </tei:teiHeader>
+             <tei:text>
+          Empty.
+        </tei:text>
+          </tei:TEI>
+       </store>
+    </setup>
+    <tearDown>
+       <code>
+        try {
+            xmldb:remove($status:status-collection, local:job-document-name())
+        }
+        catch * { () }
+       </code>
+       <remove-collection collection="/db/data/original/en/1900"/>
+    </tearDown>
+    <TestSet>
+        <testName>status:start-job()</testName>
+        <test>
+            <task>Start a job</task>
+            <code>
+                let $doc := doc("/db/data/original/en/1900/01/test.xml")
+                let $start := status:start-job($doc)
+                return doc($status:status-collection || "/" || $start || ".status.xml")
+            </code>
+            <xpath desc="a status document has been created">exists(.//status:job)</xpath>
+            <xpath desc="the document references the user">.//status:job/@user = "testuser"</xpath>
+            <xpath desc="the document references a start time">matches(.//status:job/@started, "^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?[+-]\d{2}:\d{2}$")</xpath>
+            <xpath desc="the document status is working">.//status:job/@state = "working"</xpath>
+            <xpath desc="the document references the API path of the document">ends-with(.//status:job/@resource, "/api/data/original/test")</xpath>
+        </test>
+  </TestSet>
+  <TestSet>
+      <testName>status:complete-job()</testName>
+      <setup>
+        <code> 
+            status:start-job(local:tei-document())
+        </code>
+      </setup>
+      <test>
+         <task>complete a job</task>
+         <code>
+            let $c := status:complete-job(local:job-id(), document-uri(local:tei-document()))
+            return local:job-document()
+         </code>
+         <xpath desc="completion element has been added">exists(.//status:job/status:complete)</xpath>
+         <xpath desc="completion timestamp has been added">exists(.//status:job/@completed)</xpath>
+         <xpath desc="job status has been changed to 'complete'">.//status:job/@state = "complete"</xpath>
+      </test>
+  </TestSet>
+  <TestSet>
+      <testName>status:fail-job()</testName>
+      <setup>
+        <code> 
+            status:start-job(local:tei-document())
+        </code>
+      </setup>
+      <test>
+         <task>fail a job</task>
+         <code>
+            let $c := status:fail-job(local:job-id(), document-uri(local:tei-document()), "testing", "ERROR")
+            return local:job-document()
+         </code>
+         <xpath desc="fail element has been added">exists(.//status:job/status:fail)</xpath>
+         <xpath desc="fail element records the fail stage">.//status:fail/@stage = "testing"</xpath>
+         <xpath desc="fail element records the fail error">.//status:fail = "ERROR"</xpath>
+         <xpath desc="failed timestamp has been added">exists(.//status:job/@failed)</xpath>
+         <xpath desc="job status has been changed to 'failed'">.//status:job/@state = "failed"</xpath>
+      </test>
+  </TestSet>
+  <TestSet>
+      <testName>status:start()</testName>
+      <setup>
+        <code> 
+            status:start-job(local:tei-document())
+        </code>
+      </setup>
+      <test>
+         <task>start a stage</task>
+         <code>
+            let $c := status:start(local:job-id(), local:tei-document(), "testing")
+            return local:job-document()
+         </code>
+         <xpath desc="start element has been added">count(.//status:job/status:start)=1</xpath>
+         <xpath desc="start element has a timestamp">exists(.//status:job/status:start/@timestamp)</xpath>
+         <xpath desc="start element stage is recorded">.//status:job/status:start/@stage = "testing"</xpath>
+      </test>
+  </TestSet>
+  <TestSet>
+      <testName>status:finish()</testName>
+      <setup>
+        <code> 
+            let $j := status:start-job(local:tei-document())
+            let $s := status:start($j, local:tei-document(), "testing")
+            return ()
+        </code>
+      </setup>
+      <test>
+         <task>finish a stage</task>
+         <code>
+            let $c := status:finish(local:job-id(), local:tei-document(), "testing")
+            return local:job-document()
+         </code>
+         <xpath desc="finish element has been added">count(.//status:job/status:finish)=1</xpath>
+         <xpath desc="finish element is after the start element">.//status:job/status:finish >> .//status:job/status:start</xpath>
+         <xpath desc="finish element has a timestamp">exists(.//status:job/status:finish/@timestamp)</xpath>
+         <xpath desc="finish element stage is recorded">.//status:job/status:finish/@stage = "testing"</xpath>
+      </test>
+  </TestSet>
+  <TestSet>
+      <testName>status:log()</testName>
+      <setup>
+        <code> 
+            status:start-job(local:tei-document())
+        </code>
+      </setup>
+      <test>
+         <task>log a message</task>
+         <code>
+            let $c := status:log(local:job-id(), local:tei-document(), "testing", "MESSAGE")
+            return local:job-document()
+         </code>
+         <xpath desc="log element has been added">count(.//status:job/status:log)=1</xpath>
+         <xpath desc="log element records the message">.//status:job/status:log = "MESSAGE"</xpath>
+         <xpath desc="log element has a timestamp">exists(.//status:job/status:log/@timestamp)</xpath>
+         <xpath desc="log element stage is recorded">.//status:job/status:log/@stage = "testing"</xpath>
+      </test>
+  </TestSet>
+</TestSuite>

@@ -9,6 +9,8 @@
 
     <property file="local.build.properties"/>
     <property file="build.properties"/>
+
+
     <!--	
 	<path id="classpath.core">
 	    <fileset dir="${lib.dir}/exist/lib/core">
@@ -103,6 +105,15 @@ cacheSize=${cache.size}
             	<include name="icu4j-*"/>
             </fileset>
         </copy>
+        <!-- edit conf.xml -->
+        <xslt in="${installdir}/conf.xml"
+             out="${installdir}/conf.out.xml"
+             style="setup/setup-conf-xml.xsl"
+             processor="trax"
+             classpath="${lib.dir}/saxonhe-9.2.1.5.jar">
+             <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+        </xslt>
+        <move file="${installdir}/conf.out.xml" tofile="${installdir}/conf.xml"/> 
     </target>
 	
 	<target name="exist-clean">
@@ -140,15 +151,25 @@ cacheSize=${cache.size}
     <target name="autoupgrade"
         depends="dist,install-hebmorph"
         description="install or upgrade Open Siddur packages without touching eXist">
+        <ant dir="${lib.dir}/exist" 
+            antfile="${lib.dir}/exist/build/scripts/installer.xml"
+            target="download-xars">
+            <!-- eXist-supplied apps to be installed -->
+            <property name="apps" value="shared,dashboard,eXide,doc,fundocs,monex" />
+        </ant>
 		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
 				<include name="*.xar"/>
                 <!-- hebmorph is being installed directly, not as a xar -->
                 <exclude name="hebmorph-exist.xar"/>
 			</fileset>
-            <fileset dir="${lib.dir}/exist/autodeploy">
+            <fileset dir="${lib.dir}/exist/installer/apps">
                 <include name="dashboard*.xar"/>
                 <include name="eXide*.xar"/>
+                <include name="*shared-resources*.xar"/>
+                <include name="monex*.xar"/>
+                <include name="fundocs*.xar"/>
+                <include name="doc*.xar"/>
             </fileset>
 		</copy>
     </target>
@@ -235,9 +256,9 @@ cacheSize=${cache.size}
 ^/db/refindex
 ^/db/system/config
 ^/db/system/security/exist/(accounts|groups)/removed
-^/db/system/security/exist/accounts/(admin|guest|testuser|testuser2)\.xml$
-^/db/system/security/exist/groups/(dba|testuser|testuser2)\.xml$
-^/db/data/user/(testuser|testuser2)\.xml$
+^/db/system/security/exist/accounts/(admin|guest|testuser|testuser.)\.xml$
+^/db/system/security/exist/groups/(dba|testuser|testuser2|grouptests|grouptests.)\.xml$
+^/db/data/user/(testuser|testuser.)\.xml$
 ^/db/data/tests
         </echo>
         <exec input="${exist.backup.remove.file}"
