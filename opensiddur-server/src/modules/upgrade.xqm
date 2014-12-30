@@ -74,7 +74,34 @@ declare function upg:schema-changes-0-8-0() {
     )
 };
 
+(:~ removal of tei:relatedItem/@type='scan',
+ : replaced with tei:idno -- supports Google Books (@type='books.google.com') and Internet Archive (@type='archive.org')
+ :)
+declare function upg:schema-changes-0-8-1() {
+    for $source in collection("/db/data/sources")[descendant::tei:relatedItem]
+    let $relatedItem := $source//tei:relatedItem["scan"=@type]
+    let $archive := 
+        if (contains($relatedItem/(@target || @targetPattern), "books.google.com"))
+        then "books.google.com"
+        else if (contains($relatedItem/(@target || @targetPattern), "archive.org"))
+        then "archive.org"
+        else "scan"
+    let $id := 
+        if ($archive = "archive.org")
+        then text:groups(($relatedItem/@target, $relatedItem/@targetPattern)[1], "/(details|stream)/([A-Za-z0-9_]+)")[3] 
+        else if ($archive = "books.google.com")
+        then text:groups(($relatedItem/@target, $relatedItem/@targetPattern)[1], "id=([A-Za-z0-9_]+)")[2] 
+        else $relatedItem/@target
+    return 
+        update replace $relatedItem with 
+            element tei:idno {
+                attribute type { $archive },
+                $id
+            }
+};
+
 declare function upg:all-schema-changes() {
     upg:schema-changes-0-7-5(),
-    upg:schema-changes-0-8-0()
+    upg:schema-changes-0-8-0(),
+    upg:schema-changes-0-8-1()
 };
