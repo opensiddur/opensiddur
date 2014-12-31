@@ -3,8 +3,8 @@
   xmlns="http://expath.org/ns/pkg" 
   name="http://jewishliturgy.org/apps/opensiddur-sources" 
   abbrev="opensiddur-sources" 
-  version="0.8.0" 
+  version="0.8.1" 
   spec="1.0">
     <title>Open Siddur Sources</title>
-    <dependency package="http://jewishliturgy.org/apps/opensiddur-server" semver-min="0.7.5"/>
+    <dependency package="http://jewishliturgy.org/apps/opensiddur-server" semver-min="0.8.1"/>
 </package>

@@ -863,6 +863,7 @@ TODO:
             </tei:distributor>
           </tei:imprint>
         </tei:monogr>
+        <tei:idno type="archive.org">Leningrad_Codex</tei:idno>
         <tei:note type="copyright">
           <tei:note>The transcriber has released the text "without restriction."</tei:note>
             <tei:ref type="url"

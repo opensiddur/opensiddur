@@ -21,6 +21,5 @@
          <date when="1905">1905</date>
       </imprint>
   </monogr>
-  <relatedItem type="scan" target="http://scans.com/book/1"
-                targetPattern="http://scans.com/book/1/{$page}"/>
+  <idno type="archive.org">ABCDEFG_10</idno>
 </biblStruct>

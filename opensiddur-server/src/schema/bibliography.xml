@@ -70,15 +70,13 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
         in the 
         <ref target="http://www.tei-c.org/release/doc/tei-p5-doc/en/html/CO.html#COBICO">TEI Guidelines</ref>.
         </p>
-        <p>The only major change is the introduction of the <att>targetPattern</att> attribute in
-        the <gi>relatedItem</gi> tag, allowing linking to page images.</p>
         <p>If the source is not clearly a public domain book, a <gi>note</gi> where <att>type</att> has the value
         "copyright" is recommended, where the copyright status of the work is explained in natural language.</p>
       </div>  
       <div>
         <head>Formal declaration</head>
         <schemaSpec ident="bibliography" start="biblStruct" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
-          <moduleRef key="core" include="analytic author biblScope biblStruct date editor imprint monogr name note ptr pubPlace publisher ref relatedItem resp respStmt series textLang title"/>
+          <moduleRef key="core" include="analytic author biblScope biblStruct date editor imprint monogr name note ptr pubPlace publisher ref resp respStmt series textLang title"/>
           <moduleRef key="tei"/>
           <moduleRef key="header" include="distributor edition extent idno"/>
           <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
@@ -91,7 +89,6 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
               </constraint>  
             </constraintSpec>
           </elementSpec>
-          
           <elementSpec mode="change" ident="ptr" module="core">
             <attList>
               <attDef ident="cRef" mode="delete"/>
@@ -102,25 +99,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
               <attDef ident="cRef" mode="delete"/>
             </attList>
           </elementSpec>
-          <!-- add an attribute to tei:relatedItem -->
-          <elementSpec mode="change" ident="relatedItem" module="core">
-            <attList>
-              <attDef ident="type" mode="change">
-                <desc>Type of related item. One recommended value is scan, where
-                <att>target</att> references the entirety of the scan and 
-                <att>targetPattern</att> references images of individual pages.</desc>
-              </attDef>
-              <attDef ident="targetPattern" mode="add">
-                <desc>The related item's components can be found at a URL that matches the given pattern. 
-                {$page} can be used to replace a page number. If <att>target</att> is also
-                supplied, the pattern must refer to the same Internet resource.</desc>
-                <datatype minOccurs="1" maxOccurs="1">
-                  <rng:text xmlns:rng="http://relaxng.org/ns/structure/1.0"/>
-                </datatype>
-              </attDef>
-            </attList>
-          </elementSpec>
-            <!-- definition of resp, duplicated from common-schema-base -->
+          <!-- definition of resp, duplicated from common-schema-base -->
           <elementSpec ident="resp" module="core" mode="change">
             <!-- require @key in resp -->
             <attList>
