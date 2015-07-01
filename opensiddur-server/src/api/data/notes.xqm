@@ -114,13 +114,13 @@ declare function notes:query-function(
   ) as element()* {
   let $c := collection($notes:path-base)
   return 
-    $c//tei:title[ft:query(.,$query)]|$c/tei:text[ft:query(.,$query)]
+    $c//tei:titleStmt/tei:title[ft:query(.,$query)]|$c/tei:text[ft:query(.,$query)]
 };
 
 declare function notes:list-function(
   ) as element()* {
   for $doc in collection($notes:path-base)/tei:TEI
-  order by $doc//(tei:title[@type="main"]|tei:title[not(@type)])[1] ascending
+  order by $doc//tei:titleStmt/(tei:title[@type="main"]|tei:title[not(@type)])[1] ascending
   return $doc
 };  
 
