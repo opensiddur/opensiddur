@@ -722,7 +722,7 @@ declare function flatten:generate-id(
   ) as xs:string {
   concat(
     $context/local-name(), "-",  
-    util:node-id($context)
+    replace(util:node-id($context), '[.]', '-')   (: clients have trouble handling dots in ids :)
   )
 };
 
