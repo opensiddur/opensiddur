@@ -8,7 +8,6 @@
       </tei:publicationStmt>
     </tei:teiHeader>
     <j:annotations xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
-        <tei:idno>Test</tei:idno>
         <tei:note xml:id="stream_note" type="instruction">Stream</tei:note>
         <tei:note xml:id="single_note" type="instruction">Single</tei:note>
         <tei:note xml:id="range_note" type="instruction">Range</tei:note>
