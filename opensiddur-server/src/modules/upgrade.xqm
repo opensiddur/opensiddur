@@ -17,6 +17,7 @@ import module namespace tran="http://jewishliturgy.org/api/transliteration"
     at "../api/data/transliteration.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 
 (:~ schema changes for 0.7.5
  : * tei:availability/@status was removed
@@ -100,8 +101,15 @@ declare function upg:schema-changes-0-8-1() {
             }
 };
 
+(:~ removal of tei:idno in annotations files
+ :)
+declare function upg:schema-changes-0-9-0() {
+    update delete collection("/db/data/notes")//j:annotations/tei:idno
+};
+
 declare function upg:all-schema-changes() {
     upg:schema-changes-0-7-5(),
     upg:schema-changes-0-8-0(),
-    upg:schema-changes-0-8-1()
+    upg:schema-changes-0-8-1(),
+    upg:schema-changes-0-9-0()
 };
