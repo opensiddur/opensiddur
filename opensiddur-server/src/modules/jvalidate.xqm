@@ -62,8 +62,8 @@ declare function jvalidate:validate-iso-schematron-svrl(
   return (
     <report>
       <status>{
-        if ($result-transform/svrl:failed-assert | 
-            $result-transform/svrl:successful-report)
+        if ($result-transform/svrl:failed-assert[not(@role="nonfatal")] | 
+            $result-transform/svrl:successful-report[not(@role="nonfatal")])
         then 'invalid'
         else 'valid'
       }</status>
