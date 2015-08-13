@@ -9,7 +9,7 @@
     </tei:teiHeader>
     <j:settings xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
         <tei:fs xml:id="set_notes_on" type="opensiddur:annotation">
-            <tei:f name="Test">
+            <tei:f name="combine-ann-notes">
             <j:on/>
          </tei:f>
         </tei:fs>

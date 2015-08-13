@@ -525,12 +525,11 @@ declare function combine:include-annotation(
     $params as map
     ) as xs:boolean {
     let $a := $annotation[1]
-    let $annotation-ids := $a/ancestor::j:annotations/tei:idno
+    let $annotation-id := replace(tokenize(document-uri(root($a)), '/')[last()], '\.xml$', '')
     let $s := $params("combine:settings")
     return
         exists($s) and (
-            some $annotation-id in $annotation-ids/string()
-            satisfies $s("opensiddur:annotation->" || $annotation-id)=("YES","ON")
+            $s("opensiddur:annotation->" || $annotation-id)=("YES","ON")
         )
 };
 

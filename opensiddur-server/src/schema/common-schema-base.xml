@@ -271,6 +271,7 @@ schemas, not as an independent unit
       <attDef ident="style" mode="delete"/>
     </attList>
   </classSpec>
+  <classSpec ident="att.global.rendition" mode="delete" module="tei" type="atts"/>
   <classSpec ident="att.divLike" mode="change" module="tei" type="atts">
     <attList>
       <attDef ident="org" mode="delete"/>
