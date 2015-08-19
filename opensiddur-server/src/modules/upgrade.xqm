@@ -2,7 +2,7 @@ xquery version "3.0";
 (:~ effect schema upgrades 
  : 
  : Open Siddur Project
- : Copyright 2014 Efraim Feinstein
+ : Copyright 2014-2015 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace upg="http://jewishliturgy.org/modules/upgrade";
@@ -11,6 +11,8 @@ import module namespace data="http://jewishliturgy.org/modules/data"
     at "data.xqm";
 import module namespace crest="http://jewishliturgy.org/modules/common-rest"
     at "common-rest.xqm";
+import module namespace notes="http://jewishliturgy.org/api/data/notes"
+    at "../api/data/notes.xqm";
 import module namespace src="http://jewishliturgy.org/api/data/sources"
     at "../api/data/sources.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
@@ -101,10 +103,28 @@ declare function upg:schema-changes-0-8-1() {
             }
 };
 
-(:~ removal of tei:idno in annotations files
+(:~ removal of tei:idno in annotations files, change names of annotation files to be xsd:Names
  :)
 declare function upg:schema-changes-0-9-0() {
-    update delete collection("/db/data/notes")//j:annotations/tei:idno
+    update delete collection("/db/data/notes")//j:annotations/tei:idno,
+    for $document in collection("/db/data/notes")
+    let $collection := util:collection-name($document)
+    let $resource := util:document-name($document)
+    let $uri-title := notes:uri-title-function($document)
+    let $resource-number := 
+        let $n := tokenize($resource, '-')[last()]
+        where matches($resource, "-\d+\.xml$") and matches($n, "\d+\.xml")
+        return substring-before($n, '.xml')
+    let $new-name := 
+        string-join((
+            encode-for-uri(replace(replace(normalize-space($uri-title), "\p{M}", ""), "[,;:$=@]+", "-")),
+            $resource-number), "-") || ".xml"
+    where not($new-name=$resource)
+    return (
+        util:log-system-out("Renaming annotation file: " || $collection || "/" || $resource || " -> " || $new-name || "&#x0a;using uri title=" || $uri-title),
+        xmldb:rename($collection, $resource, $new-name)
+    )
+    
 };
 
 declare function upg:all-schema-changes() {

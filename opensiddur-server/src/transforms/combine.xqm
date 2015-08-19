@@ -525,7 +525,7 @@ declare function combine:include-annotation(
     $params as map
     ) as xs:boolean {
     let $a := $annotation[1]
-    let $annotation-id := replace(tokenize(document-uri(root($a)), '/')[last()], '\.xml$', '')
+    let $annotation-id := xmldb:decode-uri(xs:anyURI(replace(tokenize(document-uri(root($a)), '/')[last()], '\.xml$', '')))
     let $s := $params("combine:settings")
     return
         exists($s) and (
