@@ -424,6 +424,13 @@
       </code>
          <class href="../common.t.incl.xml#BadRequest"/>
       </test>
+      <test>
+         <task>Post a resource lacking a title</task>
+         <code>
+      orig:post(doc("/db/apps/opensiddur-tests/tests/api/data/original/Notitle.xml"))
+      </code>
+         <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
   </TestSet>
   <TestSet>
       <testName>orig:put()</testName>
