@@ -79,7 +79,7 @@ TODO:
     Notes file name (base of name without extension)
   </xd:doc>
   <xsl:param name="notes-file-name" as="xs:string"
-    select="concat('notes/', encode-for-uri('Notes from the Westminster Leningrad Codex'))"/>
+    select="concat('notes/', encode-for-uri('Notes_from_the_Westminster_Leningrad_Codex'))"/>
 
   <xd:doc>
     Contributor list entry file name (base w/o extension)
