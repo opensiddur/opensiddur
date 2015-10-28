@@ -104,7 +104,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
             <!-- require @key in resp -->
             <attList>
               <attDef ident="ref" mode="delete"/>
-              <attDef ident="key" mode="change" usage="req">
+              <attDef ident="key" mode="add" usage="req">
                 <desc>Responsibility type, indicated using one of the allowed MARC relator codes, as defined at 
                 http://www.loc.gov/marc/relators/relaterm.html. The valid codes are:
                   ann (annotator), aut (author), edt (editor), fac (facsimilist, scanner?), fnd (funder), mrk (markup editor), pfr (proofreader), spn (sponsor),
@@ -112,7 +112,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
                 <datatype minOccurs="1" maxOccurs="1">
                   <rng:ref xmlns:rng="http://relaxng.org/ns/structure/1.0" name="data.enumerated"/>
                 </datatype>
-                <valList type="closed" mode="change">
+                <valList type="closed" mode="add">
                   <valItem ident="ann"/>
                   <valItem ident="aut"/>
                   <valItem ident="edt"/>
