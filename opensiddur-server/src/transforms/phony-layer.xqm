@@ -69,8 +69,8 @@ declare function phony:doc-phony-links(
     ) as element(tei:link)* {
     let $link-types := map:keys($phony:link-types)
     return
-        root($n)//j:links/tei:link[@type=$link-types]|
-            root($n)//j:links/tei:linkGrp[@type=$link-types]/tei:link[not(@type)]
+        root($n)//j:links/tei:link[$link-types=@type]|
+            root($n)//j:links/tei:linkGrp[$link-types=@type]/tei:link[not(@type)]
 };
 
 declare function phony:links-to-attributes(
@@ -87,7 +87,7 @@ declare function phony:links-to-attributes(
             , ' ')
         },
         let $instructions :=
-            for $link in $phony-link[@type="condition"]
+            for $link in $phony-link["condition"=@type]
             return tokenize($link/@target, '\s+')[3]
         where exists($instructions)
         return

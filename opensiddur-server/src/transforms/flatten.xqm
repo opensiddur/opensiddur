@@ -272,11 +272,10 @@ declare function flatten:display(
     return
       element {QName(namespace-uri($node), name($node))} {
         $node/(
-          (@* except 
-            @*[namespace-uri(.)="http://jewishliturgy.org/ns/jlptei/flat/1.0"]),
-          @jf:start, @jf:continue, 
-          @jf:suspend, @jf:end, 
-          @jf:id, @jf:layer-id, @jf:stream
+          (@* except (
+            @jf:position, @jf:relative, 
+            @jf:nchildren, @jf:nlevels, 
+            @jf:nprecedents))
         ),
         flatten:display($node/node(), $params)
       }
@@ -723,7 +722,7 @@ declare function flatten:generate-id(
   ) as xs:string {
   concat(
     $context/local-name(), "-",  
-    util:node-id($context)
+    replace(util:node-id($context), '[.]', '-')   (: clients have trouble handling dots in ids :)
   )
 };
 

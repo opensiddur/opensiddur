@@ -114,13 +114,13 @@ declare function notes:query-function(
   ) as element()* {
   let $c := collection($notes:path-base)
   return 
-    $c//tei:title[ft:query(.,$query)]|$c/tei:text[ft:query(.,$query)]
+    $c//tei:titleStmt/tei:title[ft:query(.,$query)]|$c/tei:text[ft:query(.,$query)]
 };
 
 declare function notes:list-function(
   ) as element()* {
   for $doc in collection($notes:path-base)/tei:TEI
-  order by $doc//(tei:title[@type="main"]|tei:title[not(@type)])[1] ascending
+  order by $doc//tei:titleStmt/(tei:title[@type="main"]|tei:title[not(@type)])[1] ascending
   return $doc
 };  
 
@@ -139,6 +139,21 @@ declare
     $name as xs:string
   ) as item()+ {
   crest:delete($notes:data-type, $name)
+};
+
+(:~ When producing an annotation document, the URI must be an XML name.
+ : This function returns a URI that is also an XML name.
+ :)
+declare function notes:uri-title-function(
+    $doc as document-node()
+    ) as xs:string {
+    let $name-start-chars :=  ":A-Z_a-z&#xC0;-&#xD6;&#xD8;-&#xF6;&#xF8;-&#x2FF;&#x370;-&#x37D;&#x37F;-&#x1FFF;&#x200C;-&#x200D;&#x2070;-&#x218F;&#x2C00;-&#x2FEF;&#x3001;-&#xD7FF;&#xF900;-&#xFDCF;&#xFDF0;-&#xFFFD;&#x10000;-&#xEFFFF;"
+    let $name-chars := $name-start-chars || ".0-9&#xb7;&#x0300;-&#x036f;&#x203f;-&#x2040;-"
+    let $crest-title := crest:tei-title-function($doc)
+    let $first-char := replace(substring($crest-title, 1, 1), '[^' || $name-start-chars || ']', '_')
+    let $all-chars := replace(substring($crest-title, 2), '[^' || $name-chars || ']+', '_')
+    return
+        $first-char || $all-chars
 };
 
 (:~ Post a new annotation document 
@@ -166,7 +181,7 @@ declare
     $body,
     notes:validate#2,
     notes:validate-report#2,
-    ()
+    notes:uri-title-function#1
   )
 };
 

@@ -58,7 +58,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
         <schemaSpec ident="annotation" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
           <moduleRef key="core" include="bibl biblScope choice cit corr date foreign head hi item l label lg list name note orig p ptr q quote ref reg resp respStmt sic title"/>
           <moduleRef key="tei"/>
-          <moduleRef key="header" include="availability change distributor fileDesc idno licence publicationStmt revisionDesc sourceDesc teiHeader titleStmt"/>
+          <moduleRef key="header" include="availability change distributor fileDesc licence publicationStmt revisionDesc sourceDesc teiHeader titleStmt"/>
           <moduleRef key="textstructure" include="TEI div"/>
           <moduleRef key="analysis" include="c interp interpGrp pc phr s w"/>
           <moduleRef key="certainty" include="respons"/>
@@ -71,17 +71,12 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <specGrpRef target="#common-specs"/>
           <specGrpRef target="#conditional-specs"/>
           <elementSpec ident="annotations" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur-annotation">
-            <desc>A resource that holds annotations, such as notes or standoff annotations. tei:idno indicates
-            which annotation set these annotations belong to.</desc>
+            <desc>A resource that holds annotations, such as notes or standoff annotations.</desc>
             <classes>
               <memberOf key="model.resourceLike"/>
               <memberOf key="att.global"/>
             </classes>
             <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <!-- TODO: move this idno and the idno from conditionals into somewhere in the header -->
-              <rng:zeroOrMore>
-                <rng:ref name="idno"/>
-              </rng:zeroOrMore>
               <rng:oneOrMore>
                 <rng:choice>
                   <rng:ref name="interpGrp"/>

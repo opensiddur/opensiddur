@@ -425,37 +425,41 @@ declare function crest:post(
       let $resource := $paths[2]
       let $collection := $paths[1]
       let $user := app:auth-user()
-      return (
-        app:make-collection-path($collection, "/", sm:get-permissions(xs:anyURI($path-base))),
-        let $db-path := xmldb:store($collection, $resource, $body)
-        return
-          if ($db-path)
-          then 
-            <rest:response>
-              <output:serialization-parameters>
-                <output:method value="text"/>
-              </output:serialization-parameters>
-              <http:response status="201">
-                {
-                  let $uri := xs:anyURI($db-path)
-                  let $doc := doc($db-path)
-                  let $change-record := crest:record-change($doc, "created")
-                  return (
-                    system:as-user("admin", $magic:password, (
-                        sm:chown($uri, $user),
-                        sm:chgrp($uri, "everyone"),
-                        sm:chmod($uri, "rw-rw-r--")
-                    )),
-                    ridx:reindex($doc)
-                  )
-                }
-                <http:header 
-                  name="Location" 
-                  value="{concat($api-path-base, "/", substring-before($resource, ".xml"))}"/>
-              </http:response>
-            </rest:response>
-          else api:rest-error(500, "Cannot store the resource")
-        )
+      return 
+        if ($resource) 
+        then (
+            app:make-collection-path($collection, "/", sm:get-permissions(xs:anyURI($path-base))),
+            let $db-path := xmldb:store($collection, $resource, $body)
+            return
+              if ($db-path)
+              then 
+                <rest:response>
+                  <output:serialization-parameters>
+                    <output:method value="text"/>
+                  </output:serialization-parameters>
+                  <http:response status="201">
+                    {
+                      let $uri := xs:anyURI($db-path)
+                      let $doc := doc($db-path)
+                      let $change-record := crest:record-change($doc, "created")
+                      return (
+                        system:as-user("admin", $magic:password, (
+                            sm:chown($uri, $user),
+                            sm:chgrp($uri, "everyone"),
+                            sm:chmod($uri, "rw-rw-r--")
+                        )),
+                        ridx:reindex($doc)
+                      )
+                    }
+                    <http:header 
+                      name="Location" 
+                      value="{concat($api-path-base, "/", substring-before($resource, ".xml"))}"/>
+                  </http:response>
+                </rest:response>
+              else api:rest-error(500, "Cannot store the resource")
+            )
+        else
+            api:rest-error(400, "A title element with non-whitespace content is required")
     else
       api:rest-error(400, "Input document is not valid", 
         $validation-function-report($body, ()))

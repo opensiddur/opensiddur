@@ -46,6 +46,14 @@ schemas, not as an independent unit
       </attDef>
     </attList>
   </elementSpec>
+  <elementSpec ident="TEI" mode="change" module="textstructure">
+    <constraintSpec ident="TEI-title-required" scheme="isoschematron" mode="add">
+      <desc>Test that the document has a main title</desc>
+      <constraint>
+        <sch:assert test="string-length(normalize-space(//tei:teiHeader/tei:fileDesc/tei:titleStmt/tei:title[not(@type) or @type='main'])) &gt; 0">A main title is required.</sch:assert>
+      </constraint>
+    </constraintSpec>
+  </elementSpec>
   <elementSpec ident="option" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
     <desc>Marks a section of text, which may be included, depending on the result of a conditional evaluation.</desc>
     <classes>
