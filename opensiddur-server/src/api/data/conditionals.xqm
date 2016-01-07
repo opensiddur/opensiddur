@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+(: Copyright 2012-2013,2016 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Conditional data API
@@ -10,6 +10,7 @@ module namespace cnd = 'http://jewishliturgy.org/api/data/conditionals';
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
+declare namespace r="http://jewishliturgy.org/ns/results/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
@@ -114,6 +115,13 @@ declare
   crest:get($cnd:data-type, $name)
 };
 
+declare function cnd:list(
+  $q as xs:string*, 
+  $start as xs:integer*, 
+  $max-results as xs:integer*
+  ) as item()+ {
+  cnd:list($q, $start, $max-results, (), (), ())
+};
 
 (:~ List or full-text query conditionals data. 
  : Querying conditionals data will search for titles and
@@ -121,6 +129,9 @@ declare
  : @param $q text of the query, empty string for all
  : @param $start first document to list
  : @param $max-results number of documents to list 
+ : @param $type search for conditional feature type match
+ : @param $name search for conditional feature name match
+ : @param $exact name or type match should be exact or contains
  : @return a list of documents that match the search. If the documents match a query, return the context.
  : @error HTTP 404 Not found
  :)
@@ -130,19 +141,124 @@ declare
   %rest:query-param("q", "{$q}", "")
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
+  %rest:query-param("type", "{$type}", "")
+  %rest:query-param("name", "{$name}", "")
+  %rest:query-param("exact", "{$exact}", "false")
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
   %output:method("html5")  
   function cnd:list(
     $q as xs:string*,
     $start as xs:integer*,
-    $max-results as xs:integer*
+    $max-results as xs:integer*,
+    $type as xs:string*,
+    $name as xs:string*,
+    $exact as xs:string*
   ) as item()+ {
-  crest:list($q, $start, $max-results,
-    "Conditional declaration data API", api:uri-of($cnd:api-path-base),
-    cnd:query-function#1, cnd:list-function#0,
-    (), (: conditionals should not support access restrictions? :) 
-    ()
-  )
+  if (exists($name) or exists($type)) 
+  then
+    cnd:list-definitions($type[1], $name[1], xs:boolean($exact[1]), $start[1], $max-results[1])
+  else
+    crest:list($q, $start, $max-results,
+      "Conditional declaration data API", api:uri-of($cnd:api-path-base),
+      cnd:query-function#1, cnd:list-function#0,
+      (), (: conditionals should not support access restrictions? :) 
+      ()
+    )
+};
+
+(:~ if searching for specific feaures, extract the features from matching feature structures :)
+declare %private 
+  function cnd:extract-named-features(
+  $nodes as node()*,
+  $name as xs:string?,
+  $exact as xs:boolean?
+  ) as node()* {
+  for $node in $nodes
+  return
+    typeswitch($node)
+    case element(tei:fsDecl)
+    return
+      element r:conditional-result {
+        attribute resource { data:db-path-to-api(document-uri(root($node))) },
+        element { QName(namespace-uri($node), name($node)) } {
+          $node/@*,
+          if ($name)
+          then
+            cnd:extract-named-features($node/node(), $name, $exact)
+          else $node/node()
+        } 
+      }
+    case element(tei:fDecl)
+    return
+      if (($exact and $name=$node/@name) or
+        (not($exact) and contains($node/@name, $name)))
+      then
+        element tei:fDecl {
+          $node/@*,
+          cnd:extract-named-features($node/node(), $name, $exact)
+        } 
+      else ()
+    case element()
+    return
+      element { QName(namespace-uri($node), name($node)) } {
+        $node/@*,
+        cnd:extract-named-features($node/node(), $name, $exact)
+      } 
+    case document-node()
+    return
+      document { 
+        cnd:extract-named-features($node/node(), $name, $exact)
+      }
+    default
+    return $node
+};
+
+(:~ find conditional definitions by type or name :)
+declare function cnd:list-definitions(
+  $type as xs:string?,
+  $name as xs:string?,
+  $exact as xs:boolean?,
+  $start as xs:integer,
+  $max-results as xs:integer
+  ) as item()+ {
+  <rest:response>
+    <output:serialization-parameters>
+      <output:method value="xml"/>
+    </output:serialization-parameters>
+  </rest:response>,
+  let $c := collection($cnd:path-base)
+  let $search-by-type := 
+    if ($type)
+    then 
+      if ($exact)
+      then $c//tei:fsDecl[$type = @type]
+      else $c//tei:fsDecl[contains(@type, $type)]
+    else $c//tei:fsDecl
+  let $search-by-name as element(r:conditional-result)* :=
+      cnd:extract-named-features(
+        if ($name)
+        then 
+          if ($exact)
+          then $search-by-type[tei:fDecl[$name = @name]]
+          else $search-by-type[tei:fDecl[contains(@name, $name)]]
+        else $search-by-type,
+        $name,
+        $exact
+      )
+  let $n-total := count($search-by-name)
+  let $subseq := 
+      subsequence(
+        for $result in $search-by-name
+        order by $result/tei:fsDecl/@type/string() 
+        return $result, $start, $max-results)
+  let $n-subseq := count($subseq)
+  return 
+    <r:conditional-results 
+      start="{$start}"
+      end="{max((0, $start + $n-subseq - 1)) }"
+      n-results="{$n-total}">{
+      $subseq
+    }</r:conditional-results>
 };
 
 (: @return (list, start, count, n-results) :) 
