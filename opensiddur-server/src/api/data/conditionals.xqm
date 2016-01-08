@@ -120,7 +120,7 @@ declare function cnd:list(
   $start as xs:integer*, 
   $max-results as xs:integer*
   ) as item()+ {
-  cnd:list($q, $start, $max-results, (), (), ())
+  cnd:list($q, $start, $max-results, ())
 };
 
 (:~ List or full-text query conditionals data. 
@@ -129,10 +129,8 @@ declare function cnd:list(
  : @param $q text of the query, empty string for all
  : @param $start first document to list
  : @param $max-results number of documents to list 
- : @param $type search for conditional feature type match
- : @param $name search for conditional feature name match
- : @param $exact name or type match should be exact or contains
- : @return a list of documents that match the search. If the documents match a query, return the context.
+ : @param $decls-only return matching declarations only, not the whole file
+ : @return a list of documents (or declarations, as XML) that match the search. If the documents match a query, return the context.
  : @error HTTP 404 Not found
  :)
 declare 
@@ -141,22 +139,18 @@ declare
   %rest:query-param("q", "{$q}", "")
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
-  %rest:query-param("type", "{$type}", "")
-  %rest:query-param("name", "{$name}", "")
-  %rest:query-param("exact", "{$exact}", "false")
+  %rest:query-param("decls-only", "{$decls-only}", "false")
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
   %output:method("html5")  
   function cnd:list(
     $q as xs:string*,
     $start as xs:integer*,
     $max-results as xs:integer*,
-    $type as xs:string*,
-    $name as xs:string*,
-    $exact as xs:string*
+    $decls-only as xs:string*
   ) as item()+ {
-  if (exists($name) or exists($type)) 
+  if (xs:boolean($decls-only))
   then
-    cnd:list-definitions($type[1], $name[1], xs:boolean($exact[1]), $start[1], $max-results[1])
+    cnd:list-definitions($q[1], $start[1], $max-results[1])
   else
     crest:list($q, $start, $max-results,
       "Conditional declaration data API", api:uri-of($cnd:api-path-base),
@@ -166,48 +160,41 @@ declare
     )
 };
 
-(:~ if searching for specific feaures, extract the features from matching feature structures :)
+(:~ 
+ : return all relevant search results
+ : if searching for specific feaures, extract the features from matching feature structures :)
 declare %private 
-  function cnd:extract-named-features(
-  $nodes as node()*,
-  $name as xs:string?,
-  $exact as xs:boolean?
+  function cnd:extract-search-results(
+  $nodes as element()*
   ) as node()* {
   for $node in $nodes
   return
     typeswitch($node)
+    case element(tei:title)
+    return
+      (: got the title of the file, return all fsDecls :)
+      for $decl in root($node)//tei:fsdDecl/tei:fsDecl
+      return
+        element r:conditional-result {
+          attribute resource { data:db-path-to-api(document-uri(root($node))) },
+          $decl
+        }
     case element(tei:fsDecl)
     return
+      (: got a match on type :)
       element r:conditional-result {
         attribute resource { data:db-path-to-api(document-uri(root($node))) },
-        element { QName(namespace-uri($node), name($node)) } {
-          $node/@*,
-          if ($name)
-          then
-            cnd:extract-named-features($node/node(), $name, $exact)
-          else $node/node()
-        } 
+        $node
       }
     case element(tei:fDecl)
     return
-      if (($exact and $name=$node/@name) or
-        (not($exact) and contains($node/@name, $name)))
-      then
-        element tei:fDecl {
-          $node/@*,
-          cnd:extract-named-features($node/node(), $name, $exact)
-        } 
-      else ()
-    case element()
-    return
-      element { QName(namespace-uri($node), name($node)) } {
-        $node/@*,
-        cnd:extract-named-features($node/node(), $name, $exact)
-      } 
-    case document-node()
-    return
-      document { 
-        cnd:extract-named-features($node/node(), $name, $exact)
+      (: got a match on name :)
+      element r:conditional-result {
+        attribute resource { data:db-path-to-api(document-uri(root($node))) },
+        element tei:fsDecl {
+          $node/parent::*/@*,
+          $node/parent::*/node() except $node/parent::*/tei:fDecl[not(. is $node)]
+        }
       }
     default
     return $node
@@ -215,9 +202,7 @@ declare %private
 
 (:~ find conditional definitions by type or name :)
 declare function cnd:list-definitions(
-  $type as xs:string?,
-  $name as xs:string?,
-  $exact as xs:boolean?,
+  $query as xs:string,
   $start as xs:integer,
   $max-results as xs:integer
   ) as item()+ {
@@ -227,28 +212,25 @@ declare function cnd:list-definitions(
     </output:serialization-parameters>
   </rest:response>,
   let $c := collection($cnd:path-base)
-  let $search-by-type := 
-    if ($type)
-    then 
-      if ($exact)
-      then $c//tei:fsDecl[$type = @type]
-      else $c//tei:fsDecl[contains(@type, $type)]
-    else $c//tei:fsDecl
-  let $search-by-name as element(r:conditional-result)* :=
-      cnd:extract-named-features(
-        if ($name)
-        then 
-          if ($exact)
-          then $search-by-type[tei:fDecl[$name = @name]]
-          else $search-by-type[tei:fDecl[contains(@name, $name)]]
-        else $search-by-type,
-        $name,
-        $exact
+  let $search-results := 
+        $c//tei:title[ft:query(.,$query)]|
+        $c//tei:fsDescr[ft:query(.,$query)]/parent::tei:fsDecl|
+        $c//tei:fDescr[ft:query(.,$query)]/parent::tei:fDecl|
+        (
+          for $qpart in tokenize($query, '\s+')
+          let $lqpart := lower-case($qpart)
+          return
+            $c//tei:fsDecl[contains(lower-case(@type), lower-case($qpart))]|
+            $c//tei:fDecl[contains(lower-case(@name), lower-case($qpart))]
+        )
+  let $extracted as element(r:conditional-result)* :=
+      cnd:extract-search-results(
+        $search-results
       )
-  let $n-total := count($search-by-name)
+  let $n-total := count($extracted)
   let $subseq := 
       subsequence(
-        for $result in $search-by-name
+        for $result in $extracted
         order by $result/tei:fsDecl/@type/string() 
         return $result, $start, $max-results)
   let $n-subseq := count($subseq)

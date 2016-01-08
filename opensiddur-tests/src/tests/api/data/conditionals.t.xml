@@ -307,7 +307,7 @@
       </test>
   </TestSet>
   <TestSet>
-    <testName>cnd:list() for searching conditional definitions</testName>
+    <testName>cnd:list() for searching conditional declarations</testName>
     <setup>
       <copy source="/db/apps/opensiddur-tests/tests/api/data/conditionals"
             name="type1.xml"
@@ -320,12 +320,12 @@
             destination="/db/data/conditionals/1900/01"/>
     </setup>
     <test>
-      <task>List by exact match to feature type: type exists</task>
+      <task>Search for feature type: exists</task>
       <code>
-      cnd:list("", 1, 100, "type1", (), "true")
+      cnd:list("type1", 1, 100, "true")
       </code>
-      <expected xpath="self::r:conditional-results" desc="one record is returned">
-        <r:conditional-results start="1" end="1" n-results="1">
+      <expected xpath="self::r:conditional-results" desc="two records are returned">
+        <r:conditional-results start="1" end="2" n-results="2">
           <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
@@ -335,7 +335,20 @@
               </tei:fDecl>
               <tei:fDecl name="name2">
                 <tei:fDescr>Second</tei:fDescr>
-                <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
+                <j:vSwitch type="yes-no-maybe"/>
+              </tei:fDecl>
+            </tei:fsDecl>
+          </r:conditional-result>
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x">
+            <tei:fsDecl type="xtype1x">
+               <tei:fsDescr>first type</tei:fsDescr>
+               <tei:fDecl name="xname1x">
+                  <tei:fDescr>First X</tei:fDescr>
+                  <j:vSwitch type="yes-no-maybe"/>
+               </tei:fDecl>
+               <tei:fDecl name="xname2x">
+                  <tei:fDescr>Second X</tei:fDescr>
+                  <j:vSwitch type="yes-no-maybe"/>
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
@@ -343,21 +356,21 @@
       </expected>
     </test>
     <test>
-      <task>List by exact match to feature type: type does not exist</task>
+      <task>Search for something that does not exist</task>
       <code>
-      cnd:list("", 1, 100, "doesnotexist", "", "true")
+      cnd:list("doesnotexist", 1, 100, "true")
       </code>
       <expected xpath="self::r:conditional-results" desc="an empty list is returned">
         <r:conditional-results start="1" end="0" n-results="0"/>
       </expected>
     </test>
     <test>
-      <task>List by exact match to feature name: name exists</task>
+      <task>List by match name: name exists</task>
       <code>
-      cnd:list("", 1, 100, "", "name1", "true")
+      cnd:list("name1", 1, 100, "true")
       </code>
       <expected xpath="self::r:conditional-results" desc="two records are returned">
-        <r:conditional-results start="1" end="2" n-results="2" >
+        <r:conditional-results start="1" end="3" n-results="3" >
           <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
@@ -376,31 +389,31 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x">
+            <tei:fsDecl type="xtype1x">
+               <tei:fsDescr>first type</tei:fsDescr>
+               <tei:fDecl name="xname1x">
+                  <tei:fDescr>First X</tei:fDescr>
+                  <j:vSwitch type="yes-no-maybe"/>
+               </tei:fDecl>
+            </tei:fsDecl>
+          </r:conditional-result>
         </r:conditional-results>
       </expected>
     </test>
     <test>
-      <task>List by exact match to feature name: name does not exist</task>
+      <task>List by match to feature name: name exists, limit to 1 result</task>
       <code>
-      cnd:list("", 1, 100, "", "doesnotexist", "true")
-      </code>
-      <expected xpath="self::r:conditional-results" desc="an empty list is returned">
-        <r:conditional-results start="1" end="0" n-results="0"/>
-      </expected>
-    </test>
-    <test>
-      <task>List by exact match to feature name: name exists, limit to 1 result</task>
-      <code>
-      cnd:list("", 1, 1, "", "name1", "true")
+      cnd:list("name1", 1, 1, "true")
       </code>
       <expected xpath="self::r:conditional-results" desc="one record is returned">
-        <r:conditional-results start="1" end="1" n-results="2">
+        <r:conditional-results start="1" end="1" n-results="3">
           <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
               <tei:fDecl name="name1">
                 <tei:fDescr>First</tei:fDescr>
-                <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
+                <j:vSwitch type="yes-no-maybe"/>
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
@@ -410,10 +423,10 @@
     <test>
       <task>List by inexact match to feature type: type exists</task>
       <code>
-      cnd:list("", 1, 100, "type1", "", "false")
+      cnd:list("type", 1, 100, "true")
       </code>
       <expected xpath="self::r:conditional-results" desc="two records are returned">
-        <r:conditional-results start="1" end="2" n-results="2">
+        <r:conditional-results start="1" end="3" n-results="3">
           <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
@@ -423,7 +436,20 @@
               </tei:fDecl>
               <tei:fDecl name="name2">
                 <tei:fDescr>Second</tei:fDescr>
-                <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
+                <j:vSwitch type="yes-no-maybe"/>
+              </tei:fDecl>
+            </tei:fsDecl>
+          </r:conditional-result>
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2">
+            <tei:fsDecl type="type2">
+               <tei:fsDescr>second type</tei:fsDescr>
+               <tei:fDecl name="name1">
+                  <tei:fDescr>First of second</tei:fDescr>
+                  <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
+               </tei:fDecl>
+               <tei:fDecl name="name2">
+                  <tei:fDescr>Second of second</tei:fDescr>
+                  <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
@@ -446,7 +472,7 @@
     <test>
       <task>List by inexact match to feature name: name exists</task>
       <code>
-      cnd:list("", 1, 100, "", "name1", "false")
+      cnd:list("name1", 1, 100, "true")
       </code>
       <expected xpath="self::r:conditional-results" desc="three records are returned">
         <r:conditional-results start="1" end="3" n-results="3">
@@ -483,10 +509,23 @@
     <test>
       <task>List by exact match to feature type and name: both exist</task>
       <code>
-      cnd:list("", 1, 100, "type1", "name1", "true")
+      cnd:list("type1 name1", 1, 100, "true")
       </code>
-      <expected xpath="self::r:conditional-results" desc="one record is returned">
-        <r:conditional-results start="1" end="1" n-results="1">
+      <expected xpath="self::r:conditional-results" desc="records that match any of the terms are returned">
+        <r:conditional-results start="1" end="5" n-results="5">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
+            <tei:fsDecl type="type1">
+              <tei:fsDescr>first type</tei:fsDescr>
+              <tei:fDecl name="name1">
+                <tei:fDescr>First</tei:fDescr>
+                <j:vSwitch type="yes-no-maybe"/>
+              </tei:fDecl>
+              <tei:fDecl name="name2">
+                <tei:fDescr>Second</tei:fDescr>
+                <j:vSwitch type="yes-no-maybe"/>
+              </tei:fDecl>
+            </tei:fsDecl>
+         </r:conditional-result> 
           <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
@@ -496,22 +535,25 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-        </r:conditional-results>
-      </expected>
-    </test>
-    <test>
-      <task>List by inexact match to feature type and name: both exist</task>
-      <code>
-      cnd:list("", 1, 100, "type1", "name1", "false")
-      </code>
-      <expected xpath="self::r:conditional-results" desc="two records are returned">
-        <r:conditional-results start="1" end="2" n-results="2">
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
-            <tei:fsDecl type="type1">
-              <tei:fsDescr>first type</tei:fsDescr>
-              <tei:fDecl name="name1">
-                <tei:fDescr>First</tei:fDescr>
-                <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2">
+            <tei:fsDecl type="type2">
+               <tei:fsDescr>second type</tei:fsDescr>
+               <tei:fDecl name="name1">
+                  <tei:fDescr>First of second</tei:fDescr>
+                  <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
+               </tei:fDecl>
+            </tei:fsDecl>
+          </r:conditional-result>
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x">
+            <tei:fsDecl type="xtype1x">
+               <tei:fsDescr>first type</tei:fsDescr>
+               <tei:fDecl name="xname1x">
+                  <tei:fDescr>First X</tei:fDescr>
+                  <j:vSwitch type="yes-no-maybe"/>
+               </tei:fDecl>
+               <tei:fDecl name="xname2x">
+                  <tei:fDescr>Second X</tei:fDescr>
+                  <j:vSwitch type="yes-no-maybe"/>
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
