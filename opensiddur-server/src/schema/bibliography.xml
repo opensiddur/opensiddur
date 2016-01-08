@@ -76,7 +76,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
       <div>
         <head>Formal declaration</head>
         <schemaSpec ident="bibliography" start="biblStruct" xml:lang="en" prefix="" ns="http://www.tei-c.org/ns/1.0">
-          <moduleRef key="core" include="analytic author biblScope biblStruct date editor imprint monogr name note ptr pubPlace publisher ref resp respStmt series textLang title"/>
+          <moduleRef key="core" include="analytic author biblScope biblStruct date editor imprint measure monogr name note ptr pubPlace publisher ref resp respStmt series textLang title"/>
           <moduleRef key="tei"/>
           <moduleRef key="header" include="distributor edition extent idno"/>
           <moduleRef key="namesdates" include="forename genName nameLink orgName roleName surname"/>
@@ -166,6 +166,20 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
           <classSpec ident="att.duration.iso" module="namesdates" mode="delete" type="atts"/>
           <classSpec ident="att.duration.w3c" module="tei" mode="delete" type="atts"/>
           <classSpec ident="att.editLike" module="tei" mode="delete" type="atts"/>
+          <classSpec ident="att.measurement" module="tei" mode="change" type="atts">
+            <attList>
+              <attDef ident="commodity" mode="delete"/>
+              <attDef ident="unit" mode="change">
+                <!-- limit measure to pages -->
+                <datatype minOccurs="1" maxOccurs="1">
+                  <rng:ref name="data.enumerated"/>
+                </datatype>
+                <valList type="closed" mode="add">
+                  <valItem ident="pages"/>
+                </valList>
+              </attDef>
+            </attList>
+          </classSpec>
           <classSpec ident="att.naming" module="tei" mode="delete" type="atts"/>
           <classSpec ident="att.placement" module="tei" mode="delete" type="atts"/>
           <classSpec ident="att.pointing" mode="change" module="tei" type="atts">
