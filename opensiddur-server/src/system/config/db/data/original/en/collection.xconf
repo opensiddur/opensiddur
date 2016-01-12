@@ -29,6 +29,11 @@
             <!-- for various types of searches -->
             <create qname="@type" type="xs:string"/>
 
+            <!-- searches on bibl/@target -->
+            <create qname="@target" type="xs:string"/>
+            <create qname="@from" type="xs:integer"/>
+            <create qname="@to" type="xs:integer"/>
+
             <!-- recent changes searches -->
             <create qname="tei:change">
                 <field name="change-who" match="@who" type="xs:string"/>

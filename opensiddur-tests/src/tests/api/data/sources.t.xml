@@ -4,7 +4,7 @@
   <description>
       <p>Test the bibliographic data API</p>
       <author>Efraim Feinstein</author>
-      <copyright>Copyright 2012-2013 Efraim Feinstein,
+      <copyright>Copyright 2012-2013,2016 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <asUser>testuser</asUser>
@@ -87,7 +87,6 @@
          <class href="../common.t.incl.xml#NotFound"/>
       </test>
   </TestSet>
-  <!-- TODO: edit from here -->
   <TestSet>
       <testName>src:list()</testName>
       <test>
@@ -261,5 +260,75 @@
       </code>
          <class href="../common.t.incl.xml#NotFound"/>
       </test>
+  </TestSet>
+  <TestSet>
+    <testName>src:pages</testName>
+    <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestBibliography.xml"
+            destination="/db/data/sources"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument1.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument2.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument3.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument4.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument5.xml"
+            destination="/db/data/original/en"/>
+    </setup>
+    <tearDown>
+      <remove-document collection="/db/data/sources" name="TestBibliography.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument1.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument2.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument3.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument4.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument5.xml"/>
+    </tearDown>
+    <test>
+      <task>Resource does not exist</task>
+      <code>
+      src:pages("DoesNotExist")
+      </code> 
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+    <test>
+      <task>List pages: there are none</task>
+      <code>
+      src:pages("Existing")
+      </code>
+      <xpath desc="html is returned">exists(./self::html:html)</xpath>
+      <xpath desc="an empty list is returned">exists(.//html:ol[@class="results"]) and empty(.//html:ol[@class="results"]/*)</xpath>
+    </test>
+    <test>
+      <task>List pages with results</task>
+      <code>
+      src:pages("TestBibliography")
+      </code>
+      <xpath desc="some results are returned">count(.//html:ol[@class="results"]/html:li[@class="result"]) &gt; 0</xpath>
+      <xpath desc="all pages are represented by a list element"><![CDATA[
+      let $pages := 
+        for $p in .//html:ol[@class="results"]/html:li[@class="result"]/html:span[@class="page"] return xs:integer($p)
+      return every $pg in (1 to 7) satisfies $pg=$pages
+      ]]></xpath>
+      <xpath desc="results without pages are represented by a list element">count(.//html:ol[@class="results"]/html:li[@class="result"][not(html:span[@class="page"])])=1</xpath>
+      <xpath desc="pages (where they exist) are ordered">every $li in .//html:ol[@class="results"]/html:li[html:span[@class="page"]][position() &gt;= 2] satisfies $li/html:span[@class="page"]/number() &gt;= $li/preceding-sibling::html:li[1]/html:span[@class="page"]/number() </xpath>
+      <xpath desc="TestDocument1 is represented as page 1">exists(.//html:ol[@class="results"]/html:li[@class="result"][html:span[@class="page"]=1][ends-with(html:a/@href, "TestDocument1")])</xpath>
+      <xpath desc="TestDocument2 is represented as pages 2-6"><![CDATA[ 
+      every $v in (for $pg at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument2")]/html:span/@page/number()
+      return $pg=(2 to 6)[$n]) satisfies $v
+      ]]></xpath>
+      <xpath desc="TestDocument3 is represented as pages 4-5 (overlap is allowed)"><![CDATA[ 
+      every $v in (for $pg at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument3")]/html:span/@page/number()
+      return $pg=(4 to 5)[$n]) satisfies $v
+      ]]></xpath>
+      <xpath desc="TestDocument4 is represented as page 7"><![CDATA[
+      every $v in (for $pg at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument4")]/html:span/@page/number()
+      return $pg=7) satisfies $v
+      ]]></xpath>
+      <xpath desc="TestDocument4 has its status represented"><![CDATA[every $v in (for $status at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument4")]/html:ul[@class="statuses"]/html:li[@class="status"]/string() return $status=("proofread-once", "transcribed")[$n]) satisfies $v
+      ]]></xpath>
+      <xpath desc="TestDocument5 (no page) is represented with no page span">exists(.//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument5")][not(html:span[@class="page"])])</xpath>
+    </test>
   </TestSet>
 </TestSuite>

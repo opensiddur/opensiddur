@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+(: Copyright 2012-2013,2016 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Sources (bibliographic) data API
@@ -18,6 +18,8 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
+import module namespace orig="http://jewishliturgy.org/api/data/original"
+  at "original.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "../../modules/paths.xqm";
 
@@ -67,6 +69,74 @@ declare
   crest:get($src:data-type, $name)
 };
 
+(:~ List the transcribed pages of a document 
+ : @param $name the source file
+ : @error HTTP 404 not found (or not available)
+ :)
+declare
+  %rest:GET
+  %rest:path("/api/data/sources/{$name}/pages")
+  %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
+  %output:method("html5")  
+  function src:pages(
+    $name as xs:string
+  ) as item()+ {
+  let $biblio := src:get($name)
+  return
+    if ($biblio/self::rest:response/http:response/@status/number() ge 400)
+    then $biblio
+    else 
+      let $target := replace(data:db-path-to-api(document-uri($biblio)), "^(/exist/restxq)?/api", "")
+      let $max-page := $biblio//tei:extent/tei:measure[@unit='pages']/@quantity/number()
+      let $title := src:title-function($biblio)
+      let $transcribed-document-bibl :=
+        collection($orig:path-base)//tei:sourceDesc/tei:bibl[tei:ptr["bibl"=@type][$target=@target]]
+      let $transcribed-pages :=
+        for $bibl in $transcribed-document-bibl
+        let $db-uri := document-uri(root($bibl))
+        let $api := data:db-path-to-api($db-uri)
+        let $status := $bibl/@j:docStatus/string()
+        return
+          if (exists($bibl/tei:biblScope))
+          then
+            for $pg in ( xs:integer($bibl/tei:biblScope/@from) to xs:integer($bibl/tei:biblScope/@to) )
+            return <page pg="{$pg}" api="{$api}" 
+                  db-doc="{$db-uri}" status="{$status}"/>
+          else
+            <page api="{$api}" db-doc="{$db-uri}" status="{$status}"/>
+      return
+        <html xmlns="http://www.w3.org/1999/xhtml">
+          <head> 
+            <title>Pages for {$title}</title>
+          </head>
+          <body>{
+            <ol class="results">{
+              for $page in $transcribed-pages
+              let $page-number := ($page/@pg/number(), -1)[1]
+              let $api-path := $page/@api/string()
+              let $db-path := $page/@db-doc/string()
+              let $statuses := tokenize($page/@status/string(), '\s+')
+              order by $page-number
+              return 
+                <li class="result">
+                  { 
+                    if ($page-number > 0) 
+                    then
+                      (<span class="page">{$page-number}</span>, ':')
+                    else ()
+                  }
+                  <a class="title" href="{$api-path}">{crest:tei-title-function(doc($db-path))}</a>: 
+                  <ul class="statuses">{
+                    for $status in $statuses
+                    order by lower-case($status)
+                    return <li class="status">{$status}</li>
+                  }</ul>
+              </li>
+            }</ol>
+          }</body>
+        </html> 
+};
+
 (:~ List or full-text query bibliographic data
  : @param $q text of the query, empty string for all
  : @param $start first document to list
@@ -90,7 +160,8 @@ declare
   crest:list($q, $start, $max-results,
     "Bibliographic data API", api:uri-of($src:api-path-base),
     src:query-function#1, src:list-function#0,
-    (), src:title-function#1
+    <crest:additional text="pages" relative-uri="pages"/>, 
+    src:title-function#1
   )
 };
 
