@@ -4,7 +4,7 @@
   <description>
       <p>Tests of combine transform</p>
       <author>Efraim Feinstein</author>
-      <copyright>Copyright 2013-2014 Efraim Feinstein
+      <copyright>Copyright 2013-2014,2016 Efraim Feinstein
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -159,6 +159,29 @@
          <xpath desc="incorporate destination in-place">exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
       </xpath>
       </test>
+  </TestSet>
+  <TestSet>
+    <testName>External inline pointer</testName>
+    <setup>
+      <code>
+      local:setup("combine-inline-dest.xml", "original"),
+      local:setup("combine-inline-source.xml", "original")
+      </code>
+    </setup>
+    <tearDown>
+      local:tearDown("combine-inline-source.xml", "original"),
+      local:tearDown("combine-inline-dest.xml", "original")
+    </tearDown>
+    <test>
+      <task>inline range pointer</task>
+      <code>
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/original/combine-inline-source.xml"),
+          map {}
+        )
+      </code>
+      <xpath desc="inline pointer included in place">count(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/tei:p[@jf:layer-id]/jf:ptr[@type="inline"][@jf:id="ptr2"][ends-with(@jf:stream, "#stream")]/tei:seg)=3</xpath>
+    </test>
   </TestSet>
   <TestSet>
       <testName>combine:tei-fs-to-map()</testName>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+  <tei:teiHeader>
+      <tei:publicationStmt>
+         <tei:availability>
+            <tei:licence target="http://www.creativecommons.org/licenses/by/3.0"/>
+         </tei:availability> 
+      </tei:publicationStmt>
+  </tei:teiHeader>
+  <tei:text>
+      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
+          <tei:anchor xml:id="start_p1"/>
+          <tei:seg xml:id="seg1">Segment 1.</tei:seg>
+          <tei:ptr xml:id="ptr2" type="inline" target="/data/original/combine-inline-dest#range(seg1,seg3)"/>
+          <tei:seg xml:id="seg3">Segment 3.</tei:seg>
+          <tei:anchor xml:id="end_p1"/>
+      </j:streamText>
+      <j:concurrent>
+        <j:layer type="p">
+          <tei:p>
+            <tei:ptr target="#range(start_p1,end_p1)"/>
+          </tei:p>
+        </j:layer>
+      </j:concurrent>
+  </tei:text>
+</tei:TEI>
