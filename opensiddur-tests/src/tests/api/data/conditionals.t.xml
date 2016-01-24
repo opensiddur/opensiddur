@@ -326,7 +326,7 @@
       </code>
       <expected xpath="self::r:conditional-results" desc="two records are returned">
         <r:conditional-results start="1" end="2" n-results="2">
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1" match="type">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
               <tei:fDecl name="name1">
@@ -339,7 +339,7 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x" match="type">
             <tei:fsDecl type="xtype1x">
                <tei:fsDescr>first type</tei:fsDescr>
                <tei:fDecl name="xname1x">
@@ -371,7 +371,7 @@
       </code>
       <expected xpath="self::r:conditional-results" desc="two records are returned">
         <r:conditional-results start="1" end="3" n-results="3" >
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1" match="feature">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
               <tei:fDecl name="name1">
@@ -380,7 +380,7 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2" match="feature">
             <tei:fsDecl type="type2">
               <tei:fsDescr>second type</tei:fsDescr>
               <tei:fDecl name="name1">
@@ -389,7 +389,7 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x" match="feature">
             <tei:fsDecl type="xtype1x">
                <tei:fsDescr>first type</tei:fsDescr>
                <tei:fDecl name="xname1x">
@@ -408,7 +408,7 @@
       </code>
       <expected xpath="self::r:conditional-results" desc="one record is returned">
         <r:conditional-results start="1" end="1" n-results="3">
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1" match="feature">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
               <tei:fDecl name="name1">
@@ -427,7 +427,7 @@
       </code>
       <expected xpath="self::r:conditional-results" desc="two records are returned">
         <r:conditional-results start="1" end="3" n-results="3">
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1" match="type">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
               <tei:fDecl name="name1">
@@ -440,7 +440,7 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2" match="type">
             <tei:fsDecl type="type2">
                <tei:fsDescr>second type</tei:fsDescr>
                <tei:fDecl name="name1">
@@ -453,7 +453,7 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x" match="type">
             <tei:fsDecl type="xtype1x">
                <tei:fsDescr>first type</tei:fsDescr>
                <tei:fDecl name="xname1x">
@@ -476,7 +476,7 @@
       </code>
       <expected xpath="self::r:conditional-results" desc="three records are returned">
         <r:conditional-results start="1" end="3" n-results="3">
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1" match="feature">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
               <tei:fDecl name="name1">
@@ -485,7 +485,7 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2" match="feature">
             <tei:fsDecl type="type2">
               <tei:fsDescr>second type</tei:fsDescr>
               <tei:fDecl name="name1">
@@ -494,7 +494,7 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x" match="feature">
             <tei:fsDecl type="xtype1x">
                <tei:fsDescr>first type</tei:fsDescr>
                <tei:fDecl name="xname1x">
@@ -513,7 +513,7 @@
       </code>
       <expected xpath="self::r:conditional-results" desc="records that match any of the terms are returned">
         <r:conditional-results start="1" end="5" n-results="5">
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1" match="type">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
               <tei:fDecl name="name1">
@@ -526,7 +526,7 @@
               </tei:fDecl>
             </tei:fsDecl>
          </r:conditional-result> 
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1" match="feature">
             <tei:fsDecl type="type1">
               <tei:fsDescr>first type</tei:fsDescr>
               <tei:fDecl name="name1">
@@ -535,7 +535,7 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/type2" match="feature">
             <tei:fsDecl type="type2">
                <tei:fsDescr>second type</tei:fsDescr>
                <tei:fDecl name="name1">
@@ -544,7 +544,7 @@
                </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x" match="type">
             <tei:fsDecl type="xtype1x">
                <tei:fsDescr>first type</tei:fsDescr>
                <tei:fDecl name="xname1x">
@@ -557,7 +557,7 @@
               </tei:fDecl>
             </tei:fsDecl>
           </r:conditional-result>
-          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x">
+          <r:conditional-result resource="/exist/restxq/api/data/conditionals/xtype1x" match="feature">
             <tei:fsDecl type="xtype1x">
                <tei:fsDescr>first type</tei:fsDescr>
                <tei:fDecl name="xname1x">

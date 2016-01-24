@@ -177,6 +177,7 @@ declare %private
       return
         element r:conditional-result {
           attribute resource { data:db-path-to-api(document-uri(root($node))) },
+          attribute match { "resource" },
           $decl
         }
     case element(tei:fsDecl)
@@ -184,6 +185,7 @@ declare %private
       (: got a match on type :)
       element r:conditional-result {
         attribute resource { data:db-path-to-api(document-uri(root($node))) },
+        attribute match { "type" },
         $node
       }
     case element(tei:fDecl)
@@ -191,6 +193,7 @@ declare %private
       (: got a match on name :)
       element r:conditional-result {
         attribute resource { data:db-path-to-api(document-uri(root($node))) },
+        attribute match { "feature" },
         element tei:fsDecl {
           $node/parent::*/@*,
           $node/parent::*/node() except $node/parent::*/tei:fDecl[not(. is $node)]
