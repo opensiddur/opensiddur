@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<TestSuite>
+<TestSuite
+  xmlns:tei="http://www.tei-c.org/ns/1.0">
     <suiteName>Transliteration transform</suiteName>
     <description>
         <p>Tests of transliteration transform</p>
         <author>Efraim Feinstein</author>
-        <copyright>Copyright 2011-2013 Efraim Feinstein
+        <copyright>Copyright 2011-2013,2016 Efraim Feinstein
         Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
     </description>
     <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -72,8 +73,29 @@
             translit:transliterate(&lt;tei:w&gt;יְיָ&lt;/tei:w&gt;, map { "translit:table" := $table })
           </code>
           <expected desc="replaced">
-            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">ʾadonay</tei:w>
+            <tei:w>ʾadonay</tei:w>
          </expected>
+      </test>
+    </TestSet>
+    <TestSet>
+      <testName>Regression tests</testName>
+      <test>
+        <task>Shin+dot+vowel</task>
+        <code>
+          translit:transliterate(&lt;tei:w&gt;&#x05e9;&#x05c1;&#x05b8;&lt;/tei:w&gt;, map { "translit:table" := $table })
+        </code>
+        <expected desc="shin + vowel">
+          <tei:w>sha</tei:w>
+        </expected>
+      </test>
+      <test>
+        <task>Shin+dot+dagesh+vowel</task>
+        <code>
+          translit:transliterate(&lt;tei:w&gt;&#x05e9;&#x05c1;&#x05bc;&#x05b8;&lt;/tei:w&gt;, map { "translit:table" := $table })
+        </code>
+        <expected desc="shin once + vowel">
+          <tei:w>sha</tei:w>
+        </expected>
       </test>
     </TestSet>
     <TestSet ignore="yes">
