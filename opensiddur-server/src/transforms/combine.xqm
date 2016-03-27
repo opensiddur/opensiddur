@@ -244,16 +244,22 @@ declare function combine:new-document-attributes(
         (: parallel documents are guaranteed to have a @jf:document attribute :)
         $new-doc-nodes[1]/ancestor::*[@jf:document][1]/@jf:document/string()
     else
-        replace(
-            data:db-path-to-api(
-                mirror:unmirror-path(
-                  $format:unflatten-cache,
-                  ( 
-                    document-uri(root($new-doc-nodes[1])), 
-                    ($new-doc-nodes[1]/@uri:document-uri)
-                  )[1]
-                )
-            ), "^(/exist/restxq)?/api", "")
+        let $uri := 
+            ( 
+              document-uri(root($new-doc-nodes[1])), 
+              ($new-doc-nodes[1]/@uri:document-uri)
+            )[1]
+        return
+          replace(
+              data:db-path-to-api(
+                  mirror:unmirror-path(
+                    (: most of the time, the document will be from unflatten; for inline ptr inclusions, it will be from flatten;
+                     this is a more or less generic way to get the cache 
+                    :)
+                    string-join(subsequence(tokenize($uri, "/"), 1, 4), "/"),
+                    $uri
+                  )
+              ), "^(/exist/restxq)?/api", "")
   return (
     (: document (as API source ), base URI?, language, source(?), 
      : license, contributors :)
@@ -287,11 +293,15 @@ declare function combine:new-document-params(
         then
             data:doc($new-doc-nodes[1]/ancestor::tei:TEI/@jf:document)
         else 
+          let $uri :=
+                (document-uri(root($new-doc-nodes[1])), 
+                $new-doc-nodes[1]/@uri:document-uri)[1]
+          return
             doc(
                 mirror:unmirror-path(
-                    $format:unflatten-cache, 
-                    (document-uri(root($new-doc-nodes[1])), 
-                     $new-doc-nodes[1]/@uri:document-uri)[1])
+                    string-join(subsequence(tokenize($uri, "/"), 1, 4), "/"),
+                    $uri 
+                    )
             )
     let $new-params := map:new((
         $params,
@@ -571,7 +581,11 @@ declare function combine:follow-pointer(
         uri:follow-steps($e),
         (),
         true(),
-        if (substring-before($target, "#") or not(contains($target, "#")))
+        if ($e/@type="inline")
+        then 
+          (: any inline pointer comes from the flatten cache :)
+          $format:flatten-cache
+        else if (substring-before($target, "#") or not(contains($target, "#")))
         then $format:unflatten-cache
         else ( 
           (: Already in the cache, no need to try to 

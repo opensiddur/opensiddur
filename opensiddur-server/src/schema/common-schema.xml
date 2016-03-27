@@ -5,6 +5,7 @@ schemas, not as an independent unit
 <specGrp 
   xml:id="common-specs"
   xmlns="http://www.tei-c.org/ns/1.0"
+  xmlns:rng="http://relaxng.org/ns/structure/1.0"
   xmlns:sch="http://purl.oclc.org/dsdl/schematron"
   xmlns:xi="http://www.w3.org/2001/XInclude"
   xml:lang="en">
@@ -86,22 +87,46 @@ schemas, not as an independent unit
     </content>
   </elementSpec>
   <elementSpec ident="w" module="analysis" mode="change">
-    <content xmlns:default="http://relaxng.org/ns/structure/1.0">
-      <default:zeroOrMore xmlns="http://relaxng.org/ns/structure/1.0">
-        <default:choice>
-          <default:text/>
-          <default:ref name="model.gLike"/>
-          <default:ref name="seg"/>
-          <default:ref name="w"/>
-          <default:ref name="m"/>
-          <default:ref name="c"/>
-          <default:ref name="model.global"/>
-          <default:ref name="model.lPart"/>
-          <default:ref name="model.hiLike"/>
-          <default:ref name="model.pPart.edit"/>
-          <default:ref name="divineName"/>
-        </default:choice>
-      </default:zeroOrMore>
+    <content>
+      <rng:zeroOrMore xmlns="http://relaxng.org/ns/structure/1.0">
+        <rng:choice>
+          <rng:text/>
+          <rng:ref name="model.gLike"/>
+          <rng:ref name="seg"/>
+          <rng:ref name="w"/>
+          <rng:ref name="m"/>
+          <rng:ref name="c"/>
+          <rng:ref name="model.global"/>
+          <rng:ref name="model.lPart"/>
+          <rng:ref name="model.hiLike"/>
+          <rng:ref name="model.pPart.edit"/>
+          <rng:ref name="divineName"/>
+        </rng:choice>
+      </rng:zeroOrMore>
     </content>
   </elementSpec>
+  <!-- the @status attribute is insufficient for Open Siddur since it can include
+    only one status. We want to record the status of transcriptions, annotations, etc.
+   -->
+  <classSpec module="tei" mode="change" ident="att.docStatus" type="atts">
+    <attList>
+      <attDef ident="status" mode="delete"/>
+      <attDef ident="docStatus" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add">
+        <datatype minOccurs="1" maxOccurs="unbounded">
+          <rng:ref name="data.enumerated"/>
+        </datatype>
+        <valList type="semi" mode="add">
+          <valItem ident="draft"/>
+          <valItem ident="transcribed"/>
+          <valItem ident="segmented"/>
+          <valItem ident="annotated"/>
+          <valItem ident="annotated-with-conditionals"/>
+          <valItem ident="linked-to-translation"/>
+          <valItem ident="hierarchies-complete"/>
+          <valItem ident="proofread-once"/>
+          <valItem ident="proofread-twice"/>
+        </valList>
+      </attDef>
+    </attList>  
+  </classSpec>
 </specGrp>
