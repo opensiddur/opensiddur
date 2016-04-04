@@ -2,9 +2,10 @@ xquery version "3.0";
 (:~
  : Combine multiple documents into a single all-encompassing 
  : JLPTEI document
+ : Also add late-binding concerns, like transliteration
  :
  : Open Siddur Project
- : Copyright 2013-2014 Efraim Feinstein 
+ : Copyright 2013-2014,2016 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -28,6 +29,8 @@ import module namespace cond="http://jewishliturgy.org/transform/conditionals"
   at "conditionals.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "flatten.xqm";
+import module namespace translit="http://jewishliturgy.org/transform/transliterator"
+  at "translit/translit.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -84,6 +87,8 @@ declare function combine:combine(
                     return combine:jf-unflattened($node, $updated-params)
                     case element(jf:parallelGrp)
                     return combine:jf-parallelGrp($node, $updated-params)
+                    case element(j:segGen)
+                    return combine:j-segGen($node, $updated-params)
                     default (: other element :) 
                     return combine:element($node, $updated-params)
                 let $annotation-sources := (
@@ -177,6 +182,16 @@ declare function combine:jf-unflattened(
               then $redirect
               else combine:combine($e/node(), $new-params)
     } 
+};
+
+declare function combine:j-segGen(
+  $e as element(j:segGen),
+  $params as map
+  ) as element() {
+  let $combined := combine:element($e, $params)
+  let $transliterated := combine:transliterate-in-place($combined, $e, $params)
+  return
+    ($transliterated, $combined)[1]
 };
 
 declare function combine:element(
@@ -420,6 +435,24 @@ declare function combine:tei-fs-to-map(
                     )[.]
                 ) 
         )
+};
+
+(:~ transliteration
+ : @param $e already fully processed element
+ : @param $context original context
+ : @param $params includes transliteration on/off and table if on
+ :)
+declare function combine:transliterate-in-place(
+  $e as element(),
+  $context as element(),
+  $params as map
+  ) as element()? {
+  let $settings := $params("combine:settings")
+  where exists($settings) and $settings("opensiddur:transliteration->active")=("ON","YES") and $settings("opensiddur:transliteration->table")
+  return
+    let $table := translit:get-table($context, $settings("opensiddur:transliteration->table"), (), $settings("opensiddur:transliteration->script"))
+    where exists($table)
+    return translit:transliterate($e, map { "translit:table" := $table })
 };
 
 (:~ get the effective document URI of the processing

@@ -5,8 +5,13 @@ xquery version "3.0";
  :)
 module namespace translit="http://jewishliturgy.org/transform/transliterator";
 
+import module namespace common="http://jewishliturgy.org/transform/common"
+  at "../../modules/common.xqm";
+import module namespace data="http://jewishliturgy.org/modules/data"
+  at "../../modules/data.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
     at "../../modules/follow-uri.xqm";
+
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -434,7 +439,6 @@ declare function translit:make-word-text(
                     "Encountered a character (", $c, "=#", $cp, ") in your Hebrew text in the word ", $word, "that doesn't match any known pattern in Hebrew.  This is either a typo or a bug in the transliterator."), ""))
             )
         }
-    let $null := util:log-system-out($characters)
     return translit:make-word-helper($characters/*)
 };
 
@@ -1077,3 +1081,16 @@ declare function translit:identity(
     }
 };
 
+(:~ utility function to get a transliteration table by name and languages :)
+declare function translit:get-table(
+  $context as node(),
+  $table-name as xs:string,
+  $lang-in as xs:string?,
+  $lang-out as xs:string?
+  ) as element(tr:table)? {
+  let $lang-in := ($lang-in, common:language($context))[1]
+  let $lang-out := ($lang-out, $lang-in || "-Latn")[1]
+  return
+    data:doc("transliteration", $table-name)/tr:schema/
+      tr:table[tr:lang[$lang-in=@in][$lang-out=@out]]
+};

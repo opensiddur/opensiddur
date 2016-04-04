@@ -701,4 +701,29 @@
         <xpath desc="the attribute points to the style in the opensiddur->style feature">.//@jf:style[1]="/data/styles/test_style"</xpath>
       </test>
   </TestSet>
+
+  <TestSet>
+      <testName>Transliteration</testName>
+      <setup>
+         <code>
+      local:setup("combine-segGen-1.xml", "original")
+      </code>
+      </setup>
+      <tearDown>
+         <code>
+      local:tearDown("combine-segGen-1.xml", "original")
+      </code>
+      </tearDown>
+      <test>
+        <task>transliterate a segGen element</task>
+        <code>
+        let $d := doc("/db/data/original/combine-segGen-1.xml")
+        return
+            format:combine($d, map {}, $d)
+        </code>
+        <xpath desc="the segGen element contains the generated transliteration">.//jf:combined/j:segGen[@jf:id="segGen1"]="ʾabbaʾ"</xpath>
+        <xpath desc="no other elements are generated">count(.//jf:combined/*)=1</xpath>
+      </test>
+  </TestSet>
+
 </TestSuite>
