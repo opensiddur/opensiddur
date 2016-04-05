@@ -35,6 +35,7 @@ import module namespace translit="http://jewishliturgy.org/transform/translitera
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
+declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 declare function combine:combine-document(
   $doc as document-node(),
@@ -437,7 +438,7 @@ declare function combine:tei-fs-to-map(
         )
 };
 
-(:~ transliteration
+(:~ transliterate an element in place
  : @param $e already fully processed element
  : @param $context original context
  : @param $params includes transliteration on/off and table if on
@@ -451,8 +452,16 @@ declare function combine:transliterate-in-place(
   where exists($settings) and $settings("opensiddur:transliteration->active")=("ON","YES") and $settings("opensiddur:transliteration->table")
   return
     let $table := translit:get-table($context, $settings("opensiddur:transliteration->table"), (), $settings("opensiddur:transliteration->script"))
+    let $out-script := $table/tr:lang[common:language($context)=@in]/@out/string()
     where exists($table)
-    return translit:transliterate($e, map { "translit:table" := $table })
+    return 
+      let $transliterated := translit:transliterate($e, map { "translit:table" := $table })
+      return 
+        element {QName(namespace-uri($transliterated), name($transliterated))}{
+          $transliterated/(@* except @xml:lang),
+          attribute xml:lang { $out-script },
+          $transliterated/node()
+        }
 };
 
 (:~ get the effective document URI of the processing

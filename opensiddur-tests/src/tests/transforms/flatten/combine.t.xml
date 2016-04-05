@@ -722,6 +722,7 @@
             format:combine($d, map {}, $d)
         </code>
         <xpath desc="the segGen element contains the generated transliteration">.//jf:combined/j:segGen[@jf:id="segGen1"]="ʾabbaʾ"</xpath>
+        <xpath desc="the segGen element has an appropriate xml:lang">.//jf:combined/j:segGen[@jf:id="segGen1"]/@xml:lang="he-Latn"</xpath>
         <xpath desc="no other elements are generated">count(.//jf:combined/*)=1</xpath>
       </test>
   </TestSet>

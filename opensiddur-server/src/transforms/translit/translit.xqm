@@ -1088,9 +1088,11 @@ declare function translit:get-table(
   $lang-in as xs:string?,
   $lang-out as xs:string?
   ) as element(tr:table)? {
+  let $tr-doc := data:doc("transliteration", $table-name)
   let $lang-in := ($lang-in, common:language($context))[1]
-  let $lang-out := ($lang-out, $lang-in || "-Latn")[1]
+  let $in-table-langs := $tr-doc/tr:schema/tr:table/tr:lang[$lang-in=tr:lang]
+  let $lang-out := ($lang-out, $in-table-langs[1]/@out/string(), $lang-in || "-Latn")[1]
   return
-    data:doc("transliteration", $table-name)/tr:schema/
+    $tr-doc/tr:schema/
       tr:table[tr:lang[$lang-in=@in][$lang-out=@out]]
 };
