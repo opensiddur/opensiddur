@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+     xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+    xml:lang="he">
+  <tei:teiHeader>
+      <tei:publicationStmt>
+         <tei:availability>
+            <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+         </tei:availability> 
+      </tei:publicationStmt>
+  </tei:teiHeader>
+  <j:settings>
+    <tei:fs xml:id="translit_on" type="opensiddur:transliteration">
+      <tei:f name="table">Modern%20Israeli</tei:f>
+      <tei:f name="active"><j:on/></tei:f>
+    </tei:fs>
+    <tei:fs xml:id="translit_bad" type="opensiddur:transliteration">
+      <tei:f name="table">DoesNotExist</tei:f>
+      <tei:f name="active"><j:on/></tei:f>
+    </tei:fs>
+    <tei:fs xml:id="set_notes_on" type="opensiddur:annotation">
+      <tei:f name="combine-translit-note-1">
+        <j:on/>
+       </tei:f>
+    </tei:fs>
+  </j:settings>
+  <j:links>
+    <tei:link type="set" target="#range(tr_a,tr_b) #translit_on"/>
+    <tei:link type="set" target="#range(tr_c,tr_d) #translit_bad"/>
+    <tei:link type="note" target="#range(ann_a,ann_b) /data/notes/combine-translit-note-1#ann1"/>
+    <tei:link type="set" target="#stream #set_notes_on"/>
+  </j:links>
+  <tei:text>
+      <j:streamText xml:id="stream">
+        <tei:seg xml:lang="en" xml:id="not_transliterated">not Hebrew.</tei:seg>
+        <tei:anchor xml:id="tr_a"/>
+        <tei:seg xml:id="to_be_transliterated">אַבָּא</tei:seg>
+        <tei:seg xml:lang="en" xml:id="bad_language">English.</tei:seg>
+        <tei:anchor xml:id="tr_b"/>
+        <tei:anchor xml:id="tr_c"/>
+        <tei:seg xml:id="no_table">אַבָּא</tei:seg>
+        <tei:anchor xml:id="tr_d"/>
+        <tei:anchor xml:id="ann_a"/>
+        <tei:seg xml:lang="en" xml:id="annotated">Annotated</tei:seg>
+        <tei:anchor xml:id="ann_b"/>
+      </j:streamText>
+  </tei:text>
+</tei:TEI>
