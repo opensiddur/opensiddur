@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+    <tei:teiHeader>
+      <tei:publicationStmt>
+        <tei:availability>
+            <tei:licence target="http://www.creativecommons.org/licenses/by/3.0"/>
+        </tei:availability> 
+      </tei:publicationStmt>
+    </tei:teiHeader>
+    <j:annotations xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+        <tei:note xml:id="ann1" type="comment" xml:lang="he"><tei:seg>אִמָּא</tei:seg></tei:note>
+    </j:annotations>
+</tei:TEI>

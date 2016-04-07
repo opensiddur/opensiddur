@@ -90,6 +90,8 @@ declare function combine:combine(
                     return combine:jf-parallelGrp($node, $updated-params)
                     case element(j:segGen)
                     return combine:j-segGen($node, $updated-params)
+                    case element(tei:seg)
+                    return combine:tei-seg($node, $updated-params)
                     default (: other element :) 
                     return combine:element($node, $updated-params)
                 let $annotation-sources := (
@@ -183,6 +185,32 @@ declare function combine:jf-unflattened(
               then $redirect
               else combine:combine($e/node(), $new-params)
     } 
+};
+
+(:~ seg handling: if the segment is inside a stream (or parallelGrp) directly and transliteration is on, 
+ : it should be turned into a jf:transliterated/(tei:seg , tei:seg[@type=transliterated])
+ :)
+declare function combine:tei-seg(
+  $e as element(tei:seg),
+  $params as map
+  ) as element() {
+  let $combined := combine:element($e, $params)
+  let $transliterated := 
+    if ($e/@jf:stream)
+    then combine:transliterate-in-place($combined, $e, $params)
+    else ()
+  return
+    if (exists($transliterated))
+    then 
+      element jf:transliterated {
+        $combined,
+        element tei:seg {
+          $transliterated/(@* except (@type, @jf:id, @jf:stream)),
+          attribute type { "transliterated" },
+          $transliterated/node()
+        }
+      }
+    else $combined
 };
 
 declare function combine:j-segGen(
