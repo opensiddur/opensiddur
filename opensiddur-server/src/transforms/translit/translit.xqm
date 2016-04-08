@@ -192,7 +192,7 @@ declare function translit:assemble-word-reverse-tei-w(
     let $context-abs-uri := 
         uri:absolutize-uri(xs:anyURI(concat('#',$context/@xml:id)), $context)
     let $backlink as element(tei:w)? := 
-      root($context)//tei:w
+      root($context)//tei:w[@next]
         [uri:absolutize-uri(xs:anyURI(@next), .)=$context-abs-uri]
     return
         if ($backlink)
