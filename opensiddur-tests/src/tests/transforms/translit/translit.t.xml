@@ -51,6 +51,42 @@
          </expected>
       </test>
       <test>
+          <task>holam male</task>
+          <code><![CDATA[
+            translit:transliterate(<tei:w>זוֹ</tei:w>, map { "translit:table" := $table })
+          ]]></code>
+          <expected desc="word is transliterated">
+            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">zo</tei:w>
+         </expected>
+      </test>
+      <test>
+          <task>shuruq</task>
+          <code><![CDATA[
+            translit:transliterate(<tei:w>זוּ</tei:w>, map { "translit:table" := $table })
+          ]]></code>
+          <expected desc="word is transliterated">
+            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">zu</tei:w>
+         </expected>
+      </test>
+      <test>
+          <task>dagesh hazak</task>
+          <code><![CDATA[
+            translit:transliterate(<tei:w>לַבַּל</tei:w>, map { "translit:table" := $table })
+          ]]></code>
+          <expected desc="word is transliterated">
+            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">labbal</tei:w>
+         </expected>
+      </test>
+      <test>
+          <task>dagesh kal</task>
+          <code><![CDATA[
+            translit:transliterate(<tei:w>בַּז</tei:w>, map { "translit:table" := $table })
+          ]]></code>
+          <expected desc="word is transliterated">
+            <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">baz</tei:w>
+         </expected>
+      </test>
+      <test>
           <task>Tetragrammaton 1</task>
           <code>
             translit:transliterate(&lt;tei:w&gt;יְהוָה&lt;/tei:w&gt;, map { "translit:table" := $table })
