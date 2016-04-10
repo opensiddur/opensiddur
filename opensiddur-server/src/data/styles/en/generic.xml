@@ -255,6 +255,18 @@ div {
     width:30%;
 }
 
+/* in-place transliterations */
+.jf-transliterated {
+    display:block;
+      padding-bottom:0.5em;
+}
+.jf-transliterated .tei-seg {
+    display:block;
+}
+.tei-seg.type-transliterated {
+    text-align:right;
+}
+
 /* inclusions */
 .jf-combine,
 .jf-ptr {
