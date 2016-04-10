@@ -169,8 +169,10 @@
       </code>
     </setup>
     <tearDown>
+      <code>
       local:tearDown("combine-inline-source.xml", "original"),
       local:tearDown("combine-inline-dest.xml", "original")
+      </code>
     </tearDown>
     <test>
       <task>inline range pointer</task>
