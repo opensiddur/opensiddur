@@ -425,11 +425,14 @@ declare function uri:dependency(
     for $dependency in $new-dependencies
     let $next-doc := data:doc($dependency)
     where not(document-uri($next-doc)=$visited)
-    return 
-      uri:dependency(
-        $next-doc, 
-        ($visited, $this-uri)
-      )
+    return
+      if (exists($next-doc))
+      then 
+        uri:dependency(
+          $next-doc, 
+          ($visited, $this-uri)
+        )
+      else error(xs:QName("error:DEPENDENCY"), "An unresolvable dependency was found in " || tokenize(document-uri($doc), "/")[last()] ||": The pointer: " || $dependency || " points to a document that does not exist.")
   ))
     
    

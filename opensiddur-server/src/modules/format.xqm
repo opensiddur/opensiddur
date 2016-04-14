@@ -366,13 +366,19 @@ declare function format:get-dependencies(
  : of a given document
  :)
 declare function format:dependencies(
-  $doc as document-node()
+  $doc as document-node(),
+  $params as map
   ) as document-node() {
-  mirror:apply-if-outdated(
-    $format:dependency-cache,
-    $doc,
-    format:get-dependencies#1
-  )
+  let $params := format:status-param($params, $doc)
+  return
+    format:apply-if-outdated(
+      "dependencies",
+      $params,
+      $format:dependency-cache,
+      $doc,
+      format:get-dependencies#1,
+      $doc
+    )
 };
 
 (:~ unflatten all transformable dependencies of a given document :)
@@ -380,7 +386,7 @@ declare function format:unflatten-dependencies(
   $doc as document-node(),
   $params as map
   ) as document-node()* {
-  for $dep in format:dependencies($doc)//format:dependency[@transformable]
+  for $dep in format:dependencies($doc, $params)//format:dependency[@transformable]
   return format:unflatten(doc($dep), $params, doc($dep))
 };
 
@@ -389,7 +395,7 @@ declare function format:flatten-external-dependencies(
   $doc as document-node(),
   $params as map
   ) as document-node()+ {
-  for $dep in format:dependencies($doc)//format:dependency[@transformable]
+  for $dep in format:dependencies($doc, $params)//format:dependency[@transformable]
   let $dep-doc := doc($dep)
   where not($dep-doc is $doc)
   return format:flatten($dep-doc, $params, $dep-doc)
