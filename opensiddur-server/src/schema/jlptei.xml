@@ -156,9 +156,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
             </content>
           </elementSpec>
           <elementSpec ident="text" module="textstructure" mode="change">
-            <classes mode="replace">
-              <memberOf key="att.global"/>
-              <memberOf key="att.typed"/>
+            <classes mode="change">
               <memberOf key="att.declaring" mode="delete"/>
             </classes>
             <content>
