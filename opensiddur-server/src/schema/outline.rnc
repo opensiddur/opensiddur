@@ -19,22 +19,14 @@ No = element olx:no {
   empty
 }
 
-## indicate that what the server thought you wanted to do was incorrect:
-## eg, if there are duplicate titles, you actually intended to produce multiple documents
-
-Transliteration = element tr {
-  ## required from attribute. What is being transliterated
-  attribute from { xsd:string },
-  ## required to attribute. What the transliteration is
-  attribute to { xsd:string },
-  ## If a silent version of the letter exists, what should it transliterate as?
-  ## Only applicable to aleph, sin
-  attribute silent { xsd:string }?,
-  ## In cases where the letter has a dagesh, should it be doubled?
-  attribute double { YesNo }? 
-}
 
 Title = element title { xsd:string }
+License = element license { 
+  "http://www.creativecommons.org/publicdomain/zero/1.0" |
+  "http://www.creativecommons.org/licenses/by/4.0" |
+  "http://www.creativecommons.org/licenses/by-sa/4.0" 
+}
+
 Lang = element lang { xsd:language }
 Resp = element resp {
     ## contributor URI
@@ -43,11 +35,27 @@ Resp = element resp {
     element responsibility { xsd:string } 
   }
 
+Pages = (
+  element from {
+    xsd:string
+  },
+  element to {
+    xsd:string
+  }
+)
+
 SameAs = element olx:sameAs {
   ## what the element is the same as; for internal, it's a pathway through the outline
   ## for external, it's a URI
   ( element olx:internal { xsd:string } | element olx:external { xsd:anyURI } ),
-  ( Yes | No )
+  ## Acknowledge the sameness or declare a difference
+  ## Note: required for execution, but optional for saving
+  ( Yes | No )?
+}
+
+## Point to an existing document
+Uri = element olx:uri {
+  xs:string
 }
 
 Status = element olx:status {
@@ -57,12 +65,16 @@ Status = element olx:status {
 Outline = element outline {
   ## required source pointer
   element source { xsd:anyURI },
+  ## default license
+  License,
   ## required title
   Title,
-  ## required language
+  ## required language (default for all documents)
   Lang,
   ## optional responsibility blocks to assign additional responsibility to contributors
   Resp*,
+  Pages?,
+  Uri?,
   ## additional items
   Item+
 }
@@ -73,8 +85,11 @@ Item = element item {
   Title,
   Lang?,
   Resp*,
-  SameAs*,
+  ## from and to pages
+  Pages?,
+  Uri?,
   ## current document status, if any
   Status?,
+  SameAs*,
   Item*
 }

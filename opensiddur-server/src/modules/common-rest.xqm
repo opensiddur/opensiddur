@@ -110,16 +110,17 @@ declare function crest:validate(
   $doc as item(),
   $old-doc as document-node()?,
   $schema-path as xs:anyURI,
-  $schematron-path as xs:anyURI,
+  $schematron-path as xs:anyURI?,
   $xquery-functions as (
       function(item(), document-node()?) as element()
     )*
   ) as xs:boolean {
   crest:validation-disabled() or (
-    validation:jing($doc, $schema-path) and
-    jvalidate:validation-boolean(
-      jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path))
-    ) and (
+    validation:jing($doc, $schema-path) and (
+      empty($schematron-path) or
+      jvalidate:validation-boolean(
+        jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path))
+    )) and (
       empty($xquery-functions) or
         (
           every $xquery-function in $xquery-functions
@@ -145,14 +146,14 @@ declare function crest:validate-report(
   $doc as item(),
   $old-doc as document-node()?,
   $schema-path as xs:anyURI,
-  $schematron-path as xs:anyURI,
+  $schematron-path as xs:anyURI?,
   $xquery-functions as ( 
       function(item(), document-node()?) as element()
     )*
   ) as element() {
   jvalidate:concatenate-reports((
     validation:jing-report($doc, $schema-path),
-    jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path)),
+    if (exists($schematron-path)) then jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path)) else (),
     for $xquery-function in $xquery-functions
     return $xquery-function($doc, $old-doc)
   ))

@@ -5,7 +5,7 @@ xquery version "3.0";
  :  authentication,
  :  content negotiation
  : 
- : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2012-2013,2016 Efraim Feinstein <efraim@opensiddur.org>
  : Open Siddur Project
  : Licensed Under the GNU Lesser General Public License, version 3 or later
  :)
@@ -51,6 +51,9 @@ declare
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/original">Original data</a>
+          </li>
+          <li class="api">
+            <a class="discovery" href="{$api-base}/outlines">Outlines</a>
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/sources">Sources (Bibliographic data)</a>

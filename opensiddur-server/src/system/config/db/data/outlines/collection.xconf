@@ -1,0 +1,12 @@
+<collection xmlns="http://exist-db.org/collection-config/1.0">
+    <index 
+      xmlns:ol="http://jewishliturgy.org/ns/outline/1.0" 
+      xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+      xmlns:html="http://www.w3.org/1999/xhtml">
+        <fulltext default="none" attributes="no"/>
+        <lucene>
+            <text qname="ol:outline"/>
+            <text qname="ol:title" boost="2.0"/>
+        </lucene>
+    </index>
+</collection>
