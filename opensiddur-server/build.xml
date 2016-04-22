@@ -26,10 +26,11 @@
             <mkdir dir="@{temp.dir}"/>
             <exec executable="${roma}">
                 <arg value="--xsl=${lib.dir}/tei/Stylesheets"/>
+                <arg value="--localsource=${lib.dir}/tei/p5subset.xml"/>
                 <arg value="--nodtd"/>
                 <arg value="--noxsd"/>
                 <arg value="--isoschematron"/>
-                <arg value="--dochtml"/>
+                <!--<arg value="- -dochtml"/>-->
                 <arg value="@{input.file}"/>
                 <arg value="@{temp.dir}"/>
             </exec>

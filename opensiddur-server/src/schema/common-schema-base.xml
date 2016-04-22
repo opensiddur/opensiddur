@@ -353,4 +353,5 @@ schemas, not as an independent unit
       <attDef ident="targFunc" mode="delete"/>
     </attList>
   </classSpec>
+  <classSpec ident="att.written" module="tei" mode="delete" type="atts"/>
 </specGrp>
