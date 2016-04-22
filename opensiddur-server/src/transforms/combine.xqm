@@ -2,9 +2,10 @@ xquery version "3.0";
 (:~
  : Combine multiple documents into a single all-encompassing 
  : JLPTEI document
+ : Also add late-binding concerns, like transliteration
  :
  : Open Siddur Project
- : Copyright 2013-2014 Efraim Feinstein 
+ : Copyright 2013-2014,2016 Efraim Feinstein 
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -28,10 +29,13 @@ import module namespace cond="http://jewishliturgy.org/transform/conditionals"
   at "conditionals.xqm";
 import module namespace flatten="http://jewishliturgy.org/transform/flatten"
   at "flatten.xqm";
+import module namespace translit="http://jewishliturgy.org/transform/transliterator"
+  at "translit/translit.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
+declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 declare function combine:combine-document(
   $doc as document-node(),
@@ -84,6 +88,10 @@ declare function combine:combine(
                     return combine:jf-unflattened($node, $updated-params)
                     case element(jf:parallelGrp)
                     return combine:jf-parallelGrp($node, $updated-params)
+                    case element(j:segGen)
+                    return combine:j-segGen($node, $updated-params)
+                    case element(tei:seg)
+                    return combine:tei-seg($node, $updated-params)
                     default (: other element :) 
                     return combine:element($node, $updated-params)
                 let $annotation-sources := (
@@ -179,6 +187,42 @@ declare function combine:jf-unflattened(
     } 
 };
 
+(:~ seg handling: if the segment is inside a stream (or parallelGrp) directly and transliteration is on, 
+ : it should be turned into a jf:transliterated/(tei:seg , tei:seg[@type=transliterated])
+ :)
+declare function combine:tei-seg(
+  $e as element(tei:seg),
+  $params as map
+  ) as element() {
+  let $combined := combine:element($e, $params)
+  let $transliterated := 
+    if ($e/@jf:stream)
+    then combine:transliterate-in-place($combined, $e, $params)
+    else ()
+  return
+    if (exists($transliterated))
+    then 
+      element jf:transliterated {
+        $combined,
+        element tei:seg {
+          $transliterated/(@* except (@type, @jf:id, @jf:stream)),
+          attribute type { "transliterated" },
+          $transliterated/node()
+        }
+      }
+    else $combined
+};
+
+declare function combine:j-segGen(
+  $e as element(j:segGen),
+  $params as map
+  ) as element() {
+  let $combined := combine:element($e, $params)
+  let $transliterated := combine:transliterate-in-place($combined, $e, $params)
+  return
+    ($transliterated, $combined)[1]
+};
+
 declare function combine:element(
   $e as element(),
   $params as map
@@ -244,16 +288,22 @@ declare function combine:new-document-attributes(
         (: parallel documents are guaranteed to have a @jf:document attribute :)
         $new-doc-nodes[1]/ancestor::*[@jf:document][1]/@jf:document/string()
     else
-        replace(
-            data:db-path-to-api(
-                mirror:unmirror-path(
-                  $format:unflatten-cache,
-                  ( 
-                    document-uri(root($new-doc-nodes[1])), 
-                    ($new-doc-nodes[1]/@uri:document-uri)
-                  )[1]
-                )
-            ), "^(/exist/restxq)?/api", "")
+        let $uri := 
+            ( 
+              document-uri(root($new-doc-nodes[1])), 
+              ($new-doc-nodes[1]/@uri:document-uri)
+            )[1]
+        return
+          replace(
+              data:db-path-to-api(
+                  mirror:unmirror-path(
+                    (: most of the time, the document will be from unflatten; for inline ptr inclusions, it will be from flatten;
+                     this is a more or less generic way to get the cache 
+                    :)
+                    string-join(subsequence(tokenize($uri, "/"), 1, 4), "/"),
+                    $uri
+                  )
+              ), "^(/exist/restxq)?/api", "")
   return (
     (: document (as API source ), base URI?, language, source(?), 
      : license, contributors :)
@@ -287,11 +337,15 @@ declare function combine:new-document-params(
         then
             data:doc($new-doc-nodes[1]/ancestor::tei:TEI/@jf:document)
         else 
+          let $uri :=
+                (document-uri(root($new-doc-nodes[1])), 
+                $new-doc-nodes[1]/@uri:document-uri)[1]
+          return
             doc(
                 mirror:unmirror-path(
-                    $format:unflatten-cache, 
-                    (document-uri(root($new-doc-nodes[1])), 
-                     $new-doc-nodes[1]/@uri:document-uri)[1])
+                    string-join(subsequence(tokenize($uri, "/"), 1, 4), "/"),
+                    $uri 
+                    )
             )
     let $new-params := map:new((
         $params,
@@ -410,6 +464,32 @@ declare function combine:tei-fs-to-map(
                     )[.]
                 ) 
         )
+};
+
+(:~ transliterate an element in place
+ : @param $e already fully processed element
+ : @param $context original context
+ : @param $params includes transliteration on/off and table if on
+ :)
+declare function combine:transliterate-in-place(
+  $e as element(),
+  $context as element(),
+  $params as map
+  ) as element()? {
+  let $settings := $params("combine:settings")
+  where exists($settings) and $settings("opensiddur:transliteration->active")=("ON","YES") and $settings("opensiddur:transliteration->table")
+  return
+    let $table := translit:get-table($context, $settings("opensiddur:transliteration->table"), (), $settings("opensiddur:transliteration->script"))
+    let $out-script := $table/tr:lang[common:language($context)=@in]/@out/string()
+    where exists($table)
+    return 
+      let $transliterated := translit:transliterate($e, map { "translit:table" := $table })
+      return 
+        element {QName(namespace-uri($transliterated), name($transliterated))}{
+          $transliterated/(@* except @xml:lang),
+          attribute xml:lang { $out-script },
+          $transliterated/node()
+        }
 };
 
 (:~ get the effective document URI of the processing
@@ -571,7 +651,11 @@ declare function combine:follow-pointer(
         uri:follow-steps($e),
         (),
         true(),
-        if (substring-before($target, "#") or not(contains($target, "#")))
+        if ($e/@type="inline")
+        then 
+          (: any inline pointer comes from the flatten cache :)
+          $format:flatten-cache
+        else if (substring-before($target, "#") or not(contains($target, "#")))
         then $format:unflatten-cache
         else ( 
           (: Already in the cache, no need to try to 

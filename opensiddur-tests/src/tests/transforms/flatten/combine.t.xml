@@ -4,7 +4,7 @@
   <description>
       <p>Tests of combine transform</p>
       <author>Efraim Feinstein</author>
-      <copyright>Copyright 2013-2014 Efraim Feinstein
+      <copyright>Copyright 2013-2014,2016 Efraim Feinstein
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
@@ -159,6 +159,31 @@
          <xpath desc="incorporate destination in-place">exists(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/jf:ptr[@jf:id="ptr1"][ends-with(@jf:stream,"#stream")]/tei:seg[@jf:id="seg1"])
       </xpath>
       </test>
+  </TestSet>
+  <TestSet>
+    <testName>External inline pointer</testName>
+    <setup>
+      <code>
+      local:setup("combine-inline-dest.xml", "original"),
+      local:setup("combine-inline-source.xml", "original")
+      </code>
+    </setup>
+    <tearDown>
+      <code>
+      local:tearDown("combine-inline-source.xml", "original"),
+      local:tearDown("combine-inline-dest.xml", "original")
+      </code>
+    </tearDown>
+    <test>
+      <task>inline range pointer</task>
+      <code>
+        combine:combine-document(
+          mirror:doc($format:unflatten-cache, "/db/data/original/combine-inline-source.xml"),
+          map {}
+        )
+      </code>
+      <xpath desc="inline pointer included in place">count(./tei:TEI/tei:text/jf:combined[@jf:id="stream"]/tei:p[@jf:layer-id]/jf:ptr[@type="inline"][@jf:id="ptr2"][ends-with(@jf:stream, "#stream")]/tei:seg)=3</xpath>
+    </test>
   </TestSet>
   <TestSet>
       <testName>combine:tei-fs-to-map()</testName>
@@ -678,4 +703,58 @@
         <xpath desc="the attribute points to the style in the opensiddur->style feature">.//@jf:style[1]="/data/styles/test_style"</xpath>
       </test>
   </TestSet>
+
+  <TestSet>
+      <testName>Transliteration with segGen</testName>
+      <setup>
+         <code>
+      local:setup("combine-segGen-1.xml", "original")
+      </code>
+      </setup>
+      <tearDown>
+         <code>
+      local:tearDown("combine-segGen-1.xml", "original")
+      </code>
+      </tearDown>
+      <test>
+        <task>transliterate a segGen element</task>
+        <code>
+        let $d := doc("/db/data/original/combine-segGen-1.xml")
+        return
+            format:combine($d, map {}, $d)
+        </code>
+        <xpath desc="the segGen element contains the generated transliteration">.//jf:combined/j:segGen[@jf:id="segGen1"]="ʾabbaʾ"</xpath>
+        <xpath desc="the segGen element has an appropriate xml:lang">.//jf:combined/j:segGen[@jf:id="segGen1"]/@xml:lang="he-Latn"</xpath>
+        <xpath desc="no other elements are generated">count(.//jf:combined/*)=1</xpath>
+      </test>
+  </TestSet>
+  <TestSet>
+      <testName>Transliteration </testName>
+      <setup>
+         <code>
+      local:setup("combine-translit-note-1.xml", "notes"),
+      local:setup("combine-translit-1.xml", "original")
+      </code>
+      </setup>
+      <tearDown>
+         <code>
+      local:tearDown("combine-translit-1.xml", "original"),
+      local:tearDown("combine-translit-note-1.xml", "notes")
+      </code>
+      </tearDown>
+      <test>
+        <task>transliterate a non-parallel document</task>
+        <code>
+        let $d := doc("/db/data/original/combine-translit-1.xml")
+        return
+            format:combine($d, map {}, $d)
+        </code>
+        <xpath desc="the untransliterated segment remains untransliterated">exists(.//jf:combined/tei:seg[@jf:id="not_transliterated"])</xpath>
+        <xpath desc="a transliterated segment that declares an untransliteratable xml:lang remains untransliterated">exists(.//jf:combined//tei:seg[@jf:id="bad_language"])</xpath>
+        <xpath desc="a segment inside an annotation does not get transliterated">exists(.//jf:combined/jf:annotation/jf:annotated/tei:note/tei:seg) and empty(.//jf:combined/jf:annotation/jf:annotated/tei:note/jf:transliterated)</xpath>
+        <xpath desc="a segment inside the transliterated portion with the correct language is transliterated">exists(.//jf:combined//jf:transliterated/tei:seg[@jf:id="to_be_transliterated"]) and .//jf:combined//jf:transliterated/tei:seg[@type="transliterated"]="ʾabbaʾ"</xpath>
+        <xpath desc="if the table does not exist, no transliteration">exists(.//jf:combined//tei:seg[@jf:id="no_table"]) and empty(.//jf:combined//jf:transliterated/tei:seg[@jf:id="no_table"])</xpath>
+      </test>
+  </TestSet>
+
 </TestSuite>

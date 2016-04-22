@@ -5,8 +5,13 @@ xquery version "3.0";
  :)
 module namespace translit="http://jewishliturgy.org/transform/transliterator";
 
+import module namespace common="http://jewishliturgy.org/transform/common"
+  at "../../modules/common.xqm";
+import module namespace data="http://jewishliturgy.org/modules/data"
+  at "../../modules/data.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
     at "../../modules/follow-uri.xqm";
+
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -187,7 +192,7 @@ declare function translit:assemble-word-reverse-tei-w(
     let $context-abs-uri := 
         uri:absolutize-uri(xs:anyURI(concat('#',$context/@xml:id)), $context)
     let $backlink as element(tei:w)? := 
-      root($context)//tei:w
+      root($context)//tei:w[@next]
         [uri:absolutize-uri(xs:anyURI(@next), .)=$context-abs-uri]
     return
         if ($backlink)
@@ -331,6 +336,28 @@ declare function translit:make-word(
         case element() return translit:identity($node, $params, translit:make-word#2) 
         default return translit:make-word($node/node(), $params)
 };
+
+declare %private function translit:make-word-helper(
+  $sequence as element()*
+  ) {
+  if (empty($sequence))
+  then ()
+  else if ($sequence[1] instance of element(tr:cons))
+  then
+    let $following := translit:make-word-helper(subsequence($sequence, 2))
+    return (
+      element tr:cc {
+        $sequence[1],
+        $following/self::* except $following/self::tr:cc
+      },
+      $following/self::tr:cc
+    )
+  else (
+    $sequence[1],
+    translit:make-word-helper(subsequence($sequence, 2))
+  )
+};
+
 (:~
 	Make a tr:w word filled with tr:cc "complex characters."  
 	The result must be processed further to make all of these correct.</xd:short>
@@ -357,55 +384,62 @@ declare function translit:make-word-text(
     $params as map
     ) as element()* {
     let $word as xs:string := $context/string()
-	(: regex order is defined by the idiotic -but at least standard- Unicode normalization chart
-		$1=consonant or equivalent 
-		$2=sheva
-		$3=ultrashort
-		$4=short
-		$5=long
-		$6=dagesh
-		$7=meteg
-		$8=rafe
-		$9=shin/sin dot
-		$10=lower accent
-		$11=mid accent
-		$12=upper accent
-	:)
-    let $regex := 
-		"([\p{Lo}\p{Po}" || $translit:hebrew("cgj") || "])" ||
-		"([" || $translit:hebrew("sheva") || "]?)" ||
-				"([" || $translit:hebrew("hatafsegol") || "-" || $translit:hebrew("hatafqamats") || "]?)" ||
-				"([" || $translit:hebrew("hiriq") || $translit:hebrew("segol") || $translit:hebrew("patah") || $translit:hebrew("qamatsqatan") || $translit:hebrew("qubuts") || "]?)" ||
-				"([" || $translit:hebrew("tsere") || $translit:hebrew("qamats") || $translit:hebrew("holam") || $translit:hebrew("holamhaserforvav") || "]?)" ||
-			"([" || $translit:hebrew("dageshormapiq") || "]?)" ||
-			"([" || $translit:hebrew("meteg") || "]?)" ||
-			"([" || $translit:hebrew("rafe") || "]?)" ||
-			"([" || $translit:hebrew("shindot") || $translit:hebrew("sindot") || "]?)" ||
-			"([" || $translit:hebrew("etnahta") || $translit:hebrew("tevir") || $translit:hebrew("atnahhafukh") || $translit:hebrew("munah") || $translit:hebrew("mahapakh") || $translit:hebrew("merkha") || $translit:hebrew("merkhakefula") || $translit:hebrew("darga") || $translit:hebrew("yerahbenyomo") || $translit:hebrew("lowerdot") || $translit:hebrew("tipeha") || "]?)" ||
-			"([" || $translit:hebrew("dehi") || $translit:hebrew("yetiv") || $translit:hebrew("zinor") || "]?)" ||
-			"([" || $translit:hebrew("geresh") || $translit:hebrew("shalshelet") || $translit:hebrew("accentsegol") || $translit:hebrew("ole") || $translit:hebrew("iluy") || $translit:hebrew("pazer") || $translit:hebrew("qadma") || $translit:hebrew("zaqefqatan") || $translit:hebrew("zaqefgadol") || $translit:hebrew("telishaqetana") || $translit:hebrew("telishagedola") || $translit:hebrew("qarneypara") || $translit:hebrew("gershayim") || $translit:hebrew("gereshmuqdam") || $translit:hebrew("revia") || $translit:hebrew("zarqa") || $translit:hebrew("pashta") || $translit:hebrew("upperdot") || "]*)"
-	for $a in analyze-string(normalize-unicode(normalize-space($word),'NFKD'), $regex)/*
-	return
-        typeswitch($a)
-        case element(fn:match)
+    let $consonants := 
+		"([\p{Lo}\p{Po}" || $translit:hebrew("cgj") || "])"
+    let $sheva :=
+		"([" || $translit:hebrew("sheva") || "])"
+    let $ultrashort :=
+		"([" || $translit:hebrew("hatafsegol") || "-" || $translit:hebrew("hatafqamats") || "])" 
+    let $short :=
+		"([" || $translit:hebrew("hiriq") || $translit:hebrew("segol") || $translit:hebrew("patah") || $translit:hebrew("qamatsqatan") || $translit:hebrew("qubuts") || "])"
+    let $long :=
+		"([" || $translit:hebrew("tsere") || $translit:hebrew("qamats") || $translit:hebrew("holam") || $translit:hebrew("holamhaserforvav") || "])" 
+    let $dagesh :=
+		"([" || $translit:hebrew("dageshormapiq") || $translit:hebrew("rafe") || "])"
+    let $meteg :=
+		"([" || $translit:hebrew("meteg") || "])"
+    let $dot :=
+		"([" || $translit:hebrew("shindot") || $translit:hebrew("sindot") || "])"
+    let $low-accent :=
+		"([" || $translit:hebrew("etnahta") || $translit:hebrew("tevir") || $translit:hebrew("atnahhafukh") || $translit:hebrew("munah") || $translit:hebrew("mahapakh") || $translit:hebrew("merkha") || $translit:hebrew("merkhakefula") || $translit:hebrew("darga") || $translit:hebrew("yerahbenyomo") || $translit:hebrew("lowerdot") || $translit:hebrew("tipeha") || "])"
+    let $mid-accent :=
+		"([" || $translit:hebrew("dehi") || $translit:hebrew("yetiv") || $translit:hebrew("zinor") || "])" 
+    let $high-accent :=
+		"([" || $translit:hebrew("geresh") || $translit:hebrew("shalshelet") || $translit:hebrew("accentsegol") || $translit:hebrew("ole") || $translit:hebrew("iluy") || $translit:hebrew("pazer") || $translit:hebrew("qadma") || $translit:hebrew("zaqefqatan") || $translit:hebrew("zaqefgadol") || $translit:hebrew("telishaqetana") || $translit:hebrew("telishagedola") || $translit:hebrew("qarneypara") || $translit:hebrew("gershayim") || $translit:hebrew("gereshmuqdam") || $translit:hebrew("revia") || $translit:hebrew("zarqa") || $translit:hebrew("pashta") || $translit:hebrew("upperdot") || "])"
+    let $characters :=
+      element tr:characters {
+        for $cp in string-to-codepoints($word)
+        let $c := codepoints-to-string($cp)
         return
-			let $complex-character-subelements := 
-				('cons','s','vu','vs','vl','d','m','d','dot','al','am','ah')
-            return
-				element tr:cc {
-					for $group in $a/fn:group
-                    let $index-num := $group/@nr/number()
-                    return
-						element { "tr:" || $complex-character-subelements[$index-num] }{
-							$group/string()
-                        }
-				}
-	    default (: no match :)
-        return (
-			element tr:nomatch { $a/string() },
-            util:log-system-err(string-join((
-				"Encountered a character (", $a/string(), "=#", string-to-codepoints($a/string()), ") in your Hebrew text in the word ", $word, "that doesn't match any known pattern in Hebrew.  This is either a typo or a bug in the transliterator."), ""))
-		)	
+            if (matches($c, $consonants))
+            then element tr:cons { $c }
+            else if (matches($c, $sheva))
+            then element tr:s { $c }
+            else if (matches($c, $ultrashort))
+            then element tr:vu { $c }
+            else if (matches($c, $short))
+            then element tr:vs { $c }
+            else if (matches($c, $long))
+            then element tr:vl { $c }
+            else if (matches($c, $dagesh)) 
+            then element tr:d { $c }
+            else if (matches($c, $meteg))
+            then element tr:m { $c }
+            else if (matches($c, $dot))
+            then element tr:dot { $c }
+            else if (matches($c, $low-accent))
+            then element tr:al { $c }
+            else if (matches($c, $mid-accent))
+            then element tr:am { $c }
+            else if (matches($c, $high-accent))
+            then element tr:ah { $c }
+            else ( 
+                element tr:nomatch { $c },
+                util:log-system-err(string-join((
+                    "Encountered a character (", $c, "=#", $cp, ") in your Hebrew text in the word ", $word, "that doesn't match any known pattern in Hebrew.  This is either a typo or a bug in the transliterator."), ""))
+            )
+        }
+    return translit:make-word-helper($characters/*)
 };
 
 (:~ @param $params translit:table as element(tr:table) :)
@@ -1047,3 +1081,18 @@ declare function translit:identity(
     }
 };
 
+(:~ utility function to get a transliteration table by name and languages :)
+declare function translit:get-table(
+  $context as node(),
+  $table-name as xs:string,
+  $lang-in as xs:string?,
+  $lang-out as xs:string?
+  ) as element(tr:table)? {
+  let $tr-doc := data:doc("transliteration", $table-name)
+  let $lang-in := ($lang-in, common:language($context))[1]
+  let $in-table-langs := $tr-doc/tr:schema/tr:table/tr:lang[$lang-in=tr:lang]
+  let $lang-out := ($lang-out, $in-table-langs[1]/@out/string(), $lang-in || "-Latn")[1]
+  return
+    $tr-doc/tr:schema/
+      tr:table[tr:lang[$lang-in=@in][$lang-out=@out]]
+};
