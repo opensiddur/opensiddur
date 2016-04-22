@@ -62,7 +62,7 @@ SameAs = element olx:sameAs {
 
 ## Point to an existing document
 Uri = element olx:uri {
-  xs:string
+  xsd:string
 }
 
 Status = element olx:status {
