@@ -3,6 +3,9 @@
 # Licensed under the GNU Lesser General Public License, version 3 or later
 
 default namespace = "http://jewishliturgy.org/ns/outline/1.0"
+
+# olx namespace is used as a response by the server or a response to 
+# a server "query"
 namespace olx = "http://jewishliturgy.org/ns/outline/responses/1.0"
 
 start = Outline
@@ -19,6 +22,10 @@ No = element olx:no {
   empty
 }
 
+## The element has an error that can't be recovered from
+Error = element olx:error {
+    xsd:string
+}
 
 Title = element title { xsd:string }
 License = element license { 
@@ -44,13 +51,13 @@ Pages = (
   }
 )
 
+## Document is the same as another document
 SameAs = element olx:sameAs {
-  ## what the element is the same as; for internal, it's a pathway through the outline
-  ## for external, it's a URI
-  ( element olx:internal { xsd:string } | element olx:external { xsd:anyURI } ),
-  ## Acknowledge the sameness or declare a difference
-  ## Note: required for execution, but optional for saving
-  ( Yes | No )?
+    ## URI of the other document
+    Uri,
+    ## Acknowlegement/refusal of identity
+    ## required for execution
+    (Yes | No)?
 }
 
 ## Point to an existing document
@@ -74,6 +81,7 @@ Outline = element outline {
   ## optional responsibility blocks to assign additional responsibility to contributors
   Resp*,
   Pages?,
+  ## Uri of the existing outline file
   Uri?,
   ## additional items
   Item+
@@ -87,9 +95,9 @@ Item = element item {
   Resp*,
   ## from and to pages
   Pages?,
-  Uri?,
+  SameAs?,
+  Error*,
   ## current document status, if any
   Status?,
-  SameAs*,
   Item*
 }
