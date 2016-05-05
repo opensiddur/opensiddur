@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
+  <suiteName>Outline data API</suiteName>
+  <description>
+      <p>Test the outline data API</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2016 Efraim Feinstein,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <asUser>testuser</asUser>
+  <password>testuser</password>
+  <setup>
+    <!-- support files required for validity -->
+    <store collection="/db/data/user" name="testuser.xml">
+         <j:contributor xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+            <tei:idno xmlns:tei="http://www.tei-c.org/ns/1.0">testuser</tei:idno>
+            <tei:name xmlns:tei="http://www.tei-c.org/ns/1.0">Test User</tei:name>
+         </j:contributor>
+      </store>
+    <!-- existing resource with read/write access for testuser -->
+    <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="Existing.xml"
+            destination="/db/data/outlines"/>
+      <code>
+      system:as-user("admin", $magic:password,
+        let $existing-uri := xs:anyURI("/db/data/outlines/Existing.xml")
+        return (
+          sm:chown($existing-uri, "testuser"),
+          sm:chgrp($existing-uri, "everyone"),
+          sm:chmod($existing-uri, "rw-rw-r--")
+      ))
+    </code>
+  </setup>
+  <tearDown>
+      <remove-document collection="/db/data/outlines" name="Existing.xml"/>
+  </tearDown>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
+  <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="ol">http://jewishliturgy.org/ns/outline/1.0</namespace>
+  <namespace prefix="olx">http://jewishliturgy.org/ns/outline/responses/1.0</namespace>
+  <imports>
+    import module namespace outl="http://jewishliturgy.org/api/data/outlines"
+      at "xmldb:exist:///db/apps/opensiddur-server/api/data/outlines.xqm";
+    import module namespace magic="http://jewishliturgy.org/magic"
+      at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
+  </imports>
+  <TestSet>
+      <testName>outl:get()</testName>
+      <test>
+         <task>Get an existing resource, no check</task>
+         <code>
+            outl:get("Existing", ())
+         </code> 
+         <xpath desc="Returns an outline resource">exists(./ol:outline)</xpath>
+      </test>
+      <test>
+         <task>Get a nonexisting resource, no check</task>
+         <code>
+        outl:get("DoesNotExist", ())
+        </code> 
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+  </TestSet>
+  <TestSet>
+    <testName>outl:get() with check</testName>
+    <setup>
+    </setup>
+    <test>
+        <task>everything is right, no documents currently exist</task>
+        <code>
+            outl:get("TestEverythingOK", "1")
+        </code>
+        <expected desc="return an identity" href="/db/apps/opensiddur-tests/tests/api/data/outlines/TestEverythingOK.xml"/>
+    </test>
+    <test>
+        <task>everything is right...</task>
+        <code>
+            outl:get("TestOutline", "1")
+        </code>
+        <xpath desc="where no document exists, no status elements are returned">exists(./ol:outline/ol:item[ol:title="TitleDoesNotExist"]) and empty(./ol:outline/ol:item["TitleDoesNotExist"]/olx:status)</xpath>
+        <xpath desc="for an item that exists, a status element is returned">count(./ol:outline/ol:item[ol:title="TitleExistsOnce"])=1 and ./ol:outline/ol:item["TitleExistsOnce"]/olx:status="Outlined"</xpath>
+        <xpath desc="for an item that exists, a sameAs element is returned">./ol:outline/ol:item["TitleExistsOnce"]/olx:sameAs/olx:uri="/data/original/TitleExistsOnce"</xpath>
+        <xpath desc="for an item where there are multiple existing items with the same titles, a sameAs element is returned for each existing item">count(./ol:outline/ol:item["TitleExistsTwice"]/olx:sameAs)=2</xpath>
+        <expected xpath="./ol:outline/ol:item[ol:title='TitleAlreadyConfirmed']" desc="for an item that exists and already has a sameAs element, no changes are made">
+    <ol:item>
+        <ol:title>TitleAlreadyConfirmed</ol:title>
+        <ol:from>7</ol:from>
+        <ol:to>8</ol:to>
+        <olx:sameAs>
+            <olx:uri>/data/original/TitleAlreadyConfirmed</olx:uri>
+            <olx:yes/>
+        </olx:sameAs>
+    </ol:item>
+</expected>
+
+    </test>
+    <test>
+        <task></task>
+        <expected desc="error"></expected>
+    </test>
+    <test>
+        <task></task>
+    </test>
+  </TestSet>
+  <TestSet>
+      <testName>outl:list()</testName>
+      <test>
+         <task>List all resources</task>
+         <code>
+        outl:list("", 1, 100)
+      </code>
+         <xpath desc="returns at least 1 result">count(.//html:li[@class="result"])&gt;=1</xpath>
+         <class href="../common.t.incl.xml#SearchResults"/>
+      </test>
+      <test>
+         <task>List some resources</task>
+         <code>
+        outl:list("", 1, 1)
+      </code>
+         <xpath desc="returns exactly 1 result">count(.//html:li[@class="result"])=1</xpath>
+         <class href="../common.t.incl.xml#SearchResults"/>
+      </test>
+      <test>
+         <task>Respond to a query</task>
+         <code>
+        outl:list("Existing", 1, 100)
+      </code>
+         <xpath desc="returns 1 result (Existing)">count(.//html:ol[@class="results"]/html:li)=1</xpath>
+         <class href="../common.t.incl.xml#SearchResults"/>
+      </test>
+  </TestSet>
+  <TestSet>
+      <testName>outl:delete()</testName>
+      <test>
+         <task>Remove an existing resource</task>
+         <code>
+      outl:delete("Existing")
+      </code>
+         <class href="../common.t.incl.xml#NoData"/>
+      </test>
+      <test>
+         <task>Remove a nonexisting resource</task>
+         <code>
+      outl:delete("DoesNotExist")
+      </code>
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+  </TestSet>
+<!--
+  <TestSet>
+      <testName>src:post()</testName>
+      <tearDown>
+         <code>
+      let $document := 
+        collection("/db/data/")//tei:title[.="Valid"]/root(.)
+      where exists($document)
+      return xmldb:remove(
+        util:collection-name($document),
+        util:document-name($document)
+        )
+      </code>
+      </tearDown>
+      <test>
+         <task>Post a valid resource</task>
+         <code>
+      src:post(doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
+      </code>
+         <class href="../common.t.incl.xml#Created"/>
+      </test>
+      <test>
+         <task>Post an invalid resource</task>
+         <code>
+      src:post(document { &lt;tei:biblStruct&gt;&lt;tei:title&gt;Invalid&lt;/tei:title&gt;&lt;/tei:biblStruct&gt;} )
+      </code>
+         <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
+  </TestSet>
+  <TestSet>
+      <testName>src:put()</testName>
+      <test>
+         <task>Put a valid resource to an existing resource</task>
+         <code>
+      src:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Existing-After-Put.xml"))
+      </code>
+         <class href="../common.t.incl.xml#NoData"/>
+         <xpath desc="The new document has been saved">collection('/data/sources')[descendant::tei:title[.='Existing']]//tei:date/@when=1920</xpath>
+      </test>
+      <test>
+         <task>Put a valid resource to a nonexisting resource</task>
+         <code>
+      src:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
+      </code>
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>Put an invalid resource</task>
+         <code>
+      src:put("Existing", document { &lt;tei:biblStruct&gt;&lt;tei:title&gt;Invalid&lt;/tei:title&gt;&lt;/tei:biblStruct&gt;})
+      </code>
+         <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
+  </TestSet>
+  <TestSet>
+      <testName>Unauthenticated</testName>
+      <asUser/>
+      <password/>
+      <test>
+         <task>src:get(): Get an existing resource</task>
+         <code>
+      src:get("Existing")
+      </code> 
+         <xpath desc="Returns a bibliography resource">exists(./tei:biblStruct)</xpath>
+      </test>
+      <test>
+         <task>src:get(): Get an existing resource with no read access</task>
+         <code>
+      src:get("NoAccess")
+      </code> 
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>src:get(): Get a nonexisting resource</task>
+         <code>
+      src:get("DoesNotExist")
+      </code> 
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>src:list(): Get a list of all resources</task>
+         <code>
+      src:list("", 1, 100)
+      </code>
+         <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
+         <xpath desc="does not list resource with no read access">empty(.//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])</xpath>
+         <class href="../common.t.incl.xml#SearchResults"/>
+      </test>
+      <test>
+         <task>src:delete(): Remove an existing resource</task>
+         <code>
+      src:delete("Existing")
+      </code>
+         <class href="../common.t.incl.xml#Unauthorized"/>
+      </test>
+      <test>
+         <task>src:delete(): Remove a nonexisting resource</task>
+         <code>
+      src:delete("DoesNotExist")
+      </code>
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+         <task>src:post(): Post a resource</task>
+         <code>
+      src:post(doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
+      </code>
+         <class href="../common.t.incl.xml#Unauthorized"/>
+      </test>
+      <test>
+         <task>src:put(): Put an existing resource</task>
+         <code>
+      src:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
+      </code>
+         <class href="../common.t.incl.xml#Unauthorized"/>
+      </test>
+      <test>
+         <task>src:put(): Put a nonexisting resource</task>
+         <code>
+      src:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
+      </code>
+         <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+  </TestSet>
+  <TestSet>
+    <testName>src:pages</testName>
+    <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestBibliography.xml"
+            destination="/db/data/sources"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument1.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument2.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument3.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument4.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument5.xml"
+            destination="/db/data/original/en"/>
+    </setup>
+    <tearDown>
+      <remove-document collection="/db/data/sources" name="TestBibliography.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument1.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument2.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument3.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument4.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestDocument5.xml"/>
+    </tearDown>
+    <test>
+      <task>Resource does not exist</task>
+      <code>
+      src:pages("DoesNotExist")
+      </code> 
+      <class href="../common.t.incl.xml#NotFound"/>
+    </test>
+    <test>
+      <task>List pages: there are none</task>
+      <code>
+      src:pages("Existing")
+      </code>
+      <xpath desc="html is returned">exists(./self::html:html)</xpath>
+      <xpath desc="an empty list is returned">exists(.//html:ol[@class="results"]) and empty(.//html:ol[@class="results"]/*)</xpath>
+    </test>
+    <test>
+      <task>List pages with results</task>
+      <code>
+      src:pages("TestBibliography")
+      </code>
+      <xpath desc="some results are returned">count(.//html:ol[@class="results"]/html:li[@class="result"]) &gt; 0</xpath>
+      <xpath desc="all pages are represented by a list element"><![CDATA[
+      let $pages := 
+        for $p in .//html:ol[@class="results"]/html:li[@class="result"]/html:span[@class="page"] return xs:integer($p)
+      return every $pg in (1 to 7) satisfies $pg=$pages
+      ]]></xpath>
+      <xpath desc="results without pages are represented by a list element">count(.//html:ol[@class="results"]/html:li[@class="result"][not(html:span[@class="page"])])=1</xpath>
+      <xpath desc="pages (where they exist) are ordered">every $li in .//html:ol[@class="results"]/html:li[html:span[@class="page"]][position() &gt;= 2] satisfies $li/html:span[@class="page"]/number() &gt;= $li/preceding-sibling::html:li[1]/html:span[@class="page"]/number() </xpath>
+      <xpath desc="TestDocument1 is represented as page 1">exists(.//html:ol[@class="results"]/html:li[@class="result"][html:span[@class="page"]=1][ends-with(html:a/@href, "TestDocument1")])</xpath>
+      <xpath desc="TestDocument2 is represented as pages 2-6"><![CDATA[ 
+      every $v in (for $pg at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument2")]/html:span/@page/number()
+      return $pg=(2 to 6)[$n]) satisfies $v
+      ]]></xpath>
+      <xpath desc="TestDocument3 is represented as pages 4-5 (overlap is allowed)"><![CDATA[ 
+      every $v in (for $pg at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument3")]/html:span/@page/number()
+      return $pg=(4 to 5)[$n]) satisfies $v
+      ]]></xpath>
+      <xpath desc="TestDocument4 is represented as page 7"><![CDATA[
+      every $v in (for $pg at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument4")]/html:span/@page/number()
+      return $pg=7) satisfies $v
+      ]]></xpath>
+      <xpath desc="TestDocument4 has its status represented"><![CDATA[every $v in (for $status at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument4")]/html:ul[@class="statuses"]/html:li[@class="status"]/string() return $status=("proofread-once", "transcribed")[$n]) satisfies $v
+      ]]></xpath>
+      <xpath desc="TestDocument5 (no page) is represented with no page span">exists(.//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument5")][not(html:span[@class="page"])])</xpath>
+    </test>
+  </TestSet>
+-->
+</TestSuite>
