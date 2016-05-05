@@ -6,7 +6,7 @@ xquery version "3.0";
  : @author Efraim Feinstein
  :)
 
-module namespace outl = 'http://jewishliturgy.org/api/data/original';
+module namespace outl = 'http://jewishliturgy.org/api/data/outlines';
 
 declare namespace ol="http://jewishliturgy.org/ns/outline/1.0";
 declare namespace olx="http://jewishliturgy.org/ns/outline/responses/1.0";
@@ -22,6 +22,8 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
+import module namespace orig="http://jewishliturgy.org/api/data/original"
+  at "original.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "../../modules/paths.xqm";
 import module namespace src="http://jewishliturgy.org/api/data/sources"
@@ -62,7 +64,7 @@ declare function outl:validate-report(
   ) as element() {
   crest:validate-report(
     $doc, $old-doc, 
-    xs:anyURI($orig:schema), (),
+    xs:anyURI($outl:schema), (),
     ()
   )
 };
@@ -72,8 +74,8 @@ declare function outl:get-outline-path(
   $e as element()
   ) as xs:string {
   typeswitch ($e)
-  case element(ol:outline) then $e/ol:title
-  default outl:get-outline-path($e/parent::*) || "->" || $e/ol:title
+  case element(ol:outline) return $e/ol:title
+  default return (outl:get-outline-path($e/parent::*) || "->" || $e/ol:title)
 };
 
 (:~ find the API paths for the given title :)
@@ -142,11 +144,12 @@ declare function outl:check(
 
 (:~ return whether a document is executable (if empty)
  : otherwise, return messages indicating why not
+ : assumes document is checked
  :)
 declare function outl:is-executable(
   $doc as document-node()
   ) as element(message)* {
-    let $chk := outl:check($doc)
+    let $chk := $doc 
     return (
         for $item in $chk//ol:item
         where exists($item/olx:sameAs[not(olx:yes|olx:no)]) and empty($item/olx:sameAs[olx:yes])
@@ -187,7 +190,7 @@ declare function outl:template(
             <tei:date>{ format-date(current-date(), '[Y0001]-[M01]-[D01]') }</tei:date>
           </tei:publicationStmt>
           <tei:sourceDesc>
-            { $old-doc//tei:sourceDesc/tei:bibl[not(tei:ptr[@type="bibl"][@target=$outline/ol:source]] }
+            { $old-doc//tei:sourceDesc/tei:bibl[not(tei:ptr[@type="bibl"][@target=$outline/ol:source])] }
             <tei:bibl j:docStatus="outlined">
               <tei:title>{ src:title-function(data:doc($outline/ol:source)) }</tei:title>
               <tei:ptr type="bibl" target="{ $outline/ol:source/string() } "/>
@@ -229,6 +232,33 @@ declare function outl:template(
 
 };
 
+declare function outl:rewrite-outline(
+    $nodes as node()*,
+    $filler-map as map
+    ) as node()* {
+    for $node in $nodes
+    return
+        typeswitch($node)
+        case document-node() return document { outl:rewrite-outline($node/node(), $filler-map) }
+        case element(ol:outline) return 
+            element ol:outline {
+                $node/(ol:source | ol:license | ol:title | ol:lang | ol:resp | ol:pages),
+                element olx:uri { $filler-map(outl:get-outline-path($node)) },
+                outl:rewrite-outline($node/ol:item, $filler-map) 
+            }
+        case element(ol:item) return
+            element ol:item {
+                $node/(ol:title | ol:lang | ol:resp | ol:pages | olx:sameAs),
+                element olx:sameAs {
+                    element olx:uri { $filler-map(outl:get-outline-path($node)) },
+                    element olx:yes { () }
+                },
+                $node/(olx:error | olx:status),
+                outl:rewrite-outline($node/ol:item, $filler-map)
+            }
+        default return $node
+};
+
 (:~ execute an outline :)
 declare function outl:execute(
   $doc as document-node()
@@ -254,20 +284,25 @@ declare function outl:execute(
                 (: a mapping between outline paths and http location :)
                 map:entry(outl:get-outline-path($it), replace($location, '^(.*/api/)', '/'))
     )
-    for $outline-path in map:keys($paths-to-uris)
-    let $uri := $paths-to-uris($outline-path)
-    return
-        orig:put(tokenize($uri, '/')[last()], outl:rewrite-filler(data:doc($uri), $paths-to-uris))
+  let $rewrite-filler :=
+      for $outline-path in map:keys($paths-to-uris)
+      let $uri := $paths-to-uris($outline-path)
+      return
+          orig:put(tokenize($uri, '/')[last()], outl:rewrite-filler(data:doc($uri), $paths-to-uris))
+  let $rewritten-outline := outl:rewrite-outline($doc, $paths-to-uris)
+  let $outline-doc-name := replace(tokenize(document-uri($doc), '/')[last()], '\.xml$', '')
+  let $save := outl:put($outline-doc-name, $rewritten-outline)
+  return $rewritten-outline
 };
 
 declare function outl:rewrite-filler(
-    $nodes as node()*
+    $nodes as node()*,
     $filler-map as map
     ) as node()* {
     for $node in $nodes
     return
         typeswitch($node)
-        case document-node() return document-node { outl:rewrite-filler($node/node(), $filler-map) }
+        case document-node() return document { outl:rewrite-filler($node/node(), $filler-map) }
         case element() return
             if ($node/self::tei:seg and $node/@n="outline:filler")
             then
@@ -277,7 +312,7 @@ declare function outl:rewrite-filler(
                     $node/@*,
                     outl:rewrite-filler($node/node(), $filler-map)
                 }
-        default $node
+        default return $node
 };
 
 (:~ Get an XML document by name
@@ -287,7 +322,7 @@ declare function outl:rewrite-filler(
 declare
   %rest:GET
   %rest:path("/api/data/outlines/{$name}")
-  %rest:query-param("check", "{$check}", "")
+  %rest:query-param("check", "{$check}")
   %rest:produces("application/xml", "text/xml", "application/tei+xml")
   function outl:get(
     $name as xs:string,
@@ -296,7 +331,7 @@ declare
   let $doc := crest:get($outl:data-type, $name)
   return
     if (exists($check) and $doc instance of document-node())
-    then outl:check($doc, false())
+    then outl:check($doc)
     else $doc
 };
 
@@ -334,14 +369,14 @@ declare function outl:query-function(
   $query as xs:string
   ) as element()* {
     let $c := collection($outl:path-base)
-    return $c//ol:outline[ft:query(.,$query)]|$c//ol:title[ft:query(.,$query)]
+    return $c//ol:outline[ft:query(.,$query)]|$c//ol:outline/ol:title[ft:query(.,$query)]
 };
 
 (: support function for list :) 
 declare function outl:list-function(
   ) as element()* {
   for $doc in collection($outl:path-base)/ol:outline
-  order by $doc//ol:title ascending
+  order by $doc/ol:outline/ol:title ascending
   return $doc
 };  
 
@@ -398,7 +433,7 @@ declare
  : @error HTTP 500 Storage error
  :
  : Other effects: 
- : * The new resource is owned by the current user, group owner=current user, and mode is 664
+ : The outline file is saved with the URIs
  :)
 declare
   %rest:POST("{$body}")
@@ -408,7 +443,7 @@ declare
     $name as xs:string,
     $body as document-node()
   ) as item()+ {
-  let $document := crest:get($outl:data-type, $name, ())
+  let $document := outl:get($name, "check")
   return 
     if ($document instance of document-node())
     then 
@@ -440,7 +475,7 @@ declare
     $name as xs:string,
     $body as document-node()
   ) as item()+ {
-  outl:put(
+  crest:put(
     $outl:data-type, $name, $body,
     outl:validate#2,
     outl:validate-report#2
