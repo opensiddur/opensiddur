@@ -1,0 +1,33 @@
+<ol:outline 
+    xmlns:ol="http://jewishliturgy.org/ns/outline/1.0"
+    xmlns:olx="http://jewishliturgy.org/ns/outline/responses/1.0"
+>
+    <ol:source>/data/sources/TestSource</ol:source>
+    <ol:license>http://www.creativecommons.org/publicdomain/zero/1.0</ol:license>
+    <ol:title>TestOutline</ol:title>
+    <ol:lang>en</ol:lang>
+    <ol:item>
+        <ol:title>TitleDoesNotExist</ol:title>
+        <ol:from>1</ol:from>
+        <ol:to>2</ol:to>
+    </ol:item>
+    <ol:item>
+        <ol:title>TitleExistsOnce</ol:title>
+        <ol:from>3</ol:from>
+        <ol:to>4</ol:to>
+    </ol:item>
+    <ol:item>
+        <ol:title>TitleExistsTwice</ol:title>
+        <ol:from>5</ol:from>
+        <ol:to>6</ol:to>
+    </ol:item>
+    <ol:item>
+        <ol:title>TitleAlreadyConfirmed</ol:title>
+        <ol:from>7</ol:from>
+        <ol:to>8</ol:to>
+        <olx:sameAs>
+            <olx:uri>/data/original/TitleAlreadyConfirmed</olx:uri>
+            <olx:yes/>
+        </olx:sameAs>
+    </ol:item>
+</ol:outline>
