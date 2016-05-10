@@ -75,7 +75,8 @@ declare function outl:get-outline-path(
   ) as xs:string {
   typeswitch ($e)
   case element(ol:outline) return $e/ol:title
-  default return (outl:get-outline-path($e/parent::*) || "->" || $e/ol:title)
+  default return (outl:get-outline-path($e/parent::*) || "/" || $e/ol:title || "[" || 
+      string(count($e/preceding-sibling::ol:item) + 1) || "]")
 };
 
 (:~ find the API paths for the given title :)
@@ -83,7 +84,7 @@ declare function outl:title-search(
     $title as xs:string
 ) as xs:string* {
     for $doc in collection($orig:path-base)//tei:titleStmt/tei:title[ft:query(., $title)]/root(.) | ()
-    return data:db-path-to-api(document-uri($doc))
+    return replace(data:db-path-to-api(document-uri($doc)), "^(/exist/restxq)?/api", "")
 };
 
 (: get the status of a document, given the item element :)
@@ -91,10 +92,74 @@ declare function outl:get-status(
     $e as element(ol:item)
     ) as xs:string? {
     let $source := root($e)/ol:outline/ol:source
+    where exists($e/olx:sameAs[olx:yes])
     return data:doc($e/olx:sameAs[olx:yes]/olx:uri)//tei:sourceDesc/tei:bibl[tei:ptr[@type="bibl"]/@target=$source]/@j:docStatus/string()
 };
 
-(:~ check an outline for duplicate titles.
+(:~ given an item definition and a document, check if the referenced pointers in the
+ : document pointed to be $same-as-uri are the same and in the same order as the ones in 
+ : the item.
+ :)
+declare function outl:check-sameas-pointers(
+  $e as element(ol:item),
+  $same-as-uri as xs:string
+  ) as element(olx:warning)? {
+  let $warning := 
+    <olx:warning>This outline item has subordinate items that are either not referenced in the resource or are referenced and are a different order than they are presented in the outline.</olx:warning>
+  let $doc := data:doc($same-as-uri)
+  (: if the document doesn't exist, it's new, so we can ignore it... :)
+  where exists($doc)
+  return
+    let $in-document-pointers := $doc//j:streamText/tei:ptr
+    let $has-warning :=
+      if (count($in-document-pointers) ne count($e/ol:item))
+      then 1
+      else
+        for $item at $n in $e/ol:item
+        let $item-title := normalize-space($item/ol:title)
+        let $pointer-target := data:doc($in-document-pointers[$n]/@target)
+        let $pointer-title := normalize-space($pointer-target//tei:titleStmt/tei:title/string())
+        where not($pointer-title=$item-title)
+        return 1
+    where exists($has-warning)
+    return $warning
+};
+
+(:~ @return true() if $node1 and $node2 have the same (direct) subordinates by title :)
+declare function outl:has-same-subordinates(
+  $node1 as element(ol:item),
+  $node2 as element(ol:item)
+  ) as xs:boolean {
+  if (empty($node1/ol:item) and empty($node2/ol:item))
+  then true()
+  else if (count($node1/ol:item) != count($node2/ol:item))
+  then false()
+  else (
+    every $value in ( 
+      for $item at $n in $node1/ol:item
+      return normalize-space($item/ol:title)=normalize-space($node2/ol:item[$n]/ol:title)
+      ) satisfies $value
+  )
+};
+
+(:~ check an outline for duplicate titles:
+ : (0) For each item without a duplicate title:
+ :  return the item as-is.
+ : (1) For each item with a duplicate title external to this outline:
+ :  (a) If there is no confirmation of it being duplicate:
+ :      add an olx:sameAs entry with olx:uri for each duplicate entry
+ :  (b) If there is a confirmation of it being duplicate:
+ :      maintain the existing olx:sameAs entry
+ :      add an olx:sameAs entry for other duplicates
+ :  (c) If there are subordinate ol:item elements and olx:sameAs is present:
+ :      for each sameAs element:
+ :          (i) if the item does not point to the same items, issue an olx:warning with a textual message
+ :          (ii) if the item does not point to the same items in the same order, issue an olx:warning with a textual message
+ :  (d) If the document has a status with respect to this source and a confirmed sameAs, an olx:status element is returned
+ : (2) For each item with a duplicate title internal to this outline:
+ :  (a) If one is empty and the other is empty or has ol:item, do nothing
+ :  (b) If both have identically titled and ordered ol:items, do nothing
+ :  (c) If both have ol:item that are not identically titled or identically ordered, issue olx:error
  : @return olx:sameAs when necessary
  :)
 declare function outl:check(
@@ -103,7 +168,7 @@ declare function outl:check(
   for $node in $nodes
   return
     typeswitch($node)
-    case document-node() return outl:check($node/*)
+    case document-node() return document { outl:check($node/*) }
     case element(ol:outline) return
       (: The outline element cannot be a duplicate. If it has a Uri element,
        : the URI is itself.
@@ -118,19 +183,26 @@ declare function outl:check(
             let $duplicate-titles := outl:title-search($node/ol:title)
             let $status := outl:get-status($node)
             return (
-                $node/(ol:title, ol:lang, ol:resp, ol:pages, olx:sameAs),
+                $node/(ol:title, ol:lang, ol:resp, ol:from|ol:to),
                 for $internal-duplicate-title-item in root($node)//ol:item[ol:title=$node/ol:title][not(. is $node)]
-                where (exists($internal-duplicate-title-item/ol:item))
+                where
+                  (: ignorable duplicates :)
+                  not(
+                    count($node/ol:item)=0 or 
+                    count($internal-duplicate-title-item/ol:item)=0  or 
+                    outl:has-same-subordinates($internal-duplicate-title-item, $node) )
                 return 
                     element olx:error {
-                        concat("Duplication of a title is only allowed for items with no descendants. This item conflicts with: ", outl:get-outline-path($internal-duplicate-title-item))
+                        concat("Duplication of a title is only allowed for items that have exactly the same subordinates or where one of the items has no subordinates. The duplicate outline item is: ", outl:get-outline-path($internal-duplicate-title-item))
                     },
                 for $duplicate-title in $duplicate-titles
-                where (empty($node/olx:sameAs[olx:yes]))
+                order by $duplicate-title
                 return
-                    (: only add new duplicates if a uri isn't already confirmed :)
                     element olx:sameAs {
-                        element olx:uri { $duplicate-title } 
+                        element olx:uri { $duplicate-title },
+                        (: copy the remaining elements (yes, no, warning, etc) :)
+                        $node/olx:sameAs[olx:uri=$duplicate-title]/(* except olx:uri),
+                        outl:check-sameas-pointers($node, $duplicate-title)
                     },
                 if (exists($status))
                 then 
@@ -242,13 +314,13 @@ declare function outl:rewrite-outline(
         case document-node() return document { outl:rewrite-outline($node/node(), $filler-map) }
         case element(ol:outline) return 
             element ol:outline {
-                $node/(ol:source | ol:license | ol:title | ol:lang | ol:resp | ol:pages),
+                $node/(ol:source | ol:license | ol:title | ol:lang | ol:resp | ol:from | ol:to),
                 element olx:uri { $filler-map(outl:get-outline-path($node)) },
                 outl:rewrite-outline($node/ol:item, $filler-map) 
             }
         case element(ol:item) return
             element ol:item {
-                $node/(ol:title | ol:lang | ol:resp | ol:pages | olx:sameAs),
+                $node/(ol:title | ol:lang | ol:resp | ol:from | ol:to | olx:sameAs),
                 element olx:sameAs {
                     element olx:uri { $filler-map(outl:get-outline-path($node)) },
                     element olx:yes { () }

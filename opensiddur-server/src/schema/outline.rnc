@@ -27,6 +27,11 @@ Error = element olx:error {
     xsd:string
 }
 
+## The element has a warning that can be ignored
+Warning = element olx:warning {
+    xsd:string
+}
+
 Title = element title { xsd:string }
 License = element license { 
   "http://www.creativecommons.org/publicdomain/zero/1.0" |
@@ -57,7 +62,9 @@ SameAs = element olx:sameAs {
     Uri,
     ## Acknowlegement/refusal of identity
     ## required for execution
-    (Yes | No)?
+    (Yes | No)?,
+    ## potential warnings
+    Warning*
 }
 
 ## Point to an existing document
@@ -95,8 +102,8 @@ Item = element item {
   Resp*,
   ## from and to pages
   Pages?,
-  SameAs?,
-  Error*,
+  SameAs*,
+  (Error|Warning)*,
   ## current document status, if any
   Status?,
   Item*

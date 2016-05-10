@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<TestSuite>
+<TestSuite
+  xmlns:ol="http://jewishliturgy.org/ns/outline/1.0"
+  xmlns:olx="http://jewishliturgy.org/ns/outline/responses/1.0"
+  >
   <suiteName>Outline data API</suiteName>
   <description>
       <p>Test the outline data API</p>
@@ -62,44 +65,250 @@
       </test>
   </TestSet>
   <TestSet>
-    <testName>outl:get() with check</testName>
+    <testName>outl:get() with check: identity</testName>
     <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" 
+        destination="/db/data/outlines"
+        name="TestEverythingOK.xml"/>
     </setup>
+    <tearDown>
+      <remove-document collection="/db/data/outlines" name="TestEverythingOK.xml"/>
+    </tearDown>
     <test>
-        <task>everything is right, no documents currently exist</task>
+        <task>For every item with no duplicate title, at any level, the item is returned as is.</task>
         <code>
             outl:get("TestEverythingOK", "1")
         </code>
         <expected desc="return an identity" href="/db/apps/opensiddur-tests/tests/api/data/outlines/TestEverythingOK.xml"/>
     </test>
+  </TestSet>
+  <TestSet>
+    <testName>outl:get() with check: logic</testName>
+    <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/outlines"
+        name="TestOutline.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="TitleExistsOnce.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="TitleExistsTwice.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="TitleExistsTwice-1.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="TitleAlreadyConfirmed.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="TitleAlreadyConfirmedAndDuplicated.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="TitleAlreadyConfirmedAndDuplicated-1.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="TitleDuplicatedAndSubordinatesExistWithSamePointers.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="TitleDuplicatedAndSubordinatesExistWithDifferentPointers.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="SubOne.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="SubTwo.xml"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines"
+        destination="/db/data/original/en"
+        name="HasAStatus.xml"/>
+    </setup>
+    <tearDown>
+      <remove-document collection="/db/data/outlines" name="TestOutline.xml"/>
+      <remove-document collection="/db/data/original/en" name="TitleExistsOnce.xml"/>
+      <remove-document collection="/db/data/original/en" name="TitleExistsTwice.xml"/>
+      <remove-document collection="/db/data/original/en" name="TitleExistsTwice-1.xml"/>
+      <remove-document collection="/db/data/original/en" name="TitleAlreadyConfirmed.xml"/>
+      <remove-document collection="/db/data/original/en" name="TitleAlreadyConfirmedAndDuplicated.xml"/>
+      <remove-document collection="/db/data/original/en" name="TitleAlreadyConfirmedAndDuplicated-1.xml"/>
+      <remove-document collection="/db/data/original/en" name="TitleDuplicatedAndSubordinatesExistWithSamePointers.xml"/>
+      <remove-document collection="/db/data/original/en" name="TitleDuplicatedAndSubordinatesExistWithDifferentPointers.xml"/>
+      <remove-document collection="/db/data/original/en" name="SubOne.xml"/>
+      <remove-document collection="/db/data/original/en" name="SubTwo.xml"/>
+      <remove-document collection="/db/data/original/en" name="HasAStatus.xml"/>
+    </tearDown> 
     <test>
-        <task>everything is right...</task>
+        <task>all logic</task>
         <code>
             outl:get("TestOutline", "1")
         </code>
-        <xpath desc="where no document exists, no status elements are returned">exists(./ol:outline/ol:item[ol:title="TitleDoesNotExist"]) and empty(./ol:outline/ol:item["TitleDoesNotExist"]/olx:status)</xpath>
-        <xpath desc="for an item that exists, a status element is returned">count(./ol:outline/ol:item[ol:title="TitleExistsOnce"])=1 and ./ol:outline/ol:item["TitleExistsOnce"]/olx:status="Outlined"</xpath>
-        <xpath desc="for an item that exists, a sameAs element is returned">./ol:outline/ol:item["TitleExistsOnce"]/olx:sameAs/olx:uri="/data/original/TitleExistsOnce"</xpath>
-        <xpath desc="for an item where there are multiple existing items with the same titles, a sameAs element is returned for each existing item">count(./ol:outline/ol:item["TitleExistsTwice"]/olx:sameAs)=2</xpath>
-        <expected xpath="./ol:outline/ol:item[ol:title='TitleAlreadyConfirmed']" desc="for an item that exists and already has a sameAs element, no changes are made">
-    <ol:item>
-        <ol:title>TitleAlreadyConfirmed</ol:title>
-        <ol:from>7</ol:from>
-        <ol:to>8</ol:to>
-        <olx:sameAs>
-            <olx:uri>/data/original/TitleAlreadyConfirmed</olx:uri>
-            <olx:yes/>
-        </olx:sameAs>
-    </ol:item>
-</expected>
-
-    </test>
-    <test>
-        <task></task>
-        <expected desc="error"></expected>
-    </test>
-    <test>
-        <task></task>
+        <expected desc="for each item without a duplicate title, return the item as-is" xpath="./ol:outline/ol:item[1]">
+          <ol:item>
+              <ol:title>TitleDoesNotExist</ol:title>
+              <ol:from>1</ol:from>
+              <ol:to>2</ol:to>
+          </ol:item>
+        </expected>
+        <expected desc="for each item with a duplicate title external to the outline without a duplication confirmation, return an olx:sameAs with an olx:uri for each duplicate entry (title exists once)" xpath="./ol:outline/ol:item[2]">
+          <ol:item>
+              <ol:title>TitleExistsOnce</ol:title>
+              <ol:from>3</ol:from>
+              <ol:to>4</ol:to>
+              <olx:sameAs>
+                <olx:uri>/data/original/TitleExistsOnce</olx:uri>
+              </olx:sameAs>
+          </ol:item>
+        </expected>
+        <expected desc="for each item with a duplicate title external to the outline without a duplication confirmation, return an olx:sameAs with an olx:uri for each duplicate entry (title exists more than once)" xpath="./ol:outline/ol:item[3]">
+          <ol:item>
+              <ol:title>TitleExistsTwice</ol:title>
+              <ol:from>5</ol:from>
+              <ol:to>6</ol:to>
+              <olx:sameAs>
+                <olx:uri>/data/original/TitleExistsTwice</olx:uri>
+              </olx:sameAs>
+              <olx:sameAs>
+                <olx:uri>/data/original/TitleExistsTwice-1</olx:uri>
+              </olx:sameAs>
+          </ol:item>
+        </expected>
+        <expected desc="for an item with a duplicate title that is already confirmed, the confirmation is maintained exactly" xpath="./ol:outline/ol:item[4]">
+          <ol:item>
+              <ol:title>TitleAlreadyConfirmed</ol:title>
+              <ol:from>7</ol:from>
+              <ol:to>8</ol:to>
+              <olx:sameAs>
+                  <olx:uri>/data/original/TitleAlreadyConfirmed</olx:uri>
+                  <olx:yes/>
+              </olx:sameAs>
+          </ol:item>
+        </expected>
+        <expected desc="for an item with a duplicate title that is already confirmed and duplicated again, the confirmation is maintained exactly and the additional duplicate is recorded" xpath="./ol:outline/ol:item[5]">
+          <ol:item>
+              <ol:title>TitleAlreadyConfirmedAndDuplicated</ol:title>
+              <ol:from>9</ol:from>
+              <ol:to>10</ol:to>
+              <olx:sameAs>
+                  <olx:uri>/data/original/TitleAlreadyConfirmedAndDuplicated</olx:uri>
+                  <olx:yes/>
+              </olx:sameAs>
+              <olx:sameAs>
+                  <olx:uri>/data/original/TitleAlreadyConfirmedAndDuplicated-1</olx:uri>
+              </olx:sameAs>
+          </ol:item>
+        </expected>
+        <expected desc="Title already exists and has subordinates that are referenced and have the same pointers in the same order" xpath="./ol:outline/ol:item[6]">
+          <ol:item>
+            <ol:title>TitleDuplicatedAndSubordinatesExistWithSamePointers</ol:title>
+            <ol:from>11</ol:from>
+            <ol:to>12</ol:to>
+            <olx:sameAs>
+              <olx:uri>/data/original/TitleDuplicatedAndSubordinatesExistWithSamePointers</olx:uri>
+            </olx:sameAs>
+            <ol:item>
+              <ol:title>SubOne</ol:title>
+              <olx:sameAs>
+                <olx:uri>/data/original/SubOne</olx:uri>
+              </olx:sameAs>
+            </ol:item>
+            <ol:item>
+              <ol:title>SubTwo</ol:title>
+              <olx:sameAs>
+                <olx:uri>/data/original/SubTwo</olx:uri>
+              </olx:sameAs>
+            </ol:item>
+          </ol:item>
+        </expected>
+        <expected desc="Title already exists and has subordinates that are referenced and have the same pointers in different order" xpath="./ol:outline/ol:item[7]">
+          <ol:item>
+            <ol:title>TitleDuplicatedAndSubordinatesExistWithDifferentPointers</ol:title>
+            <ol:from>13</ol:from>
+            <ol:to>14</ol:to>
+            <olx:sameAs>
+              <olx:uri>/data/original/TitleDuplicatedAndSubordinatesExistWithDifferentPointers</olx:uri>
+              <olx:warning>...</olx:warning>
+            </olx:sameAs>
+            <ol:item>
+              <ol:title>SubTwo</ol:title>
+              <olx:sameAs>
+                <olx:uri>/data/original/SubTwo</olx:uri>
+              </olx:sameAs>
+            </ol:item>
+            <ol:item>
+              <ol:title>SubOne</ol:title>
+              <olx:sameAs>
+                <olx:uri>/data/original/SubOne</olx:uri>
+              </olx:sameAs>
+            </ol:item>
+          </ol:item>
+        </expected>
+        <expected desc="if the document has a confirmed identity and a status with respect to the source, the status is returned" xpath="./ol:outline/ol:item[8]">
+          <ol:item>
+            <ol:title>HasAStatus</ol:title>
+            <ol:from>15</ol:from>
+            <ol:to>16</ol:to>
+            <olx:sameAs>
+              <olx:uri>/data/original/HasAStatus</olx:uri>
+              <olx:yes/>
+            </olx:sameAs>
+            <olx:status>outlined</olx:status>
+          </ol:item>
+        </expected>
+        <expected desc="if there is an internal duplicate title and one has items and the other does not, do nothing to the one that has items" xpath="./ol:outline/ol:item[9]">
+          <ol:item>
+            <ol:title>InternalDuplicate</ol:title>
+            <ol:from>17</ol:from>
+            <ol:to>18</ol:to>
+            <ol:item>
+              <ol:title>SubThree</ol:title>
+            </ol:item>
+            <ol:item>
+              <ol:title>SubFour</ol:title>
+            </ol:item>
+          </ol:item>
+        </expected>
+        <expected desc="if there is an internal duplicate title and one has items and the other does not, do nothing to the one that has no items" xpath="./ol:outline/ol:item[10]">
+          <ol:item>
+            <ol:title>InternalDuplicate</ol:title>
+            <ol:from>19</ol:from>
+            <ol:to>20</ol:to>
+          </ol:item>
+        </expected>
+        <expected desc="if there is an internal duplicate title and both have identical items, do nothing to the duplicate" xpath="./ol:outline/ol:item[11]">
+          <ol:item>
+            <ol:title>InternalDuplicate</ol:title>
+            <ol:from>21</ol:from>
+            <ol:to>22</ol:to>
+            <ol:item>
+              <ol:title>SubThree</ol:title>
+            </ol:item>
+            <ol:item>
+              <ol:title>SubFour</ol:title>
+            </ol:item>
+          </ol:item>
+        </expected>
+        <expected desc="if there is an internal duplicate title and the items are not identical, flag olx:error on the first copy" xpath="./ol:outline/ol:item[12]">
+          <ol:item>
+            <ol:title>BadInternalDuplicate</ol:title>
+            <ol:from>23</ol:from>
+            <ol:to>24</ol:to>
+            <olx:error>...</olx:error>
+            <ol:item>
+              <ol:title>SubFive</ol:title>
+            </ol:item>
+          </ol:item>
+        </expected>
+        <expected desc="if there is an internal duplicate title and the items are not identical, flag olx:error on the second copy" xpath="./ol:outline/ol:item[13]">
+          <ol:item>
+            <ol:title>BadInternalDuplicate</ol:title>
+            <ol:from>25</ol:from>
+            <ol:to>26</ol:to>
+            <olx:error>...</olx:error>
+            <ol:item>
+              <ol:title>SubSix</ol:title>
+            </ol:item>
+          </ol:item>
+        </expected>
+        <xpath desc="the resulting file is valid">outl:validate(., ())</xpath>
     </test>
   </TestSet>
   <TestSet>
@@ -146,199 +355,4 @@
          <class href="../common.t.incl.xml#NotFound"/>
       </test>
   </TestSet>
-<!--
-  <TestSet>
-      <testName>src:post()</testName>
-      <tearDown>
-         <code>
-      let $document := 
-        collection("/db/data/")//tei:title[.="Valid"]/root(.)
-      where exists($document)
-      return xmldb:remove(
-        util:collection-name($document),
-        util:document-name($document)
-        )
-      </code>
-      </tearDown>
-      <test>
-         <task>Post a valid resource</task>
-         <code>
-      src:post(doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
-      </code>
-         <class href="../common.t.incl.xml#Created"/>
-      </test>
-      <test>
-         <task>Post an invalid resource</task>
-         <code>
-      src:post(document { &lt;tei:biblStruct&gt;&lt;tei:title&gt;Invalid&lt;/tei:title&gt;&lt;/tei:biblStruct&gt;} )
-      </code>
-         <class href="../common.t.incl.xml#BadRequest"/>
-      </test>
-  </TestSet>
-  <TestSet>
-      <testName>src:put()</testName>
-      <test>
-         <task>Put a valid resource to an existing resource</task>
-         <code>
-      src:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Existing-After-Put.xml"))
-      </code>
-         <class href="../common.t.incl.xml#NoData"/>
-         <xpath desc="The new document has been saved">collection('/data/sources')[descendant::tei:title[.='Existing']]//tei:date/@when=1920</xpath>
-      </test>
-      <test>
-         <task>Put a valid resource to a nonexisting resource</task>
-         <code>
-      src:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
-      </code>
-         <class href="../common.t.incl.xml#NotFound"/>
-      </test>
-      <test>
-         <task>Put an invalid resource</task>
-         <code>
-      src:put("Existing", document { &lt;tei:biblStruct&gt;&lt;tei:title&gt;Invalid&lt;/tei:title&gt;&lt;/tei:biblStruct&gt;})
-      </code>
-         <class href="../common.t.incl.xml#BadRequest"/>
-      </test>
-  </TestSet>
-  <TestSet>
-      <testName>Unauthenticated</testName>
-      <asUser/>
-      <password/>
-      <test>
-         <task>src:get(): Get an existing resource</task>
-         <code>
-      src:get("Existing")
-      </code> 
-         <xpath desc="Returns a bibliography resource">exists(./tei:biblStruct)</xpath>
-      </test>
-      <test>
-         <task>src:get(): Get an existing resource with no read access</task>
-         <code>
-      src:get("NoAccess")
-      </code> 
-         <class href="../common.t.incl.xml#NotFound"/>
-      </test>
-      <test>
-         <task>src:get(): Get a nonexisting resource</task>
-         <code>
-      src:get("DoesNotExist")
-      </code> 
-         <class href="../common.t.incl.xml#NotFound"/>
-      </test>
-      <test>
-         <task>src:list(): Get a list of all resources</task>
-         <code>
-      src:list("", 1, 100)
-      </code>
-         <xpath desc="returns some results">count(.//html:ul[@class="results"]/html:li)&gt;=1</xpath>
-         <xpath desc="does not list resource with no read access">empty(.//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])</xpath>
-         <class href="../common.t.incl.xml#SearchResults"/>
-      </test>
-      <test>
-         <task>src:delete(): Remove an existing resource</task>
-         <code>
-      src:delete("Existing")
-      </code>
-         <class href="../common.t.incl.xml#Unauthorized"/>
-      </test>
-      <test>
-         <task>src:delete(): Remove a nonexisting resource</task>
-         <code>
-      src:delete("DoesNotExist")
-      </code>
-         <class href="../common.t.incl.xml#NotFound"/>
-      </test>
-      <test>
-         <task>src:post(): Post a resource</task>
-         <code>
-      src:post(doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
-      </code>
-         <class href="../common.t.incl.xml#Unauthorized"/>
-      </test>
-      <test>
-         <task>src:put(): Put an existing resource</task>
-         <code>
-      src:put("Existing", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
-      </code>
-         <class href="../common.t.incl.xml#Unauthorized"/>
-      </test>
-      <test>
-         <task>src:put(): Put a nonexisting resource</task>
-         <code>
-      src:put("DoesNotExist", doc("/db/apps/opensiddur-tests/tests/api/data/sources/Valid.xml"))
-      </code>
-         <class href="../common.t.incl.xml#NotFound"/>
-      </test>
-  </TestSet>
-  <TestSet>
-    <testName>src:pages</testName>
-    <setup>
-      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestBibliography.xml"
-            destination="/db/data/sources"/>
-      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument1.xml"
-            destination="/db/data/original/en"/>
-      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument2.xml"
-            destination="/db/data/original/en"/>
-      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument3.xml"
-            destination="/db/data/original/en"/>
-      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument4.xml"
-            destination="/db/data/original/en"/>
-      <copy source="/db/apps/opensiddur-tests/tests/api/data/sources" name="TestDocument5.xml"
-            destination="/db/data/original/en"/>
-    </setup>
-    <tearDown>
-      <remove-document collection="/db/data/sources" name="TestBibliography.xml"/>
-      <remove-document collection="/db/data/original/en" name="TestDocument1.xml"/>
-      <remove-document collection="/db/data/original/en" name="TestDocument2.xml"/>
-      <remove-document collection="/db/data/original/en" name="TestDocument3.xml"/>
-      <remove-document collection="/db/data/original/en" name="TestDocument4.xml"/>
-      <remove-document collection="/db/data/original/en" name="TestDocument5.xml"/>
-    </tearDown>
-    <test>
-      <task>Resource does not exist</task>
-      <code>
-      src:pages("DoesNotExist")
-      </code> 
-      <class href="../common.t.incl.xml#NotFound"/>
-    </test>
-    <test>
-      <task>List pages: there are none</task>
-      <code>
-      src:pages("Existing")
-      </code>
-      <xpath desc="html is returned">exists(./self::html:html)</xpath>
-      <xpath desc="an empty list is returned">exists(.//html:ol[@class="results"]) and empty(.//html:ol[@class="results"]/*)</xpath>
-    </test>
-    <test>
-      <task>List pages with results</task>
-      <code>
-      src:pages("TestBibliography")
-      </code>
-      <xpath desc="some results are returned">count(.//html:ol[@class="results"]/html:li[@class="result"]) &gt; 0</xpath>
-      <xpath desc="all pages are represented by a list element"><![CDATA[
-      let $pages := 
-        for $p in .//html:ol[@class="results"]/html:li[@class="result"]/html:span[@class="page"] return xs:integer($p)
-      return every $pg in (1 to 7) satisfies $pg=$pages
-      ]]></xpath>
-      <xpath desc="results without pages are represented by a list element">count(.//html:ol[@class="results"]/html:li[@class="result"][not(html:span[@class="page"])])=1</xpath>
-      <xpath desc="pages (where they exist) are ordered">every $li in .//html:ol[@class="results"]/html:li[html:span[@class="page"]][position() &gt;= 2] satisfies $li/html:span[@class="page"]/number() &gt;= $li/preceding-sibling::html:li[1]/html:span[@class="page"]/number() </xpath>
-      <xpath desc="TestDocument1 is represented as page 1">exists(.//html:ol[@class="results"]/html:li[@class="result"][html:span[@class="page"]=1][ends-with(html:a/@href, "TestDocument1")])</xpath>
-      <xpath desc="TestDocument2 is represented as pages 2-6"><![CDATA[ 
-      every $v in (for $pg at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument2")]/html:span/@page/number()
-      return $pg=(2 to 6)[$n]) satisfies $v
-      ]]></xpath>
-      <xpath desc="TestDocument3 is represented as pages 4-5 (overlap is allowed)"><![CDATA[ 
-      every $v in (for $pg at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument3")]/html:span/@page/number()
-      return $pg=(4 to 5)[$n]) satisfies $v
-      ]]></xpath>
-      <xpath desc="TestDocument4 is represented as page 7"><![CDATA[
-      every $v in (for $pg at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument4")]/html:span/@page/number()
-      return $pg=7) satisfies $v
-      ]]></xpath>
-      <xpath desc="TestDocument4 has its status represented"><![CDATA[every $v in (for $status at $n in .//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument4")]/html:ul[@class="statuses"]/html:li[@class="status"]/string() return $status=("proofread-once", "transcribed")[$n]) satisfies $v
-      ]]></xpath>
-      <xpath desc="TestDocument5 (no page) is represented with no page span">exists(.//html:ol[@class="results"]/html:li[@class="result"][ends-with(html:a/@href, "TestDocument5")][not(html:span[@class="page"])])</xpath>
-    </test>
-  </TestSet>
--->
 </TestSuite>
