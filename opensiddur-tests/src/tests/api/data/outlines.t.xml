@@ -46,6 +46,10 @@
       at "xmldb:exist:///db/apps/opensiddur-server/api/data/outlines.xqm";
     import module namespace magic="http://jewishliturgy.org/magic"
       at "xmldb:exist:///db/apps/opensiddur-server/magic/magic.xqm";
+    import module namespace data="http://jewishliturgy.org/modules/data"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/data.xqm";
+    import module namespace t="http://exist-db.org/xquery/testing/modified"
+      at "xmldb:exist:///db/apps/opensiddur-tests/modules/test2.xqm";
   </imports>
   <TestSet>
       <testName>outl:get()</testName>
@@ -309,6 +313,90 @@
           </ol:item>
         </expected>
         <xpath desc="the resulting file is valid">outl:validate(., ())</xpath>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>outl:post() with execute: olx:error</testName>
+    <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TestOutlineWithError.xml"
+            destination="/db/data/outlines"/>
+    </setup>
+    <tearDown>
+      <remove-document collection="/db/data/outlines" name="TestOutlineWithError.xml"/>
+    </tearDown>
+    <test>
+      <task>Outline file contains an olx:error after check</task>
+      <code><![CDATA[ outl:post-execute("TestOutlineWithError", document { <post/> }) ]]></code>
+      <class href="../common.t.incl.xml#BadRequest"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>outl:post() with execute: failed to confirm</testName>
+    <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TestOutlineWithUnconfirmed.xml"
+            destination="/db/data/outlines"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="HasUnconfirmed.xml"
+            destination="/db/data/original/en"/>
+    </setup>
+    <tearDown>
+      <remove-document collection="/db/data/outlines" name="TestOutlineWithUnconfirmed.xml"/>
+      <remove-document collection="/db/data/original/en" name="HasUnconfirmed.xml"/>
+    </tearDown>
+    <test>
+      <task>Outline file contains an unconfirmed olx:sameAs</task>
+      <code><![CDATA[ outl:post-execute("TestOutlineWithUnconfirmed", document { <post/> }) ]]></code>
+      <class href="../common.t.incl.xml#BadRequest"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>outl:post() with execute: executable outline</testName>
+    <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TestOutlineSource.xml"
+            destination="/db/data/sources"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TestOutlineExecutable.xml"
+            destination="/db/data/outlines"/>
+    </setup>
+    <tearDown>
+      <remove-document collection="/db/data/sources" name="TestOutlineSource.xml"/>
+      <remove-document collection="/db/data/outlines" name="TestOutlineExecutable.xml"/>
+      <!--
+      <remove-document collection="/db/data/original/en" name="TestOutlineExecutable.xml"/>
+      <remove-document collection="/db/data/original/en" name="TestOutlineExecutableNewTitle.xml"/>
+      -->
+      <code>
+        for $to-remove in ("TestOutlineExecutable", "TestOutlineExecutableNewTitle")
+        let $doc := data:doc("/data/original/" || $to-remove)
+        where exists($doc)
+        return 
+          let $collection := util:collection-name($doc)
+          let $resource := util:document-name($doc)
+          return try { xmldb:remove($collection, $resource) } catch * { () }
+      </code>
+    </tearDown>
+    <test>
+      <task>execute an executable outline</task>
+      <code><![CDATA[ outl:post-execute("TestOutlineExecutable", document { <post/> }) ]]></code>
+      <expected desc="Result is a copy of the rewritten outline" href="/db/apps/opensiddur-tests/tests/api/data/outlines/TestOutlineExecutableResult.xml"/>
+      <xpath desc="the original outline file has been rewritten to correspond to the new data from execution">t:deep-equal-wildcard(doc("/db/data/outlines/TestOutlineExecutable.xml"), doc("/db/apps/opensiddur-tests/tests/api/data/outlines/TestOutlineExecutableResult.xml"))</xpath>
+      <xpath desc="the outline main file exists">exists(data:doc("/data/original/TestOutlineExecutable"))</xpath>
+      <xpath desc="the outline main file is placed in the correct collection for its language">contains(document-uri(data:doc("/data/original/TestOutlineExecutable")), "/en")</xpath>
+      <xpath desc="the outline main file has the correct title">data:doc("/data/original/TestOutlineExecutable")//tei:titleStmt/tei:title[@type="main"]="TestOutlineExecutable"</xpath>
+      <xpath desc="the outline main file references the correct xml:lang">data:doc("/data/original/TestOutlineExecutable")/tei:TEI/@xml:lang="en"</xpath>
+      <xpath desc="the outline main file references the correct license">data:doc("/data/original/TestOutlineExecutable")//tei:availability/tei:licence/@target="http://www.creativecommons.org/publicdomain/zero/1.0"</xpath>
+      <xpath desc="the outline main file references the correct source and status">data:doc("/data/original/TestOutlineExecutable")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:ptr[@type="bibl"]/@target="/data/sources/TestOutlineSource"</xpath>
+      <xpath desc="the outline main file has a streamText containing a pointer to the included file">data:doc("/data/original/TestOutlineExecutable")//j:streamText/tei:ptr/@target="/data/original/TestOutlineExecutableNewTitle#stream"</xpath>
+      <xpath desc="the outline main file streamText filler has been removed">empty(data:doc("/data/original/TestOutlineExecutable")//j:streamText/tei:seg)</xpath>
+      <xpath desc="the outline main file has 1 creation change record">count(data:doc("/data/original/TestOutlineExecutable")//tei:revisionDesc/tei:change[@type="created"])=1</xpath>
+      <xpath desc="the outline main file has 1 edit change record">count(data:doc("/data/original/TestOutlineExecutable")//tei:revisionDesc/tei:change[@type="edited"])=1</xpath>
+      <xpath desc="the outline included file exists">exists(data:doc("/data/original/TestOutlineExecutableNewTitle"))</xpath>
+      <xpath desc="the outline included file is placed in the correct collection for its language">contains(document-uri(data:doc("/data/original/TestOutlineExecutableNewTitle")), "/en")</xpath>
+      <xpath desc="the outline included file has the correct title">data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:titleStmt/tei:title[@type="main"]="TestOutlineExecutableNewTitle"</xpath>
+      <xpath desc="the outline included file references the correct xml:lang">data:doc("/data/original/TestOutlineExecutableNewTitle")/tei:TEI/@xml:lang="en"</xpath>
+      <xpath desc="the outline included file references the correct license">data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:availability/tei:licence/@target="http://www.creativecommons.org/publicdomain/zero/1.0"</xpath>
+      <xpath desc="the outline included file references the correct source, status, and page numbers">data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"][tei:biblScope[@unit="pages"][@from="1"][@to="2"]]/tei:ptr[@type="bibl"]/@target="/data/sources/TestOutlineSource"</xpath>
+      <xpath desc="the outline included file has a streamText containing filler">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//j:streamText/tei:seg)=2</xpath>
+      <xpath desc="the outline included file has 1 creation change record">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:revisionDesc/tei:change[@type="created"])=1</xpath>
+      <xpath desc="the outline included file has 1 edit change record">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:revisionDesc/tei:change[@type="edited"])=1</xpath>
     </test>
   </TestSet>
   <TestSet>

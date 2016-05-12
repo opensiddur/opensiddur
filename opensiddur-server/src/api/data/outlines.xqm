@@ -13,6 +13,7 @@ declare namespace olx="http://jewishliturgy.org/ns/outline/responses/1.0";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace error="http://jewishliturgy.org/errors";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "../../modules/api.xqm";
@@ -87,14 +88,17 @@ declare function outl:title-search(
     return replace(data:db-path-to-api(document-uri($doc)), "^(/exist/restxq)?/api", "")
 };
 
-(: get the status of a document, given the item element :)
+(: get the status of a document, given the outline and uri.
+ : If the URI does not exist, return empty :)
 declare function outl:get-status(
-    $e as element(ol:item)
+    $outline as document-node(),
+    $uri as xs:string?
     ) as xs:string? {
-    let $source := root($e)/ol:outline/ol:source
-    where exists($e/olx:sameAs[olx:yes])
-    return data:doc($e/olx:sameAs[olx:yes]/olx:uri)//tei:sourceDesc/tei:bibl[tei:ptr[@type="bibl"]/@target=$source]/@j:docStatus/string()
+    let $source := $outline/ol:outline/ol:source
+    where exists($uri)
+    return data:doc($uri)//tei:sourceDesc/tei:bibl[tei:ptr[@type="bibl"]/@target=$source]/@j:docStatus/string()
 };
+
 
 (:~ given an item definition and a document, check if the referenced pointers in the
  : document pointed to be $same-as-uri are the same and in the same order as the ones in 
@@ -181,7 +185,7 @@ declare function outl:check(
         element ol:item {
             $node/@*,
             let $duplicate-titles := outl:title-search($node/ol:title)
-            let $status := outl:get-status($node)
+            let $status := outl:get-status(root($node), $node/olx:sameAs[olx:yes]/olx:uri/string())
             return (
                 $node/(ol:title, ol:lang, ol:resp, ol:from|ol:to),
                 for $internal-duplicate-title-item in root($node)//ol:item[ol:title=$node/ol:title][not(. is $node)]
@@ -232,76 +236,77 @@ declare function outl:is-executable(
     )
 };
 
-(:~ get a template document specified by the ol:item or ol:ouline
+(:~ get a template document specified by the ol:item or ol:outline
  : Note: the document may have pointers to unknown uris temporarily stored in tei:seg with n="outline:filler"
- : @param $e The item or outline element
+ : @param $e The item(s) or outline element that represent a single title
  : @param $old-doc If this is an edit to a pre-existing document, the pre-existing doc
  : @return the document content
  :)
 declare function outl:template(
-  $e as element(),
+  $e as element()+,
   $old-doc as document-node()?
-  ) as xs:anyURI {
-  let $sub-items := $e/ol:item
+  ) as document-node() {
+  let $f := $e[1]
+  let $sub-items := $e[ol:item][1]/ol:item  (: first entry that has items :)
   let $outline := root($e)/ol:outline
   let $lang := ($outline/ol:lang, $e/ol:lang)[1]/string()
   return
-    <tei:TEI xml:lang="{ $lang }">
-      <tei:teiHeader>
-        <tei:fileDesc>
-          <tei:titleStmt>
-            <tei:title type="main" xml:lang="{ $lang }">{$e/ol:title/string()}</tei:title>
-          </tei:titleStmt>
-          <tei:publicationStmt>
-            <tei:distributor>
-              <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
-            </tei:distributor>
-            <tei:availability>
-              <tei:licence target="{ ($old-doc//tei:availability/tei:licence/string(), $outline/ol:license)[1]/string() }"/>
-            </tei:availability>
-            <tei:date>{ format-date(current-date(), '[Y0001]-[M01]-[D01]') }</tei:date>
-          </tei:publicationStmt>
-          <tei:sourceDesc>
-            { $old-doc//tei:sourceDesc/tei:bibl[not(tei:ptr[@type="bibl"][@target=$outline/ol:source])] }
-            <tei:bibl j:docStatus="outlined">
-              <tei:title>{ src:title-function(data:doc($outline/ol:source)) }</tei:title>
-              <tei:ptr type="bibl" target="{ $outline/ol:source/string() } "/>
-              <tei:ptr type="bibl-content" target="#stream"/>
-              { 
-                if ($e/ol:from and $e/ol:to )
-                then
-                  <tei:biblScope unit="pages" from="{$e/ol:from/string()}" to="{$e/ol:to/string()}"/>
-                else ()
-              }
-            </tei:bibl>
-          </tei:sourceDesc>
-        </tei:fileDesc>
-        <tei:revisionDesc>
-          <tei:change type="{if (exists($old-doc)) then 'edited' else 'created'}" who="/user/{app:auth-user()}" when="{current-dateTime()}">{if (exists($old-doc)) then 'Edited' else 'Created'} by the outline tool.</tei:change>
-          { $old-doc//tei:revisionDesc/tei:change }
-        </tei:revisionDesc>
-      </tei:teiHeader>
-      <tei:text>
-        <j:streamText xml:id="stream">{
-          if (exists($sub-items))
-          then
-            for $sub-item at $n in $sub-items
-            let $sub-item-uri :=
-                $sub-item/olx:sameAs[olx:yes]/olx:uri/string()
-            return
-                if ($sub-item-uri)
-                then
-                    <tei:ptr xml:id="ptr_{$n}" target="{$sub-item-uri}" />
-                else
-                    <tei:seg xml:id="seg_{$n}" n="outline:filler">{outl:get-outline-path($sub-item)}</tei:seg>
-          else (
-            <tei:seg xml:id="seg_filler">FILL ME IN</tei:seg>,
-            <tei:seg xml:id="seg_title">{$e/ol:title/string()}</tei:seg>
-          )
-        }</j:streamText>
-      </tei:text>
-    </tei:TEI>
-
+    document {
+      <tei:TEI xml:lang="{ $lang }">
+        <tei:teiHeader>
+          <tei:fileDesc>
+            <tei:titleStmt>
+              <tei:title type="main" xml:lang="{ $lang }">{$f/ol:title/string()}</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+              <tei:distributor>
+                <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+              </tei:distributor>
+              <tei:availability>
+                <tei:licence target="{ ($old-doc//tei:availability/tei:licence, $outline/ol:license)[1]/string() }"/>
+              </tei:availability>
+              <tei:date>{ format-date(current-date(), '[Y0001]-[M01]-[D01]') }</tei:date>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+              { $old-doc//tei:sourceDesc/tei:bibl[not(tei:ptr[@type="bibl"][@target=$outline/ol:source])] }
+              <tei:bibl j:docStatus="outlined">
+                <tei:title>{ src:title-function(data:doc($outline/ol:source)) }</tei:title>
+                <tei:ptr type="bibl" target="{ $outline/ol:source/string() }"/>
+                <tei:ptr type="bibl-content" target="#stream"/>
+                { 
+                  for $it in $e[ol:from][ol:to] 
+                  return
+                    <tei:biblScope unit="pages" from="{$it/ol:from/string()}" to="{$it/ol:to/string()}"/>
+                }
+              </tei:bibl>
+            </tei:sourceDesc>
+          </tei:fileDesc>
+          <tei:revisionDesc>
+            <tei:change type="{if (exists($old-doc)) then 'edited' else 'created'}">{if (exists($old-doc)) then 'Edited' else 'Created'} by the outline tool.</tei:change>
+            { $old-doc//tei:revisionDesc/tei:change }
+          </tei:revisionDesc>
+        </tei:teiHeader>
+        <tei:text>
+          <j:streamText xml:id="stream">{
+            if (exists($sub-items))
+            then
+              for $sub-item at $n in $sub-items
+              let $sub-item-uri :=
+                  $sub-item/olx:sameAs[olx:yes]/olx:uri/string()
+              return
+                  if ($sub-item-uri)
+                  then
+                      <tei:ptr xml:id="ptr_{$n}" target="{$sub-item-uri}" />
+                  else
+                      <tei:seg xml:id="seg_{$n}" n="outline:filler">{outl:get-outline-path($sub-item)}</tei:seg>
+            else (
+              <tei:seg xml:id="seg_filler">FILL ME IN</tei:seg>,
+              <tei:seg xml:id="seg_title">{$f/ol:title/string()}</tei:seg>
+            )
+          }</j:streamText>
+        </tei:text>
+      </tei:TEI>
+    }
 };
 
 declare function outl:rewrite-outline(
@@ -312,27 +317,43 @@ declare function outl:rewrite-outline(
     return
         typeswitch($node)
         case document-node() return document { outl:rewrite-outline($node/node(), $filler-map) }
-        case element(ol:outline) return 
-            element ol:outline {
-                $node/(ol:source | ol:license | ol:title | ol:lang | ol:resp | ol:from | ol:to),
-                element olx:uri { $filler-map(outl:get-outline-path($node)) },
-                outl:rewrite-outline($node/ol:item, $filler-map) 
-            }
+        case element(ol:outline) return
+            let $uri := $filler-map(outl:get-outline-path($node))
+            return 
+              element ol:outline {
+                  $node/(ol:source | ol:license | ol:title | ol:lang | ol:resp | ol:from | ol:to),
+                  element olx:uri { $uri },
+                  element olx:status { outl:get-status(root($node), $uri) },
+                  outl:rewrite-outline($node/ol:item, $filler-map) 
+              }
         case element(ol:item) return
-            element ol:item {
-                $node/(ol:title | ol:lang | ol:resp | ol:from | ol:to | olx:sameAs),
-                element olx:sameAs {
-                    element olx:uri { $filler-map(outl:get-outline-path($node)) },
-                    element olx:yes { () }
-                },
-                $node/(olx:error | olx:status),
-                outl:rewrite-outline($node/ol:item, $filler-map)
-            }
+            let $uri := $filler-map(outl:get-outline-path($node))
+            return 
+              element ol:item {
+                  $node/(ol:title | ol:lang | ol:resp | ol:from | ol:to | olx:sameAs),
+                  element olx:sameAs {
+                      element olx:uri { $uri },
+                      element olx:yes { () },
+                      $node/olx:sameAs/olx:warning
+                  },
+                  $node/olx:error,
+                  element olx:status { outl:get-status(root($node), $uri) },
+                  outl:rewrite-outline($node/ol:item, $filler-map)
+              }
         default return $node
 };
 
-(:~ execute an outline :)
+(:~ execute an outline document, assuming it has been checked and is found to be executable, see also outl:is-executable
+ : Execution pattern:
+ : (1) for each title in an ol:outline or ol:item:
+ :  (a) find the item that has subordinate items and execute that item; otherwise choose the first one
+ :  (b) if multiple items exist with the same titles, all of their scopes must be represented
+ :  (c) if the item has an olx:sameAs[olx:yes], record the title=uri connection, but do not edit the file
+ :      otherwise create a file template referencing each item
+ : (.) rewrite the outline with all the uris and statuses present
+ :)
 declare function outl:execute(
+  $name as xs:string,
   $doc as document-node()
   ) {
   let $paths-to-uris :=
@@ -343,7 +364,7 @@ declare function outl:execute(
             $forced-uri := ($item/olx:sameAs[olx:yes]/olx:uri, $item/olx:uri)/string()
         return 
             let $old-doc := if ($forced-uri) then data:doc($forced-uri) else ()
-            let $template := outl:template($item, $forced-uri) 
+            let $template := outl:template($item, $old-doc) 
             let $result :=
                 if ($forced-uri)
                 then 
@@ -359,11 +380,12 @@ declare function outl:execute(
   let $rewrite-filler :=
       for $outline-path in map:keys($paths-to-uris)
       let $uri := $paths-to-uris($outline-path)
-      return
-          orig:put(tokenize($uri, '/')[last()], outl:rewrite-filler(data:doc($uri), $paths-to-uris))
+      let $put := orig:put(tokenize($uri, '/')[last()], outl:rewrite-filler(data:doc($uri), $paths-to-uris))
+      where $put/self::rest:response/http:response/@status >= 400
+      return error(xs:QName("error:OUTLINE"), ("While writing " || $uri || "received an error:" || $put/message) )
   let $rewritten-outline := outl:rewrite-outline($doc, $paths-to-uris)
   let $outline-doc-name := replace(tokenize(document-uri($doc), '/')[last()], '\.xml$', '')
-  let $save := outl:put($outline-doc-name, $rewritten-outline)
+  let $save := outl:put($name, $rewritten-outline)
   return $rewritten-outline
 };
 
@@ -375,15 +397,27 @@ declare function outl:rewrite-filler(
     return
         typeswitch($node)
         case document-node() return document { outl:rewrite-filler($node/node(), $filler-map) }
+        case element(tei:revisionDesc) return
+            element tei:revisionDesc {
+              $node/@*,
+              element tei:change { 
+                attribute type { "edited" },
+                text { "Rewritten by the outline tool." }
+              },
+              $node/tei:change
+            }
         case element() return
-            if ($node/self::tei:seg and $node/@n="outline:filler")
-            then
-                <tei:ptr target="{$filler-map($node/string())}"/>
-            else 
-                element { QName(namespace-uri($node), name($node)) }{
-                    $node/@*,
-                    outl:rewrite-filler($node/node(), $filler-map)
-                }
+              if ($node/self::tei:seg and $node/@n="outline:filler")
+              then
+                let $uri := $filler-map($node/string())
+                let $streamText-id := data:doc($uri)//j:streamText[1]/@xml:id/string()
+                return
+                  <tei:ptr xml:id="ptr_{count($node/preceding-sibling::*[@n='outline:filler']) + 1}" target="{$uri}#{$streamText-id}"/>
+              else 
+                  element { QName(namespace-uri($node), name($node)) }{
+                      $node/@*,
+                      outl:rewrite-filler($node/node(), $filler-map)
+                  }
         default return $node
 };
 
@@ -493,7 +527,8 @@ declare
     $body,
     outl:validate#2,
     outl:validate-report#2,
-    ()
+    (), 
+    false()
   )
 };
 
@@ -523,7 +558,7 @@ declare
         return
             if (exists($executable-errors))
             then api:rest-error(400, $executable-errors)
-            else outl:execute($document)
+            else outl:execute($name, $document)
     else $document
 };
 
@@ -550,7 +585,8 @@ declare
   crest:put(
     $outl:data-type, $name, $body,
     outl:validate#2,
-    outl:validate-report#2
+    outl:validate-report#2,
+    false()
   )
 };
 

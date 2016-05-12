@@ -90,6 +90,8 @@ Outline = element outline {
   Pages?,
   ## Uri of the existing outline file
   Uri?,
+  ## status of the outline file (if outlined or greater, will mean that the outline has been executed/edited)
+  Status?,
   ## additional items
   Item+
 }
