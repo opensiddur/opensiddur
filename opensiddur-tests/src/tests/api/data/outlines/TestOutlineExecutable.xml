@@ -8,6 +8,10 @@
     <ol:lang>en</ol:lang>
     <ol:item>
         <ol:title>TestOutlineExecutableNewTitle</ol:title>
+        <ol:resp>
+          <ol:contributor>/user/testuser</ol:contributor>
+          <ol:responsibility>trc</ol:responsibility>
+        </ol:resp>
         <ol:from>1</ol:from>
         <ol:to>2</ol:to>
     </ol:item>

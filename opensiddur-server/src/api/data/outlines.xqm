@@ -236,6 +236,24 @@ declare function outl:is-executable(
     )
 };
 
+declare variable $outl:responsibilities := map {
+    "ann" := "Annotated by",
+    "fac" := "Scanned by",
+    "fnd" := "Funded by",
+    "mrk" := "Markup edited by",
+    "pfr" := "Proofread by",
+    "spn" := "Sponsored by",
+    "trc" := "Transcribed by",
+    "trl" := "Translated by"
+};
+
+(:~ get the name of a contributor by uri :)
+declare function outl:contributor-lookup(
+  $uri as xs:string
+  ) as xs:string? {
+  data:doc($uri)/j:contributor/(tei:name, tei:orgName)[1]
+};
+
 (:~ get a template document specified by the ol:item or ol:outline
  : Note: the document may have pointers to unknown uris temporarily stored in tei:seg with n="outline:filler"
  : @param $e The item(s) or outline element that represent a single title
@@ -257,6 +275,17 @@ declare function outl:template(
           <tei:fileDesc>
             <tei:titleStmt>
               <tei:title type="main" xml:lang="{ $lang }">{$f/ol:title/string()}</tei:title>
+              {
+                for $resp in $e/ol:resp
+                group by 
+                  $contributor := $resp/ol:contributor/string(),
+                  $responsibility := $resp/ol:responsibility/string()
+                return
+                  <tei:respStmt>
+                    <tei:resp key="{$responsibility}">{ $outl:responsibilities($responsibility) }</tei:resp>
+                    <tei:name ref="{$contributor}">{ outl:contributor-lookup($contributor) }</tei:name>
+                  </tei:respStmt>
+              }
             </tei:titleStmt>
             <tei:publicationStmt>
               <tei:distributor>

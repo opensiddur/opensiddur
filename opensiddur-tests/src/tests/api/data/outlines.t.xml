@@ -393,11 +393,19 @@
       <xpath desc="the outline included file has the correct title">data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:titleStmt/tei:title[@type="main"]="TestOutlineExecutableNewTitle"</xpath>
       <xpath desc="the outline included file references the correct xml:lang">data:doc("/data/original/TestOutlineExecutableNewTitle")/tei:TEI/@xml:lang="en"</xpath>
       <xpath desc="the outline included file references the correct license">data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:availability/tei:licence/@target="http://www.creativecommons.org/publicdomain/zero/1.0"</xpath>
+      <xpath desc="the outline included file references a contributor credit">data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:titleStmt/tei:respStmt[tei:resp[@key="trc"][.="Transcribed by"]][tei:name[@ref="/user/testuser"][.="Test User"]]</xpath>
       <xpath desc="the outline included file references the correct source, status, and page numbers">data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"][tei:biblScope[@unit="pages"][@from="1"][@to="2"]]/tei:ptr[@type="bibl"]/@target="/data/sources/TestOutlineSource"</xpath>
       <xpath desc="the outline included file has a streamText containing filler">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//j:streamText/tei:seg)=2</xpath>
       <xpath desc="the outline included file has 1 creation change record">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:revisionDesc/tei:change[@type="created"])=1</xpath>
       <xpath desc="the outline included file has 1 edit change record">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:revisionDesc/tei:change[@type="edited"])=1</xpath>
     </test>
+  </TestSet>
+  <TestSet>
+    <testName>outl:post-execute(): duplicate titles</testName>
+    <setup>
+    </setup>
+    <tearDown>
+    </tearDown>
   </TestSet>
   <TestSet>
       <testName>outl:list()</testName>
