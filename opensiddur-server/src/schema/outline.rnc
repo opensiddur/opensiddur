@@ -44,7 +44,9 @@ Resp = element resp {
     ## contributor URI
     element contributor { xsd:anyURI },
     ## responsibility code
-    element responsibility { xsd:string } 
+    element responsibility { 
+      "ann" | "fac" | "fnd" | "mrk" | "pfr" | "spn" | "trc" | "trl"
+    } 
   }
 
 Pages = (

@@ -266,7 +266,7 @@ declare function outl:template(
   ) as document-node() {
   let $f := $e[1]
   let $sub-items := $e[ol:item][1]/ol:item  (: first entry that has items :)
-  let $outline := root($e)/ol:outline
+  let $outline := root($f)/ol:outline
   let $lang := ($outline/ol:lang, $e/ol:lang)[1]/string()
   return
     document {
@@ -406,9 +406,10 @@ declare function outl:execute(
                 (: a mapping between outline paths and http location :)
                 map:entry(outl:get-outline-path($it), replace($location, '^(.*/api/)', '/'))
     )
+  let $all-uris := 
+    distinct-values(for $outline-path in map:keys($paths-to-uris) return $paths-to-uris($outline-path))
   let $rewrite-filler :=
-      for $outline-path in map:keys($paths-to-uris)
-      let $uri := $paths-to-uris($outline-path)
+      for $uri in $all-uris
       let $put := orig:put(tokenize($uri, '/')[last()], outl:rewrite-filler(data:doc($uri), $paths-to-uris))
       where $put/self::rest:response/http:response/@status >= 400
       return error(xs:QName("error:OUTLINE"), ("While writing " || $uri || "received an error:" || $put/message) )

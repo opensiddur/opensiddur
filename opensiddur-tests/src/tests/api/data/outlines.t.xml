@@ -403,9 +403,54 @@
   <TestSet>
     <testName>outl:post-execute(): duplicate titles</testName>
     <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TestOutlineSource.xml"
+            destination="/db/data/sources"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TestOutlineExecutableWithDuplicates.xml"
+            destination="/db/data/outlines"/>
     </setup>
     <tearDown>
+      <remove-document collection="/db/data/sources" name="TestOutlineSource.xml"/>
+      <remove-document collection="/db/data/outlines" name="TestOutlineExecutableWithDuplicates.xml"/>
+      <code>
+        for $to-remove in ("TestOutlineExecutableWithDuplicates", "TestOutlineExecutableDuplicate", "TestOutlineExecutableDuplicateWithItems", "TestSubOne", "TestSubTwo")
+        let $doc := data:doc("/data/original/" || $to-remove)
+        where exists($doc)
+        return 
+          let $collection := util:collection-name($doc)
+          let $resource := util:document-name($doc)
+          return try { xmldb:remove($collection, $resource) } catch * { () }
+      </code>
     </tearDown>
+    <test>
+      <task>Execute an outline containing duplicates</task>
+      <code><![CDATA[ outl:post-execute("TestOutlineExecutableWithDuplicates", document { <post/> }) ]]></code>
+      <xpath desc="the outline main file exists">exists(data:doc("/data/original/TestOutlineExecutableWithDuplicates"))</xpath>
+      <xpath desc="The main outline file references TestOutlineExecutableDuplicate 2x and TestOutlineExecutableDuplicateWithItems 2x"><![CDATA[
+        let $d := data:doc("/data/original/TestOutlineExecutableWithDuplicates")
+        let $st := $d//j:streamText
+        return
+          count($st/tei:ptr[@target='/data/original/TestOutlineExecutableDuplicate#stream'])=2 and 
+          count($st/tei:ptr[@target='/data/original/TestOutlineExecutableDuplicateWithItems#stream'])=2
+      ]]></xpath>
+      <xpath desc="Documents with the title TestOutlineExecutableDuplicate exist only once">count(collection("/db/data/original/en")/tei:TEI[descendant::tei:titleStmt/tei:title[@type="main"][.="TestOutlineExecutableDuplicate"]])=1</xpath>
+      <xpath desc="TestOutlineExecutableDuplicate has been written to twice, once on creation, once at edit">count(data:doc("/data/original/TestOutlineExecutableDuplicate")//tei:revisionDesc/tei:change)=2</xpath>
+      <xpath desc="TestOutlineExecutableDuplicate references two different page ranges"><![CDATA[
+      let $b := data:doc("/data/original/TestOutlineExecutableDuplicate")//tei:sourceDesc/tei:bibl
+      return
+        count($b/tei:biblScope)=2
+        and exists($b/tei:biblScope[@unit='pages'][@from='1'][@to='2'])
+        and exists($b/tei:biblScope[@unit='pages'][@from='3'][@to='4'])
+      ]]></xpath>
+      <xpath desc="Documents with the title TestOutlineExecutableDuplicateWithItems exist only once">count(collection("/db/data/original/en")/tei:TEI[descendant::tei:titleStmt/tei:title[@type="main"][.="TestOutlineExecutableDuplicateWithItems"]])=1</xpath>
+      <xpath desc="TestOutlineExecutableDuplicateWithItems has a streamText that points to its two subordinates">
+      let $st := data:doc("/data/original/TestOutlineExecutableDuplicateWithItems")//j:streamText
+      return exists($st/tei:ptr[1]["/data/original/TestSubOne#stream"=@target])
+          and exists($st/tei:ptr[2]["/data/original/TestSubTwo#stream"=@target])
+      </xpath>
+      <xpath desc="TestSubOne exists">exists(data:doc("/data/original/TestSubOne"))</xpath>
+      <xpath desc="TestSubTwo exists">exists(data:doc("/data/original/TestSubTwo"))</xpath>
+      <expected desc="The return outline contains the expected data and references" href="/db/apps/opensiddur-tests/tests/api/data/outlines/TestOutlineExecutableWithDuplicatesResult.xml"/>
+    </test>
   </TestSet>
   <TestSet>
       <testName>outl:list()</testName>
