@@ -397,7 +397,7 @@
       <xpath desc="the outline included file references the correct source, status, and page numbers">data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"][tei:biblScope[@unit="pages"][@from="1"][@to="2"]]/tei:ptr[@type="bibl"]/@target="/data/sources/TestOutlineSource"</xpath>
       <xpath desc="the outline included file has a streamText containing filler">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//j:streamText/tei:seg)=2</xpath>
       <xpath desc="the outline included file has 1 creation change record">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:revisionDesc/tei:change[@type="created"])=1</xpath>
-      <xpath desc="the outline included file has 1 edit change record">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:revisionDesc/tei:change[@type="edited"])=1</xpath>
+      <xpath desc="the outline included file has no edit change records">count(data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:revisionDesc/tei:change[@type="edited"])=0</xpath>
     </test>
   </TestSet>
   <TestSet>
@@ -433,7 +433,7 @@
           count($st/tei:ptr[@target='/data/original/TestOutlineExecutableDuplicateWithItems#stream'])=2
       ]]></xpath>
       <xpath desc="Documents with the title TestOutlineExecutableDuplicate exist only once">count(collection("/db/data/original/en")/tei:TEI[descendant::tei:titleStmt/tei:title[@type="main"][.="TestOutlineExecutableDuplicate"]])=1</xpath>
-      <xpath desc="TestOutlineExecutableDuplicate has been written to twice, once on creation, once at edit">count(data:doc("/data/original/TestOutlineExecutableDuplicate")//tei:revisionDesc/tei:change)=2</xpath>
+      <xpath desc="TestOutlineExecutableDuplicate has been written to once on creation, since it has no filler pointers">count(data:doc("/data/original/TestOutlineExecutableDuplicate")//tei:revisionDesc/tei:change)=1</xpath>
       <xpath desc="TestOutlineExecutableDuplicate references two different page ranges"><![CDATA[
       let $b := data:doc("/data/original/TestOutlineExecutableDuplicate")//tei:sourceDesc/tei:bibl
       return
@@ -450,6 +450,66 @@
       <xpath desc="TestSubOne exists">exists(data:doc("/data/original/TestSubOne"))</xpath>
       <xpath desc="TestSubTwo exists">exists(data:doc("/data/original/TestSubTwo"))</xpath>
       <expected desc="The return outline contains the expected data and references" href="/db/apps/opensiddur-tests/tests/api/data/outlines/TestOutlineExecutableWithDuplicatesResult.xml"/>
+    </test>
+  </TestSet>
+  <TestSet>
+    <testName>outl:post-execute(): external duplicate titles</testName>
+    <setup>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TestOutlineSource.xml"
+            destination="/db/data/sources"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TestOutlineExecutableWithExternalDuplicates.xml"
+            destination="/db/data/outlines"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TitleExistsOnce.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TitleAlreadyConfirmedAndDuplicated.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TitleDuplicatedAndSubordinatesExistWithSamePointers.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TitleExistsOnceWithSource.xml"
+            destination="/db/data/original/en"/>
+      <copy source="/db/apps/opensiddur-tests/tests/api/data/outlines" name="TitleExistsOnceWithSourceAndPages.xml"
+            destination="/db/data/original/en"/>
+      <code><![CDATA[
+        system:as-user("admin", $magic:password, 
+          for $doc in ("TitleExistsOnce", "TitleAlreadyConfirmedAndDuplicated", "TitleDuplicatedAndSubordinatesExistWithSamePointers", "TitleExistsOnceWithSource", "TitleExistsOnceWithSourceAndPages")
+          let $uri := xs:anyURI("/db/data/original/en/" || $doc || ".xml")
+          return (
+            sm:chown($uri, "testuser"),
+            sm:chgrp($uri, "everyone"),
+            sm:chmod($uri, "rw-rw-r--")
+          )
+        )
+      ]]></code>
+    </setup>
+    <tearDown>
+      <remove-document collection="/db/data/sources" name="TestOutlineSource.xml"/>
+      <remove-document collection="/db/data/outlines" name="TestOutlineExecutableWithExternalDuplicates.xml"/>
+      <code>
+        for $to-remove in ("TestOutlineExecutableWithExternalDuplicates", "TitleExistsOnce", "TitleExistsOnce-1", "TitleAlreadyConfirmedAndDuplicated", "TitleDuplicatedAndSubordinatesExistWithSamePointers", "TitleExistsOnceWithSource", "TitleExistsOnceWithSourceAndPages", "TitleExistsOnceWithSource-1", "TitleExistsOnceWithSourceAndPages-1", "SubOne", "SubTwo")
+        let $doc := data:doc("/data/original/" || $to-remove)
+        where exists($doc)
+        return 
+          let $collection := util:collection-name($doc)
+          let $resource := util:document-name($doc)
+          return try { xmldb:remove($collection, $resource) } catch * { () }
+      </code>
+    </tearDown>
+    <test>
+      <task>Execute an outline containing external duplicate references</task>
+      <code><![CDATA[ outl:post-execute("TestOutlineExecutableWithExternalDuplicates", document { <post/> }) ]]></code>
+      <xpath desc="the outline main file exists">exists(data:doc("/data/original/TestOutlineExecutableWithExternalDuplicates"))</xpath>
+      <xpath desc="There is only file with the same title as the confirmed resource">count(collection("/db/data/original/en")//tei:titleStmt/tei:title[@type="main"][.="TitleAlreadyConfirmedAndDuplicated"])=1</xpath>
+      <xpath desc="A reference to the source has been added to the confirmed resource">exists(data:doc("/data/original/TitleAlreadyConfirmedAndDuplicated")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:ptr[@type="bibl"]["/data/sources/TestOutlineSource"=@target])</xpath>
+      <xpath desc="A reference to the source's pages has been added to the confirmed resource">exists(data:doc("/data/original/TitleAlreadyConfirmedAndDuplicated")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:biblScope[@unit="pages"][@from="1"][@to="2"])</xpath>
+      <xpath desc="An edited by change record has been added to the confirmed resource">exists(data:doc("/data/original/TitleAlreadyConfirmedAndDuplicated")//tei:revisionDesc/tei:change[1][@type="edited"][contains(., "outline tool")])</xpath>
+      <xpath desc="For each confirmed resource, a single olx:sameAs[olx:yes] record exists in the output outline">every $resource in ("TitleAlreadyConfirmedAndDuplicated", "TitleDuplicatedAndSubordinatesExistWithSamePointers", "TitleExistsOnceWithSource", "TitleExistsOnceWithSourceAndPages") satisfies count(.//ol:item[ol:title=$resource]/olx:sameAs[olx:yes])=1</xpath>
+      <xpath desc="The text data in the confirmed resource has not been overwritten">data:doc("/data/original/TitleAlreadyConfirmedAndDuplicated")//j:streamText/tei:seg[1]="Test data."</xpath>
+      <xpath desc="The confirmed negative duplicate file remains unchanged">t:deep-equal-wildcard(data:doc("/data/original/TitleExistsOnce"), doc("/db/apps/opensiddur-tests/tests/api/data/outlines/TitleExistsOnce.xml"))</xpath>
+      <xpath desc="A second file with the same title and different URI as the confirmed negative file has been created">exists(data:doc("/data/original/TitleExistsOnce-1"))</xpath>
+      <xpath desc="The second file is referenced in the returned outline">exists(./ol:outline/ol:item[ol:title="TitleExistsOnce"]/olx:sameAs[olx:yes]/olx:uri="/data/original/TitleExistsOnce-1")</xpath>
+      <xpath desc="When the title is duplicated and sub-items exist, a reference to the source has been added to the file">exists(data:doc("/data/original/TitleDuplicatedAndSubordinatesExistWithSamePointers")//tei:sourceDesc/tei:bibl[tei:ptr[@type="bibl"]["/data/sources/TestOutlineSource"=@target]])</xpath>
+      <xpath desc="When the title is confirmed and the source is already referenced, page numbers are added">exists(data:doc("/data/original/TitleExistsOnceWithSource")//tei:sourceDesc/tei:bibl[tei:ptr[@type="bibl"]["/data/sources/TestOutlineSource"=@target]][tei:biblScope[@unit="pages"][@from="11"][@to="12"]])</xpath>
+      <xpath desc="When the title is confirmed and the source and pages already referenced, @j:docStatus is added to the tei:bibl and only 1 biblScope exists">count(data:doc("/data/original/TitleExistsOnceWithSourceAndPages")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"][tei:ptr/@target="/data/sources/TestOutlineSource"][count(tei:biblScope)=1])=1</xpath>
     </test>
   </TestSet>
   <TestSet>

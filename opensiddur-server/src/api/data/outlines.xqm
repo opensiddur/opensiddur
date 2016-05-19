@@ -292,7 +292,7 @@ declare function outl:template(
                 <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
               </tei:distributor>
               <tei:availability>
-                <tei:licence target="{ ($old-doc//tei:availability/tei:licence, $outline/ol:license)[1]/string() }"/>
+                <tei:licence target="{ ($old-doc//tei:availability/tei:licence/@target, $outline/ol:license)[1]/string() }"/>
               </tei:availability>
               <tei:date>{ format-date(current-date(), '[Y0001]-[M01]-[D01]') }</tei:date>
             </tei:publicationStmt>
@@ -301,7 +301,7 @@ declare function outl:template(
               <tei:bibl j:docStatus="outlined">
                 <tei:title>{ src:title-function(data:doc($outline/ol:source)) }</tei:title>
                 <tei:ptr type="bibl" target="{ $outline/ol:source/string() }"/>
-                <tei:ptr type="bibl-content" target="#stream"/>
+                <tei:ptr type="bibl-content" target="#{($old-doc//j:streamText/@xml:id, 'stream')[1]}"/>
                 { 
                   for $it in $e[ol:from][ol:to] 
                   return
@@ -316,7 +316,7 @@ declare function outl:template(
           </tei:revisionDesc>
         </tei:teiHeader>
         <tei:text>
-          <j:streamText xml:id="stream">{
+          <j:streamText xml:id="{($old-doc//j:streamText/@xml:id, 'stream')[1]}">{
             if (exists($sub-items))
             then
               for $sub-item at $n in $sub-items
@@ -359,7 +359,7 @@ declare function outl:rewrite-outline(
             let $uri := $filler-map(outl:get-outline-path($node))
             return 
               element ol:item {
-                  $node/(ol:title | ol:lang | ol:resp | ol:from | ol:to | olx:sameAs),
+                  $node/(ol:title | ol:lang | ol:resp | ol:from | ol:to | olx:sameAs[not(olx:uri=$uri)]),
                   element olx:sameAs {
                       element olx:uri { $uri },
                       element olx:yes { () },
@@ -372,6 +372,89 @@ declare function outl:rewrite-outline(
         default return $node
 };
 
+(:~ transform an existing document by adding a source, pages or change record, if necessary :)
+declare function outl:transform-existing(
+  $nodes as node()*,
+  $item as item()+
+  ) as node()* {
+  let $source := root($item[1])//ol:source/string()
+  for $node in $nodes
+  return
+    typeswitch($node)
+    case document-node() return 
+      (: short circuit if we don't need to do anything :)
+      if (
+          every $it in $item
+          satisfies exists($node//tei:sourceDesc[
+            tei:bibl
+              [@j:docStatus]
+              [tei:ptr[@type="bibl"][$source=@target]]
+              [tei:biblScope[@unit="pages"][@from le $it/ol:from][@to ge $it/ol:to]]
+          ])
+      ) then $node
+      else document { outl:transform-existing($node/node(), $item) }
+    case element(tei:sourceDesc) return
+      element tei:sourceDesc {
+        $node/@*,
+        if (empty(
+            $node/tei:bibl
+              [tei:ptr[@type="bibl"][$source=@target]]))
+        then
+          <tei:bibl j:docStatus="outlined">
+            <tei:title>{ src:title-function(data:doc($source)) }</tei:title>
+            <tei:ptr type="bibl" target="{ $source }"/>
+            <tei:ptr type="bibl-content" target="#{(root($node)//j:streamText/@xml:id, 'stream')[1]}"/>
+            { 
+              for $it in $item[ol:from][ol:to]
+              return
+                <tei:biblScope unit="pages" from="{$it/ol:from/string()}" to="{$it/ol:to/string()}"/>
+            }
+          </tei:bibl>
+        else outl:transform-existing($node/node(), $item)
+      }
+    case element(tei:bibl) return
+      if ($node/tei:ptr[@type="bibl"]/@target=$source)
+      then
+        element tei:bibl {
+          $node/@*,
+          if (not($node/@j:docStatus))
+          then attribute j:docStatus { "outlined" }
+          else (),
+          $node/node(),
+          for $it in $item[ol:from][ol:to]
+          where empty($node/tei:biblScope[@unit="pages"][@from le $it/ol:from][@to ge $it/ol:to])
+          return
+            <tei:biblScope unit="pages" from="{$it/ol:from/string()}" to="{$it/ol:to/string()}"/>
+           
+        }
+      else $node
+    case element(tei:teiHeader) return
+      element tei:teiHeader {
+        $node/@*,
+        outl:transform-existing($node/node(), $item),
+        if (empty($node/tei:revisionDesc))
+        then
+          element tei:revisionDesc {
+            element tei:change { attribute type { "edited" }, "Edited by the outline tool." }
+          }
+        else ()
+          
+      }
+    case element(tei:revisionDesc) return
+      element tei:revisionDesc {
+        $node/@*,
+        element tei:change { attribute type { "edited" }, "Edited by the outline tool." },
+        $node/node()
+      }
+    case element() return
+      element { QName(namespace-uri($node), name($node)) }{
+        $node/@*,
+        outl:transform-existing($node/node(), $item)
+      }
+    case text() return $node
+    case comment() return $node
+    default return outl:transform-existing($node/node(), $item)
+};
 (:~ execute an outline document, assuming it has been checked and is found to be executable, see also outl:is-executable
  : Execution pattern:
  : (1) for each title in an ol:outline or ol:item:
@@ -393,14 +476,23 @@ declare function outl:execute(
             $forced-uri := ($item/olx:sameAs[olx:yes]/olx:uri, $item/olx:uri)/string()
         return 
             let $old-doc := if ($forced-uri) then data:doc($forced-uri) else ()
-            let $template := outl:template($item, $old-doc) 
+            let $template := 
+              if ($old-doc)
+              then outl:transform-existing($old-doc, $item)
+              else outl:template($item, $old-doc)
             let $result :=
                 if ($forced-uri)
-                then 
-                    orig:put(tokenize($forced-uri, '/')[last()], $template)
+                then
+                    if ($old-doc is $template)
+                    then ()
+                    else orig:put(tokenize($forced-uri, '/')[last()], $template)
                 else
                     orig:post($template)
-            let $location := $result/self::rest:response/http:response/http:header[@name="Location"]/@value/string()
+            let $null :=
+              if ($result/self::rest:response/http:response/@status >= 400)
+              then error(xs:QName("error:OUTLINE"), ("While writing from template " || ($forced-uri) || " received an error:" || $result/message) )
+              else ()
+            let $location := ($result/self::rest:response/http:response/http:header[@name="Location"]/@value/string(), $forced-uri)[1]
             for $it in $item
             return
                 (: a mapping between outline paths and http location :)
@@ -410,9 +502,13 @@ declare function outl:execute(
     distinct-values(for $outline-path in map:keys($paths-to-uris) return $paths-to-uris($outline-path))
   let $rewrite-filler :=
       for $uri in $all-uris
-      let $put := orig:put(tokenize($uri, '/')[last()], outl:rewrite-filler(data:doc($uri), $paths-to-uris))
-      where $put/self::rest:response/http:response/@status >= 400
-      return error(xs:QName("error:OUTLINE"), ("While writing " || $uri || "received an error:" || $put/message) )
+      let $doc-uri := data:doc($uri)
+      let $rewritten := outl:rewrite-filler($doc-uri, $paths-to-uris)
+      where not($rewritten is $doc-uri)
+      return
+        let $put := orig:put(tokenize($uri, '/')[last()], $rewritten)
+        where $put/self::rest:response/http:response/@status >= 400
+        return error(xs:QName("error:OUTLINE"), ("While writing " || $uri || "received an error:" || $put/message) )
   let $rewritten-outline := outl:rewrite-outline($doc, $paths-to-uris)
   let $outline-doc-name := replace(tokenize(document-uri($doc), '/')[last()], '\.xml$', '')
   let $save := outl:put($name, $rewritten-outline)
@@ -426,7 +522,10 @@ declare function outl:rewrite-filler(
     for $node in $nodes
     return
         typeswitch($node)
-        case document-node() return document { outl:rewrite-filler($node/node(), $filler-map) }
+        case document-node() return 
+          if (exists($node//tei:seg[@n="outline:filler"])) 
+          then document { outl:rewrite-filler($node/node(), $filler-map) }
+          else $node
         case element(tei:revisionDesc) return
             element tei:revisionDesc {
               $node/@*,

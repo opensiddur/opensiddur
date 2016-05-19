@@ -3,7 +3,7 @@
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">TitleDuplicatedAndSubordinatesExistWithSamePointers</tei:title>
+            <tei:title type="main" xml:lang="en">TitleExistsOnceWithSourceAndPages</tei:title>
             
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
@@ -22,16 +22,16 @@
          </tei:publicationStmt>
          <tei:sourceDesc>
             <tei:bibl>
-               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl" target="/data/sources/TestOutlineSource"/>
                <tei:ptr type="bibl-content" target="#text"/>
+               <tei:biblScope unit="pages" from="12" to="15"/>
             </tei:bibl>
          </tei:sourceDesc>
       </tei:fileDesc>
    </tei:teiHeader>
    <tei:text>
       <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="text">
-         <tei:ptr xml:id="ptr1" target="/data/original/SubOne"/>
-         <tei:ptr xml:id="ptr2" target="/data/original/SubTwo"/>
+         <tei:seg xml:id="v1_seg1">Test data.</tei:seg>
       </j:streamText>
    </tei:text>
 </tei:TEI>
