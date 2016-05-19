@@ -326,7 +326,7 @@
     </tearDown>
     <test>
       <task>Outline file contains an olx:error after check</task>
-      <code><![CDATA[ outl:post-execute("TestOutlineWithError", document { <post/> }) ]]></code>
+      <code><![CDATA[ outl:post-execute("TestOutlineWithError") ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
   </TestSet>
@@ -344,7 +344,7 @@
     </tearDown>
     <test>
       <task>Outline file contains an unconfirmed olx:sameAs</task>
-      <code><![CDATA[ outl:post-execute("TestOutlineWithUnconfirmed", document { <post/> }) ]]></code>
+      <code><![CDATA[ outl:post-execute("TestOutlineWithUnconfirmed") ]]></code>
       <class href="../common.t.incl.xml#BadRequest"/>
     </test>
   </TestSet>
@@ -375,7 +375,7 @@
     </tearDown>
     <test>
       <task>execute an executable outline</task>
-      <code><![CDATA[ outl:post-execute("TestOutlineExecutable", document { <post/> }) ]]></code>
+      <code><![CDATA[ outl:post-execute("TestOutlineExecutable") ]]></code>
       <expected desc="Result is a copy of the rewritten outline" href="/db/apps/opensiddur-tests/tests/api/data/outlines/TestOutlineExecutableResult.xml"/>
       <xpath desc="the original outline file has been rewritten to correspond to the new data from execution">t:deep-equal-wildcard(doc("/db/data/outlines/TestOutlineExecutable.xml"), doc("/db/apps/opensiddur-tests/tests/api/data/outlines/TestOutlineExecutableResult.xml"))</xpath>
       <xpath desc="the outline main file exists">exists(data:doc("/data/original/TestOutlineExecutable"))</xpath>
@@ -423,7 +423,7 @@
     </tearDown>
     <test>
       <task>Execute an outline containing duplicates</task>
-      <code><![CDATA[ outl:post-execute("TestOutlineExecutableWithDuplicates", document { <post/> }) ]]></code>
+      <code><![CDATA[ outl:post-execute("TestOutlineExecutableWithDuplicates") ]]></code>
       <xpath desc="the outline main file exists">exists(data:doc("/data/original/TestOutlineExecutableWithDuplicates"))</xpath>
       <xpath desc="The main outline file references TestOutlineExecutableDuplicate 2x and TestOutlineExecutableDuplicateWithItems 2x"><![CDATA[
         let $d := data:doc("/data/original/TestOutlineExecutableWithDuplicates")
@@ -496,7 +496,7 @@
     </tearDown>
     <test>
       <task>Execute an outline containing external duplicate references</task>
-      <code><![CDATA[ outl:post-execute("TestOutlineExecutableWithExternalDuplicates", document { <post/> }) ]]></code>
+      <code><![CDATA[ outl:post-execute("TestOutlineExecutableWithExternalDuplicates") ]]></code>
       <xpath desc="the outline main file exists">exists(data:doc("/data/original/TestOutlineExecutableWithExternalDuplicates"))</xpath>
       <xpath desc="There is only file with the same title as the confirmed resource">count(collection("/db/data/original/en")//tei:titleStmt/tei:title[@type="main"][.="TitleAlreadyConfirmedAndDuplicated"])=1</xpath>
       <xpath desc="A reference to the source has been added to the confirmed resource">exists(data:doc("/data/original/TitleAlreadyConfirmedAndDuplicated")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:ptr[@type="bibl"]["/data/sources/TestOutlineSource"=@target])</xpath>

@@ -672,12 +672,11 @@ declare
  : The outline file is saved with the URIs
  :)
 declare
-  %rest:POST("{$body}")
+  %rest:POST
   %rest:path("/api/data/outlines/{$name}/execute")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function outl:post-execute(
-    $name as xs:string,
-    $body as document-node()
+    $name as xs:string
   ) as item()+ {
   let $document := outl:get($name, "check")
   return 
