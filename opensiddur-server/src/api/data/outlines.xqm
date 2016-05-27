@@ -595,7 +595,7 @@ declare
     outl:query-function#1, outl:list-function#0,
     (<crest:additional text="check" relative-uri="?check=1"/>, 
      <crest:additional text="execute" relative-uri="execute"/>), 
-    ()
+    outl:title-function#1
   )
 };
 
@@ -605,6 +605,12 @@ declare function outl:query-function(
   ) as element()* {
     let $c := collection($outl:path-base)
     return $c//ol:outline[ft:query(.,$query)]|$c//ol:outline/ol:title[ft:query(.,$query)]
+};
+
+declare function outl:title-function(
+  $doc as document-node()
+  ) as xs:string {
+  $doc/ol:outline/ol:title/string()
 };
 
 (: support function for list :) 
