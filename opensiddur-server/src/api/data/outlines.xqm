@@ -662,7 +662,7 @@ declare
     $body,
     outl:validate#2,
     outl:validate-report#2,
-    (), 
+    outl:title-function#1, 
     false()
   )
 };
