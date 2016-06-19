@@ -314,7 +314,8 @@ declare function crest:do-list(
           {
             for $additional in $additional-uris
             return
-              <a class="alt" property="{$additional/@text}" href="{$path-base}/{$api-name}/{$additional/@relative-uri}">{string($additional/@text)}</a>
+              <a class="alt" property="{$additional/@text}"
+                href="{$path-base}/{$api-name}{if (starts-with($additional/@relative-uri, '?')) then '' else '/'}{$additional/@relative-uri}">{string($additional/@text)}</a>
           }
         </li>
     }</ul>,
