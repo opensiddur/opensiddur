@@ -65,6 +65,8 @@ declare function upg:schema-changes-0-8-0() {
         then src:title-function($document)
         else if (starts-with($collection, "/db/data/transliteration"))
         then tran:title-function($document)
+        else if (starts-with($collection, "/db/data/notes"))
+        then notes:uri-title-function($document)
         else if (starts-with($collection, "/db/data/outlines"))
         then outl:title-function($document)
         else crest:tei-title-function($document)
