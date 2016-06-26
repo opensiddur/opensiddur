@@ -122,7 +122,10 @@ declare function outl:check-sameas-pointers(
       else
         for $item at $n in $e/ol:item
         let $item-title := normalize-space($item/ol:title)
-        let $target := substring-before($in-document-pointers[$n]/@target, '#')
+        let $target :=
+            if (contains($in-document-pointers[$n]/@target, '#'))
+            then substring-before($in-document-pointers[$n]/@target, '#')
+            else $in-document-pointers[$n]/@target/string()
         let $pointer-target := if ($target) then data:doc($target) else ()
         let $pointer-title := normalize-space($pointer-target//tei:titleStmt/tei:title/string())
         where not($pointer-title=$item-title)
