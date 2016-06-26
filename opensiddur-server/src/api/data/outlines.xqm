@@ -84,12 +84,8 @@ declare function outl:get-outline-path(
 declare function outl:title-search(
     $title as xs:string
 ) as xs:string* {
-    let $stopwords := ( "a", "an", "and", "are", "as", "at",
-    "be", "but", "by", "for", "if", "in", "into", "is", "it", "no", "not", "of",
-    "on", "or", "such", "that", "the", "their", "then", "there", "these",
-    "they", "this", "to", "was", "will", "with")
-    let $title-no-stopwords := string-join(for $t in tokenize($title, '\s+')[not(.=$stopwords)] return "+" || $t, " ")
-    for $doc in collection($orig:path-base)//tei:titleStmt/tei:title[ft:query(., $title-no-stopwords)]/root(.) | ()
+    let $title-plus := string-join(for $t in tokenize($title, '\s+') return "+" || $t, " ")
+    for $doc in collection($orig:path-base)//tei:titleStmt/tei:title[ft:query(., $title-plus)]/root(.) | ()
     return replace(data:db-path-to-api(document-uri($doc)), "^(/exist/restxq)?/api", "")
 };
 

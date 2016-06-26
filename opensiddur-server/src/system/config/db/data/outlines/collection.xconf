@@ -5,6 +5,9 @@
       xmlns:html="http://www.w3.org/1999/xhtml">
         <fulltext default="none" attributes="no"/>
         <lucene>
+            <analyzer class="org.apache.lucene.analysis.standard.StandardAnalyzer">
+                <param name="stopwords" type="set" />
+            </analyzer>
             <text qname="ol:outline"/>
             <text qname="ol:title" boost="2.0"/>
         </lucene>
