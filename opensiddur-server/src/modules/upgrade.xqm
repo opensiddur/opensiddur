@@ -13,6 +13,8 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
     at "common-rest.xqm";
 import module namespace notes="http://jewishliturgy.org/api/data/notes"
     at "../api/data/notes.xqm";
+import module namespace outl="http://jewishliturgy.org/api/data/outlines"
+    at "../api/data/outlines.xqm";
 import module namespace src="http://jewishliturgy.org/api/data/sources"
     at "../api/data/sources.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
@@ -63,6 +65,8 @@ declare function upg:schema-changes-0-8-0() {
         then src:title-function($document)
         else if (starts-with($collection, "/db/data/transliteration"))
         then tran:title-function($document)
+        else if (starts-with($collection, "/db/data/outlines"))
+        then outl:title-function($document)
         else crest:tei-title-function($document)
     let $new-name := 
         string-join((
