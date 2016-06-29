@@ -127,7 +127,7 @@ declare function outl:check-sameas-pointers(
             then substring-before($in-document-pointers[$n]/@target, '#')
             else $in-document-pointers[$n]/@target/string()
         let $pointer-target := if ($target) then data:doc($target) else ()
-        let $pointer-title := normalize-space($pointer-target//tei:titleStmt/tei:title/string())
+        let $pointer-title := normalize-space($pointer-target//tei:titleStmt/tei:title["main"=@type or not(@type)]/string())
         where not($pointer-title=$item-title)
         return 1
     where exists($has-warning)
