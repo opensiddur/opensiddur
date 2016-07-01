@@ -70,7 +70,10 @@ declare function orig:validate-report(
   crest:validate-report(
     $doc, $old-doc, 
     xs:anyURI($orig:schema), xs:anyURI($orig:schematron),
-    if (exists($old-doc)) then orig:validate-changes#2 else ()
+    (
+      if (exists($old-doc)) then orig:validate-changes#2 else (),
+      orig:validate-external-links#2
+    )
   )
 };
 
