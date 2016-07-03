@@ -331,7 +331,9 @@ declare function outl:template(
               return
                   if ($sub-item-uri)
                   then
-                      <tei:ptr xml:id="ptr_{$n}" target="{$sub-item-uri}" />
+                        let $target := (data:doc($sub-item-uri)//j:streamText/@xml:id/string(), "stream")[1]
+                        return
+                            <tei:ptr xml:id="ptr_{$n}" target="{$sub-item-uri}#{$target}" />
                   else
                       <tei:seg xml:id="seg_{$n}" n="outline:filler">{outl:get-outline-path($sub-item)}</tei:seg>
             else (
