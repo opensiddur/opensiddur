@@ -770,9 +770,14 @@ TODO:
               as="element(tei:respStmt)+" select="$responsGrp-content" />
             <xsl:with-param name="links" 
               as="element(j:links)?" >
-                <j:links>
+                <xsl:variable name="links" as="element()*">
                     <xsl:apply-templates select="." mode="link-notes"/> 
-                </j:links>
+                </xsl:variable>
+                <xsl:if test="exists($links)">
+                  <j:links>
+                    <xsl:sequence select="$links"/>
+                  </j:links>
+                </xsl:if>
             </xsl:with-param>
           </xsl:call-template>
         </xsl:result-document>

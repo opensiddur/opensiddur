@@ -122,9 +122,12 @@ declare function outl:check-sameas-pointers(
       else
         for $item at $n in $e/ol:item
         let $item-title := normalize-space($item/ol:title)
-        let $target := substring-before($in-document-pointers[$n]/@target, '#')
+        let $target :=
+            if (contains($in-document-pointers[$n]/@target, '#'))
+            then substring-before($in-document-pointers[$n]/@target, '#')
+            else $in-document-pointers[$n]/@target/string()
         let $pointer-target := if ($target) then data:doc($target) else ()
-        let $pointer-title := normalize-space($pointer-target//tei:titleStmt/tei:title/string())
+        let $pointer-title := normalize-space($pointer-target//tei:titleStmt/tei:title["main"=@type or not(@type)]/string())
         where not($pointer-title=$item-title)
         return 1
     where exists($has-warning)
@@ -328,7 +331,9 @@ declare function outl:template(
               return
                   if ($sub-item-uri)
                   then
-                      <tei:ptr xml:id="ptr_{$n}" target="{$sub-item-uri}" />
+                        let $target := (data:doc($sub-item-uri)//j:streamText/@xml:id/string(), "stream")[1]
+                        return
+                            <tei:ptr xml:id="ptr_{$n}" target="{$sub-item-uri}#{$target}" />
                   else
                       <tei:seg xml:id="seg_{$n}" n="outline:filler">{outl:get-outline-path($sub-item)}</tei:seg>
             else (
@@ -542,7 +547,7 @@ declare function outl:rewrite-filler(
               if ($node/self::tei:seg and $node/@n="outline:filler")
               then
                 let $uri := $filler-map($node/string())
-                let $streamText-id := data:doc($uri)//j:streamText[1]/@xml:id/string()
+                let $streamText-id := (data:doc($uri)//j:streamText[1]/@xml:id/string(), "stream")[1] (: if the document doesn't exist, we are about to create it :)
                 return
                   <tei:ptr xml:id="ptr_{count($node/preceding-sibling::*[@n='outline:filler']) + 1}" target="{$uri}#{$streamText-id}"/>
               else 
