@@ -1,0 +1,25 @@
+<ol:outline 
+    xmlns:ol="http://jewishliturgy.org/ns/outline/1.0"
+    xmlns:olx="http://jewishliturgy.org/ns/outline/responses/1.0"
+>
+    <ol:source>/data/sources/TestSource</ol:source>
+    <ol:license>http://www.creativecommons.org/publicdomain/zero/1.0</ol:license>
+    <ol:title>TestOutlineWithError</ol:title>
+    <ol:lang>en</ol:lang>
+    <ol:item>
+      <ol:title>BadInternalDuplicate</ol:title>
+      <ol:from>23</ol:from>
+      <ol:to>24</ol:to>
+      <ol:item>
+        <ol:title>SubFive</ol:title>
+      </ol:item>
+    </ol:item>
+    <ol:item>
+      <ol:title>BadInternalDuplicate</ol:title>
+      <ol:from>25</ol:from>
+      <ol:to>26</ol:to>
+      <ol:item>
+        <ol:title>SubSix</ol:title>
+      </ol:item>
+    </ol:item>
+</ol:outline>

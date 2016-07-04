@@ -17,3 +17,4 @@ version: 1
 /db/apps/opensiddur-server/api/data/sources.xqm,{http://jewishliturgy.org/api/data/sources}delete#1{http://jewishliturgy.org/api/data/sources}post#1{http://jewishliturgy.org/api/data/sources}pages#1{http://jewishliturgy.org/api/data/sources}put#2{http://jewishliturgy.org/api/data/sources}get#1{http://jewishliturgy.org/api/data/sources}list#3
 /db/apps/opensiddur-server/api/changes.xqm,{http://jewishliturgy.org/api/changes}list#6
 /db/apps/opensiddur-server/api/static.xqm,{http://jewishliturgy.org/api/static}get#1{http://jewishliturgy.org/api/static}list#0
+/db/apps/opensiddur-server/api/data/outlines.xqm,{http://jewishliturgy.org/api/data/outlines}get#2{http://jewishliturgy.org/api/data/outlines}delete#1{http://jewishliturgy.org/api/data/outlines}post#1{http://jewishliturgy.org/api/data/outlines}post-execute#1{http://jewishliturgy.org/api/data/outlines}list#3{http://jewishliturgy.org/api/data/outlines}put#2

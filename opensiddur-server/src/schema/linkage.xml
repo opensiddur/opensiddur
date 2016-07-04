@@ -130,9 +130,7 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
             </constraintSpec>
           </elementSpec>
           <elementSpec ident="text" module="textstructure" mode="change">
-            <classes mode="replace">
-              <memberOf key="att.global"/>
-              <memberOf key="att.typed"/>
+            <classes mode="change">
               <memberOf key="att.declaring" mode="delete"/>
             </classes>
             <content>

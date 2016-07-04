@@ -51,7 +51,22 @@ declare function uri:absolutize-uri(
     xs:anyURI(
     if ($base-path and (matches($uri, "^http[s]?://") or doc-available($base-path)))
     then $uri
-    else resolve-uri($uri,base-uri($context) )
+    else (:resolve-uri($uri,base-uri($context) ):)
+        (: UHOH: there is some kind of bug in eXist 2.2 where if this is run on an in-memory document,
+        it will fail with an NPE.
+        This code checks for an in-memory document and if the document does not have a document-uri,
+        it will try to figure out the right base uri manually. If it can't, it will just assume that
+        it is as absolute as it can be :)
+        let $docuri := document-uri(root($context))
+        return
+            if ($docuri)
+            then resolve-uri($uri,base-uri($context) )
+            else
+                let $base := $context/ancestor-or-self::*[@xml:base][1]/@xml:base
+                return
+                    if ($base)
+                    then resolve-uri($uri, xs:anyURI($base))
+                    else $uri
     )
 };
   
@@ -425,11 +440,14 @@ declare function uri:dependency(
     for $dependency in $new-dependencies
     let $next-doc := data:doc($dependency)
     where not(document-uri($next-doc)=$visited)
-    return 
-      uri:dependency(
-        $next-doc, 
-        ($visited, $this-uri)
-      )
+    return
+      if (exists($next-doc))
+      then 
+        uri:dependency(
+          $next-doc, 
+          ($visited, $this-uri)
+        )
+      else error(xs:QName("error:DEPENDENCY"), "An unresolvable dependency was found in " || tokenize(document-uri($doc), "/")[last()] ||": The pointer: " || $dependency || " points to a document that does not exist.")
   ))
     
    

@@ -1,0 +1,18 @@
+<ol:outline 
+    xmlns:ol="http://jewishliturgy.org/ns/outline/1.0"
+    xmlns:olx="http://jewishliturgy.org/ns/outline/responses/1.0"
+>
+    <ol:source>/data/sources/TestOutlineSource</ol:source>
+    <ol:license>http://www.creativecommons.org/publicdomain/zero/1.0</ol:license>
+    <ol:title>TestOutlineExecutable</ol:title>
+    <ol:lang>en</ol:lang>
+    <ol:item>
+        <ol:title>TestOutlineExecutableNewTitle</ol:title>
+        <ol:resp>
+          <ol:contributor>/user/testuser</ol:contributor>
+          <ol:responsibility>trc</ol:responsibility>
+        </ol:resp>
+        <ol:from>1</ol:from>
+        <ol:to>2</ol:to>
+    </ol:item>
+</ol:outline>

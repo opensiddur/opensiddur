@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
+(: Copyright 2012-2016 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Original data API
@@ -28,6 +28,8 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "../../modules/paths.xqm";
 import module namespace status="http://jewishliturgy.org/modules/status"
   at "../../modules/status.xqm";
+import module namespace uri="http://jewishliturgy.org/transform/uri"
+    at "../../modules/follow-uri.xqm";
 
 declare variable $orig:data-type := "original";
 declare variable $orig:schema := concat($paths:schema-base, "/jlptei.rnc");
@@ -48,7 +50,10 @@ declare function orig:validate(
   crest:validate(
     $doc, $old-doc, 
     xs:anyURI($orig:schema), xs:anyURI($orig:schematron),
-    if (exists($old-doc)) then orig:validate-changes#2 else ()
+    (
+      if (exists($old-doc)) then orig:validate-changes#2 else (),
+      orig:validate-external-links#2
+    )
   )
 };
 
@@ -65,7 +70,10 @@ declare function orig:validate-report(
   crest:validate-report(
     $doc, $old-doc, 
     xs:anyURI($orig:schema), xs:anyURI($orig:schematron),
-    if (exists($old-doc)) then orig:validate-changes#2 else ()
+    (
+      if (exists($old-doc)) then orig:validate-changes#2 else (),
+      orig:validate-external-links#2
+    )
   )
 };
 
@@ -105,6 +113,47 @@ declare function orig:remove-whitespace(
             }
         default return orig:remove-whitespace($node/node())
 };
+
+(:~ determine if the external links in a document all point to something
+ : @param $doc the document to validate
+ : @param $old-doc ignored
+ : @return a validation report
+ :)
+declare function orig:validate-external-links(
+  $doc as document-node(),
+  $old-doc as document-node()?
+  ) as element(report) {
+  let $bad-ptrs :=
+    for $ptr in $doc//*[@target|@targets|@domains|@ref]/(@target|@targets|@domains|@ref)
+    let $doc := root($ptr)
+    for $target in tokenize($ptr, '\s+')
+        [not(starts-with(., 'http:'))]
+        [not(starts-with(., 'https:'))]
+    let $base := 
+        if (contains($target, '#'))
+        then substring-before($target, '#')[.]
+        else ()
+    where exists($base)
+    return
+      let $fragment := substring-after($target, '#')[.]
+      let $dest-doc := data:doc($base)
+      let $dest-fragment := uri:follow-uri($target, $ptr/.., uri:follow-steps($ptr/..))
+      where empty($dest-doc) or ($fragment and empty($dest-fragment))
+      return
+        <message>The pointer {$target} is invalid: {
+          if (empty($dest-doc))
+          then ("The document " || $base || " does not exist")
+          else ("The fragment "|| $fragment || " does not exist in the document " || $base)
+        }.</message>
+  return
+    element report {
+      element status {
+        if (exists($bad-ptrs)) then "invalid" else "valid"
+      },
+      $bad-ptrs
+    }
+};
+
 
 (:~ determine if all the changes between an old version and
  : a new version of a document are legal

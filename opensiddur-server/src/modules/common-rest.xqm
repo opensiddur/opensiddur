@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
+(: Copyright 2012-2014,2016 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Common REST API functions
@@ -110,16 +110,17 @@ declare function crest:validate(
   $doc as item(),
   $old-doc as document-node()?,
   $schema-path as xs:anyURI,
-  $schematron-path as xs:anyURI,
+  $schematron-path as xs:anyURI?,
   $xquery-functions as (
       function(item(), document-node()?) as element()
     )*
   ) as xs:boolean {
   crest:validation-disabled() or (
-    validation:jing($doc, $schema-path) and
-    jvalidate:validation-boolean(
-      jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path))
-    ) and (
+    validation:jing($doc, $schema-path) and (
+      empty($schematron-path) or
+      jvalidate:validation-boolean(
+        jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path))
+    )) and (
       empty($xquery-functions) or
         (
           every $xquery-function in $xquery-functions
@@ -145,14 +146,14 @@ declare function crest:validate-report(
   $doc as item(),
   $old-doc as document-node()?,
   $schema-path as xs:anyURI,
-  $schematron-path as xs:anyURI,
+  $schematron-path as xs:anyURI?,
   $xquery-functions as ( 
       function(item(), document-node()?) as element()
     )*
   ) as element() {
   jvalidate:concatenate-reports((
     validation:jing-report($doc, $schema-path),
-    jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path)),
+    if (exists($schematron-path)) then jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path)) else (),
     for $xquery-function in $xquery-functions
     return $xquery-function($doc, $old-doc)
   ))
@@ -313,7 +314,8 @@ declare function crest:do-list(
           {
             for $additional in $additional-uris
             return
-              <a class="alt" property="{$additional/@text}" href="{$path-base}/{$api-name}/{$additional/@relative-uri}">{string($additional/@text)}</a>
+              <a class="alt" property="{$additional/@text}"
+                href="{$path-base}/{$api-name}{if (starts-with($additional/@relative-uri, '?')) then '' else '/'}{$additional/@relative-uri}">{string($additional/@text)}</a>
           }
         </li>
     }</ul>,
@@ -382,6 +384,21 @@ declare function crest:delete(
       api:rest-error(404, "Not found", $name)
 };
 
+declare function crest:post(
+    $data-path as xs:string,
+    $path-base as xs:string,
+    $api-path-base as xs:string,
+    $body as document-node(),
+    $validation-function-boolean as 
+      function(item(), document-node()?) as xs:boolean,
+    $validation-function-report as 
+      function(item(), document-node()?) as element(),
+    $title-function as (function(document-node()) as xs:string)?
+  ) as item()+ {
+  crest:post($data-path, $path-base, $api-path-base, $body, $validation-function-boolean, $validation-function-report,
+    $title-function, true())
+};
+
 (:~ Post a new document 
  : @param $data-path document data type and additional database path
  : @param $path-base base path for document type in the db
@@ -390,6 +407,7 @@ declare function crest:delete(
  : @param $validation-function-boolean function used to validate that returns a boolean
  : @param $validation-function-report function used to validate that returns a full report
  : @param $title-function Function that derives the title text from a document
+ : @param $use-reference-index true() [default] if the reference index should be updated, false() or empty() otherwise
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid JLPTEI XML
  : @error HTTP 401 Not authorized
@@ -409,7 +427,8 @@ declare function crest:post(
       function(item(), document-node()?) as xs:boolean,
     $validation-function-report as 
       function(item(), document-node()?) as element(),
-    $title-function as (function(document-node()) as xs:string)?
+    $title-function as (function(document-node()) as xs:string)?,
+    $use-reference-index as xs:boolean?
   ) as item()+ { 
   if (sm:has-access(xs:anyURI($path-base), "w"))
   then
@@ -448,7 +467,7 @@ declare function crest:post(
                             sm:chgrp($uri, "everyone"),
                             sm:chmod($uri, "rw-rw-r--")
                         )),
-                        ridx:reindex($doc)
+                        if ($use-reference-index) then ridx:reindex($doc) else ()
                       )
                     }
                     <http:header 
@@ -466,6 +485,18 @@ declare function crest:post(
   else crest:no-access()
 };
 
+declare function crest:put(
+    $data-type as xs:string,
+    $name as xs:string,
+    $body as document-node(),
+    $validation-function-boolean as 
+      function(item(), document-node()?) as xs:boolean,
+    $validation-function-report as 
+      function(item(), document-node()?) as element()
+  ) as item()+ {
+  crest:put($data-type, $name, $body, $validation-function-boolean, $validation-function-report, true())
+};
+
 (:~ Edit/replace a document in the database
  : Side effect: update the reference index
  : @param $data-type data type of document
@@ -473,6 +504,7 @@ declare function crest:post(
  : @param $body New document
  : @param $validation-function-boolean function used to validate that returns a boolean
  : @param $validation-function-report function used to validate that returns a full report
+ : @param $use-reference-index true() [default] if reference index should be updated, else no reference index
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML; Attempt to edit a read-only part of the document
  : @error HTTP 401 Unauthorized - not logged in
@@ -490,7 +522,8 @@ declare function crest:put(
     $validation-function-boolean as 
       function(item(), document-node()?) as xs:boolean,
     $validation-function-report as 
-      function(item(), document-node()?) as element()
+      function(item(), document-node()?) as element(),
+    $use-reference-index as xs:boolean?
   ) as item()+ {
   let $doc := data:doc($data-type, $name)
   return
@@ -511,7 +544,7 @@ declare function crest:put(
                   let $doc := doc($uri)
                   return (
                     crest:record-change($doc, "edited"),
-                    ridx:reindex($doc)
+                    if ($use-reference-index) then ridx:reindex($doc) else ()
                   )
                 }
                 <output:serialization-parameters>

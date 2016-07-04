@@ -1,11 +1,8 @@
 The Open Siddur Project License file:
 
-All source code is stored on subversion, and may be obtained by following
-the instructions at http://jewishliturgy.googlecode.com/source/checkout
-
-The source code may be browsed directly at 
-http://jewishliturgy.googlecode.com/svn/trunk
-All file and directory names in this file are relative to that path.
+All source code is stored on Github, and may be obtained by following
+the instructions at https://github.com/opensiddur/opensiddur ; source code may 
+also be browsed there. 
 
 The project is distributed under the following licenses:
 
@@ -22,8 +19,7 @@ the rest of the project's.
 
 See the *-LICENSE.txt and *-NOTICE.txt files and *-notices directories
  in the lib/ directory for more information.  It is accessible on the 
-Internet at 
-http://jewishliturgy.googlecode.com/svn/trunk/lib/
+Internet at https://github.com/opensiddur/opensiddur/tree/develop/lib 
 
 The BHebrew and BHebrewSR fonts are modified versions of the Ezra SIL
 fonts from SIL International, and are released under the SIL Open Font License.

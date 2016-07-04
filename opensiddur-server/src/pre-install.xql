@@ -2,7 +2,7 @@ xquery version "3.0";
 (: pre-install setup script 
  :
  : Open Siddur Project
- : Copyright 2010-2013 Efraim Feinstein
+ : Copyright 2010-2013,2016 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
  
@@ -120,6 +120,7 @@ let $collections :=
         <collection name="linkage" perms="rwxrwxr-x">{local:lang-collections("none")}</collection>
         <collection name="notes" perms="rwxrwxr-x">{local:lang-collections()}</collection>
         <collection name="original" perms="rwxrwxr-x">{local:lang-collections()}</collection>
+        <collection name="outlines" perms="rwxrwxr-x"/>
         <collection name="sources" perms="rwxrwxr-x"/>
         <collection name="styles" perms="rwxrwxr-x">{local:lang-collections()}</collection>
         <collection name="transliteration" perms="rwxrwxr-x"/>

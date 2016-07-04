@@ -1,0 +1,114 @@
+# Outline definition schema 
+# Copyright 2016 Efraim Feinstein <efraim@opensiddur.org>
+# Licensed under the GNU Lesser General Public License, version 3 or later
+
+default namespace = "http://jewishliturgy.org/ns/outline/1.0"
+
+# olx namespace is used as a response by the server or a response to 
+# a server "query"
+namespace olx = "http://jewishliturgy.org/ns/outline/responses/1.0"
+
+start = Outline
+
+## acknowledge "yes" that what the server flagged is what you intend to do 
+## For example, server says that item is the same as another item.
+Yes = element olx:yes {
+  empty
+}
+
+## Acknowledge "no" that what the server flagged as the same is not and should be
+## treated as a new document
+No = element olx:no {
+  empty
+}
+
+## The element has an error that can't be recovered from
+Error = element olx:error {
+    xsd:string
+}
+
+## The element has a warning that can be ignored
+Warning = element olx:warning {
+    xsd:string
+}
+
+Title = element title { xsd:string }
+License = element license { 
+  "http://www.creativecommons.org/publicdomain/zero/1.0" |
+  "http://www.creativecommons.org/licenses/by/4.0" |
+  "http://www.creativecommons.org/licenses/by-sa/4.0" 
+}
+
+Lang = element lang { xsd:language }
+Resp = element resp {
+    ## contributor URI
+    element contributor { xsd:anyURI },
+    ## responsibility code
+    element responsibility { 
+      "ann" | "fac" | "fnd" | "mrk" | "pfr" | "spn" | "trc" | "trl"
+    } 
+  }
+
+Pages = (
+  element from {
+    xsd:string
+  },
+  element to {
+    xsd:string
+  }
+)
+
+## Document is the same as another document
+SameAs = element olx:sameAs {
+    ## URI of the other document
+    Uri,
+    ## Acknowlegement/refusal of identity
+    ## required for execution
+    (Yes | No)?,
+    ## potential warnings
+    Warning*
+}
+
+## Point to an existing document
+Uri = element olx:uri {
+  xsd:string
+}
+
+Status = element olx:status {
+  xsd:string
+}
+
+Outline = element outline {
+  ## required source pointer
+  element source { xsd:anyURI },
+  ## default license
+  License,
+  ## required title
+  Title,
+  ## required language (default for all documents)
+  Lang,
+  ## optional responsibility blocks to assign additional responsibility to contributors
+  Resp*,
+  Pages?,
+  ## Uri of the existing outline file
+  Uri?,
+  ## status of the outline file (if outlined or greater, will mean that the outline has been executed/edited)
+  Status?,
+  ## additional items
+  Item+
+}
+
+## each item in the outline has a title
+Item = element item {
+  ## file-unique ID for the item
+  Title,
+  Lang?,
+  Resp*,
+  ## from and to pages
+  Pages?,
+  SameAs*,
+  (Error|Warning)*,
+  ## current document status, if any
+  Status?,
+  Item*
+}

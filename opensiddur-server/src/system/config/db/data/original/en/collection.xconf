@@ -5,12 +5,16 @@
       xmlns:html="http://www.w3.org/1999/xhtml">
         <fulltext default="none" attributes="false"/>
         <lucene>
+            <analyzer class="org.apache.lucene.analysis.standard.StandardAnalyzer"/>
+            <analyzer id="no-stopwords" class="org.apache.lucene.analysis.standard.StandardAnalyzer">
+                <param name="stopwords" type="set" />
+            </analyzer>
             <!-- the main text index -->
             <text qname="tei:text">
                 <ignore qname="tei:title"/>
             </text>
-            <!-- titles occupy a special place -->
-            <text qname="tei:title" boost="2.0"/>
+            <!-- titles occupy a special place, and because they're short, we index the stopwords too -->
+            <text analyzer="no-stopwords" qname="tei:title" boost="2.0"/>
 
             <ignore qname="tei:teiHeader"/>
             <inline qname="tei:c"/>

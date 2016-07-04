@@ -116,6 +116,7 @@ schemas, not as an independent unit
           <rng:ref name="data.enumerated"/>
         </datatype>
         <valList type="semi" mode="add">
+          <valItem ident="outlined"/>
           <valItem ident="draft"/>
           <valItem ident="transcribed"/>
           <valItem ident="segmented"/>

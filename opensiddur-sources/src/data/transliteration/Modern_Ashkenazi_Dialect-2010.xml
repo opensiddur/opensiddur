@@ -37,10 +37,10 @@
       <tr:tr from="פּ" to="p"/>
       <tr:tr from="ףּ" to="p"/>
       <tr:tr from="ץ" to="tz"/>
-      <tr:tr from="צ" to="tz"/>
+      <tr:tr from="צ" to="tz" double="no"/>
       <tr:tr from="ק" to="k"/>
       <tr:tr from="ר" to="r"/>
-      <tr:tr from="שׁ" to="sh"/>
+      <tr:tr from="שׁ" to="sh" double="no"/>
       <tr:tr from="שׂ" to="s"/>
       <tr:tr from="ת" to="s"/>
       <tr:tr from="תּ" to="t"/>

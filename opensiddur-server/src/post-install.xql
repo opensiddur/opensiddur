@@ -12,6 +12,7 @@ import module namespace upg="http://jewishliturgy.org/modules/upgrade"
   at "modules/upgrade.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
   
 (: file path pointing to the exist installation directory :)
 declare variable $home external;
@@ -45,6 +46,23 @@ xmldb:store(
     "generic.xml",
     doc($target || "/data/styles/en/generic.xml")
     ),
+util:log-system-out("install default users..."),
+xmldb:store(
+    "/db/data/user",
+    "admin.xml",
+    <j:contributor>
+        <tei:idno>admin</tei:idno>
+        <tei:orgName>Open Siddur Project</tei:orgName>
+    </j:contributor>
+),
+xmldb:store(
+        "/db/data/user",
+        "SYSTEM.xml",
+        <j:contributor>
+            <tei:idno>SYSTEM</tei:idno>
+            <tei:orgName>Open Siddur Project</tei:orgName>
+        </j:contributor>
+),
 util:log-system-out("upgrades: update existing JLPTEI for schema changes..."),
 upg:all-schema-changes(),
 util:log-system-out("upgrades: reindex reference index"),
