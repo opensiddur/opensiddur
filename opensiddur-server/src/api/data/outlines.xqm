@@ -549,7 +549,7 @@ declare function outl:rewrite-filler(
                 let $uri := $filler-map($node/string())
                 let $streamText-id := (data:doc($uri)//j:streamText[1]/@xml:id/string(), "stream")[1] (: if the document doesn't exist, we are about to create it :)
                 return
-                  <tei:ptr xml:id="ptr_{count($node/preceding-sibling::*[@n='outline:filler']) + 1}" target="{$uri}#{$streamText-id}"/>
+                  <tei:ptr xml:id="ptr_{substring-after($node/@xml:id, '_')}" target="{$uri}#{$streamText-id}"/>
               else 
                   element { QName(namespace-uri($node), name($node)) }{
                       $node/@*,
