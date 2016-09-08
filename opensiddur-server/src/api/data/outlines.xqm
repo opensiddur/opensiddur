@@ -211,6 +211,12 @@ declare function outl:check(
                         element olx:uri { $duplicate-title },
                         (: copy the remaining elements (yes, no, etc) :)
                         $node/olx:sameAs[olx:uri=$duplicate-title]/(* except (olx:uri, olx:warning)),
+                        (: if there is no existing olx:yes or olx:no *and* another sibling has olx:yes, insert olx:no :)
+                        if (empty($node/olx:sameAs[olx:uri=$duplicate-title]/(olx:yes|olx:no))
+                                and exists($node/olx:sameAs/olx:yes))
+                        then
+                            element olx:no {}
+                        else (),
                         (: add appropriate warnings :)
                         outl:check-sameas-pointers($node, $duplicate-title)
                     },
