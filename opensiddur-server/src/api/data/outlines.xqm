@@ -424,7 +424,8 @@ declare function outl:transform-existing(
                 <tei:biblScope unit="pages" from="{$it/ol:from/string()}" to="{$it/ol:to/string()}"/>
             }
           </tei:bibl>
-        else outl:transform-existing($node/node(), $item)
+        else (),
+        outl:transform-existing($node/node(), $item)
       }
     case element(tei:bibl) return
       if ($node/tei:ptr[@type="bibl"]/@target=$source)
