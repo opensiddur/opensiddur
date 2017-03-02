@@ -1,5 +1,5 @@
 xquery version "3.0";
-(: Copyright 2012-2013,2016 Efraim Feinstein <efraim@opensiddur.org>
+(: Copyright 2012-2013,2016-2017 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Conditional data API
@@ -120,7 +120,16 @@ declare function cnd:list(
   $start as xs:integer*, 
   $max-results as xs:integer*
   ) as item()+ {
-  cnd:list($q, $start, $max-results, ())
+  cnd:list($q, $start, $max-results, (), ())
+};
+
+declare function cnd:list(
+        $q as xs:string*,
+        $start as xs:integer*,
+        $max-results as xs:integer*,
+        $decls-only as xs:string*
+) as item()+ {
+  cnd:list($q, $start, $max-results, $decls-only, ())
 };
 
 (:~ List or full-text query conditionals data. 
@@ -130,6 +139,7 @@ declare function cnd:list(
  : @param $start first document to list
  : @param $max-results number of documents to list 
  : @param $decls-only return matching declarations only, not the whole file
+ : @param $types-only return (exact) matching types only
  : @return a list of documents (or declarations, as XML) that match the search. If the documents match a query, return the context.
  : @error HTTP 404 Not found
  :)
@@ -140,17 +150,19 @@ declare
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
   %rest:query-param("decls-only", "{$decls-only}", "false")
+  %rest:query-param("types-only", "{$types-only}", "false")
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
   %output:method("html5")  
   function cnd:list(
     $q as xs:string*,
     $start as xs:integer*,
     $max-results as xs:integer*,
-    $decls-only as xs:string*
+    $decls-only as xs:string*,
+    $types-only as xs:string*
   ) as item()+ {
-  if (xs:boolean($decls-only))
+  if (xs:boolean($decls-only) or xs:boolean($types-only))
   then
-    cnd:list-definitions($q[1], $start[1], $max-results[1])
+    cnd:list-definitions($q[1], $start[1], $max-results[1], xs:boolean($types-only))
   else
     crest:list($q, $start, $max-results,
       "Conditional declaration data API", api:uri-of($cnd:api-path-base),
@@ -207,7 +219,8 @@ declare %private
 declare function cnd:list-definitions(
   $query as xs:string,
   $start as xs:integer,
-  $max-results as xs:integer
+  $max-results as xs:integer,
+  $types-only as xs:boolean?
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
@@ -215,7 +228,11 @@ declare function cnd:list-definitions(
     </output:serialization-parameters>
   </rest:response>,
   let $c := collection($cnd:path-base)
-  let $search-results := 
+  let $search-results :=
+      if ($types-only)
+      then
+        $c//tei:fsDecl[lower-case($query)=lower-case(@type)]
+      else
         $c//tei:title[ft:query(.,$query)]|
         $c//tei:fsDescr[ft:query(.,$query)]/parent::tei:fsDecl|
         $c//tei:fDescr[ft:query(.,$query)]/parent::tei:fDecl|
