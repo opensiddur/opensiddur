@@ -211,6 +211,12 @@ declare function outl:check(
                         element olx:uri { $duplicate-title },
                         (: copy the remaining elements (yes, no, etc) :)
                         $node/olx:sameAs[olx:uri=$duplicate-title]/(* except (olx:uri, olx:warning)),
+                        (: if there is no existing olx:yes or olx:no *and* another sibling has olx:yes, insert olx:no :)
+                        if (empty($node/olx:sameAs[olx:uri=$duplicate-title]/(olx:yes|olx:no))
+                                and exists($node/olx:sameAs/olx:yes))
+                        then
+                            element olx:no {}
+                        else (),
                         (: add appropriate warnings :)
                         outl:check-sameas-pointers($node, $duplicate-title)
                     },
@@ -418,7 +424,8 @@ declare function outl:transform-existing(
                 <tei:biblScope unit="pages" from="{$it/ol:from/string()}" to="{$it/ol:to/string()}"/>
             }
           </tei:bibl>
-        else outl:transform-existing($node/node(), $item)
+        else (),
+        outl:transform-existing($node/node(), $item)
       }
     case element(tei:bibl) return
       if ($node/tei:ptr[@type="bibl"]/@target=$source)
@@ -549,7 +556,7 @@ declare function outl:rewrite-filler(
                 let $uri := $filler-map($node/string())
                 let $streamText-id := (data:doc($uri)//j:streamText[1]/@xml:id/string(), "stream")[1] (: if the document doesn't exist, we are about to create it :)
                 return
-                  <tei:ptr xml:id="ptr_{count($node/preceding-sibling::*[@n='outline:filler']) + 1}" target="{$uri}#{$streamText-id}"/>
+                  <tei:ptr xml:id="ptr_{substring-after($node/@xml:id, '_')}" target="{$uri}#{$streamText-id}"/>
               else 
                   element { QName(namespace-uri($node), name($node)) }{
                       $node/@*,
