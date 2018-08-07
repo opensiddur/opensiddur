@@ -11,3 +11,4 @@
 [submodule "lib/hebmorph-exist"]
 	path = lib/hebmorph-exist
 	url = https://github.com/opensiddur/hebmorph-exist.git
+    branch = 2.1.x
