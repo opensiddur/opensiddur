@@ -4,7 +4,7 @@
     </description>
     <property name="lib.dir" location="lib"/>
     <property name="exist.version" value="4.3.1"/>
-	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-${exist.version}.jar"/>
+	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-${exist.version}-opensiddur.jar"/>
 	<property name="build" location="build"/>
     <property name="dist" location="dist"/>
 
@@ -35,6 +35,7 @@
 		<exec executable="git">
 		    <arg value="submodule"/>
 		    <arg value="update"/>
+            <arg value="--remote"/>
 		</exec>
        
 		<uptodate property="exist.uptodate" targetfile="${installer}">
@@ -91,7 +92,6 @@ cacheSize=${cache.size}
         <exec
             executable="${installdir}/bin/client.sh"
             dir="${installdir}"
-            inputstring="sm:passwd('admin','${adminpassword}')"
             >
             <arg value="-qls"/>
             <arg value="-u"/>
@@ -99,6 +99,7 @@ cacheSize=${cache.size}
             <arg value="-P"/>
             <arg value="password"/>
             <arg value="-x"/>
+            <arg value="sm:passwd('admin','${adminpassword}')"/>
         </exec>
         <!-- copy the icu4j library from lib -->
         <copy todir="${installdir}/lib/user">
@@ -156,7 +157,7 @@ cacheSize=${cache.size}
             antfile="${lib.dir}/exist/build/scripts/installer.xml"
             target="download-xars">
             <!-- eXist-supplied apps to be installed -->
-            <property name="apps" value="shared,dashboard,eXide,doc,fundocs,monex" />
+            <property name="apps" value="shared,dashboard,eXide,doc,fundocs,monex,usermanager" />
         </ant>
 		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
@@ -171,6 +172,7 @@ cacheSize=${cache.size}
                 <include name="monex*.xar"/>
                 <include name="fundocs*.xar"/>
                 <include name="doc*.xar"/>
+                <include name="usermanager*.xar"/>
             </fileset>
 		</copy>
     </target>
