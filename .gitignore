@@ -14,6 +14,7 @@ opensiddur-server/schema/build
 # generated dist dir
 build/
 dist/
+dependencies/
 
 # generated files:
 opensiddur-server/src/common/params.xsl2

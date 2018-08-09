@@ -1,12 +1,14 @@
-<project name="opensiddur" default="dist" basedir=".">
+<project name="opensiddur" default="dist" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 	<description>
         Build file for opensiddur
     </description>
     <property name="lib.dir" location="lib"/>
     <property name="exist.version" value="4.3.1"/>
+    <property name="ivy.version" value="2.4.0"/>
 	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-${exist.version}-opensiddur.jar"/>
 	<property name="build" location="build"/>
     <property name="dist" location="dist"/>
+    <property name="deps.dir" location="dependencies"/>
 
     <property file="local.build.properties"/>
     <property file="build.properties"/>
@@ -50,6 +52,13 @@
 		<mkdir dir="${build}"/>
         <mkdir dir="${dist}"/>
 	</target>
+
+    <!-- this little bit of code downloads ivy. Thanks to https://superuser.com/questions/697800/how-to-get-apache-ant-to-recognize-ivy -->
+    <target name="bootstrap" description="Used to install the ivy task jar">
+        <mkdir dir="${user.home}/.ant/lib"/>
+        <get dest="${user.home}/.ant/lib/ivy.jar" src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar"/>
+    </target>
+
 
     <target name="exist" depends="build-exist,autodeploy">
     </target>
@@ -136,15 +145,16 @@ cacheSize=${cache.size}
     </target>
 
     <target name="install-hebmorph"
-        depends="dist"
+        depends="retrieve-dependencies"
         description="install the hebmorph files into eXist">
         <copy todir="${installdir}/extensions/indexes/lucene/lib" flatten="true">
-            <fileset dir="${lib.dir}/hebmorph-exist/build">
-                <include name="**/*.jar"/>
+            <fileset dir="${deps.dir}">
+                <include name="hebmorph-core*.jar"/>
+                <include name="hebmorph-lucene*.jar"/>
             </fileset>
         </copy>
         <copy todir="${installdir}/extensions/indexes/lucene/lib">
-            <fileset dir="${lib.dir}/hebmorph-exist/src/hebmorph-exist">
+            <fileset dir="${lib.dir}/hebmorph-exist">
                 <include name="hspell-data-files/*"/>
             </fileset>
         </copy>
@@ -192,7 +202,6 @@ cacheSize=${cache.size}
 		<subant target="dist" inheritAll="false">
 			<fileset dir=".">
 				<include name="*/build.xml"/>
-				<include name="lib/hebmorph-exist/build.xml"/>
 				<exclude name="build.xml"/>
 			</fileset>
 		</subant>
@@ -203,6 +212,12 @@ cacheSize=${cache.size}
             </fileset>
         </copy>
     </target>
+    
+    <target name="retrieve-dependencies"
+        depends="bootstrap"
+        description="Retrieve dependencies with Apache IVY">
+        <ivy:retrieve pattern="${deps.dir}/[artifact].[ext]" type="jar" />
+    </target>
 
 	<target name="clean"
         description="clean up Open Siddur code" 
@@ -210,7 +225,6 @@ cacheSize=${cache.size}
 		<subant target="clean" inheritAll="false">
 			<fileset dir=".">
 				<include name="*/build.xml"/>
-				<include name="lib/hebmorph-exist/build.xml"/>
 				<exclude name="build.xml"/>
 			</fileset>
 		</subant>
@@ -218,6 +232,9 @@ cacheSize=${cache.size}
 		<!-- Delete the ${build} and ${dist} directory trees -->
 		<delete dir="${build}"/>
 		<delete dir="${dist}"/>
+
+        <!-- delete Ivy dependencies -->
+        <delete dir="${deps.dir}"/>
 	</target>
 	
 	<target name="lib-clean"
