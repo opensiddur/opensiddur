@@ -9,7 +9,7 @@
     <property name="build" location="${base.dir}/build"/>
 	<property name="dist"  location="${base.dir}/dist"/>
 
-    <property name="saxon" location="${lib.dir}/exist/lib/endorsed/saxonhe-9.4.0.7.jar"/>
+    <property name="saxon" location="${lib.dir}/exist/lib/endorsed/Saxon-HE-9.6.0-7.jar"/>
     <property name="wlc.xslt.dir" location="${base.dir}/input-conversion/wlc"/>    
     <property name="wlc.data.dir" location="${base.dir}/sources/tanach/WLC"/>    
     
