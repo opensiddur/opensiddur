@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ API module for recent changes
  : 
  : Copyright 2014 Efraim Feinstein <efraim@opensiddur.org>

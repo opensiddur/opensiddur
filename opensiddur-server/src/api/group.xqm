@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ Group management API
  :
  : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
@@ -24,6 +24,7 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
 declare namespace g="http://jewishliturgy.org/ns/group/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace http="http://expath.org/ns/http-client";
 
 declare variable $grp:schema := concat($paths:schema-base, "/group.rnc");
 

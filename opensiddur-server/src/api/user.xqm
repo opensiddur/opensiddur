@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ User management API
  :
  : Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
@@ -35,6 +35,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
+declare namespace http="http://expath.org/ns/http-client";
 
 (: path to user profile data :)
 declare variable $user:path := "/db/data/user";

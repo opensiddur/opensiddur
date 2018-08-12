@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: Copyright 2012-2013,2016-2017 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)

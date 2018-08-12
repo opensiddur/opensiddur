@@ -1,8 +1,8 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ effect schema upgrades 
  : 
  : Open Siddur Project
- : Copyright 2014-2015 Efraim Feinstein
+ : Copyright 2014-2015,2018 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 module namespace upg="http://jewishliturgy.org/modules/upgrade";
@@ -97,9 +97,13 @@ declare function upg:schema-changes-0-8-1() {
         else "scan"
     let $id := 
         if ($archive = "archive.org")
-        then text:groups(($relatedItem/@target, $relatedItem/@targetPattern)[1], "/(details|stream)/([A-Za-z0-9_]+)")[3] 
+        then analyze-string(
+                ($relatedItem/@target, $relatedItem/@targetPattern)[1],
+                "/(details|stream)/([A-Za-z0-9_]+)")/fn:match/fn:group[@nr=2]/string()
         else if ($archive = "books.google.com")
-        then text:groups(($relatedItem/@target, $relatedItem/@targetPattern)[1], "id=([A-Za-z0-9_]+)")[2] 
+        then analyze-string(
+                ($relatedItem/@target, $relatedItem/@targetPattern)[1],
+                "id=([A-Za-z0-9_]+)")/fn:match/fn:group[@nr=1]/string()
         else $relatedItem/@target
     return 
         update replace $relatedItem with 

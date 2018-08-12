@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ support functions for the REST API for data retrieval
  :
  : Open Siddur Project
@@ -127,12 +127,7 @@ declare function data:new-path-to-resource(
     data:resource-name-from-title-and-number($title, 
       data:find-duplicate-number($type, $title, 0))
   return (
-    (: WARNING: the format-date() function works differently 
-     : from the XSLT spec!
-     : In the spec, the format string should be:
-     : [Y0001]/[M01]
-     :)
-    app:concat-path(($data:path-base, $type, xsl:format-date($date, "YYYY/MM"))), 
+    app:concat-path(($data:path-base, $type, format-date($date, "[Y0001]/[M01]"))),
     $resource-name
   ) 
 };

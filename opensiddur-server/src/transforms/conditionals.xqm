@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : Evaluate conditionals 
  :
@@ -17,7 +17,7 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
  : if the feature value is not set, use the default value
  :)
 declare function cond:get-feature-value(
-    $params as map,
+    $params as map(*),
     $fsname as xs:string,
     $fname as xs:string
     ) as xs:string? {
@@ -40,7 +40,7 @@ declare function cond:get-feature-value(
 
 declare function cond:tei-default(
     $e as element(tei:default),
-    $params as map
+    $params as map(*)
     ) as xs:string? {
     let $fname := $e/parent::tei:f/@name/string()
     let $fstype := $e/ancestor::tei:fs[1]/@type/string()
@@ -62,7 +62,7 @@ declare function cond:tei-default(
  :)
 declare function cond:evaluate(
     $conditional as element()*,
-    $params as map
+    $params as map(*)
     ) as xs:string* {
     for $e in $conditional
     return
@@ -88,7 +88,7 @@ declare function cond:evaluate(
 
 declare function cond:j-all(
     $e as element(j:all),
-    $params as map
+    $params as map(*)
     ) as xs:string? {
     let $result := cond:evaluate($e/element(), $params)
     return 
@@ -107,7 +107,7 @@ declare function cond:j-all(
 
 declare function cond:j-any(
     $e as element(j:any),
-    $params as map
+    $params as map(*)
     ) as xs:string? {
     let $result := cond:evaluate($e/element(), $params)
     return 
@@ -126,7 +126,7 @@ declare function cond:j-any(
 
 declare function cond:j-oneOf(
     $e as element(j:oneOf),
-    $params as map
+    $params as map(*)
     ) as xs:string? {
     let $result := cond:evaluate($e/element(), $params)
     let $n-yes := count($result[.="YES"])
@@ -149,7 +149,7 @@ declare function cond:j-oneOf(
 
 declare function cond:j-not(
     $e as element(j:not),
-    $params as map
+    $params as map(*)
     ) as xs:string? {
     let $result := cond:evaluate($e/element(), $params)
     return
@@ -169,14 +169,14 @@ declare function cond:j-not(
 (: the default value is either a literal or the first matching result of an if :)
 declare function cond:tei-vDefault(
     $e as element(tei:vDefault),
-    $params as map
+    $params as map(*)
     ) as xs:string? {
     cond:evaluate($e/element(), $params)[1]
 };
 
 declare function cond:tei-if(
     $e as element(tei:if), 
-    $params as map
+    $params as map(*)
     ) as xs:string? {
     let $eval := cond:evaluate($e/tei:then/preceding-sibling::*, $params)
     where ($eval=("ON", "YES"))
@@ -203,7 +203,7 @@ declare variable $cond:truth-table :=
 
 declare function cond:tei-f(
     $e as element(tei:f), 
-    $params as map
+    $params as map(*)
     ) as xs:string? {
     let $fstype := $e/parent::tei:fs/@type/string()
     let $fname := $e/@name/string()
@@ -214,7 +214,7 @@ declare function cond:tei-f(
 
 declare function cond:tei-fs(
     $e as element(tei:fs),
-    $params as map
+    $params as map(*)
     ) as xs:string* {
     cond:evaluate($e/element(), $params)
 };

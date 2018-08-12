@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: Copyright 2012-2014,2016 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -24,6 +24,8 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "paths.xqm";
 import module namespace ridx="http://jewishliturgy.org/modules/refindex"
   at "refindex.xqm";
+import module namespace debug="http://jewishliturgy.org/transform/debug"
+  at "debug.xqm";
 
 import module namespace magic="http://jewishliturgy.org/magic"
   at "../magic/magic.xqm";
@@ -35,6 +37,7 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace error="http://jewishliturgy.org/errors";
+declare namespace http="http://expath.org/ns/http-client";
 
 (:~ @return true() if validation should be disabled (during deployment) :)
 declare 
@@ -61,6 +64,7 @@ declare function crest:no-access(
  : @param $change-type the type of the change
  : @return On return, the document is updated.
  :
+ : If the document has no teiHeader, we do nothing
  : If the document has no existing revisionDesc, one is created
  : New changes are positioned as the first element in the revisionDesc
  : If the first change record lacks @when, it is considered to be the commit log for this change.
@@ -69,32 +73,35 @@ declare function crest:record-change(
   $doc as document-node(),
   $change-type as xs:string
   ) as empty-sequence() {
-  let $who := app:auth-user()
-  let $who-uri := substring-after(data:user-api-path($who), api:uri-of("/api"))
-  let $revisionDesc := $doc//tei:revisionDesc
-  let $commit-log := $revisionDesc/tei:change[1][not(@when)]
-  let $change :=
-    <tei:change 
-      type="{$change-type}"
-      who="{$who-uri}"
-      when="{current-dateTime()}"
-      >{$commit-log/(@xml:lang, @xml:id, node())}</tei:change>
-  return
-    if (exists($commit-log))
-    then
-      update replace $commit-log with $change
-    else if (exists($revisionDesc) and exists($revisionDesc/*))
-    then 
-      update insert $change preceding $revisionDesc/*[1]
-    else if (exists($revisionDesc))
-    then 
-      update insert $change into $revisionDesc
-    else 
-      update insert 
-        <tei:revisionDesc>{
-          $change
-        }</tei:revisionDesc>
-      following $doc//tei:teiHeader/*[count(.)] (: TODO: change back to last() when eXist bug is fixed :)    
+  if (exists($doc//tei:teiHeader))
+  then
+      let $who := app:auth-user()
+      let $who-uri := substring-after(data:user-api-path($who), api:uri-of("/api"))
+      let $revisionDesc := $doc//tei:revisionDesc
+      let $commit-log := $revisionDesc/tei:change[1][not(@when)]
+      let $change :=
+        <tei:change
+          type="{$change-type}"
+          who="{$who-uri}"
+          when="{current-dateTime()}"
+          >{$commit-log/(@xml:lang, @xml:id, node())}</tei:change>
+      return
+        if (exists($commit-log))
+        then
+          update replace $commit-log with $change
+        else if (exists($revisionDesc) and exists($revisionDesc/*))
+        then
+          update insert $change preceding $revisionDesc/*[1]
+        else if (exists($revisionDesc))
+        then
+          update insert $change into $revisionDesc
+        else
+          update insert
+            <tei:revisionDesc>{
+              $change
+            }</tei:revisionDesc>
+          following $doc//tei:teiHeader/*[count(.)] (: TODO: change back to last() when eXist bug is fixed :)
+  else ()
 };
 
 (:~ validate a document based on a given schema 

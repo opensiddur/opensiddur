@@ -1,5 +1,5 @@
-xquery version "3.0";
-(: Copyright 2012-2013,2016 Efraim Feinstein <efraim@opensiddur.org>
+xquery version "3.1";
+(: Copyright 2012-2013,2016,2018 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Sources (bibliographic) data API
@@ -11,6 +11,7 @@ module namespace src = 'http://jewishliturgy.org/api/data/sources';
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace http="http://expath.org/ns/http-client";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "../../modules/api.xqm";

@@ -167,7 +167,7 @@ cacheSize=${cache.size}
             antfile="${lib.dir}/exist/build/scripts/installer.xml"
             target="download-xars">
             <!-- eXist-supplied apps to be installed -->
-            <property name="apps" value="shared,dashboard,eXide,doc,fundocs,monex,usermanager" />
+            <property name="apps" value="shared,dashboard,eXide,exist-documentation,fundocs,monex,usermanager" />
         </ant>
 		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
@@ -181,7 +181,7 @@ cacheSize=${cache.size}
                 <include name="*shared-resources*.xar"/>
                 <include name="monex*.xar"/>
                 <include name="fundocs*.xar"/>
-                <include name="doc*.xar"/>
+                <include name="exist-documentation*.xar"/>
                 <include name="usermanager*.xar"/>
             </fileset>
 		</copy>
@@ -300,7 +300,8 @@ cacheSize=${cache.size}
             <arg value="${backup.directory}"/>
             <arg value="-ouri=xmldb:exist://"/>
             <!-- DEBUG_OPTS seems to be the only way to force options after java.endorsed.dirs -->
-            <env key="DEBUG_OPTS" value="-Dexist.autodeploy=off -Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
+            <env key="DEBUG_OPTS" value="-Dexist.autodeploy=off"/>
+            <!-- -Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>-->
         </exec>
         <!-- schema update -->    
         <!--

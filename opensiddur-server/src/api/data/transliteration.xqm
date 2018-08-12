@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: Transliteration API module
  : 
  : Functions assume that the following has already been done:

@@ -16,7 +16,8 @@ import module namespace debug="http://jewishliturgy.org/transform/debug"
 	at "../modules/debug.xqm";
 	
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
-declare namespace error="http://jewishliturgy.org/errors"; 
+declare namespace error="http://jewishliturgy.org/errors";
+declare namespace http="http://expath.org/ns/http-client";
 
 (:~ Query who is currently logged in. 
  : @return HTTP 200 with an XML entity with the currently logged in user 

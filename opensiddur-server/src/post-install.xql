@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "modules/format.xqm";

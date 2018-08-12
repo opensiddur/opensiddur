@@ -3,7 +3,7 @@ xquery version "1.0";
  : debug functions
  :
  : Open Siddur Project
- : Copyright 2011,2016 Efraim Feinstein 
+ : Copyright 2011,2016,2018 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -11,10 +11,6 @@ module namespace debug="http://jewishliturgy.org/transform/debug";
 
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "paths.xqm";
-import module namespace uri="http://jewishliturgy.org/transform/uri"
-    at "follow-uri.xqm";
-import module namespace data="http://jewishliturgy.org/modules/data"
-    at "data.xqm";
 
 declare variable $debug:error := 1;
 declare variable $debug:warn := 2;
@@ -112,6 +108,7 @@ declare function debug:print-exception(
 (:~ find broken links in the data that point to nothing
  : @param $source-collection where to start searching
  :)
+(: removing -- this causes a circular dependency, if needed, move to the URI module
 declare function debug:find-dangling-links(
   $source-collection as xs:string?
   ) as element(dangling-links) {
@@ -146,4 +143,4 @@ declare function debug:find-dangling-links(
   }
 };
 
-
+:)

@@ -1,5 +1,5 @@
-xquery version "3.0";
-(: Copyright 2016 Efraim Feinstein <efraim@opensiddur.org>
+xquery version "3.1";
+(: Copyright 2016,2018 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
 (:~ Outlines data API
@@ -14,6 +14,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
+declare namespace http="http://expath.org/ns/http-client";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "../../modules/api.xqm";
@@ -354,7 +355,7 @@ declare function outl:template(
 
 declare function outl:rewrite-outline(
     $nodes as node()*,
-    $filler-map as map
+    $filler-map as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -532,7 +533,7 @@ declare function outl:execute(
 
 declare function outl:rewrite-filler(
     $nodes as node()*,
-    $filler-map as map
+    $filler-map as map(*)
     ) as node()* {
     for $node in $nodes
     return

@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ common module for reading/writing access (sharing) control
  : Not all types of access restrictions are supported!
  : See the access.rnc schema for details
