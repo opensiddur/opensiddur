@@ -145,12 +145,11 @@ cacheSize=${cache.size}
     </target>
 
     <target name="install-hebmorph"
-        depends="retrieve-dependencies"
+        depends="dist"
         description="install the hebmorph files into eXist">
         <copy todir="${installdir}/extensions/indexes/lucene/lib" flatten="true">
-            <fileset dir="${deps.dir}">
-                <include name="hebmorph-core*.jar"/>
-                <include name="hebmorph-lucene*.jar"/>
+            <fileset dir="${lib.dir}/hebmorph-exist/java/target">
+                <include name="hebmorph-lucene.jar"/>
             </fileset>
         </copy>
         <copy todir="${installdir}/extensions/indexes/lucene/lib">
@@ -205,6 +204,10 @@ cacheSize=${cache.size}
 				<exclude name="build.xml"/>
 			</fileset>
 		</subant>
+        <exec dir="${lib.dir}/hebmorph-exist" executable="mvn">
+          <arg value="-Dmaven.test.skip=true"/>
+          <arg value="package"/>
+        </exec>
         <copy todir="${dist}" flatten="true">
             <fileset dir=".">
             	<include name="lib/*/dist/*.xar"/>
