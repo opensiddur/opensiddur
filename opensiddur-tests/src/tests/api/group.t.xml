@@ -53,6 +53,7 @@
   </tearDown>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="g">http://jewishliturgy.org/ns/group/1.0</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <imports>
     import module namespace grp="http://jewishliturgy.org/api/group"
       at "xmldb:exist:///db/apps/opensiddur-server/api/group.xqm";

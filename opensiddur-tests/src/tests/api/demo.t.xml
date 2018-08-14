@@ -16,6 +16,7 @@
   <namespace prefix="tr">http://jewishliturgy.org/ns/tr/1.0</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <setup>
       <create-collection parent="/db/data/transliteration" name="1900"/>
       <create-collection parent="/db/data/transliteration/1900" name="01"/>

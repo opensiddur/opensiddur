@@ -13,8 +13,8 @@
   </imports>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
-  <variable name="year" as="xs:string">xsl:format-number(year-from-date(current-date()), "0000")</variable>
-  <variable name="month" as="xs:string">xsl:format-number(month-from-date(current-date()), "00")</variable>
+  <variable name="year" as="xs:string">format-number(year-from-date(current-date()), "[Y0001]")</variable>
+  <variable name="month" as="xs:string">format-number(month-from-date(current-date()), "[M01]")</variable>
   <TestSet>
       <setup>
          <store collection="/db/data/user" name="testuser.xml">

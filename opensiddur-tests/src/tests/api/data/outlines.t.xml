@@ -41,6 +41,7 @@
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="ol">http://jewishliturgy.org/ns/outline/1.0</namespace>
   <namespace prefix="olx">http://jewishliturgy.org/ns/outline/responses/1.0</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <imports>
     import module namespace outl="http://jewishliturgy.org/api/data/outlines"
       at "xmldb:exist:///db/apps/opensiddur-server/api/data/outlines.xqm";

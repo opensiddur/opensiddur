@@ -81,6 +81,7 @@
   <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="r">http://jewishliturgy.org/ns/results/1.0</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <imports>
     import module namespace cnd="http://jewishliturgy.org/api/data/conditionals"
       at "xmldb:exist:///db/apps/opensiddur-server/api/data/conditionals.xqm";

@@ -2,7 +2,7 @@ xquery version "3.0";
 (: Testing module
  : Original author: Wolfgang Meier (eXist db)
  : 
- : Modified by Efraim Feinstein, 2011-2012
+ : Modified by Efraim Feinstein, 2011-2012,2018
  : 
  : Licensed under the GNU Lesser General Public License, version 2.1 or later
  :)
@@ -74,6 +74,8 @@ xquery version "3.0";
 module namespace t="http://exist-db.org/xquery/testing/modified";
 
 import module namespace xdb="http://exist-db.org/xquery/xmldb";
+
+declare namespace xsl="https://www.w3.org/1999/XSL/Transform";
 
 declare function local:error(
   $activity as xs:string, 
