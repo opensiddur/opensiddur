@@ -152,7 +152,7 @@
          <code>
         data:new-path("tests", "Test Title")
       </code>
-         <xpath desc="Return a URL encoded title with no number">$output=concat("/db/data/tests/", $year, "/", $month, "/Test%20Title.xml")</xpath> 
+         <xpath desc="Return a URL encoded title with no number">$output=concat("/db/data/tests/", $year, "/", $month, "/Test%20Title.xml")</xpath>
       </test>
   </TestSet>
   <TestSet>

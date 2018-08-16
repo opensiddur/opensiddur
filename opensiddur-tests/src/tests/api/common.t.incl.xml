@@ -8,6 +8,7 @@
   </description>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <!-- HTTP returns -->
   <TestClass xml:id="Created">
       <xpath desc="returns status code 201">self::rest:response/http:response/@status = 201</xpath>

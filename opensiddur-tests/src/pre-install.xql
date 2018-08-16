@@ -5,6 +5,7 @@ declare function local:create-user(
     $user as xs:string
     ) {
     let $exists := sm:user-exists($user)
+    let $debug := util:log-system-out("user exists?" || string($exists))
     where not($exists)
     return sm:create-account($user, $user, 'everyone')
 };
