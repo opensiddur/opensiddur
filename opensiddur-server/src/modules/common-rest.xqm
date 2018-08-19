@@ -100,7 +100,7 @@ declare function crest:record-change(
             <tei:revisionDesc>{
               $change
             }</tei:revisionDesc>
-          following $doc//tei:teiHeader/*[count(.)] (: TODO: change back to last() when eXist bug is fixed :)
+          following $doc//tei:teiHeader/*[last()]
   else ()
 };
 

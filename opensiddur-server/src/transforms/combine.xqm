@@ -430,7 +430,11 @@ declare %private function combine:tei-featureVal-to-map(
         case element(tei:vColl) return combine:tei-featureVal-to-map($node/element(), $params)
         case element(tei:default) return element tei:string { cond:evaluate($node, $params) }
         case element() return element tei:string { $node/@value/string() }
-        case text() return element tei:string { string($node) }
+        case text() return
+            (: empty text nodes should not produce values :)
+            if (normalize-space($node))
+            then element tei:string { string($node) }
+            else ()
         default return ()
 }; 
 
