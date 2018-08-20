@@ -17,7 +17,7 @@
         import module namespace translit="http://jewishliturgy.org/transform/transliterator"
             at "/db/apps/opensiddur-server/transforms/translit/translit.xqm";
     </imports>
-    <variable name="table" as="element(tr:table)">doc("/db/apps/opensiddur-tests/tests/transforms/translit/test-table.xml")/tr:table</variable>
+    <variable name="table" as="element(tr:table)">doc("/db/apps/opensiddur-tests/tests/transforms/translit/testtable.xml")//tr:table</variable>
     <TestSet ignore="yes">
       <testName>No table</testName>
       <test>

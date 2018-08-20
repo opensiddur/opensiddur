@@ -984,6 +984,29 @@ declare function t:format-testResult($result as element()) {
      </html>
 };
 
+(: clean up empty text nodes from XML :)
+declare %private function t:clean-xml(
+        $nodes as node()*
+) as node()* {
+  for $node in $nodes
+  return
+    typeswitch($node)
+      case text() return
+        if (normalize-space($node))
+        then $node
+        else ()
+      case document-node() return
+        document {
+          t:clean-xml($node/node())
+        }
+      case element() return
+        element { QName(namespace-uri($node), name($node)) }{
+          $node/@*,
+          t:clean-xml($node/node())
+        }
+      default return $node
+};
+
 (:~ determine if two nodes are deep-equal, allowing for the string ... to be a wildcard
  : and the namespace http://www.w3.org/1998/xml/namespace/alias to be equivalent to the
  : xml namespace
@@ -994,19 +1017,22 @@ declare function t:deep-equal-wildcard(
 	$node1 as node()*,
 	$node2 as node()*
 	) as xs:boolean {
+  let $n1 := t:clean-xml($node1)
+  let $n2 := t:clean-xml($node2)
+  return
 	(
-	  count($node1) = count($node2)
+	  count($n1) = count($n2)
 	  and
 		(every $result in 
 			(
-			for $n at $pos in $node1
+			for $n at $pos in $n1
 			return
 				typeswitch ($n)
-				case document-node() return t:deep-docnode($n, $node2[$pos])
-				case comment() return t:deep-comment($n, $node2[$pos])
-				case text() return t:deep-text($n, $node2[$pos])
-				case attribute() return t:deep-attribute($n, $node2)	
-				case element() return t:deep-element($n, $node2[$pos])
+				case document-node() return t:deep-docnode($n, $n2[$pos])
+				case comment() return t:deep-comment($n, $n2[$pos])
+				case text() return t:deep-text($n, $n2[$pos])
+				case attribute() return t:deep-attribute($n, $n2)
+				case element() return t:deep-element($n, $n2[$pos])
 				default return false()
 			)
 			satisfies $result

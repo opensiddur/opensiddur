@@ -187,7 +187,7 @@
               </olx:sameAs>
           </ol:item>
         </expected>
-        <expected desc="for an item with a duplicate title that is already confirmed and duplicated again, the confirmation is maintained exactly and the additional duplicate is recorded" xpath="./ol:outline/ol:item[5]">
+        <expected desc="for an item with a duplicate title that is already confirmed and duplicated again, the confirmation is maintained exactly and the additional duplicate is recorded with a negative confirmation" xpath="./ol:outline/ol:item[5]">
           <ol:item>
               <ol:title>TitleAlreadyConfirmedAndDuplicated</ol:title>
               <ol:from>9</ol:from>
@@ -198,6 +198,7 @@
               </olx:sameAs>
               <olx:sameAs>
                   <olx:uri>/data/original/TitleAlreadyConfirmedAndDuplicated-1</olx:uri>
+                  <olx:no/>
               </olx:sameAs>
           </ol:item>
         </expected>

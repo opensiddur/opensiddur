@@ -707,6 +707,8 @@
   <TestSet>
       <testName>Transliteration with segGen</testName>
       <setup>
+          <copy source="/db/apps/opensiddur-tests/tests/transforms/translit" name="testtable.xml"
+                destination="/db/data/transliteration"/>
          <code>
       local:setup("combine-segGen-1.xml", "original")
       </code>
@@ -715,6 +717,7 @@
          <code>
       local:tearDown("combine-segGen-1.xml", "original")
       </code>
+          <remove-document collection="/db/data/transliteration" name="testtable.xml"/>
       </tearDown>
       <test>
         <task>transliterate a segGen element</task>
@@ -731,6 +734,8 @@
   <TestSet>
       <testName>Transliteration </testName>
       <setup>
+          <copy source="/db/apps/opensiddur-tests/tests/transforms/translit" name="testtable.xml"
+                destination="/db/data/transliteration"/>
          <code>
       local:setup("combine-translit-note-1.xml", "notes"),
       local:setup("combine-translit-1.xml", "original")
@@ -741,6 +746,7 @@
       local:tearDown("combine-translit-1.xml", "original"),
       local:tearDown("combine-translit-note-1.xml", "notes")
       </code>
+          <remove-document collection="/db/data/transliteration" name="testtable.xml"/>
       </tearDown>
       <test>
         <task>transliterate a non-parallel document</task>
