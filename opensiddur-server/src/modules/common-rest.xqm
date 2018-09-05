@@ -207,7 +207,7 @@ declare function crest:list(
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
-      <output:method value="html5"/>
+      <output:method>html5</output:method>
     </output:serialization-parameters>
   </rest:response>,
   let $query := string-join($query[.], " ")
@@ -362,7 +362,7 @@ declare function crest:delete(
           sm:has-access($path, "w")
           )
         then
-            let $doc-references := ridx:query-document($doc)[not(root(.) is $doc)]
+            let $doc-references := ridx:query-document($doc)/root(.)[not(. is $doc)]
             return
                 if (exists($doc-references))
                 then 
@@ -376,14 +376,15 @@ declare function crest:delete(
                 else
                     (
                       (: TODO: check for references! :)
-                      xmldb:remove($collection, $resource),
-                      ridx:remove($collection, $resource),
-                      <rest:response>
-                        <output:serialization-parameters>
-                          <output:method value="text"/>
-                        </output:serialization-parameters>
-                        <http:response status="204"/>
-                      </rest:response>
+                      let $r1 := xmldb:remove($collection, $resource)
+                      let $r2 := ridx:remove($collection, $resource)
+                      return
+                        <rest:response>
+                            <output:serialization-parameters>
+                              <output:method>text</output:method>
+                            </output:serialization-parameters>
+                            <http:response status="204"/>
+                        </rest:response>
                     )
         else
           crest:no-access()
@@ -461,7 +462,7 @@ declare function crest:post(
               then 
                 <rest:response>
                   <output:serialization-parameters>
-                    <output:method value="text"/>
+                    <output:method>text</output:method>
                   </output:serialization-parameters>
                   <http:response status="201">
                     {
@@ -555,7 +556,7 @@ declare function crest:put(
                   )
                 }
                 <output:serialization-parameters>
-                  <output:method value="text"/>
+                  <output:method>text</output:method>
                 </output:serialization-parameters>
                 <http:response status="204"/>
               </rest:response>
@@ -631,7 +632,7 @@ declare function crest:put-access(
             mirror:mirror-permissions($ridx:ridx-path, $uri, $ridx-uri), 
         <rest:response>
           <output:serialization-parameters>
-            <output:method value="text"/>
+            <output:method>text</output:method>
           </output:serialization-parameters>
           <http:response status="204"/>
         </rest:response>

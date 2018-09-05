@@ -172,7 +172,7 @@ declare
            :) 
           <rest:response>
             <output:serialization-parameters>
-              <output:method value="text"/>
+              <output:method>text</output:method>
             </output:serialization-parameters>
             {
             system:as-user("admin", $magic:password, 
@@ -209,7 +209,7 @@ declare
                 then 
                   <rest:response>
                     <output:serialization-parameters>
-                      <output:method value="text"/>
+                      <output:method>text</output:method>
                     </output:serialization-parameters>
                     {
                       sm:chmod($uri, "rw-r--r--"),
@@ -307,7 +307,7 @@ declare
           )),
           <rest:response>
             <output:serialization-parameters>
-              <output:method value="text"/>
+              <output:method>text</output:method>
             </output:serialization-parameters>
             {
               if ($resource-exists)
@@ -348,7 +348,7 @@ declare
   let $return-success :=
     <rest:response>
       <output:serialization-parameters>
-        <output:method value="text"/>
+        <output:method>text</output:method>
       </output:serialization-parameters>
       <http:response status="204"/>
     </rest:response>

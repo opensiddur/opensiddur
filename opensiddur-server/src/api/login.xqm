@@ -58,7 +58,7 @@ declare
   return (
     <rest:response>
       <output:serialization-parameters>
-        <output:method value="html5"/>
+        <output:method>html5</output:method>
       </output:serialization-parameters>
     </rest:response>,
     <html xmlns="http://www.w3.org/1999/xhtml">
@@ -128,7 +128,7 @@ declare
         else (),
         <rest:response>
           <output:serialization-parameters>
-            <output:method value="text"/>
+            <output:method>text</output:method>
           </output:serialization-parameters>
           <http:response status="204"/>
         </rest:response>
@@ -146,7 +146,7 @@ declare function local:logout(
   app:logout-credentials(),
   <rest:response>
     <output:serialization-parameters>
-      <output:method value="text"/>
+      <output:method>text</output:method>
     </output:serialization-parameters>
     <http:response status="204"/>
   </rest:response>

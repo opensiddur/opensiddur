@@ -184,7 +184,7 @@ declare
       else (
         <rest:response>
           <output:serialization-parameters>
-            <output:method value="text"/>
+            <output:method>text</output:method>
           </output:serialization-parameters>
         </rest:response>,
         data($transliterated)

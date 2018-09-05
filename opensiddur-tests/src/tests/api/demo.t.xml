@@ -114,7 +114,7 @@
         util:string-to-binary("אבגדה וזח"),
         "Test")
       </code>
-         <xpath desc="output is text/plain">$output[1]/self::rest:response/output:serialization-parameters/output:method/@value="text"</xpath>
+         <xpath desc="output is text/plain">$output[1]/self::rest:response/output:serialization-parameters/output:method="text"</xpath>
          <xpath desc="transliterated text">$output[2]="abcde fgh"</xpath>
       </test>
       <test output="mixed">

@@ -30,7 +30,7 @@ declare function api:rest-error(
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
-      <output:method value="xml"/>
+      <output:method>xml</output:method>
     </output:serialization-parameters>
     <http:response status="{$status-code}"/>
   </rest:response>,

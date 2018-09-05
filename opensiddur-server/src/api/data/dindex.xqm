@@ -26,7 +26,7 @@ declare
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
-      <output:method value="html5"/>
+      <output:method>html5</output:method>
     </output:serialization-parameters>
   </rest:response>,
   let $api-base := api:uri-of("/api/data")

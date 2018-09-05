@@ -404,7 +404,7 @@ declare
                   else
                     <rest:response>
                       <output:serialization-parameters>
-                        <output:method value="text"/>
+                        <output:method>text</output:method>
                       </output:serialization-parameters>
                       <http:response status="204"/>
                     </rest:response>
@@ -447,7 +447,7 @@ declare
                   else 
                     <rest:response>
                       <output:serialization-parameters>
-                        <output:method value="text"/>
+                        <output:method>text</output:method>
                       </output:serialization-parameters>
                       <http:response status="201">
                         {((: TODO: this is wrong! It needs to be an absolute URI :))}
@@ -487,7 +487,7 @@ declare
         then
           <rest:response>
             <output:serialization-parameters>
-              <output:method value="text"/>
+              <output:method>text</output:method>
             </output:serialization-parameters>
             {
               (: members are not removed automatically from a deleted group :)

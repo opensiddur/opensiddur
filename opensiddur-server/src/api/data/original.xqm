@@ -533,7 +533,7 @@ return util:log-system-out(('compiled ', document-uri($b)))"
       return 
         <rest:response>
             <output:serialization-parameters>
-                <output:method value="text"/>
+                <output:method>text</output:method>
             </output:serialization-parameters>
             <http:response status="202">
                 <http:header name="Location" value="{api:uri-of('/api/jobs')}/{$job-id}"/>

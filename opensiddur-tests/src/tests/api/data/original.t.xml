@@ -543,6 +543,16 @@
       </test>
       <test>
          <task>orig:delete(): Remove an existing resource</task>
+          <setup>
+              <code>
+                  ridx:reindex(doc("/db/data/original/en/1900/01/Existing.xml"))
+              </code>
+          </setup>
+          <tearDown>
+              <code>
+                  ridx:remove("/db/data/original/en/1900/01", "Existing.xml")
+              </code>
+          </tearDown>
          <code>
       orig:delete("Existing")
       </code>

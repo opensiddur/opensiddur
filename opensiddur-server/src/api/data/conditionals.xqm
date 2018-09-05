@@ -224,7 +224,7 @@ declare function cnd:list-definitions(
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
-      <output:method value="xml"/>
+      <output:method>xml</output:method>
     </output:serialization-parameters>
   </rest:response>,
   let $c := collection($cnd:path-base)
