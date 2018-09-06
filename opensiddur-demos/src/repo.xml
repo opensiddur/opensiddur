@@ -9,6 +9,6 @@
   <type>application</type>
   <target>opensiddur-demos</target> 
   <!--prepare>pre-install.xql</prepare-->
-  <!--finish>post-install.xql</finish-->
+  <finish>post-install.xql</finish>
   <permissions user="admin" password="" group="dba" mode="rw-rw-r--"/>
 </meta>
