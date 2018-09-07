@@ -7,10 +7,12 @@ declare function local:create-user(
     let $exists := sm:user-exists($user)
     where not($exists)
     return sm:create-account($user, $user, 'everyone')
+
 };
 
 util:log-system-out("Adding test users..."),
 for $user in ('testuser', 'testuser2')
 return local:create-user($user),
 util:log-system-out("Done.")
+
 

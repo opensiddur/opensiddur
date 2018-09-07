@@ -8,6 +8,7 @@
   </description>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <!-- HTTP returns -->
   <TestClass xml:id="Created">
       <xpath desc="returns status code 201">self::rest:response/http:response/@status = 201</xpath>
@@ -15,7 +16,7 @@
   </TestClass>
   <TestClass xml:id="NoData">
       <xpath desc="returns status code 204">self::rest:response/http:response/@status = 204</xpath>
-      <xpath desc="serializes as text">self::rest:response/output:serialization-parameters/output:method/@value = "text"</xpath>
+      <xpath desc="serializes as text">self::rest:response/output:serialization-parameters/output:method = "text"</xpath>
   </TestClass>
   <TestClass xml:id="BadRequest">
       <xpath desc="returns status code 400">self::rest:response/http:response/@status = 400</xpath>
@@ -31,11 +32,11 @@
   </TestClass>
   <!-- serialization -->
   <TestClass xml:id="SerializeHTML5">
-      <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method/@value="html5"</xpath>
+      <xpath desc="serialize as XHTML">self::rest:response/output:serialization-parameters/output:method="xhtml"</xpath>
   </TestClass>
   <!-- search and list APIs -->
   <TestClass xml:id="SearchResults">
-      <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method/@value="html5"</xpath>
+      <xpath desc="serialize as XHTML">self::rest:response/output:serialization-parameters/output:method="xhtml"</xpath>
       <xpath desc="reference to Open Search @profile removed for html5 compliance">empty(.//html:head/@profile)</xpath>
       <xpath desc="@startIndex is present">count(.//html:meta[@name='startIndex'])=1</xpath>
       <xpath desc="@endIndex has been removed">count(.//html:meta[@name='endIndex'])=0</xpath>

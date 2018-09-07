@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : Modes to unflatten a flattened hierarchy.
  :
@@ -62,7 +62,7 @@ declare function unflatten:unclosed-tags(
  :)
 declare function unflatten:parallel-suspend-and-continue(
     $e as element(jf:merged),
-    $params as map
+    $params as map(*)
     ) as element(jf:merged) {
     if (exists($e/jf:parallelGrp))
     then 
@@ -82,7 +82,7 @@ declare function unflatten:iterate-parallel-suspend-and-continue(
     $sequence as node()*,
     $opened-elements as element()*,
     $suspended-elements as element()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     let $s := $sequence[1]
     where exists($s)
@@ -158,7 +158,7 @@ declare function unflatten:continue-or-suspend(
 
 declare function unflatten:unflatten-document(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   common:apply-at(
     $doc, 
@@ -176,7 +176,7 @@ declare function unflatten:unflatten-document(
  :)
 declare function unflatten:unflatten(
   $flattened as element(),
-  $params as map
+  $params as map(*)
   ) as element(jf:unflattened) {
   element jf:unflattened {
     $flattened/@*,
@@ -189,7 +189,7 @@ declare function unflatten:unflatten(
 
 declare function unflatten:sequence(
   $sequence as node()*,
-  $params as map
+  $params as map(*)
   ) as node()* {
   let $s := $sequence[1]
   let $seq := $sequence
@@ -228,7 +228,7 @@ declare function unflatten:sequence(
 (:~ element with no start, continue, end, suspend :)
 declare function unflatten:lone-element(
   $s as element(),
-  $params as map
+  $params as map(*)
   ) as element() {
   element { QName(namespace-uri($s), name($s)) }{
     unflatten:attributes-except-flatten($s),
@@ -245,8 +245,8 @@ declare function unflatten:lone-element(
 declare function unflatten:start(
   $s as element(),
   $sequence as node()*,
-  $params as map
-  ) as map {
+  $params as map(*)
+  ) as map(*) {
   let $following := common:following($s, $sequence)
   let $end := 
     $following[(@jf:end|@jf:suspend)=$s/(@jf:start, @jf:continue)][1]

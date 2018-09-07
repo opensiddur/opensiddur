@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: Copyright 2012-2013,2016-2017 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -152,7 +152,7 @@ declare
   %rest:query-param("decls-only", "{$decls-only}", "false")
   %rest:query-param("types-only", "{$types-only}", "false")
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
-  %output:method("html5")  
+  %output:method("xhtml")
   function cnd:list(
     $q as xs:string*,
     $start as xs:integer*,
@@ -224,7 +224,7 @@ declare function cnd:list-definitions(
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
-      <output:method value="xml"/>
+      <output:method>xml</output:method>
     </output:serialization-parameters>
   </rest:response>,
   let $c := collection($cnd:path-base)

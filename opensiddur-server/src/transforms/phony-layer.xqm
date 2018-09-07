@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : Act on "condition", "set", "note", "instruction", "interp", and "annotation" links:
  : This must be run on the original data because it relies on having the reference index
@@ -36,7 +36,7 @@ declare variable $phony:link-types := map {
 
 declare function phony:phony-layer-document(
     $doc as document-node(),
-    $params as map
+    $params as map(*)
     ) as document-node() {
     common:apply-at(
         $doc,
@@ -48,7 +48,7 @@ declare function phony:phony-layer-document(
 
 declare function phony:phony-layer(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -100,7 +100,7 @@ declare function phony:links-to-attributes(
 
 declare function phony:j-streamText(
     $e as element(j:streamText),
-    $params as map
+    $params as map(*)
     ) as element(j:streamText) {
     let $phonies := ridx:query(phony:doc-phony-links($e), $e, 1, false())[self::tei:link]
     return
@@ -113,7 +113,7 @@ declare function phony:j-streamText(
 
 declare function phony:inside-streamText(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -136,8 +136,8 @@ declare function phony:inside-streamText(
 (:~ activates on elements inside layers or j:option inside streamText, which is treated the same way :)
 declare function phony:element(
     $e as element(),
-    $params as map,
-    $caller as function(node()*, map) as node()*
+    $params as map(*),
+    $caller as function(node()*, map(*)) as node()*
     ) as element() {
     let $layer-ancestor := $e/ancestor::j:layer
     let $stream-ancestor := $e/ancestor::j:streamText[not(. is $e/parent::*)]
@@ -164,7 +164,7 @@ declare function phony:element(
  :)
 declare function phony:tei-text(
     $e as element(tei:text),
-    $params as map
+    $params as map(*)
     ) as element(tei:text) {
     element tei:text {
         $e/@*,
@@ -186,7 +186,7 @@ declare function phony:tei-text(
  :)
 declare function phony:j-concurrent(
     $e as element(j:concurrent),
-    $params as map
+    $params as map(*)
     ) as element(j:concurrent) {
     element j:concurrent {
         $e/@*,
@@ -198,7 +198,7 @@ declare function phony:j-concurrent(
 
 declare function phony:phony-layer-from-links(
     $e as element(tei:link)*,
-    $params as map
+    $params as map(*)
     ) as element(j:layer)* {
     for $link at $n in $e
     let $phony-type := $phony:link-types(($link/@type,$link/parent::tei:linkGrp/@type)[1]/string())

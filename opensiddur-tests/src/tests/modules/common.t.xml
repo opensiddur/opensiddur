@@ -29,7 +29,7 @@
         return
           common:apply-at(
             $e, &lt;e/&gt;, 
-            function($n as node()*, $p as map) as node()* {()}, 
+            function($n as node()*, $p as map(*)) as node()* {()},
             map {}
           )  
       </code>
@@ -55,7 +55,7 @@
         return
           common:apply-at(
             $e, $e/c, 
-            function($n as node()*, $p as map) as node()* {
+            function($n as node()*, $p as map(*)) as node()* {
               &lt;x/&gt;
             }, 
             map {}

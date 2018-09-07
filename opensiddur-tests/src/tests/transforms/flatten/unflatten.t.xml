@@ -192,7 +192,7 @@
       </setup>
       <tearDown>
         <code>
-            format:clear-caches(doc("/db/data/tests/unflatten-order-bug.xml"))
+            format:clear-caches("/db/data/tests/unflatten-order-bug.xml")
         </code>
         <remove-document collection="/db/data/tests" name="unflatten-order-bug.xml"/>
       </tearDown>

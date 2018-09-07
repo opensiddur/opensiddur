@@ -21,6 +21,7 @@
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <variable name="valid" as="document-node()">document {
     &lt;tr:schema&gt;
       &lt;tr:title xml:lang="en"&gt;Valid&lt;/tr:title&gt;

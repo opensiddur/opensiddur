@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : follow-uri function and mode
  : The follow-uri function will follow paths in the /api/* form, 

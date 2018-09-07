@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : Combine multiple documents into a single all-encompassing 
  : JLPTEI document
@@ -39,14 +39,14 @@ declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 declare function combine:combine-document(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   combine:combine($doc, $params)
 };
 
 declare function combine:combine(
   $nodes as node()*,
-  $params as map
+  $params as map(*)
   ) as node()* {
   for $node in $nodes
   return
@@ -126,7 +126,7 @@ declare function combine:combine(
 (:~ TEI is the root element :)
 declare function combine:tei-TEI(
   $e as element(tei:TEI),
-  $params as map
+  $params as map(*)
   ) as element(tei:TEI) {
   element { QName(namespace-uri($e), name($e)) }{
     $e/@*,
@@ -145,7 +145,7 @@ declare function combine:tei-TEI(
  :)
 declare function combine:associate-style(
     $e as element(),
-    $params as map
+    $params as map(*)
     ) as node()? {
     let $s := $params("combine:settings")
     where empty($params("combine:styled")) and exists($s) and $s("opensiddur->style")
@@ -155,15 +155,15 @@ declare function combine:associate-style(
 
 (: call this after associate-style :)
 declare function combine:unset-style(
-    $params as map
-    ) as map {
-    map:new(($params, map { "combine:styled" := 1 }))
+    $params as map(*)
+    ) as map(*) {
+    map:new(($params, map { "combine:styled" : 1 }))
 };
 
 (:~ equivalent of a streamText, check for redirects, add style if necessary :)
 declare function combine:jf-unflattened(
   $e as element(jf:unflattened),
-  $params as map
+  $params as map(*)
   ) as element(jf:combined) {
   let $new-params := combine:unset-style($params)
   return
@@ -192,7 +192,7 @@ declare function combine:jf-unflattened(
  :)
 declare function combine:tei-seg(
   $e as element(tei:seg),
-  $params as map
+  $params as map(*)
   ) as element() {
   let $combined := combine:element($e, $params)
   let $transliterated := 
@@ -215,7 +215,7 @@ declare function combine:tei-seg(
 
 declare function combine:j-segGen(
   $e as element(j:segGen),
-  $params as map
+  $params as map(*)
   ) as element() {
   let $combined := combine:element($e, $params)
   let $transliterated := combine:transliterate-in-place($combined, $e, $params)
@@ -225,7 +225,7 @@ declare function combine:j-segGen(
 
 declare function combine:element(
   $e as element(),
-  $params as map
+  $params as map(*)
   ) as element() {
   element {QName(namespace-uri($e), name($e))}{
     $e/(@* except (@uri:*, @xml:id)),
@@ -239,7 +239,7 @@ declare function combine:element(
 (:~ a parallelGrp has to align the parallel from here and from the other parallel file :)
 declare function combine:jf-parallelGrp(
     $e as element(jf:parallelGrp),
-    $params as map
+    $params as map(*)
     ) as element(jf:parallelGrp) {
     element jf:parallelGrp {
         $e/@*,
@@ -315,8 +315,8 @@ declare function combine:new-document-attributes(
 
 declare function combine:new-document-params(
     $new-doc-nodes as node()*,
-    $params as map
-    ) as map {
+    $params as map(*)
+    ) as map(*) {
     combine:new-document-params($new-doc-nodes, $params, false())
 };
 
@@ -329,9 +329,9 @@ declare function combine:new-document-params(
  :)
 declare function combine:new-document-params(
   $new-doc-nodes as node()*,
-  $params as map,
+  $params as map(*),
   $is-redirect as xs:boolean
-  ) as map {
+  ) as map(*) {
     let $unmirrored-doc := 
         if ($new-doc-nodes[1]/ancestor::jf:parallel-document)
         then
@@ -350,11 +350,11 @@ declare function combine:new-document-params(
     let $new-params := map:new((
         $params,
         map { 
-            "combine:unmirrored-doc" := 
+            "combine:unmirrored-doc" :
                 if ($is-redirect)
                 then ($params("combine:unmirrored-doc"), $unmirrored-doc)
                 else $unmirrored-doc,
-            "combine:conditional-layers" := map {}
+            "combine:conditional-layers" : map {}
         }
     ))
     return
@@ -364,8 +364,8 @@ declare function combine:new-document-params(
 (:~ update parameters are required for any new context :)
 declare function combine:update-params(
   $node as node()?,
-  $params as map
-  ) as map {
+  $params as map(*)
+  ) as map(*) {
   combine:update-settings-from-standoff-markup($node, $params, true())
 };
 
@@ -376,9 +376,9 @@ declare function combine:update-params(
  :)
 declare function combine:update-settings-from-standoff-markup(
     $e as node(),
-    $params as map,
+    $params as map(*),
     $new-context as xs:boolean
-    ) as map {
+    ) as map(*) {
     let $real-context :=
         (: if there's a @uri:document-uri, we need to load the real context-equivalent :)
         if ($e/@uri:document-uri)
@@ -399,7 +399,7 @@ declare function combine:update-settings-from-standoff-markup(
             map:new((
                 $params,
                 map {
-                    "combine:settings" := map:new((
+                    "combine:settings" : map:new((
                         $params("combine:settings"),
                         for $context in $base-context,
                             $setting in tokenize($context/@jf:set, '\s+')
@@ -414,7 +414,7 @@ declare function combine:update-settings-from-standoff-markup(
 
 declare %private function combine:tei-featureVal-to-map(
     $fnodes as node()*,
-    $params as map
+    $params as map(*)
     ) as element(tei:string)* {
     for $node in $fnodes
     return 
@@ -430,7 +430,11 @@ declare %private function combine:tei-featureVal-to-map(
         case element(tei:vColl) return combine:tei-featureVal-to-map($node/element(), $params)
         case element(tei:default) return element tei:string { cond:evaluate($node, $params) }
         case element() return element tei:string { $node/@value/string() }
-        case text() return element tei:string { string($node) }
+        case text() return
+            (: empty text nodes should not produce values :)
+            if (normalize-space($node))
+            then element tei:string { string($node) }
+            else ()
         default return ()
 }; 
 
@@ -439,8 +443,8 @@ declare %private function combine:tei-featureVal-to-map(
  :)
 declare function combine:tei-fs-to-map(
     $e as element(tei:fs),
-    $params as map
-    ) as map {
+    $params as map(*)
+    ) as map(*) {
     let $fsname := 
         if ($e/@type) 
         then $e/@type/string() 
@@ -474,7 +478,7 @@ declare function combine:tei-fs-to-map(
 declare function combine:transliterate-in-place(
   $e as element(),
   $context as element(),
-  $params as map
+  $params as map(*)
   ) as element()? {
   let $settings := $params("combine:settings")
   where exists($settings) and $settings("opensiddur:transliteration->active")=("ON","YES") and $settings("opensiddur:transliteration->table")
@@ -483,7 +487,7 @@ declare function combine:transliterate-in-place(
     let $out-script := $table/tr:lang[common:language($context)=@in]/@out/string()
     where exists($table)
     return 
-      let $transliterated := translit:transliterate($e, map { "translit:table" := $table })
+      let $transliterated := translit:transliterate($e, map { "translit:table" : $table })
       return 
         element {QName(namespace-uri($transliterated), name($transliterated))}{
           $transliterated/(@* except @xml:lang),
@@ -532,7 +536,7 @@ declare %private function combine:get-first-active-translation(
 declare function combine:translation-redirect(
     $e as element(),
     $destination as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     let $active-translation := 
         let $s := $params("combine:settings")
@@ -602,7 +606,7 @@ declare function combine:translation-redirect(
 declare function combine:include-annotation(
     $node as element(), 
     $annotation as element()*,
-    $params as map
+    $params as map(*)
     ) as xs:boolean {
     let $a := $annotation[1]
     let $annotation-id := xmldb:decode-uri(xs:anyURI(replace(tokenize(document-uri(root($a)), '/')[last()], '\.xml$', '')))
@@ -616,7 +620,7 @@ declare function combine:include-annotation(
 declare function combine:follow-pointer(
     $e as element(),
     $destination-ptr as xs:string,
-    $params as map,
+    $params as map(*),
     $wrapping-element as element()
     ) as element() {
     combine:follow-pointer($e, $destination-ptr, $params, $wrapping-element, ())
@@ -634,9 +638,9 @@ declare function combine:follow-pointer(
 declare function combine:follow-pointer(
     $e as element(),
     $destination-ptr as xs:string,
-    $params as map,
+    $params as map(*),
     $wrapping-element as element(),
-    $include-function as (function(element(), element()*, map) as xs:boolean)?
+    $include-function as (function(element(), element()*, map(*)) as xs:boolean)?
     ) as element()? {
     (: pointer to follow. 
      : This will naturally result in more than one wrapper per
@@ -710,7 +714,7 @@ declare function combine:follow-pointer(
 (:~ handle a pointer :)
 declare function combine:tei-ptr(
   $e as element(tei:ptr),
-  $params as map
+  $params as map(*)
   ) as element()+ {
   if ($e/@type = "url")
   then combine:element($e, $params)
@@ -725,7 +729,7 @@ declare function combine:tei-ptr(
 
 declare function combine:get-conditional-layer-id(
     $e as element(),
-    $params as map
+    $params as map(*)
     ) as xs:string? {
     $params("combine:unmirrored-doc")[1] || "#" || $e/@jf:layer-id
 };
@@ -743,8 +747,8 @@ declare function combine:get-conditional-layer-id(
  :)
 declare function combine:evaluate-conditions(
     $e as element(),
-    $params as map
-    ) as map {
+    $params as map(*)
+    ) as map(*) {
     let $this-element-condition-result :=
         let $conditions := (
             for $condition in tokenize($e/@jf:conditional, '\s+')
@@ -783,11 +787,11 @@ declare function combine:evaluate-conditions(
             $params,
             map {
                 (: if a layer is not ON/YES, then the layer result takes precedence :)
-                "combine:conditional-result" := (
+                "combine:conditional-result" : (
                     $conditional-layer-result,
                     $this-element-condition-result
                 )[1],
-                "combine:conditional-instruction" := 
+                "combine:conditional-instruction" :
                     $e/@jf:conditional-instruction
             },
             (: record if the layer is being turned off :)
@@ -796,10 +800,10 @@ declare function combine:evaluate-conditions(
                 and $e/@jf:layer-id)
             then
                 map {
-                    "combine:conditional-layers" := map:new((
+                    "combine:conditional-layers" : map:new((
                         $params("combine:conditional-layers"), 
                         map {
-                            $conditional-layer-id := (
+                            $conditional-layer-id : (
                                 $conditional-layer-result, 
                                 $this-element-condition-result[not(.=("YES","ON"))]
                             )[1]

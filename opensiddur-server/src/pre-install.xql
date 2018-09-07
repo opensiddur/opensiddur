@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: pre-install setup script 
  :
  : Open Siddur Project

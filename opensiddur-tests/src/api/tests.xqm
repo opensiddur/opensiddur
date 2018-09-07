@@ -30,7 +30,6 @@ declare
     %rest:query-param("suite", "{$suite}")
     %rest:query-param("test", "{$test}")
     %rest:produces("application/xhtml+xml", "text/html", "application/xml", "text/xml")
-    %output:method("html5")  
     function tests:get(
         $suite as xs:string*,
         $test as xs:string*
@@ -67,7 +66,7 @@ declare function tests:do-list(
      :)
     <rest:response>
         <output:serialization-parameters>
-            <output:method value="html5"/>
+            <output:method>xhtml</output:method>
         </output:serialization-parameters>
     </rest:response>,
     <html xmlns="http://www.w3.org/1999/xhtml">
@@ -105,7 +104,7 @@ declare function tests:do-test(
         then (
             <rest:response>
                 <output:serialization-parameters>
-                    <output:method value="xml"/>
+                    <output:method>xml</output:method>
                 </output:serialization-parameters>
             </rest:response>,
             let $results :=

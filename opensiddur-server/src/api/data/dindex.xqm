@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: API module for functions for index URIs 
  : 
  : Functions assume that the following has already been done:
@@ -26,7 +26,7 @@ declare
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
-      <output:method value="html5"/>
+      <output:method>xhtml</output:method>
     </output:serialization-parameters>
   </rest:response>,
   let $api-base := api:uri-of("/api/data")

@@ -11,7 +11,7 @@
   </tei:teiHeader>
   <j:settings>
     <tei:fs xml:id="translit_on" type="opensiddur:transliteration">
-      <tei:f name="table">Modern%20Israeli</tei:f>
+      <tei:f name="table">testtable</tei:f>
       <tei:f name="active"><j:on/></tei:f>
     </tei:fs>
     <tei:fs xml:id="translit_bad" type="opensiddur:transliteration">

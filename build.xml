@@ -1,11 +1,14 @@
-<project name="opensiddur" default="dist" basedir=".">
+<project name="opensiddur" default="dist" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 	<description>
         Build file for opensiddur
     </description>
     <property name="lib.dir" location="lib"/>
-	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-2.2-opensiddur.jar"/>
+    <property name="exist.version" value="4.3.1"/>
+    <property name="ivy.version" value="2.4.0"/>
+	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-${exist.version}-opensiddur.jar"/>
 	<property name="build" location="build"/>
     <property name="dist" location="dist"/>
+    <property name="deps.dir" location="dependencies"/>
 
     <property file="local.build.properties"/>
     <property file="build.properties"/>
@@ -34,6 +37,7 @@
 		<exec executable="git">
 		    <arg value="submodule"/>
 		    <arg value="update"/>
+            <arg value="--remote"/>
 		</exec>
        
 		<uptodate property="exist.uptodate" targetfile="${installer}">
@@ -48,6 +52,13 @@
 		<mkdir dir="${build}"/>
         <mkdir dir="${dist}"/>
 	</target>
+
+    <!-- this little bit of code downloads ivy. Thanks to https://superuser.com/questions/697800/how-to-get-apache-ant-to-recognize-ivy -->
+    <target name="bootstrap" description="Used to install the ivy task jar">
+        <mkdir dir="${user.home}/.ant/lib"/>
+        <get dest="${user.home}/.ant/lib/ivy.jar" src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar"/>
+    </target>
+
 
     <target name="exist" depends="build-exist,autodeploy">
     </target>
@@ -90,7 +101,6 @@ cacheSize=${cache.size}
         <exec
             executable="${installdir}/bin/client.sh"
             dir="${installdir}"
-            inputstring="sm:passwd('admin','${adminpassword}')"
             >
             <arg value="-qls"/>
             <arg value="-u"/>
@@ -98,6 +108,7 @@ cacheSize=${cache.size}
             <arg value="-P"/>
             <arg value="password"/>
             <arg value="-x"/>
+            <arg value="sm:passwd('admin','${adminpassword}')"/>
         </exec>
         <!-- copy the icu4j library from lib -->
         <copy todir="${installdir}/lib/user">
@@ -137,12 +148,12 @@ cacheSize=${cache.size}
         depends="dist"
         description="install the hebmorph files into eXist">
         <copy todir="${installdir}/extensions/indexes/lucene/lib" flatten="true">
-            <fileset dir="${lib.dir}/hebmorph-exist/build">
-                <include name="**/*.jar"/>
+            <fileset dir="${lib.dir}/hebmorph-exist/java/target">
+                <include name="hebmorph-lucene.jar"/>
             </fileset>
         </copy>
         <copy todir="${installdir}/extensions/indexes/lucene/lib">
-            <fileset dir="${lib.dir}/hebmorph-exist/src/hebmorph-exist">
+            <fileset dir="${lib.dir}/hebmorph-exist">
                 <include name="hspell-data-files/*"/>
             </fileset>
         </copy>
@@ -155,7 +166,7 @@ cacheSize=${cache.size}
             antfile="${lib.dir}/exist/build/scripts/installer.xml"
             target="download-xars">
             <!-- eXist-supplied apps to be installed -->
-            <property name="apps" value="shared,dashboard,eXide,doc,fundocs,monex" />
+            <property name="apps" value="shared,dashboard,eXide,exist-documentation,fundocs,monex,usermanager" />
         </ant>
 		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
@@ -169,7 +180,8 @@ cacheSize=${cache.size}
                 <include name="*shared-resources*.xar"/>
                 <include name="monex*.xar"/>
                 <include name="fundocs*.xar"/>
-                <include name="doc*.xar"/>
+                <include name="exist-documentation*.xar"/>
+                <include name="usermanager*.xar"/>
             </fileset>
 		</copy>
     </target>
@@ -189,16 +201,25 @@ cacheSize=${cache.size}
 		<subant target="dist" inheritAll="false">
 			<fileset dir=".">
 				<include name="*/build.xml"/>
-				<include name="lib/hebmorph-exist/build.xml"/>
 				<exclude name="build.xml"/>
 			</fileset>
 		</subant>
+        <exec dir="${lib.dir}/hebmorph-exist" executable="mvn">
+          <arg value="-Dmaven.test.skip=true"/>
+          <arg value="package"/>
+        </exec>
         <copy todir="${dist}" flatten="true">
             <fileset dir=".">
             	<include name="lib/*/dist/*.xar"/>
                 <include name="*/dist/*.xar"/>
             </fileset>
         </copy>
+    </target>
+    
+    <target name="retrieve-dependencies"
+        depends="bootstrap"
+        description="Retrieve dependencies with Apache IVY">
+        <ivy:retrieve pattern="${deps.dir}/[artifact].[ext]" type="jar" />
     </target>
 
 	<target name="clean"
@@ -207,7 +228,6 @@ cacheSize=${cache.size}
 		<subant target="clean" inheritAll="false">
 			<fileset dir=".">
 				<include name="*/build.xml"/>
-				<include name="lib/hebmorph-exist/build.xml"/>
 				<exclude name="build.xml"/>
 			</fileset>
 		</subant>
@@ -215,6 +235,9 @@ cacheSize=${cache.size}
 		<!-- Delete the ${build} and ${dist} directory trees -->
 		<delete dir="${build}"/>
 		<delete dir="${dist}"/>
+
+        <!-- delete Ivy dependencies -->
+        <delete dir="${deps.dir}"/>
 	</target>
 	
 	<target name="lib-clean"
@@ -280,7 +303,8 @@ cacheSize=${cache.size}
             <arg value="${backup.directory}"/>
             <arg value="-ouri=xmldb:exist://"/>
             <!-- DEBUG_OPTS seems to be the only way to force options after java.endorsed.dirs -->
-            <env key="DEBUG_OPTS" value="-Dexist.autodeploy=off -Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
+            <env key="DEBUG_OPTS" value="-Dexist.autodeploy=off"/>
+            <!-- -Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>-->
         </exec>
         <!-- schema update -->    
         <!--

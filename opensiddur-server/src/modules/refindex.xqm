@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 
 (:~ reference index module
  :
@@ -133,6 +133,7 @@ declare function ridx:reindex(
       let $resource := util:document-name($doc)
       let $make-mirror-collection :=
         local:make-index-collection($collection)
+      let $debug := debug:debug($debug:detail, "refindex", "reindexing " || $doc-uri || "...")
       where not(mirror:is-up-to-date($ridx:ridx-path, $doc-uri, ridx:up-to-date-function#2))
       return
         if (mirror:store($ridx:ridx-path, $collection, $resource, 
@@ -163,7 +164,8 @@ declare %private function ridx:make-index-entries(
   let $returned := 
     if (matches($follow, "^http[s]?://"))
     then ()
-    else 
+    else
+        let $debug := debug:debug($debug:detail, "refindex", "following " || $follow || "...")
         let $r := uri:fast-follow($follow, $element, uri:follow-steps($element), true())
         return
             if (exists($r))

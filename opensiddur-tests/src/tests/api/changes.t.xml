@@ -110,9 +110,9 @@
         <code>
             chg:list((), (), (), (), 1, 100)[2]
         </code>
-        <xpath desc="an HTML API results document is returned"><![CDATA[exists(self::html[descendant::ul[@class="results"]])]]></xpath>
-        <xpath desc="at least one result is returned"><![CDATA[count(.//li[@class="result"]) >= 1]]></xpath> 
-        <xpath desc="at most max-results are returned"><![CDATA[count(.//li[@class="result"]) <= 100]]></xpath> 
+        <xpath desc="an HTML API results document is returned"><![CDATA[exists(self::html:html[descendant::html:ul[@class="results"]])]]></xpath>
+        <xpath desc="at least one result is returned"><![CDATA[count(.//html:li[@class="result"]) >= 1]]></xpath>
+        <xpath desc="at most max-results are returned"><![CDATA[count(.//html:li[@class="result"]) <= 100]]></xpath>
       </test>
       <test>
         <task>A nonexistent type returns an error</task>
@@ -126,56 +126,56 @@
         <code>
             chg:list("original", "testuser", (), (), 1, 100)[2]
         </code>
-        <xpath desc="an HTML API results document is returned"><![CDATA[exists(self::html[descendant::ul[@class="results"]])]]></xpath>
-        <xpath desc="at least one result is returned"><![CDATA[count(.//li[@class="result"]) >= 1]]></xpath> 
-        <xpath desc="at most max-results are returned"><![CDATA[count(.//li[@class="result"]) <= 100]]></xpath> 
+        <xpath desc="an HTML API results document is returned"><![CDATA[exists(self::html:html[descendant::html:ul[@class="results"]])]]></xpath>
+        <xpath desc="at least one result is returned"><![CDATA[count(.//html:li[@class="result"]) >= 1]]></xpath>
+        <xpath desc="at most max-results are returned"><![CDATA[count(.//html:li[@class="result"]) <= 100]]></xpath>
       </test>
       <test>
         <task>Return all recent changes by a given user in type notes, where none were made</task>
         <code>
             chg:list("notes", "testuser", (), (), 1, 100)[2]
         </code>
-        <xpath desc="an HTML API results document is returned"><![CDATA[exists(self::html[descendant::ul[@class="results"]])]]></xpath>
-        <xpath desc="no results is returned"><![CDATA[count(.//li[@class="result"]) = 0]]></xpath> 
+        <xpath desc="an HTML API results document is returned"><![CDATA[exists(self::html:html[descendant::html:ul[@class="results"]])]]></xpath>
+        <xpath desc="no results is returned"><![CDATA[count(.//html:li[@class="result"]) = 0]]></xpath>
       </test>
       <test>
          <task>Return all recent changes made by a particular user</task>
          <code>
             chg:list((), "testuser", (), (), 1, 1000)[2]
          </code> 
-         <xpath desc="returns results for 11 files">count(.//li[@class="result"])=11</xpath>
-         <xpath desc="returns created entry for 11 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="created"]]])=11</xpath>
-         <xpath desc="returns edited entries for 11 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]])=11</xpath>
-         <xpath desc="files are sorted in descending order"><![CDATA[.//li[1]/ol/li[1]/span[@class="when"]/string() > .//li[2]/ol/li[1]/span[@class="when"]/string() ]]></xpath>
-         <xpath desc="change records per file are sorted in descending order"><![CDATA[.//li[1]/ol/li[1]/span[@class="when"]/string() > .//li[1]/ol/li[2]/span[@class="when"]/string() ]]></xpath>
+         <xpath desc="returns results for 11 files">count(.//html:li[@class="result"])=11</xpath>
+         <xpath desc="returns created entry for 11 files">count(.//html:li[@class="result"][html:ol[@class="changes"]/html:li[@class="change"][html:span[@class="who"][.="testuser"]][html:span[@class="type"][.="created"]]])=11</xpath>
+         <xpath desc="returns edited entries for 11 files">count(.//html:li[@class="result"][html:ol[@class="changes"]/html:li[@class="change"][html:span[@class="who"][.="testuser"]][html:span[@class="type"][.="edited"]]])=11</xpath>
+         <xpath desc="files are sorted in descending order"><![CDATA[.//html:li[1]/html:ol/html:li[1]/html:span[@class="when"]/string() > .//html:li[2]/html:ol/html:li[1]/html:span[@class="when"]/string() ]]></xpath>
+         <xpath desc="change records per file are sorted in descending order"><![CDATA[.//html:li[1]/html:ol/html:li[1]/html:span[@class="when"]/string() > .//html:li[1]/html:ol/html:li[2]/html:span[@class="when"]/string() ]]></xpath>
       </test>
       <test>
          <task>Return all recent changes made by a particular user with a date begin range</task>
          <code>
             chg:list((), "testuser", "1986-06-01T00:00:00", (), 1, 1000)[2] 
          </code>
-         <xpath desc="returns results for 8 files">count(.//li[@class="result"])=8</xpath>
-         <xpath desc="returns created entry for 7 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="created"]]])=7</xpath>
-         <xpath desc="returns only entries after the breakpoint"><![CDATA[every $entry in .//ul[@class="results"][a[.="File_1986"]]/li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]] satisfies $entry/span[@class="when"] >= "1986-06-01T00:00:00"]]></xpath>
+         <xpath desc="returns results for 8 files">count(.//html:li[@class="result"])=8</xpath>
+         <xpath desc="returns created entry for 7 files">count(.//html:li[@class="result"][html:ol[@class="changes"]/html:li[@class="change"][html:span[@class="who"][.="testuser"]][html:span[@class="type"][.="created"]]])=7</xpath>
+         <xpath desc="returns only entries after the breakpoint"><![CDATA[every $entry in .//html:ul[@class="results"][html:a[.="File_1986"]]/html:li[@class="result"][html:ol[@class="changes"]/html:li[@class="change"][html:span[@class="who"][.="testuser"]][html:span[@class="type"][.="edited"]]] satisfies $entry/html:span[@class="when"] >= "1986-06-01T00:00:00"]]></xpath>
       </test>
       <test>
          <task>Return all recent changes made by a particular user with a date end range</task>
          <code>
             chg:list((), "testuser", (), "1986-06-01T00:00:00", 1, 1000)[2] 
          </code>
-         <xpath desc="returns results for 4 files">count(.//li[@class="result"])=4</xpath>
-         <xpath desc="returns created entry for 4 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="created"]]])=4</xpath>
-         <xpath desc="returns only entries before the breakpoint"><![CDATA[every $entry in .//ul[@class="results"][a[.="File_1986"]]/li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]] satisfies $entry/span[@class="when"] <= "1986-06-01T00:00:00"]]></xpath>
+         <xpath desc="returns results for 4 files">count(.//html:li[@class="result"])=4</xpath>
+         <xpath desc="returns created entry for 4 files">count(.//html:li[@class="result"][html:ol[@class="changes"]/html:li[@class="change"][html:span[@class="who"][.="testuser"]][html:span[@class="type"][.="created"]]])=4</xpath>
+         <xpath desc="returns only entries before the breakpoint"><![CDATA[every $entry in .//html:ul[@class="results"][html:a[.="File_1986"]]/html:li[@class="result"][html:ol[@class="changes"]/html:li[@class="change"][html:span[@class="who"][.="testuser"]][html:span[@class="type"][.="edited"]]] satisfies $entry/html:span[@class="when"] <= "1986-06-01T00:00:00"]]></xpath>
       </test>
       <test>
          <task>Return all recent changes made by a particular user with date begin and end ranges</task>
          <code>
             chg:list((), "testuser", "1982-06-01T00:00:00", "1990-06-01T00:00:00", 1, 1000)[2] 
          </code>
-         <xpath desc="returns results for 5 files">count(.//li[@class="result"])=5</xpath>
-         <xpath desc="returns created entry for 4 files">count(.//li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="created"]]])=4</xpath>
-         <xpath desc="returns only entries after the breakpoint for the start date"><![CDATA[every $entry in .//ul[@class="results"][a[.="File_1982"]]/li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]] satisfies $entry/span[@class="when"] >= "1982-06-01T00:00:00"]]></xpath>
-         <xpath desc="returns only entries before the breakpoint for the end date"><![CDATA[every $entry in .//ul[@class="results"][a[.="File_1990"]]/li[@class="result"][ol[@class="changes"]/li[@class="change"][span[@class="who"][.="testuser"]][span[@class="type"][.="edited"]]] satisfies $entry/span[@class="when"] <= "1990-06-01T00:00:00"]]></xpath>
+         <xpath desc="returns results for 5 files">count(.//html:li[@class="result"])=5</xpath>
+         <xpath desc="returns created entry for 4 files">count(.//html:li[@class="result"][html:ol[@class="changes"]/html:li[@class="change"][html:span[@class="who"][.="testuser"]][html:span[@class="type"][.="created"]]])=4</xpath>
+         <xpath desc="returns only entries after the breakpoint for the start date"><![CDATA[every $entry in .//html:ul[@class="results"][html:a[.="File_1982"]]/html:li[@class="result"][html:ol[@class="changes"]/html:li[@class="change"][html:span[@class="who"][.="testuser"]][html:span[@class="type"][.="edited"]]] satisfies $entry/html:span[@class="when"] >= "1982-06-01T00:00:00"]]></xpath>
+         <xpath desc="returns only entries before the breakpoint for the end date"><![CDATA[every $entry in .//html:ul[@class="results"][html:a[.="File_1990"]]/html:li[@class="result"][html:ol[@class="changes"]/html:li[@class="change"][html:span[@class="who"][.="testuser"]][html:span[@class="type"][.="edited"]]] satisfies $entry/html:span[@class="when"] <= "1990-06-01T00:00:00"]]></xpath>
       </test>
   </TestSet>
 </TestSuite>

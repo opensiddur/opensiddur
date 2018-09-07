@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: Copyright 2012-2016 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -11,6 +11,8 @@ module namespace orig = 'http://jewishliturgy.org/api/data/original';
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace http="http://expath.org/ns/http-client";
+
 
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "../../modules/api.xqm";
@@ -216,7 +218,7 @@ declare
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
-  %output:method("html5")  
+  %output:method("xhtml")
   function orig:list(
     $q as xs:string*,
     $start as xs:integer*,
@@ -451,7 +453,7 @@ declare
   %rest:path("/api/data/original/{$name}/combined")
   %rest:query-param("transclude", "{$transclude}")
   %rest:produces("application/xhtml+xml", "text/html")
-  %output:method("html5")
+  %output:method("xhtml")
   %output:indent("yes")
   function orig:get-combined-html(
     $name as xs:string,
@@ -531,7 +533,7 @@ return util:log-system-out(('compiled ', document-uri($b)))"
       return 
         <rest:response>
             <output:serialization-parameters>
-                <output:method value="text"/>
+                <output:method>text</output:method>
             </output:serialization-parameters>
             <http:response status="202">
                 <http:header name="Location" value="{api:uri-of('/api/jobs')}/{$job-id}"/>
@@ -547,7 +549,7 @@ declare
   %rest:path("/api/data/original/{$name}/html")
   %rest:query-param("transclude", "{$transclude}")
   %rest:produces("application/xhtml+xml", "text/html")
-  %output:method("html5")
+  %output:method("xhtml")
   %output:indent("yes")
   function orig:get-combined-html-forced(
     $name as xs:string,

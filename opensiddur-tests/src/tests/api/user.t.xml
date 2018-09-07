@@ -65,6 +65,7 @@
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <imports>
     import module namespace ridx="http://jewishliturgy.org/modules/refindex"
       at "xmldb:exist:///db/apps/opensiddur-server/modules/refindex.xqm";

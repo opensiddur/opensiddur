@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:
 : Module Name: Validation API
 : Date: August 19, 2009

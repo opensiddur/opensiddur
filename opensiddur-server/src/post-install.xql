@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "modules/format.xqm";
@@ -69,5 +69,26 @@ util:log-system-out("upgrades: reindex reference index"),
 ridx:reindex(collection("/db/data")),
 util:log-system-out("reindex all data collections"),
 xmldb:reindex("/db/data"),
+util:log-system-out("force registration for RESTXQ..."),
+for $module in (
+            "/api/data/conditionals.xqm",
+            "/api/data/styles.xqm",
+            "/api/data/original.xqm",
+            "/api/group.xqm",
+            "/api/data/linkage.xqm",
+            "/api/data/transliteration.xqm",
+            "/api/index.xqm",
+            "/api/login.xqm",
+            "/api/data/dindex.xqm",
+            "/api/data/notes.xqm",
+            "/api/data/dictionaries.xqm",
+            "/api/jobs.xqm",
+            "/api/user.xqm",
+            "/api/data/sources.xqm",
+            "/api/changes.xqm",
+            "/api/static.xqm",
+            "/api/data/outlines.xqm"
+)
+return exrest:register-module(xs:anyURI("/db/apps/opensiddur-server" || $module)),
 util:log-system-out("done")
 
