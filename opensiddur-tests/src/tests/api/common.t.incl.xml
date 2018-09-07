@@ -32,11 +32,11 @@
   </TestClass>
   <!-- serialization -->
   <TestClass xml:id="SerializeHTML5">
-      <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method="html5"</xpath>
+      <xpath desc="serialize as XHTML">self::rest:response/output:serialization-parameters/output:method="xhtml"</xpath>
   </TestClass>
   <!-- search and list APIs -->
   <TestClass xml:id="SearchResults">
-      <xpath desc="serialize as HTML5">self::rest:response/output:serialization-parameters/output:method="html5"</xpath>
+      <xpath desc="serialize as XHTML">self::rest:response/output:serialization-parameters/output:method="xhtml"</xpath>
       <xpath desc="reference to Open Search @profile removed for html5 compliance">empty(.//html:head/@profile)</xpath>
       <xpath desc="@startIndex is present">count(.//html:meta[@name='startIndex'])=1</xpath>
       <xpath desc="@endIndex has been removed">count(.//html:meta[@name='endIndex'])=0</xpath>

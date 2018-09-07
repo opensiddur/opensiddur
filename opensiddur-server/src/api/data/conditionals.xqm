@@ -152,7 +152,7 @@ declare
   %rest:query-param("decls-only", "{$decls-only}", "false")
   %rest:query-param("types-only", "{$types-only}", "false")
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
-  %output:method("html5")  
+  %output:method("xhtml")
   function cnd:list(
     $q as xs:string*,
     $start as xs:integer*,

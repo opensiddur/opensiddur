@@ -25,7 +25,7 @@ declare
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
-      <output:method>html5</output:method>
+      <output:method>xhtml</output:method>
     </output:serialization-parameters>
   </rest:response>,
   <html xmlns="http://www.w3.org/1999/xhtml">

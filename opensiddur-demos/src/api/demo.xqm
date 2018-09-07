@@ -56,7 +56,7 @@ declare
   %rest:GET
   %rest:path("/api/demo")
   %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
-  %output:method("html5")
+  %output:method("xhtml")
   function demo:list(
   ) as item()+ {
   <html xmlns="http://www.w3.org/1999/xhtml">
@@ -94,7 +94,7 @@ declare
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)  
   %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
-  %output:method("html5")
+  %output:method("xhtml")
   function demo:transliteration-list(
     $q as xs:string*,
     $start as xs:integer*,

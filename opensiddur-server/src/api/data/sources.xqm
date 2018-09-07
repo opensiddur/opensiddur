@@ -78,7 +78,7 @@ declare
   %rest:GET
   %rest:path("/api/data/sources/{$name}/pages")
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
-  %output:method("html5")  
+  %output:method("xhtml")
   function src:pages(
     $name as xs:string
   ) as item()+ {
@@ -152,7 +152,7 @@ declare
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
-  %output:method("html5")  
+  %output:method("xhtml")
   function src:list(
     $q as xs:string*,
     $start as xs:integer*,

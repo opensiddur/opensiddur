@@ -218,7 +218,7 @@ declare
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
-  %output:method("html5")  
+  %output:method("xhtml")
   function orig:list(
     $q as xs:string*,
     $start as xs:integer*,
@@ -453,7 +453,7 @@ declare
   %rest:path("/api/data/original/{$name}/combined")
   %rest:query-param("transclude", "{$transclude}")
   %rest:produces("application/xhtml+xml", "text/html")
-  %output:method("html5")
+  %output:method("xhtml")
   %output:indent("yes")
   function orig:get-combined-html(
     $name as xs:string,
@@ -549,7 +549,7 @@ declare
   %rest:path("/api/data/original/{$name}/html")
   %rest:query-param("transclude", "{$transclude}")
   %rest:produces("application/xhtml+xml", "text/html")
-  %output:method("html5")
+  %output:method("xhtml")
   %output:indent("yes")
   function orig:get-combined-html-forced(
     $name as xs:string,

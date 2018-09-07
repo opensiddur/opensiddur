@@ -207,7 +207,7 @@ declare function crest:list(
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
-      <output:method>html5</output:method>
+      <output:method>xhtml</output:method>
     </output:serialization-parameters>
   </rest:response>,
   let $query := string-join($query[.], " ")
