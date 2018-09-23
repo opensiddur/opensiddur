@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ parallel to layer transform
  : convert j:parallelText/tei:linkGrp into layers that can be flattened and merged 
  : assumes that external dependencies are flattened/phony-layered 
@@ -26,7 +26,7 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
 declare function pla:parallel-layer-document(
     $doc as document-node(),
-    $params as map 
+    $params as map(*)
     ) as document-node() {
     document {
         let $pt := $doc//j:parallelText
@@ -50,7 +50,7 @@ declare function pla:parallel-layer-document(
 declare function pla:add-layer(
     $nodes as node()*,
     $layer as element(j:layer),
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -86,7 +86,7 @@ declare function pla:add-layer(
 
 declare function pla:tei-linkGrp(
     $e as element(tei:linkGrp),
-    $params as map
+    $params as map(*)
     ) as element(j:layer) {
     element j:layer {
         attribute type { "parallel" },

@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : Transform for combined JLPTEI to HTML 
  :
@@ -30,14 +30,14 @@ declare variable $tohtml:default-style := "/api/data/styles/generic.css";
 (:~ entry point :)
 declare function tohtml:tohtml-document(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   tohtml:tohtml($doc, $params)
 };
 
 declare function tohtml:tohtml(
   $nodes as node()*,
-  $params as map
+  $params as map(*)
   ) as node()* {
   for $node in $nodes
   return
@@ -92,7 +92,7 @@ declare function tohtml:tohtml(
  :)
 declare function tohtml:space(
   $e as element(),
-  $params as map
+  $params as map(*)
   ) as node()? {
   if (
     $e/following::*[1] instance of element(tei:pc) or
@@ -104,7 +104,7 @@ declare function tohtml:space(
 
 declare function tohtml:span-element(
   $e as element(),
-  $params as map
+  $params as map(*)
   ) as node()+ {
   element span {
     tohtml:attributes($e, $params),
@@ -115,7 +115,7 @@ declare function tohtml:span-element(
 
 declare function tohtml:tei-pc(
   $e as element(tei:pc),
-  $params as map
+  $params as map(*)
   ) as node()+ {
   element span {
     let $attributes := tohtml:attributes($e, $params)
@@ -142,7 +142,7 @@ declare function tohtml:tei-pc(
 (:~ convert any remaining tei:ptr after processing to an a[href] :)
 declare function tohtml:tei-ptr(
     $e as element(tei:ptr),
-    $params as map
+    $params as map(*)
     ) as node()+ {
     element a {
         attribute href { $e/@target },
@@ -157,7 +157,7 @@ declare function tohtml:tei-ptr(
 
 declare function tohtml:tei-ref(
     $e as element(tei:ref),
-    $params as map
+    $params as map(*)
     ) as node()+ {
     element a {
         attribute href { $e/@target },
@@ -174,7 +174,7 @@ declare function tohtml:tei-ref(
 
 declare function tohtml:tei-ref-license(
     $e as element(tei:ref),
-    $params as map
+    $params as map(*)
     ) as node()+ {
     let $icons := map {
         "zero" := "/api/static/cc-zero.svg",
@@ -201,7 +201,7 @@ declare function tohtml:tei-ref-license(
 (:~ add an audio icon :)
 declare function tohtml:tei-ref-audio(
     $e as element(),
-    $params as map
+    $params as map(*)
     ) as node()+ {
     element object {
         attribute data { "/api/static/Speaker_Icon.svg" },
@@ -227,7 +227,7 @@ declare function tohtml:wrap-in-link(
 (:~ @return contributor list entry :)
 declare function tohtml:j-contributor(
     $e as element(j:contributor),
-    $params as map
+    $params as map(*)
     ) as element() {
     let $name := 
         let $name := tohtml:tohtml(($e/tei:name,$e/tei:orgName,$e/tei:idno)[1], $params)
@@ -251,7 +251,7 @@ declare function tohtml:j-contributor(
 (:~ @return classes :)
 declare function tohtml:attributes-to-class(
   $attributes as attribute()*,
-  $params as map
+  $params as map(*)
   ) as xs:string* {
   for $a in $attributes
   return
@@ -271,7 +271,7 @@ declare function tohtml:attributes-to-class(
 
 declare function tohtml:attributes(
   $e as element(),
-  $params as map
+  $params as map(*)
   ) as attribute()* {
   if ($e/@xml:lang and
     ( $e is root($e)/* or
@@ -317,7 +317,7 @@ declare function tohtml:attributes(
 
 declare function tohtml:tei-TEI(
   $e as element(tei:TEI),
-  $params as map
+  $params as map(*)
   ) as element(html) {
   element html {
     tohtml:attributes($e, $params),
@@ -350,7 +350,7 @@ declare %private function tohtml:lang(
 (:~ build a title suitable for an HTML header :)
 declare function tohtml:header-title( 
   $tei-header as element(tei:teiHeader),
-  $params as map
+  $params as map(*)
   ) as element(title) {
   element title {
     let $main-lang := common:language($tei-header/..)
@@ -373,7 +373,7 @@ declare function tohtml:header-title(
 
 declare function tohtml:div-with-header(
     $e as element(tei:div),
-    $params as map,
+    $params as map(*),
     $header as item()*
     ) as element() {
     element div {
@@ -388,7 +388,7 @@ declare function tohtml:div-with-header(
 (:~ add additional license notes, if necessary :)
 declare function tohtml:add-additional-license-notes(
     $e as element(),
-    $params as map
+    $params as map(*)
     ) as element() {
     element { QName(namespace-uri($e), name($e)) } {
         $e/@*,
@@ -412,7 +412,7 @@ declare function tohtml:add-additional-license-notes(
 
 declare function tohtml:tei-listBibl(
     $e as element(tei:listBibl),
-    $params as map
+    $params as map(*)
     ) as element() {
     element div {
         tohtml:attributes($e, $params),
@@ -425,7 +425,7 @@ declare function tohtml:tei-listBibl(
 
 declare function tohtml:bibliography(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -478,7 +478,7 @@ declare function tohtml:bibliography(
 
 declare function tohtml:bibl-tei-edition(
     $e as element(tei:edition),
-    $params as map
+    $params as map(*)
     ) as node()+ {
     element div {
         tohtml:attributes($e, $params),
@@ -488,7 +488,7 @@ declare function tohtml:bibl-tei-edition(
 
 declare function tohtml:bibl-tei-imprint(
     $e as element(tei:imprint),
-    $params as map
+    $params as map(*)
     ) as node()* {
     element div {
         tohtml:attributes($e, $params),
@@ -503,7 +503,7 @@ declare function tohtml:bibl-tei-imprint(
 
 declare function tohtml:bibl-tei-author-or-editor(
     $e as element(),
-    $params as map
+    $params as map(*)
     ) as node()* {
     if (not($e/@corresp)) 
     then    (: do not include translations :)
@@ -542,7 +542,7 @@ declare function tohtml:bibl-tei-author-or-editor(
 
 declare function tohtml:bibl-tei-surname(
     $e as element(tei:surname),
-    $params as map
+    $params as map(*)
     ) as node()* {
     let $rn := $e/../tei:roleName
     where exists($rn)
@@ -561,7 +561,7 @@ declare function tohtml:bibl-tei-surname(
 
 declare function tohtml:use-bibl(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -579,7 +579,7 @@ declare function tohtml:use-bibl(
 
 declare function tohtml:use-bibl-tei-forename(
     $e as element(tei:forename),
-    $params as map
+    $params as map(*)
     ) as node()* {
     if ($e/preceding-sibling::tei:forename)
     then text { " " }
@@ -592,7 +592,7 @@ declare function tohtml:use-bibl-tei-forename(
 
 declare function tohtml:use-bibl-any(
     $e as element(),
-    $params as map
+    $params as map(*)
     ) as node()* {
     element span {
         tohtml:attributes($e, $params),
@@ -603,7 +603,7 @@ declare function tohtml:use-bibl-any(
 (: TODO: differentiate between different level titles :)
 declare function tohtml:bibl-tei-title(
     $e as element(tei:title),
-    $params as map
+    $params as map(*)
     ) as node()* {
     element div {
         tohtml:attributes($e, $params),
@@ -617,7 +617,7 @@ declare function tohtml:bibl-tei-title(
 
 declare function tohtml:bibl-tei-meeting(
     $e as element(tei:meeting),
-    $params as map
+    $params as map(*)
     ) as node()* {
     text { " (" },
     element div {
@@ -632,7 +632,7 @@ declare function tohtml:bibl-tei-meeting(
 
 declare function tohtml:bibl-tei-date(
     $e as element(tei:date),
-    $params as map
+    $params as map(*)
     ) as node()* {
     if ($e/@type="access")
     then text { "Accessed " }
@@ -648,7 +648,7 @@ declare function tohtml:bibl-tei-date(
 
 declare function tohtml:bibl-tei-pubPlace(
     $e as element(tei:pubPlace),
-    $params as map
+    $params as map(*)
     ) as node()* {
     element div {
         tohtml:attributes($e, $params),
@@ -665,7 +665,7 @@ declare function tohtml:bibl-tei-pubPlace(
 
 declare function tohtml:bibl-tei-publisher(
     $e as element(tei:publisher),
-    $params as map
+    $params as map(*)
     ) as node()+ {
     element div {
         tohtml:attributes($e, $params),
@@ -676,7 +676,7 @@ declare function tohtml:bibl-tei-publisher(
 
 declare function tohtml:bibl-tei-biblScope(
     $e as element(tei:biblScope),
-    $params as map
+    $params as map(*)
     ) as node()+ {
     if ($e/ancestor::tei:bibl)
     then tohtml:bibliography($e/node(), $params)
@@ -724,7 +724,7 @@ declare function tohtml:bibl-tei-biblScope(
 
 declare function tohtml:bibl-tei-idno(
     $e as element(tei:idno),
-    $params as map
+    $params as map(*)
     ) as node()* {
     if ($e/@type=("doi", "isbn", "ISBN"))
     then ()
@@ -739,7 +739,7 @@ declare function tohtml:bibl-tei-idno(
 
 declare function tohtml:bibl-tei-biblStruct(
     $e as element(tei:biblStruct),
-    $params as map
+    $params as map(*)
     ) as element() {
     element div {
         tohtml:attributes($e, $params),
@@ -765,7 +765,7 @@ declare function tohtml:bibl-tei-biblStruct(
 
 declare function tohtml:bibl-tei-note(
     $e as element(tei:note),
-    $params as map
+    $params as map(*)
     ) as element() {
     element div {
         tohtml:attributes($e, $params),
@@ -776,7 +776,7 @@ declare function tohtml:bibl-tei-note(
 
 declare function tohtml:bibl-tei-distributor(
     $e as element(tei:distributor),
-    $params as map
+    $params as map(*)
     ) as node()+ {
     text { "Distributed by " },
     element div {
@@ -788,7 +788,7 @@ declare function tohtml:bibl-tei-distributor(
 
 declare function tohtml:bibl-text(
     $e as text(),
-    $params as map
+    $params as map(*)
     ) as text()? {
     if ($e/ancestor::tei:name/descendant::text()[last()])
     then $e (: last name in a list :)
@@ -808,7 +808,7 @@ declare function tohtml:bibl-text(
 (:~ generic element :)
 declare function tohtml:element(
   $e as element(),
-  $params as map
+  $params as map(*)
   ) as element() {
   element div {
     tohtml:attributes($e, $params),

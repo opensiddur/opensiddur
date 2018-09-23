@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : Common functions for the transform
  :
@@ -22,6 +22,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
+declare namespace http="http://expath.org/ns/http-client";
 
 (:~ generate a unique, persistent id for a node. replace with xsl:generate-id()
  : @param $node node to create an id for
@@ -270,8 +271,8 @@ declare function common:TEI-root(
 declare function common:apply-at(
   $nodes as node()*,
   $transition-nodes as node()*,
-  $transform as function(node()*, map) as node()*,
-  $params as map
+  $transform as function(node()*, map(*)) as node()*,
+  $params as map(*)
   ) as node()* {
   for $node in $nodes
   return

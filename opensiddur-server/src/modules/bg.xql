@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: background task runner.
  : runs every 1s from a cron job, and reads commands submitted by status:submit()
  :)

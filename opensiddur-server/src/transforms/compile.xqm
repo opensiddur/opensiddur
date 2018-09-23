@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : Write lists for a combined document
  :
@@ -25,14 +25,14 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
 declare function compile:compile-document(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   compile:compile($doc, $params)
 };
 
 declare function compile:compile(
   $nodes as node()*,
-  $params as map
+  $params as map(*)
   ) as node()* {
   for $node in $nodes
   return
@@ -48,7 +48,7 @@ declare function compile:compile(
 
 declare function compile:element(
   $e as element(),
-  $params as map
+  $params as map(*)
   ) as element() {
   element {QName(namespace-uri($e), name($e))}{
     $e/@*,
@@ -59,7 +59,7 @@ declare function compile:element(
 (: add back matter that's derived from the text's metadata :)
 declare function compile:tei-text(
   $e as element(tei:text),
-  $params as map
+  $params as map(*)
   ) as element(tei:text) {
   let $text-output := compile:element($e, $params)
   return 

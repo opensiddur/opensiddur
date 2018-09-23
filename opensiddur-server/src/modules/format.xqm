@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : XQuery functions to output a given XML file in a format.
  : 
@@ -42,6 +42,7 @@ import module namespace reverse="http://jewishliturgy.org/transform/reverse"
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
+declare namespace http="http://expath.org/ns/http-client";
 
 declare variable $format:temp-dir := '.format';
 
@@ -99,9 +100,9 @@ declare function format:clear-caches(
 (:~ add a format:status-job-id parameter pointing to the job where status should be updated
  : should be updated and format:stage-number to $params if they do not already exist  :)
 declare function format:status-param(
-    $params as map,
+    $params as map(*),
     $original-doc as document-node()
-    ) as map {
+    ) as map(*) {
     map:new((
         $params,
         map { 
@@ -113,7 +114,7 @@ declare function format:status-param(
 
 declare function format:apply-if-outdated(
     $stage as xs:string,
-    $params as map,
+    $params as map(*),
     $mirror-path as xs:string,
     $transformee as item(),
     $transform as function(node()*) as node()*,
@@ -124,7 +125,7 @@ declare function format:apply-if-outdated(
 
 declare function format:apply-if-outdated(
     $stage as xs:string,
-    $params as map,
+    $params as map(*),
     $mirror-path as xs:string,
     $transformee as item(),
     $transform as function(node()*) as node()*,
@@ -182,7 +183,7 @@ declare function format:is-parallel-document(
  :) 
 declare function format:parallel-layer(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
@@ -207,7 +208,7 @@ declare function format:parallel-layer(
  :) 
 declare function format:phony-layer(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
@@ -232,7 +233,7 @@ declare function format:phony-layer(
  :) 
 declare function format:flatten(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
@@ -260,7 +261,7 @@ declare function format:flatten(
  :)
 declare function format:merge(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
@@ -284,7 +285,7 @@ declare function format:merge(
  :)
 declare function format:resolve(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
@@ -304,7 +305,7 @@ declare function format:resolve(
  :)
 declare function format:display-flat(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node()
   ) as document-node() {
   flatten:display(
@@ -321,7 +322,7 @@ declare function format:display-flat(
  :)
 declare function format:unflatten(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
@@ -367,7 +368,7 @@ declare function format:get-dependencies(
  :)
 declare function format:dependencies(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   let $params := format:status-param($params, $doc)
   return
@@ -384,7 +385,7 @@ declare function format:dependencies(
 (:~ unflatten all transformable dependencies of a given document :)
 declare function format:unflatten-dependencies(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node()* {
   for $dep in format:dependencies($doc, $params)//format:dependency[@transformable]
   return format:unflatten(doc($dep), $params, doc($dep))
@@ -393,7 +394,7 @@ declare function format:unflatten-dependencies(
 (:~ flatten all transformable dependencies of a given document, excluding itself :)
 declare function format:flatten-external-dependencies(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node()+ {
   for $dep in format:dependencies($doc, $params)//format:dependency[@transformable]
   let $dep-doc := doc($dep)
@@ -461,7 +462,7 @@ declare function format:combine-dependencies-up-to-date(
  :)
 declare function format:combine(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
@@ -487,7 +488,7 @@ declare function format:combine(
  :)
 declare function format:compile(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
@@ -518,7 +519,7 @@ declare function format:compile(
  :)
 declare function format:html(
   $doc as document-node(),
-  $params as map,
+  $params as map(*),
   $original-doc as document-node(),
   $transclude as xs:boolean
   ) as document-node() {
@@ -544,7 +545,7 @@ declare function format:html(
 
 declare function format:reverse(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   reverse:reverse-document($doc, $params)
 };
@@ -552,7 +553,7 @@ declare function format:reverse(
 
 declare function format:transliterate(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   (: TODO: set up a transliteration cache :)
   translit:transliterate-document($doc, $params)

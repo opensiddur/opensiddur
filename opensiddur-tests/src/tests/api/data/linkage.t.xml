@@ -88,6 +88,7 @@
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
   <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <imports>
     import module namespace lnk="http://jewishliturgy.org/api/data/linkage"
       at "xmldb:exist:///db/apps/opensiddur-server/api/data/linkage.xqm";

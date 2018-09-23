@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ User management API
  :
  : Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
@@ -35,6 +35,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
+declare namespace http="http://expath.org/ns/http-client";
 
 (: path to user profile data :)
 declare variable $user:path := "/db/data/user";
@@ -81,7 +82,7 @@ declare
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
-  %output:method("html5")
+  %output:method("xhtml")
   function user:list(
     $q as xs:string*,
     $start as xs:integer*,
@@ -171,7 +172,7 @@ declare
            :) 
           <rest:response>
             <output:serialization-parameters>
-              <output:method value="text"/>
+              <output:method>text</output:method>
             </output:serialization-parameters>
             {
             system:as-user("admin", $magic:password, 
@@ -208,7 +209,7 @@ declare
                 then 
                   <rest:response>
                     <output:serialization-parameters>
-                      <output:method value="text"/>
+                      <output:method>text</output:method>
                     </output:serialization-parameters>
                     {
                       sm:chmod($uri, "rw-r--r--"),
@@ -306,7 +307,7 @@ declare
           )),
           <rest:response>
             <output:serialization-parameters>
-              <output:method value="text"/>
+              <output:method>text</output:method>
             </output:serialization-parameters>
             {
               if ($resource-exists)
@@ -347,7 +348,7 @@ declare
   let $return-success :=
     <rest:response>
       <output:serialization-parameters>
-        <output:method value="text"/>
+        <output:method>text</output:method>
       </output:serialization-parameters>
       <http:response status="204"/>
     </rest:response>

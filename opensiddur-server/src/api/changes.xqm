@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ API module for recent changes
  : 
  : Copyright 2014 Efraim Feinstein <efraim@opensiddur.org>
@@ -83,10 +83,10 @@ declare
     else (
       <rest:response>
         <output:serialization-parameters>
-          <output:method value="html5"/>
+          <output:method>xhtml</output:method>
         </output:serialization-parameters>
       </rest:response>,
-      <html> { ((: xmlns="http://www.w3.org/1999/xhtml"> :)) }
+      <html xmlns="http://www.w3.org/1999/xhtml"> { ((: xmlns="http://www.w3.org/1999/xhtml"> :)) }
         <head>
           <title>Recent changes</title>
           <meta charset="utf-8"/>

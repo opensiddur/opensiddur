@@ -1,8 +1,8 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ general support functions for the REST API
  :
  : Open Siddur Project
- : Copyright 2011-2014 Efraim Feinstein <efraim@opensiddur.org>
+ : Copyright 2011-2014,2018 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :
  :) 
@@ -12,6 +12,7 @@ declare default element namespace "http://www.w3.org/1999/xhtml";
 
 declare namespace http="http://expath.org/ns/http-client";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace rerr="http://exquery.org/ns/restxq/error";
 
 declare variable $api:default-max-results := 50;
 
@@ -27,30 +28,34 @@ declare function api:rest-error(
   $message as item()*, 
   $object as item()*
   ) as item()+ {
-  <rest:response>
-    <output:serialization-parameters>
-      <output:method value="xml"/>
-    </output:serialization-parameters>
-    <http:response status="{$status-code}"/>
-  </rest:response>,
-  element { QName("", if ($status-code lt 400) then "info" else "error") } {
-    element { QName("", "path") } {
-      if (request:exists())
-      then request:get-uri()
-      else 
-        try {
-            rest:uri()
-        }
-        catch rerr:RQDY0101 { (: called from non-RESTXQ context :)
-            ""
-        }
-    },
-    element { QName("", "message") } {$message},
-    if (exists($object))
-    then
-      element { QName("", "object") }{$object}
-    else ()
-  }
+  let $errors := (
+    <rest:response>
+      <output:serialization-parameters>
+        <output:method>xml</output:method>
+      </output:serialization-parameters>
+      <http:response status="{$status-code}"/>
+    </rest:response>,
+    element { QName("", if ($status-code lt 400) then "info" else "error") } {
+      element { QName("", "path") } {
+        if (request:exists())
+        then request:get-uri()
+        else
+          try {
+              rest:uri()
+          }
+          catch rerr:RQDY0101 { (: called from non-RESTXQ context :)
+              ""
+          }
+      },
+      element { QName("", "message") } {$message},
+      if (exists($object))
+      then
+        element { QName("", "object") }{$object}
+      else ()
+    }
+  )
+  let $debug := util:log-system-out(("REST API error: ", $errors))
+  return $errors
 };
 
 declare function api:rest-error(

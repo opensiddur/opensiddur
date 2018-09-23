@@ -3,10 +3,9 @@
   xmlns="http://expath.org/ns/pkg" 
   name="http://jewishliturgy.org/apps/opensiddur-tests" 
   abbrev="opensiddur-tests" 
-  version="0.10.2" 
+  version="0.11.0" 
   spec="1.0">
     <title>Open Siddur Tests</title>
-    <dependency package="http://jewishliturgy.org/apps/opensiddur-server" semver="0.10.2"/>
-    <!-- the sources dependency may be relaxed if the transliteration test comes from elsewhere -->
-    <dependency package="http://jewishliturgy.org/apps/opensiddur-sources" semver-min="0.7.5"/>
+    <dependency package="http://jewishliturgy.org/apps/opensiddur-server" semver="0.11.0"/>
+    <dependency package="http://jewishliturgy.org/apps/opensiddur-demos" semver-min="0.10.0"/>
 </package>

@@ -14,6 +14,7 @@
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="jx">http://jewishliturgy.org/ns/jlp-processor</namespace>
   <namespace prefix="status">http://jewishliturgy.org/modules/status</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <imports>
     import module namespace job="http://jewishliturgy.org/api/jobs"
       at "xmldb:exist:///db/apps/opensiddur-server/api/jobs.xqm";

@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ API module for background job tracking
  : 
  : Copyright 2014 Efraim Feinstein <efraim@opensiddur.org>
@@ -88,7 +88,7 @@ declare
     else (
       <rest:response>
         <output:serialization-parameters>
-          <output:method value="html5"/>
+          <output:method>xhtml</output:method>
         </output:serialization-parameters>
       </rest:response>,
       <html xmlns="http://www.w3.org/1999/xhtml"> 

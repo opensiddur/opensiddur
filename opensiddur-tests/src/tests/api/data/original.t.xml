@@ -68,6 +68,7 @@
   <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="jf">http://jewishliturgy.org/ns/jlptei/flat/1.0</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <imports>
     import module namespace orig="http://jewishliturgy.org/api/data/original"
       at "xmldb:exist:///db/apps/opensiddur-server/api/data/original.xqm";
@@ -412,7 +413,7 @@
       </code>
          <class href="../common.t.incl.xml#Created"/>
          <expected desc="a change record has been added"
-                   xpath="collection('/db/data/original/en')[util:document-name(.)=tokenize($output//http:header[@name='Location']/@value,'/')[count(.)] || '.xml']//tei:revisionDesc/tei:change[1]">
+                   xpath="collection('/db/data/original/en')[util:document-name(.)=tokenize($output//http:header[@name='Location']/@value,'/')[last()] || '.xml']//tei:revisionDesc/tei:change[1]">
             <tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="created" who="/user/testuser"
                         when="..."/>
          </expected>
@@ -542,6 +543,16 @@
       </test>
       <test>
          <task>orig:delete(): Remove an existing resource</task>
+          <setup>
+              <code>
+                  ridx:reindex(doc("/db/data/original/en/1900/01/Existing.xml"))
+              </code>
+          </setup>
+          <tearDown>
+              <code>
+                  ridx:remove("/db/data/original/en/1900/01", "Existing.xml")
+              </code>
+          </tearDown>
          <code>
       orig:delete("Existing")
       </code>

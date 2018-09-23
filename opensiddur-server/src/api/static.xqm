@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ API module for accessing static data 
  : 
  : Copyright 2014 Efraim Feinstein <efraim@opensiddur.org>
@@ -25,7 +25,7 @@ declare
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
-      <output:method value="html5"/>
+      <output:method>xhtml</output:method>
     </output:serialization-parameters>
   </rest:response>,
   <html xmlns="http://www.w3.org/1999/xhtml">
@@ -71,7 +71,7 @@ declare
           <rest:response>
               <output:serialization-parameters>
                 <output:media-type value="{xmldb:get-mime-type(xs:anyURI($resource-uri))}"/>
-                <output:method value="{if (util:is-binary-doc($resource-uri)) then 'binary' else 'xml'}"/>  
+                <output:method>{if (util:is-binary-doc($resource-uri)) then 'binary' else 'xml'}</output:method>  
               </output:serialization-parameters>
           </rest:response>,
           $doc

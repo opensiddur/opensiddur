@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: Copyright 2012-2014 Efraim Feinstein <efraim@opensiddur.org>
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -93,7 +93,7 @@ declare
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
-  %output:method("html5")  
+  %output:method("xhtml")
   function dict:list(
     $q as xs:string*,
     $start as xs:integer*,

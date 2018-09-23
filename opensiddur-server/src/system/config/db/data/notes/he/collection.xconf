@@ -5,7 +5,7 @@
       xmlns:html="http://www.w3.org/1999/xhtml">
         <fulltext default="none" attributes="no"/>
         <lucene>
-            <analyzer class="org.apache.lucene.analysis.hebrew.MorphAnalyzer"/>
+            <analyzer class="org.apache.lucene.analysis.hebrew.HebrewIndexingAnalyzer"/>
             <text qname="tei:text">
                 <ignore qname="tei:title"/>
                 <ignore qname="tei:teiHeader"/>

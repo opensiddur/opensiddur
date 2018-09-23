@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ Group management API
  :
  : Copyright 2012-2013 Efraim Feinstein <efraim@opensiddur.org>
@@ -24,6 +24,7 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
 declare namespace g="http://jewishliturgy.org/ns/group/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace http="http://expath.org/ns/http-client";
 
 declare variable $grp:schema := concat($paths:schema-base, "/group.rnc");
 
@@ -91,7 +92,7 @@ declare
   %rest:query-param("start", "{$start}", 1)
   %rest:query-param("max-results", "{$max-results}", 100)
   %rest:produces("application/xhtml+xml", "application/xml", "text/html", "text/xml")
-  %output:method("html5")
+  %output:method("xhtml")
   function grp:list(
     $start as xs:integer*,
     $max-results as xs:integer*
@@ -403,7 +404,7 @@ declare
                   else
                     <rest:response>
                       <output:serialization-parameters>
-                        <output:method value="text"/>
+                        <output:method>text</output:method>
                       </output:serialization-parameters>
                       <http:response status="204"/>
                     </rest:response>
@@ -446,7 +447,7 @@ declare
                   else 
                     <rest:response>
                       <output:serialization-parameters>
-                        <output:method value="text"/>
+                        <output:method>text</output:method>
                       </output:serialization-parameters>
                       <http:response status="201">
                         {((: TODO: this is wrong! It needs to be an absolute URI :))}
@@ -486,7 +487,7 @@ declare
         then
           <rest:response>
             <output:serialization-parameters>
-              <output:method value="text"/>
+              <output:method>text</output:method>
             </output:serialization-parameters>
             {
               (: members are not removed automatically from a deleted group :)

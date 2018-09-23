@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ job status/logging module 
  :
  : Open Siddur Project

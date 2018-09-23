@@ -7,7 +7,7 @@
   <description>
       <p>Test conditional data API</p>
       <author>Efraim Feinstein</author>
-      <copyright>Copyright 2012-2013,2016 Efraim Feinstein,
+      <copyright>Copyright 2012-2013,2016-2017 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <asUser>testuser</asUser>
@@ -81,6 +81,7 @@
   <namespace prefix="a">http://jewishliturgy.org/ns/access/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
   <namespace prefix="r">http://jewishliturgy.org/ns/results/1.0</namespace>
+  <namespace prefix="http">http://expath.org/ns/http-client</namespace>
   <imports>
     import module namespace cnd="http://jewishliturgy.org/api/data/conditionals"
       at "xmldb:exist:///db/apps/opensiddur-server/api/data/conditionals.xqm";
@@ -194,7 +195,7 @@
       </code>
          <class href="../common.t.incl.xml#Created"/>
          <expected desc="a change record has been added"
-                   xpath="collection('/db/data/conditionals')[util:document-name(.)=tokenize($output//http:header[@name='Location']/@value,'/')[count(.)] || '.xml']//tei:revisionDesc/tei:change[1]">
+                   xpath="collection('/db/data/conditionals')[util:document-name(.)=tokenize($output//http:header[@name='Location']/@value,'/')[last()] || '.xml']//tei:revisionDesc/tei:change[1]">
             <tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="created" who="/user/testuser"
                         when="..."/>
          </expected>
@@ -569,5 +570,38 @@
         </r:conditional-results>
       </expected>
     </test>
+      <test>
+          <task>List by exact match to feature type: type exists</task>
+          <code>
+              cnd:list("type1", 1, 100, "false", "true")
+          </code>
+          <expected xpath="self::r:conditional-results" desc="one record is returned">
+              <r:conditional-results start="1" end="1" n-results="1">
+                  <r:conditional-result resource="/exist/restxq/api/data/conditionals/type1" match="type">
+                      <tei:fsDecl type="type1">
+                          <tei:fsDescr>first type</tei:fsDescr>
+                          <tei:fDecl name="name1">
+                              <tei:fDescr>First</tei:fDescr>
+                              <j:vSwitch type="yes-no-maybe"/>
+                          </tei:fDecl>
+                          <tei:fDecl name="name2">
+                              <tei:fDescr>Second</tei:fDescr>
+                              <j:vSwitch type="yes-no-maybe"/>
+                          </tei:fDecl>
+                      </tei:fsDecl>
+                  </r:conditional-result>
+              </r:conditional-results>
+          </expected>
+      </test>
+      <test>
+          <task>List by exact match to feature type: type does not exist</task>
+          <code>
+              cnd:list("typenotexists", 1, 100, "false", "true")
+          </code>
+          <expected xpath="self::r:conditional-results" desc="no records are returned">
+              <r:conditional-results start="1" end="0" n-results="0"/>
+          </expected>
+      </test>
+
   </TestSet>
 </TestSuite>

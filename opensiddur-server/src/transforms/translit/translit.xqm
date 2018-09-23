@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ transliterator transform
  : Copyright 2008-2010,2013 Efraim Feinstein, efraim@opensiddur.org
  : Licensed under the GNU Lesser General Public License, version 3 or later
@@ -44,103 +44,103 @@ declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 :)	
 
 declare variable $translit:hebrew := map {
-    "aleph"  := "&#x05d0;",
-    "bet" := "&#x05d1;",
-    "gimel" := "&#x05d2;",
-    "dalet" := "&#x05d3;",
-    "he" := "&#x05d4;",
-    "vav" := "&#x05d5;",
-    "zayin" := "&#x05d6;",
-    "het" := "&#x05d7;",
-    "tet" := "&#x05d8;",
-    "yod" := "&#x05d9;",
-    "finalkaf" := "&#x05da;",
-    "kaf" := "&#x05db;",
-    "lamed" := "&#x05dc;",
-    "finalmem" := "&#x05dd;",
-    "mem" := "&#x05de;",
-    "finalnun" := "&#x05df;",
-    "nun" := "&#x05e0;",
-    "samekh" := "&#x05e1;",
-    "ayin" := "&#x05e2;",
-    "finalpe" := "&#x5e3;",
-    "pe" := "&#x05e4;",
-    "finaltsadi" := "&#x05e5;",
-    "tsadi" := "&#x05e6;",
-    "qof" := "&#x05e7;",
-    "resh" := "&#x05e8;",
-    "shin" := "&#x05e9;",
-    "tav" := "&#x05ea;",
-    "etnahta" := "&#x0591;",
-    "accentsegol" := "&#x0592;",
-    "shalshelet" := "&#x0593;",
-    "zaqefqatan" := "&#x0594;",
-    "zaqefgadol" := "&#x0595;",
-    "tipeha" := "&#x0596;",
-    "revia" := "&#x0597;",
-    "zarqa" := "&#x0598;",
-    "pashta" := "&#x0599;",
-    "yetiv" := "&#x059a;",
-    "tevir" := "&#x059b;",
-    "geresh" := "&#x059c;",
-    "gereshmuqdam" := "&#x059d;",
-    "gershayim" := "&#x059e;",
-    "qarneypara" := "&#x059f;",
-    "telishagedola" := "&#x05a0;",
-    "pazer" := "&#x05a1;",
-    "atnahhafukh" := "&#x05a2;",
-    "munah" := "&#x05a3;",
-    "mahapakh" := "&#x05a4;",
-    "merkha" := "&#x05a5;",
-    "merkhakefula" := "&#x05a6;",
-    "darga" := "&#x05a7;",
-    "qadma" := "&#x05a8;",
-    "telishaqetana" := "&#x05a9;",
-    "yerahbenyomo" := "&#x05aa;",
-    "ole" := "&#x05ab;",
-    "iluy" := "&#x05ac;",
-    "dehi" := "&#x05ad;",
-    "zinor" := "&#x05ae;",
-    "masoracircle" := "&#x05af;",
-    "sheva" := "&#x05b0;",
-    "hatafsegol" := "&#x05b1;",
-    "hatafpatah" := "&#x05b2;",
-    "hatafqamats" := "&#x05b3;",
-    "hiriq" := "&#x05b4;",
-    "tsere" := "&#x05b5;",
-    "segol" := "&#x05b6;",
-    "patah" := "&#x05b7;",
-    "qamats" := "&#x05b8;",
-    "holam" := "&#x05b9;",
-    "holamhaserforvav" := "&#x05ba;",
-    "qubuts" := "&#x05bb;",
-    "dageshormapiq" := "&#x05bc;",
-    "meteg" := "&#x05bd;",
-    "maqaf" := "&#x05be;",
-    "rafe" := "&#x05bf;",
-    "paseq" := "&#x05c0;",
-    "shindot" := "&#x05c1;",
-    "sindot" := "&#x05c2;",
-    "sofpasuq" := "&#x05c3;",
-    "upperdot" := "&#x05c4;",
-    "lowerdot" := "&#x05c5;",
-    "nunhafukha" := "&#x05c6;",
-    "qamatsqatan" := "&#x05c7;",
-    "punctuationgeresh" := "&#x05f3;",
-    "punctuationgershayim" := "&#x05f4;",
-    "schwa" := "&#x259;",
-    "lefthalfring" := "&#x2bf;",
-    "righthalfring" := "&#x2be;",
-    "underline" := "&#x332;",
-    "dotbelow" := "&#x323;",
-    "acute" := "&#x301;",
-    "circumflex" := "&#x302;",
-    "macron" := "&#x304;",
-    "breve" := "&#x306;",
-    "caron" := "&#x30c;",
-    "shevana" := "&#xff00;",
-    "shevanach" := "&#xff01;",
-    "cgj" := "&#x34f;"
+    "aleph"  : "&#x05d0;",
+    "bet" : "&#x05d1;",
+    "gimel" : "&#x05d2;",
+    "dalet" : "&#x05d3;",
+    "he" : "&#x05d4;",
+    "vav" : "&#x05d5;",
+    "zayin" : "&#x05d6;",
+    "het" : "&#x05d7;",
+    "tet" : "&#x05d8;",
+    "yod" : "&#x05d9;",
+    "finalkaf" : "&#x05da;",
+    "kaf" : "&#x05db;",
+    "lamed" : "&#x05dc;",
+    "finalmem" : "&#x05dd;",
+    "mem" : "&#x05de;",
+    "finalnun" : "&#x05df;",
+    "nun" : "&#x05e0;",
+    "samekh" : "&#x05e1;",
+    "ayin" : "&#x05e2;",
+    "finalpe" : "&#x5e3;",
+    "pe" : "&#x05e4;",
+    "finaltsadi" : "&#x05e5;",
+    "tsadi" : "&#x05e6;",
+    "qof" : "&#x05e7;",
+    "resh" : "&#x05e8;",
+    "shin" : "&#x05e9;",
+    "tav" : "&#x05ea;",
+    "etnahta" : "&#x0591;",
+    "accentsegol" : "&#x0592;",
+    "shalshelet" : "&#x0593;",
+    "zaqefqatan" : "&#x0594;",
+    "zaqefgadol" : "&#x0595;",
+    "tipeha" : "&#x0596;",
+    "revia" : "&#x0597;",
+    "zarqa" : "&#x0598;",
+    "pashta" : "&#x0599;",
+    "yetiv" : "&#x059a;",
+    "tevir" : "&#x059b;",
+    "geresh" : "&#x059c;",
+    "gereshmuqdam" : "&#x059d;",
+    "gershayim" : "&#x059e;",
+    "qarneypara" : "&#x059f;",
+    "telishagedola" : "&#x05a0;",
+    "pazer" : "&#x05a1;",
+    "atnahhafukh" : "&#x05a2;",
+    "munah" : "&#x05a3;",
+    "mahapakh" : "&#x05a4;",
+    "merkha" : "&#x05a5;",
+    "merkhakefula" : "&#x05a6;",
+    "darga" : "&#x05a7;",
+    "qadma" : "&#x05a8;",
+    "telishaqetana" : "&#x05a9;",
+    "yerahbenyomo" : "&#x05aa;",
+    "ole" : "&#x05ab;",
+    "iluy" : "&#x05ac;",
+    "dehi" : "&#x05ad;",
+    "zinor" : "&#x05ae;",
+    "masoracircle" : "&#x05af;",
+    "sheva" : "&#x05b0;",
+    "hatafsegol" : "&#x05b1;",
+    "hatafpatah" : "&#x05b2;",
+    "hatafqamats" : "&#x05b3;",
+    "hiriq" : "&#x05b4;",
+    "tsere" : "&#x05b5;",
+    "segol" : "&#x05b6;",
+    "patah" : "&#x05b7;",
+    "qamats" : "&#x05b8;",
+    "holam" : "&#x05b9;",
+    "holamhaserforvav" : "&#x05ba;",
+    "qubuts" : "&#x05bb;",
+    "dageshormapiq" : "&#x05bc;",
+    "meteg" : "&#x05bd;",
+    "maqaf" : "&#x05be;",
+    "rafe" : "&#x05bf;",
+    "paseq" : "&#x05c0;",
+    "shindot" : "&#x05c1;",
+    "sindot" : "&#x05c2;",
+    "sofpasuq" : "&#x05c3;",
+    "upperdot" : "&#x05c4;",
+    "lowerdot" : "&#x05c5;",
+    "nunhafukha" : "&#x05c6;",
+    "qamatsqatan" : "&#x05c7;",
+    "punctuationgeresh" : "&#x05f3;",
+    "punctuationgershayim" : "&#x05f4;",
+    "schwa" : "&#x259;",
+    "lefthalfring" : "&#x2bf;",
+    "righthalfring" : "&#x2be;",
+    "underline" : "&#x332;",
+    "dotbelow" : "&#x323;",
+    "acute" : "&#x301;",
+    "circumflex" : "&#x302;",
+    "macron" : "&#x304;",
+    "breve" : "&#x306;",
+    "caron" : "&#x30c;",
+    "shevana" : "&#xff00;",
+    "shevanach" : "&#xff01;",
+    "cgj" : "&#x34f;"
 };
 
 (:~ transliterate a document.
@@ -148,7 +148,7 @@ declare variable $translit:hebrew := map {
  :)
 declare function translit:transliterate-document(
     $doc as document-node(),
-    $params as map
+    $params as map(*)
     ) as document-node() {
     translit:transliterate($doc, $params)
 };
@@ -171,7 +171,7 @@ declare
 
 declare function translit:assemble-word-reverse(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -187,7 +187,7 @@ declare function translit:assemble-word-reverse(
 :)
 declare function translit:assemble-word-reverse-tei-w(
     $context as element(tei:w),
-    $params as map
+    $params as map(*)
     ) as node()* {
     let $context-abs-uri := 
         uri:absolutize-uri(xs:anyURI(concat('#',$context/@xml:id)), $context)
@@ -204,7 +204,7 @@ declare function translit:assemble-word-reverse-tei-w(
 
 declare function translit:assemble-word(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -220,7 +220,7 @@ declare function translit:assemble-word(
  :)
 declare function translit:assemble-word-tei-w(
     $context as element(tei:w),
-    $params as map
+    $params as map(*)
     ) {
     translit:assemble-word($context/node(), $params),
     if ($context/@next)
@@ -236,7 +236,7 @@ declare function translit:assemble-word-tei-w(
  :)
 declare function translit:assemble-word-text(
     $context as text(),
-    $params as map
+    $params as map(*)
     ) as node() { 
 	if ($context=$params("translit:this-context"))
     then
@@ -247,7 +247,7 @@ declare function translit:assemble-word-text(
 
 declare function translit:replace-tetragrammaton(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -262,7 +262,7 @@ declare function translit:replace-tetragrammaton(
  :)
 declare function translit:replace-tetragrammaton-text(
     $context as text(),
-    $params as map
+    $params as map(*)
     ) as text() {
     let $word as xs:string := $context/string()
     let $regex := "(" || $translit:hebrew("yod") || "([" || $translit:hebrew("sheva") || "]?)([\P{L}]*)" ||
@@ -327,7 +327,7 @@ declare function translit:replace-tetragrammaton-text(
 
 declare function translit:make-word(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -381,7 +381,7 @@ declare %private function translit:make-word-helper(
 :)
 declare function translit:make-word-text(
     $context as text(),
-    $params as map
+    $params as map(*)
     ) as element()* {
     let $word as xs:string := $context/string()
     let $consonants := 
@@ -445,7 +445,7 @@ declare function translit:make-word-text(
 (:~ @param $params translit:table as element(tr:table) :)
 declare function translit:transliterate-final(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     let $table as element(tr:table)? := $params("translit:table")
     for $node in $nodes
@@ -486,7 +486,7 @@ declare function translit:transliterate-final(
 (:~ continue... :)
 declare function translit:transliterate-final-continue(
     $context as element(),
-    $params as map
+    $params as map(*)
     ) as node()* {
     translit:transliterate-final($context/node(), $params)
 };
@@ -496,7 +496,7 @@ declare function translit:transliterate-final-continue(
  :)
 declare function translit:transliterate-final-different-by-dagesh(
     $context as element(),
-    $params as map
+    $params as map(*)
     ) as text() {
     let $table as element(tr:table)? := $params("translit:table")
     let $text := $context/string()
@@ -511,7 +511,7 @@ declare function translit:transliterate-final-different-by-dagesh(
 (:~ silent letter: use @silent instead of @to :)
 declare function translit:transliterate-final-silent(
     $context as element(tr:cons),
-    $params as map
+    $params as map(*)
     ) as text()? {
     let $table as element(tr:table)? := $params("translit:table")
     return text {
@@ -525,7 +525,7 @@ declare function translit:transliterate-final-silent(
  :)
 declare function translit:transliterate-final-non-ignored(
     $context as element(),
-    $params as map
+    $params as map(*)
     ) as text()? {
     let $table as element(tr:table)? := $params("translit:table")
     let $text := $context/string()
@@ -537,7 +537,7 @@ declare function translit:transliterate-final-non-ignored(
 (:~ Ignore text under tr:ignore/tr:suppress :)
 declare function translit:transliterate-final-ignored(
     $context as element(),
-    $params as map
+    $params as map(*)
     ) as empty-sequence() {
     ()
 };
@@ -545,7 +545,7 @@ declare function translit:transliterate-final-ignored(
 (:~ @param $params must include a "translit:table" parameter that contains a tr:table element :)
 declare function translit:transliterate(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -561,7 +561,7 @@ declare function translit:transliterate(
  :)
 declare function translit:transliterate-text(
     $context as text(),
-    $params as map
+    $params as map(*)
     ) as text()? {
     text { 
         string-join((
@@ -608,7 +608,7 @@ declare function translit:transliterate-text(
 
 declare function translit:pass0(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -622,7 +622,7 @@ declare function translit:pass0(
 (:~ Mark first and last in word with @first or @last; punctuation is marked with @punct; combine shin/sin dot :)
 declare function translit:pass0-tr-cc(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc) {
     $context/
     element tr:cc {
@@ -654,7 +654,7 @@ declare function translit:pass0-tr-cc(
 	
 declare function translit:pass1(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -730,7 +730,7 @@ declare function translit:pass1(
 (:~ Furtive patah.  Reverses the vowel and consonant order. :)
 declare function translit:pass1-furtive-patah(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc) {
 	$context/
     element tr:cc {
@@ -751,7 +751,7 @@ declare function translit:pass1-furtive-patah(
 (:~ Complex character preceding a holam male.  Adds the holam male. :)
 declare function translit:pass1-preceding-holam-male(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc) {
     $context/
     element tr:cc {
@@ -768,7 +768,7 @@ declare function translit:pass1-preceding-holam-male(
  :)
 declare function translit:pass1-vav-haluma(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as empty-sequence() {
     ()
 };
@@ -776,7 +776,7 @@ declare function translit:pass1-vav-haluma(
 (:~ Complex character preceding a shuruq; adds the shuruq; ignore two "possible" shuruqs in a row - first is not a shuruq :)
 declare function translit:pass1-preceding-shuruq(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc) {
 	$context/
     element tr:cc {
@@ -796,7 +796,7 @@ declare function translit:pass1-preceding-shuruq(
  :)
 declare function translit:pass1-vav-with-dagesh(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc)? {
 	$context/(
     if (@first)
@@ -815,7 +815,7 @@ declare function translit:pass1-vav-with-dagesh(
 (:~ Hiriq male or long versions of tsere and segol :)
 declare function translit:pass1-male-vowels(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc) {
     (: note: a bug in eXist *somewhere* is preventing the context from being preserved in this function :)
     $context/(
@@ -846,7 +846,7 @@ declare function translit:pass1-male-vowels(
 (:~ Hiriq male and similar, remove the yod (but not when it has a dagesh) :)
 declare function translit:pass1-male-vowels-yod(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as empty-sequence() {
     ()
 };
@@ -858,7 +858,7 @@ declare function translit:pass1-male-vowels-yod(
  :)
 declare function translit:pass1-qamats-vowel-letter(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc) {
     $context/
   	element tr:cc {
@@ -873,7 +873,7 @@ declare function translit:pass1-qamats-vowel-letter(
 (:~ Remove the vowel letter he :)
 declare function translit:pass1-vowel-letter-he(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:silent) {
     element tr:silent {
         $context/tr:cons
@@ -882,7 +882,7 @@ declare function translit:pass1-vowel-letter-he(
 
 declare function translit:pass2(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -919,7 +919,7 @@ declare function translit:pass2(
  :)
 declare function translit:pass2-preceding-silent(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc) {
     $context/
   	element tr:cc {
@@ -937,14 +937,14 @@ declare function translit:pass2-preceding-silent(
  :)
 declare function translit:pass2-silent-letter(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:silent) {
     element tr:silent { $context/tr:cons }
 };
 
 declare function translit:pass3(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -968,7 +968,7 @@ declare function translit:pass3(
  :)
 declare function translit:pass3-identify-dagesh(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc)+ {
     (: dagesh kal if begedkeft letter at beginning of word or after sheva(nach) :)
     let $is-bgdkft as xs:boolean :=
@@ -1018,7 +1018,7 @@ declare function translit:pass3-identify-dagesh(
 
 declare function translit:pass4(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -1047,7 +1047,7 @@ declare function translit:pass4(
  :)
 declare function translit:pass4-identify-sheva(
     $context as element(tr:cc),
-    $params as map
+    $params as map(*)
     ) as element(tr:cc) {
     $context/
     element tr:cc {
@@ -1072,8 +1072,8 @@ declare function translit:pass4-identify-sheva(
 (:~ By default, pass on what already exists in all modes. :)
 declare function translit:identity(
     $context as element(),
-    $params as map,
-    $mode as function(node()*,map) as node()*
+    $params as map(*),
+    $mode as function(node()*,map(*)) as node()*
     ) as node()* {
     element { QName(namespace-uri($context), name($context)) }{
         $context/(@* except @xml:lang),

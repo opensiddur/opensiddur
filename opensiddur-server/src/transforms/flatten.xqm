@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : Modes to flatten a hierarchy.
  : To run:
@@ -67,7 +67,7 @@ declare function flatten:order-flattened(
 (:~ entry point for the merge transform :)
 declare function flatten:merge-document(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   common:apply-at(
     $doc, 
@@ -79,7 +79,7 @@ declare function flatten:merge-document(
 
 declare function flatten:merge-concurrent(
   $e as element(),
-  $params as map
+  $params as map(*)
   ) as element()* {
   typeswitch($e)
   case element(j:concurrent)
@@ -97,7 +97,7 @@ declare function flatten:merge-concurrent(
 
 declare function flatten:merge-j-parallelText(
     $e as element(j:parallelText),
-    $params as map
+    $params as map(*)
     ) as element(jf:parallelText) {
     element jf:parallelText {
       if ($e/(@jf:id|@xml:id))
@@ -139,7 +139,7 @@ declare function flatten:merge-j-parallelText(
  :) 
 declare function flatten:merge-j-concurrent(
   $e as element(j:concurrent),
-  $params as map
+  $params as map(*)
   ) as element(jf:concurrent) {
   element jf:concurrent {
     if ($e/(@jf:id|@xml:id))
@@ -160,7 +160,7 @@ declare function flatten:merge-j-concurrent(
 declare function flatten:merge(
   $streamText as element(jf:streamText),
   $layers as element(jf:layer)*,
-  $params as map
+  $params as map(*)
   ) as element(jf:merged) {
   element jf:merged {
     (: jf:merged takes the place of streamText :)
@@ -184,7 +184,7 @@ declare function flatten:merge(
  :)
 declare function flatten:resolve-stream(
   $nodes as node()*,
-  $params as map
+  $params as map(*)
   ) as node()* {
   for $node in $nodes
   return
@@ -237,7 +237,7 @@ declare function flatten:resolve-stream(
 (:~ copy with xml:id->jf:id for elements inside streamText segments during the resolve stage :)
 declare function flatten:resolve-copy(
     $nodes as node()*,
-    $params as map
+    $params as map(*)
     ) as node()* {
     for $node in $nodes
     return
@@ -260,7 +260,7 @@ declare function flatten:resolve-copy(
  :)
 declare function flatten:display(
   $nodes as node()*,
-  $params as map
+  $params as map(*)
   ) as node()* {
   for $node in $nodes
   return
@@ -287,7 +287,7 @@ declare function flatten:display(
  :)
 declare function flatten:flatten-document(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   common:apply-at(
     $doc, 
@@ -299,7 +299,7 @@ declare function flatten:flatten-document(
 
 declare function flatten:flatten(
 	$node as node()*,
-	$params as map
+	$params as map(*)
 	) as node()* {
 	for $n in $node
 	return (  
@@ -323,7 +323,7 @@ declare function flatten:flatten(
 (:~ identity :)
 declare function flatten:identity(
   $e as element(),
-  $params as map
+  $params as map(*)
   ) as element() {
   element { QName(namespace-uri($e), name($e))}{
     flatten:copy-attributes($e),
@@ -334,7 +334,7 @@ declare function flatten:identity(
 (:~ identity - copy only and change xml:id->jf:id :)
 declare function flatten:copy(
   $nodes as node()*,
-  $params as map
+  $params as map(*)
   ) as node()* {
   for $node in $nodes
   return 
@@ -368,7 +368,7 @@ declare function flatten:stream-id(
  :)
 declare function flatten:j-streamText(
   $e as element(j:streamText),
-  $params as map
+  $params as map(*)
   ) {
   element j:streamText {
     if (empty($e/@jf:id))
@@ -388,7 +388,7 @@ declare function flatten:j-streamText(
  :)
 declare function flatten:flatten-streamText(
   $st as element(j:streamText),
-  $params as map
+  $params as map(*)
   ) as element(jf:streamText) {
   element jf:streamText {
     attribute jf:id { $st/(@xml:id, @jf:id, flatten:generate-id(.))[1] },
@@ -432,7 +432,7 @@ declare function flatten:write-placeholder(
  :) 
 declare function flatten:tei-ptr(
   $e as element(tei:ptr),
-  $params as map
+  $params as map(*)
   ) as element()+ {
   for $target in uri:follow-tei-link($e, 1, (), true())
   let $stream := $target/ancestor::j:streamText 
@@ -599,7 +599,7 @@ declare function flatten:suspend-or-continue(
  :)
 declare function flatten:element(
 	$context as element(),
-	$params as map
+	$params as map(*)
 	) as node()+ {
     let $active-stream := $params("flatten:stream-id")
 	let $node-id := 
@@ -733,7 +733,7 @@ declare function flatten:generate-id(
  :)
 declare function flatten:j-layer(
     $context as element(),
-    $params as map
+    $params as map(*)
     ) as element(jf:layer) {
     let $id := 
       $context/(

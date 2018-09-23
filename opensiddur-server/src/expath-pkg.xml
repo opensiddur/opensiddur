@@ -3,7 +3,7 @@
   xmlns="http://expath.org/ns/pkg" 
   name="http://jewishliturgy.org/apps/opensiddur-server" 
   abbrev="opensiddur-server" 
-  version="0.10.2.1" 
+  version="0.11.0" 
   spec="1.0">
     <title>Open Siddur Server</title>
     <!--dependency package="http://jewishliturgy.org/apps/hebmorph-exist" semver-min="0.0.1"/-->

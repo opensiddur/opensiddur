@@ -459,8 +459,9 @@ declare function grammar:p-exp(
       )
     else (
     	let $string-match as element()? :=
-    		let $match as xs:string* := 
-    			text:groups(substring($string, $string-position), concat('^(', $regex, ')'))[2]
+    		let $match as xs:string* :=
+				(: TODO: this was changed from text:groups. It's unclear if this code works right...:)
+    			analyze-string(substring($string, $string-position), concat('^(', $regex, ')'))/fn:match
     		where exists($match)
     		return 
     			element {concat('r:', if ($context/@name) then string($context/@name) else 'anonymous')}{

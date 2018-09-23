@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~
  : Modes to reverse the flattening of a hierarchy.
  :
@@ -20,7 +20,7 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
 declare function reverse:reverse-document(
   $doc as document-node(),
-  $params as map
+  $params as map(*)
   ) as document-node() {
   common:apply-at(
     $doc,
@@ -48,7 +48,7 @@ declare function reverse:copy-attributes(
 
 declare function reverse:reverse(
   $n as node(),
-  $params as map
+  $params as map(*)
   ) as node()* {
   typeswitch($n)
   case element(jf:merged)
@@ -58,7 +58,7 @@ declare function reverse:reverse(
 
 declare function reverse:jf-merged(
   $e as element(jf:merged),
-  $params as map
+  $params as map(*)
   ) as element()+ {
   reverse:construct-streamText($e, $params),
   reverse:construct-layers($e, $params)
@@ -66,7 +66,7 @@ declare function reverse:jf-merged(
 
 declare function reverse:construct-streamText(
   $e as element(jf:merged),
-  $params as map
+  $params as map(*)
   ) as element(j:streamText)* {
   for $stream in distinct-values($e//@jf:stream)
   return
@@ -87,7 +87,7 @@ declare function reverse:construct-streamText(
 
 declare function reverse:construct-layers(
   $e as element(jf:merged),
-  $params as map
+  $params as map(*)
   ) as element (j:concurrent)? {
   let $jf-concurrent := $e/../jf:concurrent
   let $layers := 
@@ -118,7 +118,7 @@ declare function reverse:construct-layers(
  :)
 declare function reverse:construct-layer(
   $node as node()?,
-  $params as map
+  $params as map(*)
   ) as node()* {
   typeswitch($node)
   case empty-sequence()

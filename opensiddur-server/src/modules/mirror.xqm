@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (:~ mirror collections
  :
  : A mirror collection is a collection intended to cache some
@@ -37,7 +37,7 @@ declare function mirror:create(
   $mirror-path as xs:string,
   $original-path as xs:string,
   $allow-universal-access as xs:boolean,
-  $extension-map as map
+  $extension-map as map(*)
   ) as empty-sequence() {
   let $check := 
     if (starts-with($mirror-path, "/db"))
