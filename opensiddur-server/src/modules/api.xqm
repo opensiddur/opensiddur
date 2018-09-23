@@ -28,30 +28,34 @@ declare function api:rest-error(
   $message as item()*, 
   $object as item()*
   ) as item()+ {
-  <rest:response>
-    <output:serialization-parameters>
-      <output:method>xml</output:method>
-    </output:serialization-parameters>
-    <http:response status="{$status-code}"/>
-  </rest:response>,
-  element { QName("", if ($status-code lt 400) then "info" else "error") } {
-    element { QName("", "path") } {
-      if (request:exists())
-      then request:get-uri()
-      else 
-        try {
-            rest:uri()
-        }
-        catch rerr:RQDY0101 { (: called from non-RESTXQ context :)
-            ""
-        }
-    },
-    element { QName("", "message") } {$message},
-    if (exists($object))
-    then
-      element { QName("", "object") }{$object}
-    else ()
-  }
+  let $errors := (
+    <rest:response>
+      <output:serialization-parameters>
+        <output:method>xml</output:method>
+      </output:serialization-parameters>
+      <http:response status="{$status-code}"/>
+    </rest:response>,
+    element { QName("", if ($status-code lt 400) then "info" else "error") } {
+      element { QName("", "path") } {
+        if (request:exists())
+        then request:get-uri()
+        else
+          try {
+              rest:uri()
+          }
+          catch rerr:RQDY0101 { (: called from non-RESTXQ context :)
+              ""
+          }
+      },
+      element { QName("", "message") } {$message},
+      if (exists($object))
+      then
+        element { QName("", "object") }{$object}
+      else ()
+    }
+  )
+  let $debug := util:log-system-out(("REST API error: ", $errors))
+  return $errors
 };
 
 declare function api:rest-error(

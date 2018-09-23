@@ -88,9 +88,11 @@ declare
     let $offset := count($new/tei:change) - count($old/tei:change) 
     return
         ($offset = (0,1) ) and not(false()=(
-        true(),     (: handle the case of the empty revisionDesc :) 
+        true(),     (: handle the case of the empty revisionDesc :)
         for $change at $x in $old/tei:change
-        return xmldiff:compare($new/tei:change[$x + $offset], $change)
+        (: Putting this line directly below causes an exception, see issue #158 :)
+        let $y := $x + $offset
+        return xmldiff:compare($new/tei:change[$y], $change)
         ))
 };
 
