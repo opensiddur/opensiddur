@@ -87,7 +87,9 @@ for $module in (
             "/api/data/sources.xqm",
             "/api/changes.xqm",
             "/api/static.xqm",
-            "/api/data/outlines.xqm"
+            "/api/data/outlines.xqm",
+            "/api/utility/utilityindex.xqm",
+            "/api/utility/translit.xqm"
 )
 return exrest:register-module(xs:anyURI("/db/apps/opensiddur-server" || $module)),
 util:log-system-out("done")

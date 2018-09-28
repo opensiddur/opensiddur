@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuite>
+  <suiteName>Utility API index test</suiteName>
+  <description>
+      <p>Test the utility API index</p>
+      <author>Efraim Feinstein</author>
+      <copyright>Copyright 2012-2013,2018 Efraim Feinstein,
+    Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
+  </description>
+  <setup/>
+  <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
+  <namespace prefix="o">http://a9.com/-/spec/opensearch/1.1/</namespace>
+  <imports>
+    import module namespace uindex="http://jewishliturgy.org/api/utility"
+      at "xmldb:exist:///db/apps/opensiddur-server/api/utility/utilityindex.xqm";
+  </imports>
+  <TestSet>
+      <testName>uindex:list()</testName>
+      <test>
+         <task>GET</task>
+         <code>
+      uindex:list()
+      </code>
+         <class href="../common.t.incl.xml#SerializeHTML5"/>
+         <class href="../common.t.incl.xml#DiscoveryAPI"/>
+      </test>
+  </TestSet>
+</TestSuite>
