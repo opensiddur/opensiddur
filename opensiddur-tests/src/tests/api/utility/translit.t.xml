@@ -11,7 +11,7 @@
   <password>testuser</password>
   <imports>
   import module namespace translit="http://jewishliturgy.org/api/utility/translit"
-    at "xmldb:exist:///db/apps/opensiddur-demos/api/utility/translit.xqm";
+    at "xmldb:exist:///db/apps/opensiddur-server/api/utility/translit.xqm";
   </imports>
   <namespace prefix="tr">http://jewishliturgy.org/ns/tr/1.0</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>

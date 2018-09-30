@@ -128,6 +128,7 @@ declare
             let $transliterated := local:transliterate($body/*, $table-exists, $out-lang)
             return $transliterated
         else if ($schema-exists)
+        then
             api:rest-error(400, "Table cannot be found to transliterate " || $in-lang || " to " || $out-lang, $schema)
         else
             api:rest-error(404, "Schema cannot be found", $schema)

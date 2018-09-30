@@ -21,7 +21,6 @@
          <code>
       uindex:list()
       </code>
-         <class href="../common.t.incl.xml#SerializeHTML5"/>
          <class href="../common.t.incl.xml#DiscoveryAPI"/>
       </test>
   </TestSet>
