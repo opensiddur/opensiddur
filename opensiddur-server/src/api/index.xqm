@@ -54,12 +54,6 @@ declare
           <li class="api">
             <a class="discovery" href="{$api-base}/data">Data</a>
           </li>,
-          index:if-installed(
-            "http://jewishliturgy.org/apps/opensiddur-demos",
-            <li class="api">
-              <a class="discovery" href="{$api-base}/demo">Demo</a>
-            </li>
-          ),
           <li class="api">
             <a class="discovery" href="{$api-base}/group">Group</a>
           </li>,
@@ -83,6 +77,9 @@ declare
           ),
           <li class="api">
             <a class="discovery" href="{$api-base}/user">User</a>
+          </li>,
+          <li class="api">
+            <a class="discovery" href="{$api-base}/utility">Utility</a>
           </li>
         )
         }

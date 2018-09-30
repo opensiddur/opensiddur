@@ -15,7 +15,6 @@ let $tests-to-run :=
     <test module="/db/code/tests/modules/refindex.t.xml"/>
     <test module="/db/code/tests/api/data.t.xml" admin="1"/>
     <test module="/db/code/tests/api/index.t.xml" />
-    <test module="/db/code/tests/api/demo.t.xml"/>
     <test module="/db/code/tests/api/access.t.xml" />
     <test module="/db/code/tests/api/login.t.xml"/>
     <test module="/db/code/tests/api/user.t.xml"/>
@@ -29,6 +28,8 @@ let $tests-to-run :=
     <test module="/db/code/tests/api/data/styles.t.xml"/>
     <test module="/db/code/tests/api/data/sources.t.xml"/>
     <test module="/db/code/tests/api/data/transliteration.t.xml"/>
+    <test module="/db/code/tests/api/utility/translit.t.xml"/>
+    <test module="/db/code/tests/api/utility/utilityindex.t.xml"/>
     <test module="/db/code/tests/transforms/flatten/flatten.t.xml"/>
     <test module="/db/code/tests/transforms/flatten/reverse.t.xml"/>
     <test module="/db/code/tests/transforms/flatten/unflatten.t.xml"/>

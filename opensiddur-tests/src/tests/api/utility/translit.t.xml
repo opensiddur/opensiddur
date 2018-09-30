@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TestSuite>
-  <suiteName>Demo API</suiteName>
+  <suiteName>Transliteration utility API</suiteName>
   <description>
-      <p>Test demo API function calls</p>
+      <p>Test transliteration utility API function calls</p>
       <author>Efraim Feinstein</author>
-      <copyright>Copyright 2012 Efraim Feinstein, 
+      <copyright>Copyright 2012,2018 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <asUser>testuser</asUser>
   <password>testuser</password>
   <imports>
-  import module namespace demo="http://jewishliturgy.org/api/demo"
-    at "xmldb:exist:///db/apps/opensiddur-demos/api/demo.xqm";
+  import module namespace translit="http://jewishliturgy.org/api/utility/translit"
+    at "xmldb:exist:///db/apps/opensiddur-server/api/utility/translit.xqm";
   </imports>
   <namespace prefix="tr">http://jewishliturgy.org/ns/tr/1.0</namespace>
   <namespace prefix="output">http://www.w3.org/2010/xslt-xquery-serialization</namespace>
@@ -56,24 +56,17 @@
       <remove-collection collection="/db/data/transliteration/1900"/>
   </tearDown>
   <TestSet>
-      <testName>demo index APIs</testName>
+      <testName>index APIs</testName>
       <test>
-         <task>demo:list()</task>
+         <task>translit:transliteration-list()</task>
          <code>
-      demo:list()
+      translit:transliteration-list("", 1, 100)
       </code>
-         <class href="common.t.incl.xml#DiscoveryAPI"/>
-      </test>
-      <test>
-         <task>demo:transliteration-list()</task>
-         <code>
-      demo:transliteration-list("", 1, 100)
-      </code>
-         <xpath desc="returns an HTML list">self::html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a[contains(@href, "/demo/")]</xpath>
+         <xpath desc="returns an HTML list">self::html:html/html:body/html:ul[@class="results"]/html:li[@class="result"]/html:a[contains(@href, "/utility/translit/")]</xpath>
       </test>
   </TestSet>
   <TestSet>
-      <testName>demo:transliterate-xml()</testName>
+      <testName>translit:transliterate-xml()</testName>
       <!-- the username/password will not be stored in the session,
     so go in as a guest -->
     <asUser/>
@@ -81,7 +74,7 @@
       <test>
          <task>Post XML and a valid transliteration schema</task>
          <code>
-      demo:transliterate-xml(
+      translit:transliterate-xml(
         document{
           &lt;transliterate xml:lang="he"&gt;אבגדה וזח&lt;/transliterate&gt;
         },
@@ -94,7 +87,7 @@
       <test>
          <task>Post XML and a nonexistent transliteration schema</task>
          <code>
-      demo:transliterate-xml(
+      translit:transliterate-xml(
         document{
           &lt;transliterate xml:lang="he"&gt;אבגדה וזח&lt;/transliterate&gt;
         },
@@ -102,15 +95,26 @@
       </code>
          <xpath desc="returns status code 404">self::rest:response/http:response/@status=404</xpath>
       </test>
+      <test>
+          <task>Post XML and a nonexistent transliteration table</task>
+          <code>
+              translit:transliterate-xml(
+              document{
+              &lt;transliterate xml:lang="xx"&gt;אבגדה וזח&lt;/transliterate&gt;
+              },
+              "Test")
+          </code>
+          <xpath desc="returns status code 400">self::rest:response/http:response/@status=400</xpath>
+      </test>
   </TestSet>
   <TestSet>
-      <testName>demo:transliterate-text()</testName>
+      <testName>translit:transliterate-text()</testName>
       <asUser/>
       <password/>
       <test output="mixed">
          <task>Post text and a valid transliteration schema</task>
          <code>
-      demo:transliterate-text(
+      translit:transliterate-text(
         util:string-to-binary("אבגדה וזח"),
         "Test")
       </code>
@@ -120,7 +124,7 @@
       <test output="mixed">
          <task>Post text and a nonexistent transliteration schema</task>
          <code>
-      demo:transliterate-text(
+      translit:transliterate-text(
         util:string-to-binary("אבגדה וזח"),
         "NotExistent")
       </code>
