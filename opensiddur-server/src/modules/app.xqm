@@ -245,4 +245,3 @@ declare function app:mirror-permissions(
   let $permissions := sm:get-permissions($source) 
   return app:copy-permissions($dest, $permissions)
 };
-

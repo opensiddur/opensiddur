@@ -77,6 +77,35 @@ declare
   crest:get($notes:data-type, $name)
 };
 
+(:~ Get an XML annotation by resource name and id
+ : @param $name Document name
+ : @param $id The xml:id of the annotation to get
+ : @return The tei:note containing the requested annotation
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare
+  %rest:GET
+  %rest:path("/api/data/notes/${name}/${id}")
+  %rest:produces("application/xml", "text/xml", "application/tei+xml")
+  %output:method("xml")
+  function notes:get-note(
+    $name as xs:string,
+    $id as xs:string
+  ) as item()+ {
+  let $notes-doc := crest:get($notes:data-type, $name)
+  return
+    if ($notes-doc instance of document-node())
+    then
+      let $note := $notes-doc//tei:note[@xml:id=$id]
+      return
+        if (exists($note))
+        then document { $note }
+        else api:rest-error(404, "Note not found", $id)
+    else
+      (: it's an error condition :)
+      $notes-doc
+};
+
 (:~ List or full-text query annotation documents
  : @param $q text of the query, empty string for all
  : @param $start first document to list
@@ -183,6 +212,91 @@ declare
     notes:validate-report#2,
     notes:uri-title-function#1
   )
+};
+
+(:~ transform to insert or replace elements in an in-memory document
+ : we do not use XQuery update because it doesn't work on in-memory documents
+ :
+ : @param $nodes Nodes that are being operated on
+ : @param $annotation-to-insert The annotation that will be inserted into j:annotations
+ : @param $annotation-to-replace The annotation that should be replaced. If it does not exist, the annotation will be
+ :          inserted at the end of j:annotations
+ : @return $node with insertions or replacements
+ :)
+declare function notes:insert-or-replace(
+  $nodes as node()*,
+  $annotation-to-insert as element(tei:note),
+  $annotation-to-replace as element(tei:note)?
+) {
+  for $node in $nodes
+  return
+    typeswitch ($node)
+    case document-node() return
+      document { notes:insert-or-replace($node/node(), $annotation-to-insert, $annotation-to-replace) }
+    case element(j:annotations) return
+      element { QName(namespace-uri($node), name($node)) } {
+        $node/@*,
+        if (empty($annotation-to-replace))
+        then (
+          $node/node(),
+          $annotation-to-insert
+        )
+        else notes:insert-or-replace($node/node(), $annotation-to-insert, $annotation-to-replace)
+      }
+    case element(tei:note) return
+      if (exists($annotation-to-replace) and $annotation-to-replace is $node)
+      then $annotation-to-insert
+      else $node
+    case element() return
+      element { QName(namespace-uri($node), name($node)) } {
+        $node/@*,
+        notes:insert-or-replace($node/node(), $annotation-to-insert, $annotation-to-replace)
+      }
+    default return $node
+};
+
+(:~ Edit or insert a note into a document
+ : @param $name Document name
+ : @param $body Body of the note
+ : @return HTTP 200 if the edit was successful
+ : @return HTTP 201 if a new document was created
+ : @error HTTP 400 for invalid XML, including missing @xml:id
+ : @error HTTP 401 not authorized
+ :
+ : Other effects:
+ : * A change record is added to the resource
+ : * If a new resource is created, it is owned by the current user, group owner=current user, and mode is 664
+ :)
+declare
+  %rest:POST
+  %rest:path("/api/data/notes/${name}")
+  %rest:consumes("application/xml", "application/tei+xml", "text/xml")
+  function notes:post-note(
+    $name as xs:string,
+    $body as element(tei:note)
+  ) as item()+ {
+  let $doc := data:doc($notes:data-type, $name)
+  return
+    if (not($body/@xml:id/string()))
+    then
+      api:rest-error(400, "Input annotation requires an xml:id")
+    else if ($doc)
+    then
+      let $resource := util:document-name($doc)
+      let $collection := util:collection-name($doc)
+      let $uri := document-uri($doc)
+      return
+        if (sm:has-access(xs:anyURI($uri), "w"))
+        then
+          (: existing document with write access :)
+          let $existing-note := $doc//tei:note[@xml:id=$body/@xml:id]
+          let $inserted := notes:insert-or-replace($doc, $body, $existing-note)
+          return notes:put($name, $inserted)
+        else
+          crest:no-access()
+    else
+      (: document does not exist, return HTTP 404 :)
+      api:rest-error(404, "Not found", $name)
 };
 
 (:~ Edit/replace an annotation document in the database
