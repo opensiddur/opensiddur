@@ -85,7 +85,7 @@ declare
  :)
 declare
   %rest:GET
-  %rest:path("/api/data/notes/${name}/${id}")
+  %rest:path("/api/data/notes/{$name}/{$id}")
   %rest:produces("application/xml", "text/xml", "application/tei+xml")
   %output:method("xml")
   function notes:get-note(
@@ -269,7 +269,7 @@ declare function notes:insert-or-replace(
  :)
 declare
   %rest:POST
-  %rest:path("/api/data/notes/${name}")
+  %rest:path("/api/data/notes/{$name}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function notes:post-note(
     $name as xs:string,
