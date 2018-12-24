@@ -12,7 +12,7 @@ xquery version "3.0";
 module namespace demo="http://jewishliturgy.org/api/demo";
 
 import module namespace translit="http://jewishliturgy.org/api/utility/translit"
-  at "/db/apps/opensiddur-server/api/utility/translit/translit.xqm";
+  at "/db/apps/opensiddur-server/api/utility/translit.xqm";
 
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
