@@ -11,6 +11,8 @@ xquery version "3.0";
  :)
 module namespace demo="http://jewishliturgy.org/api/demo";
 
+import module namespace uindex="http://jewishliturgy.org/api/utility"
+  at "/db/apps/opensiddur-server/api/utility/utilityindex.xqm";
 import module namespace translit="http://jewishliturgy.org/api/utility/translit"
   at "/db/apps/opensiddur-server/api/utility/translit.xqm";
 
@@ -30,7 +32,7 @@ declare
   %output:method("xhtml")
   function demo:list(
   ) as item()+ {
-  translit:list()
+  uindex:list()
 };
 
 (:~ list all available transliteration demos
