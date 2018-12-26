@@ -39,7 +39,7 @@ OpenSiddurTranslitDemoApp.controller(
                                     tables.push({
                                         "name" : element.text(),
                                         "api" : element.attr("href"),
-                                        "demoApi" : element.attr("href").replace("/api/data/", "/api/utility/translit/")
+                                        "demoApi" : element.attr("href").replace("/api/data/transliteration/", "/api/utility/translit/")
                                     });
                                     
                                 }
