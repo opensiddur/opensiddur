@@ -232,6 +232,7 @@ declare function translit:assemble-word-tei-w(
 (:~ Finds the textual part of a whole word; 
  : If it's from the context we're looking for, don't wrap it.  
  : If it isn't, wrap it in tr:ignore tags.
+ : Normalize all Unicode to be transliterated to NFKD
  : @param $params Includes translit:this-context as node()
  :)
 declare function translit:assemble-word-text(
@@ -240,9 +241,9 @@ declare function translit:assemble-word-text(
     ) as node() { 
 	if ($context=$params("translit:this-context"))
     then
-        $context
+        text { normalize-unicode($context, "NFKD") }
     else
-        element tr:ignore { $context }
+        element tr:ignore { normalize-unicode($context, "NFKD") }
 };
 
 declare function translit:replace-tetragrammaton(

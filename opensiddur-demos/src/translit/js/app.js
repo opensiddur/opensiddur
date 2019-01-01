@@ -1,5 +1,5 @@
 /* Transliteration demo application
- * Copyright 2013 Efraim Feinstein, efraim@opensiddur.org
+ * Copyright 2013,2018 Efraim Feinstein, efraim@opensiddur.org
  * Licensed under the GNU Lesser General Public License, version 3 or later
  */
 var httpPrefix = "/exist/restxq"; 
@@ -39,7 +39,7 @@ OpenSiddurTranslitDemoApp.controller(
                                     tables.push({
                                         "name" : element.text(),
                                         "api" : element.attr("href"),
-                                        "demoApi" : element.attr("href").replace("/api/data/", "/api/demo/")
+                                        "demoApi" : element.attr("href").replace("/api/data/transliteration/", "/api/utility/translit/")
                                     });
                                     
                                 }

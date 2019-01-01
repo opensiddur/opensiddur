@@ -4,7 +4,7 @@
   <description>
       <p>Test annotation data API</p>
       <author>Efraim Feinstein</author>
-      <copyright>Copyright 2012-2013 Efraim Feinstein,
+      <copyright>Copyright 2012-2013,2018 Efraim Feinstein,
     Licensed under the GNU Lesser General Public License, version 3 or later</copyright>
   </description>
   <asUser>testuser</asUser>
@@ -188,6 +188,68 @@
       notes:post(doc("/db/apps/opensiddur-tests/tests/api/data/notes/Invalid.xml"))
       </code>
          <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
+  </TestSet>
+  <TestSet>
+      <testName>notes:post-note()</testName>
+      <test>
+          <task>Post a valid new note to an existing resource</task>
+          <code><![CDATA[
+             notes:post-note("Existing", <tei:note type="comment" xml:id="a-new-note">This is new.</tei:note>)
+          ]]></code>
+          <class href="../common.t.incl.xml#NoData"/>
+          <expected desc="a change record has been added"
+                    xpath="(collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
+              <tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="edited" who="/user/testuser"
+                          when="..."/>
+          </expected>
+          <expected desc="a new note has been added"
+                    xpath="(collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//j:annotations/tei:note[last()])">
+              <tei:note xmlns:tei="http://www.tei-c.org/ns/1.0"
+                        type="comment" xml:id="a-new-note">This is new.</tei:note>
+          </expected>
+          <xpath desc="all the other notes remain undisturbed">count(
+              collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//j:annotations/tei:note)=2</xpath>
+      </test>
+      <test>
+          <task>Post a valid replacement note to an existing resource</task>
+          <code><![CDATA[
+             notes:post-note("Existing", <tei:note type="comment" xml:id="a-note">This is new.</tei:note>)
+          ]]></code>
+          <class href="../common.t.incl.xml#NoData"/>
+          <expected desc="a change record has been added"
+                    xpath="(collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]">
+              <tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="edited" who="/user/testuser"
+                          when="..."/>
+          </expected>
+          <expected desc="a new note has been added"
+                    xpath="(collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//j:annotations/tei:note[last()])">
+              <tei:note xmlns:tei="http://www.tei-c.org/ns/1.0"
+                        type="comment" xml:id="a-note">This is new.</tei:note>
+          </expected>
+          <xpath desc="the existing note was the one that was edited">count(
+              collection('/db/data/notes/en')[descendant::tei:title[@type='main'][.='Existing']]//j:annotations/tei:note)=1</xpath>
+      </test>
+      <test>
+          <task>Post a valid note to a nonexisting resource</task>
+          <code><![CDATA[
+             notes:post-note("Does-Not-Exist", <tei:note type="comment" xml:id="a-note">This is new.</tei:note>)
+          ]]></code>
+          <class href="../common.t.incl.xml#NotFound"/>
+      </test>
+      <test>
+          <task>Post an invalid note (lacking xml:id) to an existing resource</task>
+          <code><![CDATA[
+             notes:post-note("Existing", <tei:note type="comment">This is new.</tei:note>)
+          ]]></code>
+          <class href="../common.t.incl.xml#BadRequest"/>
+      </test>
+      <test>
+          <task>Post a note to a resource without access</task>
+          <code><![CDATA[
+             notes:post-note("NoWriteAccess", <tei:note type="comment" xml:id="a-note">This is new.</tei:note>)
+          ]]></code>
+          <class href="../common.t.incl.xml#Forbidden"/>
       </test>
   </TestSet>
   <TestSet>
