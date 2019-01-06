@@ -10,6 +10,11 @@
     <property name="dist" location="dist"/>
     <property name="deps.dir" location="dependencies"/>
 
+    <property name="docker.image.tag" value="opensiddur:latest"/>
+    <property name="docker.image.name" value="opensiddur-container"/>
+    <!-- TCP port to keep open for the docker image -->
+    <property name="docker.image.port" value="5000"/>
+
     <property file="local.build.properties"/>
     <property file="build.properties"/>
 
@@ -217,7 +222,41 @@ cacheSize=${cache.size}
             </fileset>
         </copy>
     </target>
-    
+
+    <target name="docker-build" depends="dist"
+            description="build a docker image">
+        <exec executable="docker">
+            <arg value="build"/>
+            <arg value="-t"/>
+            <arg value="${docker.image.tag}"/>
+            <arg value="."/>
+        </exec>
+    </target>
+
+    <target name="docker-run" depends="docker-build">
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-p"/>
+            <arg value="127.0.0.1:${docker.image.port}:8080/tcp"/>
+            <arg value="--name"/>
+            <arg value="${docker.image.name}"/>
+            <arg value="-d"/>
+            <arg value="${docker.image.tag}"/>
+        </exec>
+    </target>
+
+    <target name="docker-stop">
+        <exec executable="docker">
+            <arg value="stop"/>
+            <arg value="${docker.image.name}"/>
+        </exec>
+        <exec executable="docker">
+            <arg value="container"/>
+            <arg value="rm"/>
+            <arg value="${docker.image.name}"/>
+        </exec>
+    </target>
+
     <target name="retrieve-dependencies"
         depends="bootstrap"
         description="Retrieve dependencies with Apache IVY">
