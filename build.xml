@@ -291,7 +291,17 @@ cacheSize=${cache.size}
         <sleep seconds="5"/>
         <delete dir="${installdir}"/>
     </target>
-    
+
+    <target name="test"
+        description="Run tests"
+        depends="docker-run">
+        <exec
+            executable="python3"
+            failonerror="true">
+            <arg value="testrunner/testrunner.py"/>
+        </exec>
+    </target>
+
     <target name="backup"
         description="back up an existing database into $backup.directory">
         <property environment="env"/>

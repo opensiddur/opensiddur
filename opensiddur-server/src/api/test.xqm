@@ -19,7 +19,6 @@ declare function tst:list-xqueries(
 ) as xs:string* {
     if (xmldb:collection-available($path))
     then (
-        (: $path is a collection :)
         for $child-collection in xmldb:get-child-collections($path)
         let $child-path := concat($path, '/', $child-collection)
         return
@@ -27,8 +26,8 @@ declare function tst:list-xqueries(
         for $child-resource in xmldb:get-child-resources($path)
         let $child-path := concat($path, '/', $child-resource)
         return
-            if (xmldb:get-mime-type(xs:anyURI($path)) = "application/xquery")
-            then $path
+            if (xmldb:get-mime-type(xs:anyURI($child-path)) = "application/xquery")
+            then $child-path
             else ()
     )
     else ()
@@ -40,8 +39,40 @@ declare
         $modules as xs:string*
 ) as xs:string* {
     for $module in $modules
-    return
-        inspect:inspect-module(xs:anyURI($module))/function/annotation[@namespace="http://exist-db.org/xquery/xqsuite"]
+    where exists(inspect:inspect-module(
+            xs:anyURI($module))/function/annotation[@namespace="http://exist-db.org/xquery/xqsuite"])
+    return $module
+};
+
+(:~ render a list of modules as an HTML document
+ : @param $api-base Base of test API
+ : @param $modules list of modules to render
+ : @return an HTML document
+ :)
+declare function tst:render-html-list(
+        $api-base as xs:string,
+        $modules as xs:string*
+) as element() {
+    <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+            <title>Tests</title>
+        </head>
+        <body>
+            <ul class="apis">
+                <li class="api">
+                    <a class="discovery" href="{$api-base}/run">All tests</a>
+                </li>
+                {
+                    for $module in $modules
+                    return (
+                        <li class="api">
+                            <a class="discovery" href="{$api-base}/run?suite={encode-for-uri($module)}">{$module}</a>
+                        </li>
+                    )
+                }
+            </ul>
+        </body>
+    </html>
 };
 
 (:~ List all available modules that can be tested :)
@@ -54,26 +85,9 @@ declare
     ) as item()+ {
     let $api-base := api:uri-of("/api/test")
     return
-        <html xmlns="http://www.w3.org/1999/xhtml">
-            <head>
-                <title>Tests</title>
-            </head>
-            <body>
-                <ul class="apis">
-                    <li class="api">
-                        <a class="discovery" href="{$api-base}/run">All tests</a>
-                    </li>,
-                    {
-                        for $module in tst:get-testable-modules(tst:list-xqueries($paths:repo-base))
-                        return (
-                            <li class="api">
-                                <a class="discovery" href="{$api-base}/run?suite={encode-for-uri($module)}">{$module}</a>
-                            </li>
-                        )
-                    }
-                </ul>
-            </body>
-        </html>
+        tst:render-html-list($api-base,
+                tst:get-testable-modules(tst:list-xqueries($paths:repo-base))
+        )
 };
 
 (:~ Run one or more test suites and return the result as xUnit XML
@@ -89,7 +103,7 @@ declare
     %output:method("xml")
     function tst:run(
         $suites as xs:string*
-) as item()+ {
+    ) as item()+ {
     let $suites-to-run :=
         if (empty($suites))
         then tst:get-testable-modules(tst:list-xqueries($paths:repo-base))
