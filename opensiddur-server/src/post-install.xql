@@ -79,6 +79,7 @@ for $module in (
             "/api/data/transliteration.xqm",
             "/api/index.xqm",
             "/api/login.xqm",
+            "/api/test.xqm",
             "/api/data/dindex.xqm",
             "/api/data/notes.xqm",
             "/api/data/dictionaries.xqm",
