@@ -1,6 +1,6 @@
 xquery version "3.0";
 (:~ tests API
- : Copyright 2013 Efraim Feinstein efraim@opensiddur.org
+ : Copyright 2013,2019 Efraim Feinstein efraim@opensiddur.org
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : @author Efraim Feinstein
  :)
@@ -10,8 +10,8 @@ import module namespace t="http://exist-db.org/xquery/testing/modified"
     at "../modules/test2.xqm";
 import module namespace api="http://jewishliturgy.org/modules/api"
     at "/db/apps/opensiddur-server/modules/api.xqm";
-import module namespace crest="http://jewishliturgy.org/modules/common-rest"
-    at "/db/apps/opensiddur-server/modules/common-rest.xqm";
+import module namespace magic="http://jewishliturgy.org/magic"
+    at "/db/apps/opensiddur-server/magic/magic.xqm";
 
 declare namespace expath="http://expath.org/ns/pkg";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
@@ -23,6 +23,51 @@ declare variable $tests:repo-base :=
     util:collection-name($descriptor);
 declare variable $tests:path-base := concat($tests:repo-base, "/tests"); 
 declare variable $tests:api-path-base := "/api/tests";
+
+declare
+    %private
+    function tests:create-user(
+        $user as xs:string
+) {
+    let $exists := sm:user-exists($user)
+    return
+        if ($exists)
+        then sm:add-group-member("everyone", $user)
+        else sm:create-account($user, $user, 'everyone')
+};
+
+(:~ initialize the testing system :)
+declare
+    %private
+    function tests:init() {
+    util:log("info", "initializing the testing system"),
+    system:as-user("admin", $magic:password, (
+        util:log("info", "Adding test users..."),
+        for $user in ('testuser', 'testuser2')
+        return tests:create-user($user),
+        util:log-system-out("Creating test data collection..."),
+        if (xmldb:collection-available("/db/data/tests"))
+        then ()
+        else xmldb:create-collection("/db/data", "tests"),
+        sm:chown(xs:anyURI("/db/data/tests"), "testuser"),
+        sm:chgrp(xs:anyURI("/db/data/tests"), "testuser"),
+        sm:chmod(xs:anyURI("/db/data/tests"), "rwxrwxr-x")
+    )),
+    util:log("info", "Done.")
+};
+
+(:~ undo initialization of the testing system :)
+declare
+    %private
+    function tests:destroy() {
+    system:as-user("admin", $magic:password, (
+        util:log("info", "removing tests directory"),
+        xmldb:remove("/db/data/tests"),
+        util:log("info", "removing the test user"),
+        sm:remove-account("testuser"),
+        sm:remove-group("testuser")
+    ))
+};
 
 declare 
     %rest:GET
@@ -107,10 +152,12 @@ declare function tests:do-test(
                     <output:method>xml</output:method>
                 </output:serialization-parameters>
             </rest:response>,
+            let $init := tests:init()
             let $results :=
                 if ($test)
                 then t:run-testSet(doc($suite-doc)//TestSet[TestName=$test], (), ())
                 else t:run-testSuite(doc($suite-doc)/TestSuite, (), ())
+            let $destroy := tests:destroy()
             return
                 if ($format) 
                 then t:format-testResult($results)
