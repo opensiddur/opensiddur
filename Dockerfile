@@ -23,6 +23,7 @@ RUN ln -s /usr/local/opensiddur/extensions/indexes/lucene/lib/hspell-data-files 
 
 # copy autodeploy files
 COPY dist/opensiddur-server.xar /usr/local/opensiddur/autodeploy
+COPY dist/opensiddur-tests.xar /usr/local/opensiddur/autodeploy
 
 EXPOSE 8080 8443
 
