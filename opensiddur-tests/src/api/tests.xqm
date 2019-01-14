@@ -56,6 +56,61 @@ declare
     util:log("info", "Done.")
 };
 
+(:~ return a list of child collections (in <collection> elements) and resources (in <resource> elements)
+ : that are owned by the given users
+ :)
+declare
+    %private
+    function tests:get-test-resources(
+        $path as xs:string,
+        $users as xs:string+,
+        $exclude as xs:string*
+    ) as element()* {
+    system:as-user("admin", $magic:password, (
+        for $child-collection in xmldb:get-child-collections($path)
+        let $child-path := concat($path, '/', $child-collection)
+        where not($child-path = $exclude)
+        return (
+            tests:get-test-resources($child-path, $users, $exclude),
+            if (sm:get-permissions(xs:anyURI($child-path))/*/@owner = $users)
+            then <collection collection="{$child-path}"/>
+            else ()
+        ),
+        for $child-resource in xmldb:get-child-resources($path)
+        let $child-path := concat($path, '/', $child-resource)
+        where not($child-path = $exclude)
+        return
+            if (sm:get-permissions(xs:anyURI($child-path))/*/@owner = $users)
+            then <resource collection="{$path}" resource="${$child-resource}"/>
+            else ()
+    ))
+};
+
+declare
+    %private
+    function tests:remove-test-resources(
+    $items as element()*
+    ) {
+    system:as-user("admin", $magic:password, (
+        for $item in $items
+        return
+            typeswitch ($item)
+            case element(collection) return
+                let $to-remove := $item/@collection/string()
+                where xmldb:collection-available($to-remove)
+                return
+                    let $log := util:log("info", "Removing collection " || $to-remove)
+                    return xmldb:remove($item/@collection)
+            case element(resource) return
+                let $to-remove := $item/@collection/string() || "/" || $item/@resource/string()
+                where doc-available($to-remove) or util:binary-doc-available($to-remove)
+                return
+                    let $log := util:log("info", "Removing resource " || $to-remove)
+                    return xmldb:remove($item/@collection, $item/@resource)
+            default return ()
+    ))
+};
+
 (:~ undo initialization of the testing system :)
 declare
     %private
@@ -63,6 +118,14 @@ declare
     system:as-user("admin", $magic:password, (
         util:log("info", "removing tests directory"),
         xmldb:remove("/db/data/tests"),
+        if (xmldb:collection-available("/db/refindex/tests"))
+        then xmldb:remove("/db/refindex/tests")
+        else (),
+        util:log("info", "removing test resources"),
+        let $testusers := ("testuser", "testuser2")
+        let $excluded := ("/db/apps", "/db/system")
+        return
+            tests:remove-test-resources(tests:get-test-resources("/db", $testusers, $excluded)),
         util:log("info", "removing the test user"),
         sm:remove-account("testuser"),
         sm:remove-group("testuser")

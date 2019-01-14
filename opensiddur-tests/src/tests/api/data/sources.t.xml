@@ -47,6 +47,7 @@
   <tearDown>
       <remove-document collection="/db/data/sources" name="Existing.xml"/>
       <remove-document collection="/db/data/sources" name="NoWriteAccess.xml"/>
+      <remove-document collection="/db/data/user" name="testuser.xml"/>
       <!-- NoAccess has to be removed by admin -->
     <code>
       system:as-user("admin", $magic:password, 
