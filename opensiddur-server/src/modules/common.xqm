@@ -300,9 +300,9 @@ declare function common:apply-at(
  : $item is a reference, not a value
  :)
 declare function common:following(
-  $item as item()?,
-  $sequence as item()*
-  ) as item()* {
+  $item as node()?,
+  $sequence as node()*
+  ) as node()* {
   if (exists($item))
   then
     subsequence(
@@ -320,9 +320,9 @@ declare function common:following(
  : $item is a reference, not a value
  :)
 declare function common:preceding(
-  $item as item()?,
-  $sequence as item()*
-  ) as item()* {
+  $item as node()?,
+  $sequence as node()*
+  ) as node()* {
   if (exists($item))
   then
     subsequence(
