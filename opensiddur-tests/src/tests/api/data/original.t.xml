@@ -62,6 +62,7 @@
   </setup>
   <tearDown>
       <remove-collection collection="/db/data/original/en/1900"/>
+      <remove-document collection="/db/data/user" name="testuser.xml"/>
   </tearDown>
   <namespace prefix="html">http://www.w3.org/1999/xhtml</namespace>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>

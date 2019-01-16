@@ -247,14 +247,15 @@ declare function unflatten:start(
   $sequence as node()*,
   $params as map(*)
   ) as map(*) {
-  let $following := common:following($s, $sequence)
-  let $end := 
+  let $following as node()* := common:following($s, $sequence)
+  let $end as node()? :=
     $following[(@jf:end|@jf:suspend)=$s/(@jf:start, @jf:continue)][1]
-  let $inside-sequence := 
+  let $inside-sequence as node()* :=
     if (exists($end))
     then
-      $following 
-        intersect common:preceding($end, $sequence)
+        let $preceding as node()* := common:preceding($end, $sequence)
+        return
+            $following intersect $preceding
     else
       $following
   let $unopened-tags := unflatten:unopened-tags($inside-sequence)
