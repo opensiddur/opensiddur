@@ -223,7 +223,7 @@ cacheSize=${cache.size}
         </copy>
     </target>
 
-    <target name="docker-build" depends="dist"
+    <target name="docker-build" depends="build-exist,dist"
             description="build a docker image">
         <exec executable="docker">
             <arg value="build"/>
