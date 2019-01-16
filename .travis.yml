@@ -7,7 +7,7 @@ before_install:
   - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
   - git lfs pull
   - sudo apt-get update
-  - sudo apt install -y libxml2 libxml2-utils python-lxml
+  - sudo apt install -y libxml2 libxml2-utils python3-lxml
 
 script: ant test
 
