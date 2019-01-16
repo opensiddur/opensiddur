@@ -26,7 +26,8 @@
   </imports>
   <variable name="original-collection">'/db/data/tests'</variable>
   <variable name="mirror-collection">'/db/data/tests/mirror'</variable>
-  <functions>
+  <variable name="delay-time-ms">500</variable>
+  <functions><![CDATA[
     declare function local:same-permissions(
       $a as xs:string,
       $b as xs:string
@@ -35,7 +36,7 @@
         (xmldb:collection-available($b) or doc-available($b)) and
         xmldiff:compare(sm:get-permissions(xs:anyURI($a)),sm:get-permissions(xs:anyURI($b)))
       };
-  </functions>
+  ]]></functions>
   <TestSet>
       <testName>mirror:create()</testName>
       <tearDown>
@@ -281,6 +282,8 @@
          <store collection="/db/data/tests" name="test.xml">
             <test/>
          </store>
+          <!-- add an artificial delay to make the mirror newer than the file -->
+         <code><![CDATA[ util:wait($delay-time-ms) ]]></code>
          <store collection="/db/data/tests/mirror" name="test.xml">
             <mirror/>
          </store>
@@ -318,6 +321,8 @@
          <store collection="/db/data/tests/mirror" name="test.xml">
             <mirror/>
          </store>
+          <!-- add an artificial delay to make the mirror older than the file -->
+          <code><![CDATA[ util:wait($delay-time-ms) ]]></code>
          <store collection="/db/data/tests" name="test.xml">
             <test/>
          </store>
@@ -351,6 +356,8 @@
          <store collection="/db/data/tests" name="test.xml">
             <test/>
          </store>
+          <!-- add an artificial delay to make the mirror newer than the file -->
+          <code><![CDATA[ util:wait($delay-time-ms) ]]></code>
          <store collection="/db/data/tests/mirror" name="test.html">
             <mirror/>
          </store>
@@ -376,6 +383,8 @@
          <store collection="/db/data/tests/mirror" name="test.html">
             <mirror/>
          </store>
+          <!-- add an artificial delay to make the mirror older than the file -->
+          <code><![CDATA[ util:wait($delay-time-ms) ]]></code>
          <store collection="/db/data/tests" name="test.xml">
             <test/>
          </store>

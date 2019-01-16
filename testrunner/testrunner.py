@@ -115,7 +115,7 @@ class LegacyApiSax(SaxBase):
         return passed
 
     def _test(self, attributes: dict):
-        passed = self._update_counts(self._evaluate_passed(attributes[(None, "pass")]))
+        passed = self._evaluate_passed(attributes[(None, "pass")])
         desc = attributes[(None, "desc")]
         print(escaped(passed, indented(3) + desc))
 
