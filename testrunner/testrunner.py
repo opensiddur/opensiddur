@@ -46,7 +46,7 @@ def wait_for_uptime(host=DEFAULT_HOST, port=DEFAULT_PORT, max_timeout_s=120):
     while not up and elapsed_time < max_timeout_s:
         try:
             _, code = http_request(host, port, "/")  # check if eXist is serving any web page
-        except (ConnectionResetError, ConnectionRefusedError):
+        except (ConnectionResetError, ConnectionRefusedError, http.client.BadStatusLine):
             code = 0
         elapsed_time = time.time() - start_time
         up = code == 200
