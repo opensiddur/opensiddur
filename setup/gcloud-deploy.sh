@@ -2,7 +2,8 @@
 # This script is used to deploy from local to gcloud.
 # Before running it, you need to have gcloud sdk set up on you machine and provide the appropriate settings in
 # gcloud-settings.sh
-source gcloud-settings.sh
+DIR=$(dirname "${BASH_SOURCE[0]}")
+source ${DIR}/gcloud-settings.sh
 
 gcloud beta compute \
     --project=${PROJECT_NAME} instances create ${INSTANCE_NAME} \
@@ -19,8 +20,7 @@ gcloud beta compute \
     --boot-disk-type=pd-standard \
     --boot-disk-device-name=${INSTANCE_NAME} \
     --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
-    --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD} \
-    --metadata EXIST_MEMORY=${EXIST_MEMORY}
+    --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY}
 
 # TODO: copy the old instance database to the new instance
 # TODO: point db-dev.jewishliturgy.org to the new instance

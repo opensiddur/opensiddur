@@ -10,6 +10,6 @@ IMAGE=ubuntu-1804-bionic-v20181222
 IMAGE_PROJECT=ubuntu-os-cloud
 BOOT_DISK_SIZE_GB=20
 
-EXIST_MEMORY=4096
+EXIST_MEMORY=3072
 # change this!
 ADMIN_PASSWORD=$(echo "***You need to set a password***" && exit 1)
