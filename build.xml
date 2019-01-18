@@ -165,7 +165,24 @@ cacheSize=${cache.size}
         <symlink link="${installdir}/tools/yajsw/classes/hspell-data-files"
                  resource="${installdir}/extensions/indexes/lucene/lib/hspell-data-files"/>
     </target>
-    
+
+    <!-- sources and tests needs to be autodeployed separately; tests will generally be done using ant test -->
+    <target name="autodeploy-sources" depends="dist">
+        <copy todir="${installdir}/autodeploy">
+            <fileset dir="${dist}">
+                <include name="opensiddur-sources.xar"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="autodeploy-tests" depends="dist">
+        <copy todir="${installdir}/autodeploy">
+            <fileset dir="${dist}">
+                <include name="opensiddur-tests.xar"/>
+            </fileset>
+        </copy>
+    </target>
+
     <target name="autoupgrade"
         depends="dist,install-hebmorph"
         description="install or upgrade Open Siddur packages without touching eXist">
@@ -177,9 +194,8 @@ cacheSize=${cache.size}
         </ant>
 		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
-				<include name="*.xar"/>
-                <!-- hebmorph is being installed directly, not as a xar -->
-                <exclude name="hebmorph-exist.xar"/>
+				<include name="opensiddur-server.xar"/>
+                <include name="opensiddur-demos.xar"/>
 			</fileset>
             <fileset dir="${lib.dir}/exist/installer/apps">
                 <include name="dashboard*.xar"/>
