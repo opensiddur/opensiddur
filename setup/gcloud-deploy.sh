@@ -20,7 +20,7 @@ gcloud beta compute \
     --boot-disk-type=pd-standard \
     --boot-disk-device-name=${INSTANCE_NAME} \
     --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
-    --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY}
+    --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},BRANCH=${BRANCH}
 
 # TODO: copy the old instance database to the new instance
 # TODO: point db-dev.jewishliturgy.org to the new instance

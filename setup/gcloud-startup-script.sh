@@ -4,6 +4,7 @@ get_metadata() {
 curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/$1?alt=text" -H "Metadata-Flavor: Google"
 }
 
+BRANCH=$(get_metadata BRANCH)
 PASSWORD=$(get_metadata ADMIN_PASSWORD)
 EXIST_MEMORY=$(get_metadata EXIST_MEMORY)
 INSTALL_DIR=/usr/local/opensiddur
@@ -11,11 +12,13 @@ INSTALL_DIR=/usr/local/opensiddur
 useradd -c "eXist db"  exist
 apt update
 apt install -y maven openjdk-8-jdk ant libxml2 libxml2-utils python3-lxml
+update-java-alternatives -s java-1.8.0-openjdk-amd64
+
 mkdir -p src
 cd src
 git clone git://github.com/opensiddur/opensiddur.git
 cd opensiddur
-git checkout master
+git checkout ${BRANCH}
 export SRC=$HOME/src/opensiddur
 cat << EOF > local.build.properties
 installdir=${INSTALL_DIR}

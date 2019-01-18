@@ -2,6 +2,8 @@
 # settings needed for gcloud.
 # To use this, copy it to gcloud-settings.sh and set the values
 VERSION=$(git rev-parse --short HEAD)
+BRANCH=develop
+
 PROJECT_NAME=opensiddur
 INSTANCE_NAME=opensiddur-server-${VERSION}
 ZONE=us-west2-a
