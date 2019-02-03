@@ -327,7 +327,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
             </constraintSpec>
             <constraintSpec ident="streamText-1" scheme="isoschematron">
               <constraint>
-                <sch:report test="*[not(@xml:id)]">An @xml:id attribute is required on all elements in a text stream.</sch:report>
+                <sch:report test="tei:anchor[not(@xml:id)]">An @xml:id attribute is required on all anchor elements in a text stream.</sch:report>
               </constraint>
             </constraintSpec>
           </elementSpec>
