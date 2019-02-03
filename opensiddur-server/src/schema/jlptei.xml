@@ -311,13 +311,13 @@ The Open Siddur intends to work within open standards whenever possible. In choo
             </classes>
             <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
               <rng:group xmlns="http://relaxng.org/ns/structure/1.0">
-                <rng:oneOrMore>
+                <rng:zeroOrMore>
                   <rng:choice>
                     <rng:ref name="model.segLike"/>
                     <rng:ref name="model.milestoneLike"/>
                     <rng:ref name="ptr"/>
                   </rng:choice>
-                </rng:oneOrMore>
+                </rng:zeroOrMore>
               </rng:group>
             </content>
             <constraintSpec ident="streamText-0" scheme="isoschematron">
