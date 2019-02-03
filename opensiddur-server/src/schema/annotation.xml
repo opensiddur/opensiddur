@@ -76,16 +76,14 @@ considered but did not implement removal of all irrelevant datatype specs...</ch
               <memberOf key="model.resourceLike"/>
               <memberOf key="att.global"/>
             </classes>
-            <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:oneOrMore>
-                <rng:choice>
-                  <rng:ref name="interpGrp"/>
-                  <rng:ref name="interp"/>
-                  <rng:ref name="note"/>
-                  <rng:ref name="fs"/>
-                  <rng:ref name="fvLib"/>
-                </rng:choice>
-              </rng:oneOrMore>
+            <content>
+              <alternate minOccurs="0" maxOccurs="unbounded">
+                <elementRef key="interpGrp"/>
+                <elementRef key="interp"/>
+                <elementRef key="note"/>
+                <elementRef key="fs"/>
+                <elementRef key="fvLib"/>
+              </alternate>
             </content>
           </elementSpec>
           <elementSpec ident="note" mode="change" module="core">
