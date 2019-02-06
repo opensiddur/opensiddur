@@ -13,6 +13,7 @@ before_install:
   - tar zxvf credentials.tar.gz
   - gcloud auth activate-service-account --key-file=client-secret.json
   - gcloud config set project opensiddur-client
+  - ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 
 script: ant test
 after_script: ant docker-stop
