@@ -1,19 +1,37 @@
 language: generic
 git:
   depth: false
+
+env:
+  global:
+  - VERSION=${TRAVIS_COMMIT:0:8}
+  - BRANCH=$TRAVIS_BRANCH
+  - PROJECT_NAME=opensiddur-client
+  - INSTANCE_NAME=${PROJECT_NAME}-${VERSION}
+  - ZONE=us-west2-a
+  - MACHINE_TYPE=n1-standard-1
+  - IMAGE=ubuntu-1804-bionic-v20181222
+  - IMAGE_PROJECT=ubuntu-os-cloud
+  - BOOT_DISK_SIZE_GB=20
+  - EXIST_MEMORY=3072
+  - secure: 2s9ydDeMHBfI87szDRo3tl2t8O7O5ILVIv9qcfuuCf4K7xovuavvoVgV0ti81IYz/GcVa/ZlTRN3hkjiO6ZL2gltZLqJvczYBoFFuKHBJujFw0PHedJkwBvyAxMiNx/v2vQUbzzx6cETrL91CenddEGqKnP7Ufpis4zKIz4BP6drmkNiDKdkMs9UctXXfl3+0WZH+2wwpcY2hAUcv/z14qftA8eDDhHcZAHB+Cp+1BQ5ifkknUBS8/5tDOL/FD7J/4uGztA5pO9iU++7hVdMdJpBunFoJ8aVDohM3Bbz7Q0MfnabZj+eUV7RYoyaAJGEfXzCM2AR4RDTKVoBvyDSUfoUb/eVPlDyZVsC2d0w8qtkd5pMLTNc+OMAYLDBw8CxUMQ8ibLxN1+oSi0zORzf/CkZ51UtM1M315y1jm53PW3un3Kqh22Zs8jmVfdIqCTOV/WA6PS7t18CovaoTpoiCvUW7bso1lNaU2g09yUhtnYQuYNpqaL0hrClvktZgiCWDF60GamyyzBGkC3+ObaPbgS3JKPmZWSuuEkopy/IAUcF+svldQhNNeAdp6gG1Yy0PdCE4US2+l0hz+P9O+XEQb7ksIIr7OuVxtowcBCT3wxjy2KgAsDhIc+yUgxMUuMQpsHsM9d6C2PFCr7GH0qBdihH+JlI+eFy7W9SymPqmv0=
+
 before_install:
   - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
   - git lfs pull
   - export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
-  - echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+  - echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee
+    -a /etc/apt/sources.list.d/google-cloud-sdk.list
   - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
   - sudo apt-get update -y
   - sudo apt install -y libxml2 libxml2-utils python3-lxml google-cloud-sdk
-  - openssl aes-256-cbc -K $encrypted_3565cb433837_key -iv $encrypted_3565cb433837_iv -in credentials.tar.gz.enc -out credentials.tar.gz -d
+  - openssl aes-256-cbc -K $encrypted_3565cb433837_key -iv $encrypted_3565cb433837_iv
+    -in credentials.tar.gz.enc -out credentials.tar.gz -d
   - tar zxvf credentials.tar.gz
   - gcloud auth activate-service-account --key-file=client-secret.json
   - gcloud config set project opensiddur-client
   - ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 
 script: ant test
+
 after_script: ant docker-stop
