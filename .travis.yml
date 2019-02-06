@@ -6,8 +6,13 @@ git:
 before_install:
   - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
   - git lfs pull
-  - sudo apt-get update
-  - sudo apt install -y libxml2 libxml2-utils python3-lxml
+  # install the Google cloud SDK
+  - export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" && \
+    echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+  - sudo apt-get update -y
+  - sudo apt install -y libxml2 libxml2-utils python3-lxml google-cloud-sdk
+
 
 script: ant test
 
