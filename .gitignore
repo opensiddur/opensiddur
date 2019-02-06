@@ -58,3 +58,7 @@ private-scripts/
 #IntelliJ
 .idea/
 *.iml
+
+# client secret file
+credentials.tar.gz
+client-secret.json
