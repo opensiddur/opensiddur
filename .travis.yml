@@ -37,7 +37,7 @@ before_install:
 
 script:
   - ant test
-  - gcloud beta compute \
+  - gcloud compute \
     --project=${PROJECT_NAME} instances create ${INSTANCE_NAME} \
     --zone=${ZONE} \
     --machine-type=${MACHINE_TYPE} \
