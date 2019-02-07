@@ -8,7 +8,8 @@ env:
     - VERSION=${TRAVIS_COMMIT:0:8}
     - BRANCH=$TRAVIS_BRANCH
     - PROJECT_NAME=opensiddur-client
-    - INSTANCE_NAME=${PROJECT_NAME}-${BRANCH//\//-}-${VERSION}
+    - INSTANCE_BASE=${PROJECT_NAME}-${BRANCH//\//-}
+    - INSTANCE_NAME=${INSTANCE_BASE}-${VERSION}
     - ZONE=us-west2-a
     - MACHINE_TYPE=n1-standard-1
     - IMAGE=ubuntu-1804-bionic-v20181222
@@ -57,4 +58,14 @@ script:
       --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},BRANCH=${BRANCH}
 
 
-after_script: ant docker-stop
+after_script:
+  - ant docker-stop
+
+after_success:
+  # make sure there is only 1 instance running from this branch
+  - |
+    gcloud compute instances list --filter="name~'${INSTANCE_BASE}'" | \
+      sed -n '1!p' | \
+      cut -d " " -f 1 | \
+      grep -v "${INSTANCE_NAME}" | \
+      xargs gcloud compute instances stop
