@@ -68,4 +68,5 @@ after_success:
       sed -n '1!p' | \
       cut -d " " -f 1 | \
       grep -v "${INSTANCE_NAME}" | \
-      xargs gcloud compute instances stop
+      xargs echo "I would have killed:"
+  #    xargs gcloud compute instances stop
