@@ -46,7 +46,7 @@ script:
       --network=default \
       --network-tier=PREMIUM \
       --maintenance-policy=MIGRATE \
-      --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append \
+      --scopes=https://www.googleapis.com/auth/cloud-platform \
       --tags=http-server,https-server \
       --image=${IMAGE} \
       --image-project=${IMAGE_PROJECT} \
@@ -55,7 +55,7 @@ script:
       --boot-disk-device-name=${INSTANCE_NAME} \
       --service-account=${SERVICE_ACCOUNT} \
       --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
-      --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},BRANCH=${BRANCH}
+      --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},BRANCH=${BRANCH},enable-oslogin=true
 
 
 after_script:
