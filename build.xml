@@ -321,20 +321,22 @@ cacheSize=${cache.size}
     <target name="backup"
         description="back up an existing database into $backup.directory">
         <property environment="env"/>
+        <delete dir="${backup.directory}"/>
+        <mkdir dir="${backup.directory}"/>
+        <chmod dir="${backup.directory}" perm="777"/>
         <exec
-            executable="${installdir}/bin/backup.sh">
+            executable="${installdir}/bin/client.sh">
+            <arg value="-qs"/>
             <arg value="-u"/>
             <arg value="admin"/>
-            <arg value="-p"/>
+            <arg value="-P"/>
             <arg value="${adminpassword}"/>
-            <arg value="-b"/>
-            <arg value="/db"/>
-            <arg value="-d"/>
-            <arg value="${backup.directory}"/>
-            <arg value="-ouri=xmldb:exist://"/>
+            <arg value="-x"/>
+            <arg value="system:export('${backup.directory}', false(), false())"/>
+            <arg value="-ouri=xmldb:exist://localhost:8080/exist/xmlrpc"/>
             <!-- DEBUG_OPTS seems to be the only way to force options after java.endorsed.dirs -->
             <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
-        </exec>    
+        </exec>
     </target>
     <target name="backup-for-upgrade"
         depends="backup"
@@ -351,11 +353,15 @@ cacheSize=${cache.size}
 ^/db/data/user/(testuser|testuser.)\.xml$
 ^/db/data/tests
         </echo>
+        <dirset dir="${backup.directory}" includes="full*" id="full.backup.directories" />
+        <pathconvert pathsep="" property="backup.full.directory" refid="full.backup.directories"/>
+
         <exec input="${exist.backup.remove.file}"
             executable="python">
             <arg value="opensiddur-server/setup/removeFromBackup.py"/>
-            <arg value="${backup.directory}/db"/>
+            <arg value="${backup.full.directory}/db"/>
         </exec>
+        <zip destfile="${backup.directory}/exist-backup.zip" basedir="${backup.full.directory}"/>
     </target>
     <target name="restore"
         description="restore the database from (modified) backup, rerun refindex update">

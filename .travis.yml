@@ -33,7 +33,7 @@ before_install:
     -in credentials.tar.gz.enc -out credentials.tar.gz -d
   - tar zxvf credentials.tar.gz
   - gcloud auth activate-service-account --key-file=client-secret.json
-  - gcloud config set project opensiddur-client
+  - gcloud config set project ${PROJECT_NAME}
   - ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 
 script:
@@ -56,7 +56,6 @@ script:
       --service-account=${SERVICE_ACCOUNT} \
       --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
       --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},BRANCH=${BRANCH},enable-oslogin=true
-
 
 after_script:
   - ant docker-stop

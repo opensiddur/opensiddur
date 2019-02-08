@@ -51,4 +51,45 @@ find ${INSTALL_DIR}/webapp/WEB-INF/data/export/report* \
 EOF
 chmod +x /etc/cron.daily/clean-exist-backups
 
+# get some gcloud metadata:
+PROJECT=$(gcloud config get-value project)
+INSTANCE_NAME=$(hostname)
+ZONE=$(gcloud compute instances list --filter="name=(${INSTANCE_NAME})" --format 'csv[no-heading](zone)')
+
+# set production to retrieve backups from master (production), everything else retrieves backups from develop
+if [[ $BRANCH == "master" ]];
+then
+    BACKUP_BASE_BRANCH="master";
+else
+    BACKUP_BASE_BRANCH="develop";
+fi
+INSTANCE_BASE=${PROJECT}-${BACKUP_BASE_BRANCH}
+
+# retrieve the latest backup from the prior instance
+ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
+
+# download the backup from the prior instance
+PRIOR_INSTANCE=$(gcloud compute instances list --filter="name~'${INSTANCE_BASE}'" | \
+       sed -n '1!p' | \
+       cut -d " " -f 1 | \
+       grep -v "${INSTANCE_NAME}" | \
+       head -n 1)
+if [[ -n "${PRIOR_INSTANCE}" ]];
+then
+    echo "Prior instance ${PRIOR_INSTANCE} exists. Retrieving a backup...";
+    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "cd ~/src/opensiddur && ant backup-for-upgrade"
+    mkdir /tmp/exist-backup
+    gcloud compute scp ${PRIOR_INSTANCE}:/tmp/exist-backup/exist-backup.zip /tmp/exist-backup --zone ${ZONE}
+    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "rm -fr /tmp/exist-backup"
+    cd /tmp/exist-backup && unzip exist-backup.zip
+    # restore the backup
+    ant restore
+
+    # remove the backup
+    rm -fr /tmp/exist-backup
+else
+    echo "No prior instance exists. No backup will be retrieved.";
+fi
+
+
 systemctl start eXist-db
