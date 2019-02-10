@@ -314,7 +314,7 @@ cacheSize=${cache.size}
         <exec
             executable="python3"
             failonerror="true">
-            <arg value="testrunner/testrunner.py"/>
+            <arg value="python/testrunner.py"/>
         </exec>
     </target>
 
@@ -358,7 +358,8 @@ cacheSize=${cache.size}
 
         <exec input="${exist.backup.remove.file}"
             executable="python3">
-            <arg value="opensiddur-server/setup/removeFromBackup.py"/>
+            <arg value="python/removeFromBackup.py"/>
+            <arg value="-s"/>
             <arg value="${backup.full.directory}/db"/>
         </exec>
         <zip destfile="${backup.directory}/exist-backup.zip" basedir="${backup.full.directory}"/>
