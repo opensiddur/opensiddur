@@ -21,7 +21,7 @@ def load_regexps(f):
     return re.compile("|".join([line.strip() for line in f if line.strip()]))
 
 
-def should_remove(pth, remove_regexps, elem, remove_system_files=True):
+def should_remove(pth, remove_regexps, elem, remove_system_files):
     # return true if the file or collection referenced should be removed
     return (
         (  # this is a clue that the file was autoinstalled
@@ -49,7 +49,7 @@ def remove_from_backup(path_to_content_xml, remove_regexps, remove_system_files)
     # find all subcollection and resource elements
     for candidate in content_xml.findall('.//{' + exNS + '}resource') + content_xml.findall('.//{' + exNS + '}subcollection'):
         db_path = re.sub("^.*/db", "/db", path_to_content_xml)
-        if should_remove(os.path.join(db_path, candidate.attrib["name"]), remove_regexps, candidate):
+        if should_remove(os.path.join(db_path, candidate.attrib["name"]), remove_regexps, candidate, remove_system_files):
             # if shouldRemove, remove it
             candidate.getparent().remove(candidate)
             remove_from_filesystem(path_to_content_xml, candidate.attrib["filename"])
