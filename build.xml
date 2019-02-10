@@ -357,7 +357,7 @@ cacheSize=${cache.size}
         <pathconvert pathsep="" property="backup.full.directory" refid="full.backup.directories"/>
 
         <exec input="${exist.backup.remove.file}"
-            executable="python">
+            executable="python3">
             <arg value="opensiddur-server/setup/removeFromBackup.py"/>
             <arg value="${backup.full.directory}/db"/>
         </exec>

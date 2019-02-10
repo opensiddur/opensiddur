@@ -82,7 +82,7 @@ then
     mkdir /tmp/exist-backup
     gcloud compute scp ${PRIOR_INSTANCE}:/tmp/backup.${COMMIT}/exist-backup.zip /tmp/exist-backup --zone ${ZONE}
     gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "rm -fr /tmp/backup.${COMMIT}"
-    cd /tmp/exist-backup && unzip exist-backup.zip
+    ( cd /tmp/exist-backup && unzip exist-backup.zip )
     # restore the backup
     sudo -u exist ant restore
 
