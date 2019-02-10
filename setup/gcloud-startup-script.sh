@@ -94,14 +94,14 @@ then
     echo "Copying backup here..."
     mkdir /tmp/exist-backup
     gcloud compute scp ${PRIOR_INSTANCE}:/tmp/backup.${COMMIT}/exist-backup.tar.gz /tmp/exist-backup --zone ${ZONE}
-    #gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "sudo rm -fr /tmp/backup.${COMMIT}"
+    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "sudo rm -fr /tmp/backup.${COMMIT}"
     ( cd /tmp/exist-backup && tar zxvf exist-backup.tar.gz )
     # restore the backup
     echo "Restoring backup..."
     sudo -u exist ant restore
 
     # remove the backup
-    #rm -fr /tmp/exist-backup
+    rm -fr /tmp/exist-backup
 else
     echo "No prior instance exists. No backup will be retrieved.";
 fi
