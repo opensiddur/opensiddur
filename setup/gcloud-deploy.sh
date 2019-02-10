@@ -19,6 +19,7 @@ gcloud beta compute \
     --boot-disk-size=${BOOT_DISK_SIZE_GB}GB \
     --boot-disk-type=pd-standard \
     --boot-disk-device-name=${INSTANCE_NAME} \
+    --service-account=${SERVICE_ACCOUNT} \
     --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
     --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},BRANCH=${BRANCH}
 
