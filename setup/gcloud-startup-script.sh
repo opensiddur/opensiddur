@@ -14,12 +14,12 @@ apt update
 apt install -y maven openjdk-8-jdk ant libxml2 libxml2-utils python3-lxml unzip
 update-java-alternatives -s java-1.8.0-openjdk-amd64
 
-mkdir -p $HOME/src
-cd $HOME/src
+mkdir -p src
+cd src
 git clone git://github.com/opensiddur/opensiddur.git
 cd opensiddur
 git checkout ${BRANCH}
-export SRC=$HOME/src/opensiddur
+export SRC=$(pwd)
 cat << EOF > local.build.properties
 installdir=${INSTALL_DIR}
 max.memory=${EXIST_MEMORY}
@@ -78,7 +78,7 @@ if [[ -n "${PRIOR_INSTANCE}" ]];
 then
     echo "Prior instance ${PRIOR_INSTANCE} exists. Retrieving a backup...";
     COMMIT=$(git rev-parse --short HEAD)
-    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "cd ~/src/opensiddur && ant backup-for-upgrade -Dbackup.directory=/tmp/backup.${COMMIT}"
+    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "cd /src/opensiddur && sudo -u exist ant backup-for-upgrade -Dbackup.directory=/tmp/backup.${COMMIT}"
     mkdir /tmp/exist-backup
     gcloud compute scp ${PRIOR_INSTANCE}:/tmp/backup.${COMMIT}/exist-backup.zip /tmp/exist-backup --zone ${ZONE}
     gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "rm -fr /tmp/backup.${COMMIT}"
