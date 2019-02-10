@@ -360,9 +360,11 @@ cacheSize=${cache.size}
             executable="python3">
             <arg value="python/removeFromBackup.py"/>
             <arg value="-s"/>
+            <arg value="-v"/>
             <arg value="${backup.full.directory}/db"/>
         </exec>
-        <zip destfile="${backup.directory}/exist-backup.zip" basedir="${backup.full.directory}"/>
+        <tar destfile="${backup.directory}/exist-backup.tar.gz" basedir="${backup.full.directory}"
+             compression="gzip" longfile="gnu"/>
     </target>
     <target name="restore"
         description="restore the database from (modified) backup, rerun refindex update">
