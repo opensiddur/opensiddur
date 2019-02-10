@@ -77,10 +77,11 @@ PRIOR_INSTANCE=$(gcloud compute instances list --filter="name~'${INSTANCE_BASE}'
 if [[ -n "${PRIOR_INSTANCE}" ]];
 then
     echo "Prior instance ${PRIOR_INSTANCE} exists. Retrieving a backup...";
-    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "cd ~/src/opensiddur && ant backup-for-upgrade"
+    COMMIT=$(git rev-parse --short HEAD)
+    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "cd ~/src/opensiddur && ant backup-for-upgrade -Dbackup.directory=/tmp/backup.${COMMIT}"
     mkdir /tmp/exist-backup
-    gcloud compute scp ${PRIOR_INSTANCE}:/tmp/exist-backup/exist-backup.zip /tmp/exist-backup --zone ${ZONE}
-    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "rm -fr /tmp/exist-backup"
+    gcloud compute scp ${PRIOR_INSTANCE}:/tmp/backup.${COMMIT}/exist-backup.zip /tmp/exist-backup --zone ${ZONE}
+    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "rm -fr /tmp/backup.${COMMIT}"
     cd /tmp/exist-backup && unzip exist-backup.zip
     # restore the backup
     ant restore
@@ -90,6 +91,5 @@ then
 else
     echo "No prior instance exists. No backup will be retrieved.";
 fi
-
 
 systemctl start eXist-db
