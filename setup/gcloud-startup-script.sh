@@ -11,11 +11,11 @@ INSTALL_DIR=/usr/local/opensiddur
 
 useradd -c "eXist db"  exist
 apt update
-apt install -y maven openjdk-8-jdk ant libxml2 libxml2-utils python3-lxml
+apt install -y maven openjdk-8-jdk ant libxml2 libxml2-utils python3-lxml unzip
 update-java-alternatives -s java-1.8.0-openjdk-amd64
 
-mkdir -p src
-cd src
+mkdir -p $HOME/src
+cd $HOME/src
 git clone git://github.com/opensiddur/opensiddur.git
 cd opensiddur
 git checkout ${BRANCH}
@@ -84,7 +84,7 @@ then
     gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "rm -fr /tmp/backup.${COMMIT}"
     cd /tmp/exist-backup && unzip exist-backup.zip
     # restore the backup
-    ant restore
+    sudo -u exist ant restore
 
     # remove the backup
     rm -fr /tmp/exist-backup
