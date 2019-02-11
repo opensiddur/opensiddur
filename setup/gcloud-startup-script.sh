@@ -123,6 +123,9 @@ fi
 echo "Starting eXist..."
 systemctl start eXist-db
 
+echo "Wait until eXist-db is up..."
+python3 python/wait_for_up.py
+
 echo "Installing dynamic DNS updater to update ${DNS_NAME}..."
 cat << EOF > /etc/ddclient.conf
 ## ddclient configuration file
@@ -146,9 +149,6 @@ server=members.dyndns.org
 ## Dyn Standard DNS hosts
 custom=yes, ${DNS_NAME}
 EOF
-
-echo "Wait until eXist-db is up..."
-python3 python/wait_for_up.py
 
 echo "Restarting ddclient..."
 systemctl restart ddclient;
