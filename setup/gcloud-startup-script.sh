@@ -83,7 +83,7 @@ else
     fi
 fi
 BACKUP_INSTANCE_BASE=${PROJECT}-${BACKUP_BASE_BRANCH}
-INSTANCE_BASE=${PROJECT}-${BRANCH}
+INSTANCE_BASE=${PROJECT}-${BRANCH//\//-}
 
 echo "My backup base is $BACKUP_BASE_BRANCH"
 
@@ -158,4 +158,9 @@ ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="name~'${INSTANCE_B
        sed -n '1!p' | \
        cut -d " " -f 1 | \
        grep -v "${INSTANCE_NAME}" )
-gcloud compute instances stop $ALL_PRIOR_INSTANCES --zone ${ZONE}
+if [[ -n "${ALL_PRIOR_INSTANCES}" ]];
+then
+    gcloud compute instances stop ${ALL_PRIOR_INSTANCES} --zone ${ZONE};
+else
+    echo "No prior instances found for ${INSTANCE_BASE}";
+fi
