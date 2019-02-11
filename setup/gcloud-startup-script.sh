@@ -20,7 +20,8 @@ useradd -c "eXist db"  exist
 
 echo "Downloading prerequisites..."
 apt update
-apt install -y ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils python3-lxml unzip
+export DEBIAN_FRONTEND=noninteractive
+apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils python3-lxml unzip
 update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 echo "Obtaining opensiddur sources..."
