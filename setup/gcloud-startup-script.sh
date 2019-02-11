@@ -4,10 +4,15 @@ get_metadata() {
 curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/$1?alt=text" -H "Metadata-Flavor: Google"
 }
 
+set -e
+
 echo "Getting metadata..."
 BRANCH=$(get_metadata BRANCH)
 PASSWORD=$(get_metadata ADMIN_PASSWORD)
 EXIST_MEMORY=$(get_metadata EXIST_MEMORY)
+DYN_EMAIL=$(get_metadata DYN_EMAIL)
+DYN_USERNAME=$(get_metadata DYN_USERNAME)
+DYN_PASSWORD=$(get_metadata DYN_PASSWORD)
 INSTALL_DIR=/usr/local/opensiddur
 
 echo "Setting up the eXist user..."
@@ -15,7 +20,8 @@ useradd -c "eXist db"  exist
 
 echo "Downloading prerequisites..."
 apt update
-apt install -y maven openjdk-8-jdk ant libxml2 libxml2-utils python3-lxml unzip
+export DEBIAN_FRONTEND=noninteractive
+apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils python3-lxml unzip
 update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 echo "Obtaining opensiddur sources..."
@@ -63,14 +69,22 @@ PROJECT=$(gcloud config get-value project)
 INSTANCE_NAME=$(hostname)
 ZONE=$(gcloud compute instances list --filter="name=(${INSTANCE_NAME})" --format 'csv[no-heading](zone)')
 
-# set production to retrieve backups from master (production), everything else retrieves backups from develop
+DNS_NAME="db-feature.jewishliturgy.org"
+# branch-specific environment settings
 if [[ $BRANCH == "master" ]];
 then
-    BACKUP_BASE_BRANCH="master";
+    BACKUP_BASE_BRANCH="master"
+    DNS_NAME="db-prod.jewishliturgy.org";
 else
     BACKUP_BASE_BRANCH="develop";
+    if [[ $BRANCH == "develop" ]];
+    then
+        DNS_NAME="db-dev.jewishliturgy.org";
+    fi
 fi
-INSTANCE_BASE=${PROJECT}-${BACKUP_BASE_BRANCH}
+BACKUP_INSTANCE_BASE=${PROJECT}-${BACKUP_BASE_BRANCH}
+INSTANCE_BASE=${PROJECT}-${BRANCH//\//-}
+
 echo "My backup base is $BACKUP_BASE_BRANCH"
 
 # retrieve the latest backup from the prior instance
@@ -78,7 +92,7 @@ echo "Generating ssh keys..."
 ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 
 # download the backup from the prior instance
-PRIOR_INSTANCE=$(gcloud compute instances list --filter="name~'${INSTANCE_BASE}'" | \
+PRIOR_INSTANCE=$(gcloud compute instances list --filter="name~'${BACKUP_INSTANCE_BASE}'" | \
        sed -n '1!p' | \
        cut -d " " -f 1 | \
        grep -v "${INSTANCE_NAME}" | \
@@ -109,9 +123,44 @@ fi
 echo "Starting eXist..."
 systemctl start eXist-db
 
+echo "Wait until eXist-db is up..."
+python3 python/wait_for_up.py
+
+echo "Installing dynamic DNS updater to update ${DNS_NAME}..."
+cat << EOF > /etc/ddclient.conf
+## ddclient configuration file
+daemon=600
+# check every 600 seconds
+syslog=yes
+# log update msgs to syslog
+mail-failure=${DYN_EMAIL} # Mail failed updates to user
+pid=/var/run/ddclient.pid
+# record PID in file.
+ssl=yes
+# use HTTPS
+## Detect IP with our CheckIP server
+use=web, web=checkip.dyndns.com/, web-skip='IP Address'
+## DynDNS username and password here
+login=${DYN_USERNAME}
+password=${DYN_PASSWORD}
+## Default options
+  protocol=dyndns2
+server=members.dyndns.org
+## Dyn Standard DNS hosts
+custom=yes, ${DNS_NAME}
+EOF
+
+echo "Restarting ddclient..."
+systemctl restart ddclient;
+
 echo "Stopping prior instances..."
 ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="name~'${INSTANCE_BASE}'" | \
        sed -n '1!p' | \
        cut -d " " -f 1 | \
        grep -v "${INSTANCE_NAME}" )
-echo "Not running stop command: gcloud compute instances stop $ALL_PRIOR_INSTANCES"
+if [[ -n "${ALL_PRIOR_INSTANCES}" ]];
+then
+    gcloud compute instances stop ${ALL_PRIOR_INSTANCES} --zone ${ZONE};
+else
+    echo "No prior instances found for ${INSTANCE_BASE}";
+fi
