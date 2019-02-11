@@ -156,4 +156,4 @@ ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="name~'${INSTANCE_B
        sed -n '1!p' | \
        cut -d " " -f 1 | \
        grep -v "${INSTANCE_NAME}" )
-gcloud compute instances stop $ALL_PRIOR_INSTANCES
+gcloud compute instances stop $ALL_PRIOR_INSTANCES --zone ${ZONE}
