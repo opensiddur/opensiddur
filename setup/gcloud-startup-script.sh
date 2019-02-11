@@ -82,7 +82,9 @@ else
         DNS_NAME="db-dev.jewishliturgy.org";
     fi
 fi
-INSTANCE_BASE=${PROJECT}-${BACKUP_BASE_BRANCH}
+BACKUP_INSTANCE_BASE=${PROJECT}-${BACKUP_BASE_BRANCH}
+INSTANCE_BASE=${PROJECT}-${BRANCH}
+
 echo "My backup base is $BACKUP_BASE_BRANCH"
 
 # retrieve the latest backup from the prior instance
@@ -90,7 +92,7 @@ echo "Generating ssh keys..."
 ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 
 # download the backup from the prior instance
-PRIOR_INSTANCE=$(gcloud compute instances list --filter="name~'${INSTANCE_BASE}'" | \
+PRIOR_INSTANCE=$(gcloud compute instances list --filter="name~'${BACKUP_INSTANCE_BASE}'" | \
        sed -n '1!p' | \
        cut -d " " -f 1 | \
        grep -v "${INSTANCE_NAME}" | \
