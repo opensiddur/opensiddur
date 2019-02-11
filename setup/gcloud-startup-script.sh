@@ -68,7 +68,7 @@ PROJECT=$(gcloud config get-value project)
 INSTANCE_NAME=$(hostname)
 ZONE=$(gcloud compute instances list --filter="name=(${INSTANCE_NAME})" --format 'csv[no-heading](zone)')
 
-DNS_NAME=""
+DNS_NAME="db-feature.jewishliturgy.org"
 # branch-specific environment settings
 if [[ $BRANCH == "master" ]];
 then
@@ -120,9 +120,7 @@ fi
 echo "Starting eXist..."
 systemctl start eXist-db
 
-if [[ -n "${DNS_NAME}" ]];
-then
-echo "Installing dynamic DNS updater..."
+echo "Installing dynamic DNS updater to update ${DNS_NAME}..."
 cat << EOF > /etc/ddclient.conf
 ## ddclient configuration file
 daemon=600
@@ -151,9 +149,6 @@ python3 python/wait_for_up.py
 
 echo "Restarting ddclient..."
 systemctl restart ddclient;
-else
-echo "Branch is not master or develop. Not setting up ddclient.";
-fi
 
 echo "Stopping prior instances..."
 ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="name~'${INSTANCE_BASE}'" | \
