@@ -3,7 +3,6 @@
 server {
 	listen 80;
 	server_name ${DNS_NAME};
-	return 301 https://${DNS_NAME}$request_uri;
 }
 
 server {

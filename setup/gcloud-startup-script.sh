@@ -157,7 +157,7 @@ echo "Configure nginx..."
 cat setup/nginx.conf.tmpl | envsubst '$DNS_NAME' > /etc/nginx/sites-enabled/opensiddur.conf
 
 echo "Get an SSL certificate..."
-certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos
+certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos --redirect
 
 echo "Scheduling SSL Certificate renewal..."
 cat << EOF > /etc/cron.daily/certbot_renewal
