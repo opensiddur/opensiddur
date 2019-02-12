@@ -92,7 +92,7 @@ echo "Generating ssh keys..."
 ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 
 # download the backup from the prior instance
-PRIOR_INSTANCE=$(gcloud compute instances list --filter="name~'${BACKUP_INSTANCE_BASE}'" | \
+PRIOR_INSTANCE=$(gcloud compute instances list --filter="status=RUNNING AND name~'${BACKUP_INSTANCE_BASE}'" | \
        sed -n '1!p' | \
        cut -d " " -f 1 | \
        grep -v "${INSTANCE_NAME}" | \
