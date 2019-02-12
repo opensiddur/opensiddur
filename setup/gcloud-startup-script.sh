@@ -170,7 +170,7 @@ echo "Restarting nginx..."
 systemctl restart nginx
 
 echo "Stopping prior instances..."
-ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="name~'${INSTANCE_BASE}'" | \
+ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="status=RUNNING AND name~'${INSTANCE_BASE}'" | \
        sed -n '1!p' | \
        cut -d " " -f 1 | \
        grep -v "${INSTANCE_NAME}" )
