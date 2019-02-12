@@ -21,7 +21,7 @@ useradd -c "eXist db"  exist
 echo "Downloading prerequisites..."
 apt update
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils python3-lxml unzip
+apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils nginx python3-certbot-nginx python3-lxml unzip
 update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 echo "Obtaining opensiddur sources..."
@@ -69,7 +69,7 @@ PROJECT=$(gcloud config get-value project)
 INSTANCE_NAME=$(hostname)
 ZONE=$(gcloud compute instances list --filter="name=(${INSTANCE_NAME})" --format 'csv[no-heading](zone)')
 
-DNS_NAME="db-feature.jewishliturgy.org"
+export DNS_NAME="db-feature.jewishliturgy.org"
 # branch-specific environment settings
 if [[ $BRANCH == "master" ]];
 then
@@ -152,6 +152,22 @@ EOF
 
 echo "Restarting ddclient..."
 systemctl restart ddclient;
+
+echo "Configure nginx..."
+cat setup/nginx.conf.tmpl | envsubst '$DNS_NAME' > /etc/nginx/sites-enabled/opensiddur.conf
+
+echo "Get an SSL certificate..."
+certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos
+
+echo "Scheduling SSL Certificate renewal..."
+cat << EOF > /etc/cron.daily/certbot_renewal
+#!/bin/sh
+certbot renew
+EOF
+chmod +x /etc/cron.daily/certbot_renewal
+
+echo "Restarting nginx..."
+systemctl restart nginx
 
 echo "Stopping prior instances..."
 ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="name~'${INSTANCE_BASE}'" | \
