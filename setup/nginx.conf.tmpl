@@ -22,12 +22,14 @@ server {
 
         location /api {
             proxy_pass https://127.0.0.1:8443/exist/restxq$request_uri;
+            proxy_set_header Host $host;
             proxy_intercept_errors on;
         }
 
         ## proxy pass to eXist ##
         location / {
             proxy_pass   https://127.0.0.1:8443$request_uri;
+            proxy_set_header Host $host;
             proxy_intercept_errors on;
         }
 }
