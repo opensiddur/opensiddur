@@ -1,7 +1,7 @@
 [submodule "lib/exist"]
 	path = lib/exist
 	url = https://github.com/opensiddur/exist.git
-    branch = opensiddur-eXist-4.4.0
+    branch = opensiddur-eXist-4.5.0
 [submodule "lib/tei/Roma"]
 	path = lib/tei/Roma
 	url = https://github.com/opensiddur/Roma.git

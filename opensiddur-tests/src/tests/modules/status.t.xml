@@ -72,7 +72,7 @@
             </code>
             <xpath desc="a status document has been created">exists(.//status:job)</xpath>
             <xpath desc="the document references the user">.//status:job/@user = "testuser"</xpath>
-            <xpath desc="the document references a start time">matches(.//status:job/@started, "^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?[+-]\d{2}:\d{2}$")</xpath>
+            <xpath desc="the document references a start time">matches(.//status:job/@started, "^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|([+-]\d{2}:\d{2}))$")</xpath>
             <xpath desc="the document status is working">.//status:job/@state = "working"</xpath>
             <xpath desc="the document references the API path of the document">ends-with(.//status:job/@resource, "/api/data/original/test")</xpath>
         </test>

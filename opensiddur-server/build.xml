@@ -12,6 +12,8 @@
 
     <property name="roma" location="${lib.dir}/tei/Roma/roma2.sh"/>
 
+    <property environment="env"/>
+
 	<!-- set local properties for the build -->
 	<property file="../local.build.properties"/>
     <!-- set global default properties for the build -->
@@ -25,6 +27,7 @@
         <sequential>
             <mkdir dir="@{temp.dir}"/>
             <exec executable="${roma}">
+                <env key="PATH" value="${env.PATH}:${lib.dir}"/>
                 <arg value="--xsl=${lib.dir}/tei/Stylesheets"/>
                 <arg value="--localsource=${lib.dir}/tei/p5subset.xml"/>
                 <arg value="--nodtd"/>

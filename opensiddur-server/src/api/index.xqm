@@ -69,6 +69,9 @@ declare
           <li class="api">
             <a class="discovery" href="{$api-base}/static">Static files</a>
           </li>,
+          <li class="api">
+            <a class="discovery" href="{$api-base}/test">Test (XQSuite)</a>
+          </li>,
           index:if-installed(
             "http://jewishliturgy.org/apps/opensiddur-tests",
             <li class="api">

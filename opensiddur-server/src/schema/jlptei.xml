@@ -305,20 +305,17 @@ The Open Siddur intends to work within open standards whenever possible. In choo
             </content>
           </elementSpec>
           <elementSpec ident="streamText" ns="http://jewishliturgy.org/ns/jlptei/1.0" mode="add" module="opensiddur">
-            <desc>A continuous stream of segmented text, suitable for concurrent hierarchies. Every element contained in a textStream must be able to be referenced by @xml:id or using a range XPointer.</desc>
+            <desc>A continuous stream of text, suitable for concurrent hierarchies.</desc>
             <classes>
               <memberOf key="att.global"/>
             </classes>
             <content xmlns:rng="http://relaxng.org/ns/structure/1.0">
-              <rng:group xmlns="http://relaxng.org/ns/structure/1.0">
-                <rng:oneOrMore>
-                  <rng:choice>
-                    <rng:ref name="model.segLike"/>
-                    <rng:ref name="model.milestoneLike"/>
-                    <rng:ref name="ptr"/>
-                  </rng:choice>
-                </rng:oneOrMore>
-              </rng:group>
+              <alternate minOccurs="0" maxOccurs="unbounded">
+                <textNode/>
+                <classRef key="model.segLike"/>
+                <classRef key="model.milestoneLike"/>
+                <elementRef key="ptr"/>
+              </alternate>
             </content>
             <constraintSpec ident="streamText-0" scheme="isoschematron">
               <constraint>
@@ -327,7 +324,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
             </constraintSpec>
             <constraintSpec ident="streamText-1" scheme="isoschematron">
               <constraint>
-                <sch:report test="*[not(@xml:id)]">An @xml:id attribute is required on all elements in a text stream.</sch:report>
+                <sch:report test="tei:anchor[not(@xml:id)]">An @xml:id attribute is required on all anchor elements in a text stream.</sch:report>
               </constraint>
             </constraintSpec>
           </elementSpec>

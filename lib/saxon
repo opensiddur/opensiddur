@@ -1,6 +1,4 @@
-#!/bin/sh 
-# 
-# $Id: saxon 742 2011-04-17 06:38:52Z efraim.feinstein $
+#!/bin/bash 
 
 # exit 0 on --help so the xspec script will work right 
 #while [ $# -gt 0 ]
@@ -22,7 +20,7 @@ case "`uname`" in
   CYGWIN*) CYGWIN=true;
 esac
 
-SCRIPTPATH=$(dirname $(absolutize $0))
+SCRIPTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 RESOLVEROPTIONS="-x:org.apache.xml.resolver.tools.ResolvingXMLReader -y:org.apache.xml.resolver.tools.ResolvingXMLReader -r:org.apache.xml.resolver.tools.CatalogResolver"
 SAXONJAR=$SCRIPTPATH/saxonhe-9.2.1.5.jar
 LIBDIR=$SCRIPTPATH/../lib
