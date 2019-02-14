@@ -1,6 +1,13 @@
 language: generic
 git:
   depth: false
+
+branches:
+  only:
+    - master
+    - develop
+    - /^feature.*/
+
 env:
   global:
     - VERSION=${TRAVIS_COMMIT:0:8}
