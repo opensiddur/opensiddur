@@ -8,5 +8,5 @@
     <title>Open Siddur Pre-Client Demos</title>
     <dependency package="http://jewishliturgy.org/apps/opensiddur-server" semver-min="0.12.0"/>
     <!-- transliteration tables: -->
-    <dependency package="http://jewishliturgy.org/apps/opensiddur-sources" semver-min="0.7.1"/>
+    <!--dependency package="http://jewishliturgy.org/apps/opensiddur-sources" semver-min="0.7.1"/-->
 </package>
