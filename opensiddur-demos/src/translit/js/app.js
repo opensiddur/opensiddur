@@ -1,8 +1,8 @@
 /* Transliteration demo application
- * Copyright 2013,2018 Efraim Feinstein, efraim@opensiddur.org
+ * Copyright 2013,2018-2019 Efraim Feinstein, efraim@opensiddur.org
  * Licensed under the GNU Lesser General Public License, version 3 or later
  */
-var httpPrefix = "/exist/restxq"; 
+var httpPrefix = "";
 
 /* retrieve an API error return value and return the string */
 var getApiError = function(data) {
