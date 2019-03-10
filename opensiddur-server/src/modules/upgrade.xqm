@@ -19,6 +19,8 @@ import module namespace src="http://jewishliturgy.org/api/data/sources"
     at "../api/data/sources.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
     at "../api/data/transliteration.xqm";
+import module namespace upg12="http://jewishliturgy.org/modules/upgrade12"
+    at "upgrade12.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -137,23 +139,16 @@ declare function upg:schema-changes-0-9-0() {
     
 };
 
-(:~
- : Changes required:
- :
- : 1. Remove `tei:seg` from inside `j:streamText`.
- : 2. All segments with references to them as the beginning of the range (or the only reference) should be replaced with `tei:anchor` before them.
- : 3. All segments with references to them as the end of the range (or only reference) should be replaced with `tei:anchor` after them;
- :    the range pointer should be changed to point to the end instead of the beginning.
- : 4. change the schema such that all internal and external pointers in `j:streamText` must point to `tei:anchor`
- :)
 declare function upg:schema-changes-0-12-0($source-collection as xs:string) {
+(:
     for $document in collection($source-collection)
-    return
+    return xmldb:store(util:collection-name($document), util:document-name($document), upg12:upgrade($document)):)
+()
 };
 
 declare function upg:schema-changes-0-12-0() {
     upg:schema-changes-0-12-0("/db/data")
-}
+};
 
 declare function upg:all-schema-changes() {
     upg:schema-changes-0-7-5(),
