@@ -27,23 +27,24 @@ declare namespace j = "http://jewishliturgy.org/ns/jlptei/1.0";
  : remove the mirror file.
  :)
 declare function upg12:upgrade-all() {
-  let $create-mirror := mirror:create("/db/upgrade", "/db/data", false())
+  let $upgrade-mirror := "/db/upgrade"
+  let $create-mirror := mirror:create($upgrade-mirror, "/db/data", false())
   let $upgrade :=
     for $resource in upg12:recursive-file-list("/db/data")
     return
       if ($resource/@mime-type = "application/xml")
       then (
-        util:log("Upgrading to 0.12.0: " || $resource/@collection || "/" || $resource/@resource),
-        mirror:store("/db/upgrade", $resource/@collection, $resource/@resource,
+        util:log("info", "Upgrading to 0.12.0: " || $resource/@collection || "/" || $resource/@resource),
+        mirror:store($upgrade-mirror, $resource/@collection, $resource/@resource,
           upg12:upgrade(doc($resource/@collection || "/" || $resource/@resource)))
       )
       else (
         (: not an XML file, just copy it :)
-        util:log("Copying for 0.12.0: " || $resource/@collection || "/" || $resource/@resource),
-        xmldb:copy($resource/@collection, mirror:mirror-path($resource/@collection), $resource/@resource)
+        util:log("info", "Copying for 0.12.0: " || $resource/@collection || "/" || $resource/@resource),
+        xmldb:copy($resource/@collection, mirror:mirror-path($upgrade-mirror, $resource/@collection), $resource/@resource)
       )
   let $destroy := xmldb:remove("/db", "data")
-  let $move := xmldb:rename("/db/upgrade", "/db/data")
+  let $move := xmldb:rename($upgrade-mirror, "/db/data")
   let $unmirror := xmldb:remove("/db/data", $mirror:configuration)
   let $ridx-reindex := ridx:reindex("/db/data")
   let $reindex := xmldb:reindex("/db/data")
