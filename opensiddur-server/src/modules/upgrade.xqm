@@ -139,15 +139,11 @@ declare function upg:schema-changes-0-9-0() {
     
 };
 
-declare function upg:schema-changes-0-12-0($source-collection as xs:string) {
-(:
-    for $document in collection($source-collection)
-    return xmldb:store(util:collection-name($document), util:document-name($document), upg12:upgrade($document)):)
-()
-};
-
 declare function upg:schema-changes-0-12-0() {
-    upg:schema-changes-0-12-0("/db/data")
+(: TODO: this is an expensive operation. Only do it automatically if version = 0.12 :)
+    util:log("Starting schema upgrade to 0.12.0..."),
+    upg12:upgrade-all(),
+    util:log("Schema change to 0.12.0 complete."),
 };
 
 declare function upg:all-schema-changes() {
