@@ -38,7 +38,7 @@ def indented(level):
     return "".join(["  "] * level)
 
 
-def wait_for_uptime(host=DEFAULT_HOST, port=DEFAULT_PORT, max_timeout_s=120):
+def wait_for_uptime(host=DEFAULT_HOST, port=DEFAULT_PORT, max_timeout_s=240):
     up = False
     start_time = time.time()
     elapsed_time = 0

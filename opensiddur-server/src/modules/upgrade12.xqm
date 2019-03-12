@@ -32,17 +32,24 @@ declare function upg12:upgrade-all() {
   let $upgrade :=
     for $resource in upg12:recursive-file-list("/db/data")
     return
-      if ($resource/@mime-type = "application/xml")
-      then (
-        util:log("info", "Upgrading to 0.12.0: " || $resource/@collection || "/" || $resource/@resource),
-        mirror:store($upgrade-mirror, $resource/@collection, $resource/@resource,
-          upg12:upgrade(doc($resource/@collection || "/" || $resource/@resource)))
+      typeswitch ($resource)
+      case element(collection) return (
+        util:log("info", "Upgrading to 0.12.0: mirror " || $resource/@collection),
+        mirror:make-collection-path($upgrade-mirror, $resource/@collection)
       )
-      else (
-        (: not an XML file, just copy it :)
-        util:log("info", "Copying for 0.12.0: " || $resource/@collection || "/" || $resource/@resource),
-        xmldb:copy($resource/@collection, mirror:mirror-path($upgrade-mirror, $resource/@collection), $resource/@resource)
-      )
+      case element(resource) return
+        if ($resource/@mime-type = "application/xml")
+        then (
+          util:log("info", "Upgrading to 0.12.0: " || $resource/@collection || "/" || $resource/@resource),
+          mirror:store($upgrade-mirror, $resource/@collection, $resource/@resource,
+            upg12:upgrade(doc($resource/@collection || "/" || $resource/@resource)))
+        )
+        else (
+          (: not an XML file, just copy it :)
+          util:log("info", "Copying for 0.12.0: " || $resource/@collection || "/" || $resource/@resource),
+          xmldb:copy($resource/@collection, mirror:mirror-path($upgrade-mirror, $resource/@collection), $resource/@resource)
+        )
+      default return ()
   let $unmirror := xmldb:remove($upgrade-mirror, $mirror:configuration)
   let $destroy := xmldb:remove("/db/data")
   let $move := xmldb:rename($upgrade-mirror, "data")
@@ -55,7 +62,16 @@ declare %private function upg12:recursive-file-list(
   $base-path as xs:string
 ) as element(resource)* {
   for $child-collection in xmldb:get-child-collections($base-path)
-  return upg12:recursive-file-list($base-path || "/" || $child-collection),
+  let $uri := xs:anyURI($base-path || "/" || $child-collection)
+  let $perms := sm:get-permissions($uri)
+  return (
+    <collection collection="{$base-path || "/" || $child-collection}"
+      owner="{$perms/*/@owner/string()}"
+      group="{$perms/*/@group/string()}"
+      mode="{$perms/*/@mode/string()}"
+      />,
+    upg12:recursive-file-list($base-path || "/" || $child-collection)
+  ),
   for $child-resource in xmldb:get-child-resources($base-path)
   let $uri := xs:anyURI($base-path || "/" || $child-resource)
   let $perms := sm:get-permissions($uri)
