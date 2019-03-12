@@ -45,7 +45,7 @@ declare function upg12:upgrade-all() {
       )
   let $unmirror := xmldb:remove($upgrade-mirror, $mirror:configuration)
   let $destroy := xmldb:remove("/db/data")
-  let $move := xmldb:rename($upgrade-mirror, "/db/data")
+  let $move := xmldb:rename($upgrade-mirror, "data")
   let $ridx-reindex := ridx:reindex("/db/data")
   let $reindex := xmldb:reindex("/db/data")
   return ()
