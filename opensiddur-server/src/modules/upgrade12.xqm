@@ -103,39 +103,45 @@ declare function upg12:upgrade-ptrs(
         }{
           string-join(
             for $target in tokenize(string($element/(@target | @targets)), '\s+')
-            let $target-nodes := uri:fast-follow($target, $element, 1)
-            let $first-target-node-seg := $target-nodes[1][self::tei:seg][ancestor::j:streamText]
-            let $last-target-node-seg := $target-nodes[last()][self::tei:seg][ancestor::j:streamText]
-            let $first-is-last := $first-target-node-seg is $last-target-node-seg
             return
-              if (exists($first-target-node-seg) or exists($last-target-node-seg))
+              if (matches($target, "^http[s]?[:]"))
               then
-                let $document-part := substring-before($target, "#")
-                let $fragment-ptr := substring-after($target, "#")
-                let $fragment-start :=
-                  if (starts-with($fragment-ptr, "range("))
-                  then substring-before(substring-after($fragment-ptr, "("), ",")
-                  else $fragment-ptr
-                let $fragment-end :=
-                  if (starts-with($fragment-ptr, "range("))
-                  then substring-before(substring-after($fragment-ptr, ","), ")")
-                  else $fragment-ptr
-                return concat($document-part, "#",
-                  (
-                    if ($first-is-last)
-                    then
-                    (: a single segment becomes a range pointer :)
-                      "range(" || $fragment-start || "," || $fragment-start || "_end)"
-                    else
-                    (: a range pointer has to be rewritten-- if the end is a segment inside a streamText :)
-                      "range(" || $fragment-start || "," || $fragment-end || (
-                        if ($last-target-node-seg)
-                        then "_end"
-                        else ""
-                      ) || ")"
-                  )
-                )
-              else $target,
+                (: do not follow external links :)
+                $target
+              else
+                let $target-nodes := uri:fast-follow($target, $element, 1)
+                let $first-target-node-seg := $target-nodes[1][self::tei:seg][ancestor::j:streamText]
+                let $last-target-node-seg := $target-nodes[last()][self::tei:seg][ancestor::j:streamText]
+                let $first-is-last := $first-target-node-seg is $last-target-node-seg
+                return
+                  if (exists($first-target-node-seg) or exists($last-target-node-seg))
+                  then
+                    let $document-part := substring-before($target, "#")
+                    let $fragment-ptr := substring-after($target, "#")
+                    let $fragment-start :=
+                      if (starts-with($fragment-ptr, "range("))
+                      then substring-before(substring-after($fragment-ptr, "("), ",")
+                      else $fragment-ptr
+                    let $fragment-end :=
+                      if (starts-with($fragment-ptr, "range("))
+                      then substring-before(substring-after($fragment-ptr, ","), ")")
+                      else $fragment-ptr
+                    return concat($document-part, "#",
+                      (
+                        if ($first-is-last)
+                        then
+                        (: a single segment becomes a range pointer :)
+                          "range(" || $fragment-start || "," || $fragment-start || "_end)"
+                        else
+                        (: a range pointer has to be rewritten-- if the end is a segment inside a streamText :)
+                          "range(" || $fragment-start || "," || $fragment-end || (
+                            if ($last-target-node-seg)
+                            then "_end"
+                            else ""
+                          ) || ")"
+                      )
+                    )
+                  else $target,
             " "
           )
         }
