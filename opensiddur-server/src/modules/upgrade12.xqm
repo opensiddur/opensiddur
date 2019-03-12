@@ -43,9 +43,9 @@ declare function upg12:upgrade-all() {
         util:log("info", "Copying for 0.12.0: " || $resource/@collection || "/" || $resource/@resource),
         xmldb:copy($resource/@collection, mirror:mirror-path($upgrade-mirror, $resource/@collection), $resource/@resource)
       )
-  let $destroy := xmldb:remove("/db", "data")
+  let $unmirror := xmldb:remove($upgrade-mirror, $mirror:configuration)
+  let $destroy := xmldb:remove("/db/data")
   let $move := xmldb:rename($upgrade-mirror, "/db/data")
-  let $unmirror := xmldb:remove("/db/data", $mirror:configuration)
   let $ridx-reindex := ridx:reindex("/db/data")
   let $reindex := xmldb:reindex("/db/data")
   return ()
