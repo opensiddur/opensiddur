@@ -22,7 +22,6 @@
  -->
 <debug:settings xmlns:debug="http://jewishliturgy.org/transform/debug" 
 	level="2">
-	<debug:module name="refindex" level="4"/>
 	<debug:module name="grammar" level="2"/>
     <debug:module name="trigger" level="3"/>
 </debug:settings>
