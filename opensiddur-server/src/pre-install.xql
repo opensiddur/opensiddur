@@ -56,23 +56,23 @@ declare function local:mkcollection(
   let $group := $collection/ancestor-or-self::*[@group][1]/@group/string()
   let $permissions := $collection/ancestor-or-self::*[@perms][1]/@perms/string()
   return (
-    util:log-system-out('make collection ' || $path),
+    util:log("info", 'make collection ' || $path),
     (: make collection :)
     local:mkcol("/db", substring-after($path, "/db")),
     (: (re)set permissions :)
-    util:log-system-out('setting permissions for ' || $path),
+    util:log("info", 'setting permissions for ' || $path),
     sm:clear-acl(xs:anyURI($path)),
     sm:chown(xs:anyURI($path), $owner),
     sm:chgrp(xs:anyURI($path), $group),
     sm:chmod(xs:anyURI($path), $permissions),
     (: store configuration :)
-    util:log-system-out('making configuation collection for ' || $path),
+    util:log("info", 'making configuation collection for ' || $path),
     local:mkcol("/db" || $system-config-base, $path),
-    util:log-system-out('storing configuration for ' || $path || ' to ' || $config-path || ' from ' || concat($dir, $package-config-path)),
+    util:log("info", 'storing configuration for ' || $path || ' to ' || $config-path || ' from ' || concat($dir, $package-config-path)),
     xmldb:store-files-from-pattern(
       $config-path, concat($dir, $package-config-path), "*.xconf"
     ),
-    util:log-system-out('finished processing ' || $path)
+    util:log("info", 'finished processing ' || $path)
   ),
   (: recurse :)
   for $subcollection in $collection/collection
@@ -101,9 +101,9 @@ declare function local:lang-collections(
 };
 
 (: make the 'everyone' group if it does not exist :)
-util:log-system-out('making groups...'),
+util:log("info", 'making groups...'),
 local:mkgroup("everyone"),
-util:log-system-out('making collections...'),
+util:log("info", 'making collections...'),
 (: make collections and store the collection configurations
  : from the package
  :)
@@ -134,4 +134,4 @@ let $collections :=
   </collections>
 return  
   local:mkcollections($collections, "/system/config"),
-util:log-system-out('done')
+util:log("info", 'done')

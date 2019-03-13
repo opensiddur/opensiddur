@@ -21,32 +21,32 @@ declare variable $dir external;
 (: the target collection into which the app is deployed :)
 declare variable $target external;
 
-util:log-system-out("starting post-install..."),
-util:log-system-out("removing caches..."),
+util:log("info", "starting post-install..."),
+util:log("info", "removing caches..."),
 for $cache in $format:caches
 where xmldb:collection-available($cache)
 return
     try { xmldb:remove($cache) }
-    catch * { util:log-system-out(("Error removing ", $cache)) },
-util:log-system-out("setup format..."),
+    catch * { util:log("info", ("Error removing ", $cache)) },
+util:log("info", "setup format..."),
 format:setup(),
-util:log-system-out("setup refindex..."),
+util:log("info", "setup refindex..."),
 ridx:setup(),
-util:log-system-out("install default sources..."),
+util:log("info", "install default sources..."),
 (: add $target/data/sources/Born Digital using src:post() or src:put() :)
 xmldb:store(
     "/db/data/sources",
     "Born%20Digital.xml",
     doc($target || "/data/sources/Born%20Digital.xml")
     ),
-util:log-system-out("install default styles..."),
+util:log("info", "install default styles..."),
 (: add $target/data/styles/generic.xml using sty:post() or sty:put() :)
 xmldb:store(
     "/db/data/styles/en",
     "generic.xml",
     doc($target || "/data/styles/en/generic.xml")
     ),
-util:log-system-out("install default users..."),
+util:log("info", "install default users..."),
 xmldb:store(
     "/db/data/user",
     "admin.xml",
@@ -63,13 +63,13 @@ xmldb:store(
             <tei:orgName>Open Siddur Project</tei:orgName>
         </j:contributor>
 ),
-util:log-system-out("upgrades: update existing JLPTEI for schema changes..."),
+util:log("info", "upgrades: update existing JLPTEI for schema changes..."),
 upg:all-schema-changes(),
-util:log-system-out("upgrades: reindex reference index"),
+util:log("info", "upgrades: reindex reference index"),
 ridx:reindex(collection("/db/data")),
-util:log-system-out("reindex all data collections"),
+util:log("info", "reindex all data collections"),
 xmldb:reindex("/db/data"),
-util:log-system-out("force registration for RESTXQ..."),
+util:log("info", "force registration for RESTXQ..."),
 for $module in (
             "/api/data/conditionals.xqm",
             "/api/data/styles.xqm",
@@ -93,5 +93,5 @@ for $module in (
             "/api/utility/translit.xqm"
 )
 return exrest:register-module(xs:anyURI("/db/apps/opensiddur-server" || $module)),
-util:log-system-out("done")
+util:log("info", "done")
 
