@@ -27,6 +27,7 @@ declare namespace j = "http://jewishliturgy.org/ns/jlptei/1.0";
  : remove the mirror file.
  :)
 declare function upg12:upgrade-all() {
+  let $ridx-reindex := ridx:reindex("/db/data")
   let $upgrade-mirror := "/db/upgrade"
   let $create-mirror := mirror:create($upgrade-mirror, "/db/data", false())
   let $upgrade :=
