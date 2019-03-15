@@ -124,7 +124,7 @@ echo "Starting eXist..."
 systemctl start eXist-db
 
 echo "Wait until eXist-db is up..."
-python3 python/wait_for_up.py
+python3 python/wait_for_up.py --max-timeout=86400
 
 echo "Installing dynamic DNS updater to update ${DNS_NAME}..."
 cat << EOF > /etc/ddclient.conf
