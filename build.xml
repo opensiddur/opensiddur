@@ -162,7 +162,7 @@ cacheSize=${cache.size}
                 <include name="hspell-data-files/*"/>
             </fileset>
         </copy>
-        <symlink link="${installdir}/tools/yajsw/classes/hspell-data-files"
+        <symlink link="${installdir}/tools/yajsw/lib/hspell-data-files"
                  resource="${installdir}/extensions/indexes/lucene/lib/hspell-data-files"/>
     </target>
 
