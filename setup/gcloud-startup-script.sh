@@ -161,9 +161,9 @@ cat setup/nginx.conf.tmpl | envsubst '$DNS_NAME' > /etc/nginx/sites-enabled/open
 
 echo "Wait for DNS propagation..."
 PUBLIC_IP=$(curl icanhazip.com)
-while [[ $(dig +short db-feature.jewishliturgy.org @resolver1.opendns.com) != "${PUBLIC_IP}" ]];
+while [[ $(dig +short ${DNS_NAME} @resolver1.opendns.com) != "${PUBLIC_IP}" ]];
 do
-    echo "Waiting 1 min..."
+    echo "Waiting 1 min for ${DNS_NAME} to resolve to ${PUBLIC_IP}..."
     sleep 60;
 done
 
