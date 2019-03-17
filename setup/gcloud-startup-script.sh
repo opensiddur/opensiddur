@@ -160,7 +160,14 @@ echo "Configure nginx..."
 cat setup/nginx.conf.tmpl | envsubst '$DNS_NAME' > /etc/nginx/sites-enabled/opensiddur.conf
 
 echo "Get an SSL certificate..."
-certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos --redirect
+if [[ $BRANCH = feature/* ]];
+then
+    echo "using dry run for feature branches"
+    CERTBOT_DRY_RUN="--dry-run";
+else
+    CERTBOT_DRY_RUN="";
+fi
+certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos --redirect ${CERTBOT_DRY_RUN}
 
 echo "Scheduling SSL Certificate renewal..."
 cat << EOF > /etc/cron.daily/certbot_renewal
