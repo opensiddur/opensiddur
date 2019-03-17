@@ -45,7 +45,10 @@ chown -R exist:exist ${INSTALL_DIR}
 
 # install the yajsw script
 echo "Installing YAJSW..."
-echo -e "Y\nexist\nY\nn" | ${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
+export RUN_AS_USER=exist
+export WRAPPER_UNATTENDED=1
+export WRAPPER_USE_SYSTEMD=1
+${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
 
 echo "Installing periodic backup cleaning..."
 cat << EOF > /etc/cron.daily/clean-exist-backups
@@ -156,8 +159,23 @@ systemctl restart ddclient;
 echo "Configure nginx..."
 cat setup/nginx.conf.tmpl | envsubst '$DNS_NAME' > /etc/nginx/sites-enabled/opensiddur.conf
 
+echo "Wait for DNS propagation..."
+PUBLIC_IP=$(curl icanhazip.com)
+while [[ $(dig +short db-feature.jewishliturgy.org @resolver1.opendns.com) != "${PUBLIC_IP}" ]];
+do
+    echo "Waiting 1 min..."
+    sleep 60;
+done
+
 echo "Get an SSL certificate..."
-certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos --redirect
+if [[ $BRANCH = feature/* ]];
+then
+    echo "using staging cert for feature branch $BRANCH"
+    CERTBOT_DRY_RUN="--test-cert";
+else
+    CERTBOT_DRY_RUN="";
+fi
+certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos --redirect ${CERTBOT_DRY_RUN}
 
 echo "Scheduling SSL Certificate renewal..."
 cat << EOF > /etc/cron.daily/certbot_renewal
