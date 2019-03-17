@@ -162,8 +162,8 @@ cat setup/nginx.conf.tmpl | envsubst '$DNS_NAME' > /etc/nginx/sites-enabled/open
 echo "Get an SSL certificate..."
 if [[ $BRANCH = feature/* ]];
 then
-    echo "using dry run for feature branches"
-    CERTBOT_DRY_RUN="--dry-run";
+    echo "using staging cert for feature branch $BRANCH"
+    CERTBOT_DRY_RUN="--test-cert";
 else
     CERTBOT_DRY_RUN="";
 fi
