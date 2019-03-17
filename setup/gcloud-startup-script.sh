@@ -159,6 +159,14 @@ systemctl restart ddclient;
 echo "Configure nginx..."
 cat setup/nginx.conf.tmpl | envsubst '$DNS_NAME' > /etc/nginx/sites-enabled/opensiddur.conf
 
+echo "Wait for DNS propagation..."
+PUBLIC_IP=$(curl icanhazip.com)
+while [[ $(dig +short db-feature.jewishliturgy.org @resolver1.opendns.com) != "${PUBLIC_IP}" ]];
+do
+    echo "Waiting 1 min..."
+    sleep 60;
+done
+
 echo "Get an SSL certificate..."
 if [[ $BRANCH = feature/* ]];
 then
