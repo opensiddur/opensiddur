@@ -48,7 +48,6 @@ echo "Installing YAJSW..."
 export RUN_AS_USER=exist
 export WRAPPER_UNATTENDED=1
 export WRAPPER_USE_SYSTEMD=1
-export WRAPPER_USER_SYSTEMV=0
 ${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
 
 echo "Installing periodic backup cleaning..."
