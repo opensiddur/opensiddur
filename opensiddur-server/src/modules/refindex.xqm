@@ -8,7 +8,7 @@ xquery version "3.1";
  : the linking elements that make the references
  :
  : Open Siddur Project
- : Copyright 2011-2014 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2014,2019 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Licensed under the GNU Lesser General Public License, version 3 or later 
  :)
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
@@ -142,7 +142,10 @@ declare function ridx:reindex(
             ridx:make-index-entries($doc//@target|$doc//@targets|$doc//@ref|$doc//@domains|$doc//@who)
           }
         ))
-        then ()
+        then
+          let $mirror-collection := mirror:mirror-path($ridx:ridx-path, $collection)
+          return
+            xmldb:reindex($mirror-collection, $resource)
         else debug:debug($debug:warn, "refindex", 
           concat("Could not store index for ", $collection, "/", $resource))
 };
