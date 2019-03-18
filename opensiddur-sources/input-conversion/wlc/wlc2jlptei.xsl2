@@ -281,15 +281,12 @@ TODO:
 		<xsl:variable name="verse-id" select="@xml:id"/>
 	
 		<xsl:for-each-group select="$segmented-verse/self::*" group-ending-with="tei:lb">
-				<tei:anchor>
+				<tei:seg>
 					<xsl:attribute name="xml:id" select="string-join(($verse-id,'_seg',string(position())),'')"/>
-                </tei:anchor>
-                <xsl:sequence
-                  select="current-group()/self::* except current-group()/self::tei:lb"
-                  />
-				<tei:anchor>
-                  <xsl:attribute name="xml:id" select="string-join(($verse-id,'_seg',string(position()), '_end'),'')"/>
-                </tei:anchor>
+					<xsl:sequence 
+            select="current-group()/self::* except current-group()/self::tei:lb"
+            />
+				</tei:seg>
 		</xsl:for-each-group>
 	
 		<!--xsl:sequence select="j:debug($segments,'segments=',$debug-info)"/-->
@@ -450,9 +447,6 @@ TODO:
         <xsl:with-param name="body" as="element()+">
           <xsl:variable name="book-ptrs" as="element(tmp:books)">
             <tmp:books>
-              <tei:anchor>
-                <xsl:attribute name="xml:id" select="'tanach_begin'"/>
-              </tei:anchor>
               <xsl:for-each select="$tanach-as-xml//book">
                 <xsl:variable name="book" select="names/name"
                   as="xs:string" />
@@ -463,16 +457,13 @@ TODO:
                     select="concat('se_',translate($book, ' ', '_'))" />
                 </tei:ptr>
              </xsl:for-each>
-              <tei:anchor>
-                <xsl:attribute name="xml:id" select="'tanach_end'"/>
-              </tei:anchor>
             </tmp:books>
           </xsl:variable>
           <j:streamText>
             <xsl:attribute name="xml:id" select="'text'" />
             <!-- each chapter and book is its own file too -->
             <!-- books get referenced in the whole-tanach file -->
-            <xsl:copy-of copy-namespaces="no" select="$book-ptrs/*"/>
+            <xsl:copy-of copy-namespaces="no" select="$book-ptrs/tei:ptr"/>
           </j:streamText>
           <j:concurrent>
             <xsl:attribute name="xml:id" select="'concurrent'" />
@@ -483,7 +474,7 @@ TODO:
                 <tei:head xml:lang="he">תנ״ך</tei:head>
                 <tei:ab>
                   <tei:ptr xml:id="tanach"
-                    target="#range({$book-ptrs/tei:anchor[1]/@xml:id},{$book-ptrs/tei:anchor[last()]/@xml:id})"
+                    target="#range({$book-ptrs/tei:ptr[1]/@xml:id},{$book-ptrs/tei:ptr[last()]/@xml:id})"
                     xsl:exclude-result-prefixes="jx" />
                 </tei:ab>
               </tei:div>
@@ -525,9 +516,6 @@ TODO:
           <xsl:with-param name="body" as="element()+">
             <xsl:variable name="chapter-ptrs" as="element(jx:tmp)">
               <jx:tmp>
-                <tei:anchor>
-                  <xsl:attribute name="xml:id" select="'book_begin'" />
-                </tei:anchor>
                 <xsl:for-each select="c">
                   <xsl:variable name="chap" select="@n" />
                   <xsl:variable name="chap-uri"
@@ -537,14 +525,11 @@ TODO:
                       select="concat('se_ch',$chap)" />
                   </tei:ptr>
                 </xsl:for-each>
-                <tei:anchor>
-                  <xsl:attribute name="xml:id" select="'book_end'" />
-                </tei:anchor>
               </jx:tmp>
             </xsl:variable>
             <j:streamText>
               <xsl:attribute name="xml:id" select="'text'"/>
-              <xsl:copy-of copy-namespaces="no" select="$chapter-ptrs/(tei:ptr|tei:anchor)"/>
+              <xsl:copy-of copy-namespaces="no" select="$chapter-ptrs/tei:ptr"/>
             </j:streamText>
             <j:concurrent>
               <xsl:attribute name="xml:id" select="'concurrent'" />
@@ -556,8 +541,15 @@ TODO:
                     <xsl:value-of select="$book-he" />
                   </tei:head>
                   <tei:ab>
-                    <tei:ptr
-                      target="#range({$chapter-ptrs/tei:anchor[1]/@xml:id},{$chapter-ptrs/tei:anchor[last()]/@xml:id})" />
+                    <xsl:choose>
+                      <xsl:when test="count($chapter-ptrs/tei:ptr)=1">
+                        <tei:ptr target="#{$chapter-ptrs/tei:ptr/@xml:id}"/>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <tei:ptr
+                          target="#range({$chapter-ptrs/tei:ptr[1]/@xml:id},{$chapter-ptrs/tei:ptr[last()]/@xml:id})" />
+                      </xsl:otherwise>
+                    </xsl:choose>
                   </tei:ab>
                 </tei:div> 
               </j:layer>
@@ -618,7 +610,7 @@ TODO:
                   </xsl:variable>
                   
                   <xsl:variable name="segments"
-                    as="element()+">
+                    as="element(tei:seg)+">
                     <xsl:call-template name="segment-verse">
                       <xsl:with-param name="verse"
                         select="$verse-s" />
@@ -633,11 +625,11 @@ TODO:
                   <!-- l for l-view -->
                   <xsl:variable name="l-ptr"
                     as="element()+">
-                    <xsl:for-each select="$segments/self::tei:anchor">
+                    <xsl:for-each select="$segments">
                       <tei:l>
                         <xsl:attribute name="xml:id"
                           select="concat('l_',@xml:id)" />
-                        <tei:ptr target="#range({@xml:id},{@xml:id}_end'))" />
+                        <tei:ptr target="#{@xml:id}" />
                       </tei:l>
                     </xsl:for-each>
                   </xsl:variable>
@@ -701,7 +693,7 @@ TODO:
                         <xsl:number format="a"
                           value="current-grouping-key()" />
                       </xsl:variable>
-                      <tei:ptr target="#range({@xml:id},{@xml:id}_end)">
+                      <tei:ptr target="#{@xml:id}">
                         <xsl:attribute name="xml:id"
                           select="concat($verse-id, $alphabetic-segment-number)" />
                       </tei:ptr>
@@ -711,7 +703,7 @@ TODO:
                 </xsl:for-each>
               </xsl:variable>
               <xsl:variable name="streamable-text"
-                    as="element()+" select="$bodies/*" />
+                    as="element(tei:seg)+" select="$bodies/self::tei:seg" />  
               
               <j:streamText>
                 <xsl:attribute name="xml:id" select="'text'"/>
@@ -752,7 +744,7 @@ TODO:
                         </xsl:when>
                         <xsl:otherwise>
                           <tei:ptr
-                            target="#range({current-group()[1]/@xml:id},{current-group()[1]/@xml:id}_end)" />
+                            target="#{current-group()[1]/@xml:id}" />
                         </xsl:otherwise>
                       </xsl:choose>
                     </tei:p>
