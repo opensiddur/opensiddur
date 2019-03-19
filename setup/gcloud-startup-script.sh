@@ -56,13 +56,13 @@ cat << EOF > /etc/cron.daily/clean-exist-backups
 find ${INSTALL_DIR}/webapp/WEB-INF/data/export/full* \
   -maxdepth 0 \
   -type d \
-  -not -newermt `date -d "14 days ago" +%Y%m%d` \
+  -not -newermt \$(date -d "14 days ago" +%Y%m%d) \
   -execdir rm -fr {} \;
 
 find ${INSTALL_DIR}/webapp/WEB-INF/data/export/report* \
   -maxdepth 0 \
   -type d \
-  -not -newermt `date -d "14 days ago" +%Y%m%d` \
+  -not -newermt \$(date -d "14 days ago" +%Y%m%d) \
   -execdir rm -fr {} \;
 EOF
 chmod +x /etc/cron.daily/clean-exist-backups
