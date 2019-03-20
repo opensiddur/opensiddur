@@ -132,7 +132,7 @@ EXPORT_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
 cat << EOF > /etc/cron.daily/copy-exist-backups
 #!/bin/sh
 
-for dir in $(find ${EXPORT_DIR}/* -maxdepth 0 -type d -newermt $(date -d "1 day ago" +%Y%m%d) ); do
+for dir in \$(find ${EXPORT_DIR}/* -maxdepth 0 -type d -newermt \$(date -d "1 day ago" +%Y%m%d) ); do
     cd \$dir
     BASENAME=\$(basename \$dir)
     tar zcvf \$BASENAME.tar.gz db
