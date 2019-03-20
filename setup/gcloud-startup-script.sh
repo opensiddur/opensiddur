@@ -13,6 +13,7 @@ EXIST_MEMORY=$(get_metadata EXIST_MEMORY)
 DYN_EMAIL=$(get_metadata DYN_EMAIL)
 DYN_USERNAME=$(get_metadata DYN_USERNAME)
 DYN_PASSWORD=$(get_metadata DYN_PASSWORD)
+BACKUP_BUCKET_BASE=$(get_metadata BACKUP_BUCKET_BASE)
 INSTALL_DIR=/usr/local/opensiddur
 
 echo "Setting up the eXist user..."
@@ -73,15 +74,18 @@ INSTANCE_NAME=$(hostname)
 ZONE=$(gcloud compute instances list --filter="name=(${INSTANCE_NAME})" --format 'csv[no-heading](zone)')
 
 export DNS_NAME="db-feature.jewishliturgy.org"
+BACKUP_CLOUD_BUCKET="${BACKUP_BUCKET_BASE}-feature"
 # branch-specific environment settings
 if [[ $BRANCH == "master" ]];
 then
     BACKUP_BASE_BRANCH="master"
+    BACKUP_CLOUD_BUCKET="${BACKUP_BUCKET_BASE}-prod"
     DNS_NAME="db-prod.jewishliturgy.org";
 else
     BACKUP_BASE_BRANCH="develop";
     if [[ $BRANCH == "develop" ]];
     then
+        BACKUP_CLOUD_BUCKET="${BACKUP_BUCKET_BASE}-preprod"
         DNS_NAME="db-dev.jewishliturgy.org";
     fi
 fi
@@ -122,6 +126,22 @@ then
 else
     echo "No prior instance exists. No backup will be retrieved.";
 fi
+
+echo "Installing daily backup copy..."
+EXPORT_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
+cat << EOF > /etc/cron.daily/copy-exist-backups
+#!/bin/sh
+
+for dir in $(find ${EXPORT_DIR}/* -maxdepth 0 -type d -newermt $(date -d "1 day ago" +%Y%m%d) ); do
+    cd \$dir
+    BASENAME=\$(basename \$dir)
+    tar zcvf \$BASENAME.tar.gz db
+    gsutil cp \$BASENAME.tar.gz gs://${BACKUP_CLOUD_BUCKET}
+    rm \$dir/\$BASENAME.tar.gz;
+done
+
+EOF
+chmod +x /etc/cron.daily/copy-exist-backups
 
 echo "Starting eXist..."
 systemctl start eXist-db
