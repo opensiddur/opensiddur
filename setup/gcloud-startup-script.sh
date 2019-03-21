@@ -131,15 +131,17 @@ echo "Installing daily backup copy..."
 EXPORT_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
 cat << EOF > /etc/cron.daily/copy-exist-backups
 #!/bin/sh
-
+echo "Starting Open Siddur Daily Backup to Cloud..."
 for dir in \$(find ${EXPORT_DIR}/* -maxdepth 0 -type d -newermt \$(date -d "1 day ago" +%Y%m%d) ); do
     cd \$dir
     BASENAME=\$(basename \$dir)
+    echo "Backing up \$BASENAME to gs://${BACKUP_CLOUD_BUCKET}..."
     tar zcvf \$BASENAME.tar.gz db
     gsutil cp \$BASENAME.tar.gz gs://${BACKUP_CLOUD_BUCKET}
     rm \$dir/\$BASENAME.tar.gz;
 done
 
+echo "Daily backup complete."
 EOF
 chmod +x /etc/cron.daily/copy-exist-backups
 
