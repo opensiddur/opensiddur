@@ -130,8 +130,11 @@ fi
 echo "Installing daily backup copy..."
 EXPORT_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
 cat << EOF > /etc/cron.daily/copy-exist-backups
-#!/bin/sh
+#!/bin/bash
 echo "Starting Open Siddur Daily Backup to Cloud..."
+
+export PATH=\$PATH:/snap/bin
+
 for dir in \$(find ${EXPORT_DIR}/* -maxdepth 0 -type d -newermt \$(date -d "1 day ago" +%Y%m%d) ); do
     cd \$dir
     BASENAME=\$(basename \$dir)
