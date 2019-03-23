@@ -15,6 +15,7 @@ env:
     - PROJECT_NAME=opensiddur-client
     - INSTANCE_BASE=${PROJECT_NAME}-${BRANCH//\//-}
     - INSTANCE_NAME=${INSTANCE_BASE}-${VERSION}
+    - BACKUP_BUCKET_BASE=opensiddur-database-backups
     - ZONE=us-west2-a
     - MACHINE_TYPE=n1-standard-1
     - IMAGE=ubuntu-1804-bionic-v20190204
@@ -62,7 +63,7 @@ script:
       --boot-disk-device-name=${INSTANCE_NAME} \
       --service-account=${SERVICE_ACCOUNT} \
       --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
-      --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},BRANCH=${BRANCH},DYN_USERNAME=${DYN_USERNAME},DYN_PASSWORD=${DYN_PASSWORD},DYN_EMAIL=${DYN_EMAIL},enable-oslogin=true
+      --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},BRANCH=${BRANCH},DYN_USERNAME=${DYN_USERNAME},DYN_PASSWORD=${DYN_PASSWORD},DYN_EMAIL=${DYN_EMAIL},BACKUP_BUCKET_BASE=${BACKUP_BUCKET_BASE},enable-oslogin=true
 
 after_script:
   - ant docker-stop

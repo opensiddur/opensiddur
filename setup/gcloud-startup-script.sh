@@ -13,6 +13,7 @@ EXIST_MEMORY=$(get_metadata EXIST_MEMORY)
 DYN_EMAIL=$(get_metadata DYN_EMAIL)
 DYN_USERNAME=$(get_metadata DYN_USERNAME)
 DYN_PASSWORD=$(get_metadata DYN_PASSWORD)
+BACKUP_BUCKET_BASE=$(get_metadata BACKUP_BUCKET_BASE)
 INSTALL_DIR=/usr/local/opensiddur
 
 echo "Setting up the eXist user..."
@@ -45,7 +46,10 @@ chown -R exist:exist ${INSTALL_DIR}
 
 # install the yajsw script
 echo "Installing YAJSW..."
-echo -e "Y\nexist\nY\nn" | ${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
+export RUN_AS_USER=exist
+export WRAPPER_UNATTENDED=1
+export WRAPPER_USE_SYSTEMD=1
+${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
 
 echo "Installing periodic backup cleaning..."
 cat << EOF > /etc/cron.daily/clean-exist-backups
@@ -53,13 +57,13 @@ cat << EOF > /etc/cron.daily/clean-exist-backups
 find ${INSTALL_DIR}/webapp/WEB-INF/data/export/full* \
   -maxdepth 0 \
   -type d \
-  -not -newermt `date -d "14 days ago" +%Y%m%d` \
+  -not -newermt \$(date -d "14 days ago" +%Y%m%d) \
   -execdir rm -fr {} \;
 
 find ${INSTALL_DIR}/webapp/WEB-INF/data/export/report* \
   -maxdepth 0 \
   -type d \
-  -not -newermt `date -d "14 days ago" +%Y%m%d` \
+  -not -newermt \$(date -d "14 days ago" +%Y%m%d) \
   -execdir rm -fr {} \;
 EOF
 chmod +x /etc/cron.daily/clean-exist-backups
@@ -70,15 +74,18 @@ INSTANCE_NAME=$(hostname)
 ZONE=$(gcloud compute instances list --filter="name=(${INSTANCE_NAME})" --format 'csv[no-heading](zone)')
 
 export DNS_NAME="db-feature.jewishliturgy.org"
+BACKUP_CLOUD_BUCKET="${BACKUP_BUCKET_BASE}-feature"
 # branch-specific environment settings
 if [[ $BRANCH == "master" ]];
 then
     BACKUP_BASE_BRANCH="master"
+    BACKUP_CLOUD_BUCKET="${BACKUP_BUCKET_BASE}-prod"
     DNS_NAME="db-prod.jewishliturgy.org";
 else
     BACKUP_BASE_BRANCH="develop";
     if [[ $BRANCH == "develop" ]];
     then
+        BACKUP_CLOUD_BUCKET="${BACKUP_BUCKET_BASE}-preprod"
         DNS_NAME="db-dev.jewishliturgy.org";
     fi
 fi
@@ -120,6 +127,27 @@ else
     echo "No prior instance exists. No backup will be retrieved.";
 fi
 
+echo "Installing daily backup copy..."
+EXPORT_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
+cat << EOF > /etc/cron.daily/copy-exist-backups
+#!/bin/bash
+echo "Starting Open Siddur Daily Backup to Cloud..."
+
+export PATH=\$PATH:/snap/bin
+
+for dir in \$(find ${EXPORT_DIR}/* -maxdepth 0 -type d -newermt \$(date -d "1 day ago" +%Y%m%d) ); do
+    cd \$dir
+    BASENAME=\$(basename \$dir)
+    echo "Backing up \$BASENAME to gs://${BACKUP_CLOUD_BUCKET}..."
+    tar zcvf \$BASENAME.tar.gz db
+    gsutil cp \$BASENAME.tar.gz gs://${BACKUP_CLOUD_BUCKET}
+    rm \$dir/\$BASENAME.tar.gz;
+done
+
+echo "Daily backup complete."
+EOF
+chmod +x /etc/cron.daily/copy-exist-backups
+
 echo "Starting eXist..."
 systemctl start eXist-db
 
@@ -156,8 +184,23 @@ systemctl restart ddclient;
 echo "Configure nginx..."
 cat setup/nginx.conf.tmpl | envsubst '$DNS_NAME' > /etc/nginx/sites-enabled/opensiddur.conf
 
+echo "Wait for DNS propagation..."
+PUBLIC_IP=$(curl icanhazip.com)
+while [[ $(dig +short ${DNS_NAME} @resolver1.opendns.com) != "${PUBLIC_IP}" ]];
+do
+    echo "Waiting 1 min for ${DNS_NAME} to resolve to ${PUBLIC_IP}..."
+    sleep 60;
+done
+
 echo "Get an SSL certificate..."
-certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos --redirect
+if [[ $BRANCH = feature/* ]];
+then
+    echo "using staging cert for feature branch $BRANCH"
+    CERTBOT_DRY_RUN="--test-cert";
+else
+    CERTBOT_DRY_RUN="";
+fi
+certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos --redirect ${CERTBOT_DRY_RUN}
 
 echo "Scheduling SSL Certificate renewal..."
 cat << EOF > /etc/cron.daily/certbot_renewal
