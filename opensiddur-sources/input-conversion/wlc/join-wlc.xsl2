@@ -226,7 +226,7 @@
   
   <xsl:template match="note">
     <tei:note>
-			<xsl:attribute name="xml:id" select="concat('note_',code)"/>
+			<xsl:attribute name="xml:id" select="concat('note_',gccode)"/>
       <xsl:sequence select="note/child::node()"/>
     </tei:note>
   </xsl:template>
