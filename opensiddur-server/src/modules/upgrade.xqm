@@ -141,7 +141,6 @@ declare function upg:schema-changes-0-9-0() {
 
 declare function upg:schema-changes-0-12-0() {
     util:log("info","You must run the schema upgrade to 0.12.0 manually!...")
-(:upg12:upgrade-all(),:)
 };
 
 declare function upg:all-schema-changes() {
