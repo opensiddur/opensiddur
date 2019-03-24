@@ -140,10 +140,8 @@ declare function upg:schema-changes-0-9-0() {
 };
 
 declare function upg:schema-changes-0-12-0() {
-(: TODO: this is an expensive operation. Only do it automatically if version = 0.12 :)
-    util:log("info","Starting schema upgrade to 0.12.0..."),
-    upg12:upgrade-all(),
-    util:log("info","Schema change to 0.12.0 complete.")
+    util:log("info","You must run the schema upgrade to 0.12.0 manually!...")
+(:upg12:upgrade-all(),:)
 };
 
 declare function upg:all-schema-changes() {
