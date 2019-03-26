@@ -147,8 +147,13 @@ declare function upg12:upgrade-ptrs(
                       (
                         if ($first-is-last)
                         then
-                        (: a single segment becomes a range pointer :)
-                          "range(" || $fragment-start || "," || $fragment-start || "_end)"
+                          if (exists($first-target-node-seg))
+                          then
+                            (: a single segment becomes a range pointer :)
+                            "range(" || $fragment-start || "," || $fragment-start || "_end)"
+                          else
+                            (: not a segment, no change :)
+                            $fragment-ptr
                         else
                         (: a range pointer has to be rewritten-- if the end is a segment inside a streamText :)
                           "range(" || $fragment-start || "," || $fragment-end || (

@@ -135,6 +135,7 @@ declare variable $t:external-references-file := document {
         <tei:ptr xml:id="external_reference_to_stream" target="/data/tests/Referenced_File#stream"/>
         <tei:ptr xml:id="external_reference_to_seg" target="/data/tests/Referenced_File#seg_6"/>
         <tei:ptr xml:id="external_reference_to_range" target="/data/tests/Referenced_File#range(seg_8,seg_10)"/>
+        <tei:ptr xml:id="external_reference_to_ptr" target="/data/tests/Referenced_File#external_ptr"/>
       </j:streamText>
     </tei:text>
   </tei:TEI>
@@ -153,6 +154,7 @@ declare variable $t:expected-external-references-file := document {
         <tei:ptr xml:id="external_reference_to_stream" target="/data/tests/Referenced_File#stream"/>
         <tei:ptr xml:id="external_reference_to_seg" target="/data/tests/Referenced_File#range(seg_6,seg_6_end)"/>
         <tei:ptr xml:id="external_reference_to_range" target="/data/tests/Referenced_File#range(seg_8,seg_10_end)"/>
+        <tei:ptr xml:id="external_reference_to_ptr" target="/data/tests/Referenced_File#external_ptr"/>
       </j:streamText>
     </tei:text>
   </tei:TEI>
