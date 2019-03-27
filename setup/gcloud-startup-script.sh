@@ -214,7 +214,7 @@ systemctl restart nginx
 
 # TODO: only do this if the upgrade is necessary...
 echo "Changing JLPTEI schema for v0.12+..."
-#${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upg12='http://jewishliturgy.org/modules/upgrade12' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade12.xqm'; upg12:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
+${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upg12='http://jewishliturgy.org/modules/upgrade12' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade12.xqm'; upg12:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
 
 echo "Stopping prior instances..."
 ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="status=RUNNING AND name~'${INSTANCE_BASE}'" | \

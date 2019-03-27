@@ -126,7 +126,7 @@ declare function upg12:upgrade-ptrs(
                 (: do not follow external links :)
                 $target
               else
-                let $target-nodes := uri:fast-follow($target, $element, 1)
+                let $target-nodes := uri:fast-follow($target, $element, 0)
                 let $first-target-node-seg := $target-nodes[1][self::tei:seg][ancestor::j:streamText]
                 let $last-target-node-seg := $target-nodes[last()][self::tei:seg][ancestor::j:streamText]
                 let $first-is-last := $first-target-node-seg is $last-target-node-seg
