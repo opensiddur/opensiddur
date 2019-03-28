@@ -223,7 +223,9 @@ cacheSize=${cache.size}
 		description="build everything">
 		<subant target="dist" inheritAll="false">
 			<fileset dir=".">
-				<include name="*/build.xml"/>
+				<include name="opensiddur-server/build.xml"/>
+                <include name="opensiddur-demos/build.xml"/>
+                <include name="opensiddur-tests/build.xml"/>
 				<exclude name="build.xml"/>
 			</fileset>
 		</subant>

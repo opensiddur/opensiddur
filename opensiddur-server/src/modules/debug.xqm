@@ -3,7 +3,7 @@ xquery version "1.0";
  : debug functions
  :
  : Open Siddur Project
- : Copyright 2011,2016,2018 Efraim Feinstein
+ : Copyright 2011,2016,2018-2019 Efraim Feinstein
  : Licensed under the GNU Lesser General Public License, version 3 or later
  : 
  :)
@@ -29,9 +29,10 @@ declare function debug:debug(
 	$source as item()*,
 	$message as item()*
 	) as empty-sequence() {
-	let $level-strings := ('error', 'warning', 'info', 'detail', 'trace')
+	let $level-strings := ('error', 'warn', 'info', 'debug', 'trace')
+	let $level-string := $level-strings[min(($level, count($level-strings)))]
 	let $xmsg :=
-		element { $level-strings[min(($level, count($level-strings)))] } {
+		element { $level-string } {
 			element source { $source},
 			element message { 
 			  for $m in $message
@@ -55,7 +56,7 @@ declare function debug:debug(
   	if ($level = $debug:error)
   	then error(xs:QName('debug:ERROR'), $xmsg)
   	else if ($level <= $source-level)
-  	then util:log-system-out($xmsg) (: TODO: this should replace with a custom logger :)
+  	then util:log($level-string, $xmsg) (: TODO: this should replace with a custom logger :)
   	else ()
 };
 

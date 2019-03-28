@@ -123,7 +123,9 @@ declare
         else (),
         util:log("info", "removing test resources"),
         let $testusers := ("testuser", "testuser2")
-        let $excluded := ("/db/apps", "/db/system")
+        (: when we do upgrade to 0.12.0, the /db/upgrade collection sticks around even after being deleted
+         - see upgrade12.xqm :)
+        let $excluded := ("/db/apps", "/db/system", "/db/upgrade")
         return
             tests:remove-test-resources(tests:get-test-resources("/db", $testusers, $excluded)),
         util:log("info", "removing the test user"),

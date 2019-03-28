@@ -313,6 +313,7 @@ The Open Siddur intends to work within open standards whenever possible. In choo
               <alternate minOccurs="0" maxOccurs="unbounded">
                 <textNode/>
                 <classRef key="model.segLike"/>
+                <classRef key="model.limitedPhrase"/>
                 <classRef key="model.milestoneLike"/>
                 <elementRef key="ptr"/>
               </alternate>
