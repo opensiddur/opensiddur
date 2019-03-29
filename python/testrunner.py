@@ -171,8 +171,8 @@ class XQSuiteApiSax(SaxBase):
             "package": attributes[(None, "package")],
             "tests": tests,
             "pass": escaped("PASS",
-                                  str(int(tests) - int(failures) -
-                                    int(errors) - int(pending))),
+                                  str(max(int(tests) - int(failures) -
+                                    int(errors) - int(pending), 0))),
             "fail": escaped("FAIL", failures),
             "error": escaped("ERROR", errors),
             "ignore": escaped("IGNORE", pending)
@@ -323,13 +323,13 @@ def main():
 
     print("Tests completed: suites: {suites} pass: {passes} fail: {fail} error: {error} ignored: {ignored}".format(
         suites=suites,
-        passes=escaped("PASS", str(tests - errors - fails - ignores)),
+        passes=escaped("PASS", str(max(tests - errors - fails - ignores, 0))),
         fail=escaped("FAIL", str(fails)),
         error=escaped("ERROR", str(errors)),
         ignored=escaped("IGNORE", str(ignores))
     ))
 
-    if (tests > 0 and (errors + fails) > 0):
+    if (errors + fails) > 0:
         return 1
     else:
         return 0

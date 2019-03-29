@@ -44,7 +44,9 @@ declare function common:generate-id(
 	return
 	  string-join(
 	    (
-	      $node/local-name(), $docid, $nodeid
+	      if ($node instance of element())
+        then $node/local-name()
+        else "node", $docid, $nodeid
 	    ), "-"
 	  )
 };

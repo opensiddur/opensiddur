@@ -2,7 +2,7 @@ xquery version "3.1";
 (:~
  : XQuery functions to output a given XML file in a format.
  : 
- : Copyright 2011-2014 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2014,2019 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -32,6 +32,8 @@ import module namespace combine="http://jewishliturgy.org/transform/combine"
   at "../transforms/combine.xqm";
 import module namespace compile="http://jewishliturgy.org/transform/compile"
   at "../transforms/compile.xqm";
+import module namespace segment="http://jewishliturgy.org/transform/segment"
+at "../transforms/segment.xqm";
 import module namespace tohtml="http://jewishliturgy.org/transform/html"
   at "../transforms/tohtml.xqm";
 import module namespace translit="http://jewishliturgy.org/transform/transliterator"
@@ -49,6 +51,7 @@ declare variable $format:temp-dir := '.format';
 declare variable $format:parallel-layer-cache := "/db/cache/parallel-layer";
 declare variable $format:phony-layer-cache := "/db/cache/phony-layer";
 declare variable $format:dependency-cache := "/db/cache/dependency";
+declare variable $format:segment-cache := "/db/cache/segment";
 declare variable $format:flatten-cache := "/db/cache/flatten";
 declare variable $format:merge-cache := "/db/cache/merge";
 declare variable $format:resolve-cache := "/db/cache/resolved";
@@ -60,6 +63,7 @@ declare variable $format:caches := (
     $format:parallel-layer-cache,
     $format:phony-layer-cache,
     $format:dependency-cache,
+    $format:segment-cache,
     $format:flatten-cache,
     $format:merge-cache,
     $format:resolve-cache,
@@ -224,6 +228,35 @@ declare function format:phony-layer(
     )
 };
 
+(:~ make a cached version of a segmented document,
+ : and return it
+ : @param $doc The document to segment
+ : @param $params Parameters to send to the segment
+ : @param $original-doc The original document that was segmented
+ : @return The mirrored segmented document
+ :)
+declare function format:segment(
+  $doc as document-node(),
+  $params as map(*),
+  $original-doc as document-node()
+) as document-node() {
+  let $params := format:status-param($params, $original-doc)
+  let $segment-transform := segment:segment(?)
+  return
+    format:apply-if-outdated(
+      "segment",
+      $params,
+      $format:flatten-cache,
+      if (format:is-parallel-document($original-doc))
+      then
+        format:parallel-layer($doc, $params, $original-doc)
+      else
+        format:phony-layer($doc, $params, $original-doc),
+      $segment-transform,
+      $original-doc
+    )
+};
+
 (:~ make a cached version of a flattened document,
  : and return it
  : @param $doc The document to flatten
@@ -243,11 +276,7 @@ declare function format:flatten(
       "flatten", 
       $params, 
       $format:flatten-cache,
-      if (format:is-parallel-document($original-doc))
-      then 
-        format:parallel-layer($doc, $params, $original-doc)
-      else 
-        format:phony-layer($doc, $params, $original-doc),
+      format:segment($doc, $params, $original-doc),
       $flatten-transform,
       $original-doc
     )
