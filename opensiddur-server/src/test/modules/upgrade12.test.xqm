@@ -59,7 +59,7 @@ declare variable $t:referenced-file := document {
         <tei:seg xml:id="seg_13">references</tei:seg>
         <tei:seg xml:id="seg_14">in the</tei:seg>
         <tei:seg xml:id="seg_15">same ptr</tei:seg>
-        <tei:ptr xml:id="external_ptr" target="http://www.external.com"/>
+        <tei:ptr xml:id="external_ptr" type="url" target="http://www.external.com"/>
         <tei:anchor xml:id="end_p_3"/>
       </j:streamText>
       <j:concurrent type="p">
@@ -103,7 +103,7 @@ declare variable $t:expected-referenced-file := document {
         <tei:ptr xml:id="internal_ptr_to_one_segment" target="#range(seg_3,seg_3_end)"/>
         <tei:anchor xml:id="end_p_1"/>
         <tei:anchor xml:id="seg_4"/>Referenced by an internal pointer Outside a streamText<tei:anchor xml:id="seg_5_end"/> <tei:anchor xml:id="begin_p_3"/>
-        <tei:anchor xml:id="seg_6"/>Referenced externally without a range<tei:anchor xml:id="seg_6_end"/> Unreferenced. <tei:anchor xml:id="seg_8"/>Referenced externally with a range.<tei:anchor xml:id="seg_10_end"/> <tei:anchor xml:id="seg_11"/>Multiple range<tei:anchor xml:id="seg_12_end"/> <tei:anchor xml:id="seg_13"/>references<tei:anchor xml:id="seg_13_end"/> <tei:anchor xml:id="seg_14"/>in the same ptr<tei:anchor xml:id="seg_15_end"/> <tei:ptr xml:id="external_ptr" target="http://www.external.com"/>
+        <tei:anchor xml:id="seg_6"/>Referenced externally without a range<tei:anchor xml:id="seg_6_end"/> Unreferenced. <tei:anchor xml:id="seg_8"/>Referenced externally with a range.<tei:anchor xml:id="seg_10_end"/> <tei:anchor xml:id="seg_11"/>Multiple range<tei:anchor xml:id="seg_12_end"/> <tei:anchor xml:id="seg_13"/>references<tei:anchor xml:id="seg_13_end"/> <tei:anchor xml:id="seg_14"/>in the same ptr<tei:anchor xml:id="seg_15_end"/> <tei:ptr xml:id="external_ptr" type="url" target="http://www.external.com"/>
         <tei:anchor xml:id="end_p_3"/>
       </j:streamText>
       <j:concurrent type="p">
