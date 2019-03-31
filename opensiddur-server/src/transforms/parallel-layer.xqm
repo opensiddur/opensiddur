@@ -38,7 +38,7 @@ declare function pla:parallel-layer-document(
                     $pt/(@* except @xml:id, tei:idno),
                     for $domain in tokenize($doc//j:parallelText/tei:linkGrp/@domains, '\s+')
                     let $domain-doc-orig := data:doc(substring-before($domain, '#'))
-                    let $domain-document := format:phony-layer($domain-doc-orig, $params, $domain-doc-orig)
+                    let $domain-document := format:segment($domain-doc-orig, $params, $domain-doc-orig)
                     let $params := map { "pla:domain" := $domain }
                     let $layer := pla:tei-linkGrp($pt/tei:linkGrp, $params)
                     return pla:add-layer($domain-document, $layer, $params)

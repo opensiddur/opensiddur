@@ -203,31 +203,6 @@ declare function format:parallel-layer(
     )
 };
 
-(:~ make a cached version of a segmented document,
- : and return it
- : @param $doc The document to segment
- : @param $params Parameters to send to the segment
- : @param $original-doc The original document that was segmented
- : @return The mirrored segmented document
- :)
-declare function format:segment(
-  $doc as document-node(),
-  $params as map(*),
-  $original-doc as document-node()
-) as document-node() {
-  let $params := format:status-param($params, $original-doc)
-  let $segment-transform := segment:segment(?)
-  return
-    format:apply-if-outdated(
-      "segment",
-      $params,
-      $format:segment-cache,
-      $doc,
-      $segment-transform,
-      $original-doc
-    )
-};
-
 
 (:~ make a cached version of a phony layer text document,
  : and return it
@@ -248,8 +223,34 @@ declare function format:phony-layer(
       "phony-layer",
       $params,
       $format:phony-layer-cache,
-      format:segment($doc, $params, $original-doc),
+      $doc,
       $pho-transform,
+      $original-doc
+    )
+};
+
+
+(:~ make a cached version of a segmented document,
+ : and return it
+ : @param $doc The document to segment
+ : @param $params Parameters to send to the segment
+ : @param $original-doc The original document that was segmented
+ : @return The mirrored segmented document
+ :)
+declare function format:segment(
+  $doc as document-node(),
+  $params as map(*),
+  $original-doc as document-node()
+) as document-node() {
+  let $params := format:status-param($params, $original-doc)
+  let $segment-transform := segment:segment(?)
+  return
+    format:apply-if-outdated(
+      "segment",
+      $params,
+      $format:segment-cache,
+      format:phony-layer($doc, $params, $original-doc),
+      $segment-transform,
       $original-doc
     )
 };
@@ -277,7 +278,7 @@ declare function format:flatten(
       then
         format:parallel-layer($doc, $params, $original-doc)
       else
-        format:phony-layer($doc, $params, $original-doc),
+        format:segment($doc, $params, $original-doc),
       $flatten-transform,
       $original-doc
     )
