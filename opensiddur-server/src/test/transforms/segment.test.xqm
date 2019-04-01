@@ -43,7 +43,7 @@ declare variable $t:expected-streamText-output :=
     <tei:ptr xml:id="ptr" target="somewhere"/>
     <jf:textnode xml:id="...">Another text node</jf:textnode>
     <tei:anchor xml:id="anchor"/>
-    <tei:w>has no xml:id</tei:w>
+    <tei:w xml:id="...">has no xml:id</tei:w>
     <jf:textnode xml:id="...">Space inside text nodes is normalized.</jf:textnode>
   </j:streamText>;
 

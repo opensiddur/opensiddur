@@ -35,6 +35,14 @@ declare function segment:j-streamText(
     for $node in $e/node()
     return
       typeswitch ($node)
+        case element() return
+          if ($node/@xml:id or $node/@jf:id) then $node
+          else
+            element { QName(namespace-uri($node), name($node)) }{
+              attribute xml:id { common:generate-id($node) },
+              $node/@*,
+              $node/node()
+            }
         case text() return
           let $normalized := normalize-space($node)
           return
