@@ -4,7 +4,7 @@ xquery version "3.1";
  : Reduce the number of elements in j:streamText
  :)
 
-module namespace upgrade122 = "upgrade122.xqm";
+module namespace upgrade122 = "http://jewishliturgy.org/modules/upgrade122";
 
 import module namespace ridx="http://jewishliturgy.org/modules/refindex" at "refindex.xqm";
 import module namespace upg12 = "http://jewishliturgy.org/modules/upgrade12" at "upgrade12.xqm";
