@@ -54,6 +54,8 @@ declare variable $t:test-file := document {
       <tei:pc>׀</tei:pc>{ text { "    " } }
       <tei:w>מנס</tei:w>{ text { "    " } }
         <tei:anchor xml:id="anchor2"/>
+        <tei:anchor xml:id="ptr_with_no_xmlid_target"/>
+        <tei:ptr target="#ptr_with_no_xmlid_target"/>
       </j:streamText>
       <j:concurrent type="p">
         <tei:p>
@@ -91,6 +93,8 @@ declare variable $t:transformed := document {
           <j:read>unreferenced</j:read>
           <j:written>with child nodes</j:written>
       </tei:choice>{ text { "             text node                    אבג־דהו זחט׃ יכל ׀ מנס "}}<tei:anchor xml:id="anchor2"/>
+        <tei:anchor xml:id="ptr_with_no_xmlid_target"/>
+        <tei:ptr target="#ptr_with_no_xmlid_target"/>
       </j:streamText>
       <j:concurrent type="p">
         <tei:p>

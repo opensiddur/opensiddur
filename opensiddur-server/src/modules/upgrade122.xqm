@@ -94,6 +94,7 @@ declare function upgrade122:j-streamText(
     for $child in $e/node()
     return
       typeswitch($child)
+      case element(tei:ptr) return $child
       case element() return
         let $refs := ridx:query-all($child, (), false())
         return
