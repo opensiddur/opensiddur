@@ -20,6 +20,22 @@ declare function deepequality:equal-or-result(
   return $result
 };
 
+(:~ compare two nodes. If the result is deep equal to expected according to [[deepequality:equal-wildcard]],
+ : return the result, otherwise, return the result inside a deepequality:error element
+ : Test for it with test:assertXPath("not(error)")
+ :)
+declare function deepequality:equal-or-error(
+  $result as node()*,
+  $expected as node()*
+) as node()* {
+  let $is-equal := deepequality:equal-wildcard($result, $expected)
+  return
+    if ($is-equal)
+    then $result
+    else element error { $result }
+};
+
+
 (:~ determine if two nodes are equal, allowing for the string ... to be a wildcard
  : and the namespace http://www.w3.org/1998/xml/namespace/alias to be equivalent to the
  : xml namespace

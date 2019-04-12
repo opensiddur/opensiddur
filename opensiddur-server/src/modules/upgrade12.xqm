@@ -65,7 +65,7 @@ declare function upg12:upgrade-all() {
     util:log("info", "Not upgrading to 0.12.0: This database appears to already be upgraded.")
 };
 
-declare %private function upg12:recursive-file-list(
+declare function upg12:recursive-file-list(
   $base-path as xs:string
 ) as element(resource)* {
   for $child-collection in xmldb:get-child-collections($base-path)

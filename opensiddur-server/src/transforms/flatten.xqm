@@ -43,6 +43,10 @@ declare variable $flatten:layer-order := map {
     "choice" := 13
   };
 
+(:~ this declares the cache path that is expected to precede flatten, so
+ : we make sure to load absolute links from the right place. :)
+declare variable $flatten:origin-cache := "/db/cache/segment";
+
 (:~ order the given flattened nodes, using the information in 
  : the ordering attributes
  :)
@@ -434,7 +438,7 @@ declare function flatten:tei-ptr(
   $e as element(tei:ptr),
   $params as map(*)
   ) as element()+ {
-  for $target in uri:follow-tei-link($e, 1, (), true())
+  for $target in uri:follow-tei-link($e, 1, $flatten:origin-cache, true())
   let $stream := $target/ancestor::j:streamText 
   return 
     if ($stream)

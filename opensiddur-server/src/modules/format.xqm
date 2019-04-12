@@ -107,13 +107,13 @@ declare function format:status-param(
     $params as map(*),
     $original-doc as document-node()
     ) as map(*) {
-    map:new((
-        $params,
-        map { 
-            "format:status-job-id" := ($params("format:status-job-id"), status:get-job-id($original-doc))[1], 
-            "format:stage-number" := ($params("format:stage-number") + 1, 0)[1] 
-        }
-    ))
+  map:merge((
+      $params,
+      map {
+          "format:status-job-id" := ($params("format:status-job-id"), status:get-job-id($original-doc))[1],
+          "format:stage-number" := ($params("format:stage-number") + 1, 0)[1]
+      }
+  ))
 };
 
 declare function format:apply-if-outdated(
@@ -146,17 +146,17 @@ declare function format:apply-if-outdated(
         then status:start-job($original-doc)
         else ()
     return
-        try {
+      try {
             let $stage-start := status:start($status-resource, $original-doc, $stage)
             let $transformed :=
-                mirror:apply-if-outdated($mirror-path, $transformee, $transform, $original-doc, $up-to-date-function)
+              mirror:apply-if-outdated($mirror-path, $transformee, $transform, $original-doc, $up-to-date-function)
             let $stage-finish := status:finish($status-resource, $original-doc, $stage)
             let $job-end := 
                 if ($params("format:stage-number") = 0)
                 then status:complete-job($status-resource, document-uri($original-doc))
                 else ()
             return $transformed
-        }
+       }
         catch * {
             let $error-message := 
                 concat(
@@ -268,7 +268,6 @@ declare function format:flatten(
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
-  let $flatten-transform := flatten:flatten-document(?, $params)
   return
     format:apply-if-outdated(
       "flatten", 
@@ -279,7 +278,7 @@ declare function format:flatten(
         format:parallel-layer($doc, $params, $original-doc)
       else
         format:segment($doc, $params, $original-doc),
-      $flatten-transform,
+      flatten:flatten-document(?, $params),
       $original-doc
     )
 };

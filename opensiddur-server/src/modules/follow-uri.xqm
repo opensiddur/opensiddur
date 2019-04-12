@@ -204,10 +204,13 @@ declare function uri:fast-follow(
   (: short-circuit if the document does not exist :) 
   where exists($original-document)  
   return
+    let $original-document-uri := document-uri($original-document)
     let $document as document-node()? :=
-      if ($cache)
+      if ($cache
+        and not(starts-with($original-document-uri, "/db/cache")))
       then
-        mirror:doc($cache, document-uri($original-document))
+        (: we have requested a cached link and we make sure that the link is not also coming from the cache :)
+        mirror:doc($cache, $original-document-uri)
       else $original-document
     let $pointer-destination as node()* :=
       if ($fragment) 
@@ -287,7 +290,7 @@ declare function uri:follow-tei-link(
     	  then
     	    uri:fast-follow($t, $context, 
     	      uri:follow-steps($context, $steps),
-    	      $intermediate-ptrs)
+    	      $intermediate-ptrs, false(), $cache-type)
     	  else 
             (:
           uri:follow-cached-uri(
