@@ -22,7 +22,7 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
  : databases that are not converted)
  :)
 declare function upgrade122:upgrade-all() {
-  if (exists(collection("/db/data")//j:streamText/tei:pc))
+  if (count(collection("/db/data")//j:streamText/tei:pc) > 10) (: arbitrary cutoff :)
   then
     let $ridx-reindex := ridx:reindex(collection("/db/data"))
     let $upgrade-mirror := "/db/upgrade"
