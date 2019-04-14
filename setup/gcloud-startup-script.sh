@@ -10,6 +10,7 @@ echo "Getting metadata..."
 BRANCH=$(get_metadata BRANCH)
 PASSWORD=$(get_metadata ADMIN_PASSWORD)
 EXIST_MEMORY=$(get_metadata EXIST_MEMORY)
+STACK_MEMORY=$(get_metadata STACK_MEMORY)
 DYN_EMAIL=$(get_metadata DYN_EMAIL)
 DYN_USERNAME=$(get_metadata DYN_USERNAME)
 DYN_PASSWORD=$(get_metadata DYN_PASSWORD)
@@ -35,6 +36,7 @@ export SRC=$(pwd)
 cat << EOF > local.build.properties
 installdir=${INSTALL_DIR}
 max.memory=${EXIST_MEMORY}
+stack.memory=${STACK_MEMORY}
 cache.size=512
 adminpassword=${PASSWORD}
 EOF
