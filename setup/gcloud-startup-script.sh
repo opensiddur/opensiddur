@@ -54,19 +54,30 @@ export WRAPPER_USE_SYSTEMD=1
 ${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
 
 echo "Installing periodic backup cleaning..."
-cat << EOF > /etc/cron.daily/clean-exist-backups
+cat << EOF > clean-exist-backups
 #!/bin/sh
-find ${INSTALL_DIR}/webapp/WEB-INF/data/export/full* \
-  -maxdepth 0 \
-  -type d \
-  -not -newermt \$(date -d "14 days ago" +%Y%m%d) \
-  -execdir rm -fr {} \;
+BASE_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
+EARLIEST_DATE=\$(date -d "14 days ago" +%Y%m%d)
 
-find ${INSTALL_DIR}/webapp/WEB-INF/data/export/report* \
-  -maxdepth 0 \
-  -type d \
-  -not -newermt \$(date -d "14 days ago" +%Y%m%d) \
-  -execdir rm -fr {} \;
+for backup in \$( \
+    find \${BASE_DIR}/full* \
+        -maxdepth 0 \
+        -type d );
+do
+    if [[ \$(basename \$backup) < "full\$EARLIEST_DATE" ]];
+    then rm -fr \$backup;
+    fi;
+done
+
+for report in \$( \
+    find \${BASE_DIR}/report* \
+        -maxdepth 0 \
+        -type f );
+do
+    if [[ \$(basename \$report) < "report-\$EARLIEST_DATE" ]];
+    then rm -fr \$report;
+    fi;
+done
 EOF
 chmod +x /etc/cron.daily/clean-exist-backups
 
