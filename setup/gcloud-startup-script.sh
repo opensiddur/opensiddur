@@ -54,7 +54,7 @@ export WRAPPER_USE_SYSTEMD=1
 ${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
 
 echo "Installing periodic backup cleaning..."
-cat << EOF > clean-exist-backups
+cat << EOF > /etc/cron.daily/clean-exist-backups
 #!/bin/sh
 BASE_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
 EARLIEST_DATE=\$(date -d "14 days ago" +%Y%m%d)
