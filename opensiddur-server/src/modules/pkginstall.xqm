@@ -186,6 +186,24 @@ declare function pkginstall:dependencies(
 declare function pkginstall:check-external-dependencies(
   $dependencies as element(pkginstall:dependencies)
 ) as element(pkginstall:dependency-error)* {
+  for $dependency in $dependencies/pkginstall:resource/pkginstall:external-dependency
+  let $source-resource := $dependency/parent::*/@path
+  let $dependency-resource := $dependency/string()
+  where empty(data:doc($dependency-resource))
+  return
+    element pkginstall:dependency-error {
+      attribute source { $source-resource },
+      attribute dependency { $dependency-resource },
+      text { "Missing external dependency" }
+    }
+};
+
+(:~ @return element pkginstall:dependency error if any of the transitive dependencies of $iterating are $origin :)
+declare function pkginstall:check-circular-dependencies(
+  $dependencies as element(pkginstall:dependencies),
+  $iterating as element(pkginstall:resource),
+  $origin as element(pkginstall:resource)
+) as element(pkginstall:dependency-error)* {
   ()
 };
 
@@ -193,7 +211,8 @@ declare function pkginstall:check-external-dependencies(
 declare function pkginstall:check-circular-dependencies(
   $dependencies as element(pkginstall:dependencies)
 ) as element(pkginstall:dependency-error)* {
-  ()
+  for $source-resource in $dependencies/pkginstall:resource
+  return pkginstall:check-circular-dependencies($dependencies, $source-resource, $source-resource)
 };
 
 (:~ @return element pkginstall:dependency-error for each internal dependency that does not exist :)
