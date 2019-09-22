@@ -3,7 +3,7 @@
         Build file for opensiddur
     </description>
     <property name="lib.dir" location="lib"/>
-    <property name="exist.version" value="4.6.1"/>
+    <property name="exist.version" value="4.7.1"/>
     <property name="ivy.version" value="2.4.0"/>
 	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-${exist.version}-opensiddur.jar"/>
 	<property name="build" location="build"/>
