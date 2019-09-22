@@ -261,8 +261,10 @@ class TestingApi:
     def rest_api_get(self, api, prefix=None):
         """ Make a REST API call to URL, return the result """
         data, code = http_request(self.host, self.port, (self.prefix if prefix is None else prefix) + api)
-
-        xtree = etree.parse(BytesIO(data))
+        try:
+            xtree = etree.parse(BytesIO(data))
+        except Exception as e:
+            raise (RuntimeError("Parsing failed. Got from API: " + str(data) + " Original exception: " + str(e)))
         return code, xtree
 
 
