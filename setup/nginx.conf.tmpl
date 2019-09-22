@@ -1,5 +1,9 @@
 ## this is an nginx config for redirecting
 ## and redirecting all server requests to db-[dev|prod|feature].jewishliturgy.org
+
+# the Accept header from chrome does not play well with eXist https://github.com/eXist-db/exist/issues/1698
+proxy_set_header        Accept '*/*'
+
 server {
 	listen 80;
 	server_name ${DNS_NAME};
