@@ -163,7 +163,7 @@ then
 
         mkdir -p /tmp/exist-backup
         ( cd /tmp/exist-backup && tar zxvf /tmp/backup.master/exist-backup.tar.gz )
-        rm -fr /tmp/backup.master
+        sudo rm -fr /tmp/backup.master
         RESTORE_COMPLETE=1;
     fi;
 fi;
