@@ -344,26 +344,25 @@ cacheSize=${cache.size}
             <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
         </exec>
     </target>
-    <target name="backup-for-upgrade"
-        depends="backup"
-        description="edit the backup in $backup.directory, removing things that we do not want restored">
+    <target name="process-backup-for-upgrade"
+            description="edit the backup in $backup.directory, removing things that we do not want restored">
         <tempfile property="exist.backup.remove.file" destDir="${java.io.tmpdir}" deleteonexit="true"/>
         <echo file="${exist.backup.remove.file}">
-^/db/apps
-^/db/cache
-^/db/refindex
-^/db/system/config
-^/db/system/security/exist/(accounts|groups)/removed
-^/db/system/security/exist/accounts/(admin|guest|testuser|testuser.)\.xml$
-^/db/system/security/exist/groups/(dba|testuser|testuser2|grouptests|grouptests.)\.xml$
-^/db/data/user/(testuser|testuser.)\.xml$
-^/db/data/tests
+            ^/db/apps
+            ^/db/cache
+            ^/db/refindex
+            ^/db/system/config
+            ^/db/system/security/exist/(accounts|groups)/removed
+            ^/db/system/security/exist/accounts/(admin|guest|testuser|testuser.)\.xml$
+            ^/db/system/security/exist/groups/(dba|testuser|testuser2|grouptests|grouptests.)\.xml$
+            ^/db/data/user/(testuser|testuser.)\.xml$
+            ^/db/data/tests
         </echo>
         <dirset dir="${backup.directory}" includes="full*" id="full.backup.directories" />
         <pathconvert pathsep="" property="backup.full.directory" refid="full.backup.directories"/>
 
         <exec input="${exist.backup.remove.file}"
-            executable="python3">
+              executable="python3">
             <arg value="python/removeFromBackup.py"/>
             <arg value="-s"/>
             <arg value="-v"/>
@@ -371,6 +370,10 @@ cacheSize=${cache.size}
         </exec>
         <tar destfile="${backup.directory}/exist-backup.tar.gz" basedir="${backup.full.directory}"
              compression="gzip" longfile="gnu"/>
+    </target>
+    <target name="backup-for-upgrade"
+        depends="backup,process-backup-for-upgrade"
+        description="make a backup, then process what should be restored">
     </target>
     <target name="restore"
         description="restore the database from (modified) backup, rerun refindex update">
