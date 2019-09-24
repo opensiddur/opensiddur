@@ -159,7 +159,7 @@ then
 
         ( cd ${BACKUP_TEMP_DIR} && tar zxvf ${BACKUP_FILENAME} && rm -f ${BACKUP_FILENAME} && \
             sudo chown -R exist:exist ${BACKUP_TEMP_DIR} )
-        ( cd /src/opensiddur && sudo -u exist ant backup-for-upgrade -Dbackup.directory=/tmp/backup.master )
+        ( cd /src/opensiddur && sudo -u exist ant process-backup-for-upgrade -Dbackup.directory=/tmp/backup.master )
 
         mkdir -p /tmp/exist-backup
         ( cd /tmp/exist-backup && tar zxvf /tmp/backup.master/exist-backup.tar.gz )
