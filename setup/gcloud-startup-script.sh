@@ -158,7 +158,7 @@ then
         gsutil cp ${MOST_RECENT_BACKUP} ${BACKUP_TEMP_DIR}
 
         ( cd ${BACKUP_TEMP_DIR} && tar zxvf ${BACKUP_FILENAME} && rm -f ${BACKUP_FILENAME} && \
-            sudo chown -R exist:exist ${BACKUP_TEMP_DIR} )
+            sudo chown -R exist:exist /tmp/backup.master )
         ( cd /src/opensiddur && sudo -u exist ant process-backup-for-upgrade -Dbackup.directory=/tmp/backup.master )
 
         mkdir -p /tmp/exist-backup
