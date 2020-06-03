@@ -1,4 +1,4 @@
-FROM ubuntu:cosmic
+FROM ubuntu:focal
 
 RUN useradd -c "eXist db"  exist
 # install dependencies
