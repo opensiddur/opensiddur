@@ -28,6 +28,8 @@ import module namespace format="http://jewishliturgy.org/modules/format"
   at "../../modules/format.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "../../modules/paths.xqm";
+import module namespace ridx="http://jewishliturgy.org/modules/refindex"
+  at "../../modules/refindex.xqm";
 import module namespace status="http://jewishliturgy.org/modules/status"
   at "../../modules/status.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
@@ -230,9 +232,10 @@ declare
     "Original data API", api:uri-of($orig:api-path-base),
     orig:query-function#1, orig:list-function#0,
     (<crest:additional text="access" relative-uri="access"/>,
+     <crest:additional text="linkage" relative-uri="linkage"/>,
      <crest:additional text="flat" relative-uri="flat"/>,
      <crest:additional text="combined" relative-uri="combined"/>,
-     <crest:additional text="transcluded" relative-uri="combined?transclude=true"/>), 
+     <crest:additional text="transcluded" relative-uri="combined?transclude=true"/>),
     ()
   )
 };
@@ -382,6 +385,68 @@ declare
   return
     if ($doc instance of document-node())
     then format:display-flat($doc, map {}, $doc)
+    else $doc
+};
+
+(:~ find all linkage documents linked to the given document, conditioned on the query string $q
+ : @return j:parallelText elements that map to the linkage
+ :)
+declare function orig:linkage-query-function(
+  $doc as document-node(),
+  $q as xs:string?
+) as element()* {
+  let $collection := collection("/db/data/linkage")
+  let $queried :=
+    if ($q)
+    then $collection//j:parallelText[contains(tei:idno, $q)]
+    else $collection//j:parallelText
+  return
+    ridx:query(
+      $queried/tei:linkGrp[@domains],
+      $doc//j:streamText)/parent::*
+};
+
+(:~ linkage results are given as j:parallelText elements.
+ : The title is the translation id
+ :)
+declare function orig:linkage-title-function(
+  $e as element(j:parallelText)
+  ) as xs:string {
+  $e/tei:idno/string()
+};
+
+(:~ Get a list of ids that are linked to this document
+ : @param $name The resource to get the linkage list
+ : @return HTTP 200 A list of linked resources
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare
+  %rest:GET
+  %rest:path("/api/data/original/{$name}/linkage")
+  %rest:query-param("q", "{$q}", "")
+  %rest:query-param("start", "{$start}", 1)
+  %rest:query-param("max-results", "{$max-results}", 100)
+  %rest:produces("application/xhtml+xml", "application/xml", "text/xml", "text/html")
+  %output:method("xhtml")
+  function orig:get-linkage(
+    $name as xs:string,
+    $q as xs:string*,
+    $start as xs:integer*,
+    $max-results as xs:integer*
+  ) as item()+ {
+  let $doc := crest:get($orig:data-type, $name)
+  return
+    if ($doc instance of document-node())
+    then
+      let $query-function := orig:linkage-query-function($doc, ?)
+      let $list-function := function() { orig:linkage-query-function($doc, ()) }
+      return
+        crest:list($q, $start, $max-results,
+          "Linkage to " || $name,
+          api:uri-of($orig:api-path-base) || "/" || $name || "/linkage",
+          $query-function, $list-function,
+          (), ()
+        )
     else $doc
 };
 

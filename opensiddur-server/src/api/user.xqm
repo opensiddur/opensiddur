@@ -45,9 +45,9 @@ declare variable $user:data-type := "user";
 declare variable $user:schema := concat($paths:schema-base, "/contributor.rnc");
 
 declare function user:result-title(
-    $result as document-node()
+    $result as node()
     ) as xs:string {
-    let $c := $result/j:contributor
+    let $c := root($result)/j:contributor
     return
         if (exists($c/tei:name))
         then name:name-to-string($c/tei:name)
@@ -58,14 +58,14 @@ declare function user:query-function(
     $query as xs:string
     ) as element()* {
     for $doc in collection($user:path)/j:contributor[ft:query(.,$query)]
-    order by user:result-title(root($doc)) ascending
+    order by user:result-title($doc) ascending
     return $doc
 };
 
 declare function user:list-function(
     ) as element()* {
     for $doc in collection($user:path)/j:contributor
-    order by user:result-title(root($doc)) ascending
+    order by user:result-title($doc) ascending
     return $doc
 };
 

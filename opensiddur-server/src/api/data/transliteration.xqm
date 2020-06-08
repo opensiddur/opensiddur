@@ -100,9 +100,9 @@ declare function tran:list-function(
 };
 
 declare function tran:title-function(
-  $doc as document-node()
+  $n as node()
   ) as xs:string {
-  $doc//tr:title[1]/string()
+  root($n)//tr:title[1]/string()
 };
 
 declare 

@@ -45,7 +45,7 @@ declare function cnd:validate-conditionals(
       collection($cnd:path-base)[not(. is $old-doc)]//
         tei:fsDecl[@type=$types-declared] 
     return
-      <message>Type '{$fs-declaration/@type/string()}' is already declared in {crest:tei-title-function(root($fs-declaration))}
+      <message>Type '{$fs-declaration/@type/string()}' is already declared in {crest:tei-title-function($fs-declaration)}
       $old-doc={exists($old-doc)}={document-uri($old-doc)}
       root($fs-declaration)={document-uri(root($fs-declaration))}
       </message>
