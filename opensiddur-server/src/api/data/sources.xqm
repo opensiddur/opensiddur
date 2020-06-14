@@ -191,8 +191,10 @@ declare %private function src:title-part(
 };
 
 declare function src:title-function(
-  $doc as document-node()
+  $n as node()
   ) as xs:string {
+  let $doc := root($n)
+  return
     normalize-space(string-join(
         for $e in ($doc//tei:analytic, $doc//tei:monogr, $doc//tei:series) 
         return src:title-part($e), "-"))

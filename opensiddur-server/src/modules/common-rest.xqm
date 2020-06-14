@@ -185,7 +185,7 @@ declare function crest:get(
 (:~ List or full-text query the given data
  : @param $query text of the query, empty string for all
  : @param $start first document to list
- : @param $max-results number of documents to list 
+ : @param $count number of documents to list
  : @param $path-base API base path of the data type (/api/...)
  : @param $query-function function that performs a query for a string
  : @param $list-function function that lists all resources for the data type
@@ -201,9 +201,9 @@ declare function crest:list(
     $title as xs:string,
     $path-base as xs:string,
     $query-function as function(xs:string) as element()*,
-    $list-function as function(xs:string) as element()*,
+    $list-function as function() as element()*,
     $additional-uris as element(crest:additional)*,
-    $title-function as (function(document-node()) as xs:string)?
+    $title-function as (function(node()) as xs:string)?
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
@@ -240,10 +240,10 @@ declare function crest:list(
 };
 
 declare function crest:tei-title-function(
-  $doc as document-node()
+  $n as node()
   ) as xs:string {
   normalize-space(
-    $doc//tei:titleStmt/string-join((
+    root($n)//tei:titleStmt/string-join((
         tei:title["main"=@type]/string(), 
         tei:title["sub"=@type]/string()
         ), ": ")
@@ -257,9 +257,9 @@ declare function crest:do-query(
     $count as xs:integer,
     $path-base as xs:string,
     $query-function as (function(xs:string) as element()?),
-    $title-function as (function(document-node()) as xs:string)?
+    $title-function as (function(node()) as xs:string)?
   ) as item()+ {
-  let $title-function as (function(document-node()) as xs:string) :=
+  let $title-function as (function(node()) as xs:string) :=
     ($title-function, crest:tei-title-function#1)[1]
   let $all-results := $query-function($query)
   (: the ridiculous organization of this code is a workaround
@@ -306,9 +306,9 @@ declare function crest:do-list(
   $path-base as xs:string,
   $list-function as (function() as element()*),
   $additional-uris as element(crest:additional)*,
-  $title-function as (function(document-node()) as xs:string)?
+  $title-function as (function(node()) as xs:string)?
   ) {
-  let $title-function as function(document-node()) as xs:string :=
+  let $title-function as function(node()) as xs:string :=
     ($title-function, crest:tei-title-function#1)[1]
   let $all := $list-function()
   return (
@@ -317,7 +317,7 @@ declare function crest:do-list(
       let $api-name := replace(util:document-name($result), "\.xml$", "")
       return
         <li class="result">
-          <a class="document" href="{$path-base}/{$api-name}">{$title-function(root($result))}</a>
+          <a class="document" href="{$path-base}/{$api-name}">{$title-function($result)}</a>
           {
             for $additional in $additional-uris
             return
@@ -401,7 +401,7 @@ declare function crest:post(
       function(item(), document-node()?) as xs:boolean,
     $validation-function-report as 
       function(item(), document-node()?) as element(),
-    $title-function as (function(document-node()) as xs:string)?
+    $title-function as (function(node()) as xs:string)?
   ) as item()+ {
   crest:post($data-path, $path-base, $api-path-base, $body, $validation-function-boolean, $validation-function-report,
     $title-function, true())
@@ -435,7 +435,7 @@ declare function crest:post(
       function(item(), document-node()?) as xs:boolean,
     $validation-function-report as 
       function(item(), document-node()?) as element(),
-    $title-function as (function(document-node()) as xs:string)?,
+    $title-function as (function(node()) as xs:string)?,
     $use-reference-index as xs:boolean?
   ) as item()+ { 
   if (sm:has-access(xs:anyURI($path-base), "w"))
