@@ -439,13 +439,13 @@ declare
     if ($doc instance of document-node())
     then
       let $query-function := orig:linkage-query-function($doc, ?)
-      let $list-function := function() { orig:linkage-query-function($doc, ()) }
+      let $list-function := function() as element()* { orig:linkage-query-function($doc, ()) }
       return
         crest:list($q, $start, $max-results,
           "Linkage to " || $name,
-          api:uri-of($orig:api-path-base) || "/" || $name || "/linkage",
+          api:uri-of("/api/data/linkage"),
           $query-function, $list-function,
-          (), ()
+          (), orig:linkage-title-function#1
         )
     else $doc
 };

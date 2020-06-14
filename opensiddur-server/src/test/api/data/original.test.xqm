@@ -74,27 +74,30 @@ declare
   %test:setUp
   function t:setup() {
   (: for this, we need an original document :)
-  let $res1 := tcommon:setup-resource("testdoc1", "original", $t:test-original-document-1)
-  let $res2 := tcommon:setup-resource("testdoc2", "original", $t:test-original-document-2)
-  let $lnk1 := tcommon:setup-resource("linkdoc1", "linkage", $t:test-linkage-1)
-  let $lnk1 := tcommon:setup-resource("linkdoc2", "linkage", $t:test-linkage-2)
+  let $testuser := tcommon:setup-test-users(1)
+  let $res1 := tcommon:setup-resource("testdoc1", "original", 1, $t:test-original-document-1)
+  let $res2 := tcommon:setup-resource("testdoc2", "original", 1, $t:test-original-document-2)
+  let $lnk1 := tcommon:setup-resource("linkdoc1", "linkage", 1, $t:test-linkage-1)
+  let $lnk1 := tcommon:setup-resource("linkdoc2", "linkage", 1, $t:test-linkage-2)
   return ()
 };
 
 declare
   %test:tearDown
   function t:tear-down() {
-  let $res1 := tcommon:teardown-resource("testdoc1", "original")
-  let $res2 := tcommon:teardown-resource("testdoc2", "original")
-  let $lnk1 := tcommon:teardown-resource("linkdoc1", "linkage")
-  let $lnk1 := tcommon:teardown-resource("linkdoc2", "linkage")
+  let $lnk1 := tcommon:teardown-resource("linkdoc1", "linkage", 1)
+  let $lnk1 := tcommon:teardown-resource("linkdoc2", "linkage", 1)
+  let $res1 := tcommon:teardown-resource("testdoc1", "original", 1)
+  let $res2 := tcommon:teardown-resource("testdoc2", "original", 1)
+  let $testuser := tcommon:teardown-test-users(1)
   return ()
 };
 
 declare
+  %test:user("xqtest1", "xqtest1")
   %test:assertEmpty
   function t:linkage-query-function-finds-linkage-documents-associated-with-an-original-document() {
-  let $original-document := doc("/db/data/original/testdoc1")
+  let $original-document := doc("/db/data/original/testdoc1.xml")
   let $linkages := orig:linkage-query-function($original-document, ())
   return
     if (count($linkages) = 2 and $linkages/tei:idno="TEST" and $linkages/tei:idno="ANOTHER")
@@ -105,7 +108,7 @@ declare
 declare
   %test:assertEmpty
   function t:linkage-query-function-finds-linkage-documents-associated-with-an-original-document-limited-by-query-string() {
-  let $original-document := doc("/db/data/original/testdoc1")
+  let $original-document := doc("/db/data/original/testdoc1.xml")
   let $linkages := orig:linkage-query-function($original-document, "TES")
   return
     if (count($linkages) = 1 and $linkages/tei:idno="TEST")
@@ -124,9 +127,18 @@ declare
 declare
   %test:assertTrue
   function t:get-linkage-returns-a-list-of-linkages-and-ids-to-an-original-document() {
-  let $linkages := orig:get-linkage("testdoc1", (), (), ())
-  return count(.//html:li[@class="result"])=2
+  let $linkages := orig:get-linkage("testdoc1", (), 1, 100)
+  return count($linkages//html:li[@class="result"])=2
     and (
-      every $id in ("TEST", "ANOTHER") satisfies .//html:li[@class="result"]/html:a=$id
+      every $id in ("TEST", "ANOTHER") satisfies $linkages//html:li[@class="result"]/html:a=$id
+    ) and (
+      every $link in $linkages//html:li[@class="result"]/html:a satisfies (
+        let $expected-link :=
+            if ($link = "TEST") then "linkdoc1"
+            else if ($link = "ANOTHER") then "linkdoc2"
+            else ()
+        return
+            matches($link/@href, "/api/data/linkage/" || $expected-link || "$")
+        )
     )
 };

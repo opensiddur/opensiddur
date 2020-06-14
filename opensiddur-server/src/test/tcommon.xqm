@@ -20,6 +20,8 @@ import module namespace format="http://jewishliturgy.org/modules/format"
   at "../modules/format.xqm";
 import module namespace ridx="http://jewishliturgy.org/modules/refindex"
   at "../modules/refindex.xqm";
+import module namespace user="http://jewishliturgy.org/api/user"
+  at "../api/user.xqm";
 
 (:~ test if a given returned index has a discovery API, return an error if it doesn't :)
 declare function tcommon:contains-discovery-api(
@@ -67,26 +69,52 @@ declare function tcommon:minimal-valid-header(
   </tei:teiHeader>
 };
 
+(:~ set up a number $n of test users named xqtestN :)
+declare function tcommon:setup-test-users(
+    $n as xs:integer
+) {
+    for $i in 1 to $n
+    return
+        user:post-form("xqtest" || string($i), "xqtest" || string($i))
+};
+
+(:~ remove N test users :)
+declare function tcommon:teardown-test-users(
+    $n as xs:integer
+) {
+    for $i in 1 to $n
+    return
+        system:as-user("xqtest" || string($i), "xqtest" || string($i),
+        user:delete("xqtest" || string($i))
+        )
+};
+
 (:~ set up a resource as if it had been added by API :)
 declare function tcommon:setup-resource(
   $resource-name as xs:string,
   $data-type as xs:string,
+  $owner as xs:integer,
   $content as item()
 ) as xs:string {
-  let $name := xmldb:store("/db/data/" || $data-type, $resource-name || ".xml", $content)
-  let $ridx := ridx:reindex(doc($name))
-  return $name
+  system:as-user("xqtest" || string($owner), "xqtest" || string($owner),
+      let $name := xmldb:store("/db/data/" || $data-type, $resource-name || ".xml", $content)
+      let $ridx := ridx:reindex(doc($name))
+      return $name
+  )
 };
 
 (:~ remove a test resource :)
 declare function tcommon:teardown-resource(
   $resource-name as xs:string,
-  $data-type as xs:string
+  $data-type as xs:string,
+  $owner as xs:integer
 ) {
-  let $test-collection := "/db/data/" || $data-type
-  return (
-    format:clear-caches($test-collection || "/" || $resource-name),
-    ridx:remove($test-collection, $resource-name),
-    xmldb:remove($test-collection, $resource-name)
+  system:as-user("xqtest" || string($owner), "xqtest" || string($owner),
+      let $test-collection := "/db/data/" || $data-type
+      return (
+        format:clear-caches($test-collection || "/" || $resource-name || ".xml"),
+        ridx:remove($test-collection, $resource-name || ".xml"),
+        xmldb:remove($test-collection, $resource-name || ".xml")
+      )
   )
 };

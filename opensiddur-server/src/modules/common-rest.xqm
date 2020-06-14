@@ -201,7 +201,7 @@ declare function crest:list(
     $title as xs:string,
     $path-base as xs:string,
     $query-function as function(xs:string) as element()*,
-    $list-function as function(xs:string) as element()*,
+    $list-function as function() as element()*,
     $additional-uris as element(crest:additional)*,
     $title-function as (function(node()) as xs:string)?
   ) as item()+ {
