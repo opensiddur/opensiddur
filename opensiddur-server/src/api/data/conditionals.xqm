@@ -26,7 +26,7 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
   
 declare variable $cnd:data-type := "conditionals";
 declare variable $cnd:schema := concat($paths:schema-base, "/conditional.rnc");
-declare variable $cnd:schematron := concat($paths:schema-base, "/conditional.xsl2");
+declare variable $cnd:schematron := concat($paths:schema-base, "/conditional.xsl");
 declare variable $cnd:path-base := concat($data:path-base, "/", $cnd:data-type);
 declare variable $cnd:api-path-base := concat("/api/data/", $cnd:data-type);
 

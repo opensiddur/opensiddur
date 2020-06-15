@@ -37,7 +37,7 @@ import module namespace uri="http://jewishliturgy.org/transform/uri"
 
 declare variable $orig:data-type := "original";
 declare variable $orig:schema := concat($paths:schema-base, "/jlptei.rnc");
-declare variable $orig:schematron := concat($paths:schema-base, "/jlptei.xsl2");
+declare variable $orig:schematron := concat($paths:schema-base, "/jlptei.xsl");
 declare variable $orig:path-base := concat($data:path-base, "/", $orig:data-type);
 declare variable $orig:api-path-base := concat("/api/data/", $orig:data-type);  
 

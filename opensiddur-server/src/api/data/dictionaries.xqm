@@ -27,7 +27,7 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
 
 declare variable $dict:data-type := "dictionaries";
 declare variable $dict:schema := concat($paths:schema-base, "/dictionary.rnc");
-declare variable $dict:schematron := concat($paths:schema-base, "/dictionary.xsl2");
+declare variable $dict:schematron := concat($paths:schema-base, "/dictionary.xsl");
 declare variable $dict:path-base := concat($data:path-base, "/", $dict:data-type);
 declare variable $dict:api-path-base := concat("/api/data/", $dict:data-type);  
 
