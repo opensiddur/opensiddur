@@ -250,14 +250,14 @@ declare function outl:is-executable(
 };
 
 declare variable $outl:responsibilities := map {
-    "ann" := "Annotated by",
-    "fac" := "Scanned by",
-    "fnd" := "Funded by",
-    "mrk" := "Markup edited by",
-    "pfr" := "Proofread by",
-    "spn" := "Sponsored by",
-    "trc" := "Transcribed by",
-    "trl" := "Translated by"
+    "ann" : "Annotated by",
+    "fac" : "Scanned by",
+    "fnd" : "Funded by",
+    "mrk" : "Markup edited by",
+    "pfr" : "Proofread by",
+    "spn" : "Sponsored by",
+    "trc" : "Transcribed by",
+    "trl" : "Translated by"
 };
 
 (:~ get the name of a contributor by uri :)
@@ -485,7 +485,7 @@ declare function outl:execute(
   $doc as document-node()
   ) {
   let $paths-to-uris :=
-    map:new(
+    map:merge(
         for $item in ($doc//ol:item, $doc/ol:outline)
         group by
             $title := $item/ol:title/string(),

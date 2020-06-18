@@ -576,7 +576,7 @@ declare function translit:transliterate-text(
                         let $whole-word as element(tr:w) :=
                             element tr:w {
                                 if ($context/ancestor::tei:w)
-                                then translit:assemble-word-reverse($context/ancestor::tei:w, map:new(($params, map { "translit:this-context" := $context } )))
+                                then translit:assemble-word-reverse($context/ancestor::tei:w, map:merge(($params, map { "translit:this-context" : $context } )))
                                 else $original
                             }
                         return

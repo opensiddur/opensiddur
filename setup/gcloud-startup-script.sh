@@ -46,12 +46,10 @@ ant autodeploy
 
 chown -R exist:exist ${INSTALL_DIR}
 
-# install the yajsw script
-echo "Installing YAJSW..."
-export RUN_AS_USER=exist
-export WRAPPER_UNATTENDED=1
-export WRAPPER_USE_SYSTEMD=1
-${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
+# install the service script
+echo "Installing service script..."
+cp setup/exist.service /etc/systemd/system/
+chown exist:exist /etc/systemd/system/exist.service
 
 echo "Installing periodic backup cleaning..."
 cat << EOF > /etc/cron.daily/clean-exist-backups

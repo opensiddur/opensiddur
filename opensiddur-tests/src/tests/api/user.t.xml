@@ -524,7 +524,7 @@
       </code>
          <class href="common.t.incl.xml#NoData"/>
          <xpath desc="user removed">not(sm:user-exists("testuser3"))</xpath>
-         <xpath desc="group removed">not(sm:get-groups()="testuser3")</xpath>
+         <xpath desc="group removed">not(sm:list-groups()="testuser3")</xpath>
          <xpath desc="profile removed">not(doc-available("/db/data/user/testuser3.xml"))</xpath>
       </test>
       <test>
@@ -612,7 +612,7 @@
          <xpath desc="status code is 200">self::rest:response/http:response/@status = 200</xpath>
          <xpath desc="returns an info element with the referenced document">ends-with(self::info//documents/document, "/api/data/original/Reference")</xpath>
          <xpath desc="user account removed">not(sm:user-exists("testuser3"))</xpath>
-         <xpath desc="group removed">not(sm:get-groups()="testuser3")</xpath>
+         <xpath desc="group removed">not(sm:list-groups()="testuser3")</xpath>
          <xpath desc="profile changed to anonymous profile">exists(doc("/db/data/user/testuser3.xml")/j:contributor[tei:idno="testuser3"][tei:name="Deleted user"])</xpath>
          <xpath desc="profile owned by admin">sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/@owner="admin"</xpath>
          <xpath desc="profile owned by group everyone">sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/@group="everyone"</xpath>

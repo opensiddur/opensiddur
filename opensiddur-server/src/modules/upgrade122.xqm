@@ -45,7 +45,7 @@ declare function upgrade122:upgrade-all() {
             else (
             (: not an XML file, just copy it :)
             util:log("info", "Copying for 0.12.2: " || $resource/@collection || "/" || $resource/@resource),
-            xmldb:copy($resource/@collection, mirror:mirror-path($upgrade-mirror, $resource/@collection), $resource/@resource)
+            xmldb:copy-resource($resource/@collection, $resource/@resource, mirror:mirror-path($upgrade-mirror, $resource/@collection), $resource/@resource, true())
             )
           default return ()
     let $unmirror := xmldb:remove($upgrade-mirror, $mirror:configuration)

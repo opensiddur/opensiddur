@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: Testing module
  : Original author: Wolfgang Meier (eXist db)
  : 
@@ -201,7 +201,7 @@ declare function t:copy(
         )
     return ()
   else
-    xmldb:copy($copy/@source, $copy/@destination, $copy/@name) 
+    xmldb:copy-resource($copy/@source, $copy/@name, $copy/@destination, $copy/@name, true())
 };
 
 declare function t:declare-variable($var as element(variable)) as item()? {
@@ -210,7 +210,7 @@ declare function t:declare-variable($var as element(variable)) as item()? {
         if (empty($children)) then
             string-join($var/node(), '')
         else
-            util:serialize($children, ())
+            serialize($children, ())
 };
 
 declare function t:init-prolog($test as element()) {
@@ -283,12 +283,13 @@ declare function local:evaluate-assertions(
     then $output
     else if ($test/@serialize) 
     then
+    (: TODO: this will not work anymore because the serialization options have changed. :)
       let $options := $test/@serialize
       let $serialized :=
         try {
           for $x in $output
           return
-            util:serialize($x, $options)
+            serialize($x, $options)
         }
         catch * {
           local:error("serialization", $err:line-number, 
@@ -934,7 +935,7 @@ declare function local:result-details(
                   if ($test/@pass='false')
                   then
                     <pre>{
-                      util:serialize($test/result/node(), "indent=yes method=xml")
+                      serialize($test/result/node(), map {"indent": "yes", "method": "xml" })
                     }</pre>
                   else ()
                 }</td>

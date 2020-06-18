@@ -1,4 +1,4 @@
-xquery version "3.0";
+xquery version "3.1";
 (: Utility API for transliteration
  :
  : Functions assume that the following has already been done:
@@ -38,7 +38,7 @@ declare function local:transliterate(
         $table as element(tr:table),
         $out-lang as xs:string
 ) as node()* {
-    let $transliterated := xlit:transliterate($data, map { "translit:table" := $table })
+    let $transliterated := xlit:transliterate($data, map { "translit:table" : $table })
     return
         element {
             QName(namespace-uri($transliterated), name($transliterated))

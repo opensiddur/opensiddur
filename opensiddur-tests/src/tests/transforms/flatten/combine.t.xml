@@ -28,8 +28,9 @@
     };
 
     declare function local:setup($file as xs:string, $collection as xs:string) {
-      xmldb:copy(
-        "/db/apps/opensiddur-tests/tests/transforms/flatten", 
+      xmldb:copy-resource(
+        "/db/apps/opensiddur-tests/tests/transforms/flatten",
+        $file,
         "/db/data/" || $collection, 
         $file),
       let $doc := doc("/db/data/" || $collection || "/" || $file)
@@ -312,7 +313,7 @@
         let $m :=
         combine:update-settings-from-standoff-markup(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine-settings.xml")//tei:seg[@jf:id="seg1"]/parent::jf:set,
-          map { "combine:settings" := map {} },
+          map { "combine:settings" : map {} },
           false()
         )
         return $m("combine:settings")("FS1-&gt;F1")
@@ -325,7 +326,7 @@
         let $m :=
         combine:update-settings-from-standoff-markup(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine-settings.xml")//tei:seg[@jf:id="seg2"],
-          map { "combine:settings" := map {} },
+          map { "combine:settings" : map {} },
           false()
         )
         return count(map:keys($m("combine:settings")))
@@ -338,7 +339,7 @@
         let $m :=
         combine:update-settings-from-standoff-markup(
           mirror:doc($format:unflatten-cache, "/db/data/tests/combine-settings.xml")//tei:seg[@jf:id="seg1"]/parent::jf:set,
-          map { "combine:settings" := map {} },
+          map { "combine:settings" : map {} },
           true()
         )
         return 

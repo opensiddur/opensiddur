@@ -3,12 +3,12 @@
         Build file for opensiddur
     </description>
     <property name="lib.dir" location="lib"/>
-    <property name="exist.version" value="4.7.1"/>
+    <property name="exist.version" value="5.2.0"/>
     <property name="ivy.version" value="2.4.0"/>
-	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-${exist.version}-opensiddur.jar"/>
 	<property name="build" location="build"/>
     <property name="dist" location="dist"/>
     <property name="deps.dir" location="dependencies"/>
+    <property name="installer" location="${deps.dir}/exist-installer-${exist.version}.jar"/>
 
     <property name="docker.image.tag" value="opensiddur:latest"/>
     <property name="docker.image.name" value="opensiddur-container"/>
@@ -18,7 +18,7 @@
     <property file="local.build.properties"/>
     <property file="build.properties"/>
 
-    <property name="wrapper.conf" location="${installdir}/tools/yajsw/conf/wrapper.conf"/>
+    <property name="environment.file.install" location="${installdir}/bin/environment.sh"/>
 
 
     <!--	
@@ -48,11 +48,8 @@
 		</exec>
        
 		<uptodate property="exist.uptodate" targetfile="${installer}">
-			<srcfiles dir="${lib.dir}/exist">
-				<include name="**/*.java"/>
-				<include name="**/*.xml"/>
-				<include name="**/*.tmpl"/>
-				<exclude name="${installer}"/>
+			<srcfiles dir="${deps.dir}">
+				<include name="${installer}"/>
 			</srcfiles>
 		</uptodate>
 		<!-- make build dirs -->
@@ -63,7 +60,7 @@
     <!-- this little bit of code downloads ivy. Thanks to https://superuser.com/questions/697800/how-to-get-apache-ant-to-recognize-ivy -->
     <target name="bootstrap" description="Used to install the ivy task jar">
         <mkdir dir="${user.home}/.ant/lib"/>
-        <get dest="${user.home}/.ant/lib/ivy.jar" src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar"/>
+        <get dest="${user.home}/.ant/lib/ivy.jar" src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar"/>
     </target>
 
 
@@ -71,24 +68,16 @@
     </target>
 
 	<target name="build-exist" depends="init" unless="exist.uptodate">
-		<!-- ./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true -Dinclude.feature.security.oauth=true -Dinclude.feature.security.openid=true -->
-		<exec 
-			executable="./build.sh" 
-			dir="${lib.dir}/exist">
-			<arg value="installer"/>
-			<arg value="-Dizpack.dir=${lib.dir}/IzPack"/>
-			<arg value="-Dinclude.module.scheduler=true"/>
-            <!-- not using these yet -->
-			<arg value="-Dinclude.feature.security.oauth=false"/>
-			<arg value="-Dinclude.feature.security.openid=false"/>
-		</exec>
+		<get dest="${installer}"
+             src="https://bintray.com/existdb/releases/download_file?file_path=exist-installer-${exist.version}.jar"/>
 	</target>
 	
 	<target name="install-exist" depends="init,build-exist"
 		xmlns:xdb="http://exist-db.org/ant">
-		<echo file="${build}/install-options.xml" append="false">
+		<echo file="${build}/install-options.ini" append="false">
 INSTALL_PATH=${installdir}
 dataDir=webapp/WEB-INF/data
+adminPasswd=${adminpassword}
 divider=
 space=
 MAX_MEMORY=${max.memory}
@@ -101,22 +90,9 @@ cacheSize=${cache.size}
 			<arg value="${installer}"/>
 			<arg value="-console"/>
 			<arg value="-options"/>
-			<arg file="${build}/install-options.xml"/>
+			<arg file="${build}/install-options.ini"/>
 		</exec>
-		<delete file="${build}/install-options.xml"/>
-		<!-- default password has been changed to 'password' -->
-        <exec
-            executable="${installdir}/bin/client.sh"
-            dir="${installdir}"
-            >
-            <arg value="-qls"/>
-            <arg value="-u"/>
-            <arg value="admin"/>
-            <arg value="-P"/>
-            <arg value="password"/>
-            <arg value="-x"/>
-            <arg value="sm:passwd('admin','${adminpassword}')"/>
-        </exec>
+		<delete file="${build}/install-options.ini"/>
         <!-- copy the icu4j library from lib -->
         <copy todir="${installdir}/lib/user">
             <fileset dir="${lib.dir}">
@@ -124,16 +100,15 @@ cacheSize=${cache.size}
             </fileset>
         </copy>
         <!-- edit conf.xml -->
-        <xslt in="${installdir}/conf.xml"
+        <xslt in="${installdir}/etc/conf.xml"
              out="${installdir}/conf.out.xml"
              style="setup/setup-conf-xml.xsl"
              processor="trax"
              classpath="${lib.dir}/saxonhe-9.2.1.5.jar">
              <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         </xslt>
-        <move file="${installdir}/conf.out.xml" tofile="${installdir}/conf.xml"/>
-        <!-- edit wrapper.conf -->
-        <echo file="${wrapper.conf}" append="true">wrapper.java.additional.stack=-Xss${stack.memory}m</echo>
+        <move file="${installdir}/conf.out.xml" tofile="${installdir}/etc/conf.xml"/>
+        <echo file="${environment.file.install}">JAVA_OPTS="-Xss${stack.memory}m -Xmx${max.memory}"</echo>
     </target>
 	
 	<target name="exist-clean">
@@ -156,18 +131,18 @@ cacheSize=${cache.size}
     <target name="install-hebmorph"
         depends="dist"
         description="install the hebmorph files into eXist">
-        <copy todir="${installdir}/extensions/indexes/lucene/lib" flatten="true">
+        <copy todir="${installdir}/lib/user" flatten="true">
             <fileset dir="${lib.dir}/hebmorph-exist/java/target">
                 <include name="hebmorph-lucene.jar"/>
             </fileset>
         </copy>
-        <copy todir="${installdir}/extensions/indexes/lucene/lib">
+        <copy todir="${installdir}/lib/user">
             <fileset dir="${lib.dir}/hebmorph-exist">
                 <include name="hspell-data-files/*"/>
             </fileset>
         </copy>
-        <symlink link="${installdir}/tools/yajsw/target/classes/hspell-data-files"
-                 resource="${installdir}/extensions/indexes/lucene/lib/hspell-data-files"/>
+        <!--symlink link="${installdir}/tools/yajsw/target/classes/hspell-data-files"
+                 resource="${installdir}/extensions/indexes/lucene/lib/hspell-data-files"/-->
     </target>
 
     <!-- sources and tests needs to be autodeployed separately; tests will generally be done using ant test -->
@@ -190,17 +165,20 @@ cacheSize=${cache.size}
     <target name="autoupgrade"
         depends="dist,install-hebmorph"
         description="install or upgrade Open Siddur packages without touching eXist">
-        <ant dir="${lib.dir}/exist" 
+        <!--
+        <ant dir="${lib.dir}/exist"
             antfile="${lib.dir}/exist/build/scripts/installer.xml"
             target="download-xars">
-            <!-- eXist-supplied apps to be installed -->
+            <!- eXist-supplied apps to be installed ->
             <property name="apps" value="shared,dashboard,eXide,exist-documentation,fundocs,monex,usermanager" />
         </ant>
+        -->
 		<copy todir="${installdir}/autodeploy">
 			<fileset dir="${dist}">
 				<include name="opensiddur-server.xar"/>
                 <include name="opensiddur-demos.xar"/>
 			</fileset>
+            <!--
             <fileset dir="${lib.dir}/exist/installer/apps">
                 <include name="dashboard*.xar"/>
                 <include name="eXide*.xar"/>
@@ -210,6 +188,7 @@ cacheSize=${cache.size}
                 <include name="exist-documentation*.xar"/>
                 <include name="usermanager*.xar"/>
             </fileset>
+            -->
 		</copy>
     </target>
 
@@ -282,7 +261,7 @@ cacheSize=${cache.size}
     <target name="retrieve-dependencies"
         depends="bootstrap"
         description="Retrieve dependencies with Apache IVY">
-        <ivy:retrieve pattern="${deps.dir}/[artifact].[ext]" type="jar" />
+        <ivy:retrieve conf="binaries" pattern="${deps.dir}/[artifact].[ext]" type="jar" />
     </target>
 
 	<target name="clean"

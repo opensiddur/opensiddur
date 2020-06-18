@@ -81,7 +81,7 @@ declare function format:setup(
   return
     mirror:create($collection, "/db/data", true(),
       if ($collection = $format:html-cache)
-      then map { "xml" := "html" }
+      then map { "xml" : "html" }
       else map {}
     ),
   status:setup()
@@ -110,8 +110,8 @@ declare function format:status-param(
   map:merge((
       $params,
       map {
-          "format:status-job-id" := ($params("format:status-job-id"), status:get-job-id($original-doc))[1],
-          "format:stage-number" := ($params("format:stage-number") + 1, 0)[1]
+          "format:status-job-id" : ($params("format:status-job-id"), status:get-job-id($original-doc))[1],
+          "format:stage-number" : ($params("format:stage-number") + 1, 0)[1]
       }
   ))
 };

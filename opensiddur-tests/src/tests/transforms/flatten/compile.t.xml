@@ -24,8 +24,9 @@
   <password>testuser</password>
   <functions>
     declare function local:setup($file as xs:string) {
-      xmldb:copy(
-        "/db/apps/opensiddur-tests/tests/transforms/flatten", 
+      xmldb:copy-resource(
+        "/db/apps/opensiddur-tests/tests/transforms/flatten",
+        $file,
         "/db/data/tests", 
         $file),
       let $doc := doc("/db/data/tests/" || $file)

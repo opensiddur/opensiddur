@@ -26,12 +26,12 @@ declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
 (: keys are the link types, values are the attribute/element they produce :)
 declare variable $phony:link-types := map {
-    "condition" := "conditional",
-    "set" := "set",
-    "note" := "annotation",
-    "instruction" := "annotation",
-    "interp" := "annotation",
-    "annotation" := "annotation"
+    "condition" : "conditional",
+    "set" : "set",
+    "note" : "annotation",
+    "instruction" : "annotation",
+    "interp" : "annotation",
+    "annotation" : "annotation"
 };
 
 declare function phony:phony-layer-document(

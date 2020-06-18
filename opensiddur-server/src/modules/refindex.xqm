@@ -376,10 +376,10 @@ declare function ridx:query-document(
 (:~ disable the reference index: you must be admin! :)
 declare function ridx:disable(
   ) as xs:boolean {
-  let $user := xmldb:get-current-user()
+  let $user := sm:id()//(sm:effective, sm:real)[1]/sm:username/string()
   let $idx-flag := xs:anyURI(concat($ridx:ridx-path, "/", $ridx:disable-flag))
   return
-    xmldb:is-admin-user($user)
+    sm:is-dba($user)
     and (
       local:make-index-collection($ridx:indexed-base-path),
       if (xmldb:store(
@@ -400,7 +400,7 @@ declare function ridx:disable(
 (:~ re-enable the reference index: you must be admin to run! :)
 declare function ridx:enable(
   ) as xs:boolean {
-  if (xmldb:is-admin-user(xmldb:get-current-user())
+  if (sm:is-dba(sm:id()//(sm:effective, sm:real)[1]/sm:username/string())
     and doc-available(concat($ridx:ridx-path, "/", $ridx:disable-flag))
     )
   then (

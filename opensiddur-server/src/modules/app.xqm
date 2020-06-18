@@ -30,7 +30,7 @@ declare function app:get-version(
  : over the logged in user. :)
 declare function app:auth-user()
   as xs:string? {
-  (session:get-attribute('app.user'), xmldb:get-current-user()[not(. = 'guest')])[1]
+  (session:get-attribute('app.user'), sm:id()//(sm:effective, sm:real)[1]/sm:username/string()[not(. = 'guest')])[1]
 };
 
 (:~ Return authenticated user's password; only works for HTTP Basic authentication :)
