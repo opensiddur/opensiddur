@@ -67,7 +67,7 @@
          <task>Create a new mirror collection with an extension map</task>
          <code>
       mirror:create("/db/data/tests/new-mirror", $original-collection, false(), 
-        map { "xml" := "html", "txt" := "csv" })
+        map { "xml" : "html", "txt" : "csv" })
       </code>
          <xpath desc="mirror collection created">xmldb:collection-available("/db/data/tests/new-mirror")</xpath>
          <xpath desc="mirror configuration exists">doc-available("/db/data/tests/new-mirror/" || $mirror:configuration)</xpath>

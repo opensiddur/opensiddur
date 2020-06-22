@@ -200,11 +200,11 @@ declare function flatten:resolve-stream(
         element { QName(namespace-uri($node), name($node)) }{
             $node/@*,
             flatten:resolve-stream($node/node(), 
-                map:merge((
-                    $params, 
-                    map { "flatten:resolve-stream" :
-                        common:TEI-root($node)//j:streamText
-                    })))
+                map:put(
+                    $params,
+                    "flatten:resolve-stream",
+                    common:TEI-root($node)//j:streamText
+                    ))
         }
     case element (jf:placeholder)
     return 

@@ -157,7 +157,7 @@ declare function combine:associate-style(
 declare function combine:unset-style(
     $params as map(*)
     ) as map(*) {
-    map:merge(($params, map { "combine:styled" : 1 }))
+    map:put($params, "combine:styled", 1)
 };
 
 (:~ equivalent of a streamText, check for redirects, add style if necessary :)
@@ -407,7 +407,7 @@ declare function combine:update-settings-from-standoff-markup(
                         where $link-dest instance of element(tei:fs)
                         return combine:tei-fs-to-map($link-dest, $params)
                     ))
-                } 
+                }
             ))
         else $params 
 };
@@ -800,15 +800,14 @@ declare function combine:evaluate-conditions(
                 and $e/@jf:layer-id)
             then
                 map {
-                    "combine:conditional-layers" : map:merge((
+                    "combine:conditional-layers" : map:put(
                         $params("combine:conditional-layers"), 
-                        map {
-                            $conditional-layer-id : (
-                                $conditional-layer-result, 
-                                $this-element-condition-result[not(.=("YES","ON"))]
-                            )[1]
-                        }
-                    ))
+                        $conditional-layer-id,
+                        (
+                            $conditional-layer-result,
+                            $this-element-condition-result[not(.=("YES","ON"))]
+                        )[1]
+                    )
                 }
             else ()
         ))

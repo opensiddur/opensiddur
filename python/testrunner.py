@@ -7,6 +7,7 @@
 #
 # Copyright 2019 Efraim Feinstein <efraim@opensiddur.org>
 # Licensed under the GNU Lesser General Public License, version 3 or later
+import argparse
 import sys
 import http.client
 import time
@@ -29,9 +30,16 @@ ANSI_ESCAPES = {
     "ERROR": ["\033[95m", "\033[00m"]      # ERROR = purple
 }
 
+ap = argparse.ArgumentParser()
+ap.add_argument("--nocolor", action='store_true', default=False)
+cli_args = ap.parse_args()
+
 
 def escaped(escape, *args):
-    return ANSI_ESCAPES[escape][0] + "".join(args) + ANSI_ESCAPES[escape][1]
+    if cli_args.nocolor:
+        return "".join(args)
+    else:
+        return ANSI_ESCAPES[escape][0] + "".join(args) + ANSI_ESCAPES[escape][1]
 
 
 def indented(level):

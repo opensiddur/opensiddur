@@ -33,8 +33,8 @@
             <task>condition checking 1 true value</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -57,8 +57,8 @@
             <task>condition checking 1 false value</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -81,8 +81,8 @@
             <task>condition checking 1 maybe value</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -105,9 +105,9 @@
             <task>condition checking 1 true and 1 false value</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -135,10 +135,10 @@
             <task>all are YES</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -165,10 +165,10 @@
             <task>one NO</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -195,10 +195,10 @@
             <task>one MAYBE</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -228,10 +228,10 @@
             <task>all are YES</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -258,10 +258,10 @@
             <task>one YES</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -288,10 +288,10 @@
             <task>one MAYBE</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -321,10 +321,10 @@
             <task>all are YES</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -351,10 +351,10 @@
             <task>all are NO</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -381,10 +381,10 @@
             <task>one YES</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -411,10 +411,10 @@
             <task>one MAYBE</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;NO&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;NO&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -441,10 +441,10 @@
             <task>one YES, one MAYBE</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;,
-                        "FS-&gt;TWO" := &lt;tei:string&gt;YES&lt;/tei:string&gt;,
-                        "FS-&gt;THREE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;,
+                        "FS-&gt;TWO" : &lt;tei:string&gt;YES&lt;/tei:string&gt;,
+                        "FS-&gt;THREE" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -474,8 +474,8 @@
             <task>not YES</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -500,8 +500,8 @@
             <task>not NO</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -526,8 +526,8 @@
             <task>not MAYBE</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "FS-&gt;ONE" := &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "FS-&gt;ONE" : &lt;tei:string&gt;MAYBE&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -562,7 +562,7 @@
             <task>Literal default value</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
+                    "combine:settings" : map {
                     }
                 }
                 return
@@ -585,8 +585,8 @@
             <task>Conditional default value, condition evaluates true</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "test:FS-&gt;CONTROL" := &lt;tei:string&gt;NO&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "test:FS-&gt;CONTROL" : &lt;tei:string&gt;NO&lt;/tei:string&gt;
                     }
                 }
                 return
@@ -609,8 +609,8 @@
             <task>Conditional default value, condition evaluates false</task>
             <code>
                 let $settings := map {
-                    "combine:settings" := map {
-                        "test:FS-&gt;CONTROL" := &lt;tei:string&gt;YES&lt;/tei:string&gt;
+                    "combine:settings" : map {
+                        "test:FS-&gt;CONTROL" : &lt;tei:string&gt;YES&lt;/tei:string&gt;
                     }
                 }
                 return

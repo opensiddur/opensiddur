@@ -7,7 +7,7 @@
             
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
-               <tei:name ref="/user/testuser3">Test User 3</tei:name>
+               <tei:name ref="/user/deltestuser2">Deltestuser2</tei:name>
             </tei:respStmt>
             
          </tei:titleStmt>

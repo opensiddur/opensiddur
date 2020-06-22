@@ -226,12 +226,16 @@
       <password>testuser</password>
       <setup>
          <code>
-        sm:insert-user-ace(xs:anyURI("/db/data/transliteration"), 0, "testuser2", false(), "w")
+             system:as-user("admin", $magic:password,
+                sm:insert-user-ace(xs:anyURI("/db/data/transliteration"), 0, "testuser2", false(), "w")
+             )
       </code>
       </setup>
       <tearDown>
          <code>
-        sm:remove-ace(xs:anyURI("/db/data/transliteration"), 0),
+             system:as-user("admin", $magic:password,
+                sm:remove-ace(xs:anyURI("/db/data/transliteration"), 0)
+             ),
         let $created := collection("/db/data/transliteration")//tr:schema[tr:title="Valid"]
         where ($created)
         return

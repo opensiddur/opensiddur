@@ -18,7 +18,7 @@
         let $new-group2 := sm:create-group("grouptests2", "admin", "")
         for $i in 3 to 7
         let $user := sm:create-account(
-          "testuser" || $i, "testuser" || $i, 
+          "grouptestuser" || $i, "grouptestuser" || $i,
           ("everyone", "grouptests"[$i &lt;= 5])
         )
         return ()
@@ -29,10 +29,10 @@
       <code>
       system:as-user("admin", $magic:password, (
         for $i in 3 to 7
-        let $r := sm:remove-group-member("testuser" || $i, "admin")
+        let $r := sm:remove-group-member("grouptestuser" || $i, "admin")
         return (
-          sm:remove-account("testuser" || $i),
-          sm:remove-group("testuser" || $i)
+          sm:remove-account("grouptestuser" || $i),
+          sm:remove-group("grouptestuser" || $i)
         ),
         if (sm:group-exists("grouptests"))
         then (
@@ -65,10 +65,10 @@
   document {
     &lt;g:group&gt;
       &lt;g:member manager="true"&gt;testuser&lt;/g:member&gt;
-      &lt;g:member&gt;testuser3&lt;/g:member&gt;
-      &lt;g:member&gt;testuser4&lt;/g:member&gt;
-      &lt;g:member&gt;testuser5&lt;/g:member&gt;
-      &lt;g:member&gt;testuser6&lt;/g:member&gt;
+      &lt;g:member&gt;grouptestuser3&lt;/g:member&gt;
+      &lt;g:member&gt;grouptestuser4&lt;/g:member&gt;
+      &lt;g:member&gt;grouptestuser5&lt;/g:member&gt;
+      &lt;g:member&gt;grouptestuser6&lt;/g:member&gt;
     &lt;/g:group&gt;
   }</variable>
   <variable name="invalid" as="document-node()">
@@ -103,10 +103,10 @@
       </code> 
          <expected desc="returns a group-XML format list">
             <g:group xmlns:g="http://jewishliturgy.org/ns/group/1.0">
-               <g:member manager="true">testuser</g:member>
-               <g:member>testuser3</g:member>
-               <g:member>testuser4</g:member>
-               <g:member>testuser5</g:member>
+               <g:member>grouptestuser3</g:member>
+               <g:member>grouptestuser4</g:member>
+               <g:member>grouptestuser5</g:member>
+                <g:member manager="true">testuser</g:member>
             </g:group>
          </expected>
       </test>
@@ -191,37 +191,37 @@
       grp:put("grouptests", document {
         &lt;g:group&gt;
           {$valid//g:member}
-          &lt;g:member&gt;testuser6&lt;/g:member&gt;
+          &lt;g:member&gt;grouptestuser6&lt;/g:member&gt;
         &lt;/g:group&gt;
       })
       </code>
          <class href="common.t.incl.xml#NoData"/>
-         <xpath desc="the new user has been added to the group">grp:get-group-members("grouptests")="testuser6"</xpath>
+         <xpath desc="the new user has been added to the group">grp:get-group-members("grouptests")="grouptestuser6"</xpath>
       </test>
       <test>
          <task>For an existing group, removal of a member</task>
          <code>
       grp:put("grouptests", document {
         &lt;g:group&gt;
-          {$valid//g:member[not(.="testuser5")]}
+          {$valid//g:member[not(.="grouptestuser5")]}
         &lt;/g:group&gt;
       })
       </code>
          <class href="common.t.incl.xml#NoData"/>
-         <xpath desc="the member has been removed">not(grp:get-group-members("grouptests")="testuser5")</xpath>
+         <xpath desc="the member has been removed">not(grp:get-group-members("grouptests")="grouptestuser5")</xpath>
       </test>
       <test>
          <task>For an existing group, addition of a manager</task>
          <code>
       grp:put("grouptests", document {
         &lt;g:group&gt;
-          {$valid//g:member[not(.="testuser5")]}
-          &lt;g:member manager="true"&gt;testuser5&lt;/g:member&gt;
+          {$valid//g:member[not(.="grouptestuser5")]}
+          &lt;g:member manager="true"&gt;grouptestuser5&lt;/g:member&gt;
         &lt;/g:group&gt;
       })
       </code>
          <class href="common.t.incl.xml#NoData"/>
-         <xpath desc="the member is now a manager">grp:get-group-managers("grouptests")="testuser5"</xpath>
+         <xpath desc="the member is now a manager">grp:get-group-managers("grouptests")="grouptestuser5"</xpath>
       </test>
       <test>
          <task>For an existing group, removal of a manager</task>
@@ -274,7 +274,7 @@
       <test>
          <task>For an existing group, but not a manager</task>
          <code>
-      system:as-user("testuser6", "testuser6", 
+      system:as-user("grouptestuser6", "grouptestuser6",
         grp:delete("grouptests")
       )
       </code>

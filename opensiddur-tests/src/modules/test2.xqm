@@ -201,7 +201,8 @@ declare function t:copy(
         )
     return ()
   else
-    xmldb:copy-resource($copy/@source, $copy/@name, $copy/@destination, $copy/@name, true())
+    let $copied := xmldb:copy-resource($copy/@source, $copy/@name, $copy/@destination, $copy/@name, true())
+    return ()
 };
 
 declare function t:declare-variable($var as element(variable)) as item()? {
@@ -231,7 +232,7 @@ declare function t:init-prolog($test as element()) {
          	), "&#x0a;"
         )
 	return
-		string-join(("xquery version '3.0';&#x0a;", $imports, $vars, $test/ancestor::*/functions), '')
+		string-join(("xquery version '3.1';&#x0a;", $imports, $vars, $test/ancestor::*/functions), '')
 };
 
 declare function t:test($result as item()*) {

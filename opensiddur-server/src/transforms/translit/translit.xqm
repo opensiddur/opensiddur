@@ -576,7 +576,8 @@ declare function translit:transliterate-text(
                         let $whole-word as element(tr:w) :=
                             element tr:w {
                                 if ($context/ancestor::tei:w)
-                                then translit:assemble-word-reverse($context/ancestor::tei:w, map:merge(($params, map { "translit:this-context" : $context } )))
+                                then translit:assemble-word-reverse($context/ancestor::tei:w,
+                                map:put($params, "translit:this-context", $context))
                                 else $original
                             }
                         return
@@ -629,7 +630,7 @@ declare function translit:pass0-tr-cc(
     element tr:cc {
         @*,	
 	    (: mark position; can't use position() because there may be other elements in the hierarchy! :)
-		if (not(preceding::tr:cc) or preceding::tr:cc[1][matches(tr:cons/text(),'\p{P}','x')])
+		if (not(preceding::tr:cc) or preceding::tr:cc[1]/tr:cons[matches(.,'\p{P}','x')])
         then
 			attribute first { 1 }
 		else (),
@@ -637,7 +638,7 @@ declare function translit:pass0-tr-cc(
         then
             attribute punct { 1 }
         else (),
-		if (not(following::tr:cc) or following::tr:cc[1][matches(tr:cons/text(),'\p{P}','x')])
+		if (not(following::tr:cc) or following::tr:cc[1]/tr:cons[matches(.,'\p{P}','x')])
         then
 			attribute last { 1 }
 		else (),
@@ -756,8 +757,8 @@ declare function translit:pass1-preceding-holam-male(
     ) as element(tr:cc) {
     $context/
     element tr:cc {
-		@*,
-		following::tr:cc[1]/@last, (: holam male can't be first or punct :)
+		@* except @last,
+		(@last, following::tr:cc[1]/@last)[1], (: holam male can't be first or punct :)
 	    tr:cons,
         element tr:vl { $translit:hebrew("vav") || $translit:hebrew("holam") },
         * except tr:cons
@@ -781,7 +782,8 @@ declare function translit:pass1-preceding-shuruq(
     ) as element(tr:cc) {
 	$context/
     element tr:cc {
-        following::tr:cc[1]/@last, @*,
+        (@last, following::tr:cc[1]/@last)[1],
+        @* except @last,
         tr:cons, 
         tr:d,
         element tr:vl { $translit:hebrew("vav") || $translit:hebrew("dageshormapiq") },
@@ -836,7 +838,7 @@ declare function translit:pass1-male-vowels(
         return
             element tr:cc {
                 $context/following::tr:cc[1]/@last,
-                $context/@*, 
+                $context/(@* except @last),
                 $context/tr:cons,
                 $vowel-male,
                 $context/(* except (tr:cons,tr:vs,tr:vl))
@@ -863,8 +865,8 @@ declare function translit:pass1-qamats-vowel-letter(
     ) as element(tr:cc) {
     $context/
   	element tr:cc {
-  	    following::tr:cc[1]/@last,
-  		@*, 
+  	    (@last, following::tr:cc[1]/@last)[1],
+  		@* except @last,
         tr:cons,
         element tr:vl { $translit:hebrew("qamats") || $translit:hebrew("he") },
         * except (tr:cons,tr:vl)
@@ -924,8 +926,8 @@ declare function translit:pass2-preceding-silent(
     ) as element(tr:cc) {
     $context/
   	element tr:cc {
-        following::tr:cc[1]/@last,
-        @*, 
+        (@last, following::tr:cc[1]/@last)[1],
+        @* except @last,
         tr:cons,
         * except tr:cons
   	}

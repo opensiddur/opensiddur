@@ -148,48 +148,48 @@
       <!-- remove user, group, and profile -->
       <code>
       system:as-user("admin", $magic:password,(
-        if (sm:group-exists("testuser3"))
+        if (sm:group-exists("usertestuser"))
         then 
           try {
-            sm:remove-group("testuser3")
+            sm:remove-group("usertestuser")
           } 
           catch * { 
             util:log-system-out((
     $err:module, ":", $err:line-number, ":", 
-    $err:column-number, ","[$err:code], $err:code, ":"[$err:value], $err:value, ": "[$err:description], 
+    $err:column-number, ","[string($err:code)], $err:code, ":"[string($err:value)], $err:value, ": "[$err:description],
     $err:description,
     ";")) 
           }
         else (),
-        if (sm:user-exists("testuser3"))
-        then sm:remove-account("testuser3")
+        if (sm:user-exists("usertestuser"))
+        then sm:remove-account("usertestuser")
         else (),
-        if (doc-available("/db/data/user/testuser3.xml"))
-        then xmldb:remove("/db/data/user", "testuser3.xml")
+        if (doc-available("/db/data/user/usertestuser.xml"))
+        then xmldb:remove("/db/data/user", "usertestuser.xml")
         else ()
       ))
       </code>
       </tearDown>
       <test>
          <task>Create a new user</task>
-         <code>
+         <code><![CDATA[
       user:post-xml(document {
-        &lt;new&gt;
-          &lt;user&gt;testuser3&lt;/user&gt;
-          &lt;password&gt;testuser3&lt;/password&gt;
-        &lt;/new&gt;
+        <new>
+          <user>usertestuser</user>
+          <password>usertestuser</password>
+        </new>
       })
-      </code> 
+      ]]></code>
          <class href="common.t.incl.xml#Created"/>
-         <xpath desc="user has been created">system:as-user("admin", $magic:password, sm:user-exists("testuser3"))</xpath>
-         <xpath desc="group has been created">system:as-user("admin", $magic:password, sm:group-exists("testuser3"))</xpath>
-         <xpath desc="user is a manager of its own group">system:as-user("admin", $magic:password, sm:get-group-managers("testuser3")="testuser3")</xpath>
-         <xpath desc="profile has been created">doc-available("/db/data/user/testuser3.xml")</xpath>
-         <xpath desc="profile contains an idno equal to the user name">doc("/db/data/user/testuser3.xml")/j:contributor/tei:idno="testuser3"</xpath>
+         <xpath desc="user has been created">system:as-user("admin", $magic:password, sm:user-exists("usertestuser"))</xpath>
+         <xpath desc="group has been created">system:as-user("admin", $magic:password, sm:group-exists("usertestuser"))</xpath>
+         <xpath desc="user is a manager of its own group">system:as-user("admin", $magic:password, sm:get-group-managers("usertestuser")="usertestuser")</xpath>
+         <xpath desc="profile has been created">doc-available("/db/data/user/usertestuser.xml")</xpath>
+         <xpath desc="profile contains an idno equal to the user name">doc("/db/data/user/usertestuser.xml")/j:contributor/tei:idno="usertestuser"</xpath>
          <xpath desc="user profile permissions are correct">
-      doc-available("/db/data/user/testuser3.xml") and
-      sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/(
-        @owner = "testuser3" and @group="testuser3" and @mode="rw-r--r--"
+      doc-available("/db/data/user/usertestuser.xml") and
+      sm:get-permissions(xs:anyURI("/db/data/user/usertestuser.xml"))/*/(
+        @owner = "usertestuser" and @group="usertestuser" and @mode="rw-r--r--"
       )</xpath>
       </test>
       <test>
@@ -481,16 +481,16 @@
       <setup>
          <code>
       system:as-user("admin", $magic:password, (
-        let $u := sm:create-account("testuser3", "testuser3", "everyone")
-        let $s := xmldb:store("/db/data/user", "testuser3.xml",
+        let $u := sm:create-account("deltestuser", "deltestuser", "everyone")
+        let $s := xmldb:store("/db/data/user", "deltestuser.xml",
           &lt;j:contributor&gt;
-            &lt;tei:idno&gt;testuser3&lt;/tei:idno&gt;
+            &lt;tei:idno&gt;deltestuser&lt;/tei:idno&gt;
           &lt;/j:contributor&gt;
           )
-        let $uri := xs:anyURI("/db/data/user/testuser3.xml")
+        let $uri := xs:anyURI("/db/data/user/deltestuser.xml")
         let $ch := (
-          sm:chown($uri, "testuser3"),
-          sm:chgrp($uri, "testuser3"),
+          sm:chown($uri, "deltestuser"),
+          sm:chgrp($uri, "deltestuser"),
           sm:chmod($uri, "rw-r--r--")
         )
         return ()
@@ -500,17 +500,14 @@
       <tearDown>
          <code>
       system:as-user("admin", $magic:password, (
-        if (doc-available("/db/data/user/testuser3.xml"))
-        then xmldb:remove("/db/data/user", "testuser3.xml")
+        if (doc-available("/db/data/user/deltestuser.xml"))
+        then xmldb:remove("/db/data/user", "deltestuser.xml")
         else (),
-        try { 
-          if (sm:group-exists("testuser3"))
-          then sm:remove-group("testuser3")
-          else ()
-        } 
-        catch * { () },
-        if (sm:user-exists("testuser3"))
-        then sm:remove-account("testuser3")
+        if (sm:user-exists("deltestuser"))
+        then sm:remove-account("deltestuser")
+        else (),
+        if (sm:group-exists("deltestuser"))
+        then sm:remove-group("deltestuser")
         else ()
       ))
       </code>
@@ -518,20 +515,20 @@
       <test>
          <task>Delete your own profile</task>
          <code>
-      system:as-user("testuser3","testuser3", (
-        user:delete("testuser3")
+      system:as-user("deltestuser","deltestuser", (
+        user:delete("deltestuser")
       ))
       </code>
          <class href="common.t.incl.xml#NoData"/>
-         <xpath desc="user removed">not(sm:user-exists("testuser3"))</xpath>
-         <xpath desc="group removed">not(sm:list-groups()="testuser3")</xpath>
-         <xpath desc="profile removed">not(doc-available("/db/data/user/testuser3.xml"))</xpath>
+         <xpath desc="user removed">not(sm:user-exists("deltestuser"))</xpath>
+         <xpath desc="group removed">not(sm:list-groups()="deltestuser")</xpath>
+         <xpath desc="profile removed">not(doc-available("/db/data/user/deltestuser.xml"))</xpath>
       </test>
       <test>
          <task>Delete another user's profile</task>
          <code>
       system:as-user("testuser","testuser", (
-        user:delete("testuser3")
+        user:delete("deltestuser")
       ))
       </code>
          <class href="common.t.incl.xml#Forbidden"/>
@@ -562,20 +559,20 @@
             destination="/db/data/original"/>
          <code>
       system:as-user("admin", $magic:password, (
-        let $u := sm:create-account("testuser3", "testuser3", "everyone")
-        let $s := xmldb:store("/db/data/user", "testuser3.xml",
+        let $u := sm:create-account("deltestuser2", "deltestuser2", "everyone")
+        let $s := xmldb:store("/db/data/user", "deltestuser2.xml",
           &lt;j:contributor&gt;
-            &lt;tei:idno&gt;testuser3&lt;/tei:idno&gt;
+            &lt;tei:idno&gt;deltestuser2&lt;/tei:idno&gt;
           &lt;/j:contributor&gt;
           )
-        let $uri := xs:anyURI("/db/data/user/testuser3.xml")
+        let $uri := xs:anyURI("/db/data/user/deltestuser2.xml")
         let $doc-uri := xs:anyURI("/db/data/original/Reference.xml")
         let $ch := (
-          sm:chown($uri, "testuser3"),
-          sm:chgrp($uri, "testuser3"),
+          sm:chown($uri, "deltestuser2"),
+          sm:chgrp($uri, "deltestuser2"),
           sm:chmod($uri, "rw-r--r--"),
-          sm:chown($doc-uri, "testuser3"),
-          sm:chgrp($doc-uri, "testuser3"),
+          sm:chown($doc-uri, "deltestuser2"),
+          sm:chgrp($doc-uri, "deltestuser2"),
           sm:chmod($doc-uri, "rw-rw-r--"),
           ridx:reindex(doc("/db/data/original/Reference.xml"))
         )
@@ -587,17 +584,14 @@
          <remove-document collection="/db/data/original" name="Reference.xml"/>
          <code>
       system:as-user("admin", $magic:password, (
-        if (doc-available("/db/data/user/testuser3.xml"))
-        then xmldb:remove("/db/data/user", "testuser3.xml")
+        if (doc-available("/db/data/user/deltestuser2.xml"))
+        then xmldb:remove("/db/data/user", "deltestuser2.xml")
         else (),
-        try { 
-          if (sm:group-exists("testuser3"))
-          then sm:remove-group("testuser3")
-          else ()
-        } 
-        catch * { () },
-        if (sm:user-exists("testuser3"))
-        then sm:remove-account("testuser3")
+        if (sm:user-exists("deltestuser2"))
+        then sm:remove-account("deltestuser2")
+        else (),
+        if (sm:group-exists("deltestuser2"))
+        then sm:remove-group("deltestuser2")
         else ()
       ))
       </code>
@@ -605,24 +599,26 @@
       <test>
          <task>Delete your own profile</task>
          <code>
-      system:as-user("testuser3","testuser3", (
-        user:delete("testuser3")
+      system:as-user("deltestuser2","deltestuser2", (
+        let $ret := user:delete("deltestuser2")
+             let $log := util:log("info", ("***deletion of deltestuser returns =",  $ret))
+             return $ret
       ))
       </code>
          <xpath desc="status code is 200">self::rest:response/http:response/@status = 200</xpath>
          <xpath desc="returns an info element with the referenced document">ends-with(self::info//documents/document, "/api/data/original/Reference")</xpath>
-         <xpath desc="user account removed">not(sm:user-exists("testuser3"))</xpath>
-         <xpath desc="group removed">not(sm:list-groups()="testuser3")</xpath>
-         <xpath desc="profile changed to anonymous profile">exists(doc("/db/data/user/testuser3.xml")/j:contributor[tei:idno="testuser3"][tei:name="Deleted user"])</xpath>
-         <xpath desc="profile owned by admin">sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/@owner="admin"</xpath>
-         <xpath desc="profile owned by group everyone">sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/@group="everyone"</xpath>
-         <xpath desc="profile permissions are 664">sm:get-permissions(xs:anyURI("/db/data/user/testuser3.xml"))/*/@mode="rw-rw-r--"</xpath>
+         <xpath desc="user account removed">not(sm:user-exists("deltestuser2"))</xpath>
+         <xpath desc="group removed">not(sm:list-groups()="deltestuser2")</xpath>
+         <xpath desc="profile changed to anonymous profile">exists(doc("/db/data/user/deltestuser2.xml")/j:contributor[tei:idno="deltestuser2"][tei:name="Deleted user"])</xpath>
+         <xpath desc="profile owned by admin">sm:get-permissions(xs:anyURI("/db/data/user/deltestuser2.xml"))/*/@owner="admin"</xpath>
+         <xpath desc="profile owned by group everyone">sm:get-permissions(xs:anyURI("/db/data/user/deltestuser2.xml"))/*/@group="everyone"</xpath>
+         <xpath desc="profile permissions are 664">sm:get-permissions(xs:anyURI("/db/data/user/deltestuser2.xml"))/*/@mode="rw-rw-r--"</xpath>
       </test>
       <test>
          <task>Delete another user's profile</task>
          <code>
       system:as-user("testuser","testuser", (
-        user:delete("testuser3")
+        user:delete("deltestuser2")
       ))
       </code>
          <class href="common.t.incl.xml#Forbidden"/>

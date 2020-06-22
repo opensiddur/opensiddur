@@ -34,7 +34,7 @@
       <test>
           <task>one word transliteration</task>
           <code>
-            translit:transliterate(element tei:w { attribute { "n" }{ "2" }, text { "אֶפְרָיִם" }} , map { "translit:table" := $table })
+            translit:transliterate(element tei:w { attribute { "n" }{ "2" }, text { "אֶפְרָיִם" }} , map { "translit:table" : $table })
           </code>
           <expected desc="word is transliterated, element and attributes are preserved">
             <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0" n="2">ʾefrayim</tei:w>
@@ -43,7 +43,7 @@
       <test>
           <task>maleh vowel</task>
           <code>
-            translit:transliterate(element tei:w { text { "רִית" }}, map { "translit:table" := $table })
+            translit:transliterate(element tei:w { text { "רִית" }}, map { "translit:table" : $table })
           </code>
           <expected desc="word is transliterated">
             <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">riyt</tei:w>
@@ -52,7 +52,7 @@
       <test>
           <task>holam male</task>
           <code><![CDATA[
-            translit:transliterate(element tei:w { text{ "&#x05d6;&#x05d5;&#x05b9;" }}, map { "translit:table" := $table })
+            translit:transliterate(element tei:w { text{ "&#x05d6;&#x05d5;&#x05b9;" }}, map { "translit:table" : $table })
           ]]></code>
           <expected desc="word is transliterated">
             <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">zo</tei:w>
@@ -61,7 +61,7 @@
       <test>
           <task>shuruq</task>
           <code><![CDATA[
-            translit:transliterate(element tei:w { text { "&#x05d6;&#x05d5;&#x05bc;" }}, map { "translit:table" := $table })
+            translit:transliterate(element tei:w { text { "&#x05d6;&#x05d5;&#x05bc;" }}, map { "translit:table" : $table })
           ]]></code>
           <expected desc="word is transliterated">
             <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">zu</tei:w>
@@ -70,7 +70,7 @@
       <test>
           <task>dagesh hazak</task>
           <code><![CDATA[
-            translit:transliterate(element tei:w { text { "לַבַּל" }}, map { "translit:table" := $table })
+            translit:transliterate(element tei:w { text { "לַבַּל" }}, map { "translit:table" : $table })
           ]]></code>
           <expected desc="word is transliterated">
             <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">labbal</tei:w>
@@ -79,7 +79,7 @@
       <test>
           <task>dagesh kal</task>
           <code><![CDATA[
-            translit:transliterate(element tei:w { text { "בַּז" }}, map { "translit:table" := $table })
+            translit:transliterate(element tei:w { text { "בַּז" }}, map { "translit:table" : $table })
           ]]></code>
           <expected desc="word is transliterated">
             <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">baz</tei:w>
@@ -88,7 +88,7 @@
       <test>
           <task>Tetragrammaton 1</task>
           <code><![CDATA[
-            translit:transliterate(element tei:w { text { "יְהוָה" }}, map { "translit:table" := $table })
+            translit:transliterate(element tei:w { text { "יְהוָה" }}, map { "translit:table" : $table })
           ]]></code>
           <expected desc="replaced">
             <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">ʾadonay</tei:w>
@@ -97,7 +97,7 @@
       <test>
           <task>Tetragrammaton 2</task>
           <code><![CDATA[
-            translit:transliterate(element tei:w { text { "יֱהוִה" }}, map { "translit:table" := $table })
+            translit:transliterate(element tei:w { text { "יֱהוִה" }}, map { "translit:table" : $table })
           ]]></code>
           <expected desc="replaced">
             <tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">ʾelohim</tei:w>
@@ -106,7 +106,7 @@
       <test>
           <task>Tetragrammaton 3</task>
           <code><![CDATA[
-            translit:transliterate(element tei:w { text { "יְיָ" }}, map { "translit:table" := $table })
+            translit:transliterate(element tei:w { text { "יְיָ" }}, map { "translit:table" : $table })
           ]]></code>
           <expected desc="replaced">
             <tei:w>ʾadonay</tei:w>
@@ -116,9 +116,18 @@
     <TestSet>
       <testName>Regression tests</testName>
       <test>
+          <task>pass 0</task>
+          <code><![CDATA[
+            translit:pass0(<tr:w><tr:cc><tr:cons>ר</tr:cons><tr:vs>ִ</tr:vs></tr:cc><tr:cc><tr:cons>י</tr:cons></tr:cc><tr:cc><tr:cons>ת</tr:cons></tr:cc></tr:w>)
+          ]]></code>
+          <expected desc="pass0 marks first and last correctly">
+              <tr:w><tr:cc first="1"><tr:cons>ר</tr:cons><tr:vs>ִ</tr:vs></tr:cc><tr:cc><tr:cons>י</tr:cons></tr:cc><tr:cc last="1"><tr:cons>ת</tr:cons></tr:cc></tr:w>
+          </expected>
+      </test>
+      <test>
         <task>Shin+dot+vowel</task>
         <code><![CDATA[
-          translit:transliterate(element tei:w { text { "&#x05e9;&#x05c1;&#x05b8;" } }, map { "translit:table" := $table })
+          translit:transliterate(element tei:w { text { "&#x05e9;&#x05c1;&#x05b8;" } }, map { "translit:table" : $table })
         ]]></code>
         <expected desc="shin + vowel">
           <tei:w>sha</tei:w>
@@ -127,7 +136,7 @@
       <test>
         <task>Shin+dot+dagesh+vowel+consonant</task>
         <code><![CDATA[
-          translit:transliterate( element tei:w { text { "&#x05e9;&#x05c1;&#x05bc;&#x05b8;&#x05d1;" }}, map { "translit:table" := $table })
+          translit:transliterate( element tei:w { text { "&#x05e9;&#x05c1;&#x05bc;&#x05b8;&#x05d1;" }}, map { "translit:table" : $table })
         ]]></code>
         <expected desc="shin + vowel + consonant">
           <tei:w>shav</tei:w>
@@ -136,7 +145,7 @@
       <test>
         <task>Shin+dot+dagesh+vowel</task>
         <code><![CDATA[
-          translit:transliterate(element tei:w { text { "&#x05e9;&#x05c1;&#x05bc;&#x05b8;" } }, map { "translit:table" := $table })
+          translit:transliterate(element tei:w { text { "&#x05e9;&#x05c1;&#x05bc;&#x05b8;" } }, map { "translit:table" : $table })
         ]]></code>
         <expected desc="shin once + vowel (no doubling)">
           <tei:w>sha</tei:w>
@@ -145,7 +154,7 @@
       <test>
         <task>vav-holam haser for vav</task>
         <code><![CDATA[
-          translit:transliterate(element tei:w { text { "&#x05de;&#x05b4;&#x05e6;&#x05b0;&#x05d5;&#x05ba;&#x05ea;" }}, map { "translit:table" := $table })
+          translit:transliterate(element tei:w { text { "&#x05de;&#x05b4;&#x05e6;&#x05b0;&#x05d5;&#x05ba;&#x05ea;" }}, map { "translit:table" : $table })
         ]]></code>
         <expected desc="transliterates as a vav">
           <tei:w>mitzvot</tei:w>
@@ -154,7 +163,7 @@
       <test>
         <task>Unicode combined forms</task>
         <code><![CDATA[
-            translit:transliterate(element tei:w { text { "&#xfb2f;&#xfb31;&#xfb4b;" }}, map { "translit:table" := $table })
+            translit:transliterate(element tei:w { text { "&#xfb2f;&#xfb31;&#xfb4b;" }}, map { "translit:table" : $table })
         ]]></code>
         <expected desc="transliterates the same way as the decomposed form would">
             <tei:w>ʾabbo</tei:w>
