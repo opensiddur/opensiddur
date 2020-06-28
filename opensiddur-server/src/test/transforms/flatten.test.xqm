@@ -33,7 +33,9 @@ declare
 declare
   %test:tearDown
   function t:tear-down() {
-  xmldb:remove("/db/data/tests")
+  system:as-user("admin", $magic:password, (
+    xmldb:remove("/db/data/tests")
+  ))
 };
 
 declare %private function t:setup-resource(
