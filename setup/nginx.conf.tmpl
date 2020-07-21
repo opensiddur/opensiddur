@@ -5,12 +5,7 @@
 proxy_set_header        Accept '*/*';
 
 server {
-	listen 80;
-	server_name ${DNS_NAME};
-}
-
-server {
-        listen 443 ssl;
+        listen 80;
         server_name ${DNS_NAME};
         charset utf-8;
     
