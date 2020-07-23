@@ -18,6 +18,8 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
   at "../../modules/common-rest.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
+import module namespace format="http://jewishliturgy.org/modules/format"
+  at "../modules/format.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "original.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
@@ -91,6 +93,27 @@ declare
   crest:get($lnk:data-type, $name)
 };
 
+(:~ Get a version of the linkage data resource with unflattened/combined hierarchies
+ : @param $name The resource to get
+ : @return HTTP 200 A TEI header with a combined hierarchy version of the resource as XML
+ : @error HTTP 404 Not found (or not available)
+ :)
+declare
+  %rest:GET
+  %rest:path("/api/data/linkage/{$name}/combined")
+  %rest:produces("application/xml", "text/xml")
+  %output:method("xml")
+  function lnk:get-combined(
+    $name as xs:string
+  ) as item()+ {
+  let $doc := crest:get($lnk:data-type, $name)
+  return
+    if ($doc instance of document-node())
+    then
+        let $deps := format:unflatten-dependencies($doc, map {})
+        return format:unflatten($doc, map {}, $doc)
+    else $doc
+};
 
 (:~ List or full-text query linkage data. Note that querying
  : linkage data is not super-useful.
@@ -116,7 +139,8 @@ declare
   crest:list($q, $start, $max-results,
     "Linkage data API", api:uri-of($lnk:api-path-base),
     lnk:query-function#1, lnk:list-function#0,
-    <crest:additional text="access" relative-uri="access"/>, 
+    (<crest:additional text="access" relative-uri="access"/>,
+    <crest:additional text="combined" relative-uri="combined"/>),
     ()
   )
 };
