@@ -19,7 +19,7 @@ import module namespace crest="http://jewishliturgy.org/modules/common-rest"
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "../../modules/data.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
-  at "../modules/format.xqm";
+  at "../../modules/format.xqm";
 import module namespace orig="http://jewishliturgy.org/api/data/original"
   at "original.xqm";
 import module namespace paths="http://jewishliturgy.org/modules/paths"
