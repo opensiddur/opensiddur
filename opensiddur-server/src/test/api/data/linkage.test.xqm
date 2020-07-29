@@ -529,13 +529,17 @@ declare
         t:after()
     };
 
+(: TODO: this test will fail with an NPE because of eXist bugs #2577 and #2779
+ : reenable this test when those bugs are resolved
+ :)
 declare
+    %test:pending
     %test:user("xqtest1", "xqtest1")
     %test:assertEmpty
     function t:get-combined() {
     t:before(),
     let $result := lnk:get-combined("Existing")
-    where empty($result/tei:TEI//jf:merged)
+    where empty($result/tei:TEI//jf:unflattened)
     return
           <error desc="Returns a TEI resource with unflattened data">{$result}</error>,
     t:after()
@@ -737,7 +741,9 @@ declare
     t:get-a-nonexisting-resource()
     };
 
+(: TODO: see t:get-combined :)
 declare
+    %test:pending
     %test:assertEmpty
     function t:unauthenticated-get-a-combined-resource() {
     t:get-combined()
