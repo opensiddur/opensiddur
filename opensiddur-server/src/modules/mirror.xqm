@@ -426,7 +426,7 @@ declare function mirror:apply-if-outdated(
   $up-to-date-function as (function(xs:string, item()) as xs:boolean)?
   ) as document-node()? {
   if (mirror:is-up-to-date($mirror-path, $original, $up-to-date-function))
-  then 
+  then
     mirror:doc(
       $mirror-path, 
       typeswitch($original)
@@ -444,7 +444,7 @@ declare function mirror:apply-if-outdated(
       default return doc($original)
     let $collection := util:collection-name($original-doc)
     let $resource := util:document-name($original-doc)
-    let $path := 
+    let $path :=
       mirror:store($mirror-path, $collection, $resource, 
                    $transform($transformee-doc)
                   )

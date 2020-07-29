@@ -144,7 +144,9 @@ declare function ridx:reindex(
         ))
         then
           let $mirror-collection := mirror:mirror-path($ridx:ridx-path, $collection)
-          let $reindex := xmldb:reindex($mirror-collection, $resource)
+          let $reindex := system:as-user("admin", $magic:password,
+          xmldb:reindex($mirror-collection, $resource)
+          )
           return ()
         else debug:debug($debug:warn, "refindex", 
           concat("Could not store index for ", $collection, "/", $resource))

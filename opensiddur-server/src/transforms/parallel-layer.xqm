@@ -37,7 +37,10 @@ declare function pla:parallel-layer-document(
                     attribute jf:id { ($pt/@xml:id, flatten:generate-id($pt))[1] },
                     $pt/(@* except @xml:id, tei:idno),
                     for $domain in tokenize($doc//j:parallelText/tei:linkGrp/@domains, '\s+')
-                    let $domain-doc-orig := data:doc(substring-before($domain, '#'))
+                    (: substring-before() is returning blank string if the # character doesn't exist;
+                        this will select the whole domain if there is no fragment
+                    :)
+                    let $domain-doc-orig := data:doc((substring-before($domain, '#')[.], $domain)[1])
                     let $domain-document := format:segment($domain-doc-orig, $params, $domain-doc-orig)
                     let $params := map { "pla:domain" := $domain }
                     let $layer := pla:tei-linkGrp($pt/tei:linkGrp, $params)
