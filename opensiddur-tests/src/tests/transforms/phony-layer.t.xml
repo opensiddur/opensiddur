@@ -203,4 +203,45 @@
             <xpath desc="@jf:set is not added for j:layer">empty(.//j:layer/@jf:set)</xpath>
         </test>
     </TestSet>
+    <TestSet>
+        <testName>Annotations, no concurrent</testName>
+        <setup>
+            <copy source="/db/apps/opensiddur-tests/tests/transforms" name="phony6.xml"
+                  destination="/db/data/original"/>
+            <code>
+                ridx:reindex(doc("/db/data/original/phony6.xml"))
+            </code>
+        </setup>
+        <tearDown>
+            <remove-document collection="/db/data/original" name="phony6.xml"/>
+            <code>
+                ridx:remove("/db/data/original", "phony6.xml")
+            </code>
+        </tearDown>
+        <test>
+            <task>annotations with streamText only</task>
+            <code>
+                phony:phony-layer-document(
+                doc("/db/data/original/phony6.xml"),
+                map {}
+                )
+            </code>
+            <xpath desc="new concurrent section added">exists(.//j:concurrent[j:layer])</xpath>
+            <xpath desc="2 layers of type phony-annotation added">count(.//j:concurrent/j:layer[@type="phony-annotation"])=2</xpath>
+            <xpath desc="each of the layers has a @xml:id attribute">every $l in .//j:concurrent/j:layer[@type="phony-annotation"] satisfies $l/@xml:id/string()</xpath>
+            <xpath desc="the first layer has an xml:id that is different from the second">not(.//j:concurrent/j:layer[@type='phony-annotation'][1]/@xml:id/string()=.//j:concurrent/j:layer[@type="phony-annotation"][2]/@xml:id/string())</xpath>
+            <expected desc="one layer represents the note"
+                      xpath=".//j:concurrent/j:layer[@type='phony-annotation'][1]/jf:annotation">
+                <jf:annotation xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0" jf:annotation="#note1">
+                    <tei:ptr xmlns:tei="http://www.tei-c.org/ns/1.0" target="#seg1"/>
+                </jf:annotation>
+            </expected>
+            <expected desc="one layer represents the instruction"
+                      xpath=".//j:concurrent/j:layer[@type='phony-annotation'][2]/jf:instruction">
+                <jf:instruction xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0" jf:annotation="#inst1">
+                    <tei:ptr xmlns:tei="http://www.tei-c.org/ns/1.0" target="#seg2"/>
+                </jf:instruction>
+            </expected>
+        </test>
+    </TestSet>
 </TestSuite>
