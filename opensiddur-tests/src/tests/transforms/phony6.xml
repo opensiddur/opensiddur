@@ -15,7 +15,7 @@
         <j:streamText xml:id="stream">
             <tei:seg xml:id="seg1">A.</tei:seg>
             <tei:seg xml:id="seg2">B.</tei:seg>
-            <tei:seg xml:id="seg2">C.</tei:seg>
+            <tei:seg xml:id="seg3">C.</tei:seg>
         </j:streamText>
         <tei:note xml:id="note1">Note 1</tei:note>
         <tei:note xml:id="inst1">Instruction 1</tei:note>
