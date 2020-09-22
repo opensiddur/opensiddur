@@ -21,6 +21,8 @@ import module namespace deepequality="http://jewishliturgy.org/modules/deepequal
   at "../modules/deepequality.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "../modules/data.xqm";
+import module namespace didx="http://jewishliturgy.org/modules/docindex"
+  at "../modules/docindex.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "../modules/format.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
@@ -215,6 +217,7 @@ declare function tcommon:setup-resource(
       string-join(("/db/data", $data-type, $subtype), "/"), $resource-name || ".xml", $content)
       let $wait := tcommon:wait-for("Storing " || $path, function() { doc-available($path) })
       let $ridx := ridx:reindex(doc($path))
+      let $didx := didx:reindex(doc($path))
       let $log := util:log("info", "Saved " || $path || " as " || $owner)
       return $path
   )
@@ -256,6 +259,7 @@ declare function tcommon:teardown-resource(
             return (
                 format:clear-caches($uri),
                 ridx:remove($collection, $res),
+                didx:remove($collection, $res),
                 xmldb:remove($collection, $res)
             )
         else util:log("info", ("Cannot remove ", $data-type, " ", $resource-name, ": it cannot be found"))
