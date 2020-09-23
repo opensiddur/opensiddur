@@ -54,7 +54,7 @@ declare function t:the-test-document-was-indexed(
     then <error>Resource was recorded incorrectly</error>
     else if (not($expected/@data-type="original"))
     then <error>Data type was recorded incorrectly</error>
-    else if (not($expected/@document-name="test_docindex.xqm"))
+    else if (not($expected/@document-name="test_docindex.xml"))
     then <error>Document name was recorded incorrectly</error>
     else ()
 };
@@ -88,11 +88,19 @@ declare
     %test:assertEmpty
     function t:remove-deletes-the-entry-from-the-index() {
     t:before-each(),
-    let $removed := didx:remove("/db/data/original", "test_docindex.xqm")
+    let $removed := didx:remove("/db/data/original", "test_docindex.xml")
     where exists(doc($didx:didx-path || "/" || $didx:didx-resource)//didx:entry[@db-path="/db/data/original/test_docindex.xml"])
     return <error>The index entry was not removed</error>,
     t:after-each()
     };
+
+declare
+    %test:assertEmpty
+    function t:remove-does-nothing-when-the-document-does-not-exist() {
+    let $removed := didx:remove("/db/data/original", "test_docindex_does_not_exist.xml")
+    return ()
+    };
+
 
 declare
     %test:assertEmpty
@@ -102,7 +110,7 @@ declare
     return
         if (count($query) != 1)
         then  <error>query-path returned {count($query)} results</error>
-        else if (not($query = "/db/data/original/test_docindex.xqm" ))
+        else if (not($query = "/db/data/original/test_docindex.xml" ))
         then <error>The query returned '{$query}' instead of the expected result</error>
         else (),
     t:after-each()

@@ -34,18 +34,19 @@ declare function didx:setup(
         if (xmldb:collection-available($didx:didx-path))
         then ()
         else xmldb:create-collection("/db", $didx:didx-collection)
+    let $uri := xs:anyURI($didx:didx-path)
     let $owner-collection := sm:chown($uri, "admin")
-    let $group-collection := sm:chgrp($uri, "dba")
-    let $mode-collection := sm:chmod($uri, "rw-rw-r--")
+    let $group-collection := sm:chgrp($uri, "everyone")
+    let $mode-collection := sm:chmod($uri, "rwxr-xr-x")
     let $index-resource :=
         (: write the index configuration :)
         xmldb:store($didx:didx-path, $didx:didx-resource,
             <didx:index/>
         )
     let $index-uri := xs:anyURI(concat($didx:didx-path, "/", $didx:didx-resource))
-    let $index-owner := sm:chown($uri, "admin")
-    let $index-group := sm:chgrp($uri, "dba")
-    let $index-mode := sm:chmod($uri, "rw-rw-r--")
+    let $index-owner := sm:chown($index-uri, "admin")
+    let $index-group := sm:chgrp($index-uri, "everyone")
+    let $index-mode := sm:chmod($index-uri, "rw-r--r--")
     return ()
 };
 
@@ -65,8 +66,9 @@ declare function didx:reindex(
   $doc-items as item()*
   ) as empty-sequence() {
   for $doc-item in $doc-items
-  let $doc-uri := document-uri(root($doc))
-  let $collection := util:collection-name(root($doc))
+  let $doc := root($doc-item)
+  let $doc-uri := document-uri($doc)
+  let $collection := util:collection-name($doc)
   let $resource := util:document-name($doc)
   let $resource-extension-removed := replace($resource, "\.[^.]+$", "")
   let $split := tokenize($collection, "/") (: "[1]/[2]db/[3]data/[4]{datatype}/...":)
@@ -75,7 +77,7 @@ declare function didx:reindex(
     <didx:entry
         data-type="{$data-type}"
         document-name="{$resource}"
-        resource="${resource-extension-removed}"
+        resource="{$resource-extension-removed}"
         db-path="{$doc-uri}"/>
   let $index-collection := collection($didx:didx-path)
   let $existing-entry := $index-collection//didx:entry[$doc-uri=@db-path]
@@ -83,7 +85,7 @@ declare function didx:reindex(
     system:as-user("admin", $magic:password,
         if (exists($existing-entry))
             then update replace $existing-entry with $index-entry
-            else update insert $existing-entry into $index-document/*
+            else update insert $index-entry into $index-collection[1]/*
     )
 };
 
@@ -94,6 +96,7 @@ declare function didx:remove(
   let $doc-uri := $collection || "/" || $resource
   let $index-collection := collection($didx:didx-path)
   let $existing-entry := $index-collection//didx:entry[$doc-uri=@db-path]
+  where exists($existing-entry)
   return
       system:as-user("admin", $magic:password,
            update delete $existing-entry
@@ -104,7 +107,7 @@ declare function didx:remove(
 declare function didx:query-path(
   $data-type as xs:string,
   $resource as xs:string
-  ) as xs:string {
+  ) as xs:string? {
   let $query :=
     collection($didx:didx-path)//didx:entry[$data-type=@data-type][$resource=@resource]
   return $query/@db-path/string()
@@ -113,7 +116,7 @@ declare function didx:query-path(
 (:~ query the document index by a path :)
 declare function didx:query-by-path(
   $db-path as xs:string
-  ) as element(didx:result) {
+  ) as element(didx:result)? {
   let $query :=
     collection($didx:didx-path)//didx:entry[$db-path=@db-path]
   where exists($query)
