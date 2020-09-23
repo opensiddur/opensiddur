@@ -16,6 +16,8 @@ import module namespace app="http://jewishliturgy.org/modules/app"
   at "app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "data.xqm";
+import module namespace didx="http://jewishliturgy.org/modules/docindex"
+  at "docindex.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "jvalidate.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror"
@@ -378,6 +380,7 @@ declare function crest:delete(
                       (: TODO: check for references! :)
                       let $r1 := xmldb:remove($collection, $resource)
                       let $r2 := ridx:remove($collection, $resource)
+                      let $r3 := didx:remove($collection, $resource)
                       return
                         <rest:response>
                             <output:serialization-parameters>
@@ -475,7 +478,8 @@ declare function crest:post(
                             sm:chgrp($uri, "everyone"),
                             sm:chmod($uri, "rw-rw-r--")
                         )),
-                        if ($use-reference-index) then ridx:reindex($doc) else ()
+                        if ($use-reference-index) then ridx:reindex($doc) else (),
+                        didx:reindex($doc)
                       )
                     }
                     <http:header 
@@ -506,7 +510,7 @@ declare function crest:put(
 };
 
 (:~ Edit/replace a document in the database
- : Side effect: update the reference index
+ : Side effect: update the reference index, update document index
  : @param $data-type data type of document
  : @param $name Name of the document to replace
  : @param $body New document
@@ -552,7 +556,8 @@ declare function crest:put(
                   let $doc := doc($uri)
                   return (
                     crest:record-change($doc, "edited"),
-                    if ($use-reference-index) then ridx:reindex($doc) else ()
+                    if ($use-reference-index) then ridx:reindex($doc) else (),
+                    didx:reindex($doc)
                   )
                 }
                 <output:serialization-parameters>

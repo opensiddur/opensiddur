@@ -18,6 +18,8 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "../modules/data.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
+import module namespace didx="http://jewishliturgy.org/modules/docindex"
+  at "../modules/docindex.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "../modules/jvalidate.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
@@ -214,7 +216,8 @@ declare
                     {
                       sm:chmod($uri, "rw-r--r--"),
                       sm:chown($uri, $name),
-                      sm:chgrp($uri, $name)
+                      sm:chgrp($uri, $name),
+                      didx:reindex(doc($stored))
                     }
                     <http:response status="201">
                       <http:header name="Location" value="{api:uri-of('/api/user')}/{$name}"/>
@@ -397,6 +400,7 @@ declare
             return sm:remove-group-manager($name, $manager),
             sm:remove-account($name),
             sm:remove-group($name), (: TODO: successor group is guest! until remove-group#2 exists@ :)
+            didx:remove($user:path, $resource-name),
             $removal-return
           }
           catch * {
