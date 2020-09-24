@@ -12,6 +12,8 @@ import module namespace api="http://jewishliturgy.org/modules/api"
   at "api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
 	at "app.xqm";
+import module namespace didx="http://jewishliturgy.org/modules/docindex"
+	at "docindex.xqm";
   
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -41,29 +43,17 @@ declare function data:api-path-to-db(
 declare function data:db-path-to-api(
 	$db-path as xs:string
 	) as xs:string? {
-	let $norm-db-path := replace($db-path, "^(/db)?/", "")
-	let $level := tokenize($norm-db-path, "/")
+	let $norm-db-path := replace($db-path, "^(/db)?/", "/db")
+	let $doc-query := didx:query-by-path($norm-db-path)
+	where exists($doc-query)
 	return
-	  if ($level[1] = "data")
-	  then
-	    let $doc := doc($db-path)
-	    let $resource-name := replace($level[last()], "\.xml$", "")
-	    where exists($doc)
-	    return
-	      if ($level[2] = "user")
-	      then
-	        data:user-api-path($resource-name)
-	      else 
-    	    string-join(
-    	      ( api:uri-of("/api/data"), 
-    	        $level[2], 
-    	        $resource-name
-    	      ), "/")
-	  else  
-	    error(
-	      xs:QName("error:NOTIMPLEMENTED"), 
-	      "data:db-path-to-api() not implemented for the path: " || $db-path
-	    )
+        api:uri-of(string-join(
+        ("/api",
+         if ($doc-query/@data-type = "user")
+         then ()
+         else "data",
+         $doc-query/@data-type,
+         $doc-query/@resource), "/"))
 };
 
 (: Find the API path of a user by name
@@ -151,8 +141,7 @@ declare function data:doc(
   $type as xs:string,
   $name as xs:string
   ) as document-node()? {
-  collection(app:concat-path($data:path-base, $type))
-    [replace(util:document-name(.), "\.([^.]+)$", "")=$name]
+  doc(didx:query-path($type, $name))
 };
 
 (:~ get a document using an api path, with or without /api :)
@@ -161,17 +150,9 @@ declare function data:doc(
   ) as document-node()? {
   let $path := replace($api-path, "^((" || api:uri-of("/api") || ")|(/api))?/", "")
   let $tokens := tokenize($path, "/")
-  let $resource-name := $tokens[count($tokens)] || ".xml"
+  let $token-offset := if ($tokens[1] = "data") then 1 else 0
+  let $data-type := $tokens[1 + $token-offset]
+  let $resource := $tokens[2 + $token-offset]
   return
-    if ($tokens[1] = "data")
-    then
-      collection($data:path-base || "/" || $tokens[2])[util:document-name(.)=$resource-name]
-    else if ($tokens[1] = "user")
-    then
-      collection("/db/data/user")//tei:idno[.=$tokens[2]]/root(.)
-    else
-      error(
-        xs:QName("error:NOTIMPLEMENTED"), 
-        "data:doc() not implemented for the path: " || $api-path
-      )
+    doc(didx:query-path($data-type, $resource))
 };

@@ -8,6 +8,7 @@ import module namespace deepequality="http://jewishliturgy.org/modules/deepequal
 import module namespace upg12="http://jewishliturgy.org/modules/upgrade12" at "../../modules/upgrade12.xqm";
 
 import module namespace ridx="http://jewishliturgy.org/modules/refindex" at "refindex.xqm";
+import module namespace didx="http://jewishliturgy.org/modules/docindex" at "docindex.xqm";
 import module namespace magic="http://jewishliturgy.org/magic" at "../../magic/magic.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -173,12 +174,15 @@ function t:setup() {
   let $store-external-references-file :=
     xmldb:store($t:storage-collection, $t:external-reference-file-resource, $t:external-references-file)
   let $index-stored-files := ridx:reindex(collection($t:storage-collection))
+  let $doc-index-stored-files := didx:reindex(collection($t:storage-collection))
   return ()
 };
 
 declare
 %test:tearDown
 function t:tear-down() {
+  didx:remove($t:storage-collection, $t:reference-file-resource),
+  didx:remove($t:storage-collection, $t:external-reference-file-resource),
   ridx:remove($t:storage-collection, $t:reference-file-resource),
   ridx:remove($t:storage-collection, $t:external-reference-file-resource),
   xmldb:remove($t:storage-collection, $t:reference-file-resource),

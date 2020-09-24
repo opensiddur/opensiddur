@@ -10,6 +10,8 @@
   <imports>
     import module namespace data="http://jewishliturgy.org/modules/data"
       at "xmldb:exist:///db/apps/opensiddur-server/modules/data.xqm";
+    import module namespace didx="http://jewishliturgy.org/modules/docindex"
+      at "xmldb:exist:///db/apps/opensiddur-server/modules/docindex.xqm";
   </imports>
   <namespace prefix="tei">http://www.tei-c.org/ns/1.0</namespace>
   <namespace prefix="j">http://jewishliturgy.org/ns/jlptei/1.0</namespace>
@@ -38,8 +40,16 @@
           </tei:text>
             </tei:TEI>
          </store>
+          <code><![CDATA[
+          didx:reindex("/db/data/original/en/1900/01", "test.xml"),
+          didx:reindex("/db/data/user", "testuser.xml")
+          ]]></code>
       </setup>
       <tearDown>
+          <code><![CDATA[
+          didx:remove("/db/data/original/en/1900/01", "test.xml"),
+          didx:remove("/db/data/user", "testuser.xml")
+          ]]></code>
          <remove-document collection="/db/data/user" name="testuser.xml"/>
          <remove-collection collection="/db/data/original/en/1900"/>
       </tearDown>
@@ -49,7 +59,7 @@
          <code>
         data:db-path-to-api("/db/code/tests/api/data.t.xml")
       </code>
-         <error desc="returns error:NOTIMPLEMENTED" code="error:NOTIMPLEMENTED"/>
+          <xpath desc="empty sequence">not($output)</xpath>
       </test>
       <test output="text">
          <task>In /data/user hierarchy, user exists</task>
