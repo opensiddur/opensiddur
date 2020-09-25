@@ -159,7 +159,10 @@ declare function tcommon:setup-test-users(
     let $log := util:log-system-out("Setting up user " || $name)
     let $creation :=
         system:as-user("admin", $magic:password, (
-            let $create-account := sm:create-account($name, $name, "everyone")
+            let $create-account :=
+                if (not(sm:user-exists($name)))
+                then sm:create-account($name, $name, "everyone")
+                else ()
             let $stored :=
                 xmldb:store($user:path,
                   concat($name, ".xml"),
@@ -171,6 +174,7 @@ declare function tcommon:setup-test-users(
             let $chmod := sm:chmod($uri, "rw-r--r--")
             let $chown := sm:chown($uri, $name)
             let $chgrp := sm:chgrp($uri, $name)
+            let $didx := didx:reindex($user:path, $name || ".xml")
             return ()
         ))
     return (
@@ -196,9 +200,11 @@ declare function tcommon:teardown-test-users(
     $n as xs:integer
 ) {
     for $i in 1 to $n
+    let $name := "xqtest" || string($i)
+    let $remove-didx := didx:remove($user:path, $name || ".xml")
     return
-        system:as-user("xqtest" || string($i), "xqtest" || string($i),
-        user:delete("xqtest" || string($i))
+        system:as-user($name, $name,
+        user:delete($name)
         )
 };
 
@@ -212,12 +218,16 @@ declare function tcommon:setup-resource(
   $group as xs:string?,
   $permissions as xs:string?
 ) as xs:string {
+  let $log := util:log-system-out("setup " || $resource-name || " as " || string($owner))
   let $resource-path := system:as-user("xqtest" || string($owner), "xqtest" || string($owner),
       let $path := xmldb:store(
       string-join(("/db/data", $data-type, $subtype), "/"), $resource-name || ".xml", $content)
       let $wait := tcommon:wait-for("Storing " || $path, function() { doc-available($path) })
+      let $log := util:log-system-out("1")
       let $ridx := ridx:reindex(doc($path))
+      let $log := util:log-system-out("2")
       let $didx := didx:reindex(doc($path))
+      let $log := util:log-system-out("3")
       let $log := util:log("info", "Saved " || $path || " as " || $owner)
       return $path
   )
@@ -229,6 +239,7 @@ declare function tcommon:setup-resource(
     if ($permissions)
     then system:as-user("admin", $magic:password, sm:chmod(xs:anyURI($resource-path), $permissions))
     else ()
+  let $log := util:log-system-out("4")
   return $resource-path
 };
 
