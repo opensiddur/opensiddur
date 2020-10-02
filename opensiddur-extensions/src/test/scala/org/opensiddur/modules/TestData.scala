@@ -84,16 +84,17 @@ class TestData extends DbTest {
   }
 
   describe("data:db-path-to-api") {
-    it("throws an exception in a nonexistent hierarchy") {
+    it("returns empty in a nonexistent hierarchy") {
       xq(
         "data:db-path-to-api(\"/db/code/tests/api/data.t.xml\")")
-        .assertThrows("error:NOTIMPLEMENTED")
+        .assertEmpty
         .go
     }
 
     it("returns the path to a user if the user exists") {
       xq(
-        "data:db-path-to-api(\"/db/data/user/xqtest1.xml\")")
+        "data:db-path-to-api('/db/data/user/xqtest1.xml')"
+      )
         .assertEquals("/api/user/xqtest1")
         .go
     }
@@ -142,9 +143,9 @@ class TestData extends DbTest {
         .go
     }
 
-    it("throws an exception in an unsupported hierarchy") {
+    it("returns empty in an unsupported hierarchy") {
       xq("""data:api-path-to-db("/api/group/everyone")""")
-        .assertThrows("error:NOTIMPLEMENTED")
+        .assertEmpty
         .go
     }
   }

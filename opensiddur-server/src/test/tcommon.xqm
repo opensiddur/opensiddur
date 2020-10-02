@@ -223,11 +223,8 @@ declare function tcommon:setup-resource(
       let $path := xmldb:store(
       string-join(("/db/data", $data-type, $subtype), "/"), $resource-name || ".xml", $content)
       let $wait := tcommon:wait-for("Storing " || $path, function() { doc-available($path) })
-      let $log := util:log-system-out("1")
       let $ridx := ridx:reindex(doc($path))
-      let $log := util:log-system-out("2")
       let $didx := didx:reindex(doc($path))
-      let $log := util:log-system-out("3")
       let $log := util:log("info", "Saved " || $path || " as " || $owner)
       return $path
   )
@@ -239,7 +236,6 @@ declare function tcommon:setup-resource(
     if ($permissions)
     then system:as-user("admin", $magic:password, sm:chmod(xs:anyURI($resource-path), $permissions))
     else ()
-  let $log := util:log-system-out("4")
   return $resource-path
 };
 

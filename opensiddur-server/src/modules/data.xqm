@@ -43,7 +43,7 @@ declare function data:api-path-to-db(
 declare function data:db-path-to-api(
 	$db-path as xs:string
 	) as xs:string? {
-	let $norm-db-path := replace($db-path, "^(/db)?/", "/db")
+	let $norm-db-path := replace($db-path, "^(/db)?/", "/db/")
 	let $doc-query := didx:query-by-path($norm-db-path)
 	where exists($doc-query)
 	return

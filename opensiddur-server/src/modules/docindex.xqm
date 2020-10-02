@@ -12,10 +12,6 @@ xquery version "3.1";
  :)
 module namespace didx = 'http://jewishliturgy.org/modules/docindex';
 
-import module namespace debug="http://jewishliturgy.org/transform/debug"
-  at "debug.xqm";
-import module namespace uri="http://jewishliturgy.org/transform/uri"
-  at "follow-uri.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
   at "../magic/magic.xqm";
 
@@ -80,13 +76,16 @@ declare function didx:reindex(
         resource="{$resource-extension-removed}"
         db-path="{$doc-uri}"/>
   let $index-collection := collection($didx:didx-path)
-  let $existing-entry := $index-collection//didx:entry[$doc-uri=@db-path]
+  let $existing-entry := $index-collection//didx:entry[@db-path=$doc-uri]
   return
-    system:as-user("admin", $magic:password,
-        if (exists($existing-entry))
+    system:as-user("admin", $magic:password, (
+        let $update := if (exists($existing-entry))
             then update replace $existing-entry with $index-entry
             else update insert $index-entry into $index-collection[1]/*
-    )
+        let $reindex :=
+            xmldb:reindex($didx:didx-path, $didx:didx-resource)
+        return ()
+    ))
 };
 
 declare function didx:remove(
@@ -98,9 +97,11 @@ declare function didx:remove(
   let $existing-entry := $index-collection//didx:entry[$doc-uri=@db-path]
   where exists($existing-entry)
   return
-      system:as-user("admin", $magic:password,
-           update delete $existing-entry
-      )
+      system:as-user("admin", $magic:password, (
+           let $update := update delete $existing-entry
+           let $reindex := xmldb:reindex($didx:didx-path, $didx:didx-resource)
+           return ()
+      ))
 };
 
 (:~ Query the document index for a path :)

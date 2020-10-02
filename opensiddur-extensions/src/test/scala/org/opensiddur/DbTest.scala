@@ -172,12 +172,13 @@ class Xq(
     )
   }
 
-  def assertXPath(xpath: String): Xq = {
+  def assertXPath(xpath: String, clue: String = ""): Xq = {
     new Xq(
       _code = _code,
       _prolog = _prolog,
       _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion(xpath, s" output did not conform to '$xpath'"),
+      _assertions = _assertions :+ XPathAssertion(xpath,
+        if (clue.nonEmpty) clue else s" output did not conform to '$xpath'"),
       _auth = _auth
     )
   }
