@@ -22,7 +22,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
     """
 
-  override def beforeAll = {
+  override def beforeAll: Unit = {
     super.beforeAll()
 
     xq("""let $users := tcommon:setup-test-users(1)
@@ -30,7 +30,7 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
       .go
   }
 
-  override def afterAll = {
+  override def afterAll(): Unit = {
     xq("""let $users := tcommon:teardown-test-users(1)
          return ()""")
       .go
@@ -38,7 +38,7 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
     super.afterAll()
   }
 
-  override def beforeEach = {
+  override def beforeEach(): Unit = {
     super.beforeEach()
 
     xq("""let $document := tcommon:setup-resource("test_docindex", "original", 1, <test/>)
@@ -46,7 +46,7 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
       .go
   }
 
-  override def afterEach = {
+  override def afterEach(): Unit = {
     xq("""let $document := tcommon:teardown-resource("test_docindex", "original", 1)
          return ()""")
 

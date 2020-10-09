@@ -118,14 +118,14 @@ class Xq(
   private def constructXQuery: String = {
     _prolog + "\n" +
     s"let $$output := " +
-      (if (_auth.user.nonEmpty) { up : UserAndPass =>
-        s"system:as-user('${up.user}', '${up.pass}',"
-      } else "") +
+      (if (_auth.user.nonEmpty)
+        s"system:as-user('${_auth.user.get}', '${_auth.pass.get}',"
+       else "") +
       (if (_throws.nonEmpty) "try { " else "") +
       s"${_code}" +
       (if (_throws.nonEmpty) s"} catch ${_throws} { element threwException { '${_throws}' } }" else "") +
-      ( if (_auth.user.nonEmpty) { ")" } else "") +
-      "return (" + (
+      ( if (_auth.user.nonEmpty) ")" else "") +
+      "\nreturn (" + (
       if (_throws.nonEmpty) s"if ($$output instance of element(threwException)) then 1 else 0"
       else {
         _assertions.map { assertion: XPathAssertion =>
@@ -232,12 +232,80 @@ class Xq(
       _auth = _auth
     )
   }
+
+  // complex assertions
+  def assertHttpNotFound: Xq = {
+    this
+      .assertXPath("""$output/self::rest:response/http:response/@status = 404""", "expected HTTP not found")
+  }
+
+  def assertHttpBadRequest: Xq = {
+    this
+      .assertXPath("""$output/self::rest:response/http:response/@status = 400""", "expected HTTP bad request")
+  }
+
+  def assertHttpForbidden: Xq = {
+    this
+      .assertXPath("""$output/self::rest:response/http:response/@status = 403""", "expected HTTP forbidden")
+  }
+
+  def assertHttpNoData: Xq = {
+    this
+      .assertXPath("""$output/self::rest:response/http:response/@status = 204""", "expected HTTP No data")
+      .assertXPath("""$output/self::rest:response/output:serialization-parameters/output:method = "text"""", "output is declared as text")
+  }
+
+  def assertSearchResults: Xq = {
+    this
+      .assertXPath("""$output/self::rest:response/output:serialization-parameters/output:method="xhtml"""", "serialize as XHTML")
+      .assertXPath("""empty($output//html:head/@profile)""", "reference to Open Search @profile removed for html5 compliance")
+      .assertXPath("""count($output//html:meta[@name='startIndex'])=1""", "@startIndex is present")
+      .assertXPath("""count($output//html:meta[@name='endIndex'])=0""", "@endIndex has been removed")
+      .assertXPath("""count($output//html:meta[@name='totalResults'])=1""", "@totalResults is present")
+      .assertXPath("""count($output//html:meta[@name='itemsPerPage'])=1""", "@itemsPerPage is present")
+  }
 }
 
 abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndAfterAll with XQueryCall {
   def xq(code: String): Xq = {
       new Xq(code, prolog)
     }
+
+
+  def setupResource(localSource: String,
+                    resourceName: String,
+                    dataType: String,
+                    owner: Int,
+                    subType: Option[String] = None,
+                    group: Option[String] = None,
+                    permissions: Option[String] = None
+                   ) = {
+    val contentSource = io.Source.fromFile(localSource)
+    val content = try {
+      contentSource.getLines.mkString
+    } finally {
+      contentSource.close()
+    }
+    xq(
+      s"""
+         let $$file := tcommon:setup-resource('${resourceName}',
+          '${dataType}', $owner, $content,
+          ${subType.fold("()") { "'" + _ + "'"}},
+          ${group.fold("()") { "'" + _ + "'"}},
+          ${permissions.fold("()") { "'" + _ + "'"}})
+          return ()
+        """)
+      .go
+  }
+
+  def teardownResource(resourceName: String, dataType: String, owner: Int) = {
+    xq(
+      s"""
+         let $$file := tcommon:teardown-resource('${resourceName}', '${dataType}', $owner)
+          return ()
+        """)
+      .go
+  }
 
   override def beforeAll: Unit = {
     initDb

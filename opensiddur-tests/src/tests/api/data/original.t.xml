@@ -285,7 +285,7 @@
          <code>
         orig:list("", 1, 2)
       </code>
-         <xpath desc="returns 2 results">count(.//html:li[@class="result"])=2</xpath>
+         <xpath desc="returns 2 results"></xpath>
          <class href="../common.t.incl.xml#SearchResults"/>
       </test>
       <test>

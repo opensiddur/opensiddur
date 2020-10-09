@@ -23,6 +23,7 @@ class TestData extends DbTest {
       declare variable $t:month := format-number(month-from-date(current-date()), "00");
       
       declare variable $t:resource := "datatest";
+      declare variable $t:noaccess := "noaccess";
       
       declare variable $t:resource-content := document {
        <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
@@ -67,6 +68,7 @@ class TestData extends DbTest {
     xq(
       """
         let $test-resource := tcommon:setup-resource($t:resource, "original", 1, $t:resource-content)
+        let $noaccess-resource := tcommon:setup-resource($t:noaccess, "original", 1, $t:resource-content, (), "everyone", "rw-------")
         return ()
         """)
     .go
@@ -76,6 +78,7 @@ class TestData extends DbTest {
     xq(
       """
         let $test-resource := tcommon:teardown-resource($t:resource, "original", 1)
+        let $noaccess-resource := tcommon:teardown-resource($t:noaccess, "original", 1)
         return ()
         """)
     .go
@@ -160,8 +163,8 @@ class TestData extends DbTest {
     it("returns a numbered resource when there is a resource with the same title") {
       xq("""data:new-path("original", "datatest")""")
         .assertXPath("""$output=concat(
-                       |"/db/data/original/", $t:year, "/", $t:month, "/datatest-1.xml"
-                       |)""".stripMargin)
+                       "/db/data/original/", $t:year, "/", $t:month, "/datatest-1.xml"
+                       )""")
         .go
     }
   }
@@ -175,6 +178,12 @@ class TestData extends DbTest {
 
     it("returns empty for a nonexistent document by path") {
       xq("""data:doc("/api/data/original/__nope__")""")
+        .assertEmpty
+        .go
+    }
+
+    it("returns empty if a document is inaccessible") {
+      xq("""data:doc("/api/data/original/noaccess")""")
         .assertEmpty
         .go
     }

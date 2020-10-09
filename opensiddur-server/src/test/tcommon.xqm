@@ -220,11 +220,14 @@ declare function tcommon:setup-resource(
 ) as xs:string {
   let $log := util:log-system-out("setup " || $resource-name || " as " || string($owner))
   let $resource-path := system:as-user("xqtest" || string($owner), "xqtest" || string($owner),
+      let $collection := string-join(("/db/data", $data-type, $subtype), "/")
+      let $resource := $resource-name || ".xml"
       let $path := xmldb:store(
-      string-join(("/db/data", $data-type, $subtype), "/"), $resource-name || ".xml", $content)
+      $collection, $resource, $content)
       let $wait := tcommon:wait-for("Storing " || $path, function() { doc-available($path) })
       let $ridx := ridx:reindex(doc($path))
       let $didx := didx:reindex(doc($path))
+      let $xidx := system:as-user("admin", $magic:password, xmldb:reindex($collection, $resource))
       let $log := util:log("info", "Saved " || $path || " as " || $owner)
       return $path
   )

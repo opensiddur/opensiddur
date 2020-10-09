@@ -141,7 +141,12 @@ declare function data:doc(
   $type as xs:string,
   $name as xs:string
   ) as document-node()? {
-  doc(didx:query-path($type, $name))
+  try {
+    doc(didx:query-path($type, $name))
+  }
+  catch err:FODC0005 {
+    ( (: return empty on access denied :) )
+  }
 };
 
 (:~ get a document using an api path, with or without /api :)
@@ -154,5 +159,5 @@ declare function data:doc(
   let $data-type := $tokens[1 + $token-offset]
   let $resource := $tokens[2 + $token-offset]
   return
-    doc(didx:query-path($data-type, $resource))
+    data:doc($data-type, $resource)
 };
