@@ -23,6 +23,9 @@ declare namespace exist="http://exist.sourceforge.net/NS/exist";
 (:~ base of all data paths :)
 declare variable $data:path-base := "/db/data";
 
+(:~ API paths that can be supported by doc and db-api-path-to-db :)
+declare variable $data:supported-api-paths := ("data", "user");
+
 (:~ convert a given path from an API path (may begin / or /api) to a database path
  : works only to find the resource. 
  : @param $api-path API path
@@ -159,5 +162,12 @@ declare function data:doc(
   let $data-type := $tokens[1 + $token-offset]
   let $resource := $tokens[2 + $token-offset]
   return
-    data:doc($data-type, $resource)
+    if ($tokens[1] = ("data", "user"))
+    then
+        data:doc($data-type, $resource)
+    else
+        error(
+        	      xs:QName("error:NOTIMPLEMENTED"),
+        	      "data:doc() not implemented for the path: " || $api-path
+        	    )
 };

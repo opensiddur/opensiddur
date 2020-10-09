@@ -146,9 +146,9 @@ class TestData extends DbTest {
         .go
     }
 
-    it("returns empty in an unsupported hierarchy") {
+    it("throws an exception in an unsupported hierarchy") {
       xq("""data:api-path-to-db("/api/group/everyone")""")
-        .assertEmpty
+        .assertThrows("error:NOTIMPLEMENTED")
         .go
     }
   }
@@ -176,6 +176,12 @@ class TestData extends DbTest {
         .go
     }
 
+    it("returns a document that exists by API path (without /api)") {
+      xq("""data:doc("/data/original/datatest")""")
+        .assertXPath("$output instance of document-node()")
+        .go
+    }
+
     it("returns empty for a nonexistent document by path") {
       xq("""data:doc("/api/data/original/__nope__")""")
         .assertEmpty
@@ -185,6 +191,12 @@ class TestData extends DbTest {
     it("returns empty if a document is inaccessible") {
       xq("""data:doc("/api/data/original/noaccess")""")
         .assertEmpty
+        .go
+    }
+
+    it("throws an exception for an inaccessible API") {
+      xq("""data:doc("/api/test/something")""")
+        .assertThrows("error:NOTIMPLEMENTED")
         .go
     }
   }
