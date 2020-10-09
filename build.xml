@@ -323,16 +323,16 @@ cacheSize=${cache.size}
             <arg value="python/wait_for_up.py"/>
         </exec>
         <exec
-            executable="mvn"
-            failonerror="true"
-            dir="opensiddur-extensions"
-        >
-            <arg value="test"/>
-        </exec>
-        <exec
             executable="python3"
             failonerror="true">
             <arg value="python/testrunner.py"/>
+        </exec>
+        <exec
+                executable="mvn"
+                failonerror="true"
+                dir="opensiddur-extensions"
+        >
+            <arg value="test"/>
         </exec>
     </target>
 
