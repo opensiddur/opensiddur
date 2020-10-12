@@ -224,13 +224,17 @@ class Xq(
   }
 
   def assertXmlEquals(xml: String*): Xq = {
+    assertXPathEquals("$output", xml :_*)
+  }
+
+  def assertXPathEquals(xpath: String, xml: String*): Xq = {
     val xmlSequence = "(" + xml.mkString(",") +  ")"
 
     new Xq(
       _code = _code,
       _prolog = _prolog,
       _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion(s"empty(tcommon:deep-equal($$output, $xmlSequence))", s" output did not equal $xmlSequence"),
+      _assertions = _assertions :+ XPathAssertion(s"empty(tcommon:deep-equal($xpath, $xmlSequence))", s" $xpath did not equal $xmlSequence"),
       _auth = _auth
     )
   }
