@@ -277,6 +277,22 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
       new Xq(code, prolog)
     }
 
+  def setupUsers(n: Int) = {
+    xq(s"""
+    let $$users := tcommon:setup-test-users($n)
+    return ()
+    """)
+      .go
+  }
+
+  def teardownUsers(n: Int) = {
+    xq(
+      s"""
+        let $$users := tcommon:teardown-test-users($n)
+        return ()
+        """)
+      .go
+  }
 
   def setupResource(localSource: String,
                     resourceName: String,
