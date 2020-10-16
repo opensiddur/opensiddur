@@ -56,9 +56,29 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
     setupResource("src/test/resources/api/data/original/ExternalReference.xml",
       "ExternalReference", "original", 1, Some("en"),
       group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/With-RevisionDesc-And-Change.xml",
+      "WithRevisionDescAndChange", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/With-RevisionDesc-And-ChangeLog.xml",
+      "WithRevisionDescAndChangeLog", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/With-No-RevisionDesc.xml",
+      "WithNoRevisionDesc", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/With-Empty-RevisionDesc.xml",
+      "WithEmptyRevisionDesc", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+
   }
 
   def tearDown(): Unit = {
+    teardownResource("WithNoRevisionDesc", "original", 1)
+    teardownResource("WithEmptyRevisionDesc", "original", 1)
+    teardownResource("WithRevisionDescAndChangeLog", "original", 1)
+    teardownResource("WithRevisionDescAndChange", "original", 1)
+    teardownResource("TestInvalidExternalReference", "original", 1)
+    teardownResource("TestValidExternalReference", "original", 1)
+    teardownResource("Valid", "original", 1)
     teardownResource("Existing", "original", 1)
     teardownResource("NoAccess", "original", 2)
     teardownResource("NoWriteAccess", "original", 2)
@@ -95,7 +115,14 @@ class TestOriginal extends OriginalDataTestFixtures {
   }
 
   describe("orig:get") {
-    it("returns a successful http call for an existing document") {
+    it("returns a successful http call for an existing document when authenticated") {
+      xq("orig:get('Existing')")
+        .user("xqtest1")
+        .assertXPath("""exists($output/tei:TEI)""", "Returns a TEI resource")
+        .go
+    }
+
+    it("returns a successful http call for an existing document when unauthenticated") {
       xq("orig:get('Existing')")
         .assertXPath("""exists($output/tei:TEI)""", "Returns a TEI resource")
         .go
@@ -107,7 +134,14 @@ class TestOriginal extends OriginalDataTestFixtures {
         .go
     }
 
-    it("returns not found where there is no read access") {
+    it("returns not found where there is no read access when authenticated") {
+      xq("""orig:get("NoAccess")""")
+        .user("xqtest1")
+        .assertHttpNotFound
+        .go
+    }
+
+    it("returns not found where there is no read access when unauthenticated") {
       xq("""orig:get("NoAccess")""")
         .assertHttpNotFound
         .go
@@ -223,11 +257,21 @@ class TestOriginal extends OriginalDataTestFixtures {
   }
 
   describe("orig:list") {
-    it("lists all resources") {
+    it("lists all resources when authenticated") {
       xq("""orig:list("", 1, 100)""")
+        .user("xqtest1")
         .assertXPath("""count($output//html:li[@class="result"])>=1""", "Returns at least one result")
         .assertXPath("""every $li in $output//html:li[@class="result"]
                        satisfies exists($li/html:a[@class="alt"][@property="access"])""", "Results include a pointer to the access API")
+        .assertSearchResults
+        .go
+    }
+
+    it("does not list resources for which there is no read access when unauthenticated") {
+      xq("""orig:list("", 1, 100)""")
+        .assertXPath("""count($output//html:li[@class="result"])>=1""", "Returns at least one result")
+        .assertXPath("""empty($output//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])""",
+          "Does not list resources for which there is no access")
         .assertSearchResults
         .go
     }
@@ -247,10 +291,195 @@ class TestOriginal extends OriginalDataTestFixtures {
     }
   }
 
+  describe("orig:post") {
+    it("posts a valid resource") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/Valid.xml")
+
+      xq(s"""orig:post(document { $validContent })""")
+        .user("xqtest1")
+        .assertHttpCreated
+        .assertXPath(
+          """collection('/db/data/original/en')
+            [util:document-name(.)=tokenize($output//http:header[@name='Location']/@value,'/')[last()] || '.xml']
+            //tei:revisionDesc/tei:change[1][@who="/user/xqtest1"][@type="created"]""", "A change record has been added")
+        .go
+    }
+
+    it("returns unauthorized when posting a valid resource unauthenticated") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/Valid.xml")
+
+      xq(s"""orig:post(document { $validContent })""")
+        .assertHttpUnauthorized
+        .go
+    }
+
+    it("rejects a post of an invalid resource") {
+      val invalidContent = readXmlFile("src/test/resources/api/data/original/Invalid.xml")
+      xq(s"""orig:post(document { $invalidContent })""")
+        .user("xqtest1")
+        .assertHttpBadRequest
+        .go
+    }
+
+    it("rejects a post of a resource lacking a title") {
+      val invalidContent = readXmlFile("src/test/resources/api/data/original/Notitle.xml")
+      xq(s"""orig:post(document { $invalidContent })""")
+        .user("xqtest1")
+        .assertHttpBadRequest
+        .go
+    }
+
+    it("updates a document with a valid external reference") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/TestValidExternalReference.xml")
+
+      xq(s"""orig:post(document { $validContent })""")
+        .user("xqtest1")
+        .assertHttpCreated
+        .go
+    }
+
+    it("rejects a resource with an invalid external reference") {
+      val invalidContent = readXmlFile("src/test/resources/api/data/original/TestInvalidExternalReference.xml")
+      xq(s"""orig:post(document { $invalidContent })""")
+        .user("xqtest1")
+        .assertHttpBadRequest
+        .go
+    }
+  }
+
+  describe("orig:get-access") {
+    it("returns an access structure for an existing document") {
+      xq("""orig:get-access("Existing", ())""")
+        .user("xqtest1")
+        .assertXPath("exists($output/self::a:access)", "an access structure is returned")
+        .go
+    }
+
+    it("returns an access structure for an existing document when unauthenticated") {
+      xq("""orig:get-access("Existing", ())""")
+        .assertXPath("exists($output/self::a:access)", "an access structure is returned")
+        .go
+    }
+
+    it("returns not found for a nonexisting document") {
+      xq("""orig:get-access("DoesNotExist", ())""")
+        .user("xqtest1")
+        .assertHttpNotFound
+        .go
+    }
+  }
+
+  describe("orig:put-access") {
+    it("returns 'no data' when setting access with a valid structure and authenticated") {
+      xq(
+        """orig:put-access("Existing", document {
+          <a:access>
+            <a:owner>xqtest1</a:owner>
+            <a:group write="true">everyone</a:group>
+            <a:world read="true" write="true"/>
+          </a:access>
+        })""")
+        .user("xqtest1")
+        .assertHttpNoData
+        .go
+    }
+
+    it("returns unauthorized on an existing document when unauthenticated") {
+      xq(
+        """orig:put-access("Existing", document {
+          <a:access>
+            <a:owner>xqtest1</a:owner>
+            <a:group write="false">everyone</a:group>
+            <a:world read="false" write="false"/>
+          </a:access>
+        })""")
+        .assertHttpUnauthorized
+        .go
+    }
+
+    it("returns bad request when the access structure is invalid") {
+      xq("""orig:put-access("Existing", document {
+                   <a:access>
+                     <a:invalid/>
+                   </a:access>
+                 })""")
+        .user("xqtest1")
+        .assertHttpBadRequest
+        .go
+    }
+
+    it("returns forbidden when there is no write access") {
+      xq("""orig:put-access("NoWriteAccess", document {
+                   <a:access>
+                     <a:owner>xqtest1</a:owner>
+                     <a:group write="false">xqtest1</a:group>
+                     <a:world write="false" read="false"/>
+                   </a:access>
+                 })""")
+        .user("xqtest1")
+        .assertHttpForbidden
+        .go
+    }
+
+    it("returns not found when the document doesn't exist") {
+      xq("""orig:put-access("DoesNotExist", document {
+                   <a:access>
+                     <a:owner>xqtest1</a:owner>
+                     <a:group write="false">xqtest1</a:group>
+                     <a:world write="false" read="false"/>
+                   </a:access>
+                 })""")
+        .user("xqtest1")
+        .assertHttpNotFound
+        .go
+    }
+  }
+
+  describe("crest:record-change") {
+    it("adds an edit record when there is a revisionDesc and change existing") {
+      xq("""crest:record-change(doc("/db/data/original/en/WithRevisionDescAndChange.xml"), "edited")""")
+        .user("xqtest1")
+        .assertXPath(
+          """doc('/db/data/original/en/WithRevisionDescAndChange.xml')//tei:revisionDesc/tei:change[1]
+            [@when][@who='/user/xqtest1'][@type='edited']""", "change is recorded")
+        .go
+    }
+
+    it("adds details to a record with revisionDesc and change log entry") {
+      xq("""crest:record-change(doc("/db/data/original/en/WithRevisionDescAndChangeLog.xml"), "edited")""")
+        .user("xqtest1")
+        .assertXPath("""count(doc('/db/data/original/en/WithRevisionDescAndChangeLog.xml')//tei:revisionDesc/tei:change)=1""",
+          "no change entry is inserted")
+        .assertXPath(
+          """doc('/db/data/original/en/WithRevisionDescAndChangeLog.xml')//tei:revisionDesc/tei:change[1]
+            [@when][@who='/user/xqtest1'][@type='edited']""", "change is recorded")
+        .go
+    }
+
+    it("adds an edit record with empty revisionDesc") {
+      xq("""crest:record-change(doc("/db/data/original/en/WithEmptyRevisionDesc.xml"), "edited")""")
+        .user("xqtest1")
+        .assertXPath(
+          """doc('/db/data/original/en/WithEmptyRevisionDesc.xml')//tei:revisionDesc/tei:change[1]
+            [@when][@who='/user/xqtest1'][@type='edited']""", "change is recorded")
+        .go
+    }
+
+    it("adds an edit record with no revisionDesc") {
+      xq("""crest:record-change(doc("/db/data/original/en/WithNoRevisionDesc.xml"), "created")""")
+        .user("xqtest1")
+        .assertXPath(
+          """doc('/db/data/original/en/WithNoRevisionDesc.xml')//tei:revisionDesc/tei:change[1]
+            [@when][@who='/user/xqtest1'][@type='created']""", "change is recorded in a new revisionDesc")
+        .go
+    }
+  }
+
+
 }
 
-// delete will delete data, so we need a separate fixture
-class TestOriginalDelete extends OriginalDataTestFixtures {
+// delete will delete data and put will alter data, so we need a separate fixture
+class TestOriginalWithReset extends OriginalDataTestFixtures {
   override def beforeEach = {
     super.beforeEach()
     setup()
@@ -260,6 +489,66 @@ class TestOriginalDelete extends OriginalDataTestFixtures {
     tearDown()
     super.afterEach()
   }
+
+  describe("orig:put") {
+    it("successfully puts a valid resource to an existing resource") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/Existing-After-Put.xml")
+
+      xq(s"""orig:put("Existing", document { $validContent })""")
+        .user("xqtest1")
+        .assertHttpNoData
+        .assertXPath(
+          """doc('/db/data/original/en/Existing.xml')
+            //tei:revisionDesc/tei:change[1][@who="/user/xqtest1"][@type="edited"][@who="/user/xqtest1"][@when]""", "A change record has been added")
+        .assertXPath("""count(doc('/db/data/original/en/Existing.xml')//tei:revisionDesc/tei:change)=2""", "There are 2 change records total")
+        .go
+    }
+
+    it("returns unauthorized when putting a valid resource to an existing resource unauthenticated") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/Existing-After-Put.xml")
+
+      xq(s"""orig:put("Existing", document { $validContent })""")
+        .assertHttpUnauthorized
+        .go
+    }
+
+    it("flags an error when a resource is put to a nonexistent resource") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/Valid.xml")
+
+      xq(s"""orig:put("DoesNotExist", document { $validContent })""")
+        .user("xqtest1")
+        .assertHttpNotFound
+        .go
+    }
+
+    it("flags an error when a resource is put to a nonexistent resource unauthenticated") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/Valid.xml")
+
+      xq(s"""orig:put("DoesNotExist", document { $validContent })""")
+        .assertHttpNotFound
+        .go
+    }
+
+
+    it("flags an error on put of an invalid resource to an existing resource") {
+      val invalidContent = readXmlFile("src/test/resources/api/data/original/Invalid.xml")
+
+      xq(s"""orig:put("Existing", document { $invalidContent })""")
+        .user("xqtest1")
+        .assertHttpBadRequest
+        .go
+    }
+
+    it("flags an error on a resource that is invalidated by an illegal change") {
+      val invalidContent = readXmlFile("src/test/resources/api/data/original/Invalid-After-Put-Illegal-RevisionDesc.xml")
+
+      xq(s"""orig:put("Existing", document { $invalidContent })""")
+        .user("xqtest1")
+        .assertHttpBadRequest
+        .go
+    }
+  }
+
   describe("orig:delete") {
     it("removes an existing resource") {
       xq("""orig:delete("Existing")""")
@@ -268,9 +557,21 @@ class TestOriginalDelete extends OriginalDataTestFixtures {
         .go
     }
 
+    it("returns unauthorized when unauthenticated") {
+      xq("""orig:delete("Existing")""")
+        .assertHttpUnauthorized
+        .go
+    }
+
     it("returns HTTP 404 for removing a nonexistent resource") {
       xq("""orig:delete("DoesNotExist")""")
         .user("xqtest1")
+        .assertHttpNotFound
+        .go
+    }
+
+    it("returns HTTP 404 for removing a nonexistent resource, when unauthenticated") {
+      xq("""orig:delete("DoesNotExist")""")
         .assertHttpNotFound
         .go
     }
@@ -286,6 +587,36 @@ class TestOriginalDelete extends OriginalDataTestFixtures {
       xq("""orig:delete("ExternalReference")""")
         .user("xqtest1")
         .assertHttpNoData
+        .go
+    }
+  }
+
+  describe("orig:put-flat") {
+    it("puts a valid flattened resource to an existing resource") {
+      val existingFlat = readXmlFile("src/test/resources/api/data/original/Existing-Flat.xml")
+
+      xq(s"""orig:put-flat("Existing", document { $existingFlat })""")
+        .user("xqtest1")
+        .assertHttpNoData
+        .assertXPath(
+          """(collection('/db/data/original/en')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change)[1]
+            [@type="edited"][@who="/user/xqtest1"][@when]""", "A change record has been added")
+        .go
+    }
+
+    it("returns not found when the resource does not exist") {
+      val validFlat = readXmlFile("src/test/resources/api/data/original/Valid-Flat.xml")
+      xq(s"""orig:put-flat("DoesNotExist", document { $validFlat })""")
+        .assertHttpNotFound
+        .go
+    }
+
+    it("returns bad request when the resource is not valid") {
+      val invalidFlat = readXmlFile("src/test/resources/api/data/original/Invalid-Flat.xml")
+
+      xq(s"""orig:put-flat("Existing", document { $invalidFlat })""")
+        .user("xqtest1")
+        .assertHttpBadRequest
         .go
     }
   }

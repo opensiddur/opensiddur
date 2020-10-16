@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">MakesExternalReference</tei:title>
+            <tei:title type="main" xml:lang="en">TestValidExternalReference</tei:title>
             
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
-               <tei:name ref="/user/testuser">Test User</tei:name>
+               <tei:name ref="/user/xqtest1">Test User</tei:name>
             </tei:respStmt>
             
          </tei:titleStmt>
@@ -27,13 +26,10 @@
             </tei:bibl>
          </tei:sourceDesc>
       </tei:fileDesc>
-      <tei:revisionDesc>
-         <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
-      </tei:revisionDesc>
    </tei:teiHeader>
    <tei:text>
       <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="text">
-        <tei:ptr xml:id="ext_ref" target="/data/original/ExternalReference#text"/>
+        <tei:ptr xml:id="ptr1" target="/data/original/ExternalReference#text"/>
       </j:streamText>
    </tei:text>
 </tei:TEI>

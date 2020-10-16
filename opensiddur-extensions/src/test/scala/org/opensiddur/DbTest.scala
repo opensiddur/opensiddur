@@ -245,6 +245,12 @@ class Xq(
       .assertXPath("""$output/self::rest:response/http:response/@status = 404""", "expected HTTP not found")
   }
 
+  def assertHttpCreated: Xq = {
+    this
+      .assertXPath("""$output/self::rest:response/http:response/@status = 201""", "expected HTTP created")
+      .assertXPath("""exists($output/self::rest:response/http:response/http:header[@name="Location"][@value])""", "returns a Location header")
+  }
+
   def assertHttpBadRequest: Xq = {
     this
       .assertXPath("""$output/self::rest:response/http:response/@status = 400""", "expected HTTP bad request")
@@ -259,6 +265,11 @@ class Xq(
     this
       .assertXPath("""$output/self::rest:response/http:response/@status = 204""", "expected HTTP No data")
       .assertXPath("""$output/self::rest:response/output:serialization-parameters/output:method = "text"""", "output is declared as text")
+  }
+
+  def assertHttpUnauthorized: Xq = {
+    this
+      .assertXPath("""$output/self::rest:response/http:response/@status = 401""", "expected HTTP unauthorized")
   }
 
   def assertSearchResults: Xq = {
@@ -294,6 +305,17 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
       .go
   }
 
+  def readXmlFile(localSource: String): String = {
+    val contentSource = io.Source.fromFile(localSource)
+    val content = try {
+      contentSource.getLines.mkString
+    } finally {
+      contentSource.close()
+    }
+
+    content
+  }
+
   def setupResource(localSource: String,
                     resourceName: String,
                     dataType: String,
@@ -302,12 +324,7 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
                     group: Option[String] = None,
                     permissions: Option[String] = None
                    ) = {
-    val contentSource = io.Source.fromFile(localSource)
-    val content = try {
-      contentSource.getLines.mkString
-    } finally {
-      contentSource.close()
-    }
+    val content = readXmlFile(localSource)
     xq(
       s"""
          let $$file := tcommon:setup-resource('${resourceName}',
