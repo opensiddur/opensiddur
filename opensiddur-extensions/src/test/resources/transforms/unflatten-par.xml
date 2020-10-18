@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
     <tei:teiHeader>
         <tei:fileDesc>
@@ -27,13 +26,13 @@
     <tei:text>
         <j:parallelText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="parallel">
             <tei:idno>Test</tei:idno>
-            <tei:linkGrp domains="/data/tests/unflatten-parA#stream /data/tests/unflatten-parB#stream">
-                <tei:link target="/data/tests/unflatten-parA#range(A1,A3) /data/tests/unflatten-parB#B1"/>
-                <tei:link target="/data/tests/unflatten-parA#range(A5,A6) /data/tests/unflatten-parB#B2"/>
-                <tei:link target="/data/tests/unflatten-parA#range(A7,A8) /data/tests/unflatten-parB#B3"/>
-                <tei:link target="/data/tests/unflatten-parA#range(A11,A12) /data/tests/unflatten-parB#B4"/>
-                <tei:link target="/data/tests/unflatten-parA#range(A14,A15) /data/tests/unflatten-parB#B5"/>
-                <tei:link target="/data/tests/unflatten-parA#range(A16,A17) /data/tests/unflatten-parB#B6"/>
+            <tei:linkGrp domains="/data/original/unflatten-parA#stream /data/original/unflatten-parB#stream">
+                <tei:link target="/data/original/unflatten-parA#range(A1,A3) /data/original/unflatten-parB#B1"/>
+                <tei:link target="/data/original/unflatten-parA#range(A5,A6) /data/original/unflatten-parB#B2"/>
+                <tei:link target="/data/original/unflatten-parA#range(A7,A8) /data/original/unflatten-parB#B3"/>
+                <tei:link target="/data/original/unflatten-parA#range(A11,A12) /data/original/unflatten-parB#B4"/>
+                <tei:link target="/data/original/unflatten-parA#range(A14,A15) /data/original/unflatten-parB#B5"/>
+                <tei:link target="/data/original/unflatten-parA#range(A16,A17) /data/original/unflatten-parB#B6"/>
             </tei:linkGrp>
         </j:parallelText>
    </tei:text>
