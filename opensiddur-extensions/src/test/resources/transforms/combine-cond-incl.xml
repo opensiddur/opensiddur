@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
     <tei:teiHeader>
         <tei:fileDesc>
@@ -25,9 +24,9 @@
         </tei:revisionDesc>
     </tei:teiHeader>
     <j:settings xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
-        <tei:fs xml:id="set1" type="opensiddur:annotation">
-            <tei:f name="combine-ann-notes">
-            <j:on/>
+        <tei:fs xml:id="set1" type="SET1">
+            <tei:f name="OFF">
+            <j:yes/>
          </tei:f>
         </tei:fs>
         <tei:fs xml:id="tr" type="opensiddur">
@@ -41,7 +40,7 @@
     <tei:text>
         <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
             <tei:seg xml:id="seg1">From includer 1</tei:seg>
-            <tei:ptr xml:id="ptr2" target="/data/original/combine-ann-parA#stream"/>
+            <tei:ptr xml:id="ptr2" target="/data/original/combine-cond-parA#stream"/>
             <tei:seg xml:id="seg3">From includer 2</tei:seg>
         </j:streamText>
    </tei:text>

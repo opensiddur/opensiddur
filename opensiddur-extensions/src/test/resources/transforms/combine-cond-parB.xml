@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
-                <tei:title type="main">Parallel text A</tei:title>
+                <tei:title type="main">Parallel text B</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
                 <tei:distributor>
@@ -25,12 +24,12 @@
         </tei:revisionDesc>
     </tei:teiHeader>
     <j:settings xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
-        <tei:fs xml:id="set2" type="SET2">
+        <tei:fs xml:id="set3" type="SET3">
             <tei:f name="OFF">
             <j:yes/>
          </tei:f>
         </tei:fs>
-        <tei:fs xml:id="set4" type="SET4">
+        <tei:fs xml:id="set5" type="SET5">
             <tei:f name="OFF">
             <j:yes/>
          </tei:f>
@@ -44,15 +43,15 @@
             </tei:f>
             </tei:fs>
         </j:condition>
-        <j:condition xml:id="offInA">
-            <tei:fs type="SET2">
+        <j:condition xml:id="offInB">
+            <tei:fs type="SET3">
                 <tei:f name="OFF">
                <j:no/>
             </tei:f>
             </tei:fs>
         </j:condition>
-        <j:condition xml:id="offInASetA">
-            <tei:fs type="SET4">
+        <j:condition xml:id="offInBSetB">
+            <tei:fs type="SET5">
                 <tei:f name="OFF">
                <j:no/>
             </tei:f>
@@ -60,15 +59,15 @@
         </j:condition>
     </j:conditions>
     <j:links xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
-        <tei:link type="set" target="#stream #set2"/>
-        <tei:link type="set" target="#offAintSetInt #set4"/>
-        <tei:link type="condition" target="#offAint #offInA"/>
-        <tei:link type="condition" target="#offAext #offExt"/>
-        <tei:link type="condition" target="#offAintSetInt #offInASetA"/>
+        <tei:link type="set" target="#stream #set3"/>
+        <tei:link type="set" target="#offBintSetInt #set5"/>
+        <tei:link type="condition" target="#offBint #offInB"/>
+        <tei:link type="condition" target="#offBext #offExt"/>
+        <tei:link type="condition" target="#offBintSetInt #offInBSetB"/>
     </j:links>
     <tei:text>
         <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
-            <tei:anchor xml:id="beginA"/>
+            <tei:anchor xml:id="beginB"/>
             <tei:seg xml:id="present">Present in both</tei:seg>
             <tei:seg xml:id="offAext">Off in A by external</tei:seg>
             <tei:seg xml:id="offBext">Off in B by external</tei:seg>
@@ -76,7 +75,7 @@
             <tei:seg xml:id="offBint">Off in B by internal</tei:seg>
             <tei:seg xml:id="offAintSetInt">Off in A by internal set internal</tei:seg>
             <tei:seg xml:id="offBintSetInt">Off in B by internal set internal</tei:seg>
-            <tei:anchor xml:id="endA"/>
+            <tei:anchor xml:id="endB"/>
         </j:streamText>
    </tei:text>
 </tei:TEI>

@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
-                <tei:title type="main">Parallel texts A and B</tei:title>
+                <tei:title type="main">Parallel text B</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
                 <tei:distributor>
@@ -17,7 +16,7 @@
             <tei:sourceDesc>
                 <tei:bibl>
                <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
-               <tei:ptr type="bibl-content" target="#parallel"/>
+               <tei:ptr type="bibl-content" target="#stream"/>
             </tei:bibl>
             </tei:sourceDesc>
         </tei:fileDesc>
@@ -25,11 +24,8 @@
         </tei:revisionDesc>
     </tei:teiHeader>
     <tei:text>
-        <j:parallelText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="parallel">
-            <tei:idno>Test</tei:idno>
-            <tei:linkGrp domains="/data/original/combine-ann-parA#stream /data/original/combine-ann-parB#stream">
-                <tei:link target="/data/original/combine-ann-parA#range(anchor1,anchor2) /data/original/combine-ann-parB#range(anchor1,anchor2)"/>
-            </tei:linkGrp>
-        </j:parallelText>
+        <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
+            <tei:seg xml:id="B1">B-1</tei:seg>
+        </j:streamText>
    </tei:text>
 </tei:TEI>

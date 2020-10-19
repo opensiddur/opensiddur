@@ -7,6 +7,7 @@ import org.scalatest.{BeforeAndAfterEach, BeforeAndAfterAll}
 import org.xmldb.api.DatabaseManager
 import org.xmldb.api.base._
 import org.xmldb.api.modules._
+import Numeric._
 
 trait XQueryCall {
   def initDb(): Unit = {
@@ -183,7 +184,7 @@ class Xq(
     )
   }
 
-  def assertEquals[T](value: Numeric[T]): Xq = {
+  def assertEquals[T : Numeric](value: T): Xq = {
     new Xq(
       _code = _code,
       _prolog = _prolog,

@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
-                <tei:title type="main">Includer</tei:title>
+                <tei:title type="main">Include Simple</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
                 <tei:distributor>
@@ -25,24 +24,18 @@
         </tei:revisionDesc>
     </tei:teiHeader>
     <j:settings xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
-        <tei:fs xml:id="set1" type="SET1">
-            <tei:f name="OFF">
-            <j:yes/>
-         </tei:f>
-        </tei:fs>
-        <tei:fs xml:id="tr" type="opensiddur">
-            <tei:f name="translation">Test</tei:f>
+        <tei:fs xml:id="translation-on" type="opensiddur">
+            <tei:f name="translation">AB</tei:f>
         </tei:fs>
     </j:settings>
     <j:links xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
-        <tei:link type="set" target="#stream #set1"/>
-        <tei:link type="set" target="#ptr2 #tr"/>
+        <tei:link type="set" target="#inc3 #translation-on"/>
     </j:links>
     <tei:text>
         <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
-            <tei:seg xml:id="seg1">From includer 1</tei:seg>
-            <tei:ptr xml:id="ptr2" target="/data/original/combine-cond-parA#stream"/>
-            <tei:seg xml:id="seg3">From includer 2</tei:seg>
+            <tei:ptr xml:id="inc1" target="/data/original/parallel-simple-A#stream"/>
+            <tei:ptr xml:id="inc2" target="/data/original/parallel-simple-B#stream"/>
+            <tei:ptr xml:id="inc3" target="/data/original/parallel-simple-A#stream"/>
         </j:streamText>
    </tei:text>
 </tei:TEI>

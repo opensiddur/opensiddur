@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
-                <tei:title type="main">Parallel texts A and B</tei:title>
+                <tei:title type="main">Linkage A to B</tei:title>
             </tei:titleStmt>
             <tei:publicationStmt>
                 <tei:distributor>
@@ -26,9 +25,9 @@
     </tei:teiHeader>
     <tei:text>
         <j:parallelText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="parallel">
-            <tei:idno>Test</tei:idno>
-            <tei:linkGrp domains="/data/original/combine-cond-parA#stream /data/original/combine-cond-parB#stream">
-                <tei:link target="/data/original/combine-cond-parA#range(beginA,endA) /data/original/combine-cond-parB#range(beginB,endB)"/>
+            <tei:idno>AB</tei:idno>
+            <tei:linkGrp domains="/data/original/parallel-simple-A#stream /data/original/parallel-simple-B#stream">
+                <tei:link target="/data/original/parallel-simple-A#A1 /data/original/parallel-simple-B#B1"/>
             </tei:linkGrp>
         </j:parallelText>
    </tei:text>
