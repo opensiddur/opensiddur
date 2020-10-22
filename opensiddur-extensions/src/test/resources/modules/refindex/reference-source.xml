@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
   <j:links xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
-      <tei:link type="note" target="#segA /data/tests/reference-target#note"/>
+      <tei:link type="note" target="#segA /data/original/reference-target#note"/>
   </j:links>
   <tei:text>
       <tei:seg xml:id="outside">outside</tei:seg>
@@ -13,9 +12,9 @@
          <tei:seg xml:id="ancestor">
             <tei:w xml:id="child">child of a local target</tei:w>
          </tei:seg>
-         <tei:ptr xml:id="external_broken" target="/data/tests/no-target#seg1"/>
-         <tei:ptr xml:id="external" target="/data/tests/reference-target#seg1"/>
-         <tei:ptr xml:id="external_range" target="/data/tests/reference-target#range(seg2,seg4)"/>
+         <tei:ptr xml:id="external_broken" target="/data/original/no-target#seg1"/>
+         <tei:ptr xml:id="external" target="/data/original/reference-target#seg1"/>
+         <tei:ptr xml:id="external_range" target="/data/original/reference-target#range(seg2,seg4)"/>
          <tei:ptr xml:id="ptr_to_seg" target="#segA"/>
          <tei:ptr xml:id="ptr_to_range" target="#range(segB,segC)"/>
          <tei:ptr xml:id="internal_broken" target="#broken"/>

@@ -120,7 +120,7 @@ class Xq(
     _prolog + "\n" +
     s"let $$output := " +
       (if (_auth.user.nonEmpty)
-        s"system:as-user('${_auth.user.get}', '${_auth.pass.get}',"
+        s"system:as-user('${_auth.user.get}', ${if (_auth.user.get == "admin") "$magic:password" else s"'${_auth.pass.get}'"},"
        else "") +
       (if (_throws.nonEmpty) "try { " else "") +
       s"${_code}" +
