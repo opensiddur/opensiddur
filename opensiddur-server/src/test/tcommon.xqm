@@ -201,19 +201,26 @@ declare function tcommon:teardown-test-users(
 ) {
     for $i in 1 to $n
     let $name := "xqtest" || string($i)
-    let $remove-didx := didx:remove($user:path, $name || ".xml")
+    let $resource-name := $name || ".xml"
     return
-        try {
-            system:as-user($name, $name,
-            user:delete($name)
-            )
-        }
-        catch * {   (: try as admin... :)
-            system:as-user("admin", $magic:password,
-                user:delete($name)
-            )
-        }
-
+        (: this duplicates code from user:delete, but makes sure that the user *always* gets deleted :)
+        system:as-user("admin", $magic:password, (
+            if (fn:doc-available($user:path || "/" || $resource-name))
+            then xmldb:remove($user:path, $resource-name)
+            else (),
+            if (sm:user-exists($name))
+            then (
+                for $member in sm:get-group-members($name)
+                return sm:remove-group-member($name, $member),
+                for $manager in sm:get-group-managers($name)
+                return sm:remove-group-manager($name, $manager),
+                sm:remove-account($name),
+                sm:remove-group($name) (: TODO: successor group is guest! until remove-group#2 exists@ :)
+                )
+            else (),
+            didx:remove($user:path, $resource-name),
+            ridx:remove($user:path, $resource-name)
+      ))
 };
 
 (:~ set up a resource as if it had been added by API :)
@@ -280,7 +287,7 @@ declare function tcommon:teardown-resource(
             format:clear-caches($uri),
             ridx:remove($collection, $res),
             didx:remove($collection, $res),
-            xmldb:remove($collection, $res)
+            if ($doc-exists) then xmldb:remove($collection, $res) else ()
         )
   )
 };
