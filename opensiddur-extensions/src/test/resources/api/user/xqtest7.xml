@@ -1,0 +1,4 @@
+<j:contributor xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+    <tei:idno xmlns:tei="http://www.tei-c.org/ns/1.0">xqtest7</tei:idno>
+    <tei:name xmlns:tei="http://www.tei-c.org/ns/1.0">A Tester</tei:name>
+</j:contributor>

@@ -203,9 +203,17 @@ declare function tcommon:teardown-test-users(
     let $name := "xqtest" || string($i)
     let $remove-didx := didx:remove($user:path, $name || ".xml")
     return
-        system:as-user($name, $name,
-        user:delete($name)
-        )
+        try {
+            system:as-user($name, $name,
+            user:delete($name)
+            )
+        }
+        catch * {   (: try as admin... :)
+            system:as-user("admin", $magic:password,
+                user:delete($name)
+            )
+        }
+
 };
 
 (:~ set up a resource as if it had been added by API :)
@@ -251,28 +259,29 @@ declare function tcommon:setup-resource(
     tcommon:setup-resource($resource-name, $data-type, $owner, $content, (), (), ())
 };
 
-(:~ remove a test resource :)
+(:~ remove a test resource.
+ : $owner is -1 for admin
+ :)
 declare function tcommon:teardown-resource(
   $resource-name as xs:string,
   $data-type as xs:string,
   $owner as xs:integer
 ) {
-  system:as-user("xqtest" || string($owner), "xqtest" || string($owner),
-      let $test-collection := "/db/data/" || $data-type
+  system:as-user(
+    if ($owner=-1) then "admin" else ("xqtest" || string($owner)),
+    if( $owner=-1) then $magic:password else ("xqtest" || string($owner)),
+      let $probable-collection := "/db/data/" || $data-type
       let $doc := data:doc($data-type, $resource-name)
-      return
-        if (exists($doc))
-        then
-            let $uri := fn:document-uri($doc)
-            let $collection := util:collection-name($doc)
-            let $res := util:document-name($doc)
-            return (
-                format:clear-caches($uri),
-                ridx:remove($collection, $res),
-                didx:remove($collection, $res),
-                xmldb:remove($collection, $res)
-            )
-        else util:log("info", ("Cannot remove ", $data-type, " ", $resource-name, ": it cannot be found"))
+      let $doc-exists := exists($doc)
+      let $uri := if ($doc-exists) then fn:document-uri($doc) else xs:anyURI($probable-collection || "/" || $resource-name || ".xml")
+      let $collection := if ($doc-exists) then util:collection-name($doc) else $probable-collection
+      let $res := if ($doc-exists) then util:document-name($doc) else ($resource-name || ".xml")
+      return (
+            format:clear-caches($uri),
+            ridx:remove($collection, $res),
+            didx:remove($collection, $res),
+            xmldb:remove($collection, $res)
+        )
   )
 };
 
