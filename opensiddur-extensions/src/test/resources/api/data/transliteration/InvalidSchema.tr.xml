@@ -1,0 +1,14 @@
+<tr:schema xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
+    <tr:title xml:lang="en">Invalid</tr:title>
+    <tr:description xml:lang="en">An invalid transliteration table for testing, invalid because it has two duplicate langs</tr:description>
+    <tr:copyright-license uri="http://creativecommons.org/publicdomain/zero/1.0" />
+    <tr:author xml:lang="en">Nobody</tr:author>
+    <tr:table>
+        <tr:lang in="en" out="en"/>
+        <tr:tr from="a" to="a"/>
+        </tr:table>
+        <tr:table>
+        <tr:lang in="en" out="he"/>
+        <tr:tr from="a" to="a"/>
+    </tr:table>
+</tr:schema>
