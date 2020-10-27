@@ -1,0 +1,34 @@
+<tei:TEI xml:lang="en" xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title type="main">LinkDoc2</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:distributor>
+                    <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+                </tei:distributor>
+                <tei:availability>
+                    <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+                </tei:availability>
+                <tei:date>2020-01-01</tei:date>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:bibl>
+                    <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+                    <tei:ptr type="bibl-content" target="#stream"/>
+                </tei:bibl>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+        <tei:revisionDesc>
+        </tei:revisionDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <j:parallelText xml:id="parallel">
+            <tei:idno>ANOTHER</tei:idno>
+            <tei:linkGrp domains="/data/original/TestDoc1#stream /data/original/TestDoc2#stream">
+                <tei:link target="/data/original/TestDoc1#range(a1,a2) /data/original/TestDoc2#range(b1,b2)"/>
+            </tei:linkGrp>
+        </j:parallelText>
+    </tei:text>
+</tei:TEI>

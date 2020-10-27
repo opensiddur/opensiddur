@@ -30,11 +30,8 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 """
 
   def setup() = {
-    xq(
-      """let $user := tcommon:setup-test-users(2)
-         return ()
-        """)
-      .go
+    setupUsers(2)
+
     setupResource("src/test/resources/api/data/original/Existing.xml",
       "Existing", "original", 1, Some("en"),
       group=Some("everyone"),permissions=Some("rw-rw-r--"))
@@ -68,10 +65,25 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
     setupResource("src/test/resources/api/data/original/With-Empty-RevisionDesc.xml",
       "WithEmptyRevisionDesc", "original", 1, Some("en"),
       group=Some("everyone"),permissions=Some("rw-r--r--"))
-
+    setupResource("src/test/resources/api/data/original/TestDoc1.xml",
+      "TestDoc1", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/TestDoc2.xml",
+      "TestDoc2", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/LinkDoc1.xml",
+      "LinkDoc1", "linkage", 1, None,
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/LinkDoc2.xml",
+      "LinkDoc2", "linkage", 1, None,
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
   }
 
   def tearDown(): Unit = {
+    teardownResource("LinkDoc2", "linkage", 1)
+    teardownResource("LinkDoc1", "linkage", 1)
+    teardownResource("TestDoc2", "original", 1)
+    teardownResource("TestDoc1", "original", 1)
     teardownResource("WithNoRevisionDesc", "original", 1)
     teardownResource("WithEmptyRevisionDesc", "original", 1)
     teardownResource("WithRevisionDescAndChangeLog", "original", 1)
@@ -86,10 +98,8 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
     teardownResource("HasTransclude", "original", 1)
     teardownResource("Transcluded", "original", 1)
     teardownResource("ExternalReference", "original", 1)
-    xq(
-      """let $user := tcommon:teardown-test-users(2)
-         return ()
-        """)
+
+    teardownUsers(2)
   }
 
 }
@@ -475,7 +485,53 @@ class TestOriginal extends OriginalDataTestFixtures {
     }
   }
 
+  describe("orig:linkage-query-function") {
+    it("finds linkage documents associated with an original document") {
+      xq("""orig:linkage-query-function(doc("/db/data/original/en/TestDoc1.xml"), ())""")
+        .user("xqtest1")
+        .assertXPath("""count($output) = 2 and $output/tei:idno="TEST" and $output/tei:idno="ANOTHER"""",
+          "The expected linkages are returned")
+        .go
+    }
 
+    it("finds linkage documents associated with an original document, when limited by a query string") {
+      xq("""orig:linkage-query-function(doc("/db/data/original/en/TestDoc1.xml"), "TES")""")
+        .user("xqtest1")
+        .assertXPath("""count($output) = 1 and $output/tei:idno="TEST"""",
+          "The expected linkages are returned")
+        .go
+    }
+  }
+
+  describe("orig:linkage-title-function") {
+    val linkageData = readXmlFile("src/test/resources/api/data/original/LinkDoc1.xml")
+
+    it("returns the id of a linkage parallel group") {
+      xq(
+        s"""let $$data := document { $linkageData }
+           return orig:linkage-title-function($$data//j:parallelText)""")
+        .assertEquals("TEST")
+        .go
+    }
+  }
+
+  describe("orig:get-linkage") {
+    it("returns a list of linkages and ids to an original document") {
+      xq("""orig:get-linkage("TestDoc1", (), 1, 100)""")
+        .assertXPath("""count($output//html:li[@class="result"])=2""", "2 results")
+        .assertXPath("""every $id in ("TEST", "ANOTHER") satisfies $output//html:li[@class="result"]/html:a=$id""",
+          "Expected ids are returned")
+        .assertXPath("""every $link in $output//html:li[@class="result"]/html:a satisfies (
+        let $expected-link :=
+            if ($link = "TEST") then "LinkDoc1"
+            else if ($link = "ANOTHER") then "LinkDoc2"
+            else ()
+        return
+            matches($link/@href, "/api/data/linkage/" || $expected-link || "$"))""",
+          "ids are connected to the correct documents")
+        .go
+    }
+  }
 }
 
 // delete will delete data and put will alter data, so we need a separate fixture
