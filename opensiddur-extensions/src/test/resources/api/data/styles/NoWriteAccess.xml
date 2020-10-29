@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="">
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">Invalid</tei:title>
+            <tei:title type="main" xml:lang="en">NoWriteAccess</tei:title>
             
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
-               <tei:name ref="/user/testuser">Test User</tei:name>
+               <tei:name ref="/user/xqtest1">Test User</tei:name>
             </tei:respStmt>
             
          </tei:titleStmt>
@@ -31,21 +30,10 @@
          <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
       </tei:revisionDesc>
    </tei:teiHeader>
-   <j:stylesheet xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+   <j:stylesheet xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" scheme="css" xml:id="style"><![CDATA[
 // just some test CSS
 .tei-seg {
   display:none;   
 }
-
-@not-css {
-  d:x
-  y:z
-}
-   </j:stylesheet>
-   <tei:text>
-      <tei:front>
-        <tei:p>This is invalid</tei:p>
-      </tei:front>
-      
-   </tei:text>
+   ]]></j:stylesheet>
 </tei:TEI>
