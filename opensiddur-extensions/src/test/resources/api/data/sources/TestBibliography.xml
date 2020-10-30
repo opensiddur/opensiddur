@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <biblStruct xmlns="http://www.tei-c.org/ns/1.0" xml:lang="en">
   <monogr>
-      <title>Valid</title>
+      <title>TestBibliography</title>
       <author>
          <name>
             <forename>First</forename> 
@@ -14,12 +13,12 @@
             <surname>Editor</surname>
          </name>
       </editor>
-      <edition>2 ed.</edition>
+      <edition>1 ed.</edition>
       <imprint>
          <publisher>Publications, Inc.</publisher>
          <pubPlace>Nowhere, USA</pubPlace>
-         <date when="1905">1905</date>
+         <date when="1900">1900</date>
       </imprint>
   </monogr>
-  <idno type="archive.org">ABCDEFG_10</idno>
+  <idno type="archive.org">ABCDEFGH_10</idno>
 </biblStruct>

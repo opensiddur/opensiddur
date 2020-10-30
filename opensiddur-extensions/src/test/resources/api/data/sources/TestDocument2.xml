@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:lang="en">
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">TestDocument4</tei:title>
+            <tei:title type="main" xml:lang="en">TestDocument2</tei:title>
          </tei:titleStmt>
          <tei:publicationStmt>
             <tei:distributor>
@@ -15,10 +14,10 @@
             <tei:date>2012-06-08</tei:date>
          </tei:publicationStmt>
          <tei:sourceDesc>
-            <tei:bibl j:docStatus="transcribed proofread-once">
+            <tei:bibl>
                <tei:ptr type="bibl" target="/data/sources/TestBibliography"/>
                <tei:ptr type="bibl-content" target="#text"/>
-               <tei:biblScope from="7" to="7"/>
+               <tei:biblScope from="2" to="6"/>
             </tei:bibl>
          </tei:sourceDesc>
       </tei:fileDesc>
