@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+  xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+  xml:lang="en">
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">TitleAlreadyConfirmedAndDuplicated</tei:title>
+            <tei:title type="main" xml:lang="en">HasUnconfirmed</tei:title>
             
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
-               <tei:name ref="/user/testuser">Test User</tei:name>
+               <tei:name ref="/user/xqtest1">Test User</tei:name>
             </tei:respStmt>
             
          </tei:titleStmt>
@@ -22,14 +23,15 @@
          </tei:publicationStmt>
          <tei:sourceDesc>
             <tei:bibl>
-               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl" target="/data/sources/TestSource"/>
                <tei:ptr type="bibl-content" target="#text"/>
+               <tei:biblScope unit="pages" from="15" to="16"/>
             </tei:bibl>
          </tei:sourceDesc>
       </tei:fileDesc>
    </tei:teiHeader>
    <tei:text>
-      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="text">
+      <j:streamText xml:id="text">
          <tei:seg xml:id="v1_seg1">Test data.</tei:seg>
       </j:streamText>
    </tei:text>

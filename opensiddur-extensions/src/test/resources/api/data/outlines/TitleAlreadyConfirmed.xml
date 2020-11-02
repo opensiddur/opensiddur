@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">TitleDuplicatedAndSubordinatesExistWithDifferentPointers</tei:title>
+            <tei:title type="main" xml:lang="en">TitleAlreadyConfirmed</tei:title>
             
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
-               <tei:name ref="/user/testuser">Test User</tei:name>
+               <tei:name ref="/user/xqtest1">Test User</tei:name>
             </tei:respStmt>
             
          </tei:titleStmt>
@@ -30,8 +29,7 @@
    </tei:teiHeader>
    <tei:text>
       <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="text">
-         <tei:ptr target="/data/original/SubOne"/>
-         <tei:ptr target="/data/original/SubTwo"/>
+         <tei:seg xml:id="v1_seg1">Test data.</tei:seg>
       </j:streamText>
    </tei:text>
 </tei:TEI>

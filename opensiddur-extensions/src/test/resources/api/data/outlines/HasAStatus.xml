@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" 
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
   xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
   xml:lang="en">
    <tei:teiHeader>
@@ -9,7 +8,7 @@
             
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
-               <tei:name ref="/user/testuser">Test User</tei:name>
+               <tei:name ref="/user/xqtest1">Test User</tei:name>
             </tei:respStmt>
             
          </tei:titleStmt>

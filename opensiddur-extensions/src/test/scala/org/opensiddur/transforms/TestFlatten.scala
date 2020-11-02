@@ -184,7 +184,7 @@ import module namespace ridx="http://jewishliturgy.org/modules/refindex"
 
     it("writes labels with positioning information with concurrent hierarchies and two inline elements in a row") {
       xq("""flatten:flatten-document(doc("/db/data/original/en/inline2.xml"), map {})""")
-        .assertXPathEquals("$output//tei:label[1]", """<tei:label xmlns:tei="http://www.tei-c.org/ns/1.0"
+        .assertXPathEquals("$output//tei:label[1]", "label 1", """<tei:label xmlns:tei="http://www.tei-c.org/ns/1.0"
                                                       |      xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
                                                       |      jf:position="1"
                                                       |      jf:relative="-1"
@@ -192,7 +192,7 @@ import module namespace ridx="http://jewishliturgy.org/modules/refindex"
                                                       |      jf:nlevels="3"
                                                       |      jf:nprecedents="1"
                                                       |      jf:layer-id="/data/original/inline2#div-layer">Label 1</tei:label>""".stripMargin)
-        .assertXPathEquals("$output//tei:label[2]", """<tei:label xmlns:tei="http://www.tei-c.org/ns/1.0"
+        .assertXPathEquals("$output//tei:label[2]", "label 2", """<tei:label xmlns:tei="http://www.tei-c.org/ns/1.0"
                                                       |      xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
                                                       |      jf:position="1"
                                                       |      jf:relative="-1"
@@ -205,7 +205,7 @@ import module namespace ridx="http://jewishliturgy.org/modules/refindex"
 
     it("annotates labels with concurrent hierarchies with two inline elements, the second follows a ptr") {
       xq("""flatten:flatten-document(doc("/db/data/original/en/inline3.xml"), map {})""")
-        .assertXPathEquals("$output//tei:label[1]", """<tei:label xmlns:tei="http://www.tei-c.org/ns/1.0"
+        .assertXPathEquals("$output//tei:label[1]", "label 1", """<tei:label xmlns:tei="http://www.tei-c.org/ns/1.0"
                                                       |      xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
                                                       |      jf:position="1"
                                                       |      jf:relative="-1"
@@ -213,7 +213,7 @@ import module namespace ridx="http://jewishliturgy.org/modules/refindex"
                                                       |      jf:nlevels="3"
                                                       |      jf:nprecedents="1"
                                                       |      jf:layer-id="/data/original/inline3#div-layer">Label 1</tei:label>""".stripMargin)
-        .assertXPathEquals("$output//tei:label[2]", """<tei:label xmlns:tei="http://www.tei-c.org/ns/1.0"
+        .assertXPathEquals("$output//tei:label[2]", "label 2", """<tei:label xmlns:tei="http://www.tei-c.org/ns/1.0"
                                                     |      xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0"
                                                     |      jf:position="1"
                                                     |      jf:relative="1"
