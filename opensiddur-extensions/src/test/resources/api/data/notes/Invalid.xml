@@ -1,23 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
             <tei:title type="main" xml:lang="en">Valid</tei:title>
-            
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
-               <tei:name ref="/user/testuser">Test User</tei:name>
+               <tei:name ref="/user/xqtest1">Test User</tei:name>
             </tei:respStmt>
             
          </tei:titleStmt>
          <tei:publicationStmt>
-            <tei:distributor>
-               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
-            </tei:distributor>
             <tei:availability>
                <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
             </tei:availability>
+            <tei:distributor>
+               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+            </tei:distributor>
             <tei:date>2012-06-08</tei:date>
          </tei:publicationStmt>
          <tei:sourceDesc>
@@ -32,6 +30,6 @@
       </tei:revisionDesc>
    </tei:teiHeader>
   <j:annotations xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="notes"> 
-      <tei:note type="comment" xml:id="a-note">A note in a valid annotation files.</tei:note>
+      <j:invalid/>
   </j:annotations>
 </tei:TEI>
