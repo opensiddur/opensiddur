@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
   <tei:teiHeader>
       <tei:fileDesc>
@@ -23,14 +22,14 @@
       </tei:fileDesc>
   </tei:teiHeader>
   <tei:fsdDecl xml:id="conditionals">
-      <tei:fsDecl type="type2">
-         <tei:fsDescr>second type</tei:fsDescr>
-         <tei:fDecl name="name1">
-            <tei:fDescr>First of second</tei:fDescr>
+      <tei:fsDecl type="xtype1x">
+         <tei:fsDescr>first type</tei:fsDescr>
+         <tei:fDecl name="xname1x">
+            <tei:fDescr>First X</tei:fDescr>
             <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
          </tei:fDecl>
-         <tei:fDecl name="name2">
-            <tei:fDescr>Second of second</tei:fDescr>
+         <tei:fDecl name="xname2x">
+            <tei:fDescr>Second X</tei:fDescr>
             <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
         </tei:fDecl>
       </tei:fsDecl>
