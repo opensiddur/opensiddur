@@ -1,23 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">Existing</tei:title>
+            <tei:title type="main" xml:lang="en">Invalid</tei:title>
             
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
-               <tei:name ref="/user/testuser">Test User</tei:name>
+               <tei:name ref="/user/xqtest1">Test User</tei:name>
             </tei:respStmt>
             
          </tei:titleStmt>
          <tei:publicationStmt>
-            <tei:distributor>
-               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
-            </tei:distributor>
             <tei:availability>
                <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
             </tei:availability>
+            <tei:distributor>
+               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+            </tei:distributor>
             <tei:date>2012-06-08</tei:date>
          </tei:publicationStmt>
          <tei:sourceDesc>
@@ -32,7 +31,10 @@
       </tei:revisionDesc>
    </tei:teiHeader>
    <tei:text>
-      <tei:body xml:id="text">
+      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+        illegal here
+      </j:streamText>
+      <tei:body>
         <tei:entry xml:id="H1">
             <tei:form>
                <tei:orth xml:lang="he">אָב</tei:orth>
@@ -55,9 +57,6 @@
                <tei:quote type="kjv">chief, (fore-) father(-less), [idiom] patrimony, principal. Compare names in 'Abi-'.</tei:quote>
             </tei:cit>
             <tei:sense>
-               <tei:sense xml:id="QueryResult">
-                  <tei:def>Query result</tei:def>
-               </tei:sense>
                <tei:sense xml:id="H1S1">
                   <tei:def>father of an individual</tei:def>
                </tei:sense>

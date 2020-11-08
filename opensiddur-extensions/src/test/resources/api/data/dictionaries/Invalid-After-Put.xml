@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
    <tei:teiHeader>
       <tei:fileDesc>
          <tei:titleStmt>
-            <tei:title type="main" xml:lang="en">NoWriteAccess</tei:title>
+            <tei:title type="main" xml:lang="en">Existing</tei:title>
             
                <tei:respStmt>
                <tei:resp key="trc">Transcribed by</tei:resp>
-               <tei:name ref="/user/testuser">Test User</tei:name>
+               <tei:name ref="/user/xqtest1">Test User</tei:name>
             </tei:respStmt>
             
          </tei:titleStmt>
@@ -28,6 +27,7 @@
          </tei:sourceDesc>
       </tei:fileDesc>
       <tei:revisionDesc>
+         <tei:change type="edit" when="2013-04-17">Invalid change record</tei:change>
          <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
       </tei:revisionDesc>
    </tei:teiHeader>
@@ -55,6 +55,9 @@
                <tei:quote type="kjv">chief, (fore-) father(-less), [idiom] patrimony, principal. Compare names in 'Abi-'.</tei:quote>
             </tei:cit>
             <tei:sense>
+               <tei:sense xml:id="QueryResult">
+                  <tei:def>Query result</tei:def>
+               </tei:sense>
                <tei:sense xml:id="H1S1">
                   <tei:def>father of an individual</tei:def>
                </tei:sense>
