@@ -478,8 +478,8 @@ declare function crest:post(
                             sm:chgrp($uri, "everyone"),
                             sm:chmod($uri, "rw-rw-r--")
                         )),
-                        if ($use-reference-index) then ridx:reindex($doc) else (),
-                        didx:reindex($doc)
+                        didx:reindex($doc),
+                        if ($use-reference-index) then ridx:reindex($doc) else ()
                       )
                     }
                     <http:header 
@@ -556,8 +556,9 @@ declare function crest:put(
                   let $doc := doc($uri)
                   return (
                     crest:record-change($doc, "edited"),
-                    if ($use-reference-index) then ridx:reindex($doc) else (),
-                    didx:reindex($doc)
+                    didx:reindex($doc),
+                    if ($use-reference-index) then ridx:reindex($doc) else ()
+
                   )
                 }
                 <output:serialization-parameters>

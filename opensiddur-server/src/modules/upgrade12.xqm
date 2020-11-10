@@ -33,8 +33,8 @@ declare namespace j = "http://jewishliturgy.org/ns/jlptei/1.0";
 declare function upg12:upgrade-all() {
   if (exists(collection("/db/data")//j:streamText/tei:seg))
   then
-    let $ridx-reindex := ridx:reindex(collection("/db/data"))
     let $didx-reindex := didx:reindex(collection("/db/data"))
+    let $ridx-reindex := ridx:reindex(collection("/db/data"))
     let $upgrade-mirror := "/db/upgrade"
     let $create-mirror := mirror:create($upgrade-mirror, "/db/data", false())
     let $upgrade :=

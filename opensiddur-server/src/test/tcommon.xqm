@@ -240,8 +240,8 @@ declare function tcommon:setup-resource(
       let $path := xmldb:store(
       $collection, $resource, $content)
       let $wait := tcommon:wait-for("Storing " || $path, function() { doc-available($path) })
-      let $ridx := ridx:reindex(doc($path))
       let $didx := didx:reindex(doc($path))
+      let $ridx := ridx:reindex(doc($path))
       let $xidx := system:as-user("admin", $magic:password, xmldb:reindex($collection, $resource))
       let $log := util:log("info", "Saved " || $path || " as " || $owner)
       return $path
