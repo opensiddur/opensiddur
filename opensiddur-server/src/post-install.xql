@@ -2,6 +2,8 @@ xquery version "3.1";
 
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "modules/format.xqm";
+import module namespace didx="http://jewishliturgy.org/modules/docindex"
+  at "modules/docindex.xqm";
 import module namespace ridx="http://jewishliturgy.org/modules/refindex"
   at "modules/refindex.xqm";
 import module namespace src="http://jewishliturgy.org/api/data/sources"
@@ -32,6 +34,8 @@ util:log("info", "setup format..."),
 format:setup(),
 util:log("info", "setup refindex..."),
 ridx:setup(),
+util:log("info", "setup docindex..."),
+didx:setup(),
 util:log("info", "install default sources..."),
 (: add $target/data/sources/Born Digital using src:post() or src:put() :)
 xmldb:store(
@@ -65,6 +69,8 @@ xmldb:store(
 ),
 util:log("info", "upgrades: update existing JLPTEI for schema changes..."),
 upg:all-schema-changes(),
+util:log("info", "upgrades: reindex document index"),
+didx:reindex(collection("/db/data")),
 util:log("info", "upgrades: reindex reference index"),
 ridx:reindex(collection("/db/data")),
 util:log("info", "reindex all data collections"),

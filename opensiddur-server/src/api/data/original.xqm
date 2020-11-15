@@ -89,7 +89,11 @@ declare
     ) as xs:boolean {
     let $offset := count($new/tei:change) - count($old/tei:change) 
     return
-        ($offset = (0,1) ) and not(false()=(
+        ($offset = (0,1) ) and (
+            $offset=0 or ( (: if the first change record is new, it can;t have @when :)
+                empty($new/tei:change[1]/@when)
+            )
+        ) and not(false()=(
         true(),     (: handle the case of the empty revisionDesc :)
         for $change at $x in $old/tei:change
         (: Putting this line directly below causes an exception, see issue #158 :)

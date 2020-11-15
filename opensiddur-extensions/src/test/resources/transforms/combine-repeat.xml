@@ -1,0 +1,21 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <tei:teiHeader>
+      <tei:publicationStmt>
+         <tei:availability>
+            <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+         </tei:availability> 
+      </tei:publicationStmt>
+  </tei:teiHeader>
+  <tei:text>
+      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
+         <tei:seg xml:id="repeated">Repeated</tei:seg>
+         <tei:seg xml:id="seg1">One</tei:seg>
+         <tei:ptr xml:id="rpt1" target="#repeated"/>
+         <tei:seg xml:id="seg2">Two</tei:seg>
+         <tei:ptr xml:id="rpt2" target="#repeated"/>
+         <tei:seg xml:id="seg3">Three</tei:seg>
+         <tei:ptr xml:id="rpt3" target="#repeated"/>
+         <tei:seg xml:id="seg4">Four</tei:seg>
+      </j:streamText>
+  </tei:text>
+</tei:TEI>

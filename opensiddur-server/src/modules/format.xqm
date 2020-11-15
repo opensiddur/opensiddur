@@ -59,6 +59,7 @@ declare variable $format:unflatten-cache := "/db/cache/unflattened";
 declare variable $format:combine-cache := "/db/cache/combined";
 declare variable $format:compile-cache := "/db/cache/compiled";
 declare variable $format:html-cache := "/db/cache/html";
+declare variable $format:transcluded-html-cache := "/db/cache/html-transclude";
 declare variable $format:caches := (
     $format:parallel-layer-cache,
     $format:phony-layer-cache,
@@ -70,7 +71,8 @@ declare variable $format:caches := (
     $format:unflatten-cache,
     $format:combine-cache,
     $format:compile-cache,
-    $format:html-cache
+    $format:html-cache,
+    $format:transcluded-html-cache
     );
 
 (:~ setup to allow format functions to work :)
@@ -80,8 +82,8 @@ declare function format:setup(
   where not(xmldb:collection-available($collection))
   return
     mirror:create($collection, "/db/data", true(),
-      if ($collection = $format:html-cache)
-      then map { "xml" := "html" }
+      if ($collection = ($format:html-cache, $format:transcluded-html-cache))
+      then map { "xml" : "html" }
       else map {}
     ),
   status:setup()
@@ -110,8 +112,8 @@ declare function format:status-param(
   map:merge((
       $params,
       map {
-          "format:status-job-id" := ($params("format:status-job-id"), status:get-job-id($original-doc))[1],
-          "format:stage-number" := ($params("format:stage-number") + 1, 0)[1]
+          "format:status-job-id" : ($params("format:status-job-id"), status:get-job-id($original-doc))[1],
+          "format:stage-number" : ($params("format:stage-number") + 1, 0)[1]
       }
   ))
 };
@@ -563,7 +565,9 @@ declare function format:html(
     format:apply-if-outdated(
       "html",
       $params,
-      $format:html-cache,
+      if ($transclude)
+      then $format:transcluded-html-cache
+      else $format:html-cache,
       if ($transclude)
       then format:compile($doc, $params, $original-doc)
       else format:unflatten($doc, $params, $original-doc),

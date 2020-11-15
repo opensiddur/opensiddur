@@ -144,7 +144,7 @@ fi;
 
 if [[ ${RESTORE_COMPLETE} == 0 ]];
 then
-    echo "We are in the $BRANCH branch. Restoring from a recent cloud storage backup of master"
+    echo "We are in the $BRANCH branch. Restoring from a recent cloud storage backup of master"
     echo "Finding the most recent backup of master..."
     MOST_RECENT_BACKUP=$(gsutil ls gs://opensiddur-database-backups-prod | tail -n 1)
     echo "Most recent backup is ${MOST_RECENT_BACKUP}"
@@ -203,7 +203,7 @@ echo "Starting eXist..."
 systemctl start eXist-db
 
 echo "Wait until eXist-db is up..."
-python3 python/wait_for_up.py --max-timeout=86400
+python3 python/wait_for_up.py --host=localhost --port=8080 --timeout=86400
 
 echo "Installing dynamic DNS updater to update ${DNS_NAME}..."
 cat << EOF > /etc/ddclient.conf

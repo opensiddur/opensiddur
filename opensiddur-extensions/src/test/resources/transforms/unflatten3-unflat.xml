@@ -1,0 +1,15 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+    <tei:text>
+        <j:concurrent xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+            <jf:unflattened xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0">
+                <tei:div jf:id="div1" jf:part="div1" jf:layer-id="divlayer">
+                  <tei:seg jf:id="seg1" jf:stream="stream">one</tei:seg>
+                </tei:div>
+                <tei:seg jf:id="seg2" jf:stream="stream">two</tei:seg>
+                <tei:div jf:part="div1" jf:layer-id="divlayer">
+                  <tei:seg jf:id="seg3" jf:stream="stream">three</tei:seg>
+                </tei:div>
+            </jf:unflattened>
+        </j:concurrent>
+    </tei:text>
+</tei:TEI>

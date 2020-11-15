@@ -18,6 +18,8 @@ import module namespace data="http://jewishliturgy.org/modules/data"
   at "../modules/data.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "../modules/debug.xqm";
+import module namespace didx="http://jewishliturgy.org/modules/docindex"
+  at "../modules/docindex.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "../modules/jvalidate.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
@@ -214,7 +216,8 @@ declare
                     {
                       sm:chmod($uri, "rw-r--r--"),
                       sm:chown($uri, $name),
-                      sm:chgrp($uri, $name)
+                      sm:chgrp($uri, $name),
+                      didx:reindex(doc($stored))
                     }
                     <http:response status="201">
                       <http:header name="Location" value="{api:uri-of('/api/user')}/{$name}"/>
@@ -283,7 +286,8 @@ declare
   ) as item()+ {
   let $name := xmldb:decode($name)
   let $user := app:auth-user()
-  let $resource := concat($user:path, "/", $name, ".xml")
+  let $resource-name := $name || ".xml"
+  let $resource := concat($user:path, "/", $resource-name)
   let $resource-exists := doc-available($resource)
   let $is-non-user-profile := 
     not($user = $name) and 
@@ -298,13 +302,14 @@ declare
       if (user:validate($body, $name))
       then 
         (: the profile is valid :)
-        if (xmldb:store($user:path, $resource, $body))
+        if (xmldb:store($user:path, $resource-name, $body))
         then (
           system:as-user("admin", $magic:password, (
             sm:chown(xs:anyURI($resource), $user),
             sm:chgrp(xs:anyURI($resource), if ($is-non-user-profile) then "everyone" else $user),
             sm:chmod(xs:anyURI($resource), if ($is-non-user-profile) then "rw-rw-r--" else "rw-r--r--")
           )),
+          didx:reindex($user:path, $resource-name),
           <rest:response>
             <output:serialization-parameters>
               <output:method>text</output:method>
@@ -397,6 +402,7 @@ declare
             return sm:remove-group-manager($name, $manager),
             sm:remove-account($name),
             sm:remove-group($name), (: TODO: successor group is guest! until remove-group#2 exists@ :)
+            didx:remove($user:path, $resource-name),
             $removal-return
           }
           catch * {

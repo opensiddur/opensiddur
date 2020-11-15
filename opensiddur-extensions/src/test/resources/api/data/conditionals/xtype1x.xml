@@ -1,0 +1,37 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+  <tei:teiHeader>
+      <tei:fileDesc>
+         <tei:titleStmt>
+            <tei:title type="main" xml:lang="en">Valid</tei:title>
+         </tei:titleStmt>
+         <tei:publicationStmt>
+            <tei:distributor>
+               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+            </tei:distributor>
+            <tei:availability>
+               <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+            </tei:availability>
+            <tei:date>2012-06-08</tei:date>
+         </tei:publicationStmt>
+         <tei:sourceDesc>
+            <tei:bibl>
+               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl-content" target="#conditionals"/>
+            </tei:bibl>
+         </tei:sourceDesc>
+      </tei:fileDesc>
+  </tei:teiHeader>
+  <tei:fsdDecl xml:id="conditionals">
+      <tei:fsDecl type="xtype1x">
+         <tei:fsDescr>first type</tei:fsDescr>
+         <tei:fDecl name="xname1x">
+            <tei:fDescr>First X</tei:fDescr>
+            <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
+         </tei:fDecl>
+         <tei:fDecl name="xname2x">
+            <tei:fDescr>Second X</tei:fDescr>
+            <j:vSwitch xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" type="yes-no-maybe"/>
+        </tei:fDecl>
+      </tei:fsDecl>
+  </tei:fsdDecl>
+</tei:TEI>

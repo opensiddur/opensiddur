@@ -21,6 +21,8 @@ import module namespace deepequality="http://jewishliturgy.org/modules/deepequal
   at "../modules/deepequality.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "../modules/data.xqm";
+import module namespace didx="http://jewishliturgy.org/modules/docindex"
+  at "../modules/docindex.xqm";
 import module namespace format="http://jewishliturgy.org/modules/format"
   at "../modules/format.xqm";
 import module namespace magic="http://jewishliturgy.org/magic"
@@ -157,7 +159,10 @@ declare function tcommon:setup-test-users(
     let $log := util:log-system-out("Setting up user " || $name)
     let $creation :=
         system:as-user("admin", $magic:password, (
-            let $create-account := sm:create-account($name, $name, "everyone")
+            let $create-account :=
+                if (not(sm:user-exists($name)))
+                then sm:create-account($name, $name, "everyone")
+                else ()
             let $stored :=
                 xmldb:store($user:path,
                   concat($name, ".xml"),
@@ -169,6 +174,7 @@ declare function tcommon:setup-test-users(
             let $chmod := sm:chmod($uri, "rw-r--r--")
             let $chown := sm:chown($uri, $name)
             let $chgrp := sm:chgrp($uri, $name)
+            let $didx := didx:reindex($user:path, $name || ".xml")
             return ()
         ))
     return (
@@ -194,10 +200,27 @@ declare function tcommon:teardown-test-users(
     $n as xs:integer
 ) {
     for $i in 1 to $n
+    let $name := "xqtest" || string($i)
+    let $resource-name := $name || ".xml"
     return
-        system:as-user("xqtest" || string($i), "xqtest" || string($i),
-        user:delete("xqtest" || string($i))
-        )
+        (: this duplicates code from user:delete, but makes sure that the user *always* gets deleted :)
+        system:as-user("admin", $magic:password, (
+            if (fn:doc-available($user:path || "/" || $resource-name))
+            then xmldb:remove($user:path, $resource-name)
+            else (),
+            if (sm:user-exists($name))
+            then (
+                for $member in sm:get-group-members($name)
+                return sm:remove-group-member($name, $member),
+                for $manager in sm:get-group-managers($name)
+                return sm:remove-group-manager($name, $manager),
+                sm:remove-account($name),
+                sm:remove-group($name) (: TODO: successor group is guest! until remove-group#2 exists@ :)
+                )
+            else (),
+            didx:remove($user:path, $resource-name),
+            ridx:remove($user:path, $resource-name)
+      ))
 };
 
 (:~ set up a resource as if it had been added by API :)
@@ -210,11 +233,16 @@ declare function tcommon:setup-resource(
   $group as xs:string?,
   $permissions as xs:string?
 ) as xs:string {
+  let $log := util:log-system-out("setup " || $resource-name || " as " || string($owner))
   let $resource-path := system:as-user("xqtest" || string($owner), "xqtest" || string($owner),
+      let $collection := string-join(("/db/data", $data-type, $subtype), "/")
+      let $resource := $resource-name || ".xml"
       let $path := xmldb:store(
-      string-join(("/db/data", $data-type, $subtype), "/"), $resource-name || ".xml", $content)
+      $collection, $resource, $content)
       let $wait := tcommon:wait-for("Storing " || $path, function() { doc-available($path) })
+      let $didx := didx:reindex(doc($path))
       let $ridx := ridx:reindex(doc($path))
+      let $xidx := system:as-user("admin", $magic:password, xmldb:reindex($collection, $resource))
       let $log := util:log("info", "Saved " || $path || " as " || $owner)
       return $path
   )
@@ -238,27 +266,29 @@ declare function tcommon:setup-resource(
     tcommon:setup-resource($resource-name, $data-type, $owner, $content, (), (), ())
 };
 
-(:~ remove a test resource :)
+(:~ remove a test resource.
+ : $owner is -1 for admin
+ :)
 declare function tcommon:teardown-resource(
   $resource-name as xs:string,
   $data-type as xs:string,
   $owner as xs:integer
 ) {
-  system:as-user("xqtest" || string($owner), "xqtest" || string($owner),
-      let $test-collection := "/db/data/" || $data-type
+  system:as-user(
+    if ($owner=-1) then "admin" else ("xqtest" || string($owner)),
+    if( $owner=-1) then $magic:password else ("xqtest" || string($owner)),
+      let $probable-collection := "/db/data/" || $data-type
       let $doc := data:doc($data-type, $resource-name)
-      return
-        if (exists($doc))
-        then
-            let $uri := fn:document-uri($doc)
-            let $collection := util:collection-name($doc)
-            let $res := util:document-name($doc)
-            return (
-                format:clear-caches($uri),
-                ridx:remove($collection, $res),
-                xmldb:remove($collection, $res)
-            )
-        else util:log("info", ("Cannot remove ", $data-type, " ", $resource-name, ": it cannot be found"))
+      let $doc-exists := exists($doc)
+      let $uri := if ($doc-exists) then fn:document-uri($doc) else xs:anyURI($probable-collection || "/" || $resource-name || ".xml")
+      let $collection := if ($doc-exists) then util:collection-name($doc) else $probable-collection
+      let $res := if ($doc-exists) then util:document-name($doc) else ($resource-name || ".xml")
+      return (
+            format:clear-caches($uri),
+            ridx:remove($collection, $res),
+            didx:remove($collection, $res),
+            if ($doc-exists) then xmldb:remove($collection, $res) else ()
+        )
   )
 };
 

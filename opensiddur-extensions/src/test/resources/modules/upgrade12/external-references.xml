@@ -1,0 +1,17 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title xml:lang="en">External reference file</tei:title>
+            </tei:titleStmt>
+        </tei:fileDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <j:streamText xml:id="stream">
+            <tei:ptr xml:id="external_reference_to_stream" target="/data/original/Referenced_File#stream"/>
+            <tei:ptr xml:id="external_reference_to_seg" target="/data/original/Referenced_File#seg_6"/>
+            <tei:ptr xml:id="external_reference_to_range" target="/data/original/Referenced_File#range(seg_8,seg_10)"/>
+            <tei:ptr xml:id="external_reference_to_ptr" target="/data/original/Referenced_File#external_ptr"/>
+        </j:streamText>
+    </tei:text>
+</tei:TEI>

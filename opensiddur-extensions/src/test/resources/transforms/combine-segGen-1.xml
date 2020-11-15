@@ -1,0 +1,25 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0"
+     xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" 
+    xml:lang="he">
+  <tei:teiHeader>
+      <tei:publicationStmt>
+         <tei:availability>
+            <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+         </tei:availability> 
+      </tei:publicationStmt>
+  </tei:teiHeader>
+  <j:settings>
+    <tei:fs xml:id="translit_on" type="opensiddur:transliteration">
+      <tei:f name="table">testtable</tei:f>
+      <tei:f name="active"><j:on/></tei:f>
+    </tei:fs>
+  </j:settings>
+  <j:links>
+    <tei:link type="set" target="#stream #translit_on"/>
+  </j:links>
+  <tei:text>
+      <j:streamText xml:id="stream">
+         <j:segGen xml:id="segGen1" type="transliteration">אַבָּא</j:segGen>
+      </j:streamText>
+  </tei:text>
+</tei:TEI>

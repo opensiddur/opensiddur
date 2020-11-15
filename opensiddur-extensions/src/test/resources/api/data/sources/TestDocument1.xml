@@ -1,0 +1,30 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+   <tei:teiHeader>
+      <tei:fileDesc>
+         <tei:titleStmt>
+            <tei:title type="main" xml:lang="en">TestDocument1</tei:title>
+         </tei:titleStmt>
+         <tei:publicationStmt>
+            <tei:distributor>
+               <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+            </tei:distributor>
+            <tei:availability>
+               <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+            </tei:availability>
+            <tei:date>2012-06-08</tei:date>
+         </tei:publicationStmt>
+         <tei:sourceDesc>
+            <tei:bibl>
+               <tei:ptr type="bibl" target="/data/sources/TestBibliography"/>
+               <tei:ptr type="bibl-content" target="#text"/>
+               <tei:biblScope from="1" to="1"/>
+            </tei:bibl>
+         </tei:sourceDesc>
+      </tei:fileDesc>
+   </tei:teiHeader>
+   <tei:text>
+      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="text">
+         <tei:seg xml:id="v1_seg1">A segment.</tei:seg>
+      </j:streamText>
+   </tei:text>
+</tei:TEI>

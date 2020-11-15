@@ -14,6 +14,8 @@ import module namespace mirror = "http://jewishliturgy.org/modules/mirror"
   at "mirror.xqm";
 import module namespace ridx = "http://jewishliturgy.org/modules/refindex"
   at "refindex.xqm";
+import module namespace didx = "http://jewishliturgy.org/modules/docindex"
+  at "docindex.xqm";
 import module namespace uri = "http://jewishliturgy.org/transform/uri"
   at "follow-uri.xqm";
 
@@ -31,6 +33,7 @@ declare namespace j = "http://jewishliturgy.org/ns/jlptei/1.0";
 declare function upg12:upgrade-all() {
   if (exists(collection("/db/data")//j:streamText/tei:seg))
   then
+    let $didx-reindex := didx:reindex(collection("/db/data"))
     let $ridx-reindex := ridx:reindex(collection("/db/data"))
     let $upgrade-mirror := "/db/upgrade"
     let $create-mirror := mirror:create($upgrade-mirror, "/db/data", false())
