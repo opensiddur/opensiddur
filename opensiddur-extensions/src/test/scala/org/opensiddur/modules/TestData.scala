@@ -19,9 +19,6 @@ class TestData extends DbTest {
       declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
       declare namespace error="http://jewishliturgy.org/errors";
       
-      declare variable $t:year := format-number(year-from-date(current-date()), "0000");
-      declare variable $t:month := format-number(month-from-date(current-date()), "00");
-      
       declare variable $t:resource := "datatest";
       declare variable $t:noaccess := "noaccess";
       
@@ -156,14 +153,14 @@ class TestData extends DbTest {
   describe("data:new-path") {
     it("returns a full path when there is no resource with the same title") {
       xq("""data:new-path("original", "very long test title")""")
-        .assertXPath("""$output = concat("/db/data/original/", $t:year, "/", $t:month, "/very%20long%20test%20title.xml")""")
+        .assertXPath("""$output = concat("/db/data/original/very%20long%20test%20title.xml")""")
         .go
     }
 
     it("returns a numbered resource when there is a resource with the same title") {
       xq("""data:new-path("original", "datatest")""")
         .assertXPath("""$output=concat(
-                       "/db/data/original/", $t:year, "/", $t:month, "/datatest-1.xml"
+                       "/db/data/original/datatest-1.xml"
                        )""")
         .go
     }
