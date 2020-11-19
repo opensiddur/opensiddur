@@ -153,15 +153,13 @@ class TestData extends DbTest {
   describe("data:new-path") {
     it("returns a full path when there is no resource with the same title") {
       xq("""data:new-path("original", "very long test title")""")
-        .assertXPath("""$output = concat("/db/data/original/very%20long%20test%20title.xml")""")
+        .assertXPath("""$output = "/db/data/original/very%20long%20test%20title.xml" """)
         .go
     }
 
     it("returns a numbered resource when there is a resource with the same title") {
       xq("""data:new-path("original", "datatest")""")
-        .assertXPath("""$output=concat(
-                       "/db/data/original/datatest-1.xml"
-                       )""")
+        .assertXPath("""$output="/db/data/original/datatest-1.xml" """)
         .go
     }
   }
