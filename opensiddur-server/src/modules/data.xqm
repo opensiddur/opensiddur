@@ -120,7 +120,7 @@ declare function data:new-path-to-resource(
     data:resource-name-from-title-and-number($title, 
       data:find-duplicate-number($type, $title, 0))
   return (
-    app:concat-path(($data:path-base, $type, format-date($date, "[Y0001]/[M01]"))),
+    app:concat-path(($data:path-base, $type)),
     $resource-name
   ) 
 };

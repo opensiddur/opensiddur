@@ -21,6 +21,8 @@ import module namespace tran="http://jewishliturgy.org/api/transliteration"
     at "../api/data/transliteration.xqm";
 import module namespace upg12="http://jewishliturgy.org/modules/upgrade12"
     at "upgrade12.xqm";
+import module namespace upg13="http://jewishliturgy.org/modules/upgrade130"
+    at "upgrade130.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -143,10 +145,15 @@ declare function upg:schema-changes-0-12-0() {
     util:log("info","You must run the schema upgrade to 0.12.0 manually!...")
 };
 
+declare function upg:schema-changes-0-13-0() {
+    upg13:upgrade-all()
+};
+
 declare function upg:all-schema-changes() {
     upg:schema-changes-0-7-5(),
     upg:schema-changes-0-8-0(),
     upg:schema-changes-0-8-1(),
     upg:schema-changes-0-9-0(),
-    upg:schema-changes-0-12-0()
+    upg:schema-changes-0-12-0(),
+    upg:schema-changes-0-13-0()
 };
