@@ -132,6 +132,17 @@ cacheSize=${cache.size}
              <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         </xslt>
         <move file="${installdir}/conf.out.xml" tofile="${installdir}/conf.xml"/>
+
+        <!-- edit web.xml -->
+        <xslt in="${installdir}/webapp/WEB-INF/web.xml"
+              out="${installdir}/webapp/WEB-INF/web.out.xml"
+              style="setup/setup-web-xml.xsl"
+              processor="trax"
+              classpath="${lib.dir}/saxonhe-9.2.1.5.jar">
+            <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+        </xslt>
+        <move file="${installdir}/webapp/WEB-INF/web.out.xml" tofile="${installdir}/webapp/WEB-INF/web.xml"/>
+
         <!-- edit wrapper.conf -->
         <echo file="${wrapper.conf}" append="true">wrapper.java.additional.stack=-Xss${stack.memory}m</echo>
     </target>
