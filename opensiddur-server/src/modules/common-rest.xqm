@@ -111,7 +111,10 @@ declare function crest:record-change(
  : @param $old-doc The document it is replacing, if any
  : @param $schema-path path to RelaxNG schema
  : @param $schematron-path path to Schematron schema
- : @param $schema-xquery XQuery function schema
+ : @param $xquery-functions A sequence of functions to be used as additional validations.
+ :              The functions take 2 parameters: $doc, $old-doc and return a validation report element
+ :              With @status='valid' or 'invalid'. The element may also contain human-readable message elements
+ :              indicating a reason for invalidity
  : @return true() if valid, false() if not
  : @see crest:validate-report
  :) 
