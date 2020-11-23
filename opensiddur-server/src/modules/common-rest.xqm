@@ -106,6 +106,32 @@ declare function crest:record-change(
   else ()
 };
 
+(:~ validation function to invalidate duplicated xml:ids, which are not automatically rejected :)
+declare function crest:invalidate-duplicate-xmlid(
+    $doc as document-node(),
+    $old-doc as document-node()?
+) as element(report) {
+    let $ids := $doc//@xml:id/string()
+    let $distinct-ids := distinct-values($doc//@xml:id)
+    let $is-valid := count($ids) = count($distinct-ids)
+    return
+        element report {
+            element status {
+                if ($is-valid) then 'valid'
+                else 'invalid'
+            },
+            if (not($is-valid))
+            then
+                for $xid in $ids
+                group by $grouped := $xid
+                where count($xid) > 1
+                return element message {
+                    "xml:id must be unique. The xml:id '" || $grouped || "' is duplicated"
+                }
+            else ()
+        }
+};
+
 (:~ validate a document based on a given schema 
  : @param $doc The document to be validated
  : @param $old-doc The document it is replacing, if any
@@ -127,22 +153,24 @@ declare function crest:validate(
       function(item(), document-node()?) as element()
     )*
   ) as xs:boolean {
-  crest:validation-disabled() or (
-    validation:jing($doc, $schema-path) and (
-      empty($schematron-path) or
-      jvalidate:validation-boolean(
-        jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path))
-    )) and (
-      empty($xquery-functions) or
-        (
-          every $xquery-function in $xquery-functions
-          satisfies 
-            jvalidate:validation-boolean(
-              $xquery-function($doc, $old-doc)
+  let $all-xquery-functions := ($xquery-functions, crest:invalidate-duplicate-xmlid#2)
+  return
+      crest:validation-disabled() or (
+        validation:jing($doc, $schema-path) and (
+          empty($schematron-path) or
+          jvalidate:validation-boolean(
+            jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path))
+        )) and (
+          empty($all-xquery-functions) or
+            (
+              every $xquery-function in $all-xquery-functions
+              satisfies
+                jvalidate:validation-boolean(
+                  $xquery-function($doc, $old-doc)
+                )
             )
         )
-    )
-  )
+      )
 };
 
 (:~ validate, returning a validation report 
@@ -163,12 +191,14 @@ declare function crest:validate-report(
       function(item(), document-node()?) as element()
     )*
   ) as element() {
-  jvalidate:concatenate-reports((
-    validation:jing-report($doc, $schema-path),
-    if (exists($schematron-path)) then jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path)) else (),
-    for $xquery-function in $xquery-functions
-    return $xquery-function($doc, $old-doc)
-  ))
+  let $all-xquery-functions := ($xquery-functions, crest:invalidate-duplicate-xmlid#2)
+  return
+      jvalidate:concatenate-reports((
+        validation:jing-report($doc, $schema-path),
+        if (exists($schematron-path)) then jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path)) else (),
+        for $xquery-function in $all-xquery-functions
+        return $xquery-function($doc, $old-doc)
+      ))
 };
 
 (:~ Get an XML document by name

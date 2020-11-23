@@ -532,6 +532,24 @@ class TestOriginal extends OriginalDataTestFixtures {
         .go
     }
   }
+
+  describe("orig:validate") {
+
+    it("invalidates a document with duplicate xml:ids") {
+      val invalidDupe = readXmlFile("src/test/resources/api/data/original/DuplicateXmlId.xml")
+      xq(s"""orig:validate-report(document { $invalidDupe }, ())""")
+        .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .go
+    }
+
+    it("validates the same document without duplicate xml:ids") {
+      val validNoDupe = readXmlFile("src/test/resources/api/data/original/NoDuplicateXmlId.xml")
+      xq(s"""orig:validate-report(document { $validNoDupe }, ())""")
+        .assertXPath("$output/status = 'valid'", "The document is marked valid")
+        .go
+    }
+  }
+
 }
 
 // delete will delete data and put will alter data, so we need a separate fixture
@@ -676,24 +694,6 @@ class TestOriginalWithReset extends OriginalDataTestFixtures {
         .go
     }
   }
-
-  describe("orig:validate") {
-
-    it("invalidates a document with duplicate xml:ids") {
-      val invalidDupe = readXmlFile("src/test/resources/api/data/original/DuplicateXmlId.xml")
-      xq(s"""orig:validate(document { $invalidDupe }, ())""")
-        .assertXPath("$output/@status = 'invalid'", "The document is marked invalid")
-        .go
-    }
-
-    it("validates the same document without duplicate xml:ids") {
-      val validNoDupe = readXmlFile("src/test/resources/api/data/original/NoDuplicateXmlId.xml")
-      xq(s"""orig:validate(document { $validNoDupe }, ())""")
-        .assertXPath("$output/@status = 'invalid'", "The document is marked invalid")
-        .go
-    }
-  }
-
 }
 
 class TestOriginalDeleteWithExternalReference extends OriginalDataTestFixtures {
