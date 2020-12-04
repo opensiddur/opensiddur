@@ -23,6 +23,8 @@ import module namespace upg12="http://jewishliturgy.org/modules/upgrade12"
     at "upgrade12.xqm";
 import module namespace upg13="http://jewishliturgy.org/modules/upgrade130"
     at "upgrade130.xqm";
+import module namespace uri="http://jewishliturgy.org/transform/uri"
+    at "follow-uri.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
@@ -49,42 +51,92 @@ declare function upg:schema-changes-0-7-5(
             }
 };
 
+declare function upg:rename-resources-for-upgrade(
+) as map(xs:string, xs:string) {
+    map:merge(
+        for $document in collection("/db/data")
+        let $collection := util:collection-name($document)
+        let $resource := util:document-name($document)
+        let $decoded := xmldb:decode($resource)
+        let $resource-number :=
+            let $n := tokenize($decoded, '-')[last()]
+            where matches($decoded, "-\d+\.xml$") and matches($n, "\d+\.xml")
+            return substring-before($n, '.xml')
+        let $log1 := util:log("info", "10:" || $collection || "/" || $resource)
+        let $title :=
+            data:normalize-resource-title(
+                if (starts-with($collection, "/db/data/user"))
+                then "ignored"
+                else if (starts-with($collection, "/db/data/sources"))
+                then src:title-function($document)
+                else if (starts-with($collection, "/db/data/transliteration"))
+                then tran:title-function($document)
+                else if (starts-with($collection, "/db/data/outlines"))
+                then outl:title-function($document)
+                else crest:tei-title-function($document)
+            , false())
+        let $log2 := util:log("info", "11:" || $title )
+        let $new-name :=
+            encode-for-uri($title) || (
+                if ($resource-number) then ("-" || $resource-number) else ""
+            )
+        let $new-resource-name := $new-name || ".xml"
+        where not(starts-with($collection,"/db/data/user"))
+            and not($resource = $new-resource-name)
+        return (
+            let $internal-collection := "/" || string-join(subsequence(tokenize($collection, "/"), 3, 2), "/") || "/"
+            let $old-internal-uri := $internal-collection || substring-before($resource, '.xml')
+            let $new-internal-uri := $internal-collection || $new-name
+            let $log := util:log("info","Renaming: " || $collection || "/" || $resource || " -> " || $new-resource-name || "&#x0a;using title=" || $title)
+            let $rename := xmldb:rename($collection, $resource, $new-resource-name)
+            return map:entry($old-internal-uri, $new-internal-uri)
+        )
+    )
+};
+
+declare function upg:rewrite-resource-links(
+    $resource-name-map as map(xs:string, xs:string)
+) {
+    upg:rewrite-resource-links($resource-name-map, collection("/db/data")//(@target|@targets|@domains|@ref))
+};
+
+declare function upg:rewrite-resource-links(
+    $resource-name-map as map(xs:string, xs:string),
+    $link-data as attribute()*
+) {
+    for $link-attribute in $link-data
+    let $tokenized := tokenize($link-attribute, "\s+")
+    let $rewritten := string-join(
+        for $token in $tokenized
+        let $resource := string(uri:uri-base-resource($token))
+        let $fragment := string(uri:uri-fragment($token))
+        let $rewritten-resource :=
+            if (map:contains($resource-name-map, $resource))
+            then $resource-name-map($token)
+            else $resource
+        return
+            string-join(($rewritten-resource, $fragment), '#')
+        , " "
+    )
+    let $log := util:log("info", "21:" || $link-attribute/string() || "->" || $rewritten)
+    return
+        update replace $link-attribute with (
+            attribute { local-name($link-attribute) } { $rewritten }
+        )
+};
+
 (: not strictly speaking a schema change:
  : any resource in /db/data with a name containing ,;= will be renamed.
  : NOTE: if we expected any links to such files, the links would also have to be changed.
  : Fortunately, we do not expect external links. If they are found, they will have to 
  : be manually corrected.
+ : NOTE 2: This will also update for 0.13.0
  :)
 declare function upg:schema-changes-0-8-0() {
-    for $document in collection("/db/data")
-    let $collection := util:collection-name($document)
-    let $resource := util:document-name($document)
-    let $decoded := xmldb:decode($resource)
-    let $resource-number := 
-        let $n := tokenize($decoded, '-')[last()]
-        where matches($decoded, "-\d+\.xml$") and matches($n, "\d+\.xml")
-        return substring-before($n, '.xml')
-    let $title := 
-        if (starts-with($collection, "/db/data/sources"))
-        then src:title-function($document)
-        else if (starts-with($collection, "/db/data/transliteration"))
-        then tran:title-function($document)
-        else if (starts-with($collection, "/db/data/notes"))
-        then notes:uri-title-function($document)
-        else if (starts-with($collection, "/db/data/outlines"))
-        then outl:title-function($document)
-        else crest:tei-title-function($document)
-    let $new-name := 
-        string-join((
-            encode-for-uri(replace(replace(normalize-space($title), "\p{M}", ""), "[,;:$=@]+", "-")),
-            $resource-number), "-") || ".xml"
-    where not(starts-with($collection,"/db/data/user"))
-        and not($resource = $new-name) 
-        and not($resource = "Born%20Digital.xml")
-    return (
-        util:log-system-out("Renaming: " || $collection || "/" || $resource || " -> " || $new-name || "&#x0a;using title=" || $title),
-        xmldb:rename($collection, $resource, $new-name)
-    )
+    let $log1 := util:log("info", 1)
+    let $name-map := upg:rename-resources-for-upgrade()
+    let $log1 := util:log("info", 2)
+    return upg:rewrite-resource-links($name-map)
 };
 
 (:~ removal of tei:relatedItem/@type='scan',
@@ -124,7 +176,7 @@ declare function upg:schema-changes-0-9-0() {
     for $document in collection("/db/data/notes")
     let $collection := util:collection-name($document)
     let $resource := util:document-name($document)
-    let $uri-title := notes:uri-title-function($document)
+    let $uri-title := crest:tei-title-function($document)
     let $resource-number := 
         let $n := tokenize($resource, '-')[last()]
         where matches($resource, "-\d+\.xml$") and matches($n, "\d+\.xml")

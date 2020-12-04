@@ -140,7 +140,7 @@ declare function tcommon:minimal-valid-header(
       </tei:publicationStmt>
       <tei:sourceDesc>
         <tei:bibl>
-          <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+          <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
           <tei:ptr type="bibl-content" target="#stream"/>
         </tei:bibl>
       </tei:sourceDesc>

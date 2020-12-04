@@ -483,7 +483,7 @@ declare function crest:post(
       let $paths := 
         data:new-path-to-resource(
           $data-path, 
-          $title-function($body)
+          data:normalize-resource-title($title-function($body), false())
         )
       let $resource := $paths[2]
       let $collection := $paths[1]

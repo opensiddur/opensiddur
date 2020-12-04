@@ -171,3 +171,38 @@ declare function data:doc(
         	      "data:doc() not implemented for the path: " || $api-path
         	    )
 };
+
+(:~ given the parts (eg, title and subtitle) of a document title, put together a standardized
+ : title that can be used as a resource name.
+ : This function will restrict the available title space to be stricter than valid xml:id's
+ : @param case-sensitive if true(), do not lowercase, the title, otherwise, do
+ : @return the string value of the normalized title. If the value is an "", the title is invalid.
+ :)
+declare function data:normalize-resource-title(
+    $title-string-parts as xs:string+,
+    $case-sensitive as xs:boolean
+) as xs:string {
+    let $part-composition-character := "-"
+    let $word-composition-character := "_"
+    let $composed-parts := string-join($title-string-parts[.], $part-composition-character)
+    let $removed-whitespace := replace($composed-parts, "\s+", $word-composition-character)
+    let $normalized := replace(
+        normalize-unicode($removed-whitespace, "NFKD"),
+        "[^-_\p{L}\p{Nd}]+", "")
+    let $cased :=
+        if (not($case-sensitive)) then lower-case($normalized)
+        else $normalized
+    (: disallow punctuators at the beginning and end :)
+    let $remove-begin-end-punct := replace($cased, "(^[-_]+)|([-_]+$)", "")
+    (: remove duplicate punctuators :)
+    let $remove-dupe-punct := replace($remove-begin-end-punct, "(([-])+|([_])+)", "$2$3")
+    (: must begin with a letter :)
+    let $no-begin-with-number :=
+        if (matches($remove-dupe-punct, "^\d"))
+        then $word-composition-character || $remove-dupe-punct
+        else $remove-dupe-punct
+    (: empty it out if it's only - and _ :)
+    let $emptied-blanks := replace($no-begin-with-number, "^[-_]+$", "")
+    (: can't be empty :)
+    return $emptied-blanks
+};

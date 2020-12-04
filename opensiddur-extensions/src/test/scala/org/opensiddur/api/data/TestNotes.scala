@@ -27,22 +27,22 @@ class TestNotes extends DbTest with CommonTestNotes {
     super.beforeAll()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/notes/Existing.xml", "Existing", "notes", 1, Some("en"))
-    setupResource("src/test/resources/api/data/notes/Existing.xml", "ExistingPut", "notes", 1, Some("en"))
-    setupResource("src/test/resources/api/data/notes/Query.xml", "Query", "notes", 1, Some("en"))
-    setupResource("src/test/resources/api/data/notes/Existing.xml", "NoAccess", "notes", 2,
+    setupResource("src/test/resources/api/data/notes/existing.xml", "existing", "notes", 1, Some("en"))
+    setupResource("src/test/resources/api/data/notes/existing.xml", "existing_put", "notes", 1, Some("en"))
+    setupResource("src/test/resources/api/data/notes/query.xml", "query", "notes", 1, Some("en"))
+    setupResource("src/test/resources/api/data/notes/existing.xml", "no_access", "notes", 2,
       Some("en"), Some("everyone"), Some("rw-------"))
-    setupResource("src/test/resources/api/data/notes/Existing.xml", "NoWriteAccess", "notes", 2,
+    setupResource("src/test/resources/api/data/notes/existing.xml", "no_write_access", "notes", 2,
       Some("en"), Some("everyone"), Some("rw-r--r--"))
   }
 
   override def afterAll()  {
-    teardownResource("NoWriteAccess", "notes", 2)
-    teardownResource("NoAccess", "notes", 2)
-    teardownResource("Query", "notes", 1)
-    teardownResource("ExistingPut", "notes", 1)
-    teardownResource("Existing", "notes", 1)
-    teardownResource("Valid", "notes", 1)
+    teardownResource("no_write_access", "notes", 2)
+    teardownResource("no_access", "notes", 2)
+    teardownResource("query", "notes", 1)
+    teardownResource("existing_put", "notes", 1)
+    teardownResource("existing", "notes", 1)
+    teardownResource("valid", "notes", 1)
     teardownUsers(2)
 
     super.afterAll()
@@ -58,19 +58,19 @@ class TestNotes extends DbTest with CommonTestNotes {
 
   describe("notes:get") {
     it("gets an existing resource") {
-      xq("""notes:get("Existing")""")
+      xq("""notes:get("existing")""")
         .assertXPath("""exists($output/tei:TEI)""", "Returns a TEI resource")
         .go
     }
     
     it("fails to get a nonexisting resource") {
-      xq("""notes:get("DoesNotExist")""")
+      xq("""notes:get("does_not_exist")""")
         .assertHttpNotFound
         .go
     }
     
     it("fails to get a resource with no read access") {
-      xq("""notes:get("NoAccess")""")
+      xq("""notes:get("no_access")""")
         .assertHttpNotFound
         .go
     }
@@ -93,7 +93,7 @@ class TestNotes extends DbTest with CommonTestNotes {
       xq("""notes:list("", 1, 100)""")
         .assertSearchResults
         .assertXPath("""count($output//html:li[@class="result"])>=1""", "returns at least 1 result")
-        .assertXPath("""empty($output//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])""", 
+        .assertXPath("""empty($output//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "no_access")])""",
           "does not list resource with no read access")
         .go
     }
@@ -115,8 +115,8 @@ class TestNotes extends DbTest with CommonTestNotes {
   }
   
   describe("notes:post") {
-    val validDoc = readXmlFile("src/test/resources/api/data/notes/Valid.xml")
-    val invalidDoc = readXmlFile("src/test/resources/api/data/notes/Invalid.xml")
+    val validDoc = readXmlFile("src/test/resources/api/data/notes/valid.xml")
+    val invalidDoc = readXmlFile("src/test/resources/api/data/notes/invalid.xml")
     it("posts a valid resource") {
       xq(s"""notes:post(document { $validDoc })""")
         .user("xqtest1")
@@ -145,41 +145,41 @@ class TestNotes extends DbTest with CommonTestNotes {
   
   describe("notes:post-note") {
     it("posts a valid new note to an existing resource") {
-      xq("""notes:post-note("Existing", <tei:note type="comment" xml:id="a-new-note">This is new.</tei:note>)""")
+      xq("""notes:post-note("existing", <tei:note type="comment" xml:id="a-new-note">This is new.</tei:note>)""")
         .user("xqtest1")
         .assertHttpNoData
-        .assertXPathEquals("doc('/db/data/notes/en/Existing.xml')//tei:revisionDesc/tei:change[1]",
+        .assertXPathEquals("doc('/db/data/notes/en/existing.xml')//tei:revisionDesc/tei:change[1]",
           "a change record has been added",
           """<tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="edited" who="/user/xqtest1"
                           when="..."/>"""
         )
-        .assertXPathEquals("doc('/db/data/notes/en/Existing.xml')//j:annotations/tei:note[last()]",
+        .assertXPathEquals("doc('/db/data/notes/en/existing.xml')//j:annotations/tei:note[last()]",
           "a new note has been added",
           """<tei:note xmlns:tei="http://www.tei-c.org/ns/1.0"
                         type="comment" xml:id="a-new-note">This is new.</tei:note>"""
         )
         .assertXPath("""count(
-          doc('/db/data/notes/en/Existing.xml')//j:annotations/tei:note)=2""",
+          doc('/db/data/notes/en/existing.xml')//j:annotations/tei:note)=2""",
           "all the other notes remain undisturbed")
         .go
     }
     
     it("posts a valid replacement note to an existing resource") {
-      xq("""notes:post-note("Existing", <tei:note type="comment" xml:id="a-note">This is replaced.</tei:note>)""")
+      xq("""notes:post-note("existing", <tei:note type="comment" xml:id="a-note">This is replaced.</tei:note>)""")
         .user("xqtest1")
         .assertHttpNoData
-        .assertXPathEquals("doc('/db/data/notes/en/Existing.xml')//tei:revisionDesc/tei:change[1]",
+        .assertXPathEquals("doc('/db/data/notes/en/existing.xml')//tei:revisionDesc/tei:change[1]",
           "a change record has been added",
           """<tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="edited" who="/user/xqtest1"
                           when="..."/>"""
         )
-        .assertXPathEquals("doc('/db/data/notes/en/Existing.xml')//j:annotations/tei:note[@xml:id='a-note']",
+        .assertXPathEquals("doc('/db/data/notes/en/existing.xml')//j:annotations/tei:note[@xml:id='a-note']",
           "a new note has been replaced",
           """<tei:note xmlns:tei="http://www.tei-c.org/ns/1.0"
                         type="comment" xml:id="a-note">This is replaced.</tei:note>"""
         )
         .assertXPath("""count(
-          doc('/db/data/notes/en/Existing.xml')//j:annotations/tei:note[@xml:id='a-note'])=1""", "the existing note was the one that was edited")
+          doc('/db/data/notes/en/existing.xml')//j:annotations/tei:note[@xml:id='a-note'])=1""", "the existing note was the one that was edited")
         .go
     }
 
@@ -191,14 +191,14 @@ class TestNotes extends DbTest with CommonTestNotes {
     }
     
     it("fails to post an invalid note (lacking xml:id) to an existing resource") {
-      xq("""notes:post-note("Existing", <tei:note type="comment">This is new.</tei:note>)""")
+      xq("""notes:post-note("existing", <tei:note type="comment">This is new.</tei:note>)""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
     }
     
     it("fails to post a note to a resource without access") {
-      xq("""notes:post-note("NoWriteAccess", <tei:note type="comment" xml:id="a-note">This is new.</tei:note>)""")
+      xq("""notes:post-note("no_write_access", <tei:note type="comment" xml:id="a-note">This is new.</tei:note>)""")
         .user("xqtest1")
         .assertHttpForbidden
         .go
@@ -208,11 +208,11 @@ class TestNotes extends DbTest with CommonTestNotes {
   describe("notes:put") {
     
     it("puts a valid resource to an existing resource") {
-      val validDoc = readXmlFile("src/test/resources/api/data/notes/Existing-After-Put.xml")
-      xq(s"""notes:put("ExistingPut", document { $validDoc })""")
+      val validDoc = readXmlFile("src/test/resources/api/data/notes/existing_after_put.xml")
+      xq(s"""notes:put("existing_put", document { $validDoc })""")
         .user("xqtest1")
         .assertHttpNoData
-        .assertXPathEquals("""doc('/db/data/notes/en/ExistingPut.xml')//tei:revisionDesc/tei:change[1]""",
+        .assertXPathEquals("""doc('/db/data/notes/en/existing_put.xml')//tei:revisionDesc/tei:change[1]""",
           "a change record has been added",
           """<tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="edited" who="/user/xqtest1"
                         when="..."/>"""
@@ -221,31 +221,31 @@ class TestNotes extends DbTest with CommonTestNotes {
     }
     
     it("fails to put a resource when unauthenticated") {
-        val validDoc = readXmlFile("src/test/resources/api/data/notes/Existing-After-Put.xml")
-        xq(s"""notes:put("Existing", document { $validDoc })""")
+        val validDoc = readXmlFile("src/test/resources/api/data/notes/existing_after_put.xml")
+        xq(s"""notes:put("existing", document { $validDoc })""")
           .assertHttpUnauthorized
           .go
     }
     
     it("fails to put a valid resource to a nonexisting resource") {
-      val validDoc = readXmlFile("src/test/resources/api/data/notes/Valid.xml")
-      xq(s"""notes:put("DoesNotExist", document { $validDoc })""")
+      val validDoc = readXmlFile("src/test/resources/api/data/notes/valid.xml")
+      xq(s"""notes:put("does_not_exist", document { $validDoc })""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
     
     it("fails to put an invalid resource") {
-      val invalidDoc = readXmlFile("src/test/resources/api/data/notes/Invalid.xml")
-      xq(s"""notes:put("Existing", document { $invalidDoc })""")
+      val invalidDoc = readXmlFile("src/test/resources/api/data/notes/invalid.xml")
+      xq(s"""notes:put("existing", document { $invalidDoc })""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
     }
 
     it("fails to put an resource that was invalidated by an illegal change") {
-      val invalidDoc = readXmlFile("src/test/resources/api/data/notes/Invalid-After-Put-Illegal-RevisionDesc.xml")
-      xq(s"""notes:put("Existing", document { $invalidDoc })""")
+      val invalidDoc = readXmlFile("src/test/resources/api/data/notes/invalid_after_put_illegal_revisiondesc.xml")
+      xq(s"""notes:put("existing", document { $invalidDoc })""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
@@ -254,13 +254,13 @@ class TestNotes extends DbTest with CommonTestNotes {
 
   describe("notes:get-access") {
     it("gets an access document for an existing resource") {
-      xq("""notes:get-access("Existing", ())""")
+      xq("""notes:get-access("existing", ())""")
         .assertXPath("""$output/self::a:access""", "an access structure is returned")
         .go
     }
 
     it("fails to get access for a nonexistent resource") {
-      xq("""notes:get-access("DoesNotExist", ())""")
+      xq("""notes:get-access("does_not_exist", ())""")
         .assertHttpNotFound
         .go
     }
@@ -268,7 +268,7 @@ class TestNotes extends DbTest with CommonTestNotes {
   
   describe("notes:put-access") {
     it("sets access with a valid access structure") {
-      xq("""notes:put-access("Existing", document{
+      xq("""notes:put-access("existing", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="true">everyone</a:group>
@@ -281,7 +281,7 @@ class TestNotes extends DbTest with CommonTestNotes {
     }
 
     it("fails with an invalid access structure") {
-      xq("""notes:put-access("Existing", document { <a:access>
+      xq("""notes:put-access("existing", document { <a:access>
           <a:invalid/>
         </a:access> })""")
         .user("xqtest1")
@@ -290,7 +290,7 @@ class TestNotes extends DbTest with CommonTestNotes {
     }
 
     it("fails for a resource with no write access") {
-      xq("""notes:put-access("NoWriteAccess", document{
+      xq("""notes:put-access("no_write_access", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="true">everyone</a:group>
@@ -303,7 +303,7 @@ class TestNotes extends DbTest with CommonTestNotes {
     }
 
     it("fails for a nonexistent resource") {
-      xq("""notes:put-access("DoesNotExist", document{
+      xq("""notes:put-access("does_not_exist", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="true">everyone</a:group>
@@ -316,7 +316,7 @@ class TestNotes extends DbTest with CommonTestNotes {
     }
     
     it("fails to change access unauthenticated") {
-      xq("""notes:put-access("Existing", document{
+      xq("""notes:put-access("existing", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="false">everyone</a:group>
@@ -336,42 +336,42 @@ class TestNotesDelete extends DbTest with CommonTestNotes {
     super.beforeEach()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/notes/Existing.xml", "Existing", "notes", 1, Some("en"))
-    setupResource("src/test/resources/api/data/notes/Existing.xml", "NoWriteAccess", "notes", 2,
+    setupResource("src/test/resources/api/data/notes/existing.xml", "existing", "notes", 1, Some("en"))
+    setupResource("src/test/resources/api/data/notes/existing.xml", "no_write_access", "notes", 2,
       Some("en"), Some("everyone"), Some("rw-r--r--"))
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
 
-    teardownResource("Existing", "notes", 1)
-    teardownResource("NoWriteAccess", "notes", 2)
+    teardownResource("existing", "notes", 1)
+    teardownResource("no_write_access", "notes", 2)
     teardownUsers(2)
   }
 
   describe("notes:delete") {
     it("removes an existing resource") {
-      xq("""notes:delete("Existing")""")
+      xq("""notes:delete("existing")""")
         .user("xqtest1")
         .assertHttpNoData
         .go
     }
     
     it("does not remove an existing resource when unauthenticated") {
-      xq("""notes:delete("Existing")""")
+      xq("""notes:delete("existing")""")
         .assertHttpUnauthorized
         .go
     }
 
     it("fails to remove a nonexisting resource") {
-      xq("""notes:delete("DoesNotExist")""")
+      xq("""notes:delete("does_not_exist")""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
 
     it("fails to remove a resource without write access") {
-      xq("""notes:delete("NoWriteAccess")""")
+      xq("""notes:delete("no_write_access")""")
         .user("xqtest1")
         .assertHttpForbidden
         .go

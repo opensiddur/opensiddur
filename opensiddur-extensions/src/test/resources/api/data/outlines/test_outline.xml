@@ -1,0 +1,122 @@
+<ol:outline 
+    xmlns:ol="http://jewishliturgy.org/ns/outline/1.0"
+    xmlns:olx="http://jewishliturgy.org/ns/outline/responses/1.0"
+>
+    <ol:source>/data/sources/TestSource</ol:source>
+    <ol:license>http://www.creativecommons.org/publicdomain/zero/1.0</ol:license>
+    <ol:title>Test Outline</ol:title>
+    <ol:lang>en</ol:lang>
+    <ol:item>
+        <ol:title>TitleDoesNotExist</ol:title>
+        <ol:from>1</ol:from>
+        <ol:to>2</ol:to>
+    </ol:item>
+    <ol:item>
+        <ol:title>Title Exists Once</ol:title>
+        <ol:from>3</ol:from>
+        <ol:to>4</ol:to>
+    </ol:item>
+    <ol:item>
+        <ol:title>Title Exists Twice</ol:title>
+        <ol:from>5</ol:from>
+        <ol:to>6</ol:to>
+    </ol:item>
+    <ol:item>
+        <ol:title>Title Has Been Confirmed</ol:title>
+        <ol:from>7</ol:from>
+        <ol:to>8</ol:to>
+        <olx:sameAs>
+            <olx:uri>/data/original/title_has_been_confirmed</olx:uri>
+            <olx:yes/>
+        </olx:sameAs>
+    </ol:item>
+    <ol:item>
+        <ol:title>Title Already Confirmed And Duplicated</ol:title>
+        <ol:from>9</ol:from>
+        <ol:to>10</ol:to>
+        <olx:sameAs>
+            <olx:uri>/data/original/title_already_confirmed_and_duplicated</olx:uri>
+            <olx:yes/>
+        </olx:sameAs>
+    </ol:item>
+    <ol:item>
+      <ol:title>Title Duplicated And Subordinates Exist With Same Pointers</ol:title>
+      <ol:from>11</ol:from>
+      <ol:to>12</ol:to>
+      <olx:sameAs>
+        <olx:uri>/data/original/title_duplicated_and_subordinates_exist_with_same_pointers</olx:uri>
+      </olx:sameAs>
+      <ol:item>
+        <ol:title>Sub One</ol:title>
+      </ol:item>
+      <ol:item>
+        <ol:title>Sub Two</ol:title>
+      </ol:item>
+    </ol:item>
+    <ol:item>
+      <ol:title>Title Duplicated And Subordinates Exist With Different Pointers</ol:title>
+      <ol:from>13</ol:from>
+      <ol:to>14</ol:to>
+      <olx:sameAs>
+        <olx:uri>/data/original/title_duplicated_and_subordinates_exist_with_different_pointers</olx:uri>
+      </olx:sameAs>
+      <ol:item>
+        <ol:title>Sub Two</ol:title>
+      </ol:item>
+      <ol:item>
+        <ol:title>Sub One</ol:title>
+      </ol:item>
+    </ol:item>
+    <ol:item>
+      <ol:title>Has A Status</ol:title>
+      <ol:from>15</ol:from>
+      <ol:to>16</ol:to>
+      <olx:sameAs>
+        <olx:uri>/data/original/has_a_status</olx:uri>
+        <olx:yes/>
+      </olx:sameAs>
+    </ol:item>
+    <ol:item>
+      <ol:title>InternalDuplicate</ol:title>
+      <ol:from>17</ol:from>
+      <ol:to>18</ol:to>
+      <ol:item>
+        <ol:title>SubThree</ol:title>
+      </ol:item>
+      <ol:item>
+        <ol:title>SubFour</ol:title>
+      </ol:item>
+    </ol:item>
+    <ol:item>
+      <ol:title>InternalDuplicate</ol:title>
+      <ol:from>19</ol:from>
+      <ol:to>20</ol:to>
+    </ol:item>
+    <ol:item>
+      <ol:title>InternalDuplicate</ol:title>
+      <ol:from>21</ol:from>
+      <ol:to>22</ol:to>
+      <ol:item>
+        <ol:title>SubThree</ol:title>
+      </ol:item>
+      <ol:item>
+        <ol:title>SubFour</ol:title>
+      </ol:item>
+    </ol:item>
+    <ol:item>
+      <ol:title>BadInternalDuplicate</ol:title>
+      <ol:from>23</ol:from>
+      <ol:to>24</ol:to>
+      <ol:item>
+        <ol:title>SubFive</ol:title>
+      </ol:item>
+    </ol:item>
+    <ol:item>
+      <ol:title>BadInternalDuplicate</ol:title>
+      <ol:from>25</ol:from>
+      <ol:to>26</ol:to>
+      <ol:item>
+        <ol:title>SubSix</ol:title>
+      </ol:item>
+    </ol:item>
+</ol:outline>

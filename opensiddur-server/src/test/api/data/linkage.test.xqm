@@ -43,7 +43,7 @@ declare variable $t:existing-linkage-document := document {
          </tei:publicationStmt>
          <tei:sourceDesc>
             <tei:bibl>
-               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
                <tei:ptr type="bibl-content" target="#parallel"/>
             </tei:bibl>
          </tei:sourceDesc>
@@ -90,7 +90,7 @@ declare variable $t:original-resource-a := document {
          </tei:publicationStmt>
          <tei:sourceDesc>
             <tei:bibl>
-               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
                <tei:ptr type="bibl-content" target="#text"/>
             </tei:bibl>
          </tei:sourceDesc>
@@ -190,7 +190,7 @@ declare variable $t:original-resource-b := document {
          </tei:publicationStmt>
          <tei:sourceDesc>
             <tei:bibl>
-               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
                <tei:ptr type="bibl-content" target="#text"/>
             </tei:bibl>
          </tei:sourceDesc>
@@ -307,7 +307,7 @@ declare variable $t:valid-resource := document {
        </tei:publicationStmt>
        <tei:sourceDesc>
           <tei:bibl>
-             <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+             <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
              <tei:ptr type="bibl-content" target="#parallel"/>
           </tei:bibl>
        </tei:sourceDesc>
@@ -361,7 +361,7 @@ declare variable $t:invalid-resource := document {
          </tei:publicationStmt>
          <tei:sourceDesc>
             <tei:bibl>
-               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
                <tei:ptr type="bibl-content" target="#parallel"/>
             </tei:bibl>
          </tei:sourceDesc>
@@ -406,7 +406,7 @@ declare variable $t:existing-linkage-document-after-put := document {
          </tei:publicationStmt>
          <tei:sourceDesc>
             <tei:bibl>
-               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
                <tei:ptr type="bibl-content" target="#parallel"/>
             </tei:bibl>
          </tei:sourceDesc>
@@ -454,7 +454,7 @@ declare variable $t:existing-document-with-invalid-revisionDesc := document {
          </tei:publicationStmt>
          <tei:sourceDesc>
             <tei:bibl>
-               <tei:ptr type="bibl" target="/data/sources/Born%20Digital"/>
+               <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
                <tei:ptr type="bibl-content" target="#parallel"/>
             </tei:bibl>
          </tei:sourceDesc>

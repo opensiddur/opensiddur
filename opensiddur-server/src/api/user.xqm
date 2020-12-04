@@ -158,10 +158,11 @@ declare
     $password as xs:string*
   ) as item()+ {
   let $name := xmldb:decode($user[1] || "")
+  let $normalized-name := data:normalize-resource-title($name, true())
   let $password := $password[1] 
   return
-    if (matches($name, "[,;:=()/\s]"))
-    then api:rest-error(400, "User name contains illegal characters: whitespace, parenthesis, comma, semicolon, colon, slash, or equals")
+    if (not($name = $normalized-name))
+    then api:rest-error(400, "User names must contain only alphanumeric characters, nonrepeated dashes and underscores. They must begin with a letter. They may not end with an underscore or dash.")
     else if (not($name) or not($password))
     then api:rest-error(400, "Missing user or password")
     else
@@ -200,7 +201,7 @@ declare
               let $null := sm:create-account($name, $password, "everyone")
               let $stored := 
                 xmldb:store($user:path, 
-                  concat($name, ".xml"),
+                  concat($normalized-name, ".xml"),
                   <j:contributor>
                     <tei:idno>{$name}</tei:idno>
                   </j:contributor>
