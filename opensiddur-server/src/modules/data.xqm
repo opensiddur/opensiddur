@@ -26,6 +26,9 @@ declare variable $data:path-base := "/db/data";
 (:~ API paths that can be supported by doc and db-api-path-to-db :)
 declare variable $data:supported-api-paths := ("data", "user");
 
+(:~ maximum length (character) of the title part of a resource name [excludes any postfix numbers] :)
+declare variable $data:max-resource-name-length := 128;
+
 (:~ convert a given path from an API path (may begin / or /api) to a database path
  : works only to find the resource. 
  : @param $api-path API path
@@ -184,25 +187,33 @@ declare function data:normalize-resource-title(
 ) as xs:string {
     let $part-composition-character := "-"
     let $word-composition-character := "_"
-    let $composed-parts := string-join($title-string-parts[.], $part-composition-character)
-    let $removed-whitespace := replace($composed-parts, "\s+", $word-composition-character)
-    let $normalized := replace(
-        normalize-unicode($removed-whitespace, "NFKD"),
-        "[^-_\p{L}\p{Nd}]+", "")
-    let $cased :=
-        if (not($case-sensitive)) then lower-case($normalized)
-        else $normalized
-    (: disallow punctuators at the beginning and end :)
-    let $remove-begin-end-punct := replace($cased, "(^[-_]+)|([-_]+$)", "")
-    (: remove duplicate punctuators :)
-    let $remove-dupe-punct := replace($remove-begin-end-punct, "(([-])+|([_])+)", "$2$3")
-    (: must begin with a letter :)
-    let $no-begin-with-number :=
-        if (matches($remove-dupe-punct, "^\d"))
-        then $word-composition-character || $remove-dupe-punct
-        else $remove-dupe-punct
-    (: empty it out if it's only - and _ :)
-    let $emptied-blanks := replace($no-begin-with-number, "^[-_]+$", "")
-    (: can't be empty :)
-    return $emptied-blanks
+    return
+        (: join all non-empty title parts with part composition :)
+        string-join($title-string-parts[normalize-space(.)], $part-composition-character) =>
+        (: replaces spaces with word composition :)
+        replace("\s+", $word-composition-character) =>
+        (: normalize to a decomposed form :)
+        normalize-unicode("NFKD") =>
+        (: remove non-alphanumerics or compositions :)
+        replace("[^-_\p{L}\p{Nd}]+", "") =>
+        (: lower-case if case sensitive :)
+        (function ($s) {
+            if (not($case-sensitive)) then lower-case($s)
+            else $s
+        })() =>
+        (: can't be too long :)
+        substring(1, $data:max-resource-name-length) =>
+        (: disallow punctuators at the beginning and end :)
+        replace( "(^[-_]+)|([-_]+$)", "") =>
+        (: must begin with a letter - an exception to disallowing begin/end punctuators :)
+        (function($s) {
+            if (matches($s, "^\d"))
+            then $word-composition-character || $s
+            else $s
+        })() =>
+        (: remove duplicate punctuators :)
+        replace( "(([-])+|([_])+)", "$2$3") =>
+        (: empty it out if it's only - and _ :)
+        replace( "^[-_]+$", "")
+        (: can't be empty :)
 };

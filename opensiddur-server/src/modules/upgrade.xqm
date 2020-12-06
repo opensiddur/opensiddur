@@ -54,6 +54,7 @@ declare function upg:schema-changes-0-7-5(
 declare function upg:rename-resources-for-upgrade(
 ) as map(xs:string, xs:string) {
     map:merge(
+        map:entry("/data/sources/Born%20Digital", "/data/sources/open_siddur_project"),
         for $document in collection("/db/data")
         let $collection := util:collection-name($document)
         let $resource := util:document-name($document)
@@ -115,7 +116,7 @@ declare function upg:rewrite-resource-links(
             then $resource-name-map($token)
             else $resource
         return
-            string-join(($rewritten-resource, $fragment), '#')
+            string-join(($rewritten-resource, $fragment[.]), '#')
         , " "
     )
     let $log := util:log("info", "21:" || $link-attribute/string() || "->" || $rewritten)
