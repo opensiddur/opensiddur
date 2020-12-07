@@ -53,7 +53,7 @@ declare function upg:schema-changes-0-7-5(
 
 declare function upg:rename-resources-for-upgrade(
 ) as map(xs:string, xs:string) {
-    map:merge(
+    map:merge((
         map:entry("/data/sources/Born%20Digital", "/data/sources/open_siddur_project"),
         for $document in collection("/db/data")
         let $collection := util:collection-name($document)
@@ -92,7 +92,7 @@ declare function upg:rename-resources-for-upgrade(
             let $rename := xmldb:rename($collection, $resource, $new-resource-name)
             return map:entry($old-internal-uri, $new-internal-uri)
         )
-    )
+    ))
 };
 
 declare function upg:rewrite-resource-links(
