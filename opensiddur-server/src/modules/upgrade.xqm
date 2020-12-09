@@ -98,7 +98,8 @@ declare function upg:rename-resources-for-upgrade(
 declare function upg:rewrite-resource-links(
     $resource-name-map as map(xs:string, xs:string)
 ) {
-    upg:rewrite-resource-links($resource-name-map, collection("/db/data")//(@target|@targets|@domains|@ref))
+    upg:rewrite-resource-links($resource-name-map,
+        collection("/db/data")//*[(@target|@targets|@domains|@ref)]/(@target|@targets|@domains|@ref))
 };
 
 declare function upg:rewrite-resource-links(
@@ -134,9 +135,9 @@ declare function upg:rewrite-resource-links(
  : NOTE 2: This will also update for 0.13.0
  :)
 declare function upg:schema-changes-0-8-0() {
-    let $log1 := util:log("info", 1)
+    let $log1 := util:log("info", "Renaming resources for upgrade...")
     let $name-map := upg:rename-resources-for-upgrade()
-    let $log1 := util:log("info", 2)
+    let $log1 := util:log("info", "Rewriting resource links...")
     return upg:rewrite-resource-links($name-map)
 };
 
