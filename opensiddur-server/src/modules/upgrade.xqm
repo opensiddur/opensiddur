@@ -114,7 +114,7 @@ declare function upg:rewrite-resource-links(
         let $fragment := string(uri:uri-fragment($token))
         let $rewritten-resource :=
             if (map:contains($resource-name-map, $resource))
-            then $resource-name-map($token)
+            then $resource-name-map($resource)
             else $resource
         return
             string-join(($rewritten-resource, $fragment[.]), '#')
