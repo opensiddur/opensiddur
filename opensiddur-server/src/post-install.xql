@@ -40,8 +40,8 @@ util:log("info", "install default sources..."),
 (: add $target/data/sources/Born Digital using src:post() or src:put() :)
 xmldb:store(
     "/db/data/sources",
-    "Born%20Digital.xml",
-    doc($target || "/data/sources/Born%20Digital.xml")
+    "open_siddur_project.xml",
+    doc($target || "/data/sources/open_siddur_project.xml")
     ),
 util:log("info", "install default styles..."),
 (: add $target/data/styles/generic.xml using sty:post() or sty:put() :)

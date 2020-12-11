@@ -31,21 +31,21 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
     super.beforeAll()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/transliteration/Test.tr.xml", "Test", "transliteration", 1)
-    setupResource("src/test/resources/api/data/transliteration/Test%202.tr.xml", "Test%202", "transliteration", 1)
-    setupResource("src/test/resources/api/data/transliteration/Mivchan.tr.xml", "Mivchan", "transliteration", 1)
-    setupResource("src/test/resources/api/data/transliteration/Garbage.tr.xml", "Garbage", "transliteration", 1)
-    setupResource("src/test/resources/api/data/transliteration/NoWrite.tr.xml", "NoWrite", "transliteration", 2,
+    setupResource("src/test/resources/api/data/transliteration/test.tr.xml", "test", "transliteration", 1)
+    setupResource("src/test/resources/api/data/transliteration/test_2.tr.xml", "test_2", "transliteration", 1)
+    setupResource("src/test/resources/api/data/transliteration/mivchan.tr.xml", "mivchan", "transliteration", 1)
+    setupResource("src/test/resources/api/data/transliteration/garbage.tr.xml", "garbage", "transliteration", 1)
+    setupResource("src/test/resources/api/data/transliteration/no_write.tr.xml", "no_write", "transliteration", 2,
       None, Some("everyone"), Some("rw-r--r--"))
   }
 
   override def afterAll()  {
     // tear down users that were created by tests
-    teardownResource("NoWrite", "transliteration", 2)
-    teardownResource("Garbage", "transliteration", 1)
-    teardownResource("Mivchan", "transliteration", 1)
-    teardownResource("Test%202", "transliteration", 1)
-    teardownResource("Test", "transliteration", 1)
+    teardownResource("no_write", "transliteration", 2)
+    teardownResource("garbage", "transliteration", 1)
+    teardownResource("mivchan", "transliteration", 1)
+    teardownResource("test_2", "transliteration", 1)
+    teardownResource("test", "transliteration", 1)
     teardownUsers(2)
 
     super.afterAll()
@@ -61,20 +61,20 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
 
   describe("tran:get") {
     it("gets an existing resource (authenticated)") {
-      xq("""tran:get("Test")""")
+      xq("""tran:get("test")""")
         .user("xqtest1")
         .assertXPath("""exists($output/tr:schema)""", "returns a transliteration schema")
         .go
     }
 
     it("gets an existing resource (unauthenticated)") {
-      xq("""tran:get("Test")""")
+      xq("""tran:get("test")""")
         .assertXPath("""exists($output/tr:schema)""", "returns a transliteration schema")
         .go
     }
     
     it("fails to get a non-existing resource") {
-      xq("""tran:get("DoesNotExist")""")
+      xq("""tran:get("does_not_exist")""")
         .assertHttpNotFound
         .go
     }
@@ -100,7 +100,7 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
     }
     
     it("responds to a query") {
-      xq("""tran:list("Test", 1, 100)""")
+      xq("""tran:list("test", 1, 100)""")
         .assertSearchResults
         .assertXPath("""count($output//html:ol[@class="results"]/html:li)=3""", "returns 3 results")
         .go
@@ -109,26 +109,26 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
   
   describe("tran:post") {
     it("posts a valid transliteration") {
-      val validData = readXmlFile("src/test/resources/api/data/transliteration/Valid.tr.xml")
+      val validData = readXmlFile("src/test/resources/api/data/transliteration/valid.tr.xml")
       xq(s"""tran:post(document { $validData })""")
         .user("xqtest1")
         .assertHttpCreated
         .assertXPath("""exists($output/self::rest:response/http:response/http:header[@name="Location"])""",
         "A location header specifies where the document is stored")
-        .assertXPath("""exists(data:doc("transliteration", "Valid"))""", 
+        .assertXPath("""exists(data:doc("transliteration", "valid"))""",
           "A new document has been created at the location")
         .go
     }
 
     it("fails to post a valid transliteration unauthenticated") {
-      val validData = readXmlFile("src/test/resources/api/data/transliteration/Valid.tr.xml")
+      val validData = readXmlFile("src/test/resources/api/data/transliteration/valid.tr.xml")
       xq(s"""tran:post(document { $validData })""")
         .assertHttpUnauthorized
         .go
     }
     
     it("fails to post an invalid transliteration") {
-      val invalidData = readXmlFile("src/test/resources/api/data/transliteration/Invalid.tr.xml")
+      val invalidData = readXmlFile("src/test/resources/api/data/transliteration/invalid.tr.xml")
       
       xq(s"""tran:post(document { $invalidData })""")
         .user("xqtest1")
@@ -137,7 +137,7 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
     }
     
     it("fails to post an invalid transliteration that is invalid because of the Schematron") {
-      val invalidData = readXmlFile("src/test/resources/api/data/transliteration/InvalidSchema.tr.xml")
+      val invalidData = readXmlFile("src/test/resources/api/data/transliteration/invalid_schema.tr.xml")
 
       xq(s"""tran:post(document { $invalidData })""")
         .user("xqtest1")
@@ -147,48 +147,48 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
   }
   
   describe("tran:put") {
-    val validData = readXmlFile("src/test/resources/api/data/transliteration/Valid.tr.xml")
-    val invalidData = readXmlFile("src/test/resources/api/data/transliteration/Invalid.tr.xml")
-    val invalidSchema = readXmlFile("src/test/resources/api/data/transliteration/InvalidSchema.tr.xml")
+    val validData = readXmlFile("src/test/resources/api/data/transliteration/valid.tr.xml")
+    val invalidData = readXmlFile("src/test/resources/api/data/transliteration/invalid.tr.xml")
+    val invalidSchema = readXmlFile("src/test/resources/api/data/transliteration/invalid_schema.tr.xml")
     it("succeeds in putting valid data to an existing resource") {
       
-      xq(s"""tran:put("Garbage", document { $validData })""")
+      xq(s"""tran:put("garbage", document { $validData })""")
         .user("xqtest1")
         .assertHttpNoData
-        .assertXPath("""data:doc("transliteration", "Garbage")//tr:title="Valid"""", "document data has been changed")
+        .assertXPath("""data:doc("transliteration", "garbage")//tr:title="Valid"""", "document data has been changed")
         .go
     }
 
     it("fails to put valid data to an existing resource unauthenticated") {
 
-      xq(s"""tran:put("Garbage", document { $validData })""")
+      xq(s"""tran:put("garbage", document { $validData })""")
         .assertHttpUnauthorized
         .go
     }
     
     it("fails to put data to a non-existing resource") {
-      xq(s"""tran:put("DoesNotExist", document { $validData })""")
+      xq(s"""tran:put("does_not_exist", document { $validData })""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
     
     it("fails to put invalid data to an existing resource") {
-      xq(s"""tran:put("Garbage", document { $invalidData })""")
+      xq(s"""tran:put("garbage", document { $invalidData })""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
     }
     
     it("fails to put invalid data (by schematron) to an existing resource") {
-      xq(s"""tran:put("Garbage", document { $invalidSchema })""")
+      xq(s"""tran:put("garbage", document { $invalidSchema })""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
     }
     
     it("fails to put valid data to an existing resource as an unauthorized user") {
-      xq(s"""tran:put("Garbage", document { $validData })""")
+      xq(s"""tran:put("garbage", document { $validData })""")
         .user("xqtest2")
         .assertHttpForbidden
         .go
@@ -198,13 +198,13 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
   
   describe("tran:get-access") {
     it("returns an access structure for an existing document") {
-      xq("""tran:get-access("Garbage", ())""")
+      xq("""tran:get-access("garbage", ())""")
         .assertXPath("""exists($output/self::a:access)""")
         .go
     }
     
     it("fails to return an access structure for a nonexisting document") {
-      xq("""tran:get-access("DoesNotExist", ())""")
+      xq("""tran:get-access("does_not_exist", ())""")
         .assertHttpNotFound
         .go
     }
@@ -212,7 +212,7 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
   
   describe("tran:put-access") {
     it("sets access with a valid access structure, authenticated") {
-      xq("""tran:put-access("Test", document{
+      xq("""tran:put-access("test", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="true">everyone</a:group>
@@ -225,7 +225,7 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
     }
 
     it("fails when the access structure is invalid") {
-      xq("""tran:put-access("Test", document{
+      xq("""tran:put-access("test", document{
         <a:access>
           <a:invalid/>
         </a:access>
@@ -236,7 +236,7 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
     }
 
     it("fails when no write access") {
-      xq("""tran:put-access("NoWrite", document{
+      xq("""tran:put-access("no_write", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="true">everyone</a:group>
@@ -249,7 +249,7 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
     }
 
     it("fails for a nonexistent resource") {
-      xq("""tran:put-access("DoesNotExist", document{
+      xq("""tran:put-access("does_not_exist", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="true">everyone</a:group>
@@ -262,7 +262,7 @@ class TestTransliteration extends DbTest with CommonTestTransliteration {
     }
 
     it("fails to change access unauthenticated") {
-      xq("""tran:put-access("Garbage", document{
+      xq("""tran:put-access("garbage", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="false">everyone</a:group>
@@ -281,47 +281,47 @@ class TestTransliterationDelete extends DbTest with CommonTestTransliteration {
     super.beforeEach()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/transliteration/Garbage.tr.xml", "Garbage", "transliteration", 1, None,
+    setupResource("src/test/resources/api/data/transliteration/garbage.tr.xml", "garbage", "transliteration", 1, None,
       Some("everyone"), Some("rw-r--r--"))
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
 
-    teardownResource("Garbage", "transliteration", 1)
+    teardownResource("garbage", "transliteration", 1)
     teardownUsers(2)
   }
 
   describe("tran:delete") {
     it("deletes a transliteration that exists") {
-      xq("""tran:delete("Garbage")""")
+      xq("""tran:delete("garbage")""")
         .user("xqtest1")
         .assertHttpNoData
-        .assertXPath("""not(doc-available("/data/transliteration/Garbage.xml"))""", "data is removed")
+        .assertXPath("""not(doc-available("/data/transliteration/garbage.xml"))""", "data is removed")
         .go
     }
 
     it("fails to delete a transliteration that exists (unauthenticated)") {
-      xq("""tran:delete("Garbage")""")
+      xq("""tran:delete("garbage")""")
         .assertHttpUnauthorized
         .go
     }
     
     it("fails to delete a transliteration that does not exist") {
-      xq("""tran:delete("NotExist")""")
+      xq("""tran:delete("does_not_exist")""")
         .assertHttpNotFound
         .go
     }
     
     it("fails to delete where no write access is granted") {
-      xq("""tran:delete("Garbage")""")
+      xq("""tran:delete("garbage")""")
         .user("xqtest2")
         .assertHttpForbidden
         .go
     }
     
     ignore("fails to delete a transliteration with an external reference") {
-      xq("""tran:delete("ExternalReference")""")
+      xq("""tran:delete("external_reference")""")
         .assertHttpBadRequest
         .go
     }

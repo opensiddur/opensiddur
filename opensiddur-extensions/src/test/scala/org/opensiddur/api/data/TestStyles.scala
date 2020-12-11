@@ -28,20 +28,20 @@ class TestStyles extends DbTest with CommonTestStyles {
     super.beforeAll()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/styles/Existing.xml", "Existing", "styles", 1)
-    setupResource("src/test/resources/api/data/styles/Existing.xml", "NoAccess", "styles", 2, 
+    setupResource("src/test/resources/api/data/styles/existing.xml", "existing", "styles", 1)
+    setupResource("src/test/resources/api/data/styles/existing.xml", "no_access", "styles", 2,
       None, Some("everyone"), Some("rw-------"))
-    setupResource("src/test/resources/api/data/styles/NoWriteAccess.xml", "NoWriteAccess", "styles", 2,
+    setupResource("src/test/resources/api/data/styles/no_write_access.xml", "no_write_access", "styles", 2,
       None, Some("everyone"), Some("rw-r--r--"))
     
   }
 
   override def afterAll()  {
     // tear down users that were created by tests
-    teardownResource("NoWriteAccess", "styles", 2)
-    teardownResource("NoAccess", "styles", 2)
-    teardownResource("Existing", "styles", 1)
-    teardownResource("Valid", "styles", 1)
+    teardownResource("no_write_access", "styles", 2)
+    teardownResource("no_access", "styles", 2)
+    teardownResource("existing", "styles", 1)
+    teardownResource("valid", "styles", 1)
     teardownUsers(2)
 
     super.afterAll()
@@ -57,19 +57,19 @@ class TestStyles extends DbTest with CommonTestStyles {
 
   describe("sty:get-xml") {
     it("gets an existing resource") {
-      xq("""sty:get-xml("Existing")""")
+      xq("""sty:get-xml("existing")""")
         .assertXPath("""exists($output/tei:TEI)""", "Returns a TEI resource")
         .go
     }
     
     it("fails to get a nonexisting resource") {
-      xq("""sty:get-xml("DoesNotExist")""")
+      xq("""sty:get-xml("does_not_exist")""")
         .assertHttpNotFound
         .go
     }
     
     it("fails to get a resource with no read access") {
-      xq("""sty:get-xml("NoAccess")""")
+      xq("""sty:get-xml("no_access")""")
         .assertHttpNotFound
         .go
     }
@@ -77,20 +77,20 @@ class TestStyles extends DbTest with CommonTestStyles {
   
   describe("sty:get-css") {
     it("gets an existing resource") {
-      xq("""sty:get-css("Existing")""")
+      xq("""sty:get-css("existing")""")
         .assertXPath("""$output instance of xs:string and contains($output, ".tei-seg")""", 
         "Returns a string containing the CSS")
         .go
     }
     
     it("fails to get a nonexisting resource") {
-      xq("""sty:get-css("DoesNotExist")""")
+      xq("""sty:get-css("does_not_exist")""")
         .assertHttpNotFound
         .go
     }
     
     it("fails to get a resource with no read access") {
-      xq("""sty:get-css("NoAccess")""")
+      xq("""sty:get-css("no_access")""")
         .assertHttpNotFound
         .go
     }
@@ -113,7 +113,7 @@ class TestStyles extends DbTest with CommonTestStyles {
       xq("""sty:list("", 1, 100)""")
         .assertSearchResults
         .assertXPath("""count($output//html:li[@class="result"])>=1""", "returns at least 1 result")
-        .assertXPath("""empty($output//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])""", 
+        .assertXPath("""empty($output//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "no_access")])""",
           "does not list resource with no read access")
         .go
     }
@@ -127,7 +127,7 @@ class TestStyles extends DbTest with CommonTestStyles {
     }
     
     it("responds to a query") {
-      xq("""sty:list("Query", 1, 100)""")
+      xq("""sty:list("query", 1, 100)""")
         .assertXPath("""count($output//html:ol[@class="results"]/html:li)=1""", "returns 1 results")
         .assertSearchResults
         .go
@@ -135,7 +135,7 @@ class TestStyles extends DbTest with CommonTestStyles {
   }
   
   describe("sty:post") {
-    val validDoc = readXmlFile("src/test/resources/api/data/styles/Valid.xml")
+    val validDoc = readXmlFile("src/test/resources/api/data/styles/valid.xml")
     it("posts a valid resource") {
       xq(s"""sty:post(document { $validDoc })""")
         .user("xqtest1")
@@ -155,7 +155,7 @@ class TestStyles extends DbTest with CommonTestStyles {
     }
     
     it("fails to post an invalid resource") {
-      val invalidDoc = readXmlFile("src/test/resources/api/data/styles/Invalid.xml")
+      val invalidDoc = readXmlFile("src/test/resources/api/data/styles/invalid.xml")
       
       xq(s"""sty:post(document { $invalidDoc })""")
         .user("xqtest1")
@@ -165,35 +165,35 @@ class TestStyles extends DbTest with CommonTestStyles {
   }
   
   describe("sty:put-xml") {
-    val validDoc = readXmlFile("src/test/resources/api/data/styles/Existing-After-Put.xml")
+    val validDoc = readXmlFile("src/test/resources/api/data/styles/existing_after_put.xml")
     it("puts a valid resource to an existing resource") {
-      xq(s"""sty:put-xml("Existing", document { $validDoc })""")
+      xq(s"""sty:put-xml("existing", document { $validDoc })""")
         .user("xqtest1")
         .assertHttpNoData
         // en?
         .assertXPath(
-          """(collection('/db/data/styles')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change)[1]
+          """(collection('/db/data/styles')[util:document-name(.)='existing.xml']//tei:revisionDesc/tei:change)[1]
             [@type="edited"][@who="/user/xqtest1"][@when]""", "a change record has been added")
         .go
     }
     
     it("fails to put a resource when unauthenticated") {
-        xq(s"""sty:put-xml("Existing", document { $validDoc })""")
+        xq(s"""sty:put-xml("existing", document { $validDoc })""")
           .assertHttpUnauthorized
           .go
     }
     
     it("fails to put a valid resource to a nonexisting resource") {
-      val validDoc = readXmlFile("src/test/resources/api/data/styles/Valid.xml")
-      xq(s"""sty:put-xml("DoesNotExist", document { $validDoc })""")
+      val validDoc = readXmlFile("src/test/resources/api/data/styles/valid.xml")
+      xq(s"""sty:put-xml("does_not_exist", document { $validDoc })""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
     
     it("fails to put an invalid resource") {
-      val invalidDoc = readXmlFile("src/test/resources/api/data/styles/Invalid.xml")
-      xq(s"""sty:put-xml("Existing", document { $invalidDoc })""")
+      val invalidDoc = readXmlFile("src/test/resources/api/data/styles/invalid.xml")
+      xq(s"""sty:put-xml("existing", document { $invalidDoc })""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
@@ -201,39 +201,39 @@ class TestStyles extends DbTest with CommonTestStyles {
   }
   
   describe("sty:put-css") {
-    val validDoc = readXmlFile("src/test/resources/api/data/styles/Valid.xml")
+    val validDoc = readXmlFile("src/test/resources/api/data/styles/valid.xml")
   
     it("puts a valid resource to an existing resource") {
       xq(
-        """sty:put-css("Existing", ".tei-div {display: none;}")""")
+        """sty:put-css("existing", ".tei-div {display: none;}")""")
         .user("xqtest1")
         .assertHttpNoData
         .assertXPath("""contains(
           (collection('/db/data/styles')
-          [util:document-name(.)='Existing.xml']//j:stylesheet[@scheme="css"])[1],
+          [util:document-name(.)='existing.xml']//j:stylesheet[@scheme="css"])[1],
           ".tei-div")""", "j:stylesheet content changed")
         .assertXPath(
-          """(collection('/db/data/styles')[util:document-name(.)='Existing.xml']//tei:revisionDesc/tei:change)[1]
+          """(collection('/db/data/styles')[util:document-name(.)='existing.xml']//tei:revisionDesc/tei:change)[1]
             [@type="edited"][@who="/user/xqtest1"][@when]""", "a change record has been added")
         .go
     }
 
     it("fails to put a valid resource to an existing resource when unauthenticated") {
       xq(
-        """sty:put-css("Existing", ".tei-div {display: none;}")""")
+        """sty:put-css("existing", ".tei-div {display: none;}")""")
         .assertHttpUnauthorized
         .go
     }
 
     it("fails to put a valid resource to a nonexisting resource") {
-      xq("""sty:put-css("DoesNotExist", ".tei-div {display:none;}")""")
+      xq("""sty:put-css("does_not_exist", ".tei-div {display:none;}")""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
     
     ignore("it fails to put an invalid resource") {
-      xq("""sty:put-css("Existing", "xxxx")""")
+      xq("""sty:put-css("existing", "xxxx")""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
@@ -242,13 +242,13 @@ class TestStyles extends DbTest with CommonTestStyles {
     
   describe("sty:get-access") {
     it("returns an access structure on an existing document") {
-      xq("""sty:get-access("Existing", ())""")
+      xq("""sty:get-access("existing", ())""")
         .assertXPath("""exists($output/self::a:access)""", "an access structure is returned")
         .go
     }
 
     it("fails to return an access structure for a nonexistent resource") {
-      xq("""sty:get-access("DoesNotExist", ())""")
+      xq("""sty:get-access("does_not_exist", ())""")
         .assertHttpNotFound
         .go
     }
@@ -256,7 +256,7 @@ class TestStyles extends DbTest with CommonTestStyles {
   
   describe("sty:put-access") {
     it("puts a valid access structure") {
-      xq("""sty:put-access("Existing", document{
+      xq("""sty:put-access("existing", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="false">everyone</a:group>
@@ -269,7 +269,7 @@ class TestStyles extends DbTest with CommonTestStyles {
     }
 
     it("fails to put unauthenticated") {
-      xq("""sty:put-access("Existing", document{
+      xq("""sty:put-access("existing", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="false">everyone</a:group>
@@ -281,7 +281,7 @@ class TestStyles extends DbTest with CommonTestStyles {
     }
 
     it("fails to put an invalid access structure") {
-      xq("""sty:put-access("Existing", document{
+      xq("""sty:put-access("existing", document{
         <a:access>
           <a:invalid/>
         </a:access>
@@ -292,7 +292,7 @@ class TestStyles extends DbTest with CommonTestStyles {
     }
 
     it("fails to put for a resource with no write access") {
-      xq("""sty:put-access("NoWriteAccess", document{
+      xq("""sty:put-access("no_write_access", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="false">everyone</a:group>
@@ -305,7 +305,7 @@ class TestStyles extends DbTest with CommonTestStyles {
     }
 
     it("fails to put for a nonexistent resource") {
-      xq("""sty:put-access("DoesNotExist", document{
+      xq("""sty:put-access("does_not_exist", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="false">everyone</a:group>
@@ -324,42 +324,42 @@ class TestStylesDelete extends DbTest with CommonTestStyles {
     super.beforeEach()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/styles/Existing.xml", "Existing", "styles", 1)
-    setupResource("src/test/resources/api/data/styles/NoWriteAccess.xml", "NoWriteAccess", "styles", 2,
+    setupResource("src/test/resources/api/data/styles/existing.xml", "existing", "styles", 1)
+    setupResource("src/test/resources/api/data/styles/no_write_access.xml", "no_write_access", "styles", 2,
       None, Some("everyone"), Some("rw-r--r--"))
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
 
-    teardownResource("Existing", "styles", 1)
-    teardownResource("NoWriteAccess", "styles", 2)
+    teardownResource("existing", "styles", 1)
+    teardownResource("no_write_access", "styles", 2)
     teardownUsers(2)
   }
 
   describe("sty:delete") {
     it("removes an existing resource") {
-      xq("""sty:delete("Existing")""")
+      xq("""sty:delete("existing")""")
         .user("xqtest1")
         .assertHttpNoData
         .go
     }
     
     it("does not remove an existing resource when unauthenticated") {
-      xq("""sty:delete("Existing")""")
+      xq("""sty:delete("existing")""")
         .assertHttpUnauthorized
         .go
     }
 
     it("fails to remove a nonexisting resource") {
-      xq("""sty:delete("DoesNotExist")""")
+      xq("""sty:delete("does_not_exist")""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
 
     it("fails to remove a resource without write access") {
-      xq("""sty:delete("NoWriteAccess")""")
+      xq("""sty:delete("no_write_access")""")
         .user("xqtest1")
         .assertHttpForbidden
         .go

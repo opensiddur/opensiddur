@@ -21,12 +21,12 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
     super.beforeAll()
 
     setupUsers(1)
-    setupResource("src/test/resources/api/utility/translit/Test.xml",
-      "Test", "transliteration", 1)
+    setupResource("src/test/resources/api/utility/translit/test.xml",
+      "test", "transliteration", 1)
   }
 
   override def afterAll = {
-    teardownResource("Test", "transliteration", 1)
+    teardownResource("test", "transliteration", 1)
     teardownUsers(1)
 
     super.afterAll()
@@ -46,7 +46,7 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
         document{
           <transliterate xml:lang="he">אבגדה וזח</transliterate>
         },
-        "Test")
+        "test")
       """)
         .assertXmlEquals("""<transliterate xml:lang="he-Latn">abcde fgh</transliterate>""")
         .go
@@ -67,7 +67,7 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
               document{
               <transliterate xml:lang="xx">אבגדה וזח</transliterate>
               },
-              "Test")""")
+              "test")""")
         .assertHttpBadRequest
         .go
     }
@@ -77,7 +77,7 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
     it("returns a transliterated text record on posting text and valid transliteration schema") {
       xq("""translit:transliterate-text(
         util:string-to-binary("אבגדה וזח"),
-        "Test")""")
+        "test")""")
         .assertXPath("""$output[1]/self::rest:response/output:serialization-parameters/output:method="text"""", "output is text/plain")
         .assertXPath("""$output[2]="abcde fgh"""", "transliterated text")
         .go

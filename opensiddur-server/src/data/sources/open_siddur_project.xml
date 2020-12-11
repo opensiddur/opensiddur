@@ -1,0 +1,9 @@
+<tei:biblStruct xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <tei:monogr>
+    <tei:title xml:lang="en">Open Siddur Project</tei:title>
+    <tei:imprint>
+      <tei:distributor><tei:ref target="http://opensiddur.org">The Open Siddur Project</tei:ref></tei:distributor>
+    </tei:imprint>
+   </tei:monogr>
+  <tei:note>A source for all works original to the Open Siddur Project</tei:note>
+</tei:biblStruct>

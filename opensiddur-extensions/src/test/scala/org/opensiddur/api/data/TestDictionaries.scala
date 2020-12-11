@@ -27,18 +27,18 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
     super.beforeAll()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/dictionaries/Existing.xml", "Existing", "dictionaries", 1, Some("en"))
-    setupResource("src/test/resources/api/data/dictionaries/Existing.xml", "NoAccess", "dictionaries",  2,
+    setupResource("src/test/resources/api/data/dictionaries/existing.xml", "existing", "dictionaries", 1, Some("en"))
+    setupResource("src/test/resources/api/data/dictionaries/existing.xml", "no_access", "dictionaries",  2,
       Some("en"), Some("everyone"), Some("rw-------"))
-    setupResource("src/test/resources/api/data/notes/Existing.xml", "NoWriteAccess", "dictionaries", 2,
+    setupResource("src/test/resources/api/data/notes/existing.xml", "no_write_access", "dictionaries", 2,
       Some("en"), Some("everyone"), Some("rw-r--r--"))
   }
 
   override def afterAll()  {
-    teardownResource("NoWriteAccess", "dictionaries", 2)
-    teardownResource("NoAccess", "dictionaries", 2)
-    teardownResource("Existing", "dictionaries", 1)
-    teardownResource("Valid", "dictionaries", 1)
+    teardownResource("no_write_access", "dictionaries", 2)
+    teardownResource("no_access", "dictionaries", 2)
+    teardownResource("existing", "dictionaries", 1)
+    teardownResource("valid", "dictionaries", 1)
     teardownUsers(2)
 
     super.afterAll()
@@ -54,19 +54,19 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
 
   describe("dict:get") {
     it("gets an existing resource") {
-      xq("""dict:get("Existing")""")
+      xq("""dict:get("existing")""")
         .assertXPath("""exists($output/tei:TEI)""", "Returns a TEI resource")
         .go
     }
     
     it("fails to get a nonexisting resource") {
-      xq("""dict:get("DoesNotExist")""")
+      xq("""dict:get("does_not_exist")""")
         .assertHttpNotFound
         .go
     }
     
     it("fails to get a resource with no read access") {
-      xq("""dict:get("NoAccess")""")
+      xq("""dict:get("no_access")""")
         .assertHttpNotFound
         .go
     }
@@ -89,7 +89,7 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
       xq("""dict:list("", 1, 100)""")
         .assertSearchResults
         .assertXPath("""count($output//html:li[@class="result"])>=1""", "returns at least 1 result")
-        .assertXPath("""empty($output//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])""", 
+        .assertXPath("""empty($output//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "no_access")])""",
           "does not list resource with no read access")
         .go
     }
@@ -103,7 +103,7 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
     }
     
     it("responds to a query") {
-      xq("""dict:list("Query", 1, 100)""")
+      xq("""dict:list("query", 1, 100)""")
         .assertXPath("""count($output//html:ol[@class="results"]/html:li)=1""", "returns 1 result")
         .assertSearchResults
         .go
@@ -111,8 +111,8 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
   }
   
   describe("dict:post") {
-    val validDoc = readXmlFile("src/test/resources/api/data/dictionaries/Valid.xml")
-    val invalidDoc = readXmlFile("src/test/resources/api/data/dictionaries/Invalid.xml")
+    val validDoc = readXmlFile("src/test/resources/api/data/dictionaries/valid.xml")
+    val invalidDoc = readXmlFile("src/test/resources/api/data/dictionaries/invalid.xml")
     it("posts a valid resource") {
       xq(s"""dict:post(document { $validDoc })""")
         .user("xqtest1")
@@ -142,11 +142,11 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
   describe("dict:put") {
     
     it("puts a valid resource to an existing resource") {
-      val validDoc = readXmlFile("src/test/resources/api/data/dictionaries/Existing-After-Put.xml")
-      xq(s"""dict:put("Existing", document { $validDoc })""")
+      val validDoc = readXmlFile("src/test/resources/api/data/dictionaries/existing_after_put.xml")
+      xq(s"""dict:put("existing", document { $validDoc })""")
         .user("xqtest1")
         .assertHttpNoData
-        .assertXPathEquals("""doc('/db/data/dictionaries/en/Existing.xml')//tei:revisionDesc/tei:change[1]""",
+        .assertXPathEquals("""doc('/db/data/dictionaries/en/existing.xml')//tei:revisionDesc/tei:change[1]""",
           "a change record has been added",
           """<tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="edited" who="/user/xqtest1"
                         when="..."/>"""
@@ -155,31 +155,31 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
     }
     
     it("fails to put a resource when unauthenticated") {
-        val validDoc = readXmlFile("src/test/resources/api/data/dictionaries/Existing-After-Put.xml")
-        xq(s"""dict:put("Existing", document { $validDoc })""")
+        val validDoc = readXmlFile("src/test/resources/api/data/dictionaries/existing_after_put.xml")
+        xq(s"""dict:put("existing", document { $validDoc })""")
           .assertHttpUnauthorized
           .go
     }
     
     it("fails to put a valid resource to a nonexisting resource") {
-      val validDoc = readXmlFile("src/test/resources/api/data/dictionaries/Valid.xml")
-      xq(s"""dict:put("DoesNotExist", document { $validDoc })""")
+      val validDoc = readXmlFile("src/test/resources/api/data/dictionaries/valid.xml")
+      xq(s"""dict:put("does_not_exist", document { $validDoc })""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
     
     it("fails to put an invalid resource") {
-      val invalidDoc = readXmlFile("src/test/resources/api/data/dictionaries/Invalid.xml")
-      xq(s"""dict:put("Existing", document { $invalidDoc })""")
+      val invalidDoc = readXmlFile("src/test/resources/api/data/dictionaries/invalid.xml")
+      xq(s"""dict:put("existing", document { $invalidDoc })""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
     }
 
     it("fails to put an resource that was invalidated by an illegal change") {
-      val invalidDoc = readXmlFile("src/test/resources/api/data/dictionaries/Invalid-After-Put.xml")
-      xq(s"""dict:put("Existing", document { $invalidDoc })""")
+      val invalidDoc = readXmlFile("src/test/resources/api/data/dictionaries/invalid_after_put.xml")
+      xq(s"""dict:put("existing", document { $invalidDoc })""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
@@ -188,13 +188,13 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
 
   describe("dict:get-access") {
     it("gets an access document for an existing resource") {
-      xq("""dict:get-access("Existing", ())""")
+      xq("""dict:get-access("existing", ())""")
         .assertXPath("""$output/self::a:access""", "an access structure is returned")
         .go
     }
 
     it("fails to get access for a nonexistent resource") {
-      xq("""dict:get-access("DoesNotExist", ())""")
+      xq("""dict:get-access("does_not_exist", ())""")
         .assertHttpNotFound
         .go
     }
@@ -202,7 +202,7 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
   
   describe("dict:put-access") {
     it("sets access with a valid access structure") {
-      xq("""dict:put-access("Existing", document{
+      xq("""dict:put-access("existing", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="true">everyone</a:group>
@@ -215,7 +215,7 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
     }
 
     it("fails with an invalid access structure") {
-      xq("""dict:put-access("Existing", document { <a:access>
+      xq("""dict:put-access("existing", document { <a:access>
           <a:invalid/>
         </a:access> })""")
         .user("xqtest1")
@@ -224,7 +224,7 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
     }
 
     it("fails for a resource with no write access") {
-      xq("""dict:put-access("NoWriteAccess", document{
+      xq("""dict:put-access("no_write_access", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="true">everyone</a:group>
@@ -237,7 +237,7 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
     }
 
     it("fails for a nonexistent resource") {
-      xq("""dict:put-access("DoesNotExist", document{
+      xq("""dict:put-access("does_not_exist", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="true">everyone</a:group>
@@ -250,7 +250,7 @@ class TestDictionaries extends DbTest with CommonTestDictionaries {
     }
     
     it("fails to change access unauthenticated") {
-      xq("""dict:put-access("Existing", document{
+      xq("""dict:put-access("existing", document{
         <a:access>
           <a:owner>xqtest1</a:owner>
           <a:group write="false">everyone</a:group>
@@ -270,42 +270,42 @@ class TestDictionariesDelete extends DbTest with CommonTestDictionaries {
     super.beforeEach()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/dictionaries/Existing.xml", "Existing", "dictionaries", 1, Some("en"))
-    setupResource("src/test/resources/api/data/dictionaries/Existing.xml", "NoWriteAccess", "dictionaries", 2,
+    setupResource("src/test/resources/api/data/dictionaries/existing.xml", "existing", "dictionaries", 1, Some("en"))
+    setupResource("src/test/resources/api/data/dictionaries/existing.xml", "no_write_access", "dictionaries", 2,
       Some("en"), Some("everyone"), Some("rw-r--r--"))
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
 
-    teardownResource("Existing", "dictionaries", 1)
-    teardownResource("NoWriteAccess", "dictionaries", 2)
+    teardownResource("existing", "dictionaries", 1)
+    teardownResource("no_write_access", "dictionaries", 2)
     teardownUsers(2)
   }
 
   describe("dict:delete") {
     it("removes an existing resource") {
-      xq("""dict:delete("Existing")""")
+      xq("""dict:delete("existing")""")
         .user("xqtest1")
         .assertHttpNoData
         .go
     }
     
     it("does not remove an existing resource when unauthenticated") {
-      xq("""dict:delete("Existing")""")
+      xq("""dict:delete("existing")""")
         .assertHttpUnauthorized
         .go
     }
 
     it("fails to remove a nonexisting resource") {
-      xq("""dict:delete("DoesNotExist")""")
+      xq("""dict:delete("does_not_exist")""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
 
     it("fails to remove a resource without write access") {
-      xq("""dict:delete("NoWriteAccess")""")
+      xq("""dict:delete("no_write_access")""")
         .user("xqtest1")
         .assertHttpForbidden
         .go

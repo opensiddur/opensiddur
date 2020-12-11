@@ -30,66 +30,66 @@ class TestOutlines extends DbTest with CommonTestOutlines {
     super.beforeAll()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/outlines/Existing.xml", "Existing", "outlines", 1)
-    setupResource("src/test/resources/api/data/outlines/TestEverythingOK.xml", "TestEverythingOK", "outlines", 1)
-    setupResource("src/test/resources/api/data/outlines/TestOutline.xml", "TestOutline", "outlines", 1)
-    setupResource("src/test/resources/api/data/outlines/TitleExistsOnce.xml", "TitleExistsOnce", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TitleExistsOnceWithSource.xml", "TitleExistsOnceWithSource", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TitleExistsOnceWithSourceAndPages.xml", "TitleExistsOnceWithSourceAndPages", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TitleExistsTwice.xml", "TitleExistsTwice", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TitleExistsTwice-1.xml", "TitleExistsTwice-1", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TitleAlreadyConfirmed.xml", "TitleAlreadyConfirmed", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TitleAlreadyConfirmedAndDuplicated.xml", "TitleAlreadyConfirmedAndDuplicated", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TitleAlreadyConfirmedAndDuplicated-1.xml", "TitleAlreadyConfirmedAndDuplicated-1", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TitleDuplicatedAndSubordinatesExistWithSamePointers.xml", "TitleDuplicatedAndSubordinatesExistWithSamePointers", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TitleDuplicatedAndSubordinatesExistWithDifferentPointers.xml", "TitleDuplicatedAndSubordinatesExistWithDifferentPointers", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/SubOne.xml", "SubOne", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/SubTwo.xml", "SubTwo", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/HasAStatus.xml", "HasAStatus", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TestOutlineWithError.xml", "TestOutlineWithError", "outlines", 1)
-    setupResource("src/test/resources/api/data/outlines/TestOutlineWithUnconfirmed.xml", "TestOutlineWithUnconfirmed", "outlines", 1)
-    setupResource("src/test/resources/api/data/outlines/HasUnconfirmed.xml", "HasUnconfirmed", "original", 1, Some("en"))
-    setupResource("src/test/resources/api/data/outlines/TestOutlineSource.xml", "TestOutlineSource", "sources", 1)
-    setupResource("src/test/resources/api/data/outlines/TestOutlineExecutable.xml", "TestOutlineExecutable", "outlines", 1)
-    setupResource("src/test/resources/api/data/outlines/TestOutlineExecutableWithDuplicates.xml", "TestOutlineExecutableWithDuplicates", "outlines", 1)
-    setupResource("src/test/resources/api/data/outlines/TestOutlineExecutableWithExternalDuplicates.xml", "TestOutlineExecutableWithExternalDuplicates", "outlines", 1)
+    setupResource("src/test/resources/api/data/outlines/existing.xml", "existing", "outlines", 1)
+    setupResource("src/test/resources/api/data/outlines/test_everything_ok.xml", "test_everything_ok", "outlines", 1)
+    setupResource("src/test/resources/api/data/outlines/test_outline.xml", "test_outline", "outlines", 1)
+    setupResource("src/test/resources/api/data/outlines/title_exists_once.xml", "title_exists_once", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/title_contains_source_one_time.xml", "title_contains_source_one_time", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/title_has_source_and_pages_one_time.xml", "title_has_source_and_pages_one_time", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/title_exists_twice.xml", "title_exists_twice", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/title_exists_twice-1.xml", "title_exists_twice-1", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/title_has_been_confirmed.xml", "title_has_been_confirmed", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/title_already_confirmed_and_duplicated.xml", "title_already_confirmed_and_duplicated", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/title_already_confirmed_and_duplicated-1.xml", "title_already_confirmed_and_duplicated-1", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/title_duplicated_and_subordinates_exist_with_same_pointers.xml", "title_duplicated_and_subordinates_exist_with_same_pointers", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/title_duplicated_and_subordinates_exist_with_different_pointers.xml", "title_duplicated_and_subordinates_exist_with_different_pointers", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/sub_one.xml", "sub_one", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/sub_two.xml", "sub_two", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/has_a_status.xml", "has_a_status", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/test_outline_with_error.xml", "test_outline_with_error", "outlines", 1)
+    setupResource("src/test/resources/api/data/outlines/test_outline_with_unconfirmed.xml", "test_outline_with_unconfirmed", "outlines", 1)
+    setupResource("src/test/resources/api/data/outlines/has_unconfirmed.xml", "has_unconfirmed", "original", 1, Some("en"))
+    setupResource("src/test/resources/api/data/outlines/test_outline_source.xml", "test_outline_source", "sources", 1)
+    setupResource("src/test/resources/api/data/outlines/test_outline_executable.xml", "test_outline_executable", "outlines", 1)
+    setupResource("src/test/resources/api/data/outlines/test_outline_executable_with_duplicates.xml", "test_outline_executable_with_duplicates", "outlines", 1)
+    setupResource("src/test/resources/api/data/outlines/test_outline_executable_with_external_duplicates.xml", "test_outline_executable_with_external_duplicates", "outlines", 1)
   }
 
   override def afterAll()  {
-    teardownResource("TestOutlineExecutableWithExternalDuplicates", "original", 1)
-    teardownResource("TestOutlineExecutableWithExternalDuplicates", "outlines", 1)
-    teardownResource("TestOutlineExecutableWithDuplicates", "original", 1)
-    teardownResource("TestOutlineExecutableWithDuplicates", "outlines", 1)
-    teardownResource("TestOutlineExecutableDuplicate", "original", 1)
-    teardownResource("TestOutlineExecutableDuplicateWithItems", "original", 1)
-    teardownResource("TestSubOne", "original", 1)
-    teardownResource("TestSubTwo", "original", 1)
-    teardownResource("TestOutlineExecutable", "original", 1)
-    teardownResource("TestOutlineExecutableNewTitle", "original", 1)
-    teardownResource("TestOutlineExecutable", "outlines", 1)
-    teardownResource("TestOutlineSource", "sources", 1)
-    teardownResource("HasUnconfirmed", "original", 1)
-    teardownResource("TestOutlineWithUnconfirmed", "outlines", 1)
-    teardownResource("TestOutlineWithError", "outlines", 1)
-    teardownResource("HasAStatus", "original", 1)
-    teardownResource("SubTwo", "original", 1)
-    teardownResource("SubOne", "original", 1)
-    teardownResource("TitleDuplicatedAndSubordinatesExistWithDifferentPointers", "original", 1)
-    teardownResource("TitleDuplicatedAndSubordinatesExistWithSamePointers", "original", 1)
-    teardownResource("TitleAlreadyConfirmedAndDuplicated-1", "original", 1)
-    teardownResource("TitleAlreadyConfirmedAndDuplicated", "original", 1)
-    teardownResource("TitleAlreadyConfirmed", "original", 1)
-    teardownResource("TitleExistsTwice-1", "original", 1)
-    teardownResource("TitleExistsTwice", "original", 1)
-    teardownResource("TitleExistsOnceWithSource-1", "original", 1)
-    teardownResource("TitleExistsOnceWithSource", "original", 1)
-    teardownResource("TitleExistsOnceWithSourceAndPages-1", "original", 1)
-    teardownResource("TitleExistsOnceWithSourceAndPages", "original", 1)
-    teardownResource("TitleExistsOnce-1", "original", 1)
-    teardownResource("TitleExistsOnce", "original", 1)
-    teardownResource("TestOutline", "outlines", 1)
-    teardownResource("TestEverythingOK", "outlines", 1)
-    teardownResource("Existing", "outlines", 1)
+    teardownResource("test_outline_executable_with_external_duplicates", "original", 1)
+    teardownResource("test_outline_executable_with_external_duplicates", "outlines", 1)
+    teardownResource("test_outline_executable_with_duplicates", "original", 1)
+    teardownResource("test_outline_executable_with_duplicates", "outlines", 1)
+    teardownResource("test_outline_executable_duplicate", "original", 1)
+    teardownResource("test_outline_executable_duplicate_with_items", "original", 1)
+    teardownResource("test_sub_one", "original", 1)
+    teardownResource("test_sub_two", "original", 1)
+    teardownResource("test_outline_executable", "original", 1)
+    teardownResource("test_outline_executable_new_title", "original", 1)
+    teardownResource("test_outline_executable", "outlines", 1)
+    teardownResource("test_outline_source", "sources", 1)
+    teardownResource("has_unconfirmed", "original", 1)
+    teardownResource("test_outline_with_unconfirmed", "outlines", 1)
+    teardownResource("test_outline_with_error", "outlines", 1)
+    teardownResource("has_a_status", "original", 1)
+    teardownResource("sub_two", "original", 1)
+    teardownResource("sub_one", "original", 1)
+    teardownResource("title_duplicated_and_subordinates_exist_with_different_pointers", "original", 1)
+    teardownResource("title_duplicated_and_subordinates_exist_with_same_pointers", "original", 1)
+    teardownResource("title_already_confirmed_and_duplicated-1", "original", 1)
+    teardownResource("title_already_confirmed_and_duplicated", "original", 1)
+    teardownResource("title_has_been_confirmed", "original", 1)
+    teardownResource("title_exists_twice-1", "original", 1)
+    teardownResource("title_exists_twice", "original", 1)
+    teardownResource("title_contains_source_one_time-1", "original", 1)
+    teardownResource("title_contains_source_one_time", "original", 1)
+    teardownResource("title_has_source_and_pages_one_time-1", "original", 1)
+    teardownResource("title_has_source_and_pages_one_time", "original", 1)
+    teardownResource("title_exists_once-1", "original", 1)
+    teardownResource("title_exists_once", "original", 1)
+    teardownResource("test_outline", "outlines", 1)
+    teardownResource("test_everything_ok", "outlines", 1)
+    teardownResource("existing", "outlines", 1)
     teardownUsers(2)
 
     super.afterAll()
@@ -105,26 +105,26 @@ class TestOutlines extends DbTest with CommonTestOutlines {
 
   describe("outl:get") {
     it("gets an existing resource, no check") {
-      xq("""outl:get("Existing", ())""")
+      xq("""outl:get("existing", ())""")
         .assertXPath("""exists($output/ol:outline)""", "Returns a TEI resource")
         .go
     }
     
     it("fails to get a nonexisting resource, no check") {
-      xq("""outl:get("DoesNotExist", ())""")
+      xq("""outl:get("does_not_exist", ())""")
         .assertHttpNotFound
         .go
     }
 
     it("gets an existing resource, with identity check") {
-      val identity = readXmlFile("src/test/resources/api/data/outlines/TestEverythingOK.xml")
-      xq("""outl:get("TestEverythingOK", "1")/*""")
+      val identity = readXmlFile("src/test/resources/api/data/outlines/test_everything_ok.xml")
+      xq("""outl:get("test_everything_ok", "1")/*""")
         .assertXmlEquals(identity)
         .go
     }
 
     it("gets an existing resource, with logic check") {
-      xq("""outl:get("TestOutline", "1")""")
+      xq("""outl:get("test_outline", "1")""")
         .assertXPathEquals("$output/ol:outline/ol:item[1]",
           "for each item without a duplicate title, return the item as-is",
         """<ol:item>
@@ -136,35 +136,35 @@ class TestOutlines extends DbTest with CommonTestOutlines {
           "for each item with a duplicate title external to the outline without a duplication confirmation, " +
             "return an olx:sameAs with an olx:uri for each duplicate entry (title exists once)",
         """<ol:item>
-              <ol:title>TitleExistsOnce</ol:title>
+              <ol:title>Title Exists Once</ol:title>
               <ol:from>3</ol:from>
               <ol:to>4</ol:to>
               <olx:sameAs>
-                <olx:uri>/data/original/TitleExistsOnce</olx:uri>
+                <olx:uri>/data/original/title_exists_once</olx:uri>
               </olx:sameAs>
           </ol:item>""")
         .assertXPathEquals("$output/ol:outline/ol:item[3]",
         "for each item with a duplicate title external to the outline without a duplication confirmation, " +
           "return an olx:sameAs with an olx:uri for each duplicate entry (title exists more than once)",
         """<ol:item>
-              <ol:title>TitleExistsTwice</ol:title>
+              <ol:title>Title Exists Twice</ol:title>
               <ol:from>5</ol:from>
               <ol:to>6</ol:to>
               <olx:sameAs>
-                <olx:uri>/data/original/TitleExistsTwice</olx:uri>
+                <olx:uri>/data/original/title_exists_twice</olx:uri>
               </olx:sameAs>
               <olx:sameAs>
-                <olx:uri>/data/original/TitleExistsTwice-1</olx:uri>
+                <olx:uri>/data/original/title_exists_twice-1</olx:uri>
               </olx:sameAs>
           </ol:item>""")
         .assertXPathEquals("$output/ol:outline/ol:item[4]",
         "for an item with a duplicate title that is already confirmed, the confirmation is maintained exactly",
         """<ol:item>
-              <ol:title>TitleAlreadyConfirmed</ol:title>
+              <ol:title>Title Has Been Confirmed</ol:title>
               <ol:from>7</ol:from>
               <ol:to>8</ol:to>
               <olx:sameAs>
-                  <olx:uri>/data/original/TitleAlreadyConfirmed</olx:uri>
+                  <olx:uri>/data/original/title_has_been_confirmed</olx:uri>
                   <olx:yes/>
               </olx:sameAs>
           </ol:item>""")
@@ -172,37 +172,37 @@ class TestOutlines extends DbTest with CommonTestOutlines {
           "for an item with a duplicate title that is already confirmed and duplicated again, " +
             "the confirmation is maintained exactly and the additional duplicate is recorded with a negative confirmation",
         """<ol:item>
-              <ol:title>TitleAlreadyConfirmedAndDuplicated</ol:title>
+              <ol:title>Title Already Confirmed And Duplicated</ol:title>
               <ol:from>9</ol:from>
               <ol:to>10</ol:to>
               <olx:sameAs>
-                  <olx:uri>/data/original/TitleAlreadyConfirmedAndDuplicated</olx:uri>
+                  <olx:uri>/data/original/title_already_confirmed_and_duplicated</olx:uri>
                   <olx:yes/>
               </olx:sameAs>
               <olx:sameAs>
-                  <olx:uri>/data/original/TitleAlreadyConfirmedAndDuplicated-1</olx:uri>
+                  <olx:uri>/data/original/title_already_confirmed_and_duplicated-1</olx:uri>
                   <olx:no/>
               </olx:sameAs>
           </ol:item>""")
         .assertXPathEquals("$output/ol:outline/ol:item[6]",
           "Title already exists and has subordinates that are referenced and have the same pointers in the same order",
           """<ol:item>
-            <ol:title>TitleDuplicatedAndSubordinatesExistWithSamePointers</ol:title>
+            <ol:title>Title Duplicated And Subordinates Exist With Same Pointers</ol:title>
             <ol:from>11</ol:from>
             <ol:to>12</ol:to>
             <olx:sameAs>
-              <olx:uri>/data/original/TitleDuplicatedAndSubordinatesExistWithSamePointers</olx:uri>
+              <olx:uri>/data/original/title_duplicated_and_subordinates_exist_with_same_pointers</olx:uri>
             </olx:sameAs>
             <ol:item>
-              <ol:title>SubOne</ol:title>
+              <ol:title>Sub One</ol:title>
               <olx:sameAs>
-                <olx:uri>/data/original/SubOne</olx:uri>
+                <olx:uri>/data/original/sub_one</olx:uri>
               </olx:sameAs>
             </ol:item>
             <ol:item>
-              <ol:title>SubTwo</ol:title>
+              <ol:title>Sub Two</ol:title>
               <olx:sameAs>
-                <olx:uri>/data/original/SubTwo</olx:uri>
+                <olx:uri>/data/original/sub_two</olx:uri>
               </olx:sameAs>
             </ol:item>
           </ol:item>"""
@@ -210,34 +210,34 @@ class TestOutlines extends DbTest with CommonTestOutlines {
         .assertXPathEquals("$output/ol:outline/ol:item[7]",
         "Title already exists and has subordinates that are referenced and have the same pointers in different order",
         """<ol:item>
-            <ol:title>TitleDuplicatedAndSubordinatesExistWithDifferentPointers</ol:title>
+            <ol:title>Title Duplicated And Subordinates Exist With Different Pointers</ol:title>
             <ol:from>13</ol:from>
             <ol:to>14</ol:to>
             <olx:sameAs>
-              <olx:uri>/data/original/TitleDuplicatedAndSubordinatesExistWithDifferentPointers</olx:uri>
+              <olx:uri>/data/original/title_duplicated_and_subordinates_exist_with_different_pointers</olx:uri>
               <olx:warning>...</olx:warning>
             </olx:sameAs>
             <ol:item>
-              <ol:title>SubTwo</ol:title>
+              <ol:title>Sub Two</ol:title>
               <olx:sameAs>
-                <olx:uri>/data/original/SubTwo</olx:uri>
+                <olx:uri>/data/original/sub_two</olx:uri>
               </olx:sameAs>
             </ol:item>
             <ol:item>
-              <ol:title>SubOne</ol:title>
+              <ol:title>Sub One</ol:title>
               <olx:sameAs>
-                <olx:uri>/data/original/SubOne</olx:uri>
+                <olx:uri>/data/original/sub_one</olx:uri>
               </olx:sameAs>
             </ol:item>
           </ol:item>""")
         .assertXPathEquals("$output/ol:outline/ol:item[8]",
           "if the document has a confirmed identity and a status with respect to the source, the status is returned",
           """<ol:item>
-            <ol:title>HasAStatus</ol:title>
+            <ol:title>Has A Status</ol:title>
             <ol:from>15</ol:from>
             <ol:to>16</ol:to>
             <olx:sameAs>
-              <olx:uri>/data/original/HasAStatus</olx:uri>
+              <olx:uri>/data/original/has_a_status</olx:uri>
               <olx:yes/>
             </olx:sameAs>
             <olx:status>outlined</olx:status>
@@ -310,116 +310,117 @@ class TestOutlines extends DbTest with CommonTestOutlines {
 
   describe("outl:post with execute") {
     it("fails on an outline file with olx:error after check") {
-      xq("""outl:post-execute("TestOutlineWithError")""")
+      xq("""outl:post-execute("test_outline_with_error")""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
     }
     
     it("fails on an outline file with an unconfirmed olx:sameAs") {
-      xq("""outl:post-execute("TestOutlineWithUnconfirmed")""")
+      xq("""outl:post-execute("test_outline_with_unconfirmed")""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
     }
     
     it("executes an executable outline") {
-      val expectedResult = readXmlFile("src/test/resources/api/data/outlines/TestOutlineExecutableResult.xml")
-      xq("""outl:post-execute("TestOutlineExecutable")""")
+      val expectedResult = readXmlFile("src/test/resources/api/data/outlines/test_outline_executable_result.xml")
+      xq("""outl:post-execute("test_outline_executable")""")
         .user("xqtest1")
         .assertXPathEquals("$output/*", "Result is a copy of the rewritten outline", expectedResult)
-        .assertXPathEquals("""doc("/db/data/outlines/TestOutlineExecutable.xml")/*""",
+        .assertXPathEquals("""doc("/db/data/outlines/test_outline_executable.xml")/*""",
           "the original outline file has been rewritten to correspond to the new data from execution",
          expectedResult)
-        .assertXPath("""exists(data:doc("/data/original/TestOutlineExecutable"))""", "the outline main file exists")
-        .assertXPath("""contains(document-uri(data:doc("/data/original/TestOutlineExecutable")), "/en")""", "the outline main file is placed in the correct collection for its language")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutable")//tei:titleStmt/tei:title[@type="main"]="TestOutlineExecutable"""", "the outline main file has the correct title")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutable")/tei:TEI/@xml:lang="en"""", "the outline main file references the correct xml:lang")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutable")//tei:availability/tei:licence/@target="http://www.creativecommons.org/publicdomain/zero/1.0"""", "the outline main file references the correct license")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutable")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:ptr[@type="bibl"]/@target="/data/sources/TestOutlineSource"""", "the outline main file references the correct source and status")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutable")//j:streamText/tei:ptr/@target="/data/original/TestOutlineExecutableNewTitle#stream"""", "the outline main file has a streamText containing a pointer to the included file")
-        .assertXPath("""empty(data:doc("/data/original/TestOutlineExecutable")//j:streamText/tei:seg)""", "the outline main file streamText filler has been removed")
-        .assertXPath("""count(data:doc("/data/original/TestOutlineExecutable")//tei:revisionDesc/tei:change[@type="created"])=1""", "the outline main file has 1 creation change record")
-        .assertXPath("""count(data:doc("/data/original/TestOutlineExecutable")//tei:revisionDesc/tei:change[@type="edited"])=1""", "the outline main file has 1 edit change record")
-        .assertXPath("""exists(data:doc("/data/original/TestOutlineExecutableNewTitle"))""", "the outline included file exists")
-        .assertXPath("""contains(document-uri(data:doc("/data/original/TestOutlineExecutableNewTitle")), "/en")""", "the outline included file is placed in the correct collection for its language")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:titleStmt/tei:title[@type="main"]="TestOutlineExecutableNewTitle"""", "the outline included file has the correct title")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutableNewTitle")/tei:TEI/@xml:lang="en"""", "the outline included file references the correct xml:lang")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:availability/tei:licence/@target="http://www.creativecommons.org/publicdomain/zero/1.0"""", "the outline included file references the correct license")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:titleStmt/tei:respStmt[tei:resp[@key="trc"][.="Transcribed by"]][tei:name[@ref="/user/xqtest1"]]""", "the outline included file references a contributor credit")
-        .assertXPath("""data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"][tei:biblScope[@unit="pages"][@from="1"][@to="2"]]/tei:ptr[@type="bibl"]/@target="/data/sources/TestOutlineSource"""", "the outline included file references the correct source, status, and page numbers")
-        .assertXPath("""count(data:doc("/data/original/TestOutlineExecutableNewTitle")//j:streamText/tei:seg)=2""", "the outline included file has a streamText containing filler")
-        .assertXPath("""count(data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:revisionDesc/tei:change[@type="created"])=1""", "the outline included file has 1 creation change record")
-        .assertXPath("""count(data:doc("/data/original/TestOutlineExecutableNewTitle")//tei:revisionDesc/tei:change[@type="edited"])=0""", "the outline included file has no edit change records")
+        .assertXPath("""exists(data:doc("/data/original/test_outline_executable"))""", "the outline main file exists")
+        .assertXPath("""contains(document-uri(data:doc("/data/original/test_outline_executable")), "/en")""", "the outline main file is placed in the correct collection for its language")
+        .assertXPath("""data:doc("/data/original/test_outline_executable")//tei:titleStmt/tei:title[@type="main"]="test_outline_executable"""", "the outline main file has the correct title")
+        .assertXPath("""data:doc("/data/original/test_outline_executable")/tei:TEI/@xml:lang="en"""", "the outline main file references the correct xml:lang")
+        .assertXPath("""data:doc("/data/original/test_outline_executable")//tei:availability/tei:licence/@target="http://www.creativecommons.org/publicdomain/zero/1.0"""", "the outline main file references the correct license")
+        .assertXPath("""data:doc("/data/original/test_outline_executable")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:ptr[@type="bibl"]/@target="/data/sources/test_outline_source"""", "the outline main file references the correct source and status")
+        .assertXPath("""data:doc("/data/original/test_outline_executable")//j:streamText/tei:ptr/@target="/data/original/test_outline_executable_new_title#stream"""", "the outline main file has a streamText containing a pointer to the included file")
+        .assertXPath("""empty(data:doc("/data/original/test_outline_executable")//j:streamText/tei:seg)""", "the outline main file streamText filler has been removed")
+        .assertXPath("""count(data:doc("/data/original/test_outline_executable")//tei:revisionDesc/tei:change[@type="created"])=1""", "the outline main file has 1 creation change record")
+        .assertXPath("""count(data:doc("/data/original/test_outline_executable")//tei:revisionDesc/tei:change[@type="edited"])=1""", "the outline main file has 1 edit change record")
+        .assertXPath("""exists(data:doc("/data/original/test_outline_executable_new_title"))""", "the outline included file exists")
+        .assertXPath("""contains(document-uri(data:doc("/data/original/test_outline_executable_new_title")), "/en")""", "the outline included file is placed in the correct collection for its language")
+        .assertXPath("""data:doc("/data/original/test_outline_executable_new_title")//tei:titleStmt/tei:title[@type="main"]="test_outline_executable_new_title"""", "the outline included file has the correct title")
+        .assertXPath("""data:doc("/data/original/test_outline_executable_new_title")/tei:TEI/@xml:lang="en"""", "the outline included file references the correct xml:lang")
+        .assertXPath("""data:doc("/data/original/test_outline_executable_new_title")//tei:availability/tei:licence/@target="http://www.creativecommons.org/publicdomain/zero/1.0"""", "the outline included file references the correct license")
+        .assertXPath("""data:doc("/data/original/test_outline_executable_new_title")//tei:titleStmt/tei:respStmt[tei:resp[@key="trc"][.="Transcribed by"]][tei:name[@ref="/user/xqtest1"]]""", "the outline included file references a contributor credit")
+        .assertXPath("""data:doc("/data/original/test_outline_executable_new_title")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"][tei:biblScope[@unit="pages"][@from="1"][@to="2"]]/tei:ptr[@type="bibl"]/@target="/data/sources/test_outline_source"""", "the outline included file references the correct source, status, and page numbers")
+        .assertXPath("""count(data:doc("/data/original/test_outline_executable_new_title")//j:streamText/tei:seg)=2""", "the outline included file has a streamText containing filler")
+        .assertXPath("""count(data:doc("/data/original/test_outline_executable_new_title")//tei:revisionDesc/tei:change[@type="created"])=1""", "the outline included file has 1 creation change record")
+        .assertXPath("""count(data:doc("/data/original/test_outline_executable_new_title")//tei:revisionDesc/tei:change[@type="edited"])=0""", "the outline included file has no edit change records")
         .go
     }
     
     it("executes an outline with duplicates") {
-      xq("""outl:post-execute("TestOutlineExecutableWithDuplicates")""")
+      xq("""outl:post-execute("test_outline_executable_with_duplicates")""")
         .user("xqtest1")
-        .assertXPath("""exists(data:doc("/data/original/TestOutlineExecutableWithDuplicates"))""", "the outline main file exists")
+        .assertXPath("""exists(data:doc("/data/original/test_outline_executable_with_duplicates"))""", "the outline main file exists")
         .assertXPath("""
-        let $d := data:doc("/data/original/TestOutlineExecutableWithDuplicates")
+        let $d := data:doc("/data/original/test_outline_executable_with_duplicates")
         let $st := $d//j:streamText
         return
-          count($st/tei:ptr[@target='/data/original/TestOutlineExecutableDuplicate#stream'])=2 and 
-          count($st/tei:ptr[@target='/data/original/TestOutlineExecutableDuplicateWithItems#stream'])=2
-      """, "The main outline file references TestOutlineExecutableDuplicate 2x and TestOutlineExecutableDuplicateWithItems 2x")
-          .assertXPath("""count(collection("/db/data/original/en")/tei:TEI[descendant::tei:titleStmt/tei:title[@type="main"][.="TestOutlineExecutableDuplicate"]])=1""", 
+          count($st/tei:ptr[@target='/data/original/test_outline_executable_duplicate#stream'])=2 and
+          count($st/tei:ptr[@target='/data/original/test_outline_executable_duplicate_with_items#stream'])=2
+      """, "The main outline file references test_outline_executable_duplicate 2x and test_outline_executable_duplicate_with_items 2x")
+          .assertXPath("""count(collection("/db/data/original/en")/tei:TEI[descendant::tei:titleStmt/tei:title[@type="main"][.="Test Outline Executable Duplicate"]])=1""",
             "Documents with the title TestOutlineExecutableDuplicate exist only once")
-          .assertXPath("""count(data:doc("/data/original/TestOutlineExecutableDuplicate")//tei:revisionDesc/tei:change)=1""", 
+          .assertXPath("""count(data:doc("/data/original/test_outline_executable_duplicate")//tei:revisionDesc/tei:change)=1""",
             "TestOutlineExecutableDuplicate has been written to once on creation, since it has no filler pointers")
           .assertXPath("""
-        let $b := data:doc("/data/original/TestOutlineExecutableDuplicate")//tei:sourceDesc/tei:bibl
+        let $b := data:doc("/data/original/test_outline_executable_duplicate")//tei:sourceDesc/tei:bibl
         return
           count($b/tei:biblScope)=2
           and exists($b/tei:biblScope[@unit='pages'][@from='1'][@to='2'])
           and exists($b/tei:biblScope[@unit='pages'][@from='3'][@to='4'])
         """, "TestOutlineExecutableDuplicate references two different page ranges")
-          .assertXPath("""count(collection("/db/data/original/en")/tei:TEI[descendant::tei:titleStmt/tei:title[@type="main"][.="TestOutlineExecutableDuplicateWithItems"]])=1""", 
+          .assertXPath("""count(collection("/db/data/original/en")/tei:TEI[descendant::tei:titleStmt/tei:title[@type="main"][.="Test Outline Executable Duplicate With Items"]])=1""",
             "Documents with the title TestOutlineExecutableDuplicateWithItems exist only once")
           .assertXPath("""
-            let $st := data:doc("/data/original/TestOutlineExecutableDuplicateWithItems")//j:streamText
-            return exists($st/tei:ptr[1]["/data/original/TestSubOne#stream"=@target])
-            and exists($st/tei:ptr[2]["/data/original/TestSubTwo#stream"=@target])
+            let $st := data:doc("/data/original/test_outline_executable_duplicate_with_items")//j:streamText
+            return exists($st/tei:ptr[1]["/data/original/test_sub_one#stream"=@target])
+            and exists($st/tei:ptr[2]["/data/original/test_sub_two#stream"=@target])
           """, "TestOutlineExecutableDuplicateWithItems has a streamText that points to its two subordinates")
-          .assertXPath("""exists(data:doc("/data/original/TestSubOne"))""", "TestSubOne exists")
-          .assertXPath("""exists(data:doc("/data/original/TestSubTwo"))""", "TestSubTwo exists")
+          .assertXPath("""exists(data:doc("/data/original/test_sub_one"))""", "TestSubOne exists")
+          .assertXPath("""exists(data:doc("/data/original/test_sub_two"))""", "TestSubTwo exists")
           .assertXPathEquals("$output/*", "The return outline contains the expected data and references",
-            readXmlFile("src/test/resources/api/data/outlines/TestOutlineExecutableWithDuplicatesResult.xml"))
+            readXmlFile("src/test/resources/api/data/outlines/test_outline_executable_with_duplicates_result.xml"))
           .go
     }
 
     it("executes an outline containing external duplicate references") {
-      xq("""outl:post-execute("TestOutlineExecutableWithExternalDuplicates")""")
+      xq("""outl:post-execute("test_outline_executable_with_external_duplicates")""")
         .user("xqtest1")
-        .assertXPath("""exists(data:doc("/data/original/TestOutlineExecutableWithExternalDuplicates"))""", "the outline main file exists")
-        /*.assertXPath("""count(collection("/db/data/original/en")//tei:titleStmt/tei:title[@type="main"][.="TitleAlreadyConfirmedAndDuplicated"])=1""",
+        //.assertXPath("false()", "forced fail")
+        .assertXPath("""exists(data:doc("/data/original/test_outline_executable_with_external_duplicates"))""", "the outline main file exists")
+        /*.assertXPath("""count(collection("/db/data/original/en")//tei:titleStmt/tei:title[@type="main"][.="title_already_confirmed_and_duplicated"])=1""",
           "There is only file with the same title as the confirmed resource")*/
-        .assertXPath("""exists(data:doc("/data/original/TitleAlreadyConfirmedAndDuplicated")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:ptr[@type="bibl"]["/data/sources/TestOutlineSource"=@target])""",
+        .assertXPath("""exists(data:doc("/data/original/title_already_confirmed_and_duplicated")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:ptr[@type="bibl"]["/data/sources/test_outline_source"=@target])""",
           "A reference to the source has been added to the confirmed resource")
-        .assertXPath("""exists(data:doc("/data/original/TitleAlreadyConfirmedAndDuplicated")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:biblScope[@unit="pages"][@from="1"][@to="2"])""",
+        .assertXPath("""exists(data:doc("/data/original/title_already_confirmed_and_duplicated")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"]/tei:biblScope[@unit="pages"][@from="1"][@to="2"])""",
           "A reference to the source's pages has been added to the confirmed resource")
-        .assertXPath("""exists(data:doc("/data/original/TitleAlreadyConfirmedAndDuplicated")//tei:revisionDesc/tei:change[1][@type="edited"][contains(., "outline tool")])""",
+        .assertXPath("""exists(data:doc("/data/original/title_already_confirmed_and_duplicated")//tei:revisionDesc/tei:change[1][@type="edited"][contains(., "outline tool")])""",
           "An edited by change record has been added to the confirmed resource")
         .assertXPath(
-          """every $resource in ("TitleAlreadyConfirmedAndDuplicated", "TitleDuplicatedAndSubordinatesExistWithSamePointers", "TitleExistsOnceWithSource", "TitleExistsOnceWithSourceAndPages") satisfies
+          """every $resource in ("Title Already Confirmed And Duplicated", "Title Duplicated And Subordinates Exist With Same Pointers", "Title Contains Source One Time", "Title Has Source And Pages One Time") satisfies
             count($output//ol:item[ol:title=$resource]/olx:sameAs[olx:yes])=1""",
           "For each confirmed resource, a single olx:sameAs[olx:yes] record exists in the output outline")
-        .assertXPath("""data:doc("/data/original/TitleAlreadyConfirmedAndDuplicated")//j:streamText/tei:seg[1]="Test data."""",
+        .assertXPath("""data:doc("/data/original/title_already_confirmed_and_duplicated")//j:streamText/tei:seg[1]="Test data."""",
           "The text data in the confirmed resource has not been overwritten")
-        .assertXPath("""exists(data:doc("/data/original/TitleExistsOnce-1"))""",
+        .assertXPath("""exists(data:doc("/data/original/title_exists_once-1"))""",
           "A second file with the same title and different URI as the confirmed negative file has been created")
-        .assertXPath("""exists($output/ol:outline/ol:item[ol:title="TitleExistsOnce"]/olx:sameAs[olx:yes]/olx:uri="/data/original/TitleExistsOnce-1")""",
+        .assertXPath("""exists($output/ol:outline/ol:item[ol:title="Title Exists Once"]/olx:sameAs[olx:yes]/olx:uri="/data/original/title_exists_once-1")""",
           "The second file is referenced in the returned outline")
-        .assertXPath("""exists(data:doc("/data/original/TitleDuplicatedAndSubordinatesExistWithSamePointers")//tei:sourceDesc/tei:bibl[tei:ptr[@type="bibl"]["/data/sources/TestOutlineSource"=@target]])""",
+        .assertXPath("""exists(data:doc("/data/original/title_duplicated_and_subordinates_exist_with_same_pointers")//tei:sourceDesc/tei:bibl[tei:ptr[@type="bibl"]["/data/sources/test_outline_source"=@target]])""",
           "When the title is duplicated and sub-items exist, a reference to the source has been added to the file")
-        .assertXPath("""exists(data:doc("/data/original/TitleExistsOnceWithSource")//tei:sourceDesc/tei:bibl[tei:ptr[@type="bibl"]["/data/sources/TestOutlineSource"=@target]][tei:biblScope[@unit="pages"][@from="11"][@to="12"]])""",
+        .assertXPath("""exists(data:doc("/data/original/title_contains_source_one_time")//tei:sourceDesc/tei:bibl[tei:ptr[@type="bibl"]["/data/sources/test_outline_source"=@target]][tei:biblScope[@unit="pages"][@from="11"][@to="12"]])""",
           "When the title is confirmed and the source is already referenced, page numbers are added")
-        .assertXPath("""count(data:doc("/data/original/TitleExistsOnceWithSourceAndPages")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"][tei:ptr/@target="/data/sources/TestOutlineSource"][count(tei:biblScope)=1])=1""",
+        .assertXPath("""count(data:doc("/data/original/title_has_source_and_pages_one_time")//tei:sourceDesc/tei:bibl[@j:docStatus="outlined"][tei:ptr/@target="/data/sources/test_outline_source"][count(tei:biblScope)=1])=1""",
           "When the title is confirmed and the source and pages already referenced, @j:docStatus is added to the tei:bibl and only 1 biblScope exists")
-        .assertXPathEquals("""data:doc("/data/original/TitleExistsOnce")/*""", "The confirmed negative duplicate file remains unchanged",
-          readXmlFile("src/test/resources/api/data/outlines/TitleExistsOnce.xml"))
+        .assertXPathEquals("""data:doc("/data/original/title_exists_once")/*""", "The confirmed negative duplicate file remains unchanged",
+          readXmlFile("src/test/resources/api/data/outlines/title_exists_once.xml"))
         .go
     }
   }
@@ -441,8 +442,8 @@ class TestOutlines extends DbTest with CommonTestOutlines {
     }
     
     it("responds to a query") {
-      xq("""outl:list("Existing", 1, 100)""")
-        .assertXPath("""count($output//html:ol[@class="results"]/html:li)=1""", "returns 1 result (Existing)")
+      xq("""outl:list("existing", 1, 100)""")
+        .assertXPath("""count($output//html:ol[@class="results"]/html:li)=1""", "returns 1 result (existing)")
         .assertSearchResults
         .go
     }
@@ -455,32 +456,32 @@ class TestOutlinesDelete extends DbTest with CommonTestOutlines {
     super.beforeEach()
 
     setupUsers(1)
-    setupResource("src/test/resources/api/data/outlines/Existing.xml", "Existing", "outlines", 1)
+    setupResource("src/test/resources/api/data/outlines/existing.xml", "existing", "outlines", 1)
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
 
-    teardownResource("Existing", "outlines", 1)
+    teardownResource("existing", "outlines", 1)
     teardownUsers(1)
   }
 
   describe("outl:delete") {
     it("removes an existing resource") {
-      xq("""outl:delete("Existing")""")
+      xq("""outl:delete("existing")""")
         .user("xqtest1")
         .assertHttpNoData
         .go
     }
     
     it("does not remove an existing resource when unauthenticated") {
-      xq("""outl:delete("Existing")""")
+      xq("""outl:delete("existing")""")
         .assertHttpUnauthorized
         .go
     }
 
     it("fails to remove a nonexisting resource") {
-      xq("""outl:delete("DoesNotExist")""")
+      xq("""outl:delete("does_not_exist")""")
         .user("xqtest1")
         .assertHttpNotFound
         .go

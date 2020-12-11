@@ -83,6 +83,63 @@ class TestData extends DbTest {
     super.afterEach()
   }
 
+  describe("data:normalize-resource-title") {
+    it("combines parts and words") {
+      xq("""data:normalize-resource-title(("Part1", "Part2 Part3"), false())""")
+        .assertEquals("part1-part2_part3")
+        .go
+    }
+
+    it("preserves case when case-sensitive is true") {
+      xq("""data:normalize-resource-title(("Part1", "Part2 Part3"), true())""")
+        .assertEquals("Part1-Part2_Part3")
+        .go
+    }
+
+    it("removes characters that are not letters, numbers, underscore or dash") {
+      val alephPresentation = "\ufb21"
+      val betDot = "\ufb31"
+
+      val aleph = "\u05d0"
+      val bet = "\u05d1"
+
+      xq(s"""data:normalize-resource-title("a?b!c#d$$e%f^g&amp;h*i(j)k:l;m'n<o>p,q.r/s~t`u\\v|w+x=$alephPresentation$betDot", false())""")
+        .assertEquals(s"abcdefghijklmnopqrstuvwx$aleph$bet")
+        .go
+    }
+
+    it("disallows begin and end punctuators") {
+      xq("""data:normalize-resource-title(("", "_abc-", ""), false())""")
+        .assertEquals("abc")
+        .go
+    }
+
+    it("disallows duplicate punctuators") {
+      xq("""data:normalize-resource-title(("abc", "-def_ _ghi"), false())""")
+        .assertEquals("abc-def_ghi")
+        .go
+    }
+
+    it("disallows titles that start with a number") {
+      xq("""data:normalize-resource-title("1 abc", false())""")
+        .assertEquals("_1_abc")
+        .go
+    }
+
+    it("disallows titles that are all spaces") {
+      xq("""data:normalize-resource-title(("_-_", "_ _", "---"), false())""")
+        .assertEquals("")
+        .go
+    }
+
+    it("truncates super-long titles") {
+      val superLongTitleString = "a" * 200
+      xq(s"""data:normalize-resource-title("$superLongTitleString", false())""")
+        .assertXPath("fn:string-length($output) = $data:max-resource-name-length")
+        .go
+    }
+  }
+
   describe("data:db-path-to-api") {
     it("returns empty in a nonexistent hierarchy") {
       xq(

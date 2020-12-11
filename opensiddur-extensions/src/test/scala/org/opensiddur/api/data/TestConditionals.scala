@@ -28,8 +28,8 @@ class TestConditionals extends DbTest with CommonTestConditionals {
     super.beforeAll()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/conditionals/Existing.xml", "Existing", "conditionals", 1)
-    setupResource("src/test/resources/api/data/conditionals/Existing.xml", "NoAccess", "conditionals",  2,
+    setupResource("src/test/resources/api/data/conditionals/existing.xml", "existing", "conditionals", 1)
+    setupResource("src/test/resources/api/data/conditionals/existing.xml", "no_access", "conditionals",  2,
       None, Some("everyone"), Some("rw-------"))
     setupResource("src/test/resources/api/data/conditionals/type1.xml", "type1", "conditionals", 1)
     setupResource("src/test/resources/api/data/conditionals/type2.xml", "type2", "conditionals", 1)
@@ -40,9 +40,9 @@ class TestConditionals extends DbTest with CommonTestConditionals {
     teardownResource("type1", "conditionals", 1)
     teardownResource("type2", "conditionals", 1)
     teardownResource("xtype1x", "conditionals", 1)
-    teardownResource("NoAccess", "conditionals", 2)
-    teardownResource("Existing", "conditionals", 1)
-    teardownResource("Valid", "conditionals", 1)
+    teardownResource("no_access", "conditionals", 2)
+    teardownResource("existing", "conditionals", 1)
+    teardownResource("valid", "conditionals", 1)
     teardownUsers(2)
 
     super.afterAll()
@@ -58,19 +58,19 @@ class TestConditionals extends DbTest with CommonTestConditionals {
 
   describe("cnd:get") {
     it("gets an existing resource") {
-      xq("""cnd:get("Existing")""")
+      xq("""cnd:get("existing")""")
         .assertXPath("""exists($output/tei:TEI)""", "Returns a TEI resource")
         .go
     }
     
     it("fails to get a nonexisting resource") {
-      xq("""cnd:get("DoesNotExist")""")
+      xq("""cnd:get("does_not_exist")""")
         .assertHttpNotFound
         .go
     }
     
     it("fails to get a resource with no read access") {
-      xq("""cnd:get("NoAccess")""")
+      xq("""cnd:get("no_access")""")
         .assertHttpNotFound
         .go
     }
@@ -95,7 +95,7 @@ class TestConditionals extends DbTest with CommonTestConditionals {
       xq("""cnd:list("", 1, 100)""")
         .assertSearchResults
         .assertXPath("""count($output//html:li[@class="result"])>=1""", "returns at least 1 result")
-        .assertXPath("""empty($output//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "NoAccess")])""", 
+        .assertXPath("""empty($output//html:li[@class="result"]/html:a[@class="document"]/@href[contains(., "no_access")])""",
           "does not list resource with no read access")
         .go
     }
@@ -109,9 +109,9 @@ class TestConditionals extends DbTest with CommonTestConditionals {
     }
     
     it("responds to a query") {
-      xq("""cnd:list("Query", 1, 100)""")
+      xq("""cnd:list("query", 1, 100)""")
         .assertXPath("""count($output//html:ol[@class="results"]/html:li)=1""",
-          "returns 1 result (Existing)")
+          "returns 1 result (existing)")
         .assertSearchResults
         .go
     }
@@ -389,8 +389,8 @@ class TestConditionals extends DbTest with CommonTestConditionals {
   }
   
   describe("cnd:post") {
-    val validDoc = readXmlFile("src/test/resources/api/data/conditionals/Valid.xml")
-    val invalidDoc = readXmlFile("src/test/resources/api/data/conditionals/Invalid.xml")
+    val validDoc = readXmlFile("src/test/resources/api/data/conditionals/valid.xml")
+    val invalidDoc = readXmlFile("src/test/resources/api/data/conditionals/invalid.xml")
     it("posts a valid resource") {
       xq(s"""cnd:post(document { $validDoc })""")
         .user("xqtest1")
@@ -420,11 +420,11 @@ class TestConditionals extends DbTest with CommonTestConditionals {
   describe("cnd:put") {
     
     it("puts a valid resource to an existing resource") {
-      val validDoc = readXmlFile("src/test/resources/api/data/conditionals/Existing-After-Put.xml")
-      xq(s"""cnd:put("Existing", document { $validDoc })""")
+      val validDoc = readXmlFile("src/test/resources/api/data/conditionals/existing_after_put.xml")
+      xq(s"""cnd:put("existing", document { $validDoc })""")
         .user("xqtest1")
         .assertHttpNoData
-        .assertXPathEquals("""doc('/db/data/conditionals/Existing.xml')//tei:revisionDesc/tei:change[1]""",
+        .assertXPathEquals("""doc('/db/data/conditionals/existing.xml')//tei:revisionDesc/tei:change[1]""",
           "a change record has been added",
           """<tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="edited" who="/user/xqtest1"
                         when="..."/>"""
@@ -433,23 +433,23 @@ class TestConditionals extends DbTest with CommonTestConditionals {
     }
     
     it("fails to put a resource when unauthenticated") {
-        val validDoc = readXmlFile("src/test/resources/api/data/conditionals/Existing-After-Put.xml")
-        xq(s"""cnd:put("Existing", document { $validDoc })""")
+        val validDoc = readXmlFile("src/test/resources/api/data/conditionals/existing_after_put.xml")
+        xq(s"""cnd:put("existing", document { $validDoc })""")
           .assertHttpUnauthorized
           .go
     }
     
     it("fails to put a valid resource to a nonexisting resource") {
-      val validDoc = readXmlFile("src/test/resources/api/data/conditionals/Valid.xml")
-      xq(s"""cnd:put("DoesNotExist", document { $validDoc })""")
+      val validDoc = readXmlFile("src/test/resources/api/data/conditionals/valid.xml")
+      xq(s"""cnd:put("does_not_exist", document { $validDoc })""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
     
     it("fails to put an invalid resource") {
-      val invalidDoc = readXmlFile("src/test/resources/api/data/conditionals/Invalid.xml")
-      xq(s"""cnd:put("Existing", document { $invalidDoc })""")
+      val invalidDoc = readXmlFile("src/test/resources/api/data/conditionals/invalid.xml")
+      xq(s"""cnd:put("existing", document { $invalidDoc })""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go
@@ -465,49 +465,49 @@ class TestConditionalsDelete extends DbTest with CommonTestConditionals {
     super.beforeEach()
 
     setupUsers(2)
-    setupResource("src/test/resources/api/data/conditionals/Existing.xml", "Existing", "conditionals", 1, None)
-    setupResource("src/test/resources/api/data/conditionals/Existing.xml", "NoWriteAccess", "conditionals", 2,
+    setupResource("src/test/resources/api/data/conditionals/existing.xml", "existing", "conditionals", 1, None)
+    setupResource("src/test/resources/api/data/conditionals/existing.xml", "no_write_access", "conditionals", 2,
       None, Some("everyone"), Some("rw-r--r--"))
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
 
-    teardownResource("Existing", "conditionals", 1)
-    teardownResource("NoWriteAccess", "conditionals", 2)
+    teardownResource("existing", "conditionals", 1)
+    teardownResource("no_write_access", "conditionals", 2)
     teardownUsers(2)
   }
 
   describe("cnd:delete") {
     it("removes an existing resource") {
-      xq("""cnd:delete("Existing")""")
+      xq("""cnd:delete("existing")""")
         .user("xqtest1")
         .assertHttpNoData
         .go
     }
     
     it("does not remove an existing resource when unauthenticated") {
-      xq("""cnd:delete("Existing")""")
+      xq("""cnd:delete("existing")""")
         .assertHttpUnauthorized
         .go
     }
 
     it("fails to remove a nonexisting resource") {
-      xq("""cnd:delete("DoesNotExist")""")
+      xq("""cnd:delete("does_not_exist")""")
         .user("xqtest1")
         .assertHttpNotFound
         .go
     }
 
     it("fails to remove a resource without write access") {
-      xq("""cnd:delete("NoWriteAccess")""")
+      xq("""cnd:delete("no_write_access")""")
         .user("xqtest1")
         .assertHttpForbidden
         .go
     }
 
     ignore("fails to remove a resource that has external references") {
-      xq("""cnd:delete("ExternalReference")""")
+      xq("""cnd:delete("external_reference")""")
         .user("xqtest1")
         .assertHttpBadRequest
         .go

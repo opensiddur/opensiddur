@@ -47,8 +47,8 @@ before_install:
   - ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 
 script:
-  - ant test
   - |
+    ant test &&
     gcloud compute \
       --project=${PROJECT_NAME} instances create ${INSTANCE_NAME} \
       --zone=${ZONE} \

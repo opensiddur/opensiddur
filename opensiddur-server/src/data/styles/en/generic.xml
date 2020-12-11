@@ -14,7 +14,7 @@
                 <tei:date>2012-06-08</tei:date>
             </tei:publicationStmt>
             <tei:sourceDesc>
-                <tei:link type="bibl" target="#style /data/sources/Born%20Digital"/>
+                <tei:link type="bibl" target="#style /data/sources/open_siddur_project"/>
             </tei:sourceDesc>
         </tei:fileDesc>
         <tei:revisionDesc>

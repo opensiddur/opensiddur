@@ -26,6 +26,9 @@ declare variable $data:path-base := "/db/data";
 (:~ API paths that can be supported by doc and db-api-path-to-db :)
 declare variable $data:supported-api-paths := ("data", "user");
 
+(:~ maximum length (character) of the title part of a resource name [excludes any postfix numbers] :)
+declare variable $data:max-resource-name-length := 128;
+
 (:~ convert a given path from an API path (may begin / or /api) to a database path
  : works only to find the resource. 
  : @param $api-path API path
@@ -170,4 +173,47 @@ declare function data:doc(
         	      xs:QName("error:NOTIMPLEMENTED"),
         	      "data:doc() not implemented for the path: " || $api-path
         	    )
+};
+
+(:~ given the parts (eg, title and subtitle) of a document title, put together a standardized
+ : title that can be used as a resource name.
+ : This function will restrict the available title space to be stricter than valid xml:id's
+ : @param case-sensitive if true(), do not lowercase, the title, otherwise, do
+ : @return the string value of the normalized title. If the value is an "", the title is invalid.
+ :)
+declare function data:normalize-resource-title(
+    $title-string-parts as xs:string+,
+    $case-sensitive as xs:boolean
+) as xs:string {
+    let $part-composition-character := "-"
+    let $word-composition-character := "_"
+    return
+        (: join all non-empty title parts with part composition :)
+        string-join($title-string-parts[normalize-space(.)], $part-composition-character) =>
+        (: replaces spaces with word composition :)
+        replace("\s+", $word-composition-character) =>
+        (: normalize to a decomposed form :)
+        normalize-unicode("NFKD") =>
+        (: remove non-alphanumerics or compositions :)
+        replace("[^-_\p{L}\p{Nd}]+", "") =>
+        (: lower-case if case sensitive :)
+        (function ($s) {
+            if (not($case-sensitive)) then lower-case($s)
+            else $s
+        })() =>
+        (: can't be too long :)
+        substring(1, $data:max-resource-name-length) =>
+        (: disallow punctuators at the beginning and end :)
+        replace( "(^[-_]+)|([-_]+$)", "") =>
+        (: must begin with a letter - an exception to disallowing begin/end punctuators :)
+        (function($s) {
+            if (matches($s, "^\d"))
+            then $word-composition-character || $s
+            else $s
+        })() =>
+        (: remove duplicate punctuators :)
+        replace( "(([-])+|([_])+)", "$2$3") =>
+        (: empty it out if it's only - and _ :)
+        replace( "^[-_]+$", "")
+        (: can't be empty :)
 };
