@@ -11,7 +11,7 @@ branches:
 
 env:
   global:
-    - VERSION=${TRAVIS_COMMIT:0:8}
+    - VERSION=${TRAVIS_COMMIT:0:8}-$$
     - BRANCH=$TRAVIS_BRANCH
     - PROJECT_NAME=opensiddur-client
     - INSTANCE_BASE=${PROJECT_NAME}-${BRANCH//\//-}
