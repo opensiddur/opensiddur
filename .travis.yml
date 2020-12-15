@@ -19,8 +19,8 @@ env:
     - BACKUP_BUCKET_BASE=opensiddur-database-backups
     - ZONE=us-west2-a
     - MACHINE_TYPE=n1-standard-1
-    - IMAGE=ubuntu-2004-focal-v20201028
     - IMAGE_PROJECT=ubuntu-os-cloud
+    - IMAGE_VERSION=ubuntu-2004
     - BOOT_DISK_SIZE_GB=20
     - EXIST_MEMORY=3072
     - STACK_MEMORY=512
@@ -58,7 +58,7 @@ script:
       --maintenance-policy=MIGRATE \
       --scopes=https://www.googleapis.com/auth/cloud-platform \
       --tags=http-server,https-server \
-      --image=${IMAGE} \
+      --image=$(gcloud compute images list --filter=${IMAGE_PROJECT} --filter=${IMAGE_VERSION} | tail -n 1 | cut -f 1 -d " ") \
       --image-project=${IMAGE_PROJECT} \
       --boot-disk-size=${BOOT_DISK_SIZE_GB}GB \
       --boot-disk-type=pd-standard \
