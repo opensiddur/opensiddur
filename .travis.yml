@@ -11,11 +11,11 @@ branches:
 
 env:
   global:
-    - VERSION=${TRAVIS_COMMIT:0:8}-$(echo ${TRAVIS_JOB_NUMBER} | tr . -)
+    - VERSION=${TRAVIS_COMMIT:0:8}
     - BRANCH=$TRAVIS_BRANCH
     - PROJECT_NAME=opensiddur-client
     - INSTANCE_BASE=${PROJECT_NAME}-${BRANCH//\//-}
-    - INSTANCE_NAME=${INSTANCE_BASE}-${VERSION}
+    - INSTANCE_NAME=${INSTANCE_BASE}-${VERSION}-${TRAVIS_JOB_NUMBER//./-}
     - BACKUP_BUCKET_BASE=opensiddur-database-backups
     - ZONE=us-west2-a
     - MACHINE_TYPE=n1-standard-1
