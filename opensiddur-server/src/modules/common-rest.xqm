@@ -16,6 +16,8 @@ import module namespace app="http://jewishliturgy.org/modules/app"
   at "app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
   at "data.xqm";
+import module namespace didx="http://jewishliturgy.org/modules/docindex"
+  at "docindex.xqm";
 import module namespace jvalidate="http://jewishliturgy.org/modules/jvalidate"
   at "jvalidate.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror"
@@ -104,12 +106,41 @@ declare function crest:record-change(
   else ()
 };
 
+(:~ validation function to invalidate duplicated xml:ids, which are not automatically rejected :)
+declare function crest:invalidate-duplicate-xmlid(
+    $doc as document-node(),
+    $old-doc as document-node()?
+) as element(report) {
+    let $ids := $doc//@xml:id/string()
+    let $distinct-ids := distinct-values($doc//@xml:id)
+    let $is-valid := count($ids) = count($distinct-ids)
+    return
+        element report {
+            element status {
+                if ($is-valid) then 'valid'
+                else 'invalid'
+            },
+            if (not($is-valid))
+            then
+                for $xid in $ids
+                group by $grouped := $xid
+                where count($xid) > 1
+                return element message {
+                    "xml:id must be unique. The xml:id '" || $grouped || "' is duplicated"
+                }
+            else ()
+        }
+};
+
 (:~ validate a document based on a given schema 
  : @param $doc The document to be validated
  : @param $old-doc The document it is replacing, if any
  : @param $schema-path path to RelaxNG schema
  : @param $schematron-path path to Schematron schema
- : @param $schema-xquery XQuery function schema
+ : @param $xquery-functions A sequence of functions to be used as additional validations.
+ :              The functions take 2 parameters: $doc, $old-doc and return a validation report element
+ :              With @status='valid' or 'invalid'. The element may also contain human-readable message elements
+ :              indicating a reason for invalidity
  : @return true() if valid, false() if not
  : @see crest:validate-report
  :) 
@@ -122,22 +153,24 @@ declare function crest:validate(
       function(item(), document-node()?) as element()
     )*
   ) as xs:boolean {
-  crest:validation-disabled() or (
-    validation:jing($doc, $schema-path) and (
-      empty($schematron-path) or
-      jvalidate:validation-boolean(
-        jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path))
-    )) and (
-      empty($xquery-functions) or
-        (
-          every $xquery-function in $xquery-functions
-          satisfies 
-            jvalidate:validation-boolean(
-              $xquery-function($doc, $old-doc)
+  let $all-xquery-functions := ($xquery-functions, crest:invalidate-duplicate-xmlid#2)
+  return
+      crest:validation-disabled() or (
+        validation:jing($doc, $schema-path) and (
+          empty($schematron-path) or
+          jvalidate:validation-boolean(
+            jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path))
+        )) and (
+          empty($all-xquery-functions) or
+            (
+              every $xquery-function in $all-xquery-functions
+              satisfies
+                jvalidate:validation-boolean(
+                  $xquery-function($doc, $old-doc)
+                )
             )
         )
-    )
-  )
+      )
 };
 
 (:~ validate, returning a validation report 
@@ -158,12 +191,14 @@ declare function crest:validate-report(
       function(item(), document-node()?) as element()
     )*
   ) as element() {
-  jvalidate:concatenate-reports((
-    validation:jing-report($doc, $schema-path),
-    if (exists($schematron-path)) then jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path)) else (),
-    for $xquery-function in $xquery-functions
-    return $xquery-function($doc, $old-doc)
-  ))
+  let $all-xquery-functions := ($xquery-functions, crest:invalidate-duplicate-xmlid#2)
+  return
+      jvalidate:concatenate-reports((
+        validation:jing-report($doc, $schema-path),
+        if (exists($schematron-path)) then jvalidate:validate-iso-schematron-svrl($doc, doc($schematron-path)) else (),
+        for $xquery-function in $all-xquery-functions
+        return $xquery-function($doc, $old-doc)
+      ))
 };
 
 (:~ Get an XML document by name
@@ -185,7 +220,7 @@ declare function crest:get(
 (:~ List or full-text query the given data
  : @param $query text of the query, empty string for all
  : @param $start first document to list
- : @param $max-results number of documents to list 
+ : @param $count number of documents to list
  : @param $path-base API base path of the data type (/api/...)
  : @param $query-function function that performs a query for a string
  : @param $list-function function that lists all resources for the data type
@@ -201,9 +236,9 @@ declare function crest:list(
     $title as xs:string,
     $path-base as xs:string,
     $query-function as function(xs:string) as element()*,
-    $list-function as function(xs:string) as element()*,
+    $list-function as function() as element()*,
     $additional-uris as element(crest:additional)*,
-    $title-function as (function(document-node()) as xs:string)?
+    $title-function as (function(node()) as xs:string)?
   ) as item()+ {
   <rest:response>
     <output:serialization-parameters>
@@ -240,10 +275,10 @@ declare function crest:list(
 };
 
 declare function crest:tei-title-function(
-  $doc as document-node()
+  $n as node()
   ) as xs:string {
   normalize-space(
-    $doc//tei:titleStmt/string-join((
+    root($n)//tei:titleStmt/string-join((
         tei:title["main"=@type]/string(), 
         tei:title["sub"=@type]/string()
         ), ": ")
@@ -257,9 +292,9 @@ declare function crest:do-query(
     $count as xs:integer,
     $path-base as xs:string,
     $query-function as (function(xs:string) as element()?),
-    $title-function as (function(document-node()) as xs:string)?
+    $title-function as (function(node()) as xs:string)?
   ) as item()+ {
-  let $title-function as (function(document-node()) as xs:string) :=
+  let $title-function as (function(node()) as xs:string) :=
     ($title-function, crest:tei-title-function#1)[1]
   let $all-results := $query-function($query)
   (: the ridiculous organization of this code is a workaround
@@ -306,9 +341,9 @@ declare function crest:do-list(
   $path-base as xs:string,
   $list-function as (function() as element()*),
   $additional-uris as element(crest:additional)*,
-  $title-function as (function(document-node()) as xs:string)?
+  $title-function as (function(node()) as xs:string)?
   ) {
-  let $title-function as function(document-node()) as xs:string :=
+  let $title-function as function(node()) as xs:string :=
     ($title-function, crest:tei-title-function#1)[1]
   let $all := $list-function()
   return (
@@ -317,7 +352,7 @@ declare function crest:do-list(
       let $api-name := replace(util:document-name($result), "\.xml$", "")
       return
         <li class="result">
-          <a class="document" href="{$path-base}/{$api-name}">{$title-function(root($result))}</a>
+          <a class="document" href="{$path-base}/{$api-name}">{$title-function($result)}</a>
           {
             for $additional in $additional-uris
             return
@@ -378,6 +413,7 @@ declare function crest:delete(
                       (: TODO: check for references! :)
                       let $r1 := xmldb:remove($collection, $resource)
                       let $r2 := ridx:remove($collection, $resource)
+                      let $r3 := didx:remove($collection, $resource)
                       return
                         <rest:response>
                             <output:serialization-parameters>
@@ -401,7 +437,7 @@ declare function crest:post(
       function(item(), document-node()?) as xs:boolean,
     $validation-function-report as 
       function(item(), document-node()?) as element(),
-    $title-function as (function(document-node()) as xs:string)?
+    $title-function as (function(node()) as xs:string)?
   ) as item()+ {
   crest:post($data-path, $path-base, $api-path-base, $body, $validation-function-boolean, $validation-function-report,
     $title-function, true())
@@ -435,7 +471,7 @@ declare function crest:post(
       function(item(), document-node()?) as xs:boolean,
     $validation-function-report as 
       function(item(), document-node()?) as element(),
-    $title-function as (function(document-node()) as xs:string)?,
+    $title-function as (function(node()) as xs:string)?,
     $use-reference-index as xs:boolean?
   ) as item()+ { 
   if (sm:has-access(xs:anyURI($path-base), "w"))
@@ -447,7 +483,7 @@ declare function crest:post(
       let $paths := 
         data:new-path-to-resource(
           $data-path, 
-          $title-function($body)
+          data:normalize-resource-title($title-function($body), false())
         )
       let $resource := $paths[2]
       let $collection := $paths[1]
@@ -475,6 +511,7 @@ declare function crest:post(
                             sm:chgrp($uri, "everyone"),
                             sm:chmod($uri, "rw-rw-r--")
                         )),
+                        didx:reindex($doc),
                         if ($use-reference-index) then ridx:reindex($doc) else ()
                       )
                     }
@@ -506,7 +543,7 @@ declare function crest:put(
 };
 
 (:~ Edit/replace a document in the database
- : Side effect: update the reference index
+ : Side effect: update the reference index, update document index
  : @param $data-type data type of document
  : @param $name Name of the document to replace
  : @param $body New document
@@ -552,7 +589,9 @@ declare function crest:put(
                   let $doc := doc($uri)
                   return (
                     crest:record-change($doc, "edited"),
+                    didx:reindex($doc),
                     if ($use-reference-index) then ridx:reindex($doc) else ()
+
                   )
                 }
                 <output:serialization-parameters>

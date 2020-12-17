@@ -24,14 +24,14 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
-(: keys are the link types, values are the attribute/element they produce :)
+(: keys are the link types, values are the element and attribute they produce; layer type will be the attribute type :)
 declare variable $phony:link-types := map {
-    "condition" := "conditional",
-    "set" := "set",
-    "note" := "annotation",
-    "instruction" := "annotation",
-    "interp" := "annotation",
-    "annotation" := "annotation"
+    "condition" := ("conditional", "conditional"),
+    "set" := ("set", "set"),
+    "note" := ("annotation", "annotation"),
+    "instruction" := ("instruction", "annotation"),
+    "interp" := ("annotation", "annotation"),
+    "annotation" := ("annotation", "annotation")
 };
 
 declare function phony:phony-layer-document(
@@ -60,7 +60,7 @@ declare function phony:phony-layer(
         case element(j:concurrent) return phony:j-concurrent($node, $params)
         case element(j:streamText) return phony:j-streamText($node, $params)
         case element() return phony:element($node, $params, phony:phony-layer#2)
-        default return phony:phony-layer($node/node(), $params) 
+        default return phony:phony-layer($node/node(), $params)
 };
 
 (:~ return the phony-layer eligible links that apply to the document :)
@@ -77,21 +77,23 @@ declare function phony:links-to-attributes(
     $phonies as element(tei:link)*
     ) as attribute()* {
     for $phony-link in $phonies
-    group by 
+    group by
         $phony-type := $phony-link/@type/string()
     return (
-        attribute { "jf:" || $phony:link-types($phony-type) }{
-            string-join(
-                for $link in $phony-link
-                return tokenize($link/@target, '\s+')[2]
-            , ' ')
-        },
+        let $link-attribute := $phony:link-types($phony-type)[2]
+        return
+            attribute { "jf:" || $link-attribute }{
+                string-join(
+                    for $link in $phony-link
+                    return tokenize($link/@target, '\s+')[2]
+                , ' ')
+            },
         let $instructions :=
             for $link in $phony-link["condition"=@type]
             return tokenize($link/@target, '\s+')[3]
         where exists($instructions)
         return
-            (: TODO: this is really just an annotation, but it needs to be added to other annotations :) 
+            (: TODO: this is really just an annotation, but it needs to be added to other annotations :)
             attribute jf:conditional-instruction {
                 string-join($instructions, ' ')
             }
@@ -121,7 +123,7 @@ declare function phony:inside-streamText(
         case element(j:option) return phony:element($node, $params, phony:inside-streamText#2)
         case element() return
             if ($node/parent::j:streamText)
-            then 
+            then
                 element { QName(namespace-uri($node), name($node)) }{
                     $node/@*,
                     phony:inside-streamText($node/node(), $params)
@@ -142,11 +144,11 @@ declare function phony:element(
     let $layer-ancestor := $e/ancestor::j:layer
     let $stream-ancestor := $e/ancestor::j:streamText[not(. is $e/parent::*)]
     let $concurrent-ancestor := $layer-ancestor/parent::j:concurrent
-    let $phonies := 
+    let $phonies :=
         if (exists($layer-ancestor) or exists($stream-ancestor) or $e instance of element(j:option))
-        then 
+        then
             (: if a condition applies to the whole layer/concurrent section, it applies to all its constituents :)
-            ridx:query(phony:doc-phony-links($e), 
+            ridx:query(phony:doc-phony-links($e),
                 $e|(
                     if ($e/parent::j:layer) then ($concurrent-ancestor, $layer-ancestor) else ()
                 ), 1, false())[self::tei:link]
@@ -174,7 +176,7 @@ declare function phony:tei-text(
             let $phonies := phony:doc-phony-links($e)
             let $phony-layers := phony:phony-layer-from-links($phonies, $params)
             where exists($phony-layers)
-            return 
+            return
                 element j:concurrent {
                     $phony-layers
                 }
@@ -182,7 +184,7 @@ declare function phony:tei-text(
     }
 };
 
-(:~ add a additional layers, if necessary 
+(:~ add a additional layers, if necessary
  :)
 declare function phony:j-concurrent(
     $e as element(j:concurrent),
@@ -202,16 +204,19 @@ declare function phony:phony-layer-from-links(
     ) as element(j:layer)* {
     for $link at $n in $e
     let $phony-type := $phony:link-types(($link/@type,$link/parent::tei:linkGrp/@type)[1]/string())
+    let $phony-element-type := $phony-type[1]
+    let $phony-attribute-type := $phony-type[2]
+    let $phony-layer-type := $phony-type[2]
     return
         let $targets := tokenize($link/@target, '\s+')
         let $dest := uri:fast-follow($targets[1], $link, 0) (: follow only 1 step -- dest might be a ptr :)
-        where exists($dest[1]/parent::j:streamText) 
+        where exists($dest[1]/parent::j:streamText)
         return
             element j:layer {
-                attribute type { "phony-" || $phony-type },
-                attribute xml:id { "phony-" || $phony-type || "-" || string($n) },
-                element { "jf:" || $phony-type } {
-                    attribute { "jf:" || $phony-type } { $targets[2] },
+                attribute type { "phony-" || $phony-layer-type },
+                attribute xml:id { "phony-" || $phony-layer-type || "-" || string($n) },
+                element { "jf:" || $phony-element-type } {
+                    attribute { "jf:" || $phony-attribute-type } { $targets[2] },
                     if ($phony-type="conditional" and $targets[3])
                     then attribute jf:conditional-instruction { $targets[3] }
                     else (),

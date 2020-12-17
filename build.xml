@@ -3,7 +3,7 @@
         Build file for opensiddur
     </description>
     <property name="lib.dir" location="lib"/>
-    <property name="exist.version" value="4.6.1"/>
+    <property name="exist.version" value="4.7.1"/>
     <property name="ivy.version" value="2.4.0"/>
 	<property name="installer" location="${lib.dir}/exist/installer/eXist-db-setup-${exist.version}-opensiddur.jar"/>
 	<property name="build" location="build"/>
@@ -17,6 +17,8 @@
 
     <property file="local.build.properties"/>
     <property file="build.properties"/>
+
+    <property name="wrapper.conf" location="${installdir}/tools/yajsw/conf/wrapper.conf"/>
 
 
     <!--	
@@ -129,7 +131,20 @@ cacheSize=${cache.size}
              classpath="${lib.dir}/saxonhe-9.2.1.5.jar">
              <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         </xslt>
-        <move file="${installdir}/conf.out.xml" tofile="${installdir}/conf.xml"/> 
+        <move file="${installdir}/conf.out.xml" tofile="${installdir}/conf.xml"/>
+
+        <!-- edit web.xml -->
+        <xslt in="${installdir}/webapp/WEB-INF/web.xml"
+              out="${installdir}/webapp/WEB-INF/web.out.xml"
+              style="setup/setup-web-xml.xsl"
+              processor="trax"
+              classpath="${lib.dir}/saxonhe-9.2.1.5.jar">
+            <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+        </xslt>
+        <move file="${installdir}/webapp/WEB-INF/web.out.xml" tofile="${installdir}/webapp/WEB-INF/web.xml"/>
+
+        <!-- edit wrapper.conf -->
+        <echo file="${wrapper.conf}" append="true">wrapper.java.additional.stack=-Xss${stack.memory}m</echo>
     </target>
 	
 	<target name="exist-clean">
@@ -223,7 +238,9 @@ cacheSize=${cache.size}
 		description="build everything">
 		<subant target="dist" inheritAll="false">
 			<fileset dir=".">
-				<include name="*/build.xml"/>
+				<include name="opensiddur-server/build.xml"/>
+                <include name="opensiddur-demos/build.xml"/>
+                <include name="opensiddur-tests/build.xml"/>
 				<exclude name="build.xml"/>
 			</fileset>
 		</subant>
@@ -312,9 +329,21 @@ cacheSize=${cache.size}
         description="Run tests"
         depends="docker-run">
         <exec
+                executable="python3"
+                failonerror="true">
+            <arg value="python/wait_for_up.py"/>
+        </exec>
+        <exec
             executable="python3"
             failonerror="true">
             <arg value="python/testrunner.py"/>
+        </exec>
+        <exec
+                executable="mvn"
+                failonerror="true"
+                dir="opensiddur-extensions"
+        >
+            <arg value="test"/>
         </exec>
     </target>
 
@@ -338,26 +367,25 @@ cacheSize=${cache.size}
             <env key="DEBUG_OPTS" value="-Djava.endorsed.dirs=${installdir}/lib/optional:${installdir}/lib/endorsed"/>
         </exec>
     </target>
-    <target name="backup-for-upgrade"
-        depends="backup"
-        description="edit the backup in $backup.directory, removing things that we do not want restored">
+    <target name="process-backup-for-upgrade"
+            description="edit the backup in $backup.directory, removing things that we do not want restored">
         <tempfile property="exist.backup.remove.file" destDir="${java.io.tmpdir}" deleteonexit="true"/>
         <echo file="${exist.backup.remove.file}">
-^/db/apps
-^/db/cache
-^/db/refindex
-^/db/system/config
-^/db/system/security/exist/(accounts|groups)/removed
-^/db/system/security/exist/accounts/(admin|guest|testuser|testuser.)\.xml$
-^/db/system/security/exist/groups/(dba|testuser|testuser2|grouptests|grouptests.)\.xml$
-^/db/data/user/(testuser|testuser.)\.xml$
-^/db/data/tests
+            ^/db/apps
+            ^/db/cache
+            ^/db/refindex
+            ^/db/system/config
+            ^/db/system/security/exist/(accounts|groups)/removed
+            ^/db/system/security/exist/accounts/(admin|guest|testuser|testuser.)\.xml$
+            ^/db/system/security/exist/groups/(dba|testuser|testuser2|grouptests|grouptests.)\.xml$
+            ^/db/data/user/(testuser|testuser.)\.xml$
+            ^/db/data/tests
         </echo>
         <dirset dir="${backup.directory}" includes="full*" id="full.backup.directories" />
         <pathconvert pathsep="" property="backup.full.directory" refid="full.backup.directories"/>
 
         <exec input="${exist.backup.remove.file}"
-            executable="python3">
+              executable="python3">
             <arg value="python/removeFromBackup.py"/>
             <arg value="-s"/>
             <arg value="-v"/>
@@ -365,6 +393,10 @@ cacheSize=${cache.size}
         </exec>
         <tar destfile="${backup.directory}/exist-backup.tar.gz" basedir="${backup.full.directory}"
              compression="gzip" longfile="gnu"/>
+    </target>
+    <target name="backup-for-upgrade"
+        depends="backup,process-backup-for-upgrade"
+        description="make a backup, then process what should be restored">
     </target>
     <target name="restore"
         description="restore the database from (modified) backup, rerun refindex update">

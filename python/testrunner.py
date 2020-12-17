@@ -38,7 +38,7 @@ def indented(level):
     return "".join(["  "] * level)
 
 
-def wait_for_uptime(host=DEFAULT_HOST, port=DEFAULT_PORT, max_timeout_s=120):
+def wait_for_uptime(host=DEFAULT_HOST, port=DEFAULT_PORT, max_timeout_s=240):
     up = False
     start_time = time.time()
     elapsed_time = 0
@@ -171,8 +171,8 @@ class XQSuiteApiSax(SaxBase):
             "package": attributes[(None, "package")],
             "tests": tests,
             "pass": escaped("PASS",
-                                  str(int(tests) - int(failures) -
-                                    int(errors) - int(pending))),
+                                  str(max(int(tests) - int(failures) -
+                                    int(errors) - int(pending), 0))),
             "fail": escaped("FAIL", failures),
             "error": escaped("ERROR", errors),
             "ignore": escaped("IGNORE", pending)
@@ -261,8 +261,10 @@ class TestingApi:
     def rest_api_get(self, api, prefix=None):
         """ Make a REST API call to URL, return the result """
         data, code = http_request(self.host, self.port, (self.prefix if prefix is None else prefix) + api)
-
-        xtree = etree.parse(BytesIO(data))
+        try:
+            xtree = etree.parse(BytesIO(data))
+        except Exception as e:
+            raise (RuntimeError("Parsing failed. Got from API: " + str(data) + " Original exception: " + str(e)))
         return code, xtree
 
 
@@ -323,13 +325,13 @@ def main():
 
     print("Tests completed: suites: {suites} pass: {passes} fail: {fail} error: {error} ignored: {ignored}".format(
         suites=suites,
-        passes=escaped("PASS", str(tests - errors - fails - ignores)),
+        passes=escaped("PASS", str(max(tests - errors - fails - ignores, 0))),
         fail=escaped("FAIL", str(fails)),
         error=escaped("ERROR", str(errors)),
         ignored=escaped("IGNORE", str(ignores))
     ))
 
-    if (tests > 0 and (errors + fails) > 0):
+    if (errors + fails) > 0:
         return 1
     else:
         return 0

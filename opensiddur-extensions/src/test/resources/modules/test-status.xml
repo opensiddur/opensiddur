@@ -1,0 +1,12 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+    <tei:teiHeader>
+        <tei:fileSpec>
+            <tei:titleStmt>
+                <tei:title>test</tei:title>
+            </tei:titleStmt>
+        </tei:fileSpec>
+    </tei:teiHeader>
+    <tei:text>
+        Empty.
+    </tei:text>
+</tei:TEI>

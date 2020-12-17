@@ -1,0 +1,29 @@
+<tr:schema xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
+    <tr:title xml:lang="en">Test</tr:title>
+    <tr:description xml:lang="en">A test</tr:description>
+    <tr:table>
+        <tr:lang in="he" out="he-Latn"/>
+        <tr:tr to="a" from="א"/>
+        <tr:tr to="b" from="ב"/>
+        <tr:tr to="c" from="ג"/>
+        <tr:tr to="d" from="ד"/>
+        <tr:tr to="e" from="ה"/>
+        <tr:tr to="f" from="ו"/>
+        <tr:tr to="g" from="ז"/>
+        <tr:tr to="h" from="ח"/>
+        <tr:tr to="i" from="ט"/>
+        <tr:tr to="j" from="י"/>
+        <tr:tr to="k" from="כ"/>
+        <tr:tr to="l" from="ל"/>
+        <tr:tr to="m" from="מ"/>
+        <tr:tr to="n" from="נ"/>
+        <tr:tr to="o" from="ס"/>
+        <tr:tr to="p" from="ע"/>
+        <tr:tr to="q" from="פ"/>
+        <tr:tr to="r" from="צ"/>
+        <tr:tr from="ק" to="t"/>
+        <tr:tr from="ר" to="u"/>
+        <tr:tr from="ש" to="v"/>
+        <tr:tr from="ת" to="w"/>
+    </tr:table>
+</tr:schema>

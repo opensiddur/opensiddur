@@ -1,0 +1,66 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title type="main">Parallel text A</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:distributor>
+                    <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+                </tei:distributor>
+                <tei:availability>
+                    <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+                </tei:availability>
+                <tei:date>2014-03-19</tei:date>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:bibl>
+               <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
+               <tei:ptr type="bibl-content" target="#stream"/>
+            </tei:bibl>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+        <tei:revisionDesc>
+        </tei:revisionDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
+            <tei:seg xml:id="A1">A-1</tei:seg>
+            <tei:seg xml:id="A2">A-2</tei:seg>
+            <tei:seg xml:id="A3">A-3</tei:seg>
+            <tei:seg xml:id="A4">A-4</tei:seg>
+            <tei:seg xml:id="A5">A-5</tei:seg>
+            <tei:seg xml:id="A6">A-6</tei:seg>
+            <tei:seg xml:id="A7">A-7</tei:seg>
+            <tei:seg xml:id="A8">A-8</tei:seg>
+            <tei:seg xml:id="A9">A-9</tei:seg>
+            <tei:seg xml:id="A10">A-10</tei:seg>
+            <tei:seg xml:id="A11">A-11</tei:seg>
+            <tei:seg xml:id="A12">A-12</tei:seg>
+            <tei:seg xml:id="A13">A-13</tei:seg>
+            <tei:seg xml:id="A14">A-14</tei:seg>
+            <tei:seg xml:id="A15">A-15</tei:seg>
+            <tei:seg xml:id="A16">A-16</tei:seg>
+            <tei:seg xml:id="A17">A-17</tei:seg>
+        </j:streamText>
+        <j:concurrent xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+            <j:layer type="p">
+                <tei:p xml:id="p1">
+                    <tei:ptr target="#range(A1,A3)"/>
+                </tei:p>
+                <tei:p xml:id="p2">
+                    <tei:ptr target="#range(A4,A6)"/>
+                </tei:p>
+                <tei:p xml:id="p3">
+                    <tei:ptr target="#range(A7,A9)"/>
+                </tei:p>
+                <tei:p xml:id="p4">
+                    <tei:ptr target="#range(A10,A13)"/>
+                </tei:p>
+                <tei:p xml:id="p5">
+                    <tei:ptr target="#range(A14,A17)"/>
+                </tei:p>
+            </j:layer>
+        </j:concurrent>
+   </tei:text>
+</tei:TEI>

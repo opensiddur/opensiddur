@@ -1,4 +1,4 @@
-FROM ubuntu:cosmic
+FROM ubuntu:focal
 
 RUN useradd -c "eXist db"  exist
 # install dependencies
@@ -15,7 +15,7 @@ COPY lib/exist/installer/eXist-db-setup-*-opensiddur.jar /tmp/
 COPY setup/docker-install-options.conf /tmp/
 
 # run the installer
-RUN java -jar /tmp/eXist-db-setup-4.6.1-opensiddur.jar -console -options /tmp/docker-install-options.conf
+RUN java -jar /tmp/eXist-db-setup-4.7.1-opensiddur.jar -console -options /tmp/docker-install-options.conf
 COPY lib/icu4j-* /usr/local/opensiddur/lib/user/
 COPY lib/hebmorph-exist/java/target/hebmorph-lucene.jar /usr/local/opensiddur/lib/extensions/indexes/lucene/lib/
 COPY lib/hebmorph-exist/hspell-data-files /usr/local/opensiddur/extensions/indexes/lucene/lib/

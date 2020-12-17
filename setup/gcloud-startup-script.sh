@@ -10,6 +10,7 @@ echo "Getting metadata..."
 BRANCH=$(get_metadata BRANCH)
 PASSWORD=$(get_metadata ADMIN_PASSWORD)
 EXIST_MEMORY=$(get_metadata EXIST_MEMORY)
+STACK_MEMORY=$(get_metadata STACK_MEMORY)
 DYN_EMAIL=$(get_metadata DYN_EMAIL)
 DYN_USERNAME=$(get_metadata DYN_USERNAME)
 DYN_PASSWORD=$(get_metadata DYN_PASSWORD)
@@ -35,6 +36,7 @@ export SRC=$(pwd)
 cat << EOF > local.build.properties
 installdir=${INSTALL_DIR}
 max.memory=${EXIST_MEMORY}
+stack.memory=${STACK_MEMORY}
 cache.size=512
 adminpassword=${PASSWORD}
 EOF
@@ -53,18 +55,29 @@ ${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
 
 echo "Installing periodic backup cleaning..."
 cat << EOF > /etc/cron.daily/clean-exist-backups
-#!/bin/sh
-find ${INSTALL_DIR}/webapp/WEB-INF/data/export/full* \
-  -maxdepth 0 \
-  -type d \
-  -not -newermt \$(date -d "14 days ago" +%Y%m%d) \
-  -execdir rm -fr {} \;
+#!/bin/bash
+BASE_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
+EARLIEST_DATE=\$(date -d "14 days ago" +%Y%m%d)
 
-find ${INSTALL_DIR}/webapp/WEB-INF/data/export/report* \
-  -maxdepth 0 \
-  -type d \
-  -not -newermt \$(date -d "14 days ago" +%Y%m%d) \
-  -execdir rm -fr {} \;
+for backup in \$( \
+    find \${BASE_DIR}/full* \
+        -maxdepth 0 \
+        -type d );
+do
+    if [[ \$(basename \$backup) < "full\$EARLIEST_DATE" ]];
+    then rm -fr \$backup;
+    fi;
+done
+
+for report in \$( \
+    find \${BASE_DIR}/report* \
+        -maxdepth 0 \
+        -type f );
+do
+    if [[ \$(basename \$report) < "report-\$EARLIEST_DATE" ]];
+    then rm -fr \$report;
+    fi;
+done
 EOF
 chmod +x /etc/cron.daily/clean-exist-backups
 
@@ -75,6 +88,7 @@ ZONE=$(gcloud compute instances list --filter="name=(${INSTANCE_NAME})" --format
 
 export DNS_NAME="db-feature.jewishliturgy.org"
 BACKUP_CLOUD_BUCKET="${BACKUP_BUCKET_BASE}-feature"
+RESTORE_CLOUD_BUCKET="${BACKUP_BUCKET_BASE}-prod";
 # branch-specific environment settings
 if [[ $BRANCH == "master" ]];
 then
@@ -92,40 +106,77 @@ fi
 BACKUP_INSTANCE_BASE=${PROJECT}-${BACKUP_BASE_BRANCH}
 INSTANCE_BASE=${PROJECT}-${BRANCH//\//-}
 
-echo "My backup base is $BACKUP_BASE_BRANCH"
+echo "My backup base is $BACKUP_CLOUD_BUCKET"
+echo "My restore base is $RESTORE_CLOUD_BUCKET"
 
 # retrieve the latest backup from the prior instance
 echo "Generating ssh keys..."
 ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 
-# download the backup from the prior instance
-PRIOR_INSTANCE=$(gcloud compute instances list --filter="status=RUNNING AND name~'${BACKUP_INSTANCE_BASE}'" | \
-       sed -n '1!p' | \
-       cut -d " " -f 1 | \
-       grep -v "${INSTANCE_NAME}" | \
-       head -n 1)
-if [[ -n "${PRIOR_INSTANCE}" ]];
+# produce or download a recent backup
+RESTORE_COMPLETE=0
+if [[ $BRANCH == "master" ]];
 then
-    echo "Prior instance ${PRIOR_INSTANCE} exists. Retrieving a backup...";
-    COMMIT=$(git rev-parse --short HEAD)
+    echo "We are in the master branch. Restoring from the existing master branch"
+    PRIOR_INSTANCE=$(gcloud compute instances list --filter="status=RUNNING AND name~'${BACKUP_INSTANCE_BASE}'" | \
+           sed -n '1!p' | \
+           cut -d " " -f 1 | \
+           grep -v "${INSTANCE_NAME}" | \
+           head -n 1)
+    if [[ -n "${PRIOR_INSTANCE}" ]];
+    then
+        echo "Prior instance ${PRIOR_INSTANCE} exists. Retrieving a backup...";
+        COMMIT=$(git rev-parse --short HEAD)
 
-    echo "Performing a backup on ${PRIOR_INSTANCE}..."
-    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "cd /src/opensiddur && sudo -u exist ant backup-for-upgrade -Dbackup.directory=/tmp/backup.${COMMIT}"
+        echo "Performing a backup on ${PRIOR_INSTANCE}..."
+        gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "cd /src/opensiddur && sudo -u exist ant backup-for-upgrade -Dbackup.directory=/tmp/backup.${COMMIT}"
 
-    echo "Copying backup here..."
-    mkdir /tmp/exist-backup
-    gcloud compute scp ${PRIOR_INSTANCE}:/tmp/backup.${COMMIT}/exist-backup.tar.gz /tmp/exist-backup --zone ${ZONE}
-    gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "sudo rm -fr /tmp/backup.${COMMIT}"
-    ( cd /tmp/exist-backup && tar zxvf exist-backup.tar.gz )
-    # restore the backup
-    echo "Restoring backup..."
-    sudo -u exist ant restore
+        echo "Copying backup here..."
+        mkdir /tmp/exist-backup
+        gcloud compute scp ${PRIOR_INSTANCE}:/tmp/backup.${COMMIT}/exist-backup.tar.gz /tmp/exist-backup --zone ${ZONE}
+        gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "sudo rm -fr /tmp/backup.${COMMIT}"
+        ( cd /tmp/exist-backup && tar zxvf exist-backup.tar.gz )
+        RESTORE_COMPLETE=1
+    else
+        echo "No prior instance exists. Will try to retrieve a backup from cloud storage.";
+    fi;
+fi;
 
-    # remove the backup
-    rm -fr /tmp/exist-backup
-else
-    echo "No prior instance exists. No backup will be retrieved.";
-fi
+if [[ ${RESTORE_COMPLETE} == 0 ]];
+then
+    echo "We are in the $BRANCH branch. Restoring from a recent cloud storage backup of master"
+    echo "Finding the most recent backup of master..."
+    MOST_RECENT_BACKUP=$(gsutil ls gs://opensiddur-database-backups-prod | tail -n 1)
+    echo "Most recent backup is ${MOST_RECENT_BACKUP}"
+    if [[ -z "${MOST_RECENT_BACKUP}" ]];
+    then
+        echo "No viable backup exists. Proceeding without restoring data."
+    else
+        BACKUP_FILENAME=$(basename ${MOST_RECENT_BACKUP})
+        BACKUP_TEMP_DIR=/tmp/backup.master/fullbackup
+        mkdir -p ${BACKUP_TEMP_DIR}
+        gsutil cp ${MOST_RECENT_BACKUP} ${BACKUP_TEMP_DIR}
+
+        ( cd ${BACKUP_TEMP_DIR} && tar zxvf ${BACKUP_FILENAME} && rm -f ${BACKUP_FILENAME} && \
+            sudo chown -R exist:exist /tmp/backup.master )
+        ( cd /src/opensiddur && sudo -u exist ant process-backup-for-upgrade -Dbackup.directory=/tmp/backup.master )
+
+        mkdir -p /tmp/exist-backup
+        ( cd /tmp/exist-backup && tar zxvf /tmp/backup.master/exist-backup.tar.gz )
+        sudo rm -fr /tmp/backup.master
+        RESTORE_COMPLETE=1;
+    fi;
+fi;
+
+if [[ ${RESTORE_COMPLETE} == 1 ]];
+then
+        # restore the backup
+        echo "Restoring backup..."
+        sudo -u exist ant restore
+
+        # remove the backup
+        rm -fr /tmp/exist-backup
+fi;
 
 echo "Installing daily backup copy..."
 EXPORT_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
@@ -152,7 +203,7 @@ echo "Starting eXist..."
 systemctl start eXist-db
 
 echo "Wait until eXist-db is up..."
-python3 python/wait_for_up.py
+python3 python/wait_for_up.py --host=localhost --port=8080 --timeout=86400
 
 echo "Installing dynamic DNS updater to update ${DNS_NAME}..."
 cat << EOF > /etc/ddclient.conf
@@ -211,6 +262,11 @@ chmod +x /etc/cron.daily/certbot_renewal
 
 echo "Restarting nginx..."
 systemctl restart nginx
+
+# TODO: only do this if the upgrade is necessary...
+echo "Changing JLPTEI schema for v0.12+..."
+${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upg12='http://jewishliturgy.org/modules/upgrade12' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade12.xqm'; upg12:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
+${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upgrade122='http://jewishliturgy.org/modules/upgrade122' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade122.xqm'; upgrade122:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
 
 echo "Stopping prior instances..."
 ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="status=RUNNING AND name~'${INSTANCE_BASE}'" | \

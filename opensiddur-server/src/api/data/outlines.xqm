@@ -624,9 +624,9 @@ declare function outl:query-function(
 };
 
 declare function outl:title-function(
-  $doc as document-node()
+  $n as node()
   ) as xs:string {
-  $doc/ol:outline/ol:title/string()
+  root($n)/ol:outline/ol:title/string()
 };
 
 (: support function for list :) 

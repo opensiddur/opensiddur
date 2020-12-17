@@ -2,7 +2,7 @@ xquery version "3.1";
 (:~
  : XQuery functions to output a given XML file in a format.
  : 
- : Copyright 2011-2014 Efraim Feinstein <efraim.feinstein@gmail.com>
+ : Copyright 2011-2014,2019 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Open Siddur Project
  : Licensed under the GNU Lesser General Public License, version 3 or later
  :)
@@ -32,6 +32,8 @@ import module namespace combine="http://jewishliturgy.org/transform/combine"
   at "../transforms/combine.xqm";
 import module namespace compile="http://jewishliturgy.org/transform/compile"
   at "../transforms/compile.xqm";
+import module namespace segment="http://jewishliturgy.org/transform/segment"
+at "../transforms/segment.xqm";
 import module namespace tohtml="http://jewishliturgy.org/transform/html"
   at "../transforms/tohtml.xqm";
 import module namespace translit="http://jewishliturgy.org/transform/transliterator"
@@ -49,6 +51,7 @@ declare variable $format:temp-dir := '.format';
 declare variable $format:parallel-layer-cache := "/db/cache/parallel-layer";
 declare variable $format:phony-layer-cache := "/db/cache/phony-layer";
 declare variable $format:dependency-cache := "/db/cache/dependency";
+declare variable $format:segment-cache := "/db/cache/segment";
 declare variable $format:flatten-cache := "/db/cache/flatten";
 declare variable $format:merge-cache := "/db/cache/merge";
 declare variable $format:resolve-cache := "/db/cache/resolved";
@@ -56,17 +59,20 @@ declare variable $format:unflatten-cache := "/db/cache/unflattened";
 declare variable $format:combine-cache := "/db/cache/combined";
 declare variable $format:compile-cache := "/db/cache/compiled";
 declare variable $format:html-cache := "/db/cache/html";
+declare variable $format:transcluded-html-cache := "/db/cache/html-transclude";
 declare variable $format:caches := (
     $format:parallel-layer-cache,
     $format:phony-layer-cache,
     $format:dependency-cache,
+    $format:segment-cache,
     $format:flatten-cache,
     $format:merge-cache,
     $format:resolve-cache,
     $format:unflatten-cache,
     $format:combine-cache,
     $format:compile-cache,
-    $format:html-cache
+    $format:html-cache,
+    $format:transcluded-html-cache
     );
 
 (:~ setup to allow format functions to work :)
@@ -76,8 +82,8 @@ declare function format:setup(
   where not(xmldb:collection-available($collection))
   return
     mirror:create($collection, "/db/data", true(),
-      if ($collection = $format:html-cache)
-      then map { "xml" := "html" }
+      if ($collection = ($format:html-cache, $format:transcluded-html-cache))
+      then map { "xml" : "html" }
       else map {}
     ),
   status:setup()
@@ -103,13 +109,13 @@ declare function format:status-param(
     $params as map(*),
     $original-doc as document-node()
     ) as map(*) {
-    map:new((
-        $params,
-        map { 
-            "format:status-job-id" := ($params("format:status-job-id"), status:get-job-id($original-doc))[1], 
-            "format:stage-number" := ($params("format:stage-number") + 1, 0)[1] 
-        }
-    ))
+  map:merge((
+      $params,
+      map {
+          "format:status-job-id" : ($params("format:status-job-id"), status:get-job-id($original-doc))[1],
+          "format:stage-number" : ($params("format:stage-number") + 1, 0)[1]
+      }
+  ))
 };
 
 declare function format:apply-if-outdated(
@@ -142,17 +148,17 @@ declare function format:apply-if-outdated(
         then status:start-job($original-doc)
         else ()
     return
-        try {
+      try {
             let $stage-start := status:start($status-resource, $original-doc, $stage)
             let $transformed :=
-                mirror:apply-if-outdated($mirror-path, $transformee, $transform, $original-doc, $up-to-date-function)
+              mirror:apply-if-outdated($mirror-path, $transformee, $transform, $original-doc, $up-to-date-function)
             let $stage-finish := status:finish($status-resource, $original-doc, $stage)
             let $job-end := 
                 if ($params("format:stage-number") = 0)
                 then status:complete-job($status-resource, document-uri($original-doc))
                 else ()
             return $transformed
-        }
+       }
         catch * {
             let $error-message := 
                 concat(
@@ -199,6 +205,7 @@ declare function format:parallel-layer(
     )
 };
 
+
 (:~ make a cached version of a phony layer text document,
  : and return it
  : @param $doc The document to run phony layer transform on
@@ -224,6 +231,32 @@ declare function format:phony-layer(
     )
 };
 
+
+(:~ make a cached version of a segmented document,
+ : and return it
+ : @param $doc The document to segment
+ : @param $params Parameters to send to the segment
+ : @param $original-doc The original document that was segmented
+ : @return The mirrored segmented document
+ :)
+declare function format:segment(
+  $doc as document-node(),
+  $params as map(*),
+  $original-doc as document-node()
+) as document-node() {
+  let $params := format:status-param($params, $original-doc)
+  let $segment-transform := segment:segment(?)
+  return
+    format:apply-if-outdated(
+      "segment",
+      $params,
+      $format:segment-cache,
+      format:phony-layer($doc, $params, $original-doc),
+      $segment-transform,
+      $original-doc
+    )
+};
+
 (:~ make a cached version of a flattened document,
  : and return it
  : @param $doc The document to flatten
@@ -237,18 +270,17 @@ declare function format:flatten(
   $original-doc as document-node()
   ) as document-node() {
   let $params := format:status-param($params, $original-doc)
-  let $flatten-transform := flatten:flatten-document(?, $params)
   return
     format:apply-if-outdated(
       "flatten", 
       $params, 
       $format:flatten-cache,
       if (format:is-parallel-document($original-doc))
-      then 
+      then
         format:parallel-layer($doc, $params, $original-doc)
-      else 
-        format:phony-layer($doc, $params, $original-doc),
-      $flatten-transform,
+      else
+        format:segment($doc, $params, $original-doc),
+      flatten:flatten-document(?, $params),
       $original-doc
     )
 };
@@ -533,7 +565,9 @@ declare function format:html(
     format:apply-if-outdated(
       "html",
       $params,
-      $format:html-cache,
+      if ($transclude)
+      then $format:transcluded-html-cache
+      else $format:html-cache,
       if ($transclude)
       then format:compile($doc, $params, $original-doc)
       else format:unflatten($doc, $params, $original-doc),

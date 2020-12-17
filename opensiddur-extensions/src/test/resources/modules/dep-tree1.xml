@@ -1,0 +1,8 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <tei:teiHeader>
+  
+  </tei:teiHeader>
+  <tei:text>
+      <tei:ptr target="/data/original/dep-tree2"/>
+  </tei:text>
+</tei:TEI>

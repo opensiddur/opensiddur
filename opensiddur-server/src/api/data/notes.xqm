@@ -170,21 +170,6 @@ declare
   crest:delete($notes:data-type, $name)
 };
 
-(:~ When producing an annotation document, the URI must be an XML name.
- : This function returns a URI that is also an XML name.
- :)
-declare function notes:uri-title-function(
-    $doc as document-node()
-    ) as xs:string {
-    let $name-start-chars :=  ":A-Z_a-z&#xC0;-&#xD6;&#xD8;-&#xF6;&#xF8;-&#x2FF;&#x370;-&#x37D;&#x37F;-&#x1FFF;&#x200C;-&#x200D;&#x2070;-&#x218F;&#x2C00;-&#x2FEF;&#x3001;-&#xD7FF;&#xF900;-&#xFDCF;&#xFDF0;-&#xFFFD;&#x10000;-&#xEFFFF;"
-    let $name-chars := $name-start-chars || ".0-9&#xb7;&#x0300;-&#x036f;&#x203f;-&#x2040;-"
-    let $crest-title := crest:tei-title-function($doc)
-    let $first-char := replace(substring($crest-title, 1, 1), '[^' || $name-start-chars || ']', '_')
-    let $all-chars := replace(substring($crest-title, 2), '[^' || $name-chars || ']+', '_')
-    return
-        $first-char || $all-chars
-};
-
 (:~ Post a new annotation document 
  : @param $body The annotation document
  : @return HTTP 201 if created successfully
@@ -210,7 +195,7 @@ declare
     $body,
     notes:validate#2,
     notes:validate-report#2,
-    notes:uri-title-function#1
+    crest:tei-title-function#1
   )
 };
 

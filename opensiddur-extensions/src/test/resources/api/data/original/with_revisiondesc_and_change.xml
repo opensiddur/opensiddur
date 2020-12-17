@@ -1,0 +1,7 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+    <tei:teiHeader>
+        <tei:revisionDesc>
+            <tei:change who="/user/xqtest1" when="1900-01-01" type="created"/>
+        </tei:revisionDesc>
+    </tei:teiHeader>
+</tei:TEI>

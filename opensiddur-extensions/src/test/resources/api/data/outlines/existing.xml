@@ -1,0 +1,16 @@
+<ol:outline xmlns:ol="http://jewishliturgy.org/ns/outline/1.0">
+    <ol:source>/data/sources/existing</ol:source>
+    <ol:license>http://www.creativecommons.org/publicdomain/zero/1.0</ol:license>
+    <ol:title>existing</ol:title>
+    <ol:lang>en</ol:lang>
+    <ol:item>
+        <ol:title>Number One</ol:title>
+        <ol:from>1</ol:from>
+        <ol:to>2</ol:to>
+        <ol:item>
+            <ol:title>Number Two</ol:title>
+            <ol:from>3</ol:from>
+            <ol:to>4</ol:to>
+        </ol:item>
+    </ol:item>
+</ol:outline>

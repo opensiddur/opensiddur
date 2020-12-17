@@ -1,0 +1,42 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title type="main">Parallel texts A and B</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:distributor>
+                    <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+                </tei:distributor>
+                <tei:availability>
+                    <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+                </tei:availability>
+                <tei:date>2014-03-19</tei:date>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:bibl>
+               <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
+               <tei:ptr type="bibl-content" target="#parallel"/>
+            </tei:bibl>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+        <tei:revisionDesc>
+        </tei:revisionDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <j:parallelText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="parallel">
+            <tei:idno>Test</tei:idno>
+            <tei:linkGrp domains="/data/original/parA#stream /data/original/parB#stream">
+                <!-- A-1 is not part of the parallelism -->
+                <!-- link without range -->
+                <tei:link target="/data/original/parA#A2 /data/original/parB#B1"/>
+                <!-- link with range, same size -->
+                <tei:link target="/data/original/parA#range(A3,A5) /data/original/parB#range(B2,B4)"/>
+                <!-- skip both A6 and B5 -->
+                <!-- link with range, different sizes -->
+                <tei:link target="/data/original/parA#range(A7,A8) /data/original/parB#range(B6,B8)"/>
+                <!-- A9 and B9 are not part of the parallelism -->
+            </tei:linkGrp>
+        </j:parallelText>
+   </tei:text>
+</tei:TEI>
