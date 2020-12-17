@@ -1,8 +1,8 @@
 This is the Open Siddur Project's git repository.
 
 Build status:
-master: [![master build status](https://travis-ci.com/opensiddur/opensiddur.svg?branch=master)](https://travis-ci.org/opensiddur/opensiddur)
-develop: [![develop build status](https://travis-ci.com/opensiddur/opensiddur.svg?branch=develop)](https://travis-ci.org/opensiddur/opensiddur)
+master: [![master build status](https://travis-ci.com/opensiddur/opensiddur.svg?branch=master)](https://travis-ci.com/opensiddur/opensiddur)
+develop: [![develop build status](https://travis-ci.com/opensiddur/opensiddur.svg?branch=develop)](https://travis-ci.com/opensiddur/opensiddur)
 
 The Open Siddur Project aims to produce a free software toolkit 
 for making high-quality custom Jewish liturgical books such as 
