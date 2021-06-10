@@ -1,5 +1,5 @@
 language: java
-dist: focal
+dist: bionic
 git:
   depth: false
 jdk: openjdk8
