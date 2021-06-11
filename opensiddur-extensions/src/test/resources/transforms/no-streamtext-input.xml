@@ -1,0 +1,9 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+    <tei:teiHeader>
+        <tei:title>Something</tei:title>
+    </tei:teiHeader>
+    <tei:text n="an attribute">
+        <!-- comment node -->
+        <tei:p xml:id="xid">A text node</tei:p>
+    </tei:text>
+</tei:TEI>
