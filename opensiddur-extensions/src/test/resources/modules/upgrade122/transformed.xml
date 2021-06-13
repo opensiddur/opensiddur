@@ -1,0 +1,36 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title xml:lang="en">Test file</tei:title>
+            </tei:titleStmt>
+        </tei:fileDesc>
+        <tei:sourceDesc>
+            <tei:bibl j:docStatus="outlined">
+                <tei:title>Biblio</tei:title>
+                <tei:ptr xml:id="non_seg_internal_ptr" type="bibl-content" target="#stream"/>
+            </tei:bibl>
+        </tei:sourceDesc>
+    </tei:teiHeader>
+    <j:links>
+        <tei:link type="note" target="#referenced_w #note"/>
+    </j:links>
+    <j:annotations>
+        <tei:note xml:id="note">Note</tei:note>
+    </j:annotations>
+    <tei:text>
+        <j:streamText xml:id="stream">
+            <tei:anchor xml:id="anchor1"/> w1 <tei:w xml:id="referenced_w">w2</tei:w> <tei:choice>
+            <j:read>unreferenced</j:read>
+            <j:written>with child nodes</j:written>
+        </tei:choice>{ text { "             text node                    אבג־דהו זחט׃ יכל ׀ מנס "}}<tei:anchor xml:id="anchor2"/>
+            <tei:anchor xml:id="ptr_with_no_xmlid_target"/>
+            <tei:ptr target="#ptr_with_no_xmlid_target"/>
+        </j:streamText>
+        <j:concurrent type="p">
+            <tei:p>
+                <tei:ptr xml:id="p1" target="#range(anchor1,anchor2)"/>
+            </tei:p>
+        </j:concurrent>
+    </tei:text>
+</tei:TEI>
