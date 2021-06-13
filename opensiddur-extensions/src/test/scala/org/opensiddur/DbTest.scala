@@ -283,6 +283,16 @@ class Xq(
       .assertXPath("""count($output//html:meta[@name='totalResults'])=1""", "@totalResults is present")
       .assertXPath("""count($output//html:meta[@name='itemsPerPage'])=1""", "@itemsPerPage is present")
   }
+
+  def assertDiscoveryApi: Xq = {
+    this
+      .assertXPath("""exists($output/self::html:html/html:body/*[@class="apis"]/html:li[@class="api"]/html:a[@class="discovery"])""", "has a discovery API")
+  }
+
+  def assertSerializesAs(serialization: String): Xq = {
+    this
+      .assertXPath(s"""$$output/self::rest:response/output:serialization-parameters/output:method="$serialization" """, s"serializes as $serialization")
+  }
 }
 
 abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndAfterAll with XQueryCall {
@@ -375,4 +385,7 @@ object DbTest {
 
   val driver = "org.exist.xmldb.DatabaseImpl"
   val existUri = s"xmldb:exist://localhost:${existPort}/exist/xmlrpc"
+
+  val HTML5_SERIALIZATION = "xhtml"
+  val XHTML_SERIALIZATION = "xhtml"
 }
