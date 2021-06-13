@@ -207,10 +207,9 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
       xq(s""" lnk:put("existing", document { $validContent })""")
         .user("xqtest1")
         .assertHttpNoData
-        .assertXPathEquals("""(collection('/db/data/linkage/none')[descendant::tei:title[@type='main'][.='Existing']]//tei:revisionDesc/tei:change)[1]""",
-        """a change record is added""",
-        """<tei:change xmlns:tei="http://www.tei-c.org/ns/1.0" type="edited" who="/user/xqtest1"
-                                                    when="..."/>""")
+        .assertXPath("""count(doc('/db/data/linkage/none/existing.xml')//tei:revisionDesc/tei:change)=2""", "There are 2 change records total")
+        .assertXPath("""doc('/db/data/linkage/none/existing.xml')//tei:revisionDesc/tei:change[1][@who="/user/xqtest1"][@type="edited"][@when]""",
+        """a change record is added""")
         .go
     }
 
