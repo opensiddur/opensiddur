@@ -142,7 +142,7 @@ declare function orig:validate-external-links(
     let $base := 
         if (contains($target, '#'))
         then substring-before($target, '#')[.]
-        else ()
+        else $target
     where exists($base)
     return
       let $fragment := substring-after($target, '#')[.]

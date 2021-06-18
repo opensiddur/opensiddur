@@ -548,6 +548,13 @@ class TestOriginal extends OriginalDataTestFixtures {
         .assertXPath("$output/status = 'valid'", "The document is marked valid")
         .go
     }
+
+    it("invalidates a document with an invalid source (regression test for #208)") {
+      val invalidBadSource = readXmlFile("src/test/resources/api/data/original/bad_source.xml")
+      xq(s"""orig:validate-report(document { $invalidBadSource }, ())""")
+        .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .go
+    }
   }
 
 }
