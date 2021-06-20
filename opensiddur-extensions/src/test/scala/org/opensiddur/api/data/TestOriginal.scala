@@ -315,6 +315,21 @@ class TestOriginal extends OriginalDataTestFixtures {
         .go
     }
 
+    it("validates a valid resource") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/valid.xml")
+
+      xq(s"""orig:post(document { $validContent }, "true")""")
+        .assertXPath("""$output/self::report/status='valid'""")
+        .go
+    }
+
+    it("""invalidates an invalid resource""") {
+      val invalidContent = readXmlFile("src/test/resources/api/data/original/invalid.xml")
+      xq(s"""orig:post(document { $invalidContent }, "true")""")
+        .assertXPath("$output/self::report/status = 'invalid'")
+        .go
+    }
+
     it("returns unauthorized when posting a valid resource unauthenticated") {
       val validContent = readXmlFile("src/test/resources/api/data/original/valid.xml")
 

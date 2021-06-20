@@ -217,8 +217,16 @@ declare
   crest:delete($src:data-type, $name)
 };
 
+declare function src:post(
+    $body as document-node()
+  ) as item()+ {
+  src:post($body, ())
+  };
+
 (:~ Post a new bibliographic document 
  : @param $body The bibliographic document
+ : @param $validate Validate a document, instead of posting
+ : @return HTTP 200 if validated successfully
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid bibliographic XML
  : @error HTTP 401 Not authorized
@@ -230,19 +238,35 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/sources")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function src:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string
   ) as item()+ {
-  crest:post(
-      $src:data-type,
-      $src:path-base,
-      api:uri-of($src:api-path-base),
-      $body,
-      src:validate#2,
-      src:validate-report#2,
-      src:title-function#1
-    )
+  let $api-base-path := api:uri-of($src:api-path-base)
+  return
+    if ($validate)
+    then
+        crest:validation-report(
+          $src:data-type,
+                  $src:path-base,
+                  $api-path-base,
+                  $body,
+                  src:validate#2,
+                  src:validate-report#2,
+                  src:title-function#1
+        )
+    else
+      crest:post(
+          $src:data-type,
+          $src:path-base,
+          $api-path-base,
+          $body,
+          src:validate#2,
+          src:validate-report#2,
+          src:title-function#1
+        )
 };
 
 (:~ Edit/replace a bibliographic document in the database

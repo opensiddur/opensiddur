@@ -114,22 +114,45 @@ declare
   crest:delete($tran:data-type, $name)
 };
 
+
+declare function tran:post(
+    $body as document-node()
+  ) as item()+ {
+  tran:post($body, ())
+  };
+
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/transliteration")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function tran:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string?
   ) as item()+ {
-  crest:post(
-    $tran:data-type,
-    $tran:path-base,
-    api:uri-of($tran:api-path-base),
-    $body,
-    tran:validate#2,
-    tran:validate-report#2,
-    tran:title-function#1
-  )    
+  let $api-path-base := api:uri-of($tran:api-path-base)
+  return
+    if ($validate)
+    then
+        crest:validation-report(
+        $tran:data-type,
+                $tran:path-base,
+                $api-path-base,
+                $body,
+                tran:validate#2,
+                tran:validate-report#2,
+                tran:title-function#1
+        )
+    else
+      crest:post(
+        $tran:data-type,
+        $tran:path-base,
+        $api-path-base,
+        $body,
+        tran:validate#2,
+        tran:validate-report#2,
+        tran:title-function#1
+      )
 };
 
 declare

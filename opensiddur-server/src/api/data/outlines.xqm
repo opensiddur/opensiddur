@@ -654,8 +654,16 @@ declare
   crest:delete($outl:data-type, $name)
 };
 
+declare function outl:post(
+    $body as document-node()
+  ) as item()+ {
+  outl:post($body, ())
+  };
+
 (:~ Post a new outline document 
  : @param $body The outline document
+ : @param $validate Validate the document, instead of posting
+ : @return HTTP 200 if validated successfully
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid outline XML
  : @error HTTP 401 Not authorized
@@ -667,20 +675,36 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/outlines")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function outl:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string?
   ) as item()+ {
-  crest:post(
-    $outl:data-type,
-    $outl:path-base,
-    api:uri-of($outl:api-path-base),
-    $body,
-    outl:validate#2,
-    outl:validate-report#2,
-    outl:title-function#1,
-    false()
-  )
+  let $api-path-base := api:uri-of($outl:api-path-base)
+  return
+    if ($validate)
+    then
+        crest:validation-report(
+        $outl:data-type,
+               $outl:path-base,
+               $api-path-base,
+               $body,
+               outl:validate#2,
+               outl:validate-report#2,
+               outl:title-function#1
+        )
+    else
+      crest:post(
+        $outl:data-type,
+        $outl:path-base,
+        $api-path-base,
+        $body,
+        outl:validate#2,
+        outl:validate-report#2,
+        outl:title-function#1,
+        false()
+      )
 };
 
 (:~ Execute an outline document 

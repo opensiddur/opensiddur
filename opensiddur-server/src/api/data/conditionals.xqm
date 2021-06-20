@@ -297,8 +297,16 @@ declare
   crest:delete($cnd:data-type, $name)
 };
 
+declare function cnd:post(
+    $body as document-node()
+  ) as item()+ {
+    cnd:post($body, ())
+};
+
 (:~ Post a new conditionals document 
  : @param $body The conditionals document
+ : @param $validate If present, validate the document instead of posting
+ : @return HTTP 200 if validated successfully
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid linkage XML
  : @error HTTP 401 Not authorized
@@ -311,19 +319,35 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/conditionals")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function cnd:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string?
   ) as item()+ {
-  crest:post(
-    $cnd:data-type,
-    $cnd:path-base,
-    api:uri-of($cnd:api-path-base),
-    $body,
-    cnd:validate#2,
-    cnd:validate-report#2,
-    ()
-  )
+  let $api-path-base := api:uri-of($cnd:api-path-base)
+  return
+    if ($validate)
+    then
+        crest:validation-report(
+            $cnd:data-type,
+            $cnd:path-base,
+            $api-path-base,
+            $body,
+            cnd:validate#2,
+            cnd:validate-report#2,
+            ()
+        )
+    else
+      crest:post(
+        $cnd:data-type,
+        $cnd:path-base,
+        $api-path-base,
+        $body,
+        cnd:validate#2,
+        cnd:validate-report#2,
+        ()
+      )
 };
 
 (:~ Edit/replace a conditionals document in the database

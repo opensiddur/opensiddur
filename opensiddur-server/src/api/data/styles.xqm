@@ -158,8 +158,16 @@ declare
   crest:delete($sty:data-type, $name)
 };
 
+declare function sty:post(
+    $body as document-node()
+  ) as item()+ {
+  sty:post($body, ())
+  };
+
 (:~ Post a new style document 
  : @param $body The style document
+ : @param $validate Validate the document, instead of posting
+ : @return HTTP 200 if validated successfully
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid JLPTEI XML
  : @error HTTP 401 Not authorized
@@ -172,19 +180,36 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/styles")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function sty:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string?
   ) as item()+ {
-  crest:post(
-    concat($sty:data-type, "/", ($body/tei:TEI/@xml:lang/string(), "none")[1]),
-    $sty:path-base,
-    api:uri-of($sty:api-path-base),
-    $body,
-    sty:validate#2,
-    sty:validate-report#2,
-    ()
-  )
+  let $data-path := concat($sty:data-type, "/", ($body/tei:TEI/@xml:lang/string(), "none")[1])
+  let $api-path-base := api:uri-of($sty:api-path-base)
+  return
+    if ($validate)
+    then
+        crest:validation-report(
+            $data-path,
+            $sty:path-base,
+            $api-path-base,
+            $body,
+            sty:validate#2,
+            sty:validate-report#2,
+            ()
+        )
+    else
+      crest:post(
+        $data-path,
+        $sty:path-base,
+        $api-path-base,
+        $body,
+        sty:validate#2,
+        sty:validate-report#2,
+        ()
+      )
 };
 
 (:~ Edit/replace a style document in the database

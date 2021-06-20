@@ -688,3 +688,55 @@ declare function crest:put-access(
     else api:rest-error(404, "Not found", $name)
 };
 
+(:~ Validate a new document, as if it were PUT or POST-ed
+ : For validation, you need read access to the document being validated.
+ :
+ : @param $data-path document data type and additional database path
+ : @param $path-base base path for document type in the db
+ : @param $api-path-base Base path of the API (/api/...)
+ : @param $body The document
+ : @param $validation-function-boolean function used to validate that returns a boolean
+ : @param $validation-function-report function used to validate that returns a full report
+ : @param $title-function Function that derives the title text from a document
+ : @return HTTP 200 if validated successfully, with a validation report. If report/status='valid', then, the doc is valid
+ : @error HTTP 401 Not authorized
+ :
+ :)
+declare function crest:validation-report(
+    $data-path as xs:string,
+    $path-base as xs:string,
+    $api-path-base as xs:string,
+    $body as document-node(),
+    $validation-function-boolean as
+      function(item(), document-node()?) as xs:boolean,
+    $validation-function-report as
+      function(item(), document-node()?) as element(),
+    $title-function as (function(node()) as xs:string)?
+  ) as item()+ {
+  if (sm:has-access(xs:anyURI($path-base), "r"))
+  then
+    if ($validation-function-boolean($body, ()))
+    then
+      let $title-function :=
+        ($title-function, crest:tei-title-function#1)[1]
+      let $paths :=
+        data:new-path-to-resource(
+          $data-path,
+          data:normalize-resource-title($title-function($body), false())
+        )
+      let $resource := $paths[2]
+      return
+        if ($resource)
+        then
+            <report>
+                <status>valid</status>
+            </report>
+        else
+            <report>
+                <status>invalid</status>
+                <message>A title element with non-whitespace content is required</message>
+            </report>
+    else
+      $validation-function-report($body, ())
+  else crest:no-access()
+};

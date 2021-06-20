@@ -177,8 +177,16 @@ declare
   crest:delete($lnk:data-type, $name)
 };
 
+declare function lnk:post(
+    $body as document-node()
+  ) as item()+ {
+  lnk:post($body, ())
+  };
+
 (:~ Post a new linkage document 
  : @param $body The linkage document
+ : @param $validate If present, validate instead of posting
+ : @return HTTP 200 if validated successfully
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid linkage XML
  : @error HTTP 401 Not authorized
@@ -191,21 +199,38 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/linkage")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function lnk:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string?
   ) as item()+ {
-  crest:post(
-    concat($lnk:data-type, "/", 
-        ($body/tei:TEI/@xml:lang/string()[.], $lnk:no-lang)[1]
-        ),
-    $lnk:path-base,
-    api:uri-of($lnk:api-path-base),
-    $body,
-    lnk:validate#2,
-    lnk:validate-report#2,
-    ()
-  )
+  let $data-path := concat($lnk:data-type, "/",
+                            ($body/tei:TEI/@xml:lang/string()[.], $lnk:no-lang)[1]
+                            )
+  let $api-path-base := api:uri-of($lnk:api-path-base)
+  return
+    if ($validate)
+    then
+        crest:validation-report(
+            $data-path,
+            $lnk:path-base,
+            $api-path-base,
+            $body,
+            lnk:validate#2,
+            lnk:validate-report#2,
+            ()
+          )
+    else
+      crest:post(
+        $data-path,
+        $lnk:path-base,
+        $api-path-base,
+        $body,
+        lnk:validate#2,
+        lnk:validate-report#2,
+        ()
+      )
 };
 
 (:~ Edit/replace a linkage document in the database

@@ -23,6 +23,7 @@ declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
     it("returns a discovery API") {
       xq("dindex:list()")
         .assertDiscoveryApi
+        .assertXPath("""exists($output/self::html:html/html:body/*[@class="apis"]/html:li[@class="api"]/html:a[@class="alt"][@property="validation"])""", "has a validation API")
         .assertSerializesAs(DbTest.HTML5_SERIALIZATION)
         .go
     }

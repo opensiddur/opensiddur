@@ -277,8 +277,17 @@ declare
   crest:delete($orig:data-type, $name)
 };
 
+declare function orig:post(
+    $doc as document-node()
+) as item()+ {
+    orig:post($doc, ())
+};
+
 (:~ Post a new original document 
  : @param $body The JLPTEI document
+ : @param $validate If present, validate the POST-ed document, but do not actually post it
+ :
+ : @return HTTP 200 if validated
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid JLPTEI XML
  : @error HTTP 401 Not authorized
@@ -291,19 +300,36 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/original")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function orig:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string?
   ) as item()+ {
-  crest:post(
-    concat($orig:data-type, "/", $body/tei:TEI/@xml:lang),
-    $orig:path-base,
-    api:uri-of($orig:api-path-base),
-    $body,
-    orig:validate#2,
-    orig:validate-report#2,
-    ()
-  )
+  let $data-path := concat($orig:data-type, "/", $body/tei:TEI/@xml:lang)
+  let $api-path-base := api:uri-of($orig:api-path-base)
+  return
+      if ($validate)
+      then
+        crest:validation-report(
+            $data-path,
+            $orig:path-base,
+            $api-path-base,
+            $body,
+            orig:validate#2,
+            orig:validate-report#2,
+            ()
+        )
+      else
+          crest:post(
+            $data-path,
+            $orig:path-base,
+            $api-path-base,
+            $body,
+            orig:validate#2,
+            orig:validate-report#2,
+            ()
+          )
 };
 
 (:~ Edit/replace a document in the database

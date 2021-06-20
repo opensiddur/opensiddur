@@ -141,8 +141,16 @@ declare
   crest:delete($dict:data-type, $name)
 };
 
+declare function dict:post(
+    $body as document-node()
+  ) as item()+ {
+    dict:post($body, ())
+};
+
 (:~ Post a new dictionary document 
  : @param $body The JLPTEI document
+ : @param $validate If present, validate instead of posting
+ : @return HTTP 200 if validated successfully
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid JLPTEI XML
  : @error HTTP 401 Not authorized
@@ -155,19 +163,36 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/dictionaries")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function dict:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string?
   ) as item()+ {
-  crest:post(
-    concat($dict:data-type, "/", $body/tei:TEI/@xml:lang),
-    $dict:path-base,
-    api:uri-of($dict:api-path-base),
-    $body,
-    dict:validate#2,
-    dict:validate-report#2,
-    ()
-  )
+  let $data-path := concat($dict:data-type, "/", $body/tei:TEI/@xml:lang)
+  let $api-path-base := api:uri-of($dict:api-path-base)
+  return
+    if ($validate)
+    then
+        crest:validation-report(
+                $data-path,
+                $dict:path-base,
+                $api-path-base,
+                $body,
+                dict:validate#2,
+                dict:validate-report#2,
+                ()
+              )
+    else
+      crest:post(
+        $data-path,
+        $dict:path-base,
+        $api-path-base,
+        $body,
+        dict:validate#2,
+        dict:validate-report#2,
+        ()
+      )
 };
 
 (:~ Edit/replace a document in the database

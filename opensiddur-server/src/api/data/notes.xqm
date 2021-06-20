@@ -170,8 +170,16 @@ declare
   crest:delete($notes:data-type, $name)
 };
 
+declare function notes:post(
+    $body as document-node()
+  ) as item()+ {
+  notes:post($body, ())
+};
+
 (:~ Post a new annotation document 
  : @param $body The annotation document
+ : @param $validate Validate the document instead of posting
+ : @return HTTP 200 if posted successfully
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid annotation XML
  : @error HTTP 401 Not authorized
@@ -184,19 +192,36 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/notes")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function notes:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string?
   ) as item()+ {
-  crest:post(
-    concat($notes:data-type, "/", $body/tei:TEI/@xml:lang), 
-    $notes:path-base,
-    api:uri-of($notes:api-path-base),
-    $body,
-    notes:validate#2,
-    notes:validate-report#2,
-    crest:tei-title-function#1
-  )
+  let $data-path := concat($notes:data-type, "/", $body/tei:TEI/@xml:lang)
+  let $api-path-base := api:uri-of($notes:api-path-base)
+  return
+    if ($validate)
+    then
+        crest:validation-report(
+            $data-path,
+            $notes:path-base,
+            $api-path-base,
+            $body,
+            notes:validate#2,
+            notes:validate-report#2,
+            crest:tei-title-function#1
+          )
+    else
+      crest:post(
+        $data-path,
+        $notes:path-base,
+        $api-path-base,
+        $body,
+        notes:validate#2,
+        notes:validate-report#2,
+        crest:tei-title-function#1
+      )
 };
 
 (:~ transform to insert or replace elements in an in-memory document
