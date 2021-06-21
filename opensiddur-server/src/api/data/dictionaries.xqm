@@ -102,7 +102,10 @@ declare
   crest:list($q, $start, $max-results,
     "Dictionary data API", api:uri-of($dict:api-path-base),
     dict:query-function#1, dict:list-function#0,
-    <crest:additional text="access" relative-uri="access"/>, 
+    (
+        <crest:additional text="access" relative-uri="access"/>,
+        $crest:additional-validate
+     ),
     ()
   )
 };
@@ -167,23 +170,11 @@ declare
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function dict:post(
     $body as document-node(),
-    $validate as xs:string?
+    $validate as xs:string*
   ) as item()+ {
   let $data-path := concat($dict:data-type, "/", $body/tei:TEI/@xml:lang)
   let $api-path-base := api:uri-of($dict:api-path-base)
   return
-    if ($validate)
-    then
-        crest:validation-report(
-                $data-path,
-                $dict:path-base,
-                $api-path-base,
-                $body,
-                dict:validate#2,
-                dict:validate-report#2,
-                ()
-              )
-    else
       crest:post(
         $data-path,
         $dict:path-base,
@@ -191,13 +182,24 @@ declare
         $body,
         dict:validate#2,
         dict:validate-report#2,
-        ()
+        (),
+        (),
+        $validate[1]
       )
+};
+
+declare function dict:put(
+    $name as xs:string,
+    $body as document-node()
+  ) as item()+ {
+    dict:put($name, $body, ())
 };
 
 (:~ Edit/replace a document in the database
  : @param $name Name of the document to replace
  : @param $body New document
+ : @param $validate Validate only
+ : @return HTTP 200 If successfully validated
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML; Attempt to edit a read-only part of the document
  : @error HTTP 401 Unauthorized - not logged in
@@ -211,15 +213,19 @@ declare
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/data/dictionaries/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function dict:put(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
   crest:put(
     $dict:data-type, $name, $body,
     dict:validate#2,
-    dict:validate-report#2
+    dict:validate-report#2,
+    (),
+    $validate[1]
   )
 };
 

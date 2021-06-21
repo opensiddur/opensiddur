@@ -41,6 +41,9 @@ declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace http="http://expath.org/ns/http-client";
 
+(: additional URI representing validate query params for crest:list() :)
+declare variable $crest:additional-validate := <crest:additional text="validation (PUT)" relative-uri="?validate=true"/>;
+
 (:~ @return true() if validation should be disabled (during deployment) :)
 declare 
     %private 
@@ -440,10 +443,10 @@ declare function crest:post(
     $title-function as (function(node()) as xs:string)?
   ) as item()+ {
   crest:post($data-path, $path-base, $api-path-base, $body, $validation-function-boolean, $validation-function-report,
-    $title-function, true())
+    $title-function, true(), ())
 };
 
-(:~ Post a new document 
+(:~ Post a new document
  : @param $data-path document data type and additional database path
  : @param $path-base base path for document type in the db
  : @param $api-path-base Base path of the API (/api/...)
@@ -472,9 +475,10 @@ declare function crest:post(
     $validation-function-report as 
       function(item(), document-node()?) as element(),
     $title-function as (function(node()) as xs:string)?,
-    $use-reference-index as xs:boolean?
+    $use-reference-index as xs:boolean?,
+    $validate as xs:boolean?
   ) as item()+ { 
-  if (sm:has-access(xs:anyURI($path-base), "w"))
+  if (sm:has-access(xs:anyURI($path-base), if ($validate) then "r" else "w"))
   then
     if ($validation-function-boolean($body, ()))
     then 
@@ -490,43 +494,53 @@ declare function crest:post(
       let $user := app:auth-user()
       return 
         if ($resource) 
-        then (
-            app:make-collection-path($collection, "/", sm:get-permissions(xs:anyURI($path-base))),
-            let $db-path := xmldb:store($collection, $resource, $body)
-            return
-              if ($db-path)
-              then 
-                <rest:response>
-                  <output:serialization-parameters>
-                    <output:method>text</output:method>
-                  </output:serialization-parameters>
-                  <http:response status="201">
-                    {
-                      let $uri := xs:anyURI($db-path)
-                      let $doc := doc($db-path)
-                      let $change-record := crest:record-change($doc, "created")
-                      return (
-                        system:as-user("admin", $magic:password, (
-                            sm:chown($uri, $user),
-                            sm:chgrp($uri, "everyone"),
-                            sm:chmod($uri, "rw-rw-r--")
-                        )),
-                        didx:reindex($doc),
-                        if ($use-reference-index) then ridx:reindex($doc) else ()
-                      )
-                    }
-                    <http:header 
-                      name="Location" 
-                      value="{concat($api-path-base, "/", substring-before($resource, ".xml"))}"/>
-                  </http:response>
-                </rest:response>
-              else api:rest-error(500, "Cannot store the resource")
-            )
+        then
+            if ($validate)
+            then crest:validation-success()
+            else (
+                app:make-collection-path($collection, "/", sm:get-permissions(xs:anyURI($path-base))),
+                let $db-path := xmldb:store($collection, $resource, $body)
+                return
+                  if ($db-path)
+                  then
+                    <rest:response>
+                      <output:serialization-parameters>
+                        <output:method>text</output:method>
+                      </output:serialization-parameters>
+                      <http:response status="201">
+                        {
+                          let $uri := xs:anyURI($db-path)
+                          let $doc := doc($db-path)
+                          let $change-record := crest:record-change($doc, "created")
+                          return (
+                            system:as-user("admin", $magic:password, (
+                                sm:chown($uri, $user),
+                                sm:chgrp($uri, "everyone"),
+                                sm:chmod($uri, "rw-rw-r--")
+                            )),
+                            didx:reindex($doc),
+                            if ($use-reference-index) then ridx:reindex($doc) else ()
+                          )
+                        }
+                        <http:header
+                          name="Location"
+                          value="{concat($api-path-base, "/", substring-before($resource, ".xml"))}"/>
+                      </http:response>
+                    </rest:response>
+                  else api:rest-error(500, "Cannot store the resource")
+                )
         else
-            api:rest-error(400, "A title element with non-whitespace content is required")
+            let $message := "A title element with non-whitespace content is required"
+            return
+                if ($validate)
+                then crest:validation-failure(<message>{$message}</message>)
+                else api:rest-error(400, $message)
     else
-      api:rest-error(400, "Input document is not valid", 
-        $validation-function-report($body, ()))
+        let $report := $validation-function-report($body, ())
+        return
+            if ($validate)
+            then $report
+            else api:rest-error(400, "Input document is not valid", $report)
   else crest:no-access()
 };
 
@@ -539,10 +553,11 @@ declare function crest:put(
     $validation-function-report as 
       function(item(), document-node()?) as element()
   ) as item()+ {
-  crest:put($data-type, $name, $body, $validation-function-boolean, $validation-function-report, true())
+  crest:put($data-type, $name, $body, $validation-function-boolean, $validation-function-report, true(), ())
 };
 
 (:~ Edit/replace a document in the database
+ : or Validate a document as if editing (without writing the result)
  : Side effect: update the reference index, update document index
  : @param $data-type data type of document
  : @param $name Name of the document to replace
@@ -550,6 +565,8 @@ declare function crest:put(
  : @param $validation-function-boolean function used to validate that returns a boolean
  : @param $validation-function-report function used to validate that returns a full report
  : @param $use-reference-index true() [default] if reference index should be updated, else no reference index
+ : @param $validate true() for validation only
+ : @return HTTP 200 If successfully validated (but not written)
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML; Attempt to edit a read-only part of the document
  : @error HTTP 401 Unauthorized - not logged in
@@ -568,7 +585,8 @@ declare function crest:put(
       function(item(), document-node()?) as xs:boolean,
     $validation-function-report as 
       function(item(), document-node()?) as element(),
-    $use-reference-index as xs:boolean?
+    $use-reference-index as xs:boolean?,
+    $validate as xs:boolean?
   ) as item()+ {
   let $doc := data:doc($data-type, $name)
   return
@@ -578,31 +596,40 @@ declare function crest:put(
       let $collection := util:collection-name($doc)
       let $uri := document-uri($doc)
       return  
-        if (sm:has-access(xs:anyURI($uri), "w"))
+        if (sm:has-access(xs:anyURI($uri), if ($validate) then "r" else "w"))
         then
-          if ($validation-function-boolean($body, $doc))
-          then
-            if (xmldb:store($collection, $resource, $body))
-            then 
-              <rest:response>
-                {
-                  let $doc := doc($uri)
-                  return (
-                    crest:record-change($doc, "edited"),
-                    didx:reindex($doc),
-                    if ($use-reference-index) then ridx:reindex($doc) else ()
+            let $validation-result := $validation-function-boolean($body, $doc)
+            return
+                if ($validation-result)
+                then
+                    if ($validate)
+                    then crest:validation-success()
+                    else (: actual post :)
+                        if (xmldb:store($collection, $resource, $body))
+                        then
+                          <rest:response>
+                            {
+                              let $doc := doc($uri)
+                              return (
+                                crest:record-change($doc, "edited"),
+                                didx:reindex($doc),
+                                if ($use-reference-index) then ridx:reindex($doc) else ()
 
-                  )
-                }
-                <output:serialization-parameters>
-                  <output:method>text</output:method>
-                </output:serialization-parameters>
-                <http:response status="204"/>
-              </rest:response>
-            else api:rest-error(500, "Cannot store the resource")
-          else 
-            api:rest-error(400, "Input document is not valid", 
-              $validation-function-report($body, $doc)) 
+                              )
+                            }
+                            <output:serialization-parameters>
+                              <output:method>text</output:method>
+                            </output:serialization-parameters>
+                            <http:response status="204"/>
+                          </rest:response>
+                        else api:rest-error(500, "Cannot store the resource")
+                else (: document is invalid :)
+                    let $report :=  $validation-function-report($body, $doc)
+                    return
+                        if ($validate)
+                        then $report (: not an error :)
+                        else api:rest-error(400, "Input document is not valid",
+                      $report)
         else crest:no-access()
     else 
       (: it is not clear that this is correct behavior for PUT.
@@ -688,55 +715,22 @@ declare function crest:put-access(
     else api:rest-error(404, "Not found", $name)
 };
 
-(:~ Validate a new document, as if it were PUT or POST-ed
- : For validation, you need read access to the document being validated.
- :
- : @param $data-path document data type and additional database path
- : @param $path-base base path for document type in the db
- : @param $api-path-base Base path of the API (/api/...)
- : @param $body The document
- : @param $validation-function-boolean function used to validate that returns a boolean
- : @param $validation-function-report function used to validate that returns a full report
- : @param $title-function Function that derives the title text from a document
- : @return HTTP 200 if validated successfully, with a validation report. If report/status='valid', then, the doc is valid
- : @error HTTP 401 Not authorized
- :
- :)
-declare function crest:validation-report(
-    $data-path as xs:string,
-    $path-base as xs:string,
-    $api-path-base as xs:string,
-    $body as document-node(),
-    $validation-function-boolean as
-      function(item(), document-node()?) as xs:boolean,
-    $validation-function-report as
-      function(item(), document-node()?) as element(),
-    $title-function as (function(node()) as xs:string)?
-  ) as item()+ {
-  if (sm:has-access(xs:anyURI($path-base), "r"))
-  then
-    if ($validation-function-boolean($body, ()))
-    then
-      let $title-function :=
-        ($title-function, crest:tei-title-function#1)[1]
-      let $paths :=
-        data:new-path-to-resource(
-          $data-path,
-          data:normalize-resource-title($title-function($body), false())
-        )
-      let $resource := $paths[2]
-      return
-        if ($resource)
-        then
-            <report>
-                <status>valid</status>
-            </report>
-        else
-            <report>
-                <status>invalid</status>
-                <message>A title element with non-whitespace content is required</message>
-            </report>
-    else
-      $validation-function-report($body, ())
-  else crest:no-access()
+declare
+    %private
+    function crest:validation-success(
+    ) as element(report) {
+    <report>
+        <status>valid</status>
+    </report>
 };
+
+declare
+    %private
+    function crest:validation-failure(
+    $messages as element(message)+
+    ) as element(report) {
+    <report>
+        <status>invalid</status>
+        {$messages}
+    </report>
+    };

@@ -161,7 +161,10 @@ declare
   crest:list($q, $start, $max-results,
     "Bibliographic data API", api:uri-of($src:api-path-base),
     src:query-function#1, src:list-function#0,
-    <crest:additional text="pages" relative-uri="pages"/>, 
+    (
+    <crest:additional text="pages" relative-uri="pages"/>,
+    $crest:additional-validate
+    ),
     src:title-function#1
   )
 };
@@ -242,22 +245,10 @@ declare
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function src:post(
     $body as document-node(),
-    $validate as xs:string
+    $validate as xs:string*
   ) as item()+ {
-  let $api-base-path := api:uri-of($src:api-path-base)
+  let $api-path-base := api:uri-of($src:api-path-base)
   return
-    if ($validate)
-    then
-        crest:validation-report(
-          $src:data-type,
-                  $src:path-base,
-                  $api-path-base,
-                  $body,
-                  src:validate#2,
-                  src:validate-report#2,
-                  src:title-function#1
-        )
-    else
       crest:post(
           $src:data-type,
           $src:path-base,
@@ -265,13 +256,24 @@ declare
           $body,
           src:validate#2,
           src:validate-report#2,
-          src:title-function#1
+          src:title-function#1,
+          (),
+          $validate[1]
         )
 };
+
+declare function src:put(
+    $name as xs:string,
+    $body as document-node()
+  ) as item()+ {
+  src:put($name, $body, ())
+  };
 
 (:~ Edit/replace a bibliographic document in the database
  : @param $name Name of the document to replace
  : @param $body New document
+ : @param $validate Validate only without writing to the database
+ : @return HTTP 200 If successfully validated
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML
  : @error HTTP 401 Unauthorized - not logged in
@@ -283,14 +285,18 @@ declare
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/data/sources/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function src:put(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
   crest:put(
     $src:data-type, $name, $body,
     src:validate#2,
-    src:validate-report#2
+    src:validate-report#2,
+    (),
+    $validate[1]
     )
 };

@@ -167,7 +167,9 @@ declare
     crest:list($q, $start, $max-results,
       "Conditional declaration data API", api:uri-of($cnd:api-path-base),
       cnd:query-function#1, cnd:list-function#0,
-      (), (: conditionals should not support access restrictions? :) 
+      (
+        $crest:additional-validate
+      ), (: conditionals should not support access restrictions? :)
       ()
     )
 };
@@ -323,22 +325,10 @@ declare
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function cnd:post(
     $body as document-node(),
-    $validate as xs:string?
+    $validate as xs:string*
   ) as item()+ {
   let $api-path-base := api:uri-of($cnd:api-path-base)
   return
-    if ($validate)
-    then
-        crest:validation-report(
-            $cnd:data-type,
-            $cnd:path-base,
-            $api-path-base,
-            $body,
-            cnd:validate#2,
-            cnd:validate-report#2,
-            ()
-        )
-    else
       crest:post(
         $cnd:data-type,
         $cnd:path-base,
@@ -346,13 +336,24 @@ declare
         $body,
         cnd:validate#2,
         cnd:validate-report#2,
-        ()
+        (),
+        (),
+        $validate[1]
       )
+};
+
+declare function cnd:put(
+    $name as xs:string,
+    $body as document-node()
+) as item()+ {
+    cnd:put($name, $body, ())
 };
 
 (:~ Edit/replace a conditionals document in the database
  : @param $name Name of the document to replace
  : @param $body New document
+ : @param $validate If present, validate only without writing to the database
+ : @return HTTP 200 If validated successfully
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML; Attempt to edit a read-only part of the document
  : @error HTTP 401 Unauthorized - not logged in
@@ -366,14 +367,18 @@ declare
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/data/conditionals/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function cnd:put(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
   crest:put(
     $cnd:data-type, $name, $body,
     cnd:validate#2,
-    cnd:validate-report#2
+    cnd:validate-report#2,
+    (),
+    $validate[1]
   )
 };

@@ -132,7 +132,10 @@ declare
     api:uri-of($notes:api-path-base),
     notes:query-function#1,
     notes:list-function#0,
-    <crest:additional text="access" relative-uri="access"/>, 
+    (
+    <crest:additional text="access" relative-uri="access"/>,
+    $crest:additional-validate
+    ),
     ()
   )
 };
@@ -196,23 +199,11 @@ declare
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function notes:post(
     $body as document-node(),
-    $validate as xs:string?
+    $validate as xs:string*
   ) as item()+ {
   let $data-path := concat($notes:data-type, "/", $body/tei:TEI/@xml:lang)
   let $api-path-base := api:uri-of($notes:api-path-base)
   return
-    if ($validate)
-    then
-        crest:validation-report(
-            $data-path,
-            $notes:path-base,
-            $api-path-base,
-            $body,
-            notes:validate#2,
-            notes:validate-report#2,
-            crest:tei-title-function#1
-          )
-    else
       crest:post(
         $data-path,
         $notes:path-base,
@@ -220,7 +211,9 @@ declare
         $body,
         notes:validate#2,
         notes:validate-report#2,
-        crest:tei-title-function#1
+        crest:tei-title-function#1,
+        (),
+        $validate[1]
       )
 };
 
@@ -309,9 +302,18 @@ declare
       api:rest-error(404, "Not found", $name)
 };
 
+declare function notes:put(
+    $name as xs:string,
+    $body as document-node()
+  ) as item()+ {
+    notes:put($name, $body, ())
+  };
+
 (:~ Edit/replace an annotation document in the database
  : @param $name Name of the document to replace
  : @param $body New document
+ : @param $validate Validate without writing to the database
+ : @return HTTP 200 If successfully validated
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML; Attempt to edit a read-only part of the document
  : @error HTTP 401 Unauthorized - not logged in
@@ -325,16 +327,20 @@ declare
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/data/notes/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function notes:put(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
   crest:put(
     $notes:data-type, 
     $name,
     $body,
-    notes:validate#2, notes:validate-report#2)
+    notes:validate#2, notes:validate-report#2,
+    (),
+    $validate[1])
 };
 
 (:~ Get access/sharing data for an annotation document

@@ -120,7 +120,10 @@ declare
   crest:list($q, $start, $max-results,
     "Styles API", api:uri-of($sty:api-path-base),
     sty:query-function#1, sty:list-function#0,
-    <crest:additional text="access" relative-uri="access"/>, 
+    (
+    <crest:additional text="access" relative-uri="access"/>,
+    $crest:additional-validate
+    ),
     ()
   )
 };
@@ -184,23 +187,11 @@ declare
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function sty:post(
     $body as document-node(),
-    $validate as xs:string?
+    $validate as xs:string*
   ) as item()+ {
   let $data-path := concat($sty:data-type, "/", ($body/tei:TEI/@xml:lang/string(), "none")[1])
   let $api-path-base := api:uri-of($sty:api-path-base)
   return
-    if ($validate)
-    then
-        crest:validation-report(
-            $data-path,
-            $sty:path-base,
-            $api-path-base,
-            $body,
-            sty:validate#2,
-            sty:validate-report#2,
-            ()
-        )
-    else
       crest:post(
         $data-path,
         $sty:path-base,
@@ -208,13 +199,24 @@ declare
         $body,
         sty:validate#2,
         sty:validate-report#2,
-        ()
+        (),
+        (),
+        $validate[1]
       )
 };
+
+declare function sty:put-xml(
+    $name as xs:string,
+    $body as document-node()
+  ) as item()+ {
+  sty:put-xml($name, $body, ())
+  };
 
 (:~ Edit/replace a style document in the database
  : @param $name Name of the document to replace
  : @param $body New document
+ : @param $validate Validate, but do not write to the database
+ : @return HTTP 200 If successfully validated
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML; Attempt to edit a read-only part of the document
  : @error HTTP 401 Unauthorized - not logged in
@@ -228,15 +230,19 @@ declare
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/data/styles/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function sty:put-xml(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
   crest:put(
     $sty:data-type, $name, $body,
     sty:validate#2,
-    sty:validate-report#2
+    sty:validate-report#2,
+    (),
+    $validate[1]
   )
 };
 
@@ -299,7 +305,9 @@ declare
         $sty:data-type, $adj-name, 
         sty:replace-stylesheet($old-xml, $body, "css"),
         sty:validate#2,
-        sty:validate-report#2
+        sty:validate-report#2,
+        (),
+        ()
       )
     else $old-xml
 };

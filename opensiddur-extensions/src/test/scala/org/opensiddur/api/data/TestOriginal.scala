@@ -273,6 +273,8 @@ class TestOriginal extends OriginalDataTestFixtures {
         .assertXPath("""count($output//html:li[@class="result"])>=1""", "Returns at least one result")
         .assertXPath("""every $li in $output//html:li[@class="result"]
                        satisfies exists($li/html:a[@class="alt"][@property="access"])""", "Results include a pointer to the access API")
+        .assertXPath("""every $li in $output//html:li[@class="result"]
+                       satisfies exists($li/html:a[@class="alt"][starts-with(@property, "validation")])""", "Results include a pointer to the validation API")
         .assertSearchResults
         .go
     }
@@ -600,6 +602,15 @@ class TestOriginalWithReset extends OriginalDataTestFixtures {
         .go
     }
 
+    it("successfully validates a valid resource to an existing resource") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/existing_after_put.xml")
+
+      xq(s"""orig:put("existing", document { $validContent }, "true")""")
+        .assertXPath(
+          """$output/self::report/status = 'valid'""")
+        .go
+    }
+
     it("returns unauthorized when putting a valid resource to an existing resource unauthenticated") {
       val validContent = readXmlFile("src/test/resources/api/data/original/existing_after_put.xml")
 
@@ -632,6 +643,15 @@ class TestOriginalWithReset extends OriginalDataTestFixtures {
       xq(s"""orig:put("existing", document { $invalidContent })""")
         .user("xqtest1")
         .assertHttpBadRequest
+        .go
+    }
+
+    it("successfully invalidates an invalid resource to an existing resource") {
+      val invalidContent = readXmlFile("src/test/resources/api/data/original/invalid.xml")
+
+      xq(s"""orig:put("existing", document { $invalidContent }, "true")""")
+        .assertXPath(
+          """$output/self::report/status = 'invalid'""")
         .go
     }
 

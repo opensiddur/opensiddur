@@ -610,7 +610,8 @@ declare
     "Outline data API", api:uri-of($outl:api-path-base),
     outl:query-function#1, outl:list-function#0,
     (<crest:additional text="check" relative-uri="?check=1"/>, 
-     <crest:additional text="execute" relative-uri="execute"/>), 
+     <crest:additional text="execute" relative-uri="execute"/>,
+     $crest:additional-validate),
     outl:title-function#1
   )
 };
@@ -679,22 +680,10 @@ declare
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function outl:post(
     $body as document-node(),
-    $validate as xs:string?
+    $validate as xs:string*
   ) as item()+ {
   let $api-path-base := api:uri-of($outl:api-path-base)
   return
-    if ($validate)
-    then
-        crest:validation-report(
-        $outl:data-type,
-               $outl:path-base,
-               $api-path-base,
-               $body,
-               outl:validate#2,
-               outl:validate-report#2,
-               outl:title-function#1
-        )
-    else
       crest:post(
         $outl:data-type,
         $outl:path-base,
@@ -703,7 +692,8 @@ declare
         outl:validate#2,
         outl:validate-report#2,
         outl:title-function#1,
-        false()
+        false(),
+        $validate[1]
       )
 };
 
@@ -736,10 +726,18 @@ declare
     else $document
 };
 
+declare function outl:put(
+    $name as xs:string,
+    $body as document-node()
+  ) as item()+ {
+  outl:put($name, $body, ())
+  };
 
 (:~ Edit/replace a document in the database
  : @param $name Name of the document to replace
  : @param $body New document
+ : @param $validate Validate the document without writing to the database
+ : @return HTTP 200 If successfully validated
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML; Attempt to edit a read-only part of the document
  : @error HTTP 401 Unauthorized - not logged in
@@ -751,16 +749,19 @@ declare
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/data/outlines/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function outl:put(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
   crest:put(
     $outl:data-type, $name, $body,
     outl:validate#2,
     outl:validate-report#2,
-    false()
+    false(),
+    $validate[1]
   )
 };
 
