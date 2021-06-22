@@ -95,7 +95,8 @@ declare
         user:query-function#1, user:list-function#0,
         (
             <crest:additional text="access" relative-uri="access"/>,
-            <crest:additional text="groups" relative-uri="groups"/>
+            <crest:additional text="groups" relative-uri="groups"/>,
+            $crest:additional-validate
         ),
         user:result-title#1
     )
@@ -267,10 +268,19 @@ declare function user:validate-report(
   ))
 };
 
+declare function user:put(
+    $name as xs:string,
+    $body as document-node()
+  ) as item()+ {
+  user:put($name, $body, ())
+};
+
 (:~ Edit or create a user or contributor profile
  : @param $name The name to place the profile under
  : @param $body The user profile, which must validate against /schema/contributor.rnc
- : @return 
+ : @param $validate Validate without writing to the database
+ : @return
+ :  200 (OK): validated successfully
  :  201 (created): A new contributor profile, which is not associated with a user, has been created
  :  204 (no data): The profile was successfully edited 
  :  400 (bad request): The profile is invalid
@@ -280,11 +290,14 @@ declare function user:validate-report(
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/user/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/tei+xml", "application/xml", "text/xml")
   function user:put(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
+  let $is-validate := xs:boolean($validate[1])
   let $name := xmldb:decode($name)
   let $user := app:auth-user()
   let $resource-name := $name || ".xml"
@@ -301,32 +314,41 @@ declare
     then
       (: user editing his own profile, or a non-user profile :)
       if (user:validate($body, $name))
-      then 
+      then
         (: the profile is valid :)
-        if (xmldb:store($user:path, $resource-name, $body))
-        then (
-          system:as-user("admin", $magic:password, (
-            sm:chown(xs:anyURI($resource), $user),
-            sm:chgrp(xs:anyURI($resource), if ($is-non-user-profile) then "everyone" else $user),
-            sm:chmod(xs:anyURI($resource), if ($is-non-user-profile) then "rw-rw-r--" else "rw-r--r--")
-          )),
-          didx:reindex($user:path, $resource-name),
-          <rest:response>
-            <output:serialization-parameters>
-              <output:method>text</output:method>
-            </output:serialization-parameters>
-            {
-              if ($resource-exists)
-              then <http:response status="204"/>
-              else 
-                <http:response status="201">
-                  <http:header name="Location" value="{api:uri-of('/api/user')}/{$name}"/>
-                </http:response>
-            }
-          </rest:response>
-        )
-        else api:rest-error(500, "Internal error: cannot store the profile")
-      else api:rest-error(400, "Invalid", user:validate-report($body, $name))
+        if ($is-validate)
+        then
+            crest:validation-success()
+        else
+            if (xmldb:store($user:path, $resource-name, $body))
+            then (
+              system:as-user("admin", $magic:password, (
+                sm:chown(xs:anyURI($resource), $user),
+                sm:chgrp(xs:anyURI($resource), if ($is-non-user-profile) then "everyone" else $user),
+                sm:chmod(xs:anyURI($resource), if ($is-non-user-profile) then "rw-rw-r--" else "rw-r--r--")
+              )),
+              didx:reindex($user:path, $resource-name),
+              <rest:response>
+                <output:serialization-parameters>
+                  <output:method>text</output:method>
+                </output:serialization-parameters>
+                {
+                  if ($resource-exists)
+                  then <http:response status="204"/>
+                  else
+                    <http:response status="201">
+                      <http:header name="Location" value="{api:uri-of('/api/user')}/{$name}"/>
+                    </http:response>
+                }
+              </rest:response>
+            )
+            else api:rest-error(500, "Internal error: cannot store the profile")
+      else (: invalid :)
+        let $report := user:validate-report($body, $name)
+        return
+            if ($is-validate)
+            then $report
+            else api:rest-error(400, "Invalid", $report)
     else api:rest-error(403, "Forbidden") 
 };
 

@@ -715,18 +715,14 @@ declare function crest:put-access(
     else api:rest-error(404, "Not found", $name)
 };
 
-declare
-    %private
-    function crest:validation-success(
+declare function crest:validation-success(
     ) as element(report) {
     <report>
         <status>valid</status>
     </report>
 };
 
-declare
-    %private
-    function crest:validation-failure(
+declare function crest:validation-failure(
     $messages as element(message)+
     ) as element(report) {
     <report>
