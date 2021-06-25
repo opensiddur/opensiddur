@@ -297,7 +297,7 @@ declare
     $body as document-node(),
     $validate as xs:string*
   ) as item()+ {
-  let $is-validate := xs:boolean($validate[1])
+  let $is-validate := boolean($validate[1])
   let $name := xmldb:decode($name)
   let $user := app:auth-user()
   let $resource-name := $name || ".xml"
