@@ -300,7 +300,7 @@ declare
   let $is-validate := boolean($validate[1])
   let $name := xmldb:decode($name)
   let $user := app:auth-user()
-  let $resource-name := $name || ".xml"
+  let $resource-name := encode-for-uri($name) || ".xml"
   let $resource := concat($user:path, "/", $resource-name)
   let $resource-exists := doc-available($resource)
   let $is-non-user-profile := 
