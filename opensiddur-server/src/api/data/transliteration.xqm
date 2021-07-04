@@ -79,7 +79,10 @@ declare
   crest:list($q, $start, $max-results,
     "Transliteration API", api:uri-of($tran:api-path-base),
     tran:query-function#1, tran:list-function#0,
-    <crest:additional text="access" relative-uri="access"/>, 
+    (
+    <crest:additional text="access" relative-uri="access"/>,
+    $crest:additional-validate
+    ),
     tran:title-function#1
   )
 };
@@ -114,36 +117,60 @@ declare
   crest:delete($tran:data-type, $name)
 };
 
+
+declare function tran:post(
+    $body as document-node()
+  ) as item()+ {
+  tran:post($body, ())
+  };
+
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/transliteration")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function tran:post(
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
-  crest:post(
-    $tran:data-type,
-    $tran:path-base,
-    api:uri-of($tran:api-path-base),
-    $body,
-    tran:validate#2,
-    tran:validate-report#2,
-    tran:title-function#1
-  )    
+  let $api-path-base := api:uri-of($tran:api-path-base)
+  return
+      crest:post(
+        $tran:data-type,
+        $tran:path-base,
+        $api-path-base,
+        $body,
+        tran:validate#2,
+        tran:validate-report#2,
+        tran:title-function#1,
+        (),
+        $validate[1]
+      )
+};
+
+declare function tran:put(
+    $name as xs:string,
+    $body as document-node()
+) as item()+ {
+    tran:put($name, $body, ())
 };
 
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/data/transliteration/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function tran:put(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
   crest:put(
     $tran:data-type, $name, $body,
     tran:validate#2,
-    tran:validate-report#2
+    tran:validate-report#2,
+    (),
+    $validate[1]
   )
 };
 

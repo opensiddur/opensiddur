@@ -79,6 +79,12 @@ class TestUser extends DbTest with CommonTestUser {
           every $d in $output//html:li[@class="result"]/html:a[@class="document"]
           satisfies exists($d/following-sibling::html:a[@class="alt"][@property="access"])
           )""", "access view is presented as an alternate")
+        .assertXPath(
+          """
+          exists($output//html:li[@class="result"]/html:a[@class="document"]) and (
+          every $d in $output//html:li[@class="result"]/html:a[@class="document"]
+          satisfies exists($d/following-sibling::html:a[@class="alt"][starts-with(@property, "validation")])
+          )""", "validation view is presented as an alternate")
         .go
     }
 
@@ -278,6 +284,19 @@ class TestUser extends DbTest with CommonTestUser {
         .assertXPath("""doc("/db/data/user/xqtest2.xml")/j:contributor/tei:name="Test User"""", "profile is edited")
         .go
     }
+
+    it("validates a user's profile") {
+      xq(
+        """user:put("xqtest2", document {
+        <j:contributor>
+          <tei:idno>xqtest2</tei:idno>
+          <tei:name>Test User</tei:name>
+        </j:contributor>
+      }, "true")""")
+        .user("xqtest2")
+        .assertXPath("""$output/self::report/status = 'valid' """)
+        .go
+    }
     
     it("refuses to change idno in a user's own profile") {
       xq(
@@ -302,6 +321,19 @@ class TestUser extends DbTest with CommonTestUser {
       })""")
         .user("xqtest2")
         .assertHttpBadRequest
+        .go
+    }
+
+    it("invalidates invalid contributor data") {
+      xq(
+        """user:put("xqtest2", document {
+        <j:contributor>
+          <tei:idno>xqtest2</tei:idno>
+          <tei:notallowed/>
+        </j:contributor>
+      }, "true")""")
+        .user("xqtest2")
+        .assertXPath("""$output/self::report/status = 'invalid' """)
         .go
     }
     
@@ -334,7 +366,20 @@ class TestUser extends DbTest with CommonTestUser {
           )""", "profile mode is correct")
         .go
     }
-    
+
+    it("validates a non-user profile") {
+      xq(
+        """user:put("still_not_a_real_contributors_profile", document {
+        <j:contributor>
+            <tei:idno>still_not_a_real_contributors_profile</tei:idno>
+            <tei:name>Not Real</tei:name>
+        </j:contributor>
+      }, "true")""")
+        .user("xqtest1")
+        .assertXPath("""$output/self::report/status = 'valid' """)
+        .go
+    }
+
     it("edits a non-user profile") {
       xq("""user:put("xqtest5", document {
         <j:contributor>

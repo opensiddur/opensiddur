@@ -140,7 +140,8 @@ declare
     "Linkage data API", api:uri-of($lnk:api-path-base),
     lnk:query-function#1, lnk:list-function#0,
     (<crest:additional text="access" relative-uri="access"/>,
-    <crest:additional text="combined" relative-uri="combined"/>),
+    <crest:additional text="combined" relative-uri="combined"/>,
+    $crest:additional-validate),
     ()
   )
 };
@@ -177,8 +178,16 @@ declare
   crest:delete($lnk:data-type, $name)
 };
 
+declare function lnk:post(
+    $body as document-node()
+  ) as item()+ {
+  lnk:post($body, ())
+  };
+
 (:~ Post a new linkage document 
  : @param $body The linkage document
+ : @param $validate If present, validate instead of posting
+ : @return HTTP 200 if validated successfully
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid linkage XML
  : @error HTTP 401 Not authorized
@@ -191,26 +200,42 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/linkage")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function lnk:post(
+    $body as document-node(),
+    $validate as xs:string*
+  ) as item()+ {
+  let $data-path := concat($lnk:data-type, "/",
+                            ($body/tei:TEI/@xml:lang/string()[.], $lnk:no-lang)[1]
+                            )
+  let $api-path-base := api:uri-of($lnk:api-path-base)
+  return
+      crest:post(
+        $data-path,
+        $lnk:path-base,
+        $api-path-base,
+        $body,
+        lnk:validate#2,
+        lnk:validate-report#2,
+        (),
+        (),
+        $validate[1]
+      )
+};
+
+declare function lnk:put(
+    $name as xs:string,
     $body as document-node()
   ) as item()+ {
-  crest:post(
-    concat($lnk:data-type, "/", 
-        ($body/tei:TEI/@xml:lang/string()[.], $lnk:no-lang)[1]
-        ),
-    $lnk:path-base,
-    api:uri-of($lnk:api-path-base),
-    $body,
-    lnk:validate#2,
-    lnk:validate-report#2,
-    ()
-  )
+    lnk:put($name, $body, ())
 };
 
 (:~ Edit/replace a linkage document in the database
  : @param $name Name of the document to replace
  : @param $body New document
+ : @param $validate Validate without writing to the database
+ : @return HTTP 200 If successfully validated
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML; Attempt to edit a read-only part of the document
  : @error HTTP 401 Unauthorized - not logged in
@@ -224,15 +249,19 @@ declare
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/data/linkage/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function lnk:put(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
   crest:put(
     $lnk:data-type, $name, $body,
     lnk:validate#2,
-    lnk:validate-report#2
+    lnk:validate-report#2,
+    (),
+    $validate[1]
   )
 };
 
