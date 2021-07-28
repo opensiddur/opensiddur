@@ -334,9 +334,10 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
                     owner: Int,
                     subType: Option[String] = None,
                     group: Option[String] = None,
-                    permissions: Option[String] = None
+                    permissions: Option[String] = None,
+                    firstParamIsContent: Boolean = false
                    ) = {
-    val content = readXmlFile(localSource)
+    val content = if (firstParamIsContent) ("'" + localSource + "'") else readXmlFile(localSource)
     xq(
       s"""
          let $$file := tcommon:setup-resource('${resourceName}',
