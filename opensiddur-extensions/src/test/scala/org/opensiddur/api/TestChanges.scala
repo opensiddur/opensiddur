@@ -90,7 +90,7 @@ declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
     it("returns all recent changes") {
       xq("""chg:list((), (), (), (), 1, 100)[2]""")
         .user("xqtest1")
-        .assertXPath("exists($output/self::html:html[descendant::html:ul[@class=\"results\"]])", "an HTML API results document is returned")
+        .assertXPath("""exists($output/self::html:html[descendant::html:ul[@class="results"]])""", "an HTML API results document is returned")
         .assertXPath("""count($output//html:li[@class="result"]) >= 1""", "at least one result is returned")
         .assertXPath("""count($output//html:li[@class="result"]) <= 100""", "at most max-results are returned")
         .go
