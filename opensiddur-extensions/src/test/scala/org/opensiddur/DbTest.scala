@@ -328,6 +328,25 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
     content
   }
 
+  /** Store arbitrary content to an arbitrary path */
+  def store(
+             localSource: String,
+             collection: String,
+             resourceName: String,
+             dataType: String = "application/xml",
+             firstParamIsContent: Boolean = false
+            ): Array[String] = {
+    val content = if (firstParamIsContent) ("'" + localSource + "'") else readXmlFile(localSource)
+    xq(s"""xmldb:store('$collection', '$resourceName', $content, '$dataType')""")
+      .go
+  }
+
+  /** Remove an arbitrary path from the db */
+  def remove(collection: String, resourceName: String) = {
+    xq(s"""xmldb:remove('$collection', '$resourceName')""")
+      .go
+  }
+
   def setupResource(localSource: String,
                     resourceName: String,
                     dataType: String,
