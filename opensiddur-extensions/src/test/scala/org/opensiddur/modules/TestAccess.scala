@@ -48,7 +48,7 @@ class TestAccess extends DbTest {
 
   describe("acc:get-access()") {
     it("returns basic permissions") {
-      xq("""acc:get-access(data:doc("/data/original/test_one"))/*""")
+      xq("""acc:get-access(data:doc("/data/original/test_one"))""")
         .user("xqtest1")
         .assertXmlEquals(
           """<a:access xmlns:a="http://jewishliturgy.org/ns/access/1.0">
@@ -67,7 +67,7 @@ class TestAccess extends DbTest {
          let $grant := system:as-user("admin", $magic:password,
           sm:add-group-ace($uri, "everyone", true(), "rw-")
         )
-        return acc:get-access(data:doc("/data/original/test_one"))/*""")
+        return acc:get-access(data:doc("/data/original/test_one"))""")
         .user("xqtest1")
         .assertXPathEquals("$output/a:grant/a:grant-group[@write='true']='everyone'", "read-write grant is recorded")
         .go
@@ -80,7 +80,7 @@ class TestAccess extends DbTest {
          let $grant := system:as-user("admin", $magic:password,
         sm:add-group-ace($uri, "everyone", true(), "r--")
         )
-        return acc:get-access(data:doc("/data/original/test_one"))/*""")
+        return acc:get-access(data:doc("/data/original/test_one"))""")
         .user("xqtest1")
         .assertXPathEquals("$output/a:grant/a:grant-group[@write='false']='everyone'", "read-only grant is recorded")
         .go
@@ -93,7 +93,7 @@ class TestAccess extends DbTest {
          let $grant := system:as-user("admin", $magic:password,
         sm:add-user-ace($uri, "xqtest2", true(), "rw-")
         )
-        return acc:get-access(data:doc("/data/original/test_one"))/*""")
+        return acc:get-access(data:doc("/data/original/test_one"))""")
         .user("xqtest1")
         .assertXPathEquals("$output/a:grant/a:grant-user[@write='true']='xqtest2'", "read-write grant is recorded")
         .go
@@ -106,7 +106,7 @@ class TestAccess extends DbTest {
          let $grant := system:as-user("admin", $magic:password,
         sm:add-user-ace($uri, "xqtest2", true(), "r--")
         )
-        return acc:get-access(data:doc("/data/original/test_one"))/*""")
+        return acc:get-access(data:doc("/data/original/test_one"))""")
         .user("xqtest1")
         .assertXPathEquals("$output/a:grant/a:grant-user[@write='false']='xqtest2'", "read-only grant is recorded")
         .go
@@ -121,7 +121,7 @@ class TestAccess extends DbTest {
         sm:chmod($uri, "rw-rw-r--"),
         sm:add-group-ace($uri, "guest", false(), "rw-")
       ))
-        return acc:get-access(data:doc("/data/original/test_one"))/*""")
+        return acc:get-access(data:doc("/data/original/test_one"))""")
         .user("xqtest1")
         .assertXPathEquals("$output/a:deny/a:deny-group[@read='false']='guest'", "read-write deny is recorded")
         .go
@@ -136,7 +136,7 @@ class TestAccess extends DbTest {
         sm:chmod($uri, "rw-rw-r--"),
         sm:add-group-ace($uri, "guest", false(), "-w-")
       ))
-        return acc:get-access(data:doc("/data/original/test_one"))/*""")
+        return acc:get-access(data:doc("/data/original/test_one"))""")
         .user("xqtest1")
         .assertXPathEquals("$output/a:deny/a:deny-group[@read='true']='guest'", "write-only deny is recorded")
         .go
@@ -151,7 +151,7 @@ class TestAccess extends DbTest {
           sm:chmod($uri, "rw-rw-r--"),
           sm:add-user-ace($uri, "xqtest2", false(), "rw-")
         ))
-          return acc:get-access(data:doc("/data/original/test_one"))/*""")
+          return acc:get-access(data:doc("/data/original/test_one"))""")
         .user("xqtest1")
         .assertXPathEquals("$output/a:deny/a:deny-user[@read='false']='xqtest2'", "read-write deny is recorded")
         .go
@@ -166,7 +166,7 @@ class TestAccess extends DbTest {
           sm:chmod($uri, "rw-rw-r--"),
           sm:add-user-ace($uri, "xqtest2", false(), "-w-")
         ))
-          return acc:get-access(data:doc("/data/original/test_one"))/*""")
+          return acc:get-access(data:doc("/data/original/test_one"))""")
         .user("xqtest1")
         .assertXPathEquals("$output/a:deny/a:deny-user[@read='true']='xqtest2'", "write-only deny is recorded")
         .go
@@ -404,7 +404,7 @@ class TestAccess extends DbTest {
 
   describe("acc:get-access-as-user()") {
     it("returns an access structure when called as the same user") {
-      xq("""acc:get-access-as-user(data:doc("/data/original/test_one"), "xqtest1")/*""")
+      xq("""acc:get-access-as-user(data:doc("/data/original/test_one"), "xqtest1")""")
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0"
                     user="xqtest1" read="true"
@@ -421,7 +421,7 @@ class TestAccess extends DbTest {
            let $grant := system:as-user("admin", $magic:password,
           sm:chmod(document-uri($resource), "rw-r--r--")
         )
-        return acc:get-access-as-user(doc($resource), "xqtest2")/*
+        return acc:get-access-as-user(doc($resource), "xqtest2")
           """)
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0"
@@ -447,7 +447,7 @@ class TestAccess extends DbTest {
                        sm:add-user-ace(xs:anyURI($resource), "xqtest2", true(), "r--")
                        )
                      )
-        return acc:get-access-as-user(doc($resource), "xqtest2")/* """)
+        return acc:get-access-as-user(doc($resource), "xqtest2") """)
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0" user="xqtest2" read="true"
                                                      write="false"
@@ -463,7 +463,7 @@ class TestAccess extends DbTest {
           sm:chmod(xs:anyURI($resource), "rw-------"),
           sm:add-user-ace(xs:anyURI($resource), "xqtest2", true(), "rw-")
         ))
-        return acc:get-access-as-user(doc($resource), "xqtest2")/* """)
+        return acc:get-access-as-user(doc($resource), "xqtest2") """)
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0" user="xqtest2" read="true"
                            write="true"
@@ -479,7 +479,7 @@ class TestAccess extends DbTest {
           sm:chmod(xs:anyURI($resource), "rw-rw-rw-"),
           sm:add-user-ace(xs:anyURI($resource), "xqtest2", false(), "-w-")
         ))
-        return acc:get-access-as-user(doc($resource), "xqtest2")/* """)
+        return acc:get-access-as-user(doc($resource), "xqtest2") """)
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0" user="xqtest2" read="true"
                            write="false"
@@ -495,7 +495,7 @@ class TestAccess extends DbTest {
           sm:chmod(xs:anyURI($resource), "rw-rw-rw-"),
           sm:add-user-ace(xs:anyURI($resource), "xqtest2", false(), "rw-")
         ))
-        return acc:get-access-as-user(doc($resource), "xqtest2")/* """)
+        return acc:get-access-as-user(doc($resource), "xqtest2") """)
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0" user="xqtest2" read="false"
                            write="false"
@@ -522,7 +522,7 @@ class TestAccess extends DbTest {
                        <a:deny-group read="true">guest</a:deny-group>
                      </a:deny>
                    </a:access>)
-                 return acc:get-access(data:doc($resource))/*""")
+                 return acc:get-access(data:doc($resource))""")
         .user("xqtest1")
         .assertXPath("""count(*)=6 and count(a:grant/*)=2 and count(a:deny/*)=2""", "correct number of conditions")
         .assertXPathEquals("$output/a:owner", "owner", """<a:owner xmlns:a="http://jewishliturgy.org/ns/access/1.0">xqtest1</a:owner>""")
