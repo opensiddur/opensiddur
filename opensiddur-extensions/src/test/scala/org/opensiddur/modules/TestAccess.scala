@@ -211,7 +211,7 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(xs:anyURI($resource))//sm:ace
+        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
                                      [@target="GROUP"][@who="guest"][@access_type="ALLOWED"]/@mode="rw-" """, "group share is present and has r/w access")
         .go
     }
@@ -231,7 +231,7 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(xs:anyURI($resource))//sm:ace
+        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
         [@target="GROUP"][@who="guest"][@access_type="ALLOWED"]/@mode="r--" """, "group share is present and has r/o access")
         .go
     }
@@ -251,7 +251,7 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(xs:anyURI($resource))//sm:ace
+        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
         [@target="USER"][@who="guest"][@access_type="ALLOWED"]/@mode="rw-" """, "user share is present and has r/w access")
         .go
     }
@@ -271,7 +271,7 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(xs:anyURI($resource))//sm:ace
+        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
         [@target="USER"][@who="guest"][@access_type="ALLOWED"]/@mode="r--" """, "user share is present and has r/o access")
         .go
     }
@@ -291,7 +291,7 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(xs:anyURI($resource))//sm:ace
+        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
         [@target="GROUP"][@who="guest"][@access_type="DENIED"]/@mode="rw-" """, "group deny is present and covers r/w access")
         .go
     }
@@ -311,7 +311,7 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(xs:anyURI($resource))//sm:ace
+        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
         [@target="GROUP"][@who="guest"][@access_type="DENIED"]/@mode="-w-" """, "group deny is present and covers w/o access")
         .go
     }
@@ -331,7 +331,7 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(xs:anyURI($resource))//sm:ace
+        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
         [@target="USER"][@who="guest"][@access_type="DENIED"]/@mode="rw-" """, "user deny is present and covers r/w access")
         .go
     }
@@ -351,7 +351,7 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(xs:anyURI($resource))//sm:ace
+        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
         [@target="USER"][@who="guest"][@access_type="DENIED"]/@mode="-w-" """, "user deny is present and covers w/o access")
         .go
     }
