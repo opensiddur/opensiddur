@@ -3,7 +3,6 @@ package org.opensiddur.modules
 import org.opensiddur.DbTest
 
 class TestAccess extends DbTest {
-  /** imports, namespaces and variables */
   override val prolog: String =
     """xquery version '3.1';
   import module namespace magic="http://jewishliturgy.org/magic"
@@ -21,26 +20,26 @@ class TestAccess extends DbTest {
   declare namespace error="http://jewishliturgy.org/errors";
 """
 
-  override def beforeAll() = {
-    setupUsers(2)
-
+  override def beforeAll: Unit = {
     super.beforeAll()
+
+    setupUsers(2)
   }
 
-  override def beforeEach() = {
+  override def beforeEach: Unit = {
+    super.beforeEach()
+
     setupResource("""<a/>""", "test_one", "original", 1,
       Some("en"), Some("dba"), Some("rw-r--r--"), firstParamIsContent = true)
-
-    super.beforeEach()
   }
 
-  override def afterEach() = {
+  override def afterEach: Unit = {
     teardownResource("test_one", "original", 1)
 
     super.afterEach()
   }
 
-  override def afterAll() = {
+  override def afterAll: Unit = {
     teardownUsers(2)
 
     super.afterAll()
@@ -251,8 +250,9 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
-        [@target="USER"][@who="guest"][@access_type="ALLOWED"]/@mode="rw-" """, "user share is present and has r/w access")
+        .assertXPath("""system:as-user("admin", $magic:password,
+                sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
+        [@target="USER"][@who="guest"][@access_type="ALLOWED"]/@mode="rw-") """, "user share is present and has r/w access")
         .go
     }
 
@@ -291,8 +291,9 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
-        [@target="GROUP"][@who="guest"][@access_type="DENIED"]/@mode="rw-" """, "group deny is present and covers r/w access")
+        .assertXPath("""system:as-user("admin", $magic:password,
+                sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
+                  [@target="GROUP"][@who="guest"][@access_type="DENIED"]/@mode="rw-") """, "group deny is present and covers r/w access")
         .go
     }
 
@@ -331,8 +332,8 @@ class TestAccess extends DbTest {
         </a:access>)
         """)
         .user("xqtest1")
-        .assertXPath("""sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
-        [@target="USER"][@who="guest"][@access_type="DENIED"]/@mode="rw-" """, "user deny is present and covers r/w access")
+        .assertXPath("""system:as-user("admin", $magic:password, sm:get-permissions(document-uri(data:doc("/data/original/test_one")))//sm:ace
+        [@target="USER"][@who="guest"][@access_type="DENIED"]/@mode="rw-") """, "user deny is present and covers r/w access")
         .go
     }
 
@@ -443,13 +444,14 @@ class TestAccess extends DbTest {
 
     it("returns that the user has r/o access when the calling user is different from the second argument and an ACE is present") {
       xq("""
-        let $resource := data:doc("/data/original/test_one")
+        let $resource-doc := data:doc("/data/original/test_one")
+        let $resource := document-uri($resource-doc)
         let $grant := system:as-user("admin", $magic:password,(
                        sm:chmod(xs:anyURI($resource), "rw-------"),
                        sm:add-user-ace(xs:anyURI($resource), "xqtest2", true(), "r--")
                        )
                      )
-        return acc:get-access-as-user($resource, "xqtest2") """)
+        return acc:get-access-as-user($resource-doc, "xqtest2") """)
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0" user="xqtest2" read="true"
                                                      write="false"
@@ -460,12 +462,13 @@ class TestAccess extends DbTest {
 
     it("returns that the user has r/w access when the calling user is different from the second argument and an ACE is present") {
       xq("""
-        let $resource := data:doc("/data/original/test_one")
+        let $resource-doc := data:doc("/data/original/test_one")
+        let $resource := document-uri($resource-doc)
         let $grant := system:as-user("admin", $magic:password, (
-          sm:chmod(xs:anyURI($resource), "rw-------"),
-          sm:add-user-ace(xs:anyURI($resource), "xqtest2", true(), "rw-")
+          sm:chmod($resource, "rw-------"),
+          sm:add-user-ace($resource, "xqtest2", true(), "rw-")
         ))
-        return acc:get-access-as-user($resource, "xqtest2") """)
+        return acc:get-access-as-user($resource-doc, "xqtest2") """)
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0" user="xqtest2" read="true"
                            write="true"
@@ -476,12 +479,13 @@ class TestAccess extends DbTest {
 
     it("returns that the user has r/o access when the calling user is different from the second argument and an ACE is present with w/o override") {
       xq("""
-        let $resource := data:doc("/data/original/test_one")
+        let $resource-doc := data:doc("/data/original/test_one")
+        let $resource := document-uri($resource-doc)
         let $grant := system:as-user("admin", $magic:password, (
           sm:chmod(xs:anyURI($resource), "rw-rw-rw-"),
           sm:add-user-ace(xs:anyURI($resource), "xqtest2", false(), "-w-")
         ))
-        return acc:get-access-as-user($resource, "xqtest2") """)
+        return acc:get-access-as-user($resource-doc, "xqtest2") """)
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0" user="xqtest2" read="true"
                            write="false"
@@ -492,12 +496,13 @@ class TestAccess extends DbTest {
 
     it("returns that the user has no access when the calling user is different from the second argument and an ACE is present with r/w denial override") {
       xq("""
-        let $resource := data:doc("/data/original/test_one")
+        let $resource-doc := data:doc("/data/original/test_one")
+        let $resource := document-uri($resource-doc)
         let $grant := system:as-user("admin", $magic:password, (
           sm:chmod(xs:anyURI($resource), "rw-rw-rw-"),
           sm:add-user-ace(xs:anyURI($resource), "xqtest2", false(), "rw-")
         ))
-        return acc:get-access-as-user($resource, "xqtest2") """)
+        return acc:get-access-as-user($resource-doc, "xqtest2") """)
         .user("xqtest1")
         .assertXmlEquals("""<a:user-access xmlns:a="http://jewishliturgy.org/ns/access/1.0" user="xqtest2" read="false"
                            write="false"
@@ -526,7 +531,7 @@ class TestAccess extends DbTest {
                    </a:access>)
                  return acc:get-access(data:doc($resource))""")
         .user("xqtest1")
-        .assertXPath("""count(*)=6 and count(a:grant/*)=2 and count(a:deny/*)=2""", "correct number of conditions")
+        .assertXPath("""count($output/*)=6 and count($output/a:grant/*)=2 and count($output/a:deny/*)=2""", "correct number of conditions")
         .assertXPathEquals("$output/a:owner", "owner", """<a:owner xmlns:a="http://jewishliturgy.org/ns/access/1.0">xqtest1</a:owner>""")
         .assertXPathEquals("$output/a:group", "group", """<a:group xmlns:a="http://jewishliturgy.org/ns/access/1.0" write="true">dba</a:group>""")
         .assertXPathEquals("$output/a:world", "world", """<a:world xmlns:a="http://jewishliturgy.org/ns/access/1.0" read="true" write="false"/>""")
