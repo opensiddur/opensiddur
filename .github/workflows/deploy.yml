@@ -57,7 +57,7 @@ jobs:
         run: |-
           echo \
           gcloud compute \
-          --project=${{env.PROJECT_NAME}} instances create ${{steps.vars.INSTANCE_NAME}} \
+          --project=${{env.PROJECT_NAME}} instances create ${{steps.vars.outputs.INSTANCE_NAME}} \
           --zone=${{env.ZONE}} \
           --machine-type=${{env.MACHINE_TYPE}} \
           --network=default \
@@ -69,7 +69,7 @@ jobs:
           --image-project=${{env.IMAGE_PROJECT}} \
           --boot-disk-size=${{env.BOOT_DISK_SIZE_GB}}GB \
           --boot-disk-type=pd-standard \
-          --boot-disk-device-name=${{steps.vars.INSTANCE_NAME}} \
+          --boot-disk-device-name=${{steps.vars.outputs.INSTANCE_NAME}} \
           --service-account=${{env.SERVICE_ACCOUNT}} \
           --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
           redacted
