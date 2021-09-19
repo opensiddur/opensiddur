@@ -58,21 +58,21 @@ jobs:
       - name: Deploy
         run: |-
           gcloud compute \
-                --project=${PROJECT_NAME} instances create ${{steps.vars.INSTANCE_NAME}} \
-                --zone=${ZONE} \
-                --machine-type=${MACHINE_TYPE} \
+                --project=${{env.PROJECT_NAME}} instances create ${{steps.vars.INSTANCE_NAME}} \
+                --zone=${{env.ZONE}} \
+                --machine-type=${{env.MACHINE_TYPE}} \
                 --network=default \
                 --network-tier=PREMIUM \
                 --maintenance-policy=MIGRATE \
                 --scopes=https://www.googleapis.com/auth/cloud-platform \
                 --tags=http-server,https-server \
-                --image=$(gcloud compute images list --filter=${IMAGE_PROJECT} --filter=${IMAGE_VERSION} | tail -n 1 | cut -f 1 -d " ") \
-                --image-project=${IMAGE_PROJECT} \
-                --boot-disk-size=${BOOT_DISK_SIZE_GB}GB \
+                --image=$(gcloud compute images list --filter=${{env.IMAGE_PROJECT}} --filter=${{env.IMAGE_VERSION}} | tail -n 1 | cut -f 1 -d " ") \
+                --image-project=${{env.IMAGE_PROJECT}} \
+                --boot-disk-size=${{env.BOOT_DISK_SIZE_GB}}GB \
                 --boot-disk-type=pd-standard \
-                --boot-disk-device-name=${INSTANCE_NAME} \
-                --service-account=${SERVICE_ACCOUNT} \
+                --boot-disk-device-name=${{steps.vars.INSTANCE_NAME}} \
+                --service-account=${{env.SERVICE_ACCOUNT}} \
                 --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
-                --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},STACK_MEMORY=${STACK_MEMORY},BRANCH=${{steps.vars.BRANCH}},DYN_USERNAME=${DYN_USERNAME},DYN_PASSWORD=${DYN_PASSWORD},DYN_EMAIL=${DYN_EMAIL},BACKUP_BUCKET_BASE=${BACKUP_BUCKET_BASE},enable-oslogin=true
+                --metadata ADMIN_PASSWORD=${{env.ADMIN_PASSWORD}},EXIST_MEMORY=${{env.EXIST_MEMORY}},STACK_MEMORY=${{env.STACK_MEMORY}},BRANCH=${{steps.vars.BRANCH}},DYN_USERNAME=${{env.DYN_USERNAME}},DYN_PASSWORD=${{env.DYN_PASSWORD}},DYN_EMAIL=${{env.DYN_EMAIL}},BACKUP_BUCKET_BASE=${{env.BACKUP_BUCKET_BASE}},enable-oslogin=true
 
 
