@@ -36,7 +36,7 @@ jobs:
         id: vars
         run: |-
           echo ::set-output name=VERSION::$(git rev-parse --short=8 ${{ github.sha }})
-          echo ::set-output name=BRANCH::${{GITHUB_REF#refs/heads/}}
+          echo ::set-output name=BRANCH::${GITHUB_REF##*/}
           echo ::set-output name=INSTANCE_BASE::${{PROJECT_NAME}}-${{BRANCH//\//-}}
           echo ::set-output name=INSTANCE_NAME::${{INSTANCE_BASE}}-${{VERSION}}
       - uses: actions/setup-java@v2
