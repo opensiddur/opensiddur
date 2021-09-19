@@ -39,7 +39,7 @@ jobs:
           echo ::set-output name=VERSION::${VERSION}
           echo ::set-output name=BRANCH::${GITHUB_REF##*/}
           echo ::set-output name=INSTANCE_BASE::${{env.PROJECT_NAME}}-${BRANCH//\//-}
-          echo ::set-output name=INSTANCE_NAME::${{env.INSTANCE_BASE}}-${{VERSION}}
+          echo ::set-output name=INSTANCE_NAME::${{env.INSTANCE_BASE}}-${VERSION}
       - uses: actions/setup-java@v2
         with:
           java-version: '11'
@@ -49,7 +49,7 @@ jobs:
         with:
           version: '290.0.1'
           service_account_key: ${{ secrets.GCE_SA_KEY }}
-          project_id: ${{ PROJECT_NAME }}
+          project_id: ${{ env.PROJECT_NAME }}
 
       - run: |-
           gcloud --quiet auth
