@@ -10,10 +10,6 @@ on:
 
 env:
   PROJECT_NAME: opensiddur-client
-  VERSION: ${{GITHUB_SHA:0:8}}
-  BRANCH: ${{GITHUB_REF#refs/heads/}}
-  INSTANCE_BASE: ${{PROJECT_NAME}}-${{BRANCH//\//-}}
-  INSTANCE_NAME: ${{INSTANCE_BASE}}-${{VERSION}}
   BACKUP_BUCKET_BASE: opensiddur-database-backups
   ZONE: us-west2-a
   MACHINE_TYPE: n1-standard-1
@@ -36,6 +32,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Set calculated vars
+        id: vars
+        run: |-
+          echo ::set-output name=VERSION::$(git rev-parse --short=8 ${{ github.sha }})
+          echo ::set-output name=BRANCH::${{GITHUB_REF#refs/heads/}}
+          echo ::set-output name=INSTANCE_BASE::${{PROJECT_NAME}}-${{BRANCH//\//-}}
+          echo ::set-output name=INSTANCE_NAME::${{INSTANCE_BASE}}-${{VERSION}}
       - uses: actions/setup-java@v2
         with:
           java-version: '11'
@@ -55,7 +58,7 @@ jobs:
       - name: Deploy
         run: |-
           gcloud compute \
-                --project=${PROJECT_NAME} instances create ${INSTANCE_NAME} \
+                --project=${PROJECT_NAME} instances create ${{steps.vars.INSTANCE_NAME}} \
                 --zone=${ZONE} \
                 --machine-type=${MACHINE_TYPE} \
                 --network=default \
@@ -70,6 +73,6 @@ jobs:
                 --boot-disk-device-name=${INSTANCE_NAME} \
                 --service-account=${SERVICE_ACCOUNT} \
                 --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
-                --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},STACK_MEMORY=${STACK_MEMORY},BRANCH=${BRANCH},DYN_USERNAME=${DYN_USERNAME},DYN_PASSWORD=${DYN_PASSWORD},DYN_EMAIL=${DYN_EMAIL},BACKUP_BUCKET_BASE=${BACKUP_BUCKET_BASE},enable-oslogin=true
+                --metadata ADMIN_PASSWORD=${ADMIN_PASSWORD},EXIST_MEMORY=${EXIST_MEMORY},STACK_MEMORY=${STACK_MEMORY},BRANCH=${{steps.vars.BRANCH}},DYN_USERNAME=${DYN_USERNAME},DYN_PASSWORD=${DYN_PASSWORD},DYN_EMAIL=${DYN_EMAIL},BACKUP_BUCKET_BASE=${BACKUP_BUCKET_BASE},enable-oslogin=true
 
 
