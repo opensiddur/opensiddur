@@ -35,11 +35,12 @@ jobs:
       - name: Set calculated vars
         id: vars
         run: |-
+          INSTANCE_BASE=${{env.PROJECT_NAME}}-${BRANCH//\//-}
           VERSION=$(git rev-parse --short=8 ${{ github.sha }})
           echo ::set-output name=VERSION::${VERSION}
           echo ::set-output name=BRANCH::${GITHUB_REF##*/}
-          echo ::set-output name=INSTANCE_BASE::${{env.PROJECT_NAME}}-${BRANCH//\//-}
-          echo ::set-output name=INSTANCE_NAME::${{env.INSTANCE_BASE}}-${VERSION}
+          echo ::set-output name=INSTANCE_BASE::${INSTANCE_BASE}
+          echo ::set-output name=INSTANCE_NAME::${INSTANCE_BASE}-${VERSION}
       - uses: actions/setup-java@v2
         with:
           java-version: '8'
@@ -52,27 +53,47 @@ jobs:
           project_id: ${{ env.PROJECT_NAME }}
       - name: Install packages
         run: sudo apt-get install libxml2-utils python3-lxml
-      - name: Build
-        run: |-
-          ant test
-      - name: Deploy
-        run: |-
-          gcloud compute \
-                --project=${{env.PROJECT_NAME}} instances create ${{steps.vars.INSTANCE_NAME}} \
-                --zone=${{env.ZONE}} \
-                --machine-type=${{env.MACHINE_TYPE}} \
-                --network=default \
-                --network-tier=PREMIUM \
-                --maintenance-policy=MIGRATE \
-                --scopes=https://www.googleapis.com/auth/cloud-platform \
-                --tags=http-server,https-server \
-                --image=$(gcloud compute images list --filter=${{env.IMAGE_PROJECT}} --filter=${{env.IMAGE_VERSION}} | tail -n 1 | cut -f 1 -d " ") \
-                --image-project=${{env.IMAGE_PROJECT}} \
-                --boot-disk-size=${{env.BOOT_DISK_SIZE_GB}}GB \
-                --boot-disk-type=pd-standard \
-                --boot-disk-device-name=${{steps.vars.INSTANCE_NAME}} \
-                --service-account=${{env.SERVICE_ACCOUNT}} \
-                --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
-                --metadata ADMIN_PASSWORD=${{env.ADMIN_PASSWORD}},EXIST_MEMORY=${{env.EXIST_MEMORY}},STACK_MEMORY=${{env.STACK_MEMORY}},BRANCH=${{steps.vars.BRANCH}},DYN_USERNAME=${{env.DYN_USERNAME}},DYN_PASSWORD=${{env.DYN_PASSWORD}},DYN_EMAIL=${{env.DYN_EMAIL}},BACKUP_BUCKET_BASE=${{env.BACKUP_BUCKET_BASE}},enable-oslogin=true
-
-
+      - name: Test gcloud compute command
+        run: echo \
+        gcloud compute \
+        --project=${{env.PROJECT_NAME}} instances create ${{steps.vars.INSTANCE_NAME}} \
+        --zone=${{env.ZONE}} \
+        --machine-type=${{env.MACHINE_TYPE}} \
+        --network=default \
+        --network-tier=PREMIUM \
+        --maintenance-policy=MIGRATE \
+        --scopes=https://www.googleapis.com/auth/cloud-platform \
+        --tags=http-server,https-server \
+        --image=$(gcloud compute images list --filter=${{env.IMAGE_PROJECT}} --filter=${{env.IMAGE_VERSION}} | tail -n 1 | cut -f 1 -d " ") \
+        --image-project=${{env.IMAGE_PROJECT}} \
+        --boot-disk-size=${{env.BOOT_DISK_SIZE_GB}}GB \
+        --boot-disk-type=pd-standard \
+        --boot-disk-device-name=${{steps.vars.INSTANCE_NAME}} \
+        --service-account=${{env.SERVICE_ACCOUNT}} \
+        --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
+        redacted
+        
+#      - name: Build
+#        run: |-
+#          ant test
+#      - name: Deploy
+#        run: |-
+#          gcloud compute \
+#                --project=${{env.PROJECT_NAME}} instances create ${{steps.vars.INSTANCE_NAME}} \
+#                --zone=${{env.ZONE}} \
+#                --machine-type=${{env.MACHINE_TYPE}} \
+#                --network=default \
+#                --network-tier=PREMIUM \
+#                --maintenance-policy=MIGRATE \
+#                --scopes=https://www.googleapis.com/auth/cloud-platform \
+#                --tags=http-server,https-server \
+#                --image=$(gcloud compute images list --filter=${{env.IMAGE_PROJECT}} --filter=${{env.IMAGE_VERSION}} | tail -n 1 | cut -f 1 -d " ") \
+#                --image-project=${{env.IMAGE_PROJECT}} \
+#                --boot-disk-size=${{env.BOOT_DISK_SIZE_GB}}GB \
+#                --boot-disk-type=pd-standard \
+#                --boot-disk-device-name=${{steps.vars.INSTANCE_NAME}} \
+#                --service-account=${{env.SERVICE_ACCOUNT}} \
+#                --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
+#                --metadata ADMIN_PASSWORD=${{env.ADMIN_PASSWORD}},EXIST_MEMORY=${{env.EXIST_MEMORY}},STACK_MEMORY=${{env.STACK_MEMORY}},BRANCH=${{steps.vars.BRANCH}},DYN_USERNAME=${{env.DYN_USERNAME}},DYN_PASSWORD=${{env.DYN_PASSWORD}},DYN_EMAIL=${{env.DYN_EMAIL}},BACKUP_BUCKET_BASE=${{env.BACKUP_BUCKET_BASE}},enable-oslogin=true
+#
+#
