@@ -42,8 +42,8 @@ jobs:
           echo ::set-output name=INSTANCE_NAME::${{env.INSTANCE_BASE}}-${VERSION}
       - uses: actions/setup-java@v2
         with:
-          java-version: '11'
-          distribution: 'adopt'
+          java-version: '8'
+          distribution: 'temurin'
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@master
         with:
