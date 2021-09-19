@@ -50,7 +50,8 @@ jobs:
           version: '290.0.1'
           service_account_key: ${{ secrets.GCE_SA_KEY }}
           project_id: ${{ env.PROJECT_NAME }}
-
+      - name: Install packages
+        run: sudo apt-get install libxml2-utils python3-lxml
       - name: Build
         run: |-
           ant test
