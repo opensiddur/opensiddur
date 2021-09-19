@@ -1,5 +1,5 @@
 # Deployment to Google Compute Engine
-name: CI/CD pipeline for GCE
+name: Build
 
 on:
   push:
