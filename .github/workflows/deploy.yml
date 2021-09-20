@@ -1,0 +1,81 @@
+# Deployment to Google Compute Engine
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - feature**
+
+env:
+  PROJECT_NAME: opensiddur-client
+  BACKUP_BUCKET_BASE: opensiddur-database-backups
+  ZONE: us-west2-a
+  MACHINE_TYPE: n1-standard-1
+  IMAGE_PROJECT: ubuntu-os-cloud
+  IMAGE_VERSION: ubuntu-2004
+  BOOT_DISK_SIZE_GB: 20
+  EXIST_MEMORY: 3072
+  STACK_MEMORY: 512
+  SERVICE_ACCOUNT: opensiddur-deploy-1@opensiddur-client.iam.gserviceaccount.com
+  ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+  DYN_USERNAME: ${{ secrets.DYN_USERNAME }}
+  DYN_PASSWORD: ${{ secrets.DYN_PASSWORD }}
+  DYN_EMAIL: ${{ secrets.DYN_EMAIL }}
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set calculated vars
+        id: vars
+        run: |-
+          BRANCH=${GITHUB_REF#refs/heads/}
+          INSTANCE_BASE=${{env.PROJECT_NAME}}-${BRANCH//\//-}
+          VERSION=$(git rev-parse --short=8 ${{ github.sha }})
+          echo ::set-output name=VERSION::${VERSION}
+          echo ::set-output name=BRANCH::${BRANCH}
+          echo ::set-output name=INSTANCE_BASE::${INSTANCE_BASE}
+          echo ::set-output name=INSTANCE_NAME::${INSTANCE_BASE}-${VERSION}
+      - uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GCE_SA_KEY }}
+          project_id: ${{ env.PROJECT_NAME }}
+      - name: Install packages
+        run: sudo apt-get install libxml2-utils python3-lxml
+
+      - name: Build
+        run: |-
+          ant test
+      - name: Deploy
+        run: |-
+          gcloud compute \
+                --project=${{env.PROJECT_NAME}} instances create ${{steps.vars.outputs.INSTANCE_NAME}} \
+                --zone=${{env.ZONE}} \
+                --machine-type=${{env.MACHINE_TYPE}} \
+                --network=default \
+                --network-tier=PREMIUM \
+                --maintenance-policy=MIGRATE \
+                --scopes=https://www.googleapis.com/auth/cloud-platform \
+                --tags=http-server,https-server \
+                --image=$(gcloud compute images list --filter=${{env.IMAGE_PROJECT}} --filter=${{env.IMAGE_VERSION}} | tail -n 1 | cut -f 1 -d " ") \
+                --image-project=${{env.IMAGE_PROJECT}} \
+                --boot-disk-size=${{env.BOOT_DISK_SIZE_GB}}GB \
+                --boot-disk-type=pd-standard \
+                --boot-disk-device-name=${{steps.vars.outputs.INSTANCE_NAME}} \
+                --service-account=${{env.SERVICE_ACCOUNT}} \
+                --metadata-from-file startup-script=setup/gcloud-startup-script.sh \
+                --metadata ADMIN_PASSWORD=${{env.ADMIN_PASSWORD}},EXIST_MEMORY=${{env.EXIST_MEMORY}},STACK_MEMORY=${{env.STACK_MEMORY}},BRANCH=${{steps.vars.outputs.BRANCH}},DYN_USERNAME=${{env.DYN_USERNAME}},DYN_PASSWORD=${{env.DYN_PASSWORD}},DYN_EMAIL=${{env.DYN_EMAIL}},BACKUP_BUCKET_BASE=${{env.BACKUP_BUCKET_BASE}},enable-oslogin=true
+
+
