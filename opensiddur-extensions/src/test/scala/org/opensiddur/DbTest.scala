@@ -334,16 +334,48 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
              collection: String,
              resourceName: String,
              dataType: String = "application/xml",
-             firstParamIsContent: Boolean = false
+             firstParamIsContent: Boolean = false,
+             as: String = "guest"
             ): Array[String] = {
     val content = if (firstParamIsContent) ("'" + localSource + "'") else readXmlFile(localSource)
     xq(s"""xmldb:store('$collection', '$resourceName', $content, '$dataType')""")
+      .user(as)
       .go
   }
 
   /** Remove an arbitrary path from the db */
-  def remove(collection: String, resourceName: String) = {
+  def remove(collection: String, resourceName: String, as: String = "guest") = {
     xq(s"""xmldb:remove('$collection', '$resourceName')""")
+      .user(as)
+      .go
+  }
+
+  def setupCollection(base: String, collection: String,
+                      owner: Option[String] = None,
+                      group: Option[String] = None,
+                      permissions: Option[String] = None) = {
+    val changeOwner =
+      if (owner.isDefined)
+        s"""let $$change-owner := sm:chown(xs:anyURI('$base/$collection'), '${owner.get}')"""
+      else ""
+    val changeGroup =
+      if (group.isDefined)
+        s"""let $$change-group := sm:chgrp(xs:anyURI('$base/$collection'), '${group.get}')"""
+      else ""
+    val changePermissions =
+      if (permissions.isDefined)
+        s"""let $$change-permissions := sm:chmod(xs:anyURI('$base/$collection'), '${permissions.get}')"""
+      else ""
+
+    xq(
+      s"""
+         let $$create := xmldb:create-collection('$base', '$collection')
+         $changeOwner
+         $changeGroup
+         $changePermissions
+         return ()
+      """)
+      .user("admin")
       .go
   }
 
@@ -375,6 +407,12 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
          let $$file := tcommon:teardown-resource('${resourceName}', '${dataType}', $owner)
           return ()
         """)
+      .go
+  }
+
+  def teardownCollection(collectionName: String) = {
+    xq(s"""if (xmldb:collection-available('$collectionName')) then xmldb:remove('$collectionName') else ()""")
+      .user("admin")
       .go
   }
 
