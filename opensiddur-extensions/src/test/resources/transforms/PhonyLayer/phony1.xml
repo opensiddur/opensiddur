@@ -1,0 +1,25 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <tei:teiHeader>
+      <tei:fileDesc>
+          <tei:titleStmt>
+              <tei:title>phony1</tei:title>
+          </tei:titleStmt>
+          <tei:publicationStmt>
+              <tei:availability>
+                  <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+              </tei:availability>
+          </tei:publicationStmt>
+          <tei:sourceDesc>
+
+          </tei:sourceDesc>
+      </tei:fileDesc>
+
+  </tei:teiHeader>
+  <tei:text>
+      <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
+         <tei:seg xml:id="seg1">A.</tei:seg>
+         <tei:seg xml:id="seg2">B.</tei:seg>
+         <tei:seg xml:id="seg2">C.</tei:seg>
+      </j:streamText>
+  </tei:text>
+</tei:TEI>

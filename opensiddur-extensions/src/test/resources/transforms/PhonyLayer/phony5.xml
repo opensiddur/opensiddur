@@ -1,33 +1,37 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
   <tei:teiHeader>
-      <tei:publicationStmt>
-         <tei:availability>
-            <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
-         </tei:availability> 
-      </tei:publicationStmt>
+      <tei:fileDesc>
+          <tei:titleStmt>
+              <tei:title>phony5</tei:title>
+          </tei:titleStmt>
+          <tei:publicationStmt>
+              <tei:availability>
+                  <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+              </tei:availability>
+          </tei:publicationStmt>
+          <tei:sourceDesc>
+
+          </tei:sourceDesc>
+      </tei:fileDesc>
+
   </tei:teiHeader>
-  <j:conditions xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
-      <j:condition xml:id="cond1">
-         <tei:fs type="opensiddur:time">
-            <tei:f name="shabbat">
-               <j:yes/>
-            </tei:f>
-         </tei:fs>
-      </j:condition>
-      <j:condition xml:id="cond2">
-         <tei:fs type="opensiddur:time">
-            <tei:f name="shabbat">
-               <j:no/>
-            </tei:f>
-         </tei:fs>
-      </j:condition>
-  </j:conditions>
+  <j:settings xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+      <tei:fs type="opensiddur:time" xml:id="set1">
+        <tei:f name="shabbat">
+            <j:yes/>
+         </tei:f>
+      </tei:fs>
+      <tei:fs type="opensiddur:time" xml:id="set2">
+        <tei:f name="shabbat">
+            <j:no/>
+         </tei:f>
+      </tei:fs>
+  </j:settings>
   <j:links xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
-      <tei:link type="condition" target="#seg1 #cond1"/>
-      <tei:link type="condition" target="#concurrent #cond2"/>
-      <tei:link type="condition" target="#range(ab1,ab2) #cond1"/>
-      <tei:link type="condition" target="#div2 #cond1"/>
+      <tei:link type="set" target="#seg1 #set1"/>
+      <tei:link type="set" target="#concurrent #set2"/>
+      <tei:link type="set" target="#range(ab1,ab2) #set1"/>
+      <tei:link type="set" target="#div2 #set1"/>
   </j:links>
   <tei:text>
       <j:streamText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="stream">
