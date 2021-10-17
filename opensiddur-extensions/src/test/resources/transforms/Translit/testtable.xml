@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tr:schema xmlns:tr="http://jewishliturgy.org/ns/tr/1.0">
     <tr:title xml:lang="en">testtable</tr:title>
     <tr:description xml:lang="en">A table for testing</tr:description>
