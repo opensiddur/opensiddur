@@ -1,11 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
     <tei:teiHeader>
-      <tei:publicationStmt>
-        <tei:availability>
-            <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
-        </tei:availability> 
-      </tei:publicationStmt>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title>conditional1</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:availability>
+                    <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+                </tei:availability>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+
     </tei:teiHeader>
     <tei:fsdDecl>
         <tei:fsDecl type="test:FS">

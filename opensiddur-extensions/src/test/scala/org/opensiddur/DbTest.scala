@@ -163,12 +163,15 @@ class Xq(
       _auth = _auth)
   }
 
-  def assertEquals(value: String): Xq = {
+  def assertEquals(value: String*): Xq = {
     new Xq(
       _code = _code,
       _prolog = _prolog,
       _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion(s"$$output='$value'", s" output did not equal '$value'"),
+      _assertions = _assertions ++ value.zipWithIndex.map { case (v:String, idx: Int) =>
+        val indexString = if (value.length > 1) s"[${idx + 1}]" else ""
+        XPathAssertion(s"$$output$indexString='$v'", s" output$indexString did not equal '$v'")
+      },
       _auth = _auth
     )
   }
@@ -184,12 +187,15 @@ class Xq(
     )
   }
 
-  def assertEquals[T : Numeric](value: T): Xq = {
+  def assertEquals[T : Numeric](value: T*): Xq = {
     new Xq(
       _code = _code,
       _prolog = _prolog,
       _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion(s"$$output=$value", s" output did not equal $value"),
+      _assertions = _assertions ++ value.zipWithIndex.map { case (v:T, idx: Int) =>
+        val indexString = if (value.length > 1) s"[${idx + 1}]" else ""
+        XPathAssertion(s"$$output$indexString=$v", s" output$indexString did not equal $v")
+      },
       _auth = _auth
     )
   }
