@@ -410,7 +410,7 @@ declare
                     </rest:response>
               else
                 (: not a group manager of an existing group :)
-                api:rest-error(403, "Forbidden")
+                api:rest-error(403, "Forbidden: " || $user || " cannot edit group because managers are " || string-join($old-managers, ","))
           else
             (: group does not exist, this is group creation :)
             let $members := distinct-values($body//g:member)

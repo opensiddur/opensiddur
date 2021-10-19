@@ -190,14 +190,6 @@ cacheSize=${cache.size}
         </copy>
     </target>
 
-    <target name="autodeploy-tests" depends="dist">
-        <copy todir="${installdir}/autodeploy">
-            <fileset dir="${dist}">
-                <include name="opensiddur-tests.xar"/>
-            </fileset>
-        </copy>
-    </target>
-
     <target name="autoupgrade"
         depends="dist,install-hebmorph"
         description="install or upgrade Open Siddur packages without touching eXist">
@@ -240,7 +232,6 @@ cacheSize=${cache.size}
 			<fileset dir=".">
 				<include name="opensiddur-server/build.xml"/>
                 <include name="opensiddur-demos/build.xml"/>
-                <include name="opensiddur-tests/build.xml"/>
 				<exclude name="build.xml"/>
 			</fileset>
 		</subant>
@@ -332,11 +323,6 @@ cacheSize=${cache.size}
                 executable="python3"
                 failonerror="true">
             <arg value="python/wait_for_up.py"/>
-        </exec>
-        <exec
-            executable="python3"
-            failonerror="true">
-            <arg value="python/testrunner.py"/>
         </exec>
         <exec
                 executable="mvn"

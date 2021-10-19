@@ -163,12 +163,15 @@ class Xq(
       _auth = _auth)
   }
 
-  def assertEquals(value: String): Xq = {
+  def assertEquals(value: String*): Xq = {
     new Xq(
       _code = _code,
       _prolog = _prolog,
       _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion(s"$$output='$value'", s" output did not equal '$value'"),
+      _assertions = _assertions ++ value.zipWithIndex.map { case (v:String, idx: Int) =>
+        val indexString = if (value.length > 1) s"[${idx + 1}]" else ""
+        XPathAssertion(s"$$output$indexString='$v'", s" output$indexString did not equal '$v'")
+      },
       _auth = _auth
     )
   }
@@ -184,12 +187,15 @@ class Xq(
     )
   }
 
-  def assertEquals[T : Numeric](value: T): Xq = {
+  def assertEquals[T : Numeric](value: T*): Xq = {
     new Xq(
       _code = _code,
       _prolog = _prolog,
       _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion(s"$$output=$value", s" output did not equal $value"),
+      _assertions = _assertions ++ value.zipWithIndex.map { case (v:T, idx: Int) =>
+        val indexString = if (value.length > 1) s"[${idx + 1}]" else ""
+        XPathAssertion(s"$$output$indexString=$v", s" output$indexString did not equal $v")
+      },
       _auth = _auth
     )
   }
@@ -328,15 +334,67 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
     content
   }
 
+  /** Store arbitrary content to an arbitrary path */
+  def store(
+             localSource: String,
+             collection: String,
+             resourceName: String,
+             dataType: String = "application/xml",
+             firstParamIsContent: Boolean = false,
+             as: String = "guest"
+            ): Array[String] = {
+    val content = if (firstParamIsContent) ("'" + localSource + "'") else readXmlFile(localSource)
+    xq(s"""xmldb:store('$collection', '$resourceName', $content, '$dataType')""")
+      .user(as)
+      .go
+  }
+
+  /** Remove an arbitrary path from the db */
+  def remove(collection: String, resourceName: String, as: String = "guest") = {
+    xq(s"""xmldb:remove('$collection', '$resourceName')""")
+      .user(as)
+      .go
+  }
+
+  def setupCollection(base: String, collection: String,
+                      owner: Option[String] = None,
+                      group: Option[String] = None,
+                      permissions: Option[String] = None) = {
+    val changeOwner =
+      if (owner.isDefined)
+        s"""let $$change-owner := sm:chown(xs:anyURI('$base/$collection'), '${owner.get}')"""
+      else ""
+    val changeGroup =
+      if (group.isDefined)
+        s"""let $$change-group := sm:chgrp(xs:anyURI('$base/$collection'), '${group.get}')"""
+      else ""
+    val changePermissions =
+      if (permissions.isDefined)
+        s"""let $$change-permissions := sm:chmod(xs:anyURI('$base/$collection'), '${permissions.get}')"""
+      else ""
+
+    xq(
+      s"""
+         let $$create := xmldb:create-collection('$base', '$collection')
+         $changeOwner
+         $changeGroup
+         $changePermissions
+         return ()
+      """)
+      .user("admin")
+      .go
+  }
+
   def setupResource(localSource: String,
                     resourceName: String,
                     dataType: String,
                     owner: Int,
                     subType: Option[String] = None,
                     group: Option[String] = None,
-                    permissions: Option[String] = None
+                    permissions: Option[String] = None,
+                    firstParamIsContent: Boolean = false
                    ) = {
-    val content = readXmlFile(localSource)
+    val content = if (firstParamIsContent) ("'" + localSource + "'") else readXmlFile(localSource)
     xq(
       s"""
          let $$file := tcommon:setup-resource('${resourceName}',
@@ -355,6 +413,12 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
          let $$file := tcommon:teardown-resource('${resourceName}', '${dataType}', $owner)
           return ()
         """)
+      .go
+  }
+
+  def teardownCollection(collectionName: String) = {
+    xq(s"""if (xmldb:collection-available('$collectionName')) then xmldb:remove('$collectionName') else ()""")
+      .user("admin")
       .go
   }
 
