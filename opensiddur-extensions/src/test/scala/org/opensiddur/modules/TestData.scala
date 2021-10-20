@@ -41,20 +41,11 @@ class TestData extends DbTest {
   override def beforeAll()  {
     super.beforeAll()
 
-    xq("""
-    let $users := tcommon:setup-test-users(1)
-    return ()
-    """)
-    .go
+    setupUsers(2)
   }
 
   override def afterAll()  {
-    xq(
-      """
-        let $users := tcommon:teardown-test-users(1)
-        return ()
-        """)
-    .go
+    teardownUsers(1)
 
     super.afterAll()
   }

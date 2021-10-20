@@ -1,0 +1,32 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="en">
+  <tei:teiHeader/>
+  <tei:text>
+      <jf:merged xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0">
+         <tei:p jf:start="p-1.3.2.1.2" jf:position="1" jf:relative="-1" jf:nchildren="-2"
+                jf:nlevels="1"
+                jf:nprecedents="1"
+                jf:layer-id="layer-1.3.2.1"/>
+         <tei:seg jf:id="seg1" jf:stream="stream">Segment 1</tei:seg>
+         <tei:label jf:nprecedents="2" jf:layer-id="layer-1.3.2.1" jf:position="1" jf:nlevels="-2"
+                    jf:relative="1"
+                    jf:nchildren="2">1</tei:label>
+         <tei:p jf:suspend="p-1.3.2.1.2" jf:position="1" jf:relative="1" jf:nchildren="2"
+                jf:nlevels="-1"
+                jf:nprecedents="1"
+                jf:layer-id="layer-1.3.2.1"/>
+         <tei:seg jf:id="seg2" jf:stream="stream">Segment 2</tei:seg>
+         <tei:p jf:continue="p-1.3.2.1.2" jf:position="3" jf:relative="-1" jf:nchildren="-2"
+                jf:nlevels="1"
+                jf:nprecedents="1"
+                jf:layer-id="layer-1.3.2.1"/>
+         <tei:seg jf:id="seg3" jf:stream="stream">Segment 3</tei:seg>
+         <tei:p jf:end="p-1.3.2.1.2" jf:position="3" jf:relative="1" jf:nchildren="2"
+                jf:nlevels="-1"
+                jf:nprecedents="1"
+                jf:layer-id="layer-1.3.2.1"/>
+      </jf:merged>
+      <jf:concurrent xmlns:jf="http://jewishliturgy.org/ns/jlptei/flat/1.0">
+         <jf:layer type="p" jf:layer-id="layer-1.3.2.1"/>
+      </jf:concurrent>
+  </tei:text>
+</tei:TEI>

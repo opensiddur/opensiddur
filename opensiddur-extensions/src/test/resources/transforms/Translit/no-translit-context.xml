@@ -1,0 +1,21 @@
+<jx:joined-concurrent xmlns:jx="http://jewishliturgy.org/ns/jlp-processor">
+  <tei:p xmlns:tei="http://www.tei-c.org/ns/1.0" jx:id="p1">
+      <tei:s jx:id="s1">
+         <tei:seg jx:id="seg1">
+        This is a segment
+      </tei:seg>
+      </tei:s>
+  </tei:p>
+  <j:parallelGrp xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+      <j:original xml:lang="he">
+         <tei:seg xmlns:tei="http://www.tei-c.org/ns/1.0" jx:id="seg2">
+        וגם זה
+      </tei:seg>
+      </j:original>
+      <j:parallel xml:lang="en">
+         <tei:seg xmlns:tei="http://www.tei-c.org/ns/1.0" jx:id="seg3">
+        and so is this.
+      </tei:seg>
+      </j:parallel>
+  </j:parallelGrp>
+</jx:joined-concurrent>
