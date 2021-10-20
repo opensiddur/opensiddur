@@ -142,7 +142,7 @@ declare function orig:validate-external-links(
     let $base := 
         if (contains($target, '#'))
         then substring-before($target, '#')[.]
-        else ()
+        else $target
     where exists($base)
     return
       let $fragment := substring-after($target, '#')[.]
@@ -239,7 +239,8 @@ declare
      <crest:additional text="linkage" relative-uri="linkage"/>,
      <crest:additional text="flat" relative-uri="flat"/>,
      <crest:additional text="combined" relative-uri="combined"/>,
-     <crest:additional text="transcluded" relative-uri="combined?transclude=true"/>),
+     <crest:additional text="transcluded" relative-uri="combined?transclude=true"/>,
+     $crest:additional-validate),
     ()
   )
 };
@@ -277,8 +278,17 @@ declare
   crest:delete($orig:data-type, $name)
 };
 
+declare function orig:post(
+    $doc as document-node()
+) as item()+ {
+    orig:post($doc, ())
+};
+
 (:~ Post a new original document 
  : @param $body The JLPTEI document
+ : @param $validate If present, validate the POST-ed document, but do not actually post it
+ :
+ : @return HTTP 200 if validated
  : @return HTTP 201 if created successfully
  : @error HTTP 400 Invalid JLPTEI XML
  : @error HTTP 401 Not authorized
@@ -291,24 +301,40 @@ declare
 declare
   %rest:POST("{$body}")
   %rest:path("/api/data/original")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "application/tei+xml", "text/xml")
   function orig:post(
+    $body as document-node(),
+    $validate as xs:string*
+  ) as item()+ {
+  let $data-path := concat($orig:data-type, "/", $body/tei:TEI/@xml:lang)
+  let $api-path-base := api:uri-of($orig:api-path-base)
+  return
+      crest:post(
+        $data-path,
+        $orig:path-base,
+        $api-path-base,
+        $body,
+        orig:validate#2,
+        orig:validate-report#2,
+        (),
+        (),
+        $validate[1]
+      )
+};
+
+declare function orig:put(
+    $name as xs:string,
     $body as document-node()
   ) as item()+ {
-  crest:post(
-    concat($orig:data-type, "/", $body/tei:TEI/@xml:lang),
-    $orig:path-base,
-    api:uri-of($orig:api-path-base),
-    $body,
-    orig:validate#2,
-    orig:validate-report#2,
-    ()
-  )
-};
+  orig:put($name, $body, ())
+  };
 
 (:~ Edit/replace a document in the database
  : @param $name Name of the document to replace
  : @param $body New document
+ : @param $validate Validate without writing to the database
+ : @return HTTP 200 If successfully validated
  : @return HTTP 204 If successful
  : @error HTTP 400 Invalid XML; Attempt to edit a read-only part of the document
  : @error HTTP 401 Unauthorized - not logged in
@@ -322,15 +348,19 @@ declare
 declare
   %rest:PUT("{$body}")
   %rest:path("/api/data/original/{$name}")
+  %rest:query-param("validate", "{$validate}")
   %rest:consumes("application/xml", "text/xml")
   function orig:put(
     $name as xs:string,
-    $body as document-node()
+    $body as document-node(),
+    $validate as xs:string*
   ) as item()+ {
   crest:put(
     $orig:data-type, $name, $body,
     orig:validate#2,
-    orig:validate-report#2
+    orig:validate-report#2,
+    (),
+    $validate[1]
   )
 };
 
@@ -449,7 +479,8 @@ declare
           "Linkage to " || $name,
           api:uri-of("/api/data/linkage"),
           $query-function, $list-function,
-          (), orig:linkage-title-function#1
+          (),
+           orig:linkage-title-function#1
         )
     else $doc
 };

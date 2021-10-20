@@ -39,30 +39,48 @@ declare
         <ul class="apis">
           <li class="api">
             <a class="discovery" href="{$api-base}/notes">Annotation data</a>
+            <a class="alt" property="validation"
+                            href="{$api-base}/notes?validate=true">validation (POST)</a>
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/conditionals">Conditional definition data</a>
+            <a class="alt" property="validation"
+                                        href="{$api-base}/conditionals?validate=true">validation (POST)</a>
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/dictionaries">Dictionary data</a>
+            <a class="alt" property="validation"
+                                                    href="{$api-base}/dictionaries?validate=true">validation (POST)</a>
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/linkage">Linkage data</a>
+            <a class="alt" property="validation"
+                                                    href="{$api-base}/linkage?validate=true">validation (POST)</a>
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/original">Original data</a>
+            <a class="alt" property="validation"
+                                                    href="{$api-base}/original?validate=true">validation (POST)</a>
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/outlines">Outlines</a>
+            <a class="alt" property="validation"
+                                                    href="{$api-base}/outlines?validate=true">validation (POST)</a>
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/sources">Sources (Bibliographic data)</a>
+            <a class="alt" property="validation"
+                                                    href="{$api-base}/sources?validate=true">validation (POST)</a>
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/styles">Styles</a>
+            <a class="alt" property="validation"
+                                                    href="{$api-base}/styles?validate=true">validation (POST)</a>
           </li>
           <li class="api">
             <a class="discovery" href="{$api-base}/transliteration">Transliteration</a>
+            <a class="alt" property="validation"
+                                                    href="{$api-base}/transliteration?validate=true">validation (POST)</a>
           </li>
         </ul>
       </body>

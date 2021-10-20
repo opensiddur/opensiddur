@@ -1,0 +1,49 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xml:lang="">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title type="main" xml:lang="en">Valid</tei:title>
+                <tei:respStmt>
+                    <tei:resp key="trc">Transcribed by</tei:resp>
+                    <tei:name ref="/user/testuser">Test User</tei:name>
+                </tei:respStmt>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:distributor>
+                    <tei:ref target="http://opensiddur.org">Open Siddur Project</tei:ref>
+                </tei:distributor>
+                <tei:availability>
+                    <tei:licence target="http://www.creativecommons.org/publicdomain/zero/1.0"/>
+                </tei:availability>
+                <tei:date>2012-06-08</tei:date>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:bibl>
+                    <tei:ptr type="bibl" target="/data/sources/open_siddur_project"/>
+                    <tei:ptr type="bibl-content" target="#parallel"/>
+                </tei:bibl>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+        <tei:revisionDesc>
+            <tei:change type="create" when="2012-06-08-04:00">Document created from template</tei:change>
+        </tei:revisionDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <tei:front>
+            <tei:div>
+                <tei:p>Front matter</tei:p>
+            </tei:div>
+        </tei:front>
+        <j:parallelText xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0" xml:id="parallel">
+            <tei:idno>Test Translation</tei:idno>
+            <tei:linkGrp domains="/data/original/a-he /data/original/b-en">
+                <tei:link target="/data/original/a-he#range(v1_seg1,v1_seg2) /data/original/b-en#range(v1_seg1,v1_seg2)"/>
+            </tei:linkGrp>
+        </j:parallelText>
+        <tei:back>
+            <tei:div>
+                <tei:p>Back matter</tei:p>
+            </tei:div>
+        </tei:back>
+    </tei:text>
+</tei:TEI>

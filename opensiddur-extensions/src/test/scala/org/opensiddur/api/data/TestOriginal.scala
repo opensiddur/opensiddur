@@ -273,6 +273,8 @@ class TestOriginal extends OriginalDataTestFixtures {
         .assertXPath("""count($output//html:li[@class="result"])>=1""", "Returns at least one result")
         .assertXPath("""every $li in $output//html:li[@class="result"]
                        satisfies exists($li/html:a[@class="alt"][@property="access"])""", "Results include a pointer to the access API")
+        .assertXPath("""every $li in $output//html:li[@class="result"]
+                       satisfies exists($li/html:a[@class="alt"][starts-with(@property, "validation")])""", "Results include a pointer to the validation API")
         .assertSearchResults
         .go
     }
@@ -312,6 +314,21 @@ class TestOriginal extends OriginalDataTestFixtures {
           """collection('/db/data/original/en')
             [util:document-name(.)=tokenize($output//http:header[@name='Location']/@value,'/')[last()] || '.xml']
             //tei:revisionDesc/tei:change[1][@who="/user/xqtest1"][@type="created"]""", "A change record has been added")
+        .go
+    }
+
+    it("validates a valid resource") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/valid.xml")
+
+      xq(s"""orig:post(document { $validContent }, "true")""")
+        .assertXPath("""$output/self::report/status='valid'""")
+        .go
+    }
+
+    it("""invalidates an invalid resource""") {
+      val invalidContent = readXmlFile("src/test/resources/api/data/original/invalid.xml")
+      xq(s"""orig:post(document { $invalidContent }, "true")""")
+        .assertXPath("$output/self::report/status = 'invalid'")
         .go
     }
 
@@ -548,6 +565,13 @@ class TestOriginal extends OriginalDataTestFixtures {
         .assertXPath("$output/status = 'valid'", "The document is marked valid")
         .go
     }
+
+    it("invalidates a document with an invalid source (regression test for #208)") {
+      val invalidBadSource = readXmlFile("src/test/resources/api/data/original/bad_source.xml")
+      xq(s"""orig:validate-report(document { $invalidBadSource }, ())""")
+        .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .go
+    }
   }
 
 }
@@ -575,6 +599,15 @@ class TestOriginalWithReset extends OriginalDataTestFixtures {
           """doc('/db/data/original/en/existing.xml')
             //tei:revisionDesc/tei:change[1][@who="/user/xqtest1"][@type="edited"][@who="/user/xqtest1"][@when]""", "A change record has been added")
         .assertXPath("""count(doc('/db/data/original/en/existing.xml')//tei:revisionDesc/tei:change)=2""", "There are 2 change records total")
+        .go
+    }
+
+    it("successfully validates a valid resource to an existing resource") {
+      val validContent = readXmlFile("src/test/resources/api/data/original/existing_after_put.xml")
+
+      xq(s"""orig:put("existing", document { $validContent }, "true")""")
+        .assertXPath(
+          """$output/self::report/status = 'valid'""")
         .go
     }
 
@@ -610,6 +643,15 @@ class TestOriginalWithReset extends OriginalDataTestFixtures {
       xq(s"""orig:put("existing", document { $invalidContent })""")
         .user("xqtest1")
         .assertHttpBadRequest
+        .go
+    }
+
+    it("successfully invalidates an invalid resource to an existing resource") {
+      val invalidContent = readXmlFile("src/test/resources/api/data/original/invalid.xml")
+
+      xq(s"""orig:put("existing", document { $invalidContent }, "true")""")
+        .assertXPath(
+          """$output/self::report/status = 'invalid'""")
         .go
     }
 

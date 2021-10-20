@@ -305,7 +305,7 @@ def main():
     suites, tests, errors, fails, ignores = 0, 0, 0, 0, 0
 
     suite_apis = {
-        "XQSuite": XQSuiteApi(),
+        #"XQSuite": XQSuiteApi(),   # all XQSuite tests have been removed!
         "Legacy": LegacyTestApi()
     }
 
