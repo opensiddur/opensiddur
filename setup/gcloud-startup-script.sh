@@ -23,7 +23,7 @@ useradd -c "eXist db"  exist
 echo "Downloading prerequisites..."
 apt update
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils nginx python3-certbot-nginx python3-lxml unzip
+apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils nginx python3-certbot-nginx python3-lxml unzip unattended-upgrades update-notifier-common
 update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 echo "Obtaining opensiddur sources..."
@@ -279,3 +279,4 @@ then
 else
     echo "No prior instances found for ${INSTANCE_BASE}";
 fi
+echo "Done."
