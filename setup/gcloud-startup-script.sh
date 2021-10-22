@@ -29,6 +29,10 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils nginx python3-certbot-nginx python3-lxml unzip unattended-upgrades update-notifier-common
 update-java-alternatives -s java-1.8.0-openjdk-amd64
 
+echo "Setting up unattended upgrades..."
+echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean true | debconf-set-selections
+dpkg-reconfigure -f noninteractive unattended-upgrades
+
 echo "Obtaining opensiddur sources..."
 mkdir -p src
 cd src

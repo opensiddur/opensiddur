@@ -57,8 +57,7 @@ jobs:
 
       - name: Build
         run: |-
-          echo "Test disabled. Just deploying now"
-      #    ant test
+          ant test
       - name: Deploy
         run: |-
           gcloud compute \
