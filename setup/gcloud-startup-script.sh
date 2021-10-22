@@ -21,7 +21,10 @@ echo "Setting up the eXist user..."
 useradd -c "eXist db"  exist
 
 echo "Downloading prerequisites..."
-apt update
+# apt is sometimes locked, so we need to wait for any locks to resolve
+while [[ -n $(pgrep apt-get) ]]; do sleep 1; done
+
+apt-get update
 export DEBIAN_FRONTEND=noninteractive
 apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils nginx python3-certbot-nginx python3-lxml unzip unattended-upgrades update-notifier-common
 update-java-alternatives -s java-1.8.0-openjdk-amd64
