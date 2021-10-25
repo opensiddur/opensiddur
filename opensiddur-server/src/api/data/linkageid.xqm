@@ -28,7 +28,7 @@ import module namespace data="http://jewishliturgy.org/modules/data"
 import module namespace lnk="http://jewishliturgy.org/api/data/linkage"
   at "linkage.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
-    at "../../modules/follow-uri.xqm";
+  at "../../modules/follow-uri.xqm";
 
 declare variable $lnkid:api-path-base := "/api/data/linkageid";
 
@@ -44,7 +44,7 @@ declare function lnkid:query-function(
 
 (:~ list all linkage ids :)
 declare function lnkid:list-function() as element()* {
-  for $id in distinct-values(collection($lnk:path-base)//tei:parallelText/tei:idno/normalize-space(.))
+  for $id in distinct-values(collection($lnk:path-base)//j:parallelText/tei:idno/normalize-space(.))
   order by $id ascending
   return element tei:idno { $id }
 };
@@ -87,16 +87,16 @@ declare
  :)
 declare function lnkid:list-by-id(
     $id as xs:string
-) as element(result)* {
+) as element(lnkid:result)* {
     for $id-element in collection($lnk:path-base)//tei:idno[. = $id]
-    let $parallel-domains := tokenize($id-element/parent::j:parallelText/@domains/string(), "\s+")
+    let $parallel-domains := tokenize($id-element/parent::j:parallelText/tei:linkGrp/@domains/string(), "\s+")
     let $left-domain := uri:uri-base-path($parallel-domains[1])
     let $right-domain := uri:uri-base-path($parallel-domains[2])
     return
-        element result {
-            element linkage { data:db-path-to-api(document-uri(root($id-element))) },
-            element left { data:db-path-to-api($left-domain) },
-            element right { data:db-path-to-api($right-domain) }
+        element lnkid:result {
+            element lnkid:linkage { data:db-path-to-api(document-uri(root($id-element))) },
+            element lnkid:left { "/api" || $left-domain }, (: I am assuming here that the domains contain api-like paths, but lack /api prepended :)
+            element lnkid:right { "/api" || $right-domain }
         }
 };
 
@@ -130,9 +130,10 @@ declare
                 <body>
                     <ul class="results">{
                         for $result in $results
-                        let $linkage := $result/linkage/string()
-                        let $left := $result/left/string()
-                        let $right := $result/right/string()
+                        let $linkage := $result/lnkid:linkage/string()
+                        let $left := $result/lnkid:left/string()
+                        let $right := $result/lnkid:right/string()
+                        let $log := util:log("INFO", ("***linkage=", $linkage, " left=", $left, " right=", $right))
                         return
                             <li class="result">
                                 <a class="document linkage" href="{$linkage}">{crest:tei-title-function(data:doc($linkage))}</a>
