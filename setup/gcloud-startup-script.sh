@@ -288,8 +288,11 @@ for FINGERPRINT in $(gcloud compute os-login ssh-keys list ); do
 INSTANCE=$(gcloud compute os-login ssh-keys describe --key $FINGERPRINT --format "(key)" | grep "root@" | tr -d ' ' | sed -e "s/root@//g");
 if ! _contains "$RUNNING_INSTANCES" "$INSTANCE";
 then
-echo "Removing ssh key for $INSTANCE"
-gcloud compute os-login ssh-keys remove --key $FINGERPRINT
+  if [[ -n "$INSTANCE" ]];
+  then
+    echo "Removing ssh key for $INSTANCE"
+    gcloud compute os-login ssh-keys remove --key $FINGERPRINT
+  fi
 fi
 done
 
