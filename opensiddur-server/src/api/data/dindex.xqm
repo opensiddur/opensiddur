@@ -58,6 +58,9 @@ declare
                                                     href="{$api-base}/linkage?validate=true">validation (POST)</a>
           </li>
           <li class="api">
+            <a class="discovery" href="{$api-base}/linkageid">Linkage identifiers</a>
+          </li>
+          <li class="api">
             <a class="discovery" href="{$api-base}/original">Original data</a>
             <a class="alt" property="validation"
                                                     href="{$api-base}/original?validate=true">validation (POST)</a>

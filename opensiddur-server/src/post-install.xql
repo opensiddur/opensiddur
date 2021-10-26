@@ -82,6 +82,7 @@ for $module in (
             "/api/data/original.xqm",
             "/api/group.xqm",
             "/api/data/linkage.xqm",
+            "/api/data/linkageid.xqm",
             "/api/data/transliteration.xqm",
             "/api/index.xqm",
             "/api/login.xqm",
