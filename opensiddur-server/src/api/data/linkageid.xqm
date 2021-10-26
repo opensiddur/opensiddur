@@ -44,9 +44,10 @@ declare function lnkid:query-function(
 
 (:~ list all linkage ids :)
 declare function lnkid:list-function() as element()* {
-  for $id in distinct-values(collection($lnk:path-base)//j:parallelText/tei:idno/normalize-space(.))
+  for $id in distinct-values(collection($lnk:path-base)//j:parallelText/tei:idno)
+  let $normalized := normalize-space($id)
   order by $id ascending
-  return element tei:idno { $id }
+  return element tei:idno { $normalized }
 };
 
 (:~ title of a linkage id from an id node :)
