@@ -46,7 +46,7 @@ declare function lnkid:query-function(
 declare function lnkid:list-function() as element()* {
   for $id in distinct-values(collection($lnk:path-base)//j:parallelText/tei:idno)
   let $normalized := normalize-space($id)
-  order by $id ascending
+  order by $normalized ascending
   return element tei:idno { $normalized }
 };
 
@@ -89,13 +89,15 @@ declare
 declare function lnkid:list-by-id(
     $id as xs:string
 ) as element(lnkid:result)* {
-    for $id-element in collection($lnk:path-base)//tei:idno[. = $id]
+    for $id-element in collection($lnk:path-base)//tei:idno[normalize-space(.) = $id]
     let $parallel-domains := tokenize($id-element/parent::j:parallelText/tei:linkGrp/@domains/string(), "\s+")
     let $left-domain := uri:uri-base-path($parallel-domains[1])
     let $right-domain := uri:uri-base-path($parallel-domains[2])
+    let $linkage := document-uri(root($id-element))
+    order by $linkage
     return
         element lnkid:result {
-            element lnkid:linkage { data:db-path-to-api(document-uri(root($id-element))) },
+            element lnkid:linkage { data:db-path-to-api($linkage) },
             element lnkid:left { "/api" || $left-domain }, (: I am assuming here that the domains contain api-like paths, but lack /api prepended :)
             element lnkid:right { "/api" || $right-domain }
         }
@@ -114,16 +116,16 @@ declare
   function lnkid:get(
     $name as xs:string
   ) as item()+ {
-    <rest:response>
-      <output:serialization-parameters>
-        <output:method>xhtml</output:method>
-      </output:serialization-parameters>
-    </rest:response>,
     let $results := lnkid:list-by-id($name)
     return
         if (empty($results))
         then api:rest-error(404, "Not found", $name)
-        else
+        else (
+            <rest:response>
+              <output:serialization-parameters>
+                <output:method>xhtml</output:method>
+              </output:serialization-parameters>
+            </rest:response>,
             <html xmlns="http://www.w3.org/1999/xhtml">
                 <head>
                     <title>{$name}</title>
@@ -146,4 +148,5 @@ declare
                     }</ul>
                 </body>
             </html>
+        )
 };
