@@ -275,6 +275,27 @@ echo "Changing JLPTEI schema for v0.12+..."
 ${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upg12='http://jewishliturgy.org/modules/upgrade12' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade12.xqm'; upg12:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
 ${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upgrade122='http://jewishliturgy.org/modules/upgrade122' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade122.xqm'; upgrade122:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
 
+echo "Removing stale ssh keys..."
+# Note that this will (intentionally) leave the key for the immediate-prior instance
+_contains () { # Check if space-separated list $1 contains line $2
+echo "$1" | tr ' ' '\n' | grep -F -x -q "$2"
+}
+
+RUNNING_INSTANCES=$(gcloud compute instances list | grep RUNNING | cut -f 1 -d " ")
+echo "Running instances are ${RUNNING_INSTANCES}"
+
+for FINGERPRINT in $(gcloud compute os-login ssh-keys list ); do
+INSTANCE=$(gcloud compute os-login ssh-keys describe --key $FINGERPRINT --format "(key)" | grep "root@" | tr -d ' ' | sed -e "s/root@//g");
+if ! _contains "$RUNNING_INSTANCES" "$INSTANCE";
+then
+  if [[ -n "$INSTANCE" ]];
+  then
+    echo "Removing ssh key for $INSTANCE"
+    gcloud compute os-login ssh-keys remove --key $FINGERPRINT
+  fi
+fi
+done
+
 echo "Stopping prior instances..."
 ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="status=RUNNING AND name~'${INSTANCE_BASE}'" | \
        sed -n '1!p' | \
@@ -286,4 +307,5 @@ then
 else
     echo "No prior instances found for ${INSTANCE_BASE}";
 fi
+
 echo "Done."

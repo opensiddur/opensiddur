@@ -53,6 +53,7 @@ class TestLinkageId extends DbTest {
         .user("xqtest1")
         .assertXPath("""count($output//html:li[@class="result"]) >= 2""", "returns at least 2 results")
         .assertXPath("""$output//html:li[@class="result"]/html:a/string() = "identifier1" """, "one of the results is identifier1")
+        .assertXPath("""ends-with($output//html:li[@class="result"]/html:a/@href/string(), "/api/data/linkageid/identifier1") """, "the url of identifier1 is referenced")
         .assertXPath("""$output//html:li[@class="result"]/html:a/string() = "identifier2" """, "one of the results is identifier2")
         .assertSearchResults
         .go

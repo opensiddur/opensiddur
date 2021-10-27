@@ -352,7 +352,9 @@ declare function crest:do-list(
   return (
     <ul xmlns="http://www.w3.org/1999/xhtml" class="results">{
       for $result in subsequence($all, $start, $count) 
-      let $api-name := replace(util:document-name($result), "\.xml$", "")
+      let $api-name := replace((
+          util:document-name($result)[.], (: if there is no document available, use the result itself as the API name :)
+          $result)[1], "\.xml$", "")
       return
         <li class="result">
           <a class="document" href="{$path-base}/{$api-name}">{$title-function($result)}</a>
