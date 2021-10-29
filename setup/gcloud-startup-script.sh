@@ -125,14 +125,17 @@ RESTORE_COMPLETE=0
 if [[ $BRANCH == "master" ]];
 then
     echo "We are in the master branch. Restoring from the existing master branch"
-    PRIOR_INSTANCE=$(gcloud compute instances list --filter="status=RUNNING AND name~'${BACKUP_INSTANCE_BASE}'" | \
+
+    PRIOR_INSTANCE=$(gcloud compute instances list --filter="status=RUNNING AND name~'${BACKUP_INSTANCE_BASE}'" | \
            sed -n '1!p' | \
            cut -d " " -f 1 | \
            grep -v "${INSTANCE_NAME}" | \
            head -n 1)
+
     if [[ -n "${PRIOR_INSTANCE}" ]];
     then
         echo "Prior instance ${PRIOR_INSTANCE} exists. Retrieving a backup...";
+        gcloud logging -q write instance "Restoring backup from the active master branch ${PRIOR_INSTANCE}." --severity=INFO
         COMMIT=$(git rev-parse --short HEAD)
 
         echo "Performing a backup on ${PRIOR_INSTANCE}..."
@@ -154,11 +157,14 @@ then
     echo "We are in the $BRANCH branch. Restoring from a recent cloud storage backup of master"
     echo "Finding the most recent backup of master..."
     MOST_RECENT_BACKUP=$(gsutil ls gs://opensiddur-database-backups-prod | tail -n 1)
+
     echo "Most recent backup is ${MOST_RECENT_BACKUP}"
     if [[ -z "${MOST_RECENT_BACKUP}" ]];
     then
         echo "No viable backup exists. Proceeding without restoring data."
+        gcloud logging -q write instance "No viable backup exists to restore data." --severity=ALERT
     else
+        gcloud logging -q write instance "Restoring backup from cloud storage ${MOST_RECENT_BACKUP}." --severity=INFO
         BACKUP_FILENAME=$(basename ${MOST_RECENT_BACKUP})
         BACKUP_TEMP_DIR=/tmp/backup.master/fullbackup
         mkdir -p ${BACKUP_TEMP_DIR}
@@ -193,12 +199,20 @@ echo "Starting Open Siddur Daily Backup to Cloud..."
 
 export PATH=\$PATH:/snap/bin
 
-for dir in \$(find ${EXPORT_DIR}/* -maxdepth 0 -type d -newermt \$(date -d "1 day ago" +%Y%m%d) ); do
+BACKUPS=\$(find ${EXPORT_DIR}/* -maxdepth 0 -type d -newermt \$(date -d "1 day ago" +%Y%m%d))
+
+if [[ -z "\$BACKUPS" ]];
+then
+gcloud logging -q write backups "No backup available to write today!" --severity=ALERT
+fi
+
+for dir in \$BACKUPS; do
     cd \$dir
     BASENAME=\$(basename \$dir)
     echo "Backing up \$BASENAME to gs://${BACKUP_CLOUD_BUCKET}..."
     tar zcvf \$BASENAME.tar.gz db
     gsutil cp \$BASENAME.tar.gz gs://${BACKUP_CLOUD_BUCKET}
+    gcloud logging -q write backups "Backup \$BASENAME.tar.gz written to gs://${BACKUP_CLOUD_BUCKET}" --severity=INFO
     rm \$dir/\$BASENAME.tar.gz;
 done
 
@@ -211,6 +225,8 @@ systemctl start eXist-db
 
 echo "Wait until eXist-db is up..."
 python3 python/wait_for_up.py --host=localhost --port=8080 --timeout=86400
+
+gcloud logging -q write instance "${INSTANCE_NAME}: eXist is up." --severity=INFO
 
 echo "Installing dynamic DNS updater to update ${DNS_NAME}..."
 cat << EOF > /etc/ddclient.conf
@@ -250,6 +266,8 @@ do
     sleep 60;
 done
 
+gcloud logging -q write instance "${INSTANCE_NAME}: Dynamic DNS propagation for ${DNS_NAME} to ${PUBLIC_IP} has completed successfully." --severity=INFO
+
 echo "Get an SSL certificate..."
 if [[ $BRANCH = feature/* ]];
 then
@@ -260,6 +278,8 @@ else
 fi
 certbot --nginx -n --domain ${DNS_NAME} --email ${DYN_EMAIL} --no-eff-email --agree-tos --redirect ${CERTBOT_DRY_RUN}
 
+gcloud logging -q write instance "${INSTANCE_NAME}: SSL certificate has been obtained." --severity=INFO
+
 echo "Scheduling SSL Certificate renewal..."
 cat << EOF > /etc/cron.daily/certbot_renewal
 #!/bin/sh
@@ -269,6 +289,8 @@ chmod +x /etc/cron.daily/certbot_renewal
 
 echo "Restarting nginx..."
 systemctl restart nginx
+
+gcloud logging -q write instance "${INSTANCE_NAME}: Web server is up." --severity=INFO
 
 # TODO: only do this if the upgrade is necessary...
 echo "Changing JLPTEI schema for v0.12+..."
@@ -300,7 +322,7 @@ echo "Stopping prior instances..."
 ALL_PRIOR_INSTANCES=$(gcloud compute instances list --filter="status=RUNNING AND name~'${INSTANCE_BASE}'" | \
        sed -n '1!p' | \
        cut -d " " -f 1 | \
-       grep -v "${INSTANCE_NAME}" )
+       grep -v "${INSTANCE_NAME}" || true )
 if [[ -n "${ALL_PRIOR_INSTANCES}" ]];
 then
     gcloud compute instances stop ${ALL_PRIOR_INSTANCES} --zone ${ZONE};
@@ -308,4 +330,5 @@ else
     echo "No prior instances found for ${INSTANCE_BASE}";
 fi
 
+gcloud logging -q write instance "${INSTANCE_NAME}: startup script completed successfully." --severity=INFO
 echo "Done."
