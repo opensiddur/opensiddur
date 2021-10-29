@@ -203,7 +203,7 @@ BACKUPS=\$(find ${EXPORT_DIR}/* -maxdepth 0 -type d -newermt \$(date -d "1 day a
 
 if [[ -z "\$BACKUPS" ]];
 then
-gcloud logging -q write backups "No backup available to write today!" --severity=ALERT
+gcloud logging -q write instance "No backup available to write today!" --severity=ALERT
 fi
 
 for dir in \$BACKUPS; do
@@ -212,7 +212,7 @@ for dir in \$BACKUPS; do
     echo "Backing up \$BASENAME to gs://${BACKUP_CLOUD_BUCKET}..."
     tar zcvf \$BASENAME.tar.gz db
     gsutil cp \$BASENAME.tar.gz gs://${BACKUP_CLOUD_BUCKET}
-    gcloud logging -q write backups "Backup \$BASENAME.tar.gz written to gs://${BACKUP_CLOUD_BUCKET}" --severity=INFO
+    gcloud logging -q write instance "Backup \$BASENAME.tar.gz written to gs://${BACKUP_CLOUD_BUCKET}" --severity=INFO
     rm \$dir/\$BASENAME.tar.gz;
 done
 
