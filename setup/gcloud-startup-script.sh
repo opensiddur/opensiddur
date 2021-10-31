@@ -139,7 +139,7 @@ then
         COMMIT=$(git rev-parse --short HEAD)
 
         echo "Performing a backup on ${PRIOR_INSTANCE}..."
-        gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "cd /src/opensiddur && sudo -u exist ant backup-for-upgrade -Dbackup.directory=/tmp/backup.${COMMIT}"
+        gcloud compute ssh ${PRIOR_INSTANCE} --quiet --zone ${ZONE} --command "cd /src/opensiddur && sudo -u exist ant backup-for-upgrade -Dbackup.directory=/tmp/backup.${COMMIT}"
 
         echo "Copying backup here..."
         mkdir /tmp/exist-backup
