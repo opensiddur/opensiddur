@@ -97,10 +97,10 @@ declare function reverse:construct-layers(
         reverse:copy-attributes($layer),
         reverse:construct-layer(
           $e/*[1], 
-          map:new(($params, 
-            map {
-              "reverse:layer-id" : $layer/@jf:layer-id/string()
-            })))
+          map:put($params,
+            "reverse:layer-id",
+            $layer/@jf:layer-id/string()
+            ))
       }
   where $layers
   return
@@ -146,7 +146,7 @@ declare function reverse:construct-layer(
               reverse:copy-attributes($node),
               reverse:construct-layer(
                 $node/following-sibling::node()[1],
-                map:new((
+                map:merge((
                   $params,
                   map {
                     "reverse:start" : $node,
@@ -164,12 +164,11 @@ declare function reverse:construct-layer(
           (: recurse forward, suspending the current :)
           reverse:construct-layer(
             $node/following-sibling::node()[1], 
-            map:new((
+            map:put(
               $params,
-              map { 
-                "reverse:suspended" : ($params("reverse:suspended"), $node/@jf:suspend)
-              } 
-            ))
+              "reverse:suspended",
+               ($params("reverse:suspended"), $node/@jf:suspend)
+            )
           )
         )
         else if ($node/@jf:continue)
@@ -177,12 +176,11 @@ declare function reverse:construct-layer(
           (: recurse forward, undo the suspension :)
           reverse:construct-layer(
             $node/following-sibling::node()[1], 
-            map:new((
+            map:put(
               $params,
-              map { 
-                "reverse:suspended" : ($params("reverse:suspended")[not(.=$node/@jf:continue)])
-              } 
-            ))
+              "reverse:suspended",
+              ($params("reverse:suspended")[not(.=$node/@jf:continue)])
+            )
           )
         )
         else (

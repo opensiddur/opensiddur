@@ -27,20 +27,20 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
 
 declare variable $flatten:layer-order := map {
-    "none" := 0,
-    "parallel" := 1,
-    "phony-set" := 2,
-    "phony-conditional" := 3,
-    "phony-annotation" := 4,
-    "div" := 5,
-    "p"   := 6,
-    "lg"  := 7,
-    "s"   := 8,
-    "ab"  := 9,
-    "verse" := 10,
-    "l"   := 11,
-    "cit" := 12,
-    "choice" := 13
+    "none" : 0,
+    "parallel" : 1,
+    "phony-set" : 2,
+    "phony-conditional" : 3,
+    "phony-annotation" : 4,
+    "div" : 5,
+    "p"   : 6,
+    "lg"  : 7,
+    "s"   : 8,
+    "ab"  : 9,
+    "verse" : 10,
+    "l"   : 11,
+    "cit" : 12,
+    "choice" : 13
   };
 
 (:~ this declares the cache path that is expected to precede flatten, so
@@ -200,11 +200,11 @@ declare function flatten:resolve-stream(
         element { QName(namespace-uri($node), name($node)) }{
             $node/@*,
             flatten:resolve-stream($node/node(), 
-                map:new((
+                map:put(
                     $params, 
-                    map { "flatten:resolve-stream" := 
-                        common:TEI-root($node)//j:streamText
-                    })))
+                    "flatten:resolve-stream",
+                    common:TEI-root($node)//j:streamText
+                    ))
         }
     case element (jf:placeholder)
     return 
@@ -761,7 +761,7 @@ declare function flatten:j-layer(
       flatten:order-flattened(
         flatten:flatten(
           $context/node(), 
-          map:new(($params, map { "flatten:layer-id" := $layer-id, "flatten:stream-id" := $stream-id } ))
+          map:merge(($params, map { "flatten:layer-id" : $layer-id, "flatten:stream-id" : $stream-id } ))
         )
       )
     }

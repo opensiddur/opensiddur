@@ -271,7 +271,7 @@ declare function unflatten:start(
         $params
       )
     return map {
-      "start" := 
+      "start" :
         if (empty($processed-inside-sequence))
         then () 
         else
@@ -291,9 +291,9 @@ declare function unflatten:start(
             else (),
             $processed-inside-sequence
           },
-      "end" :=
+      "end" :
         ($end, $inside-sequence[last()])[1],
-      "continue" :=
+      "continue" :
         unflatten:continue-or-suspend($unclosed-tags, "continue")
     }
 };
