@@ -134,19 +134,20 @@ then
 
     if [[ -n "${PRIOR_INSTANCE}" ]];
     then
-        echo "Prior instance ${PRIOR_INSTANCE} exists. Retrieving a backup...";
-        gcloud logging -q write instance "${INSTANCE_NAME}: Restoring backup from the active master branch ${PRIOR_INSTANCE}." --severity=INFO
-        COMMIT=$(git rev-parse --short HEAD)
-
-        echo "Performing a backup on ${PRIOR_INSTANCE}..."
-        gcloud compute ssh ${PRIOR_INSTANCE} --quiet --zone ${ZONE} --command "cd /src/opensiddur && sudo -u exist ant backup-for-upgrade -Dbackup.directory=/tmp/backup.${COMMIT}"
-
-        echo "Copying backup here..."
-        mkdir /tmp/exist-backup
-        gcloud compute scp ${PRIOR_INSTANCE}:/tmp/backup.${COMMIT}/exist-backup.tar.gz /tmp/exist-backup --zone ${ZONE}
-        gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "sudo rm -fr /tmp/backup.${COMMIT}"
-        ( cd /tmp/exist-backup && tar zxvf exist-backup.tar.gz )
-        RESTORE_COMPLETE=1
+      echo "A prior instance ${PRIOR_INSTANCE} exists. Will not retrieve a backup to avoid a freeze. Will try to retrieve from cloud storage."
+#        echo "Prior instance ${PRIOR_INSTANCE} exists. Retrieving a backup...";
+#        gcloud logging -q write instance "${INSTANCE_NAME}: Restoring backup from the active master branch ${PRIOR_INSTANCE}." --severity=INFO
+#        COMMIT=$(git rev-parse --short HEAD)
+#
+#        echo "Performing a backup on ${PRIOR_INSTANCE}..."
+#        gcloud compute ssh ${PRIOR_INSTANCE} --quiet --zone ${ZONE} --command "cd /src/opensiddur && sudo -u exist ant backup-for-upgrade -Dbackup.directory=/tmp/backup.${COMMIT}"
+#
+#        echo "Copying backup here..."
+#        mkdir /tmp/exist-backup
+#        gcloud compute scp ${PRIOR_INSTANCE}:/tmp/backup.${COMMIT}/exist-backup.tar.gz /tmp/exist-backup --zone ${ZONE}
+#        gcloud compute ssh ${PRIOR_INSTANCE} --zone ${ZONE} --command "sudo rm -fr /tmp/backup.${COMMIT}"
+#        ( cd /tmp/exist-backup && tar zxvf exist-backup.tar.gz )
+#        RESTORE_COMPLETE=1
     else
         echo "No prior instance exists. Will try to retrieve a backup from cloud storage.";
     fi;
