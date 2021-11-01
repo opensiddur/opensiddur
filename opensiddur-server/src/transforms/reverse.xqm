@@ -99,7 +99,7 @@ declare function reverse:construct-layers(
           $e/*[1], 
           map:new(($params, 
             map {
-              "reverse:layer-id" := $layer/@jf:layer-id/string()
+              "reverse:layer-id" : $layer/@jf:layer-id/string()
             })))
       }
   where $layers
@@ -149,8 +149,8 @@ declare function reverse:construct-layer(
                 map:new((
                   $params,
                   map {
-                    "reverse:start" := $node,
-                    "reverse:end" := $end
+                    "reverse:start" : $node,
+                    "reverse:end" : $end
                   }))
               )
             },
@@ -167,7 +167,7 @@ declare function reverse:construct-layer(
             map:new((
               $params,
               map { 
-                "reverse:suspended" := ($params("reverse:suspended"), $node/@jf:suspend)
+                "reverse:suspended" : ($params("reverse:suspended"), $node/@jf:suspend)
               } 
             ))
           )
@@ -180,7 +180,7 @@ declare function reverse:construct-layer(
             map:new((
               $params,
               map { 
-                "reverse:suspended" := ($params("reverse:suspended")[not(.=$node/@jf:continue)])
+                "reverse:suspended" : ($params("reverse:suspended")[not(.=$node/@jf:continue)])
               } 
             ))
           )
