@@ -12,6 +12,7 @@ module namespace uindex = "http://jewishliturgy.org/api/utility";
 import module namespace api="http://jewishliturgy.org/modules/api"
     at "../../modules/api.xqm";
 
+declare namespace rest="http://exquery.org/ns/restxq";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 (:~ index function for the demo services

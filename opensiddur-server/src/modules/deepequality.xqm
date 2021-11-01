@@ -2,7 +2,7 @@ xquery version "3.1";
 
 (:~ Functions to test for deep XML equality.
   :
-  : Copyright 2019 Efraim Feinstein, Open Siddur Project
+  : Copyright 2019 Efraim Feinstein, Open Siddur Project
   : Licensed under the GNU Lesser General Public License, version 3 or later
   :)
 

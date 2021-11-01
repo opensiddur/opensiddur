@@ -21,7 +21,7 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "../../modules/paths.xqm";
 
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
-
+declare namespace rest="http://exquery.org/ns/restxq";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
 

@@ -10,6 +10,7 @@ module namespace format="http://jewishliturgy.org/modules/format";
 
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
 declare namespace error="http://jewishliturgy.org/errors";
+declare namespace err="http://www.w3.org/2005/xqt-errors";
 declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 
 import module namespace data="http://jewishliturgy.org/modules/data" 
