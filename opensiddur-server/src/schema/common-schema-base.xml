@@ -32,6 +32,23 @@ schemas, not as an independent unit
       </constraint>  
     </constraintSpec>
   </elementSpec>
+  <elementSpec ident="anchor" mode="change" module="linking">
+    <attList>
+      <attDef ident="type" mode="change" usage="opt">
+        <desc>Identifies the type of the anchor as internal (only pointed to within a document, the default value)
+          or external (may be pointed to from outside the document, must be declared as such). Internal anchor ids
+          may be changed; external anchor ids must remain constant if they are used elsewhere.</desc>
+        <datatype>
+          <dataRef key="teidata.enumerated"/>
+        </datatype>
+        <defaultVal>internal</defaultVal>
+        <valList type="closed">
+          <valItem ident="internal"><gloss>Anchor is internal</gloss></valItem>
+          <valItem ident="external"><gloss>Anchor is external and the id must be maintained</gloss></valItem>
+        </valList>
+      </attDef>
+    </attList>
+  </elementSpec>
   <elementSpec ident="ptr" mode="change" module="core">
     <!-- TODO: need an additional constraint where we test if all pointer targets exist -->
     <constraintSpec scheme="isoschematron" ident="ptr-j-1">

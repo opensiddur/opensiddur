@@ -124,6 +124,48 @@ declare function orig:remove-whitespace(
         default return orig:remove-whitespace($node/node())
 };
 
+(:~ determine if:
+ : 1. the anchors in a document that have type=external *and* are referenced externally are still present in the new doc
+ : 2. all anchors that are referenced externally in the new doc have type=external
+ : @param $doc the document to validate
+ : @param $old-doc ignored
+ : @return a validation report
+ :)
+declare function orig:validate-external-anchors(
+    $doc as document-node(),
+    $old-doc as document-node()?
+) as element(report) {
+    let $missing-old-doc-externals as map(xs:string, xs:string) :=
+        if (exists($old-doc))
+        then map:merge(
+            let $external-anchor-ids := $old-doc//tei:anchor[@type="external"]/@xml:id
+            let $missing-new-doc-anchors :=
+                for $external-anchor-id in $external-anchor-ids
+                where empty($doc//tei:anchor[@type="external"][@xml:id=$external-anchor-id])
+                return $external-anchor-id
+            for $missing-anchor in $missing-new-doc-anchors
+            let $missing-anchor-original := $old-doc//tei:anchor[@xml:id=$missing-anchor]
+            let $reference := ridx:query-all($missing-anchor-original)
+            let $reference-doc := data:db-path-to-api(document-uri(root($reference[1])))
+            where exists($reference) and not(root($reference) is $old-doc)
+            return map:entry($missing-anchor-original/@xml:id/string(), $reference-doc)
+            )
+        else map {}
+    let $status :=
+        if (count($missing-old-doc-externals)) then "invalid"
+        else "valid"
+    return
+        element report {
+            attribute status { $status },
+            for $missing-external-anchor in map:keys($missing-old-doc-externals)
+            return element message {
+                "The anchor " || $missing-external-anchor || " is referenced by " ||
+                $missing-old-doc-externals($missing-external-anchor) ||
+                " but is not present in the new document."
+            }
+        }
+};
+
 (:~ determine if the external links in a document all point to something
  : @param $doc the document to validate
  : @param $old-doc ignored
