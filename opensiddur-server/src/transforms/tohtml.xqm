@@ -177,9 +177,9 @@ declare function tohtml:tei-ref-license(
     $params as map(*)
     ) as node()+ {
     let $icons := map {
-        "zero" := "/api/static/cc-zero.svg",
-        "by" := "/api/static/cc-by.svg",
-        "by-sa" := "/api/static/cc-by-sa.svg"
+        "zero" : "/api/static/cc-zero.svg",
+        "by" : "/api/static/cc-by.svg",
+        "by-sa" : "/api/static/cc-by-sa.svg"
     }
     let $license-type := tokenize($e/@target, "/")[5]
     let $img :=

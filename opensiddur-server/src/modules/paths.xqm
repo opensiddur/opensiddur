@@ -3,7 +3,7 @@
  : Copyright 2010-2011,2013 Efraim Feinstein <efraim.feinstein@gmail.com>
  : Released under the GNU Lesser General Public License, ver 3 or later
  :)
-xquery version "1.0";
+xquery version "3.1";
 
 module namespace paths="http://jewishliturgy.org/modules/paths";
 

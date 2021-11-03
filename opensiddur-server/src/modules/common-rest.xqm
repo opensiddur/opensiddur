@@ -40,6 +40,7 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace http="http://expath.org/ns/http-client";
+declare namespace rest="http://exquery.org/ns/restxq";
 
 (: additional URI representing validate query params for crest:list() :)
 declare variable $crest:additional-validate := <crest:additional text="validation (PUT)" relative-uri="?validate=true"/>;

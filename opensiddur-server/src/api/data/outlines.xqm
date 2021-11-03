@@ -13,6 +13,7 @@ declare namespace olx="http://jewishliturgy.org/ns/outline/responses/1.0";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace rest="http://exquery.org/ns/restxq";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace http="http://expath.org/ns/http-client";
 
@@ -250,14 +251,14 @@ declare function outl:is-executable(
 };
 
 declare variable $outl:responsibilities := map {
-    "ann" := "Annotated by",
-    "fac" := "Scanned by",
-    "fnd" := "Funded by",
-    "mrk" := "Markup edited by",
-    "pfr" := "Proofread by",
-    "spn" := "Sponsored by",
-    "trc" := "Transcribed by",
-    "trl" := "Translated by"
+    "ann" : "Annotated by",
+    "fac" : "Scanned by",
+    "fnd" : "Funded by",
+    "mrk" : "Markup edited by",
+    "pfr" : "Proofread by",
+    "spn" : "Sponsored by",
+    "trc" : "Transcribed by",
+    "trl" : "Translated by"
 };
 
 (:~ get the name of a contributor by uri :)
@@ -485,7 +486,7 @@ declare function outl:execute(
   $doc as document-node()
   ) {
   let $paths-to-uris :=
-    map:new(
+    map:merge(
         for $item in ($doc//ol:item, $doc/ol:outline)
         group by
             $title := $item/ol:title/string(),

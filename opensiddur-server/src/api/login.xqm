@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.1";
 (:~ api login
  : 
  : Open Siddur Project
@@ -17,6 +17,7 @@ import module namespace debug="http://jewishliturgy.org/transform/debug"
 	
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
+declare namespace rest="http://exquery.org/ns/restxq";
 declare namespace http="http://expath.org/ns/http-client";
 
 (:~ Query who is currently logged in. 

@@ -35,8 +35,10 @@ import module namespace kwic="http://exist-db.org/xquery/kwic";
 declare namespace html="http://www.w3.org/1999/xhtml";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
+declare namespace rest="http://exquery.org/ns/restxq";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace error="http://jewishliturgy.org/errors";
+declare namespace err = "http://www.w3.org/2005/xqt-errors";
 declare namespace http="http://expath.org/ns/http-client";
 
 (: path to user profile data :)

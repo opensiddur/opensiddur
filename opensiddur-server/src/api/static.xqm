@@ -12,6 +12,7 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 import module namespace paths="http://jewishliturgy.org/modules/paths"
   at "../modules/paths.xqm";
 
+declare namespace rest="http://exquery.org/ns/restxq";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 (:~ List all static data 
