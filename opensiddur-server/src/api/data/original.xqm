@@ -56,7 +56,8 @@ declare function orig:validate(
     xs:anyURI($orig:schema), xs:anyURI($orig:schematron),
     (
       if (exists($old-doc)) then orig:validate-changes#2 else (),
-      orig:validate-external-links#2
+      orig:validate-external-links#2,
+      orig:validate-external-anchors#2
     )
   )
 };
@@ -76,7 +77,8 @@ declare function orig:validate-report(
     xs:anyURI($orig:schema), xs:anyURI($orig:schematron),
     (
       if (exists($old-doc)) then orig:validate-changes#2 else (),
-      orig:validate-external-links#2
+      orig:validate-external-links#2,
+      orig:validate-external-anchors#2
     )
   )
 };
@@ -152,8 +154,8 @@ declare function orig:validate-external-anchor-presence(
                 for $reference in $references
                 where not(root($reference) is $old-doc)
                 return data:db-path-to-api(document-uri(root($reference)))
-            where exists($reference)
-            return map:entry($missing-anchor-original/@xml:id/string(), string-join($reference-doc, ","))
+            where exists($reference-docs)
+            return map:entry($missing-anchor-original/@xml:id/string(), string-join($reference-docs, ","))
             )
         else map {}
     for $missing-external-anchor in map:keys($missing-old-doc-externals)
@@ -187,6 +189,64 @@ declare function orig:validate-internal-anchors(
 
 };
 
+(:~ return all internal references to anchors within the given document :)
+declare function orig:internal-references(
+    $doc as document-node()
+) as map(xs:string, element()*) {
+    fold-left( (: eXist does not support map:merge with combine semantics... :)
+        for $ptr-element in $doc//*[@target|@targets|@domains|@ref]
+        for $reference in tokenize($ptr-element/@target|$ptr-element/@targets|$ptr-element/@domains|$ptr-element/@ref, "\s+")
+        where starts-with($reference, "#")
+        return
+            let $after-hash := substring-after($reference, "#")
+            let $target-ids :=
+                if (starts-with($after-hash, "range"))
+                then
+                    let $left := $after-hash => substring-after("(") => substring-before(",")
+                    let $right := $after-hash => substring-after(",") => substring-before(")")
+                    return ($left, $right)
+                else $after-hash
+            let $sources := $doc//tei:anchor[@xml:id=$target-ids]
+            for $source in $sources
+            return map:entry($source/@xml:id/string(), $ptr-element),
+        map {},
+        function($items as map(xs:string, element()*), $new-item as map(xs:string, element()*)) {
+                map:merge(
+                for $key in (map:keys($items), map:keys($new-item))
+                    return
+                        if (map:contains($new-item, $key))
+                        then map:entry($key, $items($key) | $new-item($key))
+                        else map:entry($key, $items($key))
+                )
+            }
+    )
+};
+
+(:~ determine if the anchors in a document follow the single-reference rule,
+ : which requires that all anchors that are not canonical have only 1 pointer referencing them,
+ : either internally or externally.
+ : @param $doc the document to validate
+ : @param $old-doc ignored
+ : @return validation messages that indicate errors
+ :)
+declare function orig:validate-anchors-single-reference-rule(
+    $doc as document-node(),
+    $old-doc as document-node()?
+) as element(message)* {
+    let $all-internal-references as map(xs:string, element()*) := orig:internal-references($doc)
+    let $relevant-anchors := $doc//tei:anchor[not(@type="canonical")]
+    for $anchor in $relevant-anchors
+    let $id := $anchor/@xml:id/string()
+    let $old-doc-equivalent := $old-doc//tei:anchor[@xml:id=$id]
+    let $external-references := ridx:query-all($old-doc-equivalent)[not(root(.) is $old-doc)]
+    let $internal-references := $all-internal-references($id)
+    let $all-references := ($external-references, $internal-references)
+    let $count := count($all-references)
+    where $count > 1
+    return element message {
+        "The anchor '" || $id || "' is referenced " || string($count) || " times, but may only be referenced once"
+    }
+};
 
 (:~ determine if:
  : 1. the anchors in a document that have type=external or canonical *and* are referenced externally are still present in the new doc
@@ -202,7 +262,8 @@ declare function orig:validate-external-anchors(
 ) as element(report) {
     let $all-messages := (
         orig:validate-external-anchor-presence($doc, $old-doc),
-        orig:validate-internal-anchors($doc, $old-doc)
+        orig:validate-internal-anchors($doc, $old-doc),
+        orig:validate-anchors-single-reference-rule($doc, $old-doc)
     )
     let $status :=
         if (exists($all-messages))
@@ -210,7 +271,7 @@ declare function orig:validate-external-anchors(
         else "valid"
     return
         element report {
-            attribute status { $status },
+            element status { $status },
             $all-messages
         }
 };

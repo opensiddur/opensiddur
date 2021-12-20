@@ -572,6 +572,67 @@ class TestOriginal extends OriginalDataTestFixtures {
         .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
         .go
     }
+
+    it("invalidates non-canonical anchors that fail the single reference rule") {
+
+    }
+
+    it("invalidates a document when referenced external or canonical anchors are removed") {
+
+    }
+
+    it("invalidates a document when externally referenced anchors are not declared as external") {
+
+    }
+  }
+
+  describe("(non-public function) orig:internal-references") {
+    it("returns all references to anchors inside a document") {
+      xq(
+        """let $doc := document {
+           <tei:TEI>
+            <tei:header>
+
+            </tei:header>
+            <tei:text>
+              <j:streamText xml:id="stream">
+                <tei:anchor xml:id="referenced_as_begin"/>
+                <tei:anchor xml:id="l_begin"/>
+                abcdef
+                <tei:anchor xml:id="referenced_as_middle"/>
+                dsifjs
+                <tei:anchor xml:id="referenced_as_end"/>
+                <tei:ptr xml:id="single_reference" target="#referenced_as_middle"/>
+                <tei:anchor xml:id="unreferenced"/>
+                <tei:ptr xml:id="reference_to_non_anchor" target="#stream"/>
+              </j:streamText>
+              <j:concurrent xml:id="concurrent">
+                <j:layer type="p">
+                  <tei:p>
+                    <tei:ptr xml:id="range_reference" target="#range(referenced_as_begin,referenced_as_end)"/>
+                  </tei:p>
+                </j:layer>
+                <j:layer type="lg">
+                  <tei:lg>
+                    <tei:l>
+                      <tei:ptr xml:id="with_duplicate_reference" target="#range(l_begin,referenced_as_end)"/>
+                    </tei:l>
+                  </tei:lg>
+                </j:layer>
+              </j:concurrent>
+            </tei:text>
+           </tei:TEI>
+        }
+        return orig:internal-references($doc)
+          """)
+        .assertXPath("""$output("referenced_as_middle")/@xml:id="single_reference" """, "single reference")
+        .assertXPath("""$output("referenced_as_begin")/@xml:id="range_reference" """, "start of range reference")
+        .assertXPath("""$output("referenced_as_end")/@xml:id="range_reference" """, "end of range reference")
+        .assertXPath("""$output("referenced_as_end")/@xml:id="with_duplicate_reference" """, "duplicate reference")
+        .assertXPath("""not(map:contains($output, "unreferenced")) """, "unreferenced doesn't exist")
+        .assertXPath("""not(map:contains($output, "stream")) """, "non-anchor reference doesn't exist")
+        .go
+    }
   }
 
 }
