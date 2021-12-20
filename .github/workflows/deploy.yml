@@ -36,7 +36,7 @@ jobs:
         id: vars
         run: |-
           BRANCH=${GITHUB_REF#refs/heads/}
-          INSTANCE_BASE=${{env.PROJECT_NAME}}-${BRANCH//\//-}
+          INSTANCE_BASE=${{env.PROJECT_NAME}}-${BRANCH//[.\/]/-}
           VERSION=$(git rev-parse --short=8 ${{ github.sha }})
           echo ::set-output name=VERSION::${VERSION}
           echo ::set-output name=BRANCH::${BRANCH}
