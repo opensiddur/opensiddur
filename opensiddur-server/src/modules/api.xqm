@@ -13,6 +13,7 @@ declare default element namespace "http://www.w3.org/1999/xhtml";
 declare namespace http="http://expath.org/ns/http-client";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 declare namespace rerr="http://exquery.org/ns/restxq/error";
+declare namespace rest="http://exquery.org/ns/restxq";
 
 declare variable $api:default-max-results := 50;
 

@@ -103,9 +103,9 @@ declare function compile:license-statements(
         "http://www.creativecommons.org/licenses/by-sa/"
     )
     let $supported-license-names := map {
-        "http://www.creativecommons.org/publicdomain/zero/" := "Creative Commons Zero",
-        "http://www.creativecommons.org/licenses/by/" := "Creative Commons Attribution",
-        "http://www.creativecommons.org/licenses/by-sa/" := "Creative Commons Attribution-ShareAlike"
+        "http://www.creativecommons.org/publicdomain/zero/" : "Creative Commons Zero",
+        "http://www.creativecommons.org/licenses/by/" : "Creative Commons Attribution",
+        "http://www.creativecommons.org/licenses/by-sa/" : "Creative Commons Attribution-ShareAlike"
     }
     return
         if (count($text-licenses)>0)
@@ -135,19 +135,19 @@ declare function compile:license-statements(
 
 declare variable $compile:contributor-types := 
     map {
-        "aut" := "Author",
-        "ann" := "Annotator",
-        "ctb" := "Contributor",
-        "cre" := "Creator",
-        "edt" := "Editor",
-        "fac" := "Facsimilist",
-        "fnd" := "Funder",
-        "mrk" := "Markup editor",
-        "oth" := "Other",
-        "pfr" := "Proofreader",
-        "spn" := "Sponsor",
-        "trc" := "Transcriber",
-        "trl" := "Translator"
+        "aut" : "Author",
+        "ann" : "Annotator",
+        "ctb" : "Contributor",
+        "cre" : "Creator",
+        "edt" : "Editor",
+        "fac" : "Facsimilist",
+        "fnd" : "Funder",
+        "mrk" : "Markup editor",
+        "oth" : "Other",
+        "pfr" : "Proofreader",
+        "spn" : "Sponsor",
+        "trc" : "Transcriber",
+        "trl" : "Translator"
     };
 
 declare function compile:contributor-list(

@@ -1,4 +1,4 @@
-xquery version "1.0";
+xquery version "3.1";
 (: convert text to a separated tei:name structure
  :
  : Copyright 2010-2011 Efraim Feinstein <efraim.feinstein@gmail.com>

@@ -19,6 +19,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace error="http://jewishliturgy.org/errors";
 declare namespace exist="http://exist.sourceforge.net/NS/exist";
+declare namespace err="http://www.w3.org/2005/xqt-errors";
 
 (:~ base of all data paths :)
 declare variable $data:path-base := "/db/data";

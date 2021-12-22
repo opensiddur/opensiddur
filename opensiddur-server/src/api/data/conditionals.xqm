@@ -12,6 +12,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
 declare namespace r="http://jewishliturgy.org/ns/results/1.0";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace rest="http://exquery.org/ns/restxq";
 
 import module namespace api="http://jewishliturgy.org/modules/api"
   at "../../modules/api.xqm";
