@@ -16,6 +16,7 @@ import module namespace api="http://jewishliturgy.org/modules/api"
 
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare namespace rest="http://exquery.org/ns/restxq";
 
 (:~ list all available data APIs :)
 declare 

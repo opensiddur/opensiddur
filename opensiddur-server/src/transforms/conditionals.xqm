@@ -186,19 +186,19 @@ declare function cond:tei-if(
 declare variable $cond:truth-table :=
     (: map setting,condition -> value :) 
     map {
-        "ON,ON" := "ON",
-        "ON,OFF" := "OFF",
-        "OFF,ON" := "OFF",
-        "OFF,OFF" := "ON",
-        "YES,YES" := "YES",
-        "YES,NO" := "NO",
-        "YES,MAYBE" := "MAYBE",
-        "NO,YES" := "NO",
-        "NO,NO" := "YES",
-        "NO,MAYBE" := "MAYBE",
-        "MAYBE,YES" := "MAYBE",
-        "MAYBE,NO" := "MAYBE",
-        "MAYBE,MAYBE" := "MAYBE"
+        "ON,ON" : "ON",
+        "ON,OFF" : "OFF",
+        "OFF,ON" : "OFF",
+        "OFF,OFF" : "ON",
+        "YES,YES" : "YES",
+        "YES,NO" : "NO",
+        "YES,MAYBE" : "MAYBE",
+        "NO,YES" : "NO",
+        "NO,NO" : "YES",
+        "NO,MAYBE" : "MAYBE",
+        "MAYBE,YES" : "MAYBE",
+        "MAYBE,NO" : "MAYBE",
+        "MAYBE,MAYBE" : "MAYBE"
     };
 
 declare function cond:tei-f(

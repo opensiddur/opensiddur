@@ -5,7 +5,7 @@ xquery version "3.0";
  :  authentication,
  :  content negotiation
  : TODO: change the GET API to return lists of table/from/to combinations
- : TODO: change the POST API to /api/utility/translit?table=&from=&to= 
+ : TODO: change the POST API to /api/utility/translit?table=&from=&to=
  :
  : Copyright 2012-2013,2018 Efraim Feinstein <efraim@opensiddur.org>
  : Open Siddur Project
@@ -16,11 +16,11 @@ module namespace translit = "http://jewishliturgy.org/api/utility/translit";
 
 
 import module namespace api="http://jewishliturgy.org/modules/api"
-    at "/db/apps/opensiddur-server/modules/api.xqm";
+    at "../../modules/api.xqm";
 import module namespace app="http://jewishliturgy.org/modules/app"
-at "/db/apps/opensiddur-server/modules/app.xqm";
+    at "../../modules/app.xqm";
 import module namespace data="http://jewishliturgy.org/modules/data"
-at "/db/apps/opensiddur-server/modules/data.xqm";
+    at "../../modules/data.xqm";
 import module namespace xlit="http://jewishliturgy.org/transform/transliterator"
     at "../../transforms/translit/translit.xqm";
 import module namespace tran="http://jewishliturgy.org/api/transliteration"
@@ -30,6 +30,7 @@ declare namespace tr="http://jewishliturgy.org/ns/tr/1.0";
 declare namespace jx="http://jewishliturgy.org/ns/jlp-processor";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
+declare namespace rest="http://exquery.org/ns/restxq";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 (:~ transliterate the given data, which is wrapped in XML :)
@@ -38,7 +39,7 @@ declare function local:transliterate(
         $table as element(tr:table),
         $out-lang as xs:string
 ) as node()* {
-    let $transliterated := xlit:transliterate($data, map { "translit:table" := $table })
+    let $transliterated := xlit:transliterate($data, map { "translit:table" : $table })
     return
         element {
             QName(namespace-uri($transliterated), name($transliterated))

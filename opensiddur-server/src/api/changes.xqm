@@ -15,6 +15,7 @@ import module namespace data="http://jewishliturgy.org/modules/data"
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace o="http://a9.com/-/spec/opensearch/1.1/";
+declare namespace rest="http://exquery.org/ns/restxq";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 declare function chg:get-recent-changes(

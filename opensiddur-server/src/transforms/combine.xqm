@@ -157,7 +157,7 @@ declare function combine:associate-style(
 declare function combine:unset-style(
     $params as map(*)
     ) as map(*) {
-    map:new(($params, map { "combine:styled" : 1 }))
+    map:put($params, "combine:styled", 1 )
 };
 
 (:~ equivalent of a streamText, check for redirects, add style if necessary :)
@@ -347,7 +347,7 @@ declare function combine:new-document-params(
                     $uri 
                     )
             )
-    let $new-params := map:new((
+    let $new-params := map:merge((
         $params,
         map { 
             "combine:unmirrored-doc" :
@@ -396,10 +396,10 @@ declare function combine:update-settings-from-standoff-markup(
     return
         if (exists($base-context))
         then
-            map:new((
+            map:merge((
                 $params,
                 map {
-                    "combine:settings" : map:new((
+                    "combine:settings" : map:merge((
                         $params("combine:settings"),
                         for $context in $base-context,
                             $setting in tokenize($context/@jf:set, '\s+')
@@ -450,7 +450,7 @@ declare function combine:tei-fs-to-map(
         then $e/@type/string() 
         else ("anonymous:" || common:generate-id($e))
     return
-        map:new(
+        map:merge(
             for $f in $e/tei:f
             return 
                 map:entry(
@@ -783,7 +783,7 @@ declare function combine:evaluate-conditions(
             return $conditional-layer($conditional-layer-id)
         else ()
     return 
-        map:new((
+        map:merge((
             $params,
             map {
                 (: if a layer is not ON/YES, then the layer result takes precedence :)
@@ -800,15 +800,13 @@ declare function combine:evaluate-conditions(
                 and $e/@jf:layer-id)
             then
                 map {
-                    "combine:conditional-layers" : map:new((
+                    "combine:conditional-layers" : map:put(
                         $params("combine:conditional-layers"), 
-                        map {
-                            $conditional-layer-id : (
+                        $conditional-layer-id, (
                                 $conditional-layer-result, 
                                 $this-element-condition-result[not(.=("YES","ON"))]
                             )[1]
-                        }
-                    ))
+                    )
                 }
             else ()
         ))
