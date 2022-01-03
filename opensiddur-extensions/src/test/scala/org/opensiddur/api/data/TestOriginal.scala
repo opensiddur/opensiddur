@@ -574,7 +574,11 @@ class TestOriginal extends OriginalDataTestFixtures {
     }
 
     it("invalidates non-canonical anchors that fail the single reference rule") {
-
+      val invalidSource = readXmlFile("src/test/resources/api/data/original/fails_single_reference_rule_internal.xml")
+      xq(s"""orig:validate-report(document { $invalidSource }, ())""")
+        .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .assertXPath("""contains($output/message, "'beginning'")""", "The failed anchor is mentioned in the error")
+        .go
     }
 
     it("invalidates a document when referenced external or canonical anchors are removed") {
