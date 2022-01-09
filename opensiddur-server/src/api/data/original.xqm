@@ -161,7 +161,7 @@ declare function orig:validate-external-anchor-presence(
         else map {}
     for $missing-external-anchor in map:keys($missing-old-doc-externals)
     return element message {
-        "The anchor " || $missing-external-anchor || " is referenced by " ||
+        "The anchor '" || $missing-external-anchor || "' is referenced by " ||
         $missing-old-doc-externals($missing-external-anchor) ||
         " but is not present in the new document."
     }
@@ -183,7 +183,7 @@ declare function orig:validate-internal-anchors(
     where not(root($reference) is $old-doc) and
         not($new-doc-equivalent/@type = ("canonical", "external"))
     return element message {
-        "The anchor " || $new-doc-equivalent/@xml:id/string() || " is referenced externally by " ||
+        "The anchor '" || $new-doc-equivalent/@xml:id/string() || "' is referenced externally by " ||
              data:db-path-to-api(document-uri(root($reference))) ||
             " but is not marked 'external' or 'canonical'."
     }

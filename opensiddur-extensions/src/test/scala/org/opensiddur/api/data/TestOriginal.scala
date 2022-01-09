@@ -77,9 +77,25 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
     setupResource("src/test/resources/api/data/original/link_doc_2.xml",
       "link_doc_2", "linkage", 1, None,
       group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/has_external_reference.xml",
+      "has_external_reference", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/references_external_reference.xml",
+      "references_external_reference", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/has_undeclared_external_reference.xml",
+      "has_undeclared_external_reference", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/references_undeclared_external_reference.xml",
+      "references_undeclared_external_reference", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
   }
 
   def tearDown(): Unit = {
+    teardownResource("references_undeclared_external_reference", "original", 1)
+    teardownResource("has_undeclared_external_reference", "original", 1)
+    teardownResource("references_external_reference", "original", 1)
+    teardownResource("has_external_reference", "original", 1)
     teardownResource("link_doc_2", "linkage", 1)
     teardownResource("link_doc_1", "linkage", 1)
     teardownResource("test_doc_2", "original", 1)
@@ -582,11 +598,19 @@ class TestOriginal extends OriginalDataTestFixtures {
     }
 
     it("invalidates a document when referenced external or canonical anchors are removed") {
-
+      val newDoc = readXmlFile("src/test/resources/api/data/original/has_external_reference_removed.xml")
+      xq(s"""orig:validate-report(document { $newDoc }, doc("/db/data/original/en/has_external_reference.xml"))""")
+        .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .assertXPath("""contains($output/message, "'is_external_end'")""", "The missing anchor is mentioned in the error")
+        .go
     }
 
     it("invalidates a document when externally referenced anchors are not declared as external") {
-
+      val newDoc = readXmlFile("src/test/resources/api/data/original/has_undeclared_external_reference.xml")
+      xq(s"""orig:validate-report(document { $newDoc }, doc("/db/data/original/en/has_undeclared_external_reference.xml"))""")
+        .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .assertXPath("""contains($output/message, "'is_external_end'")""", "The undeclared anchor is mentioned in the error")
+        .go
     }
   }
 
