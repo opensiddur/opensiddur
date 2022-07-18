@@ -15,7 +15,7 @@
     <tei:text>
         <j:streamText xml:id="stream">
             <tei:anchor xml:id="with_internal_reference"/>
-            <tei:ptr target="#with_internal_reference"/>
+            <tei:ptr xml:id="ptr_to_internal_reference" target="#with_internal_reference"/>
 
             <tei:anchor xml:id="with_internal_start"/>
             Inside an internal something
@@ -39,7 +39,7 @@
 
             Inside multiple internal reference
             <tei:anchor xml:id="multiple_reference_end"/>
-            <tei:ptr target="#range(multiple_reference_start,multiple_reference_end)"/>
+            <tei:ptr xml:id="multi_ref" target="#range(multiple_reference_start,multiple_reference_end)"/>
         </j:streamText>
     </tei:text>
 </tei:TEI>

@@ -2,7 +2,7 @@
     <tei:teiHeader>
         <tei:fileDesc>
             <tei:titleStmt>
-                <tei:title xml:lang="en">Anchors</tei:title>
+                <tei:title xml:lang="en">References</tei:title>
             </tei:titleStmt>
         </tei:fileDesc>
         <tei:sourceDesc>
@@ -17,9 +17,9 @@
             <tei:ptr target="/data/original/anchors#with_external_reference"/>
             <tei:ptr target="/data/original/anchors#range(with_external_start,with_external_end)"/>
 
-            <tei:ptr target="/data/original/anchors#range(v10_seg1,v10_seg1_end"/>
+            <tei:ptr target="/data/original/anchors#range(v10_seg1,v10_seg1_end)"/>
 
-            <tei:ptr target="/data/original/anchors#range(multiple_reference_start,multiple_reference_end)"/>
+            <tei:ptr xml:id="multi_ref" target="/data/original/anchors#range(multiple_reference_start,multiple_reference_end)"/>
         </j:streamText>
     </tei:text>
 </tei:TEI>

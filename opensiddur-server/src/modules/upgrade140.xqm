@@ -22,7 +22,7 @@ declare function upg14:needs-upgrade(
 ) as xs:boolean {
     let $anchors := collection($root-collection)//tei:anchor
     return count($anchors) > 1 and (: there is some data:)
-            count($anchors[@type=("external", "canonical")]) > 10 (: there are some canonical/external anchors :)
+            count($anchors[@type=("external", "canonical")]) < 10 (: there are not enough canonical/external anchors :)
 };
 
 (:~ heuristic to determine if the link should be called canonical :)
@@ -51,10 +51,11 @@ declare function upg14:get-upgrade-changes-map(
             where exists(
                 (: this picks up the actual elements that reference the anchor :)
                 for $token in tokenize($reference/(@target|@targets|@ref|@domains|@who), "\s+")
+                let $fragment := substring-after($token, "#")
                 where (
-                    if (starts-with($token, "#range("))
-                    then tokenize(substring-before(substring-after($token, "("), ")"), ",")=$anchor/@xml:id
-                    else substring-after($token, "#")=$anchor/@xml:id
+                    if (starts-with($fragment, "range("))
+                    then tokenize(substring-before(substring-after($fragment, "("), ")"), ",")=$anchor/@xml:id
+                    else $fragment=$anchor/@xml:id
                 )
                 return $token
             )
@@ -81,7 +82,7 @@ declare function upg14:get-upgrade-changes-map(
                         map {
                             "type": $type,
                             "id" : (
-                                if (count($reference-element) = 1)
+                                if (count($reference-elements) = 1)
                                 then $anchor/@xml:id/string()
                                 else ($anchor/@xml:id/string() || "_" || string($ctr))
                             ),
@@ -94,34 +95,36 @@ declare function upg14:get-upgrade-changes-map(
 };
 
 declare function upg14:do-upgrade-changes($changes as map(*)) {
-    for $anchor-id in $changes
+    for $anchor-id in map:keys($changes)
     let $doc-uri := substring-before($anchor-id, "#")
     let $anchor-doc := doc($doc-uri)
     let $anchor-xml-id := substring-after($anchor-id, "#")
     let $anchor := $anchor-doc//tei:anchor[@xml:id=$anchor-xml-id]
     let $map-entry := $changes($anchor-id)
-    for $change in $map-entry
-    let $new-type := $change("type")
-    let $new-id := $change("id")
-    let $old-id := $change("old_id")
-    return
-        if ($new-type = "canonical" or $new-id = $old-id)
-        then update insert attribute type { $new-type } into $anchor
-        else (
-            let $reference := util:node-by-id(doc($change("reference_doc")), $change("reference_id"))
-            let $reference-target-attribute := $reference/(@target|@targets|@ref|@domains|@who)
-            return (
-                update insert element tei:anchor {
-                    attribute type { $new-type },
-                    attribute xml:id { $new-id }
-                } following $anchor
-                update replace $reference-target-attribute with attribute { name($reference-target-attribute) } {
-                    replace($reference-target-attribute/string() || ("($|,|\))"), $old-id, $new-id || "$1")
-                }
-            ),
-            update delete $anchor
-        )
-
+    let $deletions :=
+        for $change in $map-entry
+        let $new-type := $change("type")
+        let $new-id := $change("id")
+        let $old-id := $change("old_id")
+        return
+            if ($new-type = "canonical" or $new-id = $old-id)
+            then update insert attribute type { $new-type } into $anchor
+            else (
+                let $reference := util:node-by-id(doc($change("reference_doc")), $change("reference_id"))
+                let $reference-target-attribute := $reference/(@target|@targets|@ref|@domains|@who)
+                return (
+                    update insert element tei:anchor {
+                        attribute type { $new-type },
+                        attribute xml:id { $new-id }
+                    } following $anchor,
+                    update replace $reference-target-attribute with attribute { name($reference-target-attribute) } {
+                        replace($reference-target-attribute/string(), $old-id || ("($|,|\))"), $new-id || "$1")
+                    }
+                ),
+                $anchor
+            )
+    for $deletion in ($deletions | ())
+    return update delete $deletion
 };
 
 (: eventually, we want a list like this:
