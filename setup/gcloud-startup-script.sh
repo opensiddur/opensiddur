@@ -36,7 +36,7 @@ dpkg-reconfigure -f noninteractive unattended-upgrades
 echo "Obtaining opensiddur sources..."
 mkdir -p src
 cd src
-git clone git://github.com/opensiddur/opensiddur.git
+git clone https://github.com/opensiddur/opensiddur.git
 cd opensiddur
 git checkout ${BRANCH}
 export SRC=$(pwd)
