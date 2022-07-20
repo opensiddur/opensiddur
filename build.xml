@@ -22,6 +22,10 @@
 
     <property name="wrapper.conf" location="${installdir}/tools/yajsw/conf/wrapper.conf"/>
 
+    <!-- if we are running as root, the build image has to be the root build image -->
+    <condition property="build.docker.image" value="build-root" else="build-user">
+        <equals arg1="${user.name}" arg2="root"/>
+    </condition>
 
     <!--	
 	<path id="classpath.core">
@@ -80,8 +84,11 @@
     </target>
 
     <target name="builder-docker" depends="init">
+        <echo>build docker image: ${build.docker.image}</echo>
         <exec executable="docker">
             <arg value="build"/>
+            <arg value="--target"/>
+            <arg value="${build.docker.image}"/>
             <arg value="-f"/>
             <arg value="build.Dockerfile"/>
             <arg value="-t"/>
