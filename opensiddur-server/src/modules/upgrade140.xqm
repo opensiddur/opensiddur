@@ -135,13 +135,16 @@ declare function upg14:do-upgrade($root-collection as xs:string) {
     (: find references to anchors and determine if the anchor supports an external reference :)
     let $log := util:log("info", "Upgrade to 0.14.0: Finding upgrade changes")
     let $changes := upg14:get-upgrade-changes-map($root-collection)
-    let $log := util:log("info", "Upgrade to 0.14.0: Found changes: " || string(count($changes)))
+    let $log := util:log("info", "Upgrade to 0.14.0: Found changes: " || string(count(map:keys($changes))))
     return upg14:do-upgrade-changes($changes)
 };
 
 declare function upg14:upgrade() {
     if (upg14:needs-upgrade("/db/data"))
     then
+        let $log := util:log("info", "Prewriting indexes")
+        let $didx-reindex := didx:reindex(collection("/db/data"))
+        let $ridx-reindex := ridx:reindex(collection("/db/data"))
         let $log := util:log("info", "Upgrading to 0.14.0")
         let $upgraded := upg14:do-upgrade("/db/data")
         let $log := util:log("info", "Rewriting indexes")
