@@ -10,6 +10,8 @@
     <property name="dist" location="dist"/>
     <property name="deps.dir" location="dependencies"/>
 
+    <property name="builder.image.tag" value="opensiddur-builder:latest"/>
+
     <property name="docker.image.tag" value="opensiddur:latest"/>
     <property name="docker.image.name" value="opensiddur-container"/>
     <!-- TCP port to keep open for the docker image -->
@@ -20,6 +22,10 @@
 
     <property name="wrapper.conf" location="${installdir}/tools/yajsw/conf/wrapper.conf"/>
 
+    <!-- if we are running as root, the build image has to be the root build image -->
+    <condition property="build.docker.image" value="build-root" else="build-user">
+        <equals arg1="${user.name}" arg2="root"/>
+    </condition>
 
     <!--	
 	<path id="classpath.core">
@@ -46,6 +52,13 @@
 		    <arg value="update"/>
             <arg value="--remote"/>
 		</exec>
+
+        <exec executable="id" outputproperty="user.id">
+            <arg value="-u"/>
+        </exec>
+        <exec executable="id" outputproperty="group.id">
+            <arg value="-g"/>
+        </exec>
        
 		<uptodate property="exist.uptodate" targetfile="${installer}">
 			<srcfiles dir="${lib.dir}/exist">
@@ -70,18 +83,39 @@
     <target name="exist" depends="build-exist,autodeploy">
     </target>
 
-	<target name="build-exist" depends="init" unless="exist.uptodate">
-		<!-- ./build.sh installer -Dizpack.dir=$(IZPACK) -Dinclude.module.scheduler=true -Dinclude.feature.security.oauth=true -Dinclude.feature.security.openid=true -->
-		<exec 
-			executable="./build.sh" 
-			dir="${lib.dir}/exist">
-			<arg value="installer"/>
-			<arg value="-Dizpack.dir=${lib.dir}/IzPack"/>
-			<arg value="-Dinclude.module.scheduler=true"/>
-            <!-- not using these yet -->
-			<arg value="-Dinclude.feature.security.oauth=false"/>
-			<arg value="-Dinclude.feature.security.openid=false"/>
-		</exec>
+    <target name="builder-docker" depends="init">
+        <echo>build docker image: ${build.docker.image}</echo>
+        <exec executable="docker">
+            <arg value="build"/>
+            <arg value="--target"/>
+            <arg value="${build.docker.image}"/>
+            <arg value="-f"/>
+            <arg value="build.Dockerfile"/>
+            <arg value="-t"/>
+            <arg value="${builder.image.tag}"/>
+            <arg value="--build-arg"/>
+            <arg value="USER_ID=${user.id}"/>
+            <arg value="--build-arg"/>
+            <arg value="GROUP_ID=${group.id}"/>
+            <arg value="."/>
+        </exec>
+    </target>
+
+	<target name="build-exist" depends="init,builder-docker" unless="exist.uptodate">
+		<exec executable="docker">
+            <arg value="run"/>
+            <arg value="-v"/>
+            <arg value="${lib.dir}:/usr/local/src"/>
+            <arg value="-w"/>
+            <arg value="/usr/local/src/exist"/>
+            <arg value="${builder.image.tag}"/>
+            <arg value="./build.sh"/>
+            <arg value="installer"/>
+            <arg value="-Dizpack.dir=/usr/local/src/IzPack"/>
+            <arg value="-Dinclude.module.scheduler=true"/>
+            <arg value="-Dinclude.feature.security.oauth=false"/>
+            <arg value="-Dinclude.feature.security.openid=false"/>
+        </exec>
 	</target>
 	
 	<target name="install-exist" depends="init,build-exist"
@@ -226,7 +260,7 @@ cacheSize=${cache.size}
 		description="set up eXist and built xars for autodeployment">
 	</target>
     
-	<target name="dist" depends="init"
+	<target name="dist" depends="init,builder-docker"
 		description="build everything">
 		<subant target="dist" inheritAll="false">
 			<fileset dir=".">
@@ -235,9 +269,16 @@ cacheSize=${cache.size}
 				<exclude name="build.xml"/>
 			</fileset>
 		</subant>
-        <exec dir="${lib.dir}/hebmorph-exist" executable="mvn">
-          <arg value="-Dmaven.test.skip=true"/>
-          <arg value="package"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-v"/>
+            <arg value="${lib.dir}:/usr/local/src"/>
+            <arg value="-w"/>
+            <arg value="/usr/local/src/hebmorph-exist"/>
+            <arg value="${builder.image.tag}"/>
+            <arg value="mvn"/>
+            <arg value="-Dmaven.test.skip=true"/>
+            <arg value="package"/>
         </exec>
         <copy todir="${dist}" flatten="true">
             <fileset dir=".">

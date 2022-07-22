@@ -77,9 +77,25 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
     setupResource("src/test/resources/api/data/original/link_doc_2.xml",
       "link_doc_2", "linkage", 1, None,
       group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/has_external_reference.xml",
+      "has_external_reference", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/references_external_reference.xml",
+      "references_external_reference", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/has_undeclared_external_reference.xml",
+      "has_undeclared_external_reference", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
+    setupResource("src/test/resources/api/data/original/references_undeclared_external_reference.xml",
+      "references_undeclared_external_reference", "original", 1, Some("en"),
+      group=Some("everyone"),permissions=Some("rw-r--r--"))
   }
 
   def tearDown(): Unit = {
+    teardownResource("references_undeclared_external_reference", "original", 1)
+    teardownResource("has_undeclared_external_reference", "original", 1)
+    teardownResource("references_external_reference", "original", 1)
+    teardownResource("has_external_reference", "original", 1)
     teardownResource("link_doc_2", "linkage", 1)
     teardownResource("link_doc_1", "linkage", 1)
     teardownResource("test_doc_2", "original", 1)
@@ -570,6 +586,79 @@ class TestOriginal extends OriginalDataTestFixtures {
       val invalidBadSource = readXmlFile("src/test/resources/api/data/original/bad_source.xml")
       xq(s"""orig:validate-report(document { $invalidBadSource }, ())""")
         .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .go
+    }
+
+    it("invalidates non-canonical anchors that fail the single reference rule") {
+      val invalidSource = readXmlFile("src/test/resources/api/data/original/fails_single_reference_rule_internal.xml")
+      xq(s"""orig:validate-report(document { $invalidSource }, ())""")
+        .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .assertXPath("""contains($output/message, "'beginning'")""", "The failed anchor is mentioned in the error")
+        .go
+    }
+
+    it("invalidates a document when referenced external or canonical anchors are removed") {
+      val newDoc = readXmlFile("src/test/resources/api/data/original/has_external_reference_removed.xml")
+      xq(s"""orig:validate-report(document { $newDoc }, doc("/db/data/original/en/has_external_reference.xml"))""")
+        .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .assertXPath("""contains($output/message, "'is_external_end'")""", "The missing anchor is mentioned in the error")
+        .go
+    }
+
+    it("invalidates a document when externally referenced anchors are not declared as external") {
+      val newDoc = readXmlFile("src/test/resources/api/data/original/has_undeclared_external_reference.xml")
+      xq(s"""orig:validate-report(document { $newDoc }, doc("/db/data/original/en/has_undeclared_external_reference.xml"))""")
+        .assertXPath("$output/status = 'invalid'", "The document is marked invalid")
+        .assertXPath("""contains($output/message, "'is_external_end'")""", "The undeclared anchor is mentioned in the error")
+        .go
+    }
+  }
+
+  describe("(non-public function) orig:internal-references") {
+    it("returns all references to anchors inside a document") {
+      xq(
+        """let $doc := document {
+           <tei:TEI>
+            <tei:header>
+
+            </tei:header>
+            <tei:text>
+              <j:streamText xml:id="stream">
+                <tei:anchor xml:id="referenced_as_begin"/>
+                <tei:anchor xml:id="l_begin"/>
+                abcdef
+                <tei:anchor xml:id="referenced_as_middle"/>
+                dsifjs
+                <tei:anchor xml:id="referenced_as_end"/>
+                <tei:ptr xml:id="single_reference" target="#referenced_as_middle"/>
+                <tei:anchor xml:id="unreferenced"/>
+                <tei:ptr xml:id="reference_to_non_anchor" target="#stream"/>
+              </j:streamText>
+              <j:concurrent xml:id="concurrent">
+                <j:layer type="p">
+                  <tei:p>
+                    <tei:ptr xml:id="range_reference" target="#range(referenced_as_begin,referenced_as_end)"/>
+                  </tei:p>
+                </j:layer>
+                <j:layer type="lg">
+                  <tei:lg>
+                    <tei:l>
+                      <tei:ptr xml:id="with_duplicate_reference" target="#range(l_begin,referenced_as_end)"/>
+                    </tei:l>
+                  </tei:lg>
+                </j:layer>
+              </j:concurrent>
+            </tei:text>
+           </tei:TEI>
+        }
+        return orig:internal-references($doc)
+          """)
+        .assertXPath("""$output("referenced_as_middle")/@xml:id="single_reference" """, "single reference")
+        .assertXPath("""$output("referenced_as_begin")/@xml:id="range_reference" """, "start of range reference")
+        .assertXPath("""$output("referenced_as_end")/@xml:id="range_reference" """, "end of range reference")
+        .assertXPath("""$output("referenced_as_end")/@xml:id="with_duplicate_reference" """, "duplicate reference")
+        .assertXPath("""not(map:contains($output, "unreferenced")) """, "unreferenced doesn't exist")
+        .assertXPath("""not(map:contains($output, "stream")) """, "non-anchor reference doesn't exist")
         .go
     }
   }

@@ -26,7 +26,7 @@ while [[ -n $(pgrep apt-get) ]]; do sleep 1; done
 
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils nginx python3-certbot-nginx python3-lxml unzip unattended-upgrades update-notifier-common
+apt-get install -yq ddclient docker.io maven openjdk-8-jdk ant libxml2 libxml2-utils nginx python3-certbot-nginx python3-lxml unzip unattended-upgrades update-notifier-common
 update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 echo "Setting up unattended upgrades..."
@@ -36,7 +36,7 @@ dpkg-reconfigure -f noninteractive unattended-upgrades
 echo "Obtaining opensiddur sources..."
 mkdir -p src
 cd src
-git clone git://github.com/opensiddur/opensiddur.git
+git clone https://github.com/opensiddur/opensiddur.git
 cd opensiddur
 git checkout ${BRANCH}
 export SRC=$(pwd)

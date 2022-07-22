@@ -1,0 +1,31 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title xml:lang="en">Test file</tei:title>
+            </tei:titleStmt>
+        </tei:fileDesc>
+        <tei:sourceDesc>
+            <tei:bibl j:docStatus="outlined">
+                <tei:title>Biblio</tei:title>
+                <tei:ptr type="bibl-content" target="#stream"/>
+            </tei:bibl>
+        </tei:sourceDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <j:streamText xml:id="stream">
+            <tei:anchor xml:id="anchor1"/>
+            <tei:anchor xml:id="anchor2"/>
+            <tei:anchor xml:id="anchor3"/>
+            <tei:anchor xml:id="anchor4"/>
+            <tei:anchor xml:id="anchor5"/>
+            <tei:anchor xml:id="anchor6"/>
+            <tei:anchor xml:id="anchor7"/>
+            <tei:anchor xml:id="anchor8"/>
+            <tei:anchor xml:id="anchor9"/>
+            <tei:anchor xml:id="anchor10"/>
+            <tei:anchor xml:id="anchor11"/>
+            <tei:anchor xml:id="anchor12"/>
+        </j:streamText>
+    </tei:text>
+</tei:TEI>

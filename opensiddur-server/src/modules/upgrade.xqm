@@ -23,6 +23,8 @@ import module namespace upg12="http://jewishliturgy.org/modules/upgrade12"
     at "upgrade12.xqm";
 import module namespace upg13="http://jewishliturgy.org/modules/upgrade130"
     at "upgrade130.xqm";
+import module namespace upg14="http://jewishliturgy.org/modules/upgrade140"
+    at "upgrade140.xqm";
 import module namespace uri="http://jewishliturgy.org/transform/uri"
     at "follow-uri.xqm";
 
@@ -203,11 +205,16 @@ declare function upg:schema-changes-0-13-0() {
     upg13:upgrade-all()
 };
 
+declare function upg:schema-changes-0-14-0() {
+    upg14:upgrade()
+};
+
 declare function upg:all-schema-changes() {
     upg:schema-changes-0-7-5(),
     upg:schema-changes-0-8-0(),
     upg:schema-changes-0-8-1(),
     upg:schema-changes-0-9-0(),
     upg:schema-changes-0-12-0(),
-    upg:schema-changes-0-13-0()
+    upg:schema-changes-0-13-0(),
+    upg:schema-changes-0-14-0()
 };
