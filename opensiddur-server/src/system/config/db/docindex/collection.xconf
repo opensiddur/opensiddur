@@ -3,11 +3,13 @@
         <range>
             <!-- range indexes -->
             <create qname="@db-path" type="xs:string"/>
+            <create qname="@collection" type="xs:string"/>
             <create qname="@data-type" type="xs:string"/>
             <create qname="@project" type="xs:string"/>
             <create qname="@document-name" type="xs:string"/>
             <create qname="@resource" type="xs:string"/>
             <create qname="didx:entry">
+                <field name="entry-collection" match="@collection" type="xs:string"/>
                 <field name="entry-db-path" match="@db-path" type="xs:string"/>
                 <field name="entry-data-type" match="@data-type" type="xs:string"/>
                 <field name="entry-project" match="@project" type="xs:string"/>

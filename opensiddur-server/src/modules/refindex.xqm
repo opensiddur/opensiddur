@@ -64,12 +64,19 @@ declare function ridx:index-collection(
 };
 
 (:~ index or reindex a document given its location by collection
- : and resource name :)
+ : and resource name.
+ : If the resource is empty, clear and reindex the collection.
+ : Note that this is the only way to clear documents by collection name.
+ :)
 declare function ridx:reindex(
   $collection as xs:string,
-  $resource as xs:string
+  $resource as xs:string?
   ) {
-  ridx:reindex(doc(concat($collection, "/", $resource)))
+  if (not($resource))
+  then
+    let $remove := mirror:remove($ridx:ridx-path, $collection, ())
+    return ridx:reindex(collection($collection))
+  else ridx:reindex(doc(concat($collection, "/", $resource)))
 };
 
 declare function ridx:is-enabled(
@@ -154,7 +161,7 @@ declare function ridx:reindex(
 
 declare function ridx:remove(
   $collection as xs:string,
-  $resource as xs:string
+  $resource as xs:string?
   ) as empty-sequence() {
   mirror:remove($ridx:ridx-path, $collection, $resource)
 };
