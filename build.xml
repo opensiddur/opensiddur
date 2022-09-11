@@ -81,8 +81,9 @@
     </target>
 
 	<target name="build-exist" depends="init" unless="exist.uptodate">
+        <mkdir dir="${deps.dir}"/>
 		<get dest="${installer}"
-             src="https://bintray.com/existdb/releases/download_file?file_path=exist-installer-${exist.version}.jar"/>
+             src="https://github.com/eXist-db/exist/releases/download/eXist-6.0.1/exist-installer-${exist.version}.jar"/>
 	</target>
 	
 	<target name="install-exist" depends="init,build-exist"
@@ -206,8 +207,27 @@ cacheSize=${cache.size}
 		depends="install-exist,autoupgrade"
 		description="set up eXist and built xars for autodeployment">
 	</target>
-    
-	<target name="dist" depends="init,builder-docker"
+
+    <target name="builder-docker" depends="init">
+        <echo>build docker image: ${build.docker.image}</echo>
+        <exec executable="docker">
+            <arg value="build"/>
+            <arg value="--target"/>
+            <arg value="${build.docker.image}"/>
+            <arg value="-f"/>
+            <arg value="build.Dockerfile"/>
+            <arg value="-t"/>
+            <arg value="${builder.image.tag}"/>
+            <arg value="--build-arg"/>
+            <arg value="USER_ID=${user.id}"/>
+            <arg value="--build-arg"/>
+            <arg value="GROUP_ID=${group.id}"/>
+            <arg value="."/>
+        </exec>
+    </target>
+
+
+    <target name="dist" depends="init,builder-docker"
 		description="build everything">
 		<subant target="dist" inheritAll="false">
 			<fileset dir=".">
