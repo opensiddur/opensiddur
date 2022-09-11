@@ -1,5 +1,6 @@
 package org.opensiddur
 
+import scala.io.Source
 import org.exist.xmldb.EXistResource
 import org.opensiddur.DbTest._
 import org.scalatest.funspec.AnyFunSpec
@@ -324,7 +325,7 @@ abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndA
   }
 
   def readXmlFile(localSource: String): String = {
-    val contentSource = io.Source.fromFile(localSource)
+    val contentSource = Source.fromFile(localSource)
     val content = try {
       contentSource.getLines.mkString
     } finally {
