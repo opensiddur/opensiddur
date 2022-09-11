@@ -27,7 +27,7 @@ declare namespace error="http://jewishliturgy.org/errors";
 
 declare variable $tran:data-type := "transliteration";
 declare variable $tran:schema := concat($paths:schema-base, "/transliteration.rnc");
-declare variable $tran:schematron := concat($paths:schema-base, "/transliteration.xsl2");
+declare variable $tran:schematron := concat($paths:schema-base, "/transliteration.xsl");
 declare variable $tran:path-base := concat($data:path-base, "/", $tran:data-type);
 declare variable $tran:api-path-base := concat("/api/data/", $tran:data-type);
 

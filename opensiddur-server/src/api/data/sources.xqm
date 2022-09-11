@@ -27,7 +27,7 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
 
 declare variable $src:data-type := "sources";
 declare variable $src:schema := concat($paths:schema-base, "/bibliography.rnc");
-declare variable $src:schematron := concat($paths:schema-base, "/bibliography.xsl2");
+declare variable $src:schematron := concat($paths:schema-base, "/bibliography.xsl");
 declare variable $src:path-base := concat($data:path-base, "/", $src:data-type);
 declare variable $src:api-path-base := concat("/api/data/", $src:data-type);
 

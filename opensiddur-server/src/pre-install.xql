@@ -39,7 +39,7 @@ declare function local:mkcol($collection, $path) {
 declare function local:mkgroup($name) {
   if (sm:group-exists($name))
   then ()
-  else xmldb:create-group($name, "admin")
+  else sm:create-group($name, "admin", "")
 };
 
 declare function local:mkcollection(

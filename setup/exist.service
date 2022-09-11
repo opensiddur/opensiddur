@@ -1,0 +1,14 @@
+[Unit]
+Description=eXist-db Server
+Documentation=
+After=syslog.target
+
+[Service]
+Type=simple
+User=exist
+Group=exist
+EnvironmentFile=/usr/local/opensiddur/bin/environment.sh
+ExecStart=/usr/local/opensiddur/bin/startup.sh
+
+[Install]
+WantedBy=multi-user.target

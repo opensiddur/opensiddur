@@ -201,7 +201,7 @@ declare function flatten:resolve-stream(
             $node/@*,
             flatten:resolve-stream($node/node(), 
                 map:put(
-                    $params, 
+                    $params,
                     "flatten:resolve-stream",
                     common:TEI-root($node)//j:streamText
                     ))

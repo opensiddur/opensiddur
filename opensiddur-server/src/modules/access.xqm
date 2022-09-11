@@ -39,7 +39,7 @@ declare function local:validate-report(
     $access/
       (a:owner, a:grant/a:grant-user, a:deny/a:deny-user)
       [not(sm:user-exists(.))]   
-  let $all-groups := sm:get-groups()
+  let $all-groups := sm:list-groups()
   let $bad-groups :=
     $access/(a:group, a:grant/a:grant-group, a:deny/a:deny-group)
       [not(.=$all-groups)]
@@ -332,7 +332,7 @@ declare function acc:can-set-access(
     sm:get-permissions($doc-uri)/*
   return 
     exists($user) and
-    xmldb:is-admin-user($user) or (
+    sm:is-dba($user) or (
       (:sm:has-access($doc-uri, "w"):)
       acc:get-access-as-user($doc, $user, false())/@write="true" and
       $permissions/(
