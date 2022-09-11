@@ -275,7 +275,7 @@ declare function tohtml:attributes(
   ) as attribute()* {
   if ($e/@xml:lang and
     ( $e is root($e)/* or
-      not($e/../tohtml:lang($e/@xml:lang))
+      not($e/../tohtml:lang(., $e/@xml:lang))
     )
   )
   then (
@@ -342,9 +342,10 @@ declare function tohtml:tei-TEI(
 
 (:~ workaround for broken lang() function. Requires a context :)
 declare %private function tohtml:lang(
+  $context as node(),
   $lang as xs:string
   ) as xs:boolean {
-  starts-with(common:language(.), $lang)
+  starts-with(common:language($context), $lang)
 };
 
 (:~ build a title suitable for an HTML header :)
@@ -356,8 +357,8 @@ declare function tohtml:header-title(
     let $main-lang := common:language($tei-header/..)
     let $title-element as element(tei:title) :=
       $tei-header/tei:fileDesc/tei:titleStmt/(
-        tei:title[@type="main"][tohtml:lang($main-lang)],
-        tei:title[not(@type)][tohtml:lang($main-lang)],
+        tei:title[@type="main"][tohtml:lang(., $main-lang)],
+        tei:title[not(@type)][tohtml:lang(., $main-lang)],
         tei:title[@type="main"],
         tei:title[not(@type)])[1]
     let $title-element-lang := common:language($title-element)

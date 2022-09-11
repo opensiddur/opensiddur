@@ -43,7 +43,7 @@ declare function app:auth-password()
  : create new collections with the given mode, owner and group
  : @param $path directory path
  : @param $origin path begins at
- : @param $permissions an sm:permissions document
+ : @param $permissions an sm:permission document
  :)
 declare function app:make-collection-path(
   $path as xs:string, 

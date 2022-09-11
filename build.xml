@@ -145,12 +145,12 @@ cacheSize=${cache.size}
     <target name="install-hebmorph"
         depends="dist"
         description="install the hebmorph files into eXist">
-        <copy todir="${installdir}/lib/user" flatten="true">
+        <copy todir="${installdir}/lib" flatten="true">
             <fileset dir="${lib.dir}/hebmorph-exist/java/target">
                 <include name="hebmorph-lucene.jar"/>
             </fileset>
         </copy>
-        <copy todir="${installdir}/lib/user">
+        <copy todir="${installdir}/lib">
             <fileset dir="${lib.dir}/hebmorph-exist">
                 <include name="hspell-data-files/*"/>
             </fileset>

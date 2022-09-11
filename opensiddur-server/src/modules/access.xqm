@@ -249,7 +249,7 @@ declare function acc:get-access(
 declare function acc:get-access-data(
   $doc as document-node()
   ) as element(a:access) {
-  let $permissions as element(sm:permissions) := 
+  let $permissions as element(sm:permission) :=
     sm:get-permissions(xs:anyURI(document-uri($doc)))/*
   return
     <a:access>
@@ -328,7 +328,7 @@ declare function acc:can-set-access(
   $user as xs:string?  
   ) as xs:boolean {
   let $doc-uri := xs:anyURI(document-uri($doc))
-  let $permissions as element(sm:permissions) :=
+  let $permissions as element(sm:permission) :=
     sm:get-permissions($doc-uri)/*
   return 
     exists($user) and

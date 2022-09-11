@@ -17,9 +17,9 @@ COPY setup/docker-install-options.conf /tmp/
 # run the installer
 RUN java -jar /tmp/exist-installer.jar -console -options /tmp/docker-install-options.conf
 COPY setup/docker-startup.sh /usr/local/opensiddur/bin/docker-startup.sh
-COPY lib/icu4j-* /usr/local/opensiddur/lib/user/
-COPY lib/hebmorph-exist/java/target/hebmorph-lucene.jar /usr/local/opensiddur/lib/user/
-COPY lib/hebmorph-exist/hspell-data-files /usr/local/opensiddur/lib/user/
+COPY lib/icu4j-* /usr/local/opensiddur/lib/
+COPY lib/hebmorph-exist/java/target/hebmorph-lucene.jar /usr/local/opensiddur/lib/
+COPY lib/hebmorph-exist/hspell-data-files /usr/local/opensiddur/lib/
 
 # copy autodeploy files
 COPY dist/opensiddur-server.xar /usr/local/opensiddur/autodeploy

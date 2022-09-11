@@ -66,12 +66,17 @@ declare function local:mkcollection(
     sm:chgrp(xs:anyURI($path), $group),
     sm:chmod(xs:anyURI($path), $permissions),
     (: store configuration :)
-    util:log("info", 'making configuation collection for ' || $path),
+    util:log("info", 'making configuration collection for ' || $path),
     local:mkcol("/db" || $system-config-base, $path),
     util:log("info", 'storing configuration for ' || $path || ' to ' || $config-path || ' from ' || concat($dir, $package-config-path)),
-    xmldb:store-files-from-pattern(
-      $config-path, concat($dir, $package-config-path), "*.xconf"
-    ),
+    let $local-path := concat($dir, $package-config-path)
+    return
+    if (file:is-directory($local-path))
+    then
+        xmldb:store-files-from-pattern(
+          $config-path, $local-path, "*.xconf"
+        )
+    else (),
     util:log("info", 'finished processing ' || $path)
   ),
   (: recurse :)

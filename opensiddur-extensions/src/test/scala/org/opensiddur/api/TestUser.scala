@@ -482,7 +482,7 @@ class TestUserDelete extends DbTest with CommonTestUser {
         .user("xqtest2")
         .assertHttpNoData
         .assertXPath("""system:as-user("admin", $magic:password, not(sm:user-exists("xqtest2")))""", "user removed")
-        .assertXPath("""system:as-user("admin", $magic:password, not(sm:get-groups()="xqtest2"))""", "group removed")
+        .assertXPath("""system:as-user("admin", $magic:password, not(sm:list-groups()="xqtest2"))""", "group removed")
         .assertXPath("""not(doc-available("/db/data/user/xqtest2.xml"))""", "profile removed")
         .go
     }
@@ -515,7 +515,7 @@ class TestUserDelete extends DbTest with CommonTestUser {
         .assertXPath("""$output/self::rest:response/http:response/@status = 200""", "status code is 200")
         .assertXPath("""ends-with($output/self::info//documents/document, "/api/data/original/Reference")""", "returns an info element with the referenced document")
         .assertXPath("""system:as-user("admin", $magic:password, not(sm:user-exists("xqtest3")))""", "user account removed")
-        .assertXPath("""system:as-user("admin", $magic:password, not(sm:get-groups()="xqtest3"))""", "group removed")
+        .assertXPath("""system:as-user("admin", $magic:password, not(sm:list-groups()="xqtest3"))""", "group removed")
         .assertXPath("""exists(doc("/db/data/user/xqtest3.xml")/j:contributor[tei:idno="xqtest3"][tei:name="Deleted user"])""", "profile changed to anonymous profile")
         .assertXPath("""system:as-user("admin", $magic:password, sm:get-permissions(xs:anyURI("/db/data/user/xqtest3.xml")))/*/@owner="admin"""", "profile owned by admin")
         .assertXPath("""system:as-user("admin", $magic:password, sm:get-permissions(xs:anyURI("/db/data/user/xqtest3.xml")))/*/@group="everyone"""", "profile owned by group everyone")
