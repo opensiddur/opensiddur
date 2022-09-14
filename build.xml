@@ -108,7 +108,7 @@ cacheSize=${cache.size}
 		</exec>
 		<delete file="${build}/install-options.ini"/>
         <!-- copy the icu4j library from lib -->
-        <copy todir="${installdir}/lib/user">
+        <copy todir="${installdir}/lib">
             <fileset dir="${lib.dir}">
             	<include name="icu4j-*"/>
             </fileset>
