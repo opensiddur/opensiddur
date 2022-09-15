@@ -1,5 +1,5 @@
 # To build, we assume that lib is mounted to /usr/local/src
-FROM ubuntu:focal as base
+FROM ubuntu:kinetic as base
 
 # install dependencies
 RUN apt-get update && apt-get install -y openjdk-8-jdk maven

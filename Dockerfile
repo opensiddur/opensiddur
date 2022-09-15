@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:kinetic
 
 RUN useradd -c "eXist db"  exist
 # install dependencies
