@@ -55,8 +55,8 @@ chown -R exist:exist ${INSTALL_DIR}
 
 # install the service script
 echo "Installing service script..."
-cp setup/exist.service /etc/systemd/system/
-chown exist:exist /etc/systemd/system/exist.service
+cp setup/exist-db.service /etc/systemd/system/
+chown exist:exist /etc/systemd/system/exist-db.service
 
 echo "Installing periodic backup cleaning..."
 cat << EOF > /etc/cron.daily/clean-exist-backups
@@ -220,7 +220,9 @@ EOF
 chmod +x /etc/cron.daily/copy-exist-backups
 
 echo "Starting eXist..."
-systemctl start eXist-db
+systemctl daemon-reload
+systemctl enable exist-db
+systemctl start exist-db
 
 echo "Wait until eXist-db is up..."
 python3 python/wait_for_up.py --host=localhost --port=8080 --timeout=86400

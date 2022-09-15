@@ -1,6 +1,6 @@
 [Unit]
 Description=eXist-db Server
-Documentation=
+Documentation=https://exist-db.org/exist/apps/doc/
 After=syslog.target
 
 [Service]
