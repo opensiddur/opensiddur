@@ -14,7 +14,7 @@ env:
   ZONE: us-west2-a
   MACHINE_TYPE: n1-standard-1
   IMAGE_PROJECT: ubuntu-os-cloud
-  IMAGE_VERSION: ubuntu-2210
+  IMAGE_VERSION: ubuntu-2204
   BOOT_DISK_SIZE_GB: 20
   EXIST_MEMORY: 3072
   STACK_MEMORY: 512
