@@ -122,7 +122,7 @@ cacheSize=${cache.size}
              <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         </xslt>
         <move file="${installdir}/conf.out.xml" tofile="${installdir}/etc/conf.xml"/>
-        <echo file="${environment.file.install}">JAVA_OPTS="-Xss${stack.memory}m -Xmx${max.memory}"</echo>
+        <echo file="${environment.file.install}">JAVA_OPTS="-Xss${stack.memory}m -Xmx${max.memory}m"</echo>
     </target>
 	
 	<target name="exist-clean">
