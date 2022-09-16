@@ -93,8 +93,8 @@ class TestMirrorCreate extends BaseTestMirror {
     it("creates a new mirror collection with an extension map") {
       xq("""mirror:create("/db/data/tests/new-mirror", $local:original-collection, false(),
                    map {
-                   "xml" := "html"
-                    , "txt" := "csv"}
+                   "xml" : "html"
+                    , "txt" : "csv"}
                  )""")
         .user("xqtest1")
         .assertXPath("""xmldb:collection-available("/db/data/tests/new-mirror") """, "mirror collection created")

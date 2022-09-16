@@ -217,7 +217,7 @@ class TestGroupPut extends BaseTestGroup {
   override def afterAll: Unit = {
     xq(
       """system:as-user("admin", $magic:password, (
-        if (sm:get-groups()="grouptestsnew")
+        if (sm:list-groups()="grouptestsnew")
         then (
           for $user in sm:get-group-members("grouptestsnew")
           let $removed := sm:remove-group-member("grouptestsnew", $user)

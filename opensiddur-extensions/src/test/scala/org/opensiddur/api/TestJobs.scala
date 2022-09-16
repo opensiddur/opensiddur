@@ -151,8 +151,8 @@ class TestJobList extends BaseTestJobs {
         .assertXPath("""every $result in $output//html:li[@class="result"] satisfies matches($result/html:a/@href, "^/api/jobs/\d+-\d+$")""", "every result returns a pointer to an API")
         .assertXPath("""every $result in $output//html:li[@class="result"] satisfies $result/html:span[@class="user"]="xqtest2" """, "every result returns a user name")
         .assertXPath("""every $result in $output//html:li[@class="result"] satisfies $result/html:span[@class="state"]=("complete", "failed", "working")""", "every result returns a state")
-        .assertXPath("""every $result in $output//html:li[@class="result"] satisfies matches($result/html:span[@class="started"], '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?[+-]\d{2}:\d{2}')""", "every result returns a start time")
-        .assertXPath("""every $result in $output//html:li[@class="result"][html:span[@class="state"][not(.="working")]] satisfies matches($result/html:span[@class=("complete", "failed")], '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?[+-]\d{2}:\d{2}')""", "every completed of failed result returns a complete/failed time")
+        .assertXPath("""every $result in $output//html:li[@class="result"] satisfies matches($result/html:span[@class="started"], '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?[+\-]\d{2}:\d{2}')""", "every result returns a start time")
+        .assertXPath("""every $result in $output//html:li[@class="result"][html:span[@class="state"][not(.="working")]] satisfies matches($result/html:span[@class=("complete", "failed")], '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?[+\-]\d{2}:\d{2}')""", "every completed of failed result returns a complete/failed time")
         .go
     }
 

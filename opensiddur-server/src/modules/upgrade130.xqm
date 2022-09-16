@@ -51,7 +51,7 @@ declare function upg13:upgrade-all() {
           let $destination-collection := replace($resource/@collection, "[/]\d+[/]\d+", "")
           let $log := util:log("info", "Copying for 0.13.0: " || $resource/@collection || "/" || $resource/@resource || " to " || $destination-collection)
           return
-            xmldb:copy($resource/@collection, mirror:mirror-path($upgrade-mirror, $destination-collection), $resource/@resource)
+            xmldb:copy-resource($resource/@collection, $resource/@resource, mirror:mirror-path($upgrade-mirror, $destination-collection), $resource/@resource)
         default return ()
     let $unmirror := xmldb:remove($upgrade-mirror, $mirror:configuration)
     let $destroy := xmldb:remove("/db/data")

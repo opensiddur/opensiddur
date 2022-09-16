@@ -161,12 +161,14 @@ declare
     function translit:has-vowel(
         $context as element(tr:cc)
     ) as xs:boolean {
-    $context/(
-        (tr:s|tr:vu|tr:vl|tr:vs) or
-        following::tr:cc[1][tr:cons=$translit:hebrew('vav') and 
-        (tr:vl=$translit:hebrew('holam') or 
-          (tr:d and not(tr:s|tr:vu|tr:vl|tr:vs)))]
-    )
+    let $following := $context/following::tr:cc[1]
+    return
+        $context/(
+            (tr:s|tr:vu|tr:vl|tr:vs) or
+            $following[tr:cons=$translit:hebrew('vav') and
+            (tr:vl=$translit:hebrew('holam') or
+              (tr:d and not(tr:s|tr:vu|tr:vl|tr:vs)))]
+        )
 };
 
 declare function translit:assemble-word-reverse(
@@ -605,8 +607,7 @@ declare function translit:transliterate-text(
                                     translit:pass3($pass2-result, $params)
                                 let $pass4-result as element(tr:w) :=
                                     translit:pass4($pass3-result, $params)
-                                return
-                                    translit:transliterate-final($pass4-result, $params)
+                                return translit:transliterate-final($pass4-result, $params)
                     default return $token/string() (: whitespace :)
         ), "")
     } 
@@ -630,19 +631,22 @@ declare function translit:pass0-tr-cc(
     $context as element(tr:cc),
     $params as map(*)
     ) as element(tr:cc) {
+    let $following := $context/following::tr:cc[1]
+    let $preceding := $context/preceding::tr:cc[1]
+    return
     $context/
     element tr:cc {
         @*,	
 	    (: mark position; can't use position() because there may be other elements in the hierarchy! :)
-		if (not(preceding::tr:cc) or preceding::tr:cc[1][matches(tr:cons/text(),'\p{P}','x')])
+		if (not($preceding) or $preceding/tr:cons[matches(.,'\p{P}')])
         then
 			attribute first { 1 }
 		else (),
-		if (matches(tr:cons/text(),'\p{P}','x'))
+		if (matches(tr:cons/text(),'\p{P}'))
         then
             attribute punct { 1 }
         else (),
-		if (not(following::tr:cc) or following::tr:cc[1][matches(tr:cons/text(),'\p{P}','x')])
+		if (not($following) or $following/tr:cons[matches(.,'\p{P}')])
         then
 			attribute last { 1 }
 		else (),
@@ -663,6 +667,9 @@ declare function translit:pass1(
     $params as map(*)
     ) as node()* {
     for $node in $nodes
+    let $preceding := $node/preceding::tr:cc[1]
+    let $following := $node/following::tr:cc[1]
+    let $following2 := $node/following::tr:cc[2]
     return
         typeswitch ($node)
         case element(tr:cc) return
@@ -671,7 +678,7 @@ declare function translit:pass1(
             else if (
                 $node
                     [not(tr:vs|tr:s|tr:vl|tr:vu)]
-                    [following::tr:cc[1][tr:cons=$translit:hebrew("vav")][tr:vl=$translit:hebrew("holam")]]
+                    [$following[tr:cons=$translit:hebrew("vav")][tr:vl=$translit:hebrew("holam")]]
             )
             then translit:pass1-preceding-holam-male($node, $params)
             else if ($node[tr:cons=$translit:hebrew("vav")][tr:vl=$translit:hebrew("holam")])
@@ -679,10 +686,10 @@ declare function translit:pass1(
             else if (
                 $node
                     [not(tr:vs|tr:s|tr:vl|tr:vu)]
-                    [following::tr:cc[1]
+                    [$following
                         [tr:cons=$translit:hebrew("vav")]
                         [tr:d=$translit:hebrew("dageshormapiq")]
-                        [not(following::tr:cc[2]
+                        [not($following2
                             [tr:cons=$translit:hebrew("vav")][tr:d=$translit:hebrew("dageshormapiq")])]]
             )
             then translit:pass1-preceding-shuruq($node, $params)
@@ -691,7 +698,7 @@ declare function translit:pass1(
                     [tr:cons=$translit:hebrew("vav")]
                     [tr:d=$translit:hebrew("dageshormapiq")]
                     [not(tr:vl|tr:vs|tr:s)]
-                    [not(following::tr:cc[1]
+                    [not($following
                         [tr:cons=$translit:hebrew("vav")]
                         [tr:d=$translit:hebrew("dageshormapiq") or tr:vl=$translit:hebrew("holam")])
                     ])
@@ -699,16 +706,16 @@ declare function translit:pass1(
             else if (
                 $node
                     [tr:vs=($translit:hebrew("hiriq"),$translit:hebrew("segol")) or tr:vl=$translit:hebrew("tsere")]
-                    [following::tr:cc[1][tr:cons=$translit:hebrew("yod")][tr:d or not(translit:has-vowel(.))]]
+                    [$following[tr:cons=$translit:hebrew("yod")][tr:d or not(translit:has-vowel(.))]]
             )
             then translit:pass1-male-vowels($node, $params)
             else if (
                 $node
                     [tr:cons=$translit:hebrew("yod")]
                     [not(tr:s|tr:d|tr:vl|tr:vs|tr:vu)]
-                    [preceding::tr:cc[1]
+                    [$preceding
                         [tr:vs=($translit:hebrew("hiriq"),$translit:hebrew("segol")) or tr:vl=$translit:hebrew("tsere")]
-                        [not(following::tr:cc[1]
+                        [not($following
                             [tr:cons=$translit:hebrew("vav")]
                             [((tr:d and not(tr:vl|tr:vs|tr:vu|tr:s)) or tr:vl=$translit:hebrew("holam")) ])]
                     ])
@@ -716,7 +723,7 @@ declare function translit:pass1(
             else if (
                 $node
                     [tr:vl=$translit:hebrew("qamats")]
-                    [following::tr:cc[1]
+                    [$following
                         [tr:cons=$translit:hebrew("he")][not(tr:d)][not(translit:has-vowel(.))]])
             then translit:pass1-qamats-vowel-letter($node, $params)
             else if (
@@ -724,7 +731,7 @@ declare function translit:pass1(
                     [tr:cons=$translit:hebrew("he")]
                     [not(translit:has-vowel(.))]
                     [not(tr:d)]
-                    [preceding::tr:cc[1][tr:vl=$translit:hebrew("qamats")]]
+                    [$preceding[tr:vl=$translit:hebrew("qamats")]]
             )
             then translit:pass1-vowel-letter-he($node, $params) 
             else translit:identity($node, $params, translit:pass1#2)
@@ -761,8 +768,8 @@ declare function translit:pass1-preceding-holam-male(
     ) as element(tr:cc) {
     $context/
     element tr:cc {
-		@*,
-		following::tr:cc[1]/@last, (: holam male can't be first or punct :)
+		@* except @last,
+		(@last, following::tr:cc[1]/@last)[1], (: holam male can't be first or punct :)
 	    tr:cons,
         element tr:vl { $translit:hebrew("vav") || $translit:hebrew("holam") },
         * except tr:cons
@@ -786,7 +793,8 @@ declare function translit:pass1-preceding-shuruq(
     ) as element(tr:cc) {
 	$context/
     element tr:cc {
-        following::tr:cc[1]/@last, @*,
+        (@last, following::tr:cc[1]/@last)[1],
+        @* except @last,
         tr:cons, 
         tr:d,
         element tr:vl { $translit:hebrew("vav") || $translit:hebrew("dageshormapiq") },
@@ -804,6 +812,8 @@ declare function translit:pass1-vav-with-dagesh(
     $context as element(tr:cc),
     $params as map(*)
     ) as element(tr:cc)? {
+    let $preceding := $context/preceding::tr:cc[1]
+    return
 	$context/(
     if (@first)
     then
@@ -812,7 +822,7 @@ declare function translit:pass1-vav-with-dagesh(
 			element tr:vl { $translit:hebrew("vav") || $translit:hebrew("dageshormapiq") },
 			* except (tr:cons, tr:d)
 		}
-    else if (preceding::tr:cc[1][not(tr:s|tr:vs|tr:vl|tr:vu)])
+    else if ($preceding[not(tr:s|tr:vs|tr:vl|tr:vu)])
     then ()
     else .
     )
@@ -832,7 +842,7 @@ declare function translit:pass1-male-vowels(
                     $context/(tr:vs,tr:vl),
                     $translit:hebrew("yod"),
                     if ($context/tr:vs=$translit:hebrew("hiriq") and 
-                        $context/following::tr:cc[1][tr:d] and
+                        $context/following::tr:cc[1]/tr:d and
                         $table/tr:tr[@from=($translit:hebrew("hiriq") || $translit:hebrew("yod") || $translit:hebrew("dageshormapiq"))])
                     then $translit:hebrew("dageshormapiq")
                     else ()
@@ -841,7 +851,7 @@ declare function translit:pass1-male-vowels(
         return
             element tr:cc {
                 $context/following::tr:cc[1]/@last,
-                $context/@*, 
+                $context/(@* except @last),
                 $context/tr:cons,
                 $vowel-male,
                 $context/(* except (tr:cons,tr:vs,tr:vl))
@@ -868,8 +878,8 @@ declare function translit:pass1-qamats-vowel-letter(
     ) as element(tr:cc) {
     $context/
   	element tr:cc {
-  	    following::tr:cc[1]/@last,
-  		@*, 
+  	    (@last, following::tr:cc[1]/@last)[1],
+  		@* except @last,
         tr:cons,
         element tr:vl { $translit:hebrew("qamats") || $translit:hebrew("he") },
         * except (tr:cons,tr:vl)
@@ -891,6 +901,8 @@ declare function translit:pass2(
     $params as map(*)
     ) as node()* {
     for $node in $nodes
+    let $following := $node/following::tr:cc[1]
+    let $preceding := $node/preceding::tr:cc[1]
     return
         typeswitch($node)
         case element(tr:cc) return
@@ -898,7 +910,7 @@ declare function translit:pass2(
                 $node
                     [not(@first|@punct)]
                     [not(translit:has-vowel(.))]
-                    [following::tr:cc[1]
+                    [$following
                         [tr:cons=($translit:hebrew("he"),$translit:hebrew("aleph"))]
                         [not(tr:d)]
                         [not(translit:has-vowel(.))]
@@ -910,7 +922,7 @@ declare function translit:pass2(
                     [tr:cons=$translit:hebrew("aleph")]
                     [not(tr:d)]
                     [not(translit:has-vowel(.))]
-                    [not(preceding::tr:cc[1][tr:s|tr:vs|tr:vu|tr:vl]) or (not(@last))]
+                    [not($preceding[tr:s|tr:vs|tr:vu|tr:vl]) or (not(@last))]
                     [not(@first|@punct)]
             )
             then translit:pass2-silent-letter($node, $params)
@@ -929,8 +941,8 @@ declare function translit:pass2-preceding-silent(
     ) as element(tr:cc) {
     $context/
   	element tr:cc {
-        following::tr:cc[1]/@last,
-        @*, 
+        (@last, following::tr:cc[1]/@last)[1],
+        @* except @last,
         tr:cons,
         * except tr:cons
   	}
@@ -989,7 +1001,7 @@ declare function translit:pass3-identify-dagesh(
             $translit:hebrew("tav")
         )
     let $is-dagesh-kal as xs:boolean :=
-        ($is-bgdkft) and $context/(@first or preceding::tr:cc[1][tr:s])
+        ($is-bgdkft) and $context/(@first or preceding::tr:cc[1]/tr:s)
     let $new-consonant as element(tr:cons) :=
         element tr:cons {
             string-join((
@@ -1011,13 +1023,15 @@ declare function translit:pass3-identify-dagesh(
                 attribute virtual { 1 },
                 @first,
                 $new-consonant,
-                tr:d,
+                (: virtual doubling of a vav should not cause a vowel-shuruq to be printed :)
+                if (not(tr:cons=$translit:hebrew("vav"))) then tr:d else (),
                 element tr:s { $translit:hebrew("shevanach") }
             },
             element tr:cc {
                 @* except @first, 
-                $new-consonant, 
-                * except tr:cons
+                $new-consonant,
+                if (not(tr:cons=$translit:hebrew("vav"))) then tr:d else (),
+                * except (tr:cons, tr:d)
             }
         )
 };
@@ -1061,12 +1075,15 @@ declare function translit:pass4-identify-sheva(
         tr:cons,
         (: removed tr:s and @last from following::tr:cc[1][tr:s] :)
         element tr:s {
+            let $following := following::tr:cc[1]
+            let $preceding := preceding::tr:cc[1]
+            return
             if (
   			    (@first
-  			    or preceding::tr:cc[1][tr:vl|tr:s] 
+  			    or $preceding[tr:vl|tr:s]
   			    and not(@last))
-  			    and not(following::tr:cc[1][tr:s])
-  			    or (tr:cons=following::tr:cc[1]/tr:cons)
+  			    and not($following/tr:s)
+  			    or (tr:cons=$following/tr:cons)
   			) 
             then $translit:hebrew("shevana")
             else $translit:hebrew("shevanach")

@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:kinetic
 
 RUN useradd -c "eXist db"  exist
 # install dependencies
@@ -11,19 +11,19 @@ RUN chown exist:exist /usr/local/opensiddur
 USER exist:exist
 
 # copy the build
-COPY lib/exist/installer/eXist-db-setup-*-opensiddur.jar /tmp/
+COPY dependencies/exist-installer-*.jar /tmp/exist-installer.jar
 COPY setup/docker-install-options.conf /tmp/
 
 # run the installer
-RUN java -jar /tmp/eXist-db-setup-4.8.0-opensiddur.jar -console -options /tmp/docker-install-options.conf
-COPY lib/icu4j-* /usr/local/opensiddur/lib/user/
-COPY lib/hebmorph-exist/java/target/hebmorph-lucene.jar /usr/local/opensiddur/lib/extensions/indexes/lucene/lib/
-COPY lib/hebmorph-exist/hspell-data-files /usr/local/opensiddur/extensions/indexes/lucene/lib/
-RUN ln -s /usr/local/opensiddur/extensions/indexes/lucene/lib/hspell-data-files /usr/local/opensiddur/tools/yajsw/target/classes/hspell-data-files
+RUN java -jar /tmp/exist-installer.jar -console -options /tmp/docker-install-options.conf
+COPY setup/docker-startup.sh /usr/local/opensiddur/bin/docker-startup.sh
+COPY lib/icu4j-* /usr/local/opensiddur/lib/
+COPY lib/hebmorph-exist/java/target/hebmorph-lucene.jar /usr/local/opensiddur/lib/
+COPY lib/hebmorph-exist/hspell-data-files /usr/local/opensiddur/lib/
 
 # copy autodeploy files
 COPY dist/opensiddur-server.xar /usr/local/opensiddur/autodeploy
 
 EXPOSE 8080 8443
 
-ENTRYPOINT /usr/local/opensiddur/bin/startup.sh
+ENTRYPOINT /usr/local/opensiddur/bin/docker-startup.sh

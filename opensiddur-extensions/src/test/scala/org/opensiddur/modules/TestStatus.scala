@@ -68,7 +68,7 @@ declare function local:tei-document() {
         .user("xqtest1")
         .assertXPath("""exists($output//status:job)""", "a status document has been created")
         .assertXPath("""$output//status:job/@user = "xqtest1"""", "the document references the user")
-        .assertXPath("""matches($output//status:job/@started, "^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|([+-]\d{2}:\d{2}))$")""",
+        .assertXPath("""matches($output//status:job/@started, "^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|([+\-]\d{2}:\d{2}))$")""",
           "the document references a start time")
         .assertXPath("""$output//status:job/@state = "working"""", "the document status is working")
         .assertXPath("""ends-with($output//status:job/@resource, "/api/data/original/test-status")""", "the document references the API path of the document")

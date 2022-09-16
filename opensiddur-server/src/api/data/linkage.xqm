@@ -31,7 +31,7 @@ import module namespace uri="http://jewishliturgy.org/transform/uri"
 declare variable $lnk:data-type := "linkage";
 declare variable $lnk:no-lang := "none";  (: no language :)
 declare variable $lnk:schema := concat($paths:schema-base, "/linkage.rnc");
-declare variable $lnk:schematron := concat($paths:schema-base, "/linkage.xsl2");
+declare variable $lnk:schematron := concat($paths:schema-base, "/linkage.xsl");
 declare variable $lnk:path-base := concat($data:path-base, "/", $lnk:data-type);
 declare variable $lnk:api-path-base := concat("/api/data/", $lnk:data-type);
 

@@ -54,6 +54,36 @@ class TestTranslit extends DbTest {
         .go
     }
 
+    it("transliterates a patah genuva") {
+      xq("""translit:transliterate(element tei:w { text { "שַׂמֵחַ" }}, map { "translit:table" : $local:table//tr:table })""")
+        .assertXmlEquals("""<tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">sameyaḥ</tei:w>""")
+        .go
+    }
+
+    it("transliterates a sheva na") {
+      xq("""translit:transliterate(element tei:w { text { "בְּךָ" }}, map { "translit:table" : $local:table//tr:table })""")
+        .assertXmlEquals("""<tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">bəkha</tei:w>""")
+        .go
+    }
+
+    it("transliterates a sheva nakh") {
+      xq("""translit:transliterate(element tei:w { text { "בָּךְ" }}, map { "translit:table" : $local:table//tr:table })""")
+        .assertXmlEquals("""<tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">bakh</tei:w>""")
+        .go
+    }
+
+    it("transliterates a vowel letter") {
+      xq("""translit:transliterate(element tei:w { text { "בָּה" }}, map { "translit:table" : $local:table//tr:table })""")
+        .assertXmlEquals("""<tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">ba</tei:w>""")
+        .go
+    }
+
+    it("transliterates a vav-dagesh") {
+      xq("""translit:transliterate(element tei:w { text { "צִוָּה" }}, map { "translit:table" : $local:table//tr:table })""")
+        .assertXmlEquals("""<tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">tzivva</tei:w>""")
+        .go
+    }
+
     it("transliterates a maleh vowel") {
       xq("""translit:transliterate(element tei:w { text { "רִית" }}, map { "translit:table" : $local:table//tr:table })""")
         .assertXmlEquals("""<tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">riyt</tei:w>""")
@@ -83,6 +113,13 @@ class TestTranslit extends DbTest {
         .assertXmlEquals("""<tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">baz</tei:w>""")
         .go
     }
+
+    it("transliterates a silent letter") {
+      xq("""translit:transliterate(element tei:w { text { "רֹאשׁ" }}, map { "translit:table" : $local:table//tr:table })""")
+        .assertXmlEquals("""<tei:w xmlns:tei="http://www.tei-c.org/ns/1.0">rosh</tei:w>""")
+        .go
+    }
+
 
     it("transliterates a Tetragrammation (form 1)") {
       xq("""translit:transliterate(element tei:w { text { "יְהוָה" }}, map { "translit:table" : $local:table//tr:table })""")
