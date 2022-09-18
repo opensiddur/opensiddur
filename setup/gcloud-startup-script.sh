@@ -61,7 +61,7 @@ chown exist:exist /etc/systemd/system/exist-db.service
 echo "Installing periodic backup cleaning..."
 cat << EOF > /etc/cron.daily/clean-exist-backups
 #!/bin/bash
-BASE_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
+BASE_DIR=${INSTALL_DIR}/etc/webapp/WEB-INF/data/export
 EARLIEST_DATE=\$(date -d "14 days ago" +%Y%m%d)
 
 for backup in \$( \
@@ -191,7 +191,7 @@ then
 fi;
 
 echo "Installing daily backup copy..."
-EXPORT_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
+EXPORT_DIR=${INSTALL_DIR}/etc/webapp/WEB-INF/data/export
 cat << EOF > /etc/cron.daily/copy-exist-backups
 #!/bin/bash
 echo "Starting Open Siddur Daily Backup to Cloud..."
