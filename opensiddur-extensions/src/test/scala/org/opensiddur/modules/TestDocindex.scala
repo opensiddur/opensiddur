@@ -26,9 +26,11 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
     super.beforeAll()
 
     setupUsers(1)
+    setupCollection("/db/data/original", "test", Some("xqtest1"), Some("xqtest1"), Some("rwxrwxrwx"))
   }
 
   override def afterAll(): Unit = {
+    teardownCollection("/db/data/original/test")
     teardownUsers(1)
     super.afterAll()
   }
@@ -37,10 +39,12 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
     super.beforeEach()
 
     setupResource("src/test/resources/modules/docindex/test_docindex.xml", "test_docindex", "original", 1, Some("en"))
+    setupResource("src/test/resources/modules/docindex/test_docindex.xml", "test_docindex_2", "original", 1, Some("test"))
 
   }
 
   override def afterEach(): Unit = {
+    teardownResource("test_docindex_2", "original", 1)
     teardownResource("test_docindex", "original", 1)
     super.afterEach()
   }
@@ -60,6 +64,7 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
           didx:entry[@db-path="/db/data/original/en/test_docindex.xml"]""")
         .assertXPath("exists($output)", "The document was not indexed")
         .assertXPath("count($output) = 1", "The document was not indexed exactly once")
+        .assertXPath("$output/@collection='/db/data/original/en'", "the collection was recorded incorrectly")
         .assertXPath("$output/@resource='test_docindex'", "the resource was recorded incorrectly")
         .assertXPath("$output/@data-type='original'", "the data type was recorded incorrectly")
         .assertXPath("$output/@document-name='test_docindex.xml'", "The document name was recorded incorrectly")
@@ -81,6 +86,19 @@ declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
       xq("""didx:remove("/db/data/original/en", "test_docindex.xml")""")
         .assertXPath("empty(doc($didx:didx-path || \"/\" || $didx:didx-resource)//didx:entry[@db-path=\"/db/data/original/en/test_docindex.xml\"])",
         "The entry was not removed")
+        .assertXPath("""exists(doc($didx:didx-path || "/" || $didx:didx-resource)//didx:entry[@collection="/db/data/original/test"]) """)
+        .go
+    }
+
+    it("deletes an entire collection from the index with remove#2") {
+      xq("""didx:remove("/db/data/original/test", ())""")
+        .assertXPath("""empty(doc($didx:didx-path || "/" || $didx:didx-resource)//didx:entry[@collection="/db/data/original/test"]) """)
+        .go
+    }
+
+    it("deletes an entire collection from the index with remove#1") {
+      xq("""didx:remove("/db/data/original/test")""")
+        .assertXPath("""empty(doc($didx:didx-path || "/" || $didx:didx-resource)//didx:entry[@collection="/db/data/original/test"]) """)
         .go
     }
 

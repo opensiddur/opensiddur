@@ -102,25 +102,28 @@ declare function didx:remove(
     system:as-user("admin", $magic:password,
         let $collection-entries := collection($didx:didx-path)//didx:entry[$collection=@collection]
         let $delete := update delete $collection-entries
-        let $reindex := xmldb:reindex(didx:didx-path, $didx:didx-resource)
+        let $reindex := xmldb:reindex($didx:didx-path, $didx:didx-resource)
         return ()
     )
 };
 
 declare function didx:remove(
   $collection as xs:string,
-  $resource as xs:string
+  $resource as xs:string?
   ) as empty-sequence() {
-  let $doc-uri := $collection || "/" || $resource
-  let $index-collection := collection($didx:didx-path)
-  let $existing-entry := $index-collection//didx:entry[$doc-uri=@db-path]
-  where exists($existing-entry)
-  return
-      system:as-user("admin", $magic:password, (
-           let $update := update delete $existing-entry
-           let $reindex := xmldb:reindex($didx:didx-path, $didx:didx-resource)
-           return ()
-      ))
+  if (exists($resource))
+  then
+      let $doc-uri := $collection || "/" || $resource
+      let $index-collection := collection($didx:didx-path)
+      let $existing-entry := $index-collection//didx:entry[$doc-uri=@db-path]
+      where exists($existing-entry)
+      return
+          system:as-user("admin", $magic:password, (
+               let $update := update delete $existing-entry
+               let $reindex := xmldb:reindex($didx:didx-path, $didx:didx-resource)
+               return ()
+          ))
+  else didx:remove($collection)
 };
 
 (:~ Query the document index for a path :)
