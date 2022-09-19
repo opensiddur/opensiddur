@@ -31,7 +31,7 @@ declare function common:generate-id(
 	$node as node()
 	) as xs:string {
 	let $docid := 
-		let $d := util:document-id($node)
+		let $d := util:absolute-resource-id($node)
 		return
 			if ($d)
 			then string($d)
