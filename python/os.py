@@ -88,9 +88,21 @@ def ls(args):
 
 
 def get(args):
+    request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}"
+    headers = {
+        **auth_headers(args),
+    }
+
+    data = requests.get(request_url, headers=headers)
+    if data.status_code == 200:
+        with (open(args.output, "w") if args.output else sys.stdout) as f:
+            f.write(data.content.decode("utf8"))
+    else:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+
+def combine(args):
     request_url = (
-        f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}"
-        + ("/combined" if (args.combined or args.transclude or args.html) else "")
+            f"{server_url(args.server)}/api/data/original/{args.resource}/combined"
     )
     html_header = {"Accept": "application/xhtml+xml"} if args.html else {}
     headers = {
@@ -99,7 +111,7 @@ def get(args):
     }
 
     params = {
-        **({"transclude": "true"} if args.transclude else {})
+        **({"transclude": "true"} if args.subparser == "transclude" else {})
     }
     data = requests.get(request_url, params=params, headers=headers)
     if data.status_code == 200:
@@ -107,6 +119,25 @@ def get(args):
             f.write(data.content.decode("utf8"))
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+
+def validate(args):
+    request_url = (f"{server_url(args.server)}/api/data/{args.data_type}" + (
+        f"/{args.resource}" if args.resource else ""))
+    headers = {
+        **auth_headers(args),
+        "Content-type": "application/xml",
+    }
+    params = {
+        "validate": "true"
+    }
+    request = requests.put if args.resource else requests.post
+    with (open(args.file, "r") if args.file else sys.stdin) as f:
+        data = request(request_url, f.read(), params=params, headers=headers)
+    if data.status_code == 200:
+        print(data.content.decode("utf8"))
+    else:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -124,7 +155,7 @@ def main():
     server_type_group.add_argument("--prod", action="store_const", dest="server", const="prod",
                                    help="Use production server")
 
-    command_parsers = ap.add_subparsers(title="command")
+    command_parsers = ap.add_subparsers(title="command", dest="subparser")
     ls_parser = command_parsers.add_parser("ls", aliases=["search"])
     ls_parser.add_argument("data_type", action="store", type=str,
                     choices=data_types)
@@ -134,11 +165,20 @@ def main():
     get_parser = command_parsers.add_parser("get")
     get_parser.add_argument("data_type", action="store", type=str, choices=data_types)
     get_parser.add_argument("resource", action="store", type=str)
-    get_parser.add_argument("--html", action="store_true", dest="html", default=False)
-    get_parser.add_argument("--combined", action="store_true", dest="combined", default=False)
-    get_parser.add_argument("--transclude", action="store_true", dest="transclude", default=False)
     get_parser.add_argument("--output", action="store", dest="output")
-    get_parser.set_defaults(func=get)
+
+    combine_parser = command_parsers.add_parser("combine", aliases=["transclude"])
+    combine_parser.add_argument("resource", action="store", type=str)
+    combine_parser.add_argument("--html", action="store_true", dest="html", default=False)
+    combine_parser.add_argument("--output", action="store", dest="output")
+    combine_parser.set_defaults(func=combine)
+
+    validate_parser = command_parsers.add_parser("validate")
+    validate_parser.add_argument("data_type", action="store", type=str, choices=data_types)
+    validate_parser.add_argument("--resource", action="store", type=str, required=False)
+    validate_parser.add_argument("--file", action="store", type=str, required=False)
+    validate_parser.set_defaults(func=validate)
+
     args = ap.parse_args()
     args.func(args)
 
