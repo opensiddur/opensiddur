@@ -75,7 +75,18 @@ def paginate(request_url, request_size=100, params=None, headers=None):
         start_index += items_per_page
         finished = start_index >= total_results
 
+def up(args):
+    try:
+        response = requests.get(server_url(args.server), timeout=args.timeout)
+        is_up = response.status_code == 200
+    except requests.exceptions.RequestException:
+        is_up = False
 
+    if is_up:
+        print("Up")
+    else:
+        print("Down")
+    return 0 if is_up else 1
 
 def ls(args):
     """ List or query database resources """
@@ -85,6 +96,7 @@ def ls(args):
                                           headers=auth_headers(args))):
         print(f"{result.resource}\t{result.title}")
     print(f"{ctr + 1} results found.")
+    return 0
 
 
 def get(args):
@@ -99,6 +111,7 @@ def get(args):
             f.write(data.content.decode("utf8"))
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0
 
 def combine(args):
     request_url = (
@@ -119,6 +132,7 @@ def combine(args):
             f.write(data.content.decode("utf8"))
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0
 
 def validate(args):
     request_url = (f"{server_url(args.server)}/api/data/{args.data_type}" + (
@@ -137,6 +151,7 @@ def validate(args):
         print(data.content.decode("utf8"))
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0 # TODO: return 1 if invalid!
 
 
 def main():
@@ -156,6 +171,11 @@ def main():
                                    help="Use production server")
 
     command_parsers = ap.add_subparsers(title="command", dest="subparser")
+    up_parser = command_parsers.add_parser("up")
+    up_parser.add_argument("--timeout", action="store", dest="timeout", type=float, default=10.0,
+                           help="Time in seconds to wait for a response")
+    up_parser.set_defaults(func=up)
+
     ls_parser = command_parsers.add_parser("ls", aliases=["search"])
     ls_parser.add_argument("data_type", action="store", type=str,
                     choices=data_types)
@@ -180,7 +200,7 @@ def main():
     validate_parser.set_defaults(func=validate)
 
     args = ap.parse_args()
-    args.func(args)
+    return args.func(args)
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
