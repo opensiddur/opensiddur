@@ -151,7 +151,7 @@ CLASSPATH_PREFIX=/usr/local/opensiddur/lib/*:/usr/local/opensiddur/lib/user/*</e
                 <include name="hebmorph-lucene.jar"/>
             </fileset>
         </copy>
-        <copy todir="${installdir}/lib">
+        <copy todir="${installdir}/etc">
             <fileset dir="${lib.dir}/hebmorph-exist">
                 <include name="hspell-data-files/*"/>
             </fileset>
