@@ -32,7 +32,8 @@ def server_url(server):
     return f"{coords.protocol}://{coords.host}:{coords.port}"
 
 namespaces = {
-    "html": "http://www.w3.org/1999/xhtml"
+    "html": "http://www.w3.org/1999/xhtml",
+    "a": "http://jewishliturgy.org/ns/access/1.0"
 }
 
 
@@ -192,12 +193,61 @@ def validate(args):
     request = requests.put if args.resource else requests.post
     with (open(args.file, "r") if args.file else sys.stdin) as f:
         data = request(request_url, f.read(), params=params, headers=headers)
+    is_valid = False
     if data.status_code == 200:
+        xml = et.fromstring(data.content)
+        is_valid = xml.xpath("status='valid'", namespaces=namespaces)
         print(data.content.decode("utf8"))
+        print("Valid" if is_valid else "Invalid")
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
-    return 0 # TODO: return 1 if invalid!
+    return 0 if is_valid else 1
 
+def access(args):
+    request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}/access"
+    headers = {
+        **auth_headers(args),
+        "Content-type": "application/xml",
+    }
+    data = requests.get(request_url, headers=headers)
+    if data.status_code == 200:
+        xml = et.fromstring(data.content)
+        you = args.user or "guest"
+        you_read = "r" if xml.xpath("a:you/@read='true'", namespaces=namespaces) else "-"
+        you_write = "w" if xml.xpath("a:you/@write='true'", namespaces=namespaces) else "-"
+        you_chmod = "m" if xml.xpath("a:you/@chmod='true'", namespaces=namespaces) else "-"
+        you_relicense = "l" if xml.xpath("a:you/@relicense='true'", namespaces=namespaces) else "-"
+
+        owner = xml.xpath("string(a:owner)", namespaces=namespaces)
+        group = xml.xpath("string(a:group)", namespaces=namespaces)
+        group_write = "w" if xml.xpath("a:group/@write = 'true'", namespaces=namespaces) else "-"
+
+        world_read = "r" if xml.xpath("a:world/@read = 'true'", namespaces=namespaces) else "-"
+        world_write = "w" if xml.xpath("a:world/@write = 'true'", namespaces=namespaces) else "-"
+        print(f"{you}:{you_read}{you_write}{you_chmod}{you_relicense} {owner} {group}({group_write}) {world_read}{world_write}")
+    else:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0
+
+def transliterate(args):
+    request_url = f"{server_url(args.server)}/api/utility/translit/{args.table}"
+    headers = {
+        **auth_headers(args),
+        "Content-type": "text/plain" if args.text else "application/xml",
+        "Accept": "text/plain" if args.text else "application/xml",
+    }
+    with (open(args.file, "r") if args.file else sys.stdin) as f:
+        data = requests.post(request_url, f.read().encode("utf8"), headers=headers)
+        print(data.request.url)
+        print(data.request.body)
+        print(data.request.headers)
+
+    if data.status_code == 200:
+        with (open(args.output, "w") if args.output else sys.stdout) as f:
+            f.write(data.content.decode("utf8"))
+    else:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0
 
 def main():
     ap = argparse.ArgumentParser()
@@ -207,7 +257,7 @@ def main():
 
     server_type_group = ap.add_mutually_exclusive_group()
     server_type_group.add_argument("--dev", action="store_const", dest="server", const="dev",
-                                   help="Use dev server (default)", default="dev")
+                                   help="Use development server (default)", default="dev")
     server_type_group.add_argument("--feature", action="store_const", dest="server", const="feature",
                                    help="Use feature server")
     server_type_group.add_argument("--local", action="store_const", dest="server", const="local",
@@ -215,51 +265,82 @@ def main():
     server_type_group.add_argument("--prod", action="store_const", dest="server", const="prod",
                                    help="Use production server")
 
-    command_parsers = ap.add_subparsers(title="command", dest="subparser")
-    up_parser = command_parsers.add_parser("up")
+    command_parsers = ap.add_subparsers(title="command", dest="subparser", description="Available commands")
+    up_parser = command_parsers.add_parser("up", description="Check if the server is responding")
     up_parser.add_argument("--timeout", action="store", dest="timeout", type=float, default=10.0,
                            help="Time in seconds to wait for a response")
     up_parser.set_defaults(func=up)
 
-    ls_parser = command_parsers.add_parser("ls", aliases=["search"])
-    ls_parser.add_argument("data_type", action="store", type=str,
-                    choices=data_types)
-    ls_parser.add_argument("--query", dest="query", help="Search text")
+    data_type_for = lambda subparser: subparser.add_argument("data_type", action="store", type=str,
+                                                             choices=data_types,
+                                                             help="Type of resource")
+    resource_for = lambda subparser: subparser.add_argument("resource", action="store", type=str,
+                                                            help="Name of database resource")
+    file_for = lambda subparser: subparser.add_argument("file", action="store", type=str, nargs="?", default=None,
+                                                        help="File containing data to post (default: stdin)")
+    output_for = lambda subparser: subparser.add_argument("--output", action="store", dest="output",
+                                                          help="Output file (default: stdout)")
+
+    ls_parser = command_parsers.add_parser("ls", aliases=["search"], description="list resources or search the database")
+    data_type_for(ls_parser)
+    ls_parser.add_argument("--query", dest="query", help="Search text (must be quoted if it has whitespace)")
     ls_parser.set_defaults(func=ls)
 
-    get_parser = command_parsers.add_parser("get")
-    get_parser.add_argument("data_type", action="store", type=str, choices=data_types)
-    get_parser.add_argument("resource", action="store", type=str)
-    get_parser.add_argument("--output", action="store", dest="output")
+    get_parser = command_parsers.add_parser("get", description="get the content of a resource")
+    data_type_for(get_parser)
+    resource_for(get_parser)
+    output_for(get_parser)
     get_parser.set_defaults(func=get)
 
-    post_parser = command_parsers.add_parser("post")
-    post_parser.add_argument("data_type", action="store", type=str, choices=data_types)
-    post_parser.add_argument("file", action="store", type=str, nargs="?", default=None)
+    post_parser = command_parsers.add_parser("post", description="Post a new resource of the given data type")
+    data_type_for(post_parser)
+    file_for(post_parser)
     post_parser.set_defaults(func=post)
 
-    put_parser = command_parsers.add_parser("put")
-    put_parser.add_argument("data_type", action="store", type=str, choices=data_types)
-    put_parser.add_argument("resource", action="store", type=str)
-    put_parser.add_argument("file", action="store", type=str, nargs="?", default=None)
+    put_parser = command_parsers.add_parser("put", description="Overwrite the content of the given resource")
+    data_type_for(put_parser)
+    resource_for(put_parser)
+    file_for(put_parser)
     put_parser.set_defaults(func=put)
 
-    delete_parser = command_parsers.add_parser("delete", aliases=["rm"])
-    delete_parser.add_argument("data_type", action="store", type=str, choices=data_types)
-    delete_parser.add_argument("resource", action="store", type=str)
+    delete_parser = command_parsers.add_parser("delete", aliases=["rm"], help="Remove a resource from the database")
+    data_type_for(delete_parser)
+    resource_for(delete_parser)
     delete_parser.set_defaults(func=rm)
 
-    combine_parser = command_parsers.add_parser("combine", aliases=["transclude"])
-    combine_parser.add_argument("resource", action="store", type=str)
-    combine_parser.add_argument("--html", action="store_true", dest="html", default=False)
-    combine_parser.add_argument("--output", action="store", dest="output")
+    combine_parser = command_parsers.add_parser("combine", aliases=["transclude"],
+                                                help="Retrieve a resource with combined overlapping XML hierarchies "
+                                                     "(or transcluded to include all included data from other resources)")
+    resource_for(combine_parser)
+    combine_parser.add_argument("--html", action="store_true", dest="html", default=False, help="Output in HTML")
+    output_for(combine_parser)
     combine_parser.set_defaults(func=combine)
 
-    validate_parser = command_parsers.add_parser("validate")
-    validate_parser.add_argument("data_type", action="store", type=str, choices=data_types)
-    validate_parser.add_argument("--resource", action="store", type=str, required=False)
-    validate_parser.add_argument("--file", action="store", type=str, required=False)
+    validate_parser = command_parsers.add_parser("validate", description="Validate JLPTEI")
+    data_type_for(validate_parser)
+    resource_for(validate_parser)
+    file_for(validate_parser)
     validate_parser.set_defaults(func=validate)
+
+    access_parser = command_parsers.add_parser("access", description="Determine access constraints on a resource.\n"
+                                               "Output format: <you>:<perms> <owner> <group>(<perms>) <world perms>\n"
+                                               "Permissions are:\n"
+                                               "r - read\n"
+                                               "w - write\n"
+                                               "m - chmod (change permissions)\n"
+                                               "l - change license",
+                                               formatter_class=argparse.RawTextHelpFormatter)
+    data_type_for(access_parser)
+    resource_for(access_parser)
+    access_parser.set_defaults(func=access)
+
+    transliterate_parser = command_parsers.add_parser("transliterate", description="Transliterate text")
+    transliterate_parser.add_argument("table", help="transliteration table")
+    file_for(transliterate_parser)
+    output_for(transliterate_parser)
+    transliterate_parser.add_argument("--text", action="store_true", default=False,
+                                      help="treat the input data as text instead of XML")
+    transliterate_parser.set_defaults(func=transliterate)
 
     args = ap.parse_args()
     return args.func(args)
