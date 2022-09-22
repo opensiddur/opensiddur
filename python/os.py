@@ -113,6 +113,51 @@ def get(args):
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0
 
+def post(args):
+    request_url = f"{server_url(args.server)}/api/data/{args.data_type}"
+    headers = {
+        **auth_headers(args),
+        "Content-type": "application/xml"
+    }
+
+    with (open(args.file, "r") if args.file else sys.stdin) as f:
+        data = requests.post(request_url, f.read(), headers=headers)
+    if data.status_code < 300:
+        print(f"{data.status_code} {data.reason}")
+    else:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0
+
+def put(args):
+    request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}"
+    headers = {
+        **auth_headers(args),
+        "Content-type": "application/xml"
+    }
+
+    with (open(args.file, "r") if args.file else sys.stdin) as f:
+        data = requests.put(request_url, f.read(), headers=headers)
+    if data.status_code < 300:
+        print(f"{data.status_code} {data.reason}")
+    else:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0
+
+def rm(args):
+    request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}"
+    headers = {
+        **auth_headers(args)
+    }
+
+
+    data = requests.delete(request_url, headers=headers)
+    if data.status_code < 300:
+        print(f"{data.status_code} {data.reason}")
+    else:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0
+
+
 def combine(args):
     request_url = (
             f"{server_url(args.server)}/api/data/original/{args.resource}/combined"
@@ -186,6 +231,23 @@ def main():
     get_parser.add_argument("data_type", action="store", type=str, choices=data_types)
     get_parser.add_argument("resource", action="store", type=str)
     get_parser.add_argument("--output", action="store", dest="output")
+    get_parser.set_defaults(func=get)
+
+    post_parser = command_parsers.add_parser("post")
+    post_parser.add_argument("data_type", action="store", type=str, choices=data_types)
+    post_parser.add_argument("file", action="store", type=str, nargs="?", default=None)
+    post_parser.set_defaults(func=post)
+
+    put_parser = command_parsers.add_parser("put")
+    put_parser.add_argument("data_type", action="store", type=str, choices=data_types)
+    put_parser.add_argument("resource", action="store", type=str)
+    put_parser.add_argument("file", action="store", type=str, nargs="?", default=None)
+    put_parser.set_defaults(func=put)
+
+    delete_parser = command_parsers.add_parser("delete", aliases=["rm"])
+    delete_parser.add_argument("data_type", action="store", type=str, choices=data_types)
+    delete_parser.add_argument("resource", action="store", type=str)
+    delete_parser.set_defaults(func=rm)
 
     combine_parser = command_parsers.add_parser("combine", aliases=["transclude"])
     combine_parser.add_argument("resource", action="store", type=str)
