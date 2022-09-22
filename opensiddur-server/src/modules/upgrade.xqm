@@ -217,7 +217,5 @@ declare function upg:all-schema-changes() {
     upg:schema-changes-0-9-0(),
     upg:schema-changes-0-12-0(),
     upg:schema-changes-0-13-0(),
-    upg:schema-changes-0-14-0(),
-    util:log-system-out("Reindexing..."),
-    xmldb:reindex("/db") (: forcing a reindex after upgrade seems necessary :)
+    upg:schema-changes-0-14-0()
 };
