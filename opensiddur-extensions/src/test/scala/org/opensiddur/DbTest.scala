@@ -4,13 +4,19 @@ import scala.io.Source
 import org.exist.xmldb.EXistResource
 import org.opensiddur.DbTest._
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.{BeforeAndAfterEach, BeforeAndAfterAll}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.xmldb.api.DatabaseManager
 import org.xmldb.api.base._
 import org.xmldb.api.modules._
+import scala.xml.XML
+
 import Numeric._
 
-trait XQueryCall {
+trait AbstractXQueryCall {
+  def callXQuery(query: String): Array[String]
+}
+
+trait XQueryCall extends AbstractXQueryCall {
   def initDb(): Unit = {
     val cl = Class.forName(driver)
     val database = cl.newInstance.asInstanceOf[Database]
@@ -19,7 +25,7 @@ trait XQueryCall {
   }
 
   /** run a generic XQuery. return the content as strings */
-  def callXQuery(query: String): Array[String] = {
+  override def callXQuery(query: String): Array[String] = {
     var results = Array[String]()
     val col = DatabaseManager.getCollection(existUri + "/db")
     try {
@@ -85,60 +91,62 @@ class Xq(
         _auth: UserAndPass = UserAndPass()
         ) extends XQueryCall {
 
+  def copy(__code: String = _code,
+           __prolog: String = _prolog,
+           __throws: String = _throws,
+           __assertions: Seq[XPathAssertion] = _assertions,
+           __auth: UserAndPass = _auth): Xq = {
+    new Xq(__code, __prolog, __throws, __assertions, __auth)
+  }
+
   def prolog(xquery: String): Xq = {
-    new Xq(
-      _code = _code,
-      _prolog = xquery,
-      _throws = _throws,
-      _assertions = _assertions,
-      _auth = _auth
+    copy(
+      __prolog = xquery
     )
   }
 
   def user(user: String, password: Option[String] = None): Xq = {
-    new Xq(
-      _code = _code,
-      _prolog = _prolog,
-      _throws = _throws,
-      _assertions = _assertions,
-      _auth = UserAndPass(Some(user), password.orElse(Some(user)))
+    copy(
+      __auth = UserAndPass(Some(user), password.orElse(Some(user)))
     )
   }
 
   def code(xquery: String): Xq = {
-    new Xq(
-      _code = xquery,
-      _prolog = _prolog,
-      _throws = _throws,
-      _assertions = _assertions,
-      _auth = _auth
+    copy(
+      __code = xquery
     )
   }
 
   /** construct a query that contains the prolog, code and assertions
    * after the last assertion, all output is returned */
-  private def constructXQuery: String = {
-    _prolog + "\n" +
+  protected def constructXQuery(
+                             __prolog: String = _prolog,
+                             __auth: UserAndPass = _auth,
+                             __throws: String = _throws,
+                             __code: String = _code,
+                             __assertions: Seq[XPathAssertion] = _assertions
+                             ): String = {
+    __prolog + "\n" +
     s"let $$output := " +
-      (if (_auth.user.nonEmpty)
-        s"system:as-user('${_auth.user.get}', ${if (_auth.user.get == "admin") "$magic:password" else s"'${_auth.pass.get}'"},"
+      (if (__auth.user.nonEmpty)
+        s"system:as-user('${__auth.user.get}', ${if (__auth.user.get == "admin") "$magic:password" else s"'${__auth.pass.get}'"},"
        else "") +
-      (if (_throws.nonEmpty) "try { " else "") +
-      s"${_code}" +
-      (if (_throws.nonEmpty) s"} catch ${_throws} { element threwException { '${_throws}' } }" else "") +
-      ( if (_auth.user.nonEmpty) ")" else "") +
+      (if (__throws.nonEmpty) "try { " else "") +
+      s"${__code}" +
+      (if (__throws.nonEmpty) s"} catch ${__throws} { element threwException { '${__throws}' } }" else "") +
+      ( if (__auth.user.nonEmpty) ")" else "") +
       "\nreturn (" + (
-      if (_throws.nonEmpty) s"if ($$output instance of element(threwException)) then 1 else 0"
+      if (__throws.nonEmpty) s"if ($$output instance of element(threwException)) then 1 else 0"
       else {
-        _assertions.map { assertion: XPathAssertion =>
+        __assertions.map { assertion: XPathAssertion =>
           s"if (${assertion.xpath}) then 1 else 0"
         }.mkString(",\n")
       }) +
-      (if (_throws.nonEmpty || _assertions.nonEmpty) "," else "") + "\n$output\n)"
+      (if (__throws.nonEmpty || __assertions.nonEmpty) "," else "") + "\n$output\n)"
   }
 
   def go: Array[String] = {
-    val xquery = constructXQuery
+    val xquery = constructXQuery()
     val returns = callXQuery(xquery)
     val actualOutput =
       if (_throws.nonEmpty) returns.tail
@@ -156,78 +164,50 @@ class Xq(
   }
 
   def assertThrows(exceptionType: String): Xq = {
-    new Xq(
-      _code = _code,
-      _prolog = _prolog,
-      _throws = exceptionType,
-      _assertions = _assertions,
-      _auth = _auth)
+    copy(
+      __throws = exceptionType)
   }
 
   def assertEquals(value: String*): Xq = {
-    new Xq(
-      _code = _code,
-      _prolog = _prolog,
-      _throws = _throws,
-      _assertions = _assertions ++ value.zipWithIndex.map { case (v:String, idx: Int) =>
+    copy(
+      __assertions = _assertions ++ value.zipWithIndex.map { case (v:String, idx: Int) =>
         val indexString = if (value.length > 1) s"[${idx + 1}]" else ""
         XPathAssertion(s"$$output$indexString='$v'", s" output$indexString did not equal '$v'")
-      },
-      _auth = _auth
+      }
     )
   }
 
   def assertXPath(xpath: String, clue: String = ""): Xq = {
-    new Xq(
-      _code = _code,
-      _prolog = _prolog,
-      _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion(xpath,
-        if (clue.nonEmpty) clue else s" output did not conform to '$xpath'"),
-      _auth = _auth
+    copy(
+      __assertions = _assertions :+ XPathAssertion(xpath,
+        if (clue.nonEmpty) clue else s" output did not conform to '$xpath'")
     )
   }
 
   def assertEquals[T : Numeric](value: T*): Xq = {
-    new Xq(
-      _code = _code,
-      _prolog = _prolog,
-      _throws = _throws,
-      _assertions = _assertions ++ value.zipWithIndex.map { case (v:T, idx: Int) =>
+    copy(
+      __assertions = _assertions ++ value.zipWithIndex.map { case (v:T, idx: Int) =>
         val indexString = if (value.length > 1) s"[${idx + 1}]" else ""
         XPathAssertion(s"$$output$indexString=$v", s" output$indexString did not equal $v")
-      },
-      _auth = _auth
+      }
     )
   }
 
   def assertTrue: Xq = {
-    new Xq(
-      _code = _code,
-      _prolog = _prolog,
-      _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion("$output", s" output was not true()"),
-      _auth = _auth
+    copy(
+      __assertions = _assertions :+ XPathAssertion("$output", s" output was not true()")
     )
   }
 
   def assertFalse: Xq = {
-    new Xq(
-      _code = _code,
-      _prolog = _prolog,
-      _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion("not($output)", s" output was not false()"),
-      _auth = _auth
+    copy(
+      __assertions = _assertions :+ XPathAssertion("not($output)", s" output was not false()")
     )
   }
 
   def assertEmpty: Xq = {
-    new Xq(
-      _code = _code,
-      _prolog = _prolog,
-      _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion("empty($output)", s" output was not empty"),
-      _auth = _auth
+    copy(
+      __assertions = _assertions :+ XPathAssertion("empty($output)", s" output was not empty")
     )
   }
 
@@ -239,12 +219,8 @@ class Xq(
   def assertXPathEquals(xpath: String, clue: String, xml: String*): Xq = {
     val xmlSequence = "(" + xml.mkString(",") +  ")"
 
-    new Xq(
-      _code = _code,
-      _prolog = _prolog,
-      _throws = _throws,
-      _assertions = _assertions :+ XPathAssertion(s"empty(tcommon:deep-equal($xpath, $xmlSequence))", clue),
-      _auth = _auth
+    copy(
+      __assertions = _assertions :+ XPathAssertion(s"empty(tcommon:deep-equal($xpath, $xmlSequence))", clue)
     )
   }
 
@@ -302,10 +278,50 @@ class Xq(
   }
 }
 
+class XqRest(
+              _code: String = "",
+              _prolog: String = "",
+              _throws: String = "",
+              _assertions: Seq[XPathAssertion] = Seq(),
+              _auth: UserAndPass = UserAndPass()
+            ) extends Xq(_code, _prolog, _throws, _assertions, _auth) {
+  override def copy(__code: String, __prolog: String, __throws: String, __assertions: Seq[XPathAssertion], __auth: UserAndPass): XqRest = {
+    new XqRest(__code, __prolog, __throws, __assertions, __auth)
+  }
+
+  override def constructXQuery(__prolog: String, __auth: UserAndPass, __throws: String, __code: String, __assertions: Seq[XPathAssertion]): String = {
+    super.constructXQuery(__prolog, UserAndPass(), __throws, __code, __assertions)
+  }
+
+  override def callXQuery(query: String): Array[String] = {
+    val auth = (_auth.user.getOrElse("guest"), _auth.pass.getOrElse("guest"))
+
+    val response = requests.get(restUri,
+      params = Map("_query" -> query),
+      auth = auth
+    )
+    val xml = XML.loadString(response.text())
+    if (response.statusCode == 200) { // results
+      xml.child.
+        map { c =>
+          if (c.label == "value") c.child.text
+          else c.toString().trim }.
+        filter { _.nonEmpty }
+    }.toArray
+    else { // should never get here...
+      throw new RuntimeException("Error in XML processing via REST: " + xml.toString())
+    }
+  }
+}
+
 abstract class DbTest extends AnyFunSpec with BeforeAndAfterEach with BeforeAndAfterAll with XQueryCall {
   def xq(code: String): Xq = {
       new Xq(code, prolog)
     }
+
+  def xqRest(code: String): XqRest = {
+    new XqRest(code, prolog)
+  }
 
   def setupUsers(n: Int) = {
     xq(s"""
@@ -450,6 +466,8 @@ object DbTest {
 
   val driver = "org.exist.xmldb.DatabaseImpl"
   val existUri = s"xmldb:exist://localhost:${existPort}/exist/xmlrpc"
+
+  val restUri = s"http://localhost:${existPort}/exist/rest/db"
 
   val HTML5_SERIALIZATION = "xhtml"
   val XHTML_SERIALIZATION = "xhtml"

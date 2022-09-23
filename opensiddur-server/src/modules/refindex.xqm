@@ -13,6 +13,8 @@ xquery version "3.1";
  :)
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
 
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "debug.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror"
@@ -386,7 +388,7 @@ declare function ridx:query-document(
 (:~ disable the reference index: you must be admin! :)
 declare function ridx:disable(
   ) as xs:boolean {
-  let $user := sm:id()/(descendant::sm:effective,descendant::sm:real)[1]/sm:username/string()
+  let $user := app:auth-user()
   let $idx-flag := xs:anyURI(concat($ridx:ridx-path, "/", $ridx:disable-flag))
   return
     sm:is-dba($user)

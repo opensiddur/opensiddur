@@ -2,6 +2,7 @@
 import sys
 import argparse
 import base64
+import getpass
 import lxml.etree as et
 import requests
 from collections import namedtuple
@@ -24,7 +25,7 @@ server_port = namedtuple("server_port", ["protocol", "host", "port"])
 server_location = {
     "dev": server_port(protocol="https", host="db-dev.jewishliturgy.org", port=443),
     "feature": server_port(protocol="https", host="db-feature.jewishliturgy.org", port=443),
-    "local": server_port(protocol="http", host="localhost", port=5000),
+    "local": server_port(protocol="http", host="localhost", port=3001),
     "prod": server_port(protocol="https", host="db-prod.jewishliturgy.org", port=443),
 }
 def server_url(server):
@@ -33,7 +34,8 @@ def server_url(server):
 
 namespaces = {
     "html": "http://www.w3.org/1999/xhtml",
-    "a": "http://jewishliturgy.org/ns/access/1.0"
+    "a": "http://jewishliturgy.org/ns/access/1.0",
+    "status": "http://jewishliturgy.org/modules/status",
 }
 
 
@@ -84,9 +86,9 @@ def up(args):
         is_up = False
 
     if is_up:
-        print("Up")
+        print("Up", file=sys.stderr)
     else:
-        print("Down")
+        print("Down", file=sys.stderr)
     return 0 if is_up else 1
 
 def ls(args):
@@ -96,7 +98,7 @@ def ls(args):
                                           {"q": quote(args.query)} if args.query else {},
                                           headers=auth_headers(args))):
         print(f"{result.resource}\t{result.title}")
-    print(f"{ctr + 1} results found.")
+    print(f"{ctr + 1} results found.", file=sys.stderr)
     return 0
 
 
@@ -198,7 +200,7 @@ def validate(args):
         xml = et.fromstring(data.content)
         is_valid = xml.xpath("status='valid'", namespaces=namespaces)
         print(data.content.decode("utf8"))
-        print("Valid" if is_valid else "Invalid")
+        print("Valid" if is_valid else "Invalid", file=sys.stderr)
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0 if is_valid else 1
@@ -229,6 +231,50 @@ def access(args):
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0
 
+def chmod(args):
+    request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}/access"
+    headers = {
+        **auth_headers(args),
+        "Content-type": "application/xml",
+    }
+    existing_access = requests.get(request_url, headers=headers)
+    if existing_access.status_code == 200:
+        xml = et.fromstring(existing_access.content)
+        you_chmod = xml.xpath("a:you/@chmod='true'", namespaces=namespaces)
+
+        if not you_chmod:
+            print("Permission denied.", file=sys.stderr)
+            return 1
+
+        owner = xml.xpath("string(a:owner)", namespaces=namespaces)
+        group = xml.xpath("string(a:group)", namespaces=namespaces)
+        group_write = xml.xpath("a:group/@write = 'true'", namespaces=namespaces)
+
+        world_read = xml.xpath("a:world/@read = 'true'", namespaces=namespaces)
+        world_write = xml.xpath("a:world/@write = 'true'", namespaces=namespaces)
+
+        new_owner = args.owner or owner
+        new_group = args.group or group
+        new_group_write = str((args.g == "w") if args.g else group_write).lower()
+
+        new_world_read = str(("r" in args.o) if args.o else world_read).lower()
+        new_world_write = str(("w" in args.o) if args.o else world_write).lower()
+
+        new_access = f"""<a:access xmlns:a="{namespaces['a']}">
+            <a:owner>{new_owner}</a:owner>
+            <a:group write="{new_group_write}">{new_group}</a:group>
+            <a:world read="{new_world_read}" write="{new_world_write}"/> 
+        </a>"""
+        response = requests.put(request_url, new_access, headers=headers)
+        if response.status_code < 300:
+            print("Changed.", file=sys.stderr)
+        else:
+            raise RuntimeError(f"{response.status_code} {response.reason} {response.content.decode('utf8')}")
+    else:
+        raise RuntimeError(f"{existing_access.status_code} {existing_access.reason} {existing_access.content.decode('utf8')}")
+    return 0
+
+
 def transliterate(args):
     request_url = f"{server_url(args.server)}/api/utility/translit/{args.table}"
     headers = {
@@ -238,15 +284,110 @@ def transliterate(args):
     }
     with (open(args.file, "r") if args.file else sys.stdin) as f:
         data = requests.post(request_url, f.read().encode("utf8"), headers=headers)
-        print(data.request.url)
-        print(data.request.body)
-        print(data.request.headers)
 
     if data.status_code == 200:
         with (open(args.output, "w") if args.output else sys.stdout) as f:
             f.write(data.content.decode("utf8"))
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0
+
+def jobs_ls(args):
+    """ List or query database resources """
+    data = requests.get(f"{server_url(args.server)}/api/jobs", headers=auth_headers(args))
+    if data.status_code >= 300:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    xml = et.fromstring(data.content)
+    for result in xml.xpath("html:body/html:*/html:li", namespaces=namespaces):
+        id = result.xpath("string(html:a/@href)", namespaces=namespaces).split("/")[-1]
+        title = result.xpath("string(html:span[@class='title'])", namespaces=namespaces)
+        user = result.xpath("string(html:span[@class='user'])", namespaces=namespaces)
+        state = result.xpath("string(html:span[@class='state'])", namespaces=namespaces)
+        started = result.xpath("string(html:span[@class='started'])", namespaces=namespaces)
+        completed = result.xpath("string(html:span[@class='completed'])", namespaces=namespaces)
+        print("\t".join([id, title, user, state, started, completed]))
+    return 0
+
+def jobs_status(args):
+    data = requests.get(f"{server_url(args.server)}/api/jobs/{args.id}", headers={
+        **auth_headers(args),
+        "Content-type": "application/xml"
+    })
+    if data.status_code >= 300:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    xml = et.fromstring(data.content)
+
+    user = xml.attrib["user"]
+    started = xml.attrib["started"]
+    state = xml.attrib["state"]
+    completed = xml.attrib.get("completed",
+                               xml.attrib.get("failed", "*"))
+    resource = unquote(xml.attrib["resource"]).split("/")[-1]
+
+    print(f"{resource} by {user}: {state} at {started}-{completed}")
+    for action_description in xml.xpath("*", namespaces=namespaces):
+        action = et.QName(action_description).localname
+        timestamp = action_description.attrib["timestamp"]
+        resource = unquote(action_description.attrib["resource"]).replace("/exist/restxq/api/data/", "")
+        data_type, resource_name = resource.split("/")
+        stage = action_description.attrib.get("stage", "-")
+        info = action_description.text or ""
+
+        print(f"{action}:{stage}:{timestamp} {data_type} {resource_name}: {info}")
+
+def changes(args):
+    data = requests.get(f"{server_url(args.server)}/api/changes", headers=auth_headers(args))
+    if data.status_code >= 300:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    xml = et.fromstring(data.content)
+
+    for changed_file in xml.xpath("html:body/*/html:li", namespaces=namespaces):
+        title = changed_file.xpath("string(html:a)", namespaces=namespaces)
+        data_type, resource = unquote(changed_file.xpath("string(html:a/@href)", namespaces=namespaces)).split("/")[-2:]
+        print(f"{data_type} {resource}: {title}:")
+        for change in changed_file.xpath("html:ol/html:li", namespaces=namespaces):
+            who = change.xpath("string(html:span[@class='who'])", namespaces=namespaces)
+            change_type = change.xpath("string(html:span[@class='type'])", namespaces=namespaces)
+            when = change.xpath("string(html:span[@class='when'])", namespaces=namespaces)
+            message = change.xpath("string(html:span[@class='message'])", namespaces=namespaces)
+            print(f"\t{change_type} by {who} at {when}: {message}")
+    return 0
+
+def login(args):
+    response = requests.get(f"{server_url(args.server)}/api/login", headers={
+        **auth_headers(args),
+        "Accept": "application/xml"
+    })
+    if response.status_code >= 300:
+        raise RuntimeError(f"{response.status_code} {response.reason} {response.content.decode('utf8')}")
+    else:
+        xml = et.fromstring(response.content)
+        print(xml.text or "Not logged in.", file=sys.stderr)
+    return 0
+
+def user_ls(args):
+    ctr = -1
+    for ctr, result in enumerate(paginate(f"{server_url(args.server)}/api/user", 500,
+                                          {"q": quote(args.query)} if args.query else {},
+                                          headers=auth_headers(args))):
+        print(f"{result.resource}\t{result.title}")
+    print(f"{ctr + 1} results found.", file=sys.stderr)
+    return 0
+
+def user_new(args):
+    if not args.passwd:
+        passwd = getpass.getpass()
+    else:
+        passwd = args.passwd
+    response = requests.post(f"{server_url(args.server)}/api/user",
+                             data={"user": args.name, "password": passwd},
+                             headers=auth_headers(args))
+    if response.status_code >= 300:
+        raise RuntimeError(f"{response.status_code} {response.reason} {response.content.decode('utf8')}")
+    elif response.status_code == 201:
+        print("Created.", file=sys.stderr)
+    else:
+        print("Password changed.", file=sys.stderr)
     return 0
 
 def main():
@@ -261,12 +402,12 @@ def main():
     server_type_group.add_argument("--feature", action="store_const", dest="server", const="feature",
                                    help="Use feature server")
     server_type_group.add_argument("--local", action="store_const", dest="server", const="local",
-                                   help="Use local server")
+                                   help="Use local server (port 3001)")
     server_type_group.add_argument("--prod", action="store_const", dest="server", const="prod",
                                    help="Use production server")
 
     command_parsers = ap.add_subparsers(title="command", dest="subparser", description="Available commands")
-    up_parser = command_parsers.add_parser("up", description="Check if the server is responding")
+    up_parser = command_parsers.add_parser("up", help="Check if the server is responding")
     up_parser.add_argument("--timeout", action="store", dest="timeout", type=float, default=10.0,
                            help="Time in seconds to wait for a response")
     up_parser.set_defaults(func=up)
@@ -281,23 +422,23 @@ def main():
     output_for = lambda subparser: subparser.add_argument("--output", action="store", dest="output",
                                                           help="Output file (default: stdout)")
 
-    ls_parser = command_parsers.add_parser("ls", aliases=["search"], description="list resources or search the database")
+    ls_parser = command_parsers.add_parser("ls", aliases=["search"], help="List resources or search the database")
     data_type_for(ls_parser)
     ls_parser.add_argument("--query", dest="query", help="Search text (must be quoted if it has whitespace)")
     ls_parser.set_defaults(func=ls)
 
-    get_parser = command_parsers.add_parser("get", description="get the content of a resource")
+    get_parser = command_parsers.add_parser("get", help="Get the content of a resource")
     data_type_for(get_parser)
     resource_for(get_parser)
     output_for(get_parser)
     get_parser.set_defaults(func=get)
 
-    post_parser = command_parsers.add_parser("post", description="Post a new resource of the given data type")
+    post_parser = command_parsers.add_parser("post", help="Post a new resource of the given data type")
     data_type_for(post_parser)
     file_for(post_parser)
     post_parser.set_defaults(func=post)
 
-    put_parser = command_parsers.add_parser("put", description="Overwrite the content of the given resource")
+    put_parser = command_parsers.add_parser("put", help="Overwrite the content of the given resource")
     data_type_for(put_parser)
     resource_for(put_parser)
     file_for(put_parser)
@@ -316,13 +457,14 @@ def main():
     output_for(combine_parser)
     combine_parser.set_defaults(func=combine)
 
-    validate_parser = command_parsers.add_parser("validate", description="Validate JLPTEI")
+    validate_parser = command_parsers.add_parser("validate", help="Validate JLPTEI")
     data_type_for(validate_parser)
     resource_for(validate_parser)
     file_for(validate_parser)
     validate_parser.set_defaults(func=validate)
 
-    access_parser = command_parsers.add_parser("access", description="Determine access constraints on a resource.\n"
+    access_parser = command_parsers.add_parser("access", help="Get access constraints",
+                                               description="Determine access constraints on a resource.\n"
                                                "Output format: <you>:<perms> <owner> <group>(<perms>) <world perms>\n"
                                                "Permissions are:\n"
                                                "r - read\n"
@@ -334,13 +476,55 @@ def main():
     resource_for(access_parser)
     access_parser.set_defaults(func=access)
 
-    transliterate_parser = command_parsers.add_parser("transliterate", description="Transliterate text")
+    chmod_parser = command_parsers.add_parser("chmod", help="Change access for a resource")
+    data_type_for(chmod_parser)
+    resource_for(chmod_parser)
+    chmod_parser.add_argument("--owner", action="store", default=None, help="Change owner")
+    chmod_parser.add_argument("--group", action="store", default=None, help="Change group")
+    chmod_parser.add_argument("-g", nargs=1, choices=["w", "-"], default=None, help="set group privileges (write)")
+    chmod_parser.add_argument("-o", nargs=1, choices=["rw", "r", "w", "-"], default=None, help="set other read/write privileges")
+    chmod_parser.set_defaults(func=chmod)
+
+    transliterate_parser = command_parsers.add_parser("transliterate", help="Transliterate text")
     transliterate_parser.add_argument("table", help="transliteration table")
     file_for(transliterate_parser)
     output_for(transliterate_parser)
     transliterate_parser.add_argument("--text", action="store_true", default=False,
                                       help="treat the input data as text instead of XML")
     transliterate_parser.set_defaults(func=transliterate)
+
+    jobs_parser = command_parsers.add_parser("jobs", help="Compilation jobs")
+    jobs_parsers = jobs_parser.add_subparsers(title="jobs_commands", dest="jobs_command", description="Jobs commands")
+
+    jobs_ls_parser = jobs_parsers.add_parser("ls", help="List jobs")
+    jobs_ls_parser.set_defaults(func=jobs_ls)
+
+    jobs_status_parser = jobs_parsers.add_parser("status", help="Get job status")
+    jobs_status_parser.add_argument("id", action="store", type=str, help="Job identifier")
+    jobs_status_parser.set_defaults(func=jobs_status)
+
+    changes_parser = command_parsers.add_parser("changes", help="Show recent changes")
+    changes_parser.set_defaults(func=changes)
+
+    login_parser = command_parsers.add_parser("login", help="Check a username/password")
+    login_parser.set_defaults(func=login)
+
+    user_parser = command_parsers.add_parser("user", help="User commands")
+    user_parsers = user_parser.add_subparsers(title="user_commands", dest="user_command", description="User commands")
+
+    user_ls_parser = user_parsers.add_parser("ls", aliases=["search"], help="List or find users")
+    user_ls_parser.add_argument("--query", action="store", default=None, help="Search query")
+    user_ls_parser.set_defaults(func=user_ls)
+
+    user_new_parser = user_parsers.add_parser("new", help="Sign up as a new user")
+    user_new_parser.add_argument("name", action="store", help="User name")
+    user_new_parser.add_argument("--passwd", dest="passwd", action="store", help="Password (may also be typed)")
+    user_new_parser.set_defaults(func=user_new)
+
+    user_passwd_parser = user_parsers.add_parser("passwd", help="Change a password")
+    user_passwd_parser.add_argument("name", action="store", help="User name")
+    user_passwd_parser.add_argument("--passwd", dest="passwd", action="store", help="Password (may also be typed)")
+    user_passwd_parser.set_defaults(func=user_new)
 
     args = ap.parse_args()
     return args.func(args)
