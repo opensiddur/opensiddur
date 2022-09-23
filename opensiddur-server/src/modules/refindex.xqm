@@ -412,7 +412,7 @@ declare function ridx:disable(
 (:~ re-enable the reference index: you must be admin to run! :)
 declare function ridx:enable(
   ) as xs:boolean {
-  if (sm:is-dba(sm:id()/(descendant::sm:effective,descendant::sm:real)[1]/sm:username/string())
+  if (sm:is-dba(app:auth-user())
     and doc-available(concat($ridx:ridx-path, "/", $ridx:disable-flag))
     )
   then (
