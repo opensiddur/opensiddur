@@ -28,13 +28,17 @@ server_location = {
     "local": server_port(protocol="http", host="localhost", port=3001),
     "prod": server_port(protocol="https", host="db-prod.jewishliturgy.org", port=443),
 }
+
+
 def server_url(server):
     coords = server_location[server]
     return f"{coords.protocol}://{coords.host}:{coords.port}"
 
+
 namespaces = {
     "html": "http://www.w3.org/1999/xhtml",
     "a": "http://jewishliturgy.org/ns/access/1.0",
+    "g": "http://jewishliturgy.org/ns/group/1.0",
     "status": "http://jewishliturgy.org/modules/status",
 }
 
@@ -48,8 +52,10 @@ def auth_headers(args):
 
 search_result = namedtuple("search_result", ["title", "resource", "href"])
 
+
 def paginate(request_url, request_size=100, params=None, headers=None):
-    """ paginate results from a search-type request URL, return one list element at a time, until there are none left """
+    """ paginate results from a search-type request URL, return one list element at a time,
+    until there are none left """
     if params is None:
         params = {}
     if headers is None:
@@ -78,6 +84,7 @@ def paginate(request_url, request_size=100, params=None, headers=None):
         start_index += items_per_page
         finished = start_index >= total_results
 
+
 def up(args):
     try:
         response = requests.get(server_url(args.server), timeout=args.timeout)
@@ -91,6 +98,7 @@ def up(args):
         print("Down", file=sys.stderr)
     return 0 if is_up else 1
 
+
 def ls(args):
     """ List or query database resources """
     ctr = -1
@@ -103,7 +111,8 @@ def ls(args):
 
 
 def get(args):
-    request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}"
+    api_path = "user" if args.subparser == "user" else f"data/{args.data_type}"
+    request_url = f"{server_url(args.server)}/api/{api_path}/{args.resource}"
     headers = {
         **auth_headers(args),
     }
@@ -115,6 +124,7 @@ def get(args):
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0
+
 
 def post(args):
     request_url = f"{server_url(args.server)}/api/data/{args.data_type}"
@@ -131,8 +141,10 @@ def post(args):
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0
 
+
 def put(args):
-    request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}"
+    api_path = "user" if args.subparser == "user" else f"data/{args.data_type}"
+    request_url = f"{server_url(args.server)}/api/{api_path}/{args.resource}"
     headers = {
         **auth_headers(args),
         "Content-type": "application/xml"
@@ -146,12 +158,12 @@ def put(args):
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0
 
+
 def rm(args):
     request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}"
     headers = {
         **auth_headers(args)
     }
-
 
     data = requests.delete(request_url, headers=headers)
     if data.status_code < 300:
@@ -182,8 +194,10 @@ def combine(args):
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0
 
+
 def validate(args):
-    request_url = (f"{server_url(args.server)}/api/data/{args.data_type}" + (
+    api_path = "user" if args.subparser == "user" else f"data/{args.data_type}"
+    request_url = (f"{server_url(args.server)}/api/{api_path}" + (
         f"/{args.resource}" if args.resource else ""))
     headers = {
         **auth_headers(args),
@@ -204,6 +218,7 @@ def validate(args):
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0 if is_valid else 1
+
 
 def access(args):
     request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}/access"
@@ -230,6 +245,7 @@ def access(args):
     else:
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0
+
 
 def chmod(args):
     request_url = f"{server_url(args.server)}/api/data/{args.data_type}/{args.resource}/access"
@@ -292,6 +308,7 @@ def transliterate(args):
         raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
     return 0
 
+
 def jobs_ls(args):
     """ List or query database resources """
     data = requests.get(f"{server_url(args.server)}/api/jobs", headers=auth_headers(args))
@@ -307,6 +324,7 @@ def jobs_ls(args):
         completed = result.xpath("string(html:span[@class='completed'])", namespaces=namespaces)
         print("\t".join([id, title, user, state, started, completed]))
     return 0
+
 
 def jobs_status(args):
     data = requests.get(f"{server_url(args.server)}/api/jobs/{args.id}", headers={
@@ -335,6 +353,7 @@ def jobs_status(args):
 
         print(f"{action}:{stage}:{timestamp} {data_type} {resource_name}: {info}")
 
+
 def changes(args):
     data = requests.get(f"{server_url(args.server)}/api/changes", headers=auth_headers(args))
     if data.status_code >= 300:
@@ -353,6 +372,7 @@ def changes(args):
             print(f"\t{change_type} by {who} at {when}: {message}")
     return 0
 
+
 def login(args):
     response = requests.get(f"{server_url(args.server)}/api/login", headers={
         **auth_headers(args),
@@ -365,14 +385,17 @@ def login(args):
         print(xml.text or "Not logged in.", file=sys.stderr)
     return 0
 
+
 def user_ls(args):
     ctr = -1
-    for ctr, result in enumerate(paginate(f"{server_url(args.server)}/api/user", 500,
+    api = args.subparser
+    for ctr, result in enumerate(paginate(f"{server_url(args.server)}/api/{api}", 500,
                                           {"q": quote(args.query)} if args.query else {},
                                           headers=auth_headers(args))):
         print(f"{result.resource}\t{result.title}")
     print(f"{ctr + 1} results found.", file=sys.stderr)
     return 0
+
 
 def user_new(args):
     if not args.passwd:
@@ -389,6 +412,77 @@ def user_new(args):
     else:
         print("Password changed.", file=sys.stderr)
     return 0
+
+
+def user_groups(args):
+    data = requests.get(f"{server_url(args.server)}/api/user/{args.resource}/groups", headers=auth_headers(args))
+    if data.status_code >= 300:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    xml = et.fromstring(data.content)
+
+    groups = []
+    for group in xml.xpath("html:body/*/html:li/html:a", namespaces=namespaces):
+        group_name = group.text
+        is_manager = group.attrib.get("property", "") == "manager"
+        groups.append(group_name + ("*" if is_manager else ""))
+    print(f"{args.resource}: {', '.join(groups)}")
+
+    return 0
+
+
+def group_get(args):
+    data = requests.get(f"{server_url(args.server)}/api/group/{args.resource}", headers={
+        **auth_headers(args),
+        "Accept": "application/xml"
+    })
+    if data.status_code >= 300:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    xml = et.fromstring(data.content)
+
+    users = []
+    for group in xml.xpath("//g:member", namespaces=namespaces):
+        user_name = group.text
+        is_manager = group.attrib.get("manager", "").lower() == "true"
+        users.append(user_name + ("*" if is_manager else ""))
+    print(f"{args.resource}: {', '.join(users)}")
+
+    return 0
+
+
+def user_rm(args):
+    api = args.subparser
+    request_url = f"{server_url(args.server)}/api/{api}/{args.resource}"
+    headers = {
+        **auth_headers(args)
+    }
+
+    data = requests.delete(request_url, headers=headers)
+    if data.status_code < 300:
+        print(f"{data.status_code} {data.reason}")
+    else:
+        raise RuntimeError(f"{data.status_code} {data.reason} {data.content.decode('utf8')}")
+    return 0
+
+
+def group_put(args):
+    members = set(args.members)
+    managers = set(args.managers)
+
+    member_xml_lines = [f"""<g:member {'manager="true"' if m in managers else ""}>{m}</g:member>\n"""
+                        for m in (members.union(managers))]
+
+    group_definition = f"""<g:group xmlns:g="{namespaces['g']}">{' '.join(member_xml_lines)}</g:group>"""
+    response = requests.put(f"{server_url(args.server)}/api/group/{args.resource}", group_definition,
+                            headers={
+                                        **auth_headers(args),
+                                        "Content-type": "application/xml"
+                                    })
+    if response.status_code < 300:
+        print(f"{response.status_code} {response.reason}")
+    else:
+        raise RuntimeError(f"{response.status_code} {response.reason} {response.content.decode('utf8')}")
+    return 0
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -526,8 +620,56 @@ def main():
     user_passwd_parser.add_argument("--passwd", dest="passwd", action="store", help="Password (may also be typed)")
     user_passwd_parser.set_defaults(func=user_new)
 
+    user_get = user_parsers.add_parser("get", help="Get a user or contributor profile")
+    resource_for(user_get)
+    output_for(user_get)
+    user_get.set_defaults(func=get)
+
+    user_put = user_parsers.add_parser("put", help="Replace a user or contributor profile")
+    resource_for(user_put)
+    file_for(user_put)
+    user_put.set_defaults(func=put)
+
+    user_validate = user_parsers.add_parser("validate", help="Validate a user or contributor profile")
+    resource_for(user_validate)
+    file_for(user_validate)
+    user_validate.set_defaults(func=validate)
+
+    user_groups_parser = user_parsers.add_parser("groups", help="List the groups a user is a member and manager* of")
+    resource_for(user_groups_parser)
+    user_groups_parser.set_defaults(func=user_groups)
+
+    user_delete_parser = user_parsers.add_parser("delete", aliases=["rm"], help="Remove a user or contributor")
+    resource_for(user_delete_parser)
+    user_delete_parser.set_defaults(func=user_rm)
+
+    group_parser = command_parsers.add_parser("group", help="Group commands")
+    group_parsers = group_parser.add_subparsers(title="group_commands", dest="group_command",
+                                                description="Group commands")
+
+    group_ls_parser = group_parsers.add_parser("ls", aliases=["search"], help="List or find groups")
+    group_ls_parser.add_argument("--query", action="store", default=None, help=argparse.SUPPRESS)
+    group_ls_parser.set_defaults(func=user_ls)
+
+    group_get_parser = group_parsers.add_parser("get", help="List users and managers* of a group")
+    resource_for(group_get_parser)
+    group_get_parser.set_defaults(func=group_get)
+
+    group_new_parser = group_parsers.add_parser("new", aliases=["put"],
+                                                help="Create a new group or edit an existing group, "
+                                                     "setting members and managers")
+    resource_for(group_new_parser)
+    group_new_parser.add_argument("members", nargs="+", help="List of group members (users)")
+    group_new_parser.add_argument("--managers", nargs="+", help="List of group managers (users)")
+    group_new_parser.set_defaults(func=group_put)
+
+    group_delete_parser = group_parsers.add_parser("delete", aliases=["rm"], help="Remove a group from the database")
+    resource_for(group_delete_parser)
+    group_delete_parser.set_defaults(func=user_rm)
+
     args = ap.parse_args()
     return args.func(args)
+
 
 if __name__ == "__main__":
     sys.exit(main())
