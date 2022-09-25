@@ -43,12 +43,12 @@
                 destdir="@{temp.dir}"
                 style="${lib.dir}/iso-schematron/iso_svrl_for_xslt2.xsl">
                 <factory name="net.sf.saxon.TransformerFactoryImpl" />
-                <mapper type="glob" from="*.isosch" to="*.xsl2"/>
+                <mapper type="glob" from="*.isosch" to="*.xsl"/>
             </xslt>
             <copy todir="@{output.dir}">
                 <fileset dir="@{temp.dir}">
                     <include name="*.rnc" />
-                    <include name="*.xsl2" />
+                    <include name="*.xsl" />
                 </fileset>
             </copy>
             <copy todir="@{output.dir}/doc">
@@ -68,7 +68,7 @@
 				<include name="*.xml"/>
 				<exclude name="*common*.xml"/>
 			</srcfiles>
-			<mapper type="glob" from="*.xml" to="${build}/schema/*.xsl2"/>
+			<mapper type="glob" from="*.xml" to="${build}/schema/*.xsl"/>
 		</uptodate>
 		<!-- make build dirs --> 
         <mkdir dir="${build}"/>
@@ -97,7 +97,7 @@
             destdir="${build}/schema"
             style="${lib.dir}/iso-schematron/iso_svrl_for_xslt2.xsl">
             <factory name="net.sf.saxon.TransformerFactoryImpl" />
-            <mapper type="glob" from="*.isosch" to="*.xsl2"/>
+            <mapper type="glob" from="*.isosch" to="*.xsl"/>
         </xslt>
     </target>
     <target name="jlptei-schema" depends="schema-dir" unless="schema.uptodate">
@@ -187,7 +187,7 @@
 				<include name="**/*.xconf"/>
 				<include name="**/*.rnc"/>
 				<include name="**/*.svg"/>
-				<include name="**/*.xsl2"/>
+				<include name="**/*.xsl"/>
 				<include name="img/*"/>
 				<exclude name="schema/*"/>
 				<exclude name="**/*.tmpl.*" />

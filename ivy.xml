@@ -1,7 +1,11 @@
 <ivy-module version="2.0">
-    <info organisation="org.opensiddur" module="opensiddur-server" />
+    <info organisation="" module="" />
+    <configurations>
+      <conf name="binaries"/>
+    </configurations>
     <dependencies>
-        <dependency org="com.code972.hebmorph" name="hebmorph-lucene" rev="2.1.0" />
+        <dependency org="com.code972.hebmorph" name="hebmorph-lucene" rev="2.1.0"  />
         <dependency org="com.code972.hebmorph" name="hebmorph-core" rev="1.5.0" />
+        <dependency org="org.exist-db" name="exist" rev="5.2.0" />
     </dependencies>
 </ivy-module>

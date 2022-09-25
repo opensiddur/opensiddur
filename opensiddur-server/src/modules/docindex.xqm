@@ -47,12 +47,18 @@ declare function didx:setup(
 };
 
 (:~ index or reindex a document given its location by collection
- : and resource name :)
+ : and resource name
+ : If only a collection is given, reindex the collection after clearing it
+ :)
 declare function didx:reindex(
   $collection as xs:string,
-  $resource as xs:string
+  $resource as xs:string?
   ) {
-  didx:reindex(doc(concat($collection, "/", $resource)))
+  if (not($resource))
+  then
+    let $remove := didx:remove($collection)
+    return didx:reindex(collection($collection))
+  else didx:reindex(doc(concat($collection, "/", $resource)))
 };
 
 (:~ index or reindex a document from the given document node
@@ -71,6 +77,7 @@ declare function didx:reindex(
   let $data-type := $split[4]
   let $index-entry :=
     <didx:entry
+        collection="{$collection}"
         data-type="{$data-type}"
         document-name="{$resource}"
         resource="{$resource-extension-removed}"
@@ -88,20 +95,35 @@ declare function didx:reindex(
     ))
 };
 
+
+declare function didx:remove(
+    $collection as xs:string
+    ) as empty-sequence() {
+    system:as-user("admin", $magic:password,
+        let $collection-entries := collection($didx:didx-path)//didx:entry[$collection=@collection]
+        let $delete := update delete $collection-entries
+        let $reindex := xmldb:reindex($didx:didx-path, $didx:didx-resource)
+        return ()
+    )
+};
+
 declare function didx:remove(
   $collection as xs:string,
-  $resource as xs:string
+  $resource as xs:string?
   ) as empty-sequence() {
-  let $doc-uri := $collection || "/" || $resource
-  let $index-collection := collection($didx:didx-path)
-  let $existing-entry := $index-collection//didx:entry[$doc-uri=@db-path]
-  where exists($existing-entry)
-  return
-      system:as-user("admin", $magic:password, (
-           let $update := update delete $existing-entry
-           let $reindex := xmldb:reindex($didx:didx-path, $didx:didx-resource)
-           return ()
-      ))
+  if (exists($resource))
+  then
+      let $doc-uri := $collection || "/" || $resource
+      let $index-collection := collection($didx:didx-path)
+      let $existing-entry := $index-collection//didx:entry[$doc-uri=@db-path]
+      where exists($existing-entry)
+      return
+          system:as-user("admin", $magic:password, (
+               let $update := update delete $existing-entry
+               let $reindex := xmldb:reindex($didx:didx-path, $didx:didx-resource)
+               return ()
+          ))
+  else didx:remove($collection)
 };
 
 (:~ Query the document index for a path :)

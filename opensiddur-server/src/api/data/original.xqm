@@ -38,7 +38,7 @@ import module namespace uri="http://jewishliturgy.org/transform/uri"
 
 declare variable $orig:data-type := "original";
 declare variable $orig:schema := concat($paths:schema-base, "/jlptei.rnc");
-declare variable $orig:schematron := concat($paths:schema-base, "/jlptei.xsl2");
+declare variable $orig:schematron := concat($paths:schema-base, "/jlptei.xsl");
 declare variable $orig:path-base := concat($data:path-base, "/", $orig:data-type);
 declare variable $orig:api-path-base := concat("/api/data/", $orig:data-type);  
 
@@ -57,7 +57,8 @@ declare function orig:validate(
     xs:anyURI($orig:schema), xs:anyURI($orig:schematron),
     (
       if (exists($old-doc)) then orig:validate-changes#2 else (),
-      orig:validate-external-links#2
+      orig:validate-external-links#2,
+      orig:validate-external-anchors#2
     )
   )
 };
@@ -77,7 +78,8 @@ declare function orig:validate-report(
     xs:anyURI($orig:schema), xs:anyURI($orig:schematron),
     (
       if (exists($old-doc)) then orig:validate-changes#2 else (),
-      orig:validate-external-links#2
+      orig:validate-external-links#2,
+      orig:validate-external-anchors#2
     )
   )
 };
@@ -123,6 +125,156 @@ declare function orig:remove-whitespace(
                 orig:remove-whitespace($node/node())
             }
         default return orig:remove-whitespace($node/node())
+};
+
+(:~ determine if:
+ : 1. the anchors in a document that have type=external or canonical *and* are referenced externally are still present in the new doc
+ : @param $doc the document to validate
+ : @param $old-doc ignored
+ : @return validation messages if the document breaks the rule, otherwise empty sequence if the document is valid
+ :)
+declare function orig:validate-external-anchor-presence(
+    $doc as document-node(),
+    $old-doc as document-node()?
+) as element(message)* {
+    (: this map will have one entry keyed by the xml:id with the value of the referencing document
+       for each referenced external anchor that is not present in the new version of the document.
+    :)
+    let $missing-old-doc-externals as map(xs:string, xs:string) :=
+        if (exists($old-doc))
+        then map:merge(
+            let $external-anchor-ids := $old-doc//tei:anchor[@type=("canonical", "external")]/@xml:id
+            let $missing-new-doc-anchors :=
+                for $external-anchor-id in $external-anchor-ids
+                where empty($doc//tei:anchor[@type=("canonical", "external")][@xml:id=$external-anchor-id])
+                return $external-anchor-id
+            for $missing-anchor in $missing-new-doc-anchors
+            let $missing-anchor-original := $old-doc//tei:anchor[@xml:id=$missing-anchor]
+            let $references := ridx:query-all($missing-anchor-original)
+            let $reference-docs :=
+                for $reference in $references
+                where not(root($reference) is $old-doc)
+                return data:db-path-to-api(document-uri(root($reference)))
+            where exists($reference-docs)
+            return map:entry($missing-anchor-original/@xml:id/string(), string-join($reference-docs, ","))
+            )
+        else map {}
+    for $missing-external-anchor in map:keys($missing-old-doc-externals)
+    return element message {
+        "The anchor '" || $missing-external-anchor || "' is referenced by " ||
+        $missing-old-doc-externals($missing-external-anchor) ||
+        " but is not present in the new document."
+    }
+};
+
+(:~ determine if all anchors that are referenced externally in the new doc have type=external or canonical
+ : @param $doc the document to validate
+ : @param $old-doc ignored
+ : @return a validation report
+ :)
+declare function orig:validate-internal-anchors(
+    $doc as document-node(),
+    $old-doc as document-node()?
+) as element(message)* {
+    for $anchor in $old-doc//tei:anchor
+    let $references := ridx:query-all($anchor)
+    for $reference in $references
+    let $new-doc-equivalent := $doc//tei:anchor[@xml:id=$anchor/@xml:id]
+    where not(root($reference) is $old-doc) and
+        not($new-doc-equivalent/@type = ("canonical", "external"))
+    return element message {
+        "The anchor '" || $new-doc-equivalent/@xml:id/string() || "' is referenced externally by " ||
+             data:db-path-to-api(document-uri(root($reference))) ||
+            " but is not marked 'external' or 'canonical'."
+    }
+
+};
+
+(:~ return all internal references to anchors within the given document :)
+declare function orig:internal-references(
+    $doc as document-node()
+) as map(xs:string, element()*) {
+    fold-left( (: eXist does not support map:merge with combine semantics... :)
+        for $ptr-element in $doc//*[@target|@targets|@domains|@ref]
+        for $reference in tokenize($ptr-element/@target|$ptr-element/@targets|$ptr-element/@domains|$ptr-element/@ref, "\s+")
+        where starts-with($reference, "#")
+        return
+            let $after-hash := substring-after($reference, "#")
+            let $target-ids :=
+                if (starts-with($after-hash, "range"))
+                then
+                    let $left := $after-hash => substring-after("(") => substring-before(",")
+                    let $right := $after-hash => substring-after(",") => substring-before(")")
+                    return ($left, $right)
+                else $after-hash
+            let $sources := $doc//tei:anchor[@xml:id=$target-ids]
+            for $source in $sources
+            return map:entry($source/@xml:id/string(), $ptr-element),
+        map {},
+        function($items as map(xs:string, element()*), $new-item as map(xs:string, element()*)) {
+                map:merge(
+                for $key in (map:keys($items), map:keys($new-item))
+                    return
+                        if (map:contains($new-item, $key))
+                        then map:entry($key, $items($key) | $new-item($key))
+                        else map:entry($key, $items($key))
+                )
+            }
+    )
+};
+
+(:~ determine if the anchors in a document follow the single-reference rule,
+ : which requires that all anchors that are not canonical have only 1 pointer referencing them,
+ : either internally or externally.
+ : @param $doc the document to validate
+ : @param $old-doc ignored
+ : @return validation messages that indicate errors
+ :)
+declare function orig:validate-anchors-single-reference-rule(
+    $doc as document-node(),
+    $old-doc as document-node()?
+) as element(message)* {
+    let $all-internal-references as map(xs:string, element()*) := orig:internal-references($doc)
+    let $relevant-anchors := $doc//tei:anchor[not(@type="canonical")]
+    for $anchor in $relevant-anchors
+    let $id := $anchor/@xml:id/string()
+    let $old-doc-equivalent := $old-doc//tei:anchor[@xml:id=$id]
+    let $external-references := ridx:query-all($old-doc-equivalent)[not(root(.) is $old-doc)]
+    let $internal-references := $all-internal-references($id)
+    let $all-references := ($external-references, $internal-references)
+    let $count := count($all-references)
+    where $count > 1
+    return element message {
+        "The anchor '" || $id || "' is referenced " || string($count) || " times, but may only be referenced once"
+    }
+};
+
+(:~ determine if:
+ : 1. the anchors in a document that have type=external or canonical *and* are referenced externally are still present in the new doc
+ : 2. all anchors that are referenced externally in the new doc have type=external or canonical
+ : 3. each anchor that has type=external or internal is referenced once
+ : @param $doc the document to validate
+ : @param $old-doc ignored
+ : @return a validation report
+ :)
+declare function orig:validate-external-anchors(
+    $doc as document-node(),
+    $old-doc as document-node()?
+) as element(report) {
+    let $all-messages := (
+        orig:validate-external-anchor-presence($doc, $old-doc),
+        orig:validate-internal-anchors($doc, $old-doc),
+        orig:validate-anchors-single-reference-rule($doc, $old-doc)
+    )
+    let $status :=
+        if (exists($all-messages))
+        then "invalid"
+        else "valid"
+    return
+        element report {
+            element status { $status },
+            $all-messages
+        }
 };
 
 (:~ determine if the external links in a document all point to something

@@ -1,0 +1,45 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:j="http://jewishliturgy.org/ns/jlptei/1.0">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title xml:lang="en">Anchors</tei:title>
+            </tei:titleStmt>
+        </tei:fileDesc>
+        <tei:sourceDesc>
+            <tei:bibl j:docStatus="outlined">
+                <tei:title>Biblio</tei:title>
+                <tei:ptr type="bibl-content" target="#stream"/>
+            </tei:bibl>
+        </tei:sourceDesc>
+    </tei:teiHeader>
+    <tei:text>
+        <j:streamText xml:id="stream">
+            <tei:anchor xml:id="with_internal_reference"/>
+            <tei:ptr xml:id="ptr_to_internal_reference" target="#with_internal_reference"/>
+
+            <tei:anchor xml:id="with_internal_start"/>
+            Inside an internal something
+            <tei:anchor xml:id="with_internal_end"/>
+            <tei:ptr target="#range(with_internal_start,with_internal_end)"/>
+
+            <tei:anchor xml:id="with_external_reference"/>
+            <tei:anchor xml:id="with_external_start"/>
+            Inside external
+            <tei:anchor xml:id="with_external_end"/>
+
+            <tei:anchor xml:id="v10_seg1"/>
+            Inside canonical, referenced
+            <tei:anchor xml:id="v10_seg1_end"/>
+
+            <tei:anchor xml:id="v10_seg2"/>
+            Inside canonical, unreferenced
+            <tei:anchor xml:id="v10_seg2_end"/>
+
+            <tei:anchor xml:id="multiple_reference_start"/>
+
+            Inside multiple internal reference
+            <tei:anchor xml:id="multiple_reference_end"/>
+            <tei:ptr xml:id="multi_ref" target="#range(multiple_reference_start,multiple_reference_end)"/>
+        </j:streamText>
+    </tei:text>
+</tei:TEI>

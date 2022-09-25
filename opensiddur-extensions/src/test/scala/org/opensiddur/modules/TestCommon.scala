@@ -16,6 +16,18 @@ class TestCommon extends DbTest {
   declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
   declare namespace jf="http://jewishliturgy.org/ns/jlptei/flat/1.0";
     """
+
+  override def beforeAll: Unit = {
+    super.beforeAll
+    setupUsers(1)
+    setupResource("src/test/resources/modules/common/test_common.xml", "test_common", "original", 1, Some("en"))
+  }
+
+  override def afterAll(): Unit = {
+    teardownResource("test_common", "original", 1)
+    teardownUsers(1)
+    super.afterAll()
+  }
   
   describe("common:apply-at") {
     it("acts as an identity transform if it can't find the node to apply at") {
@@ -62,6 +74,41 @@ class TestCommon extends DbTest {
                <x/>
             </a>""")
         .go
+    }
+  }
+
+  describe("common:generate-id") {
+    it("generates an id") {
+      xq("""common:generate-id(doc("/db/data/original/en/test_common.xml"))""")
+        .user("xqtest1")
+        .assertXPath("""not(empty($output))""")
+        .go
+    }
+
+    it("generates a different id for 2 different nodes") {
+      val firstCall = xq("""common:generate-id(doc("/db/data/original/en/test_common.xml")/*/*/node[1])""")
+        .user("xqtest1")
+        .assertXPath("""not(empty($output))""")
+        .go
+
+      val secondCall = xq("""common:generate-id(doc("/db/data/original/en/test_common.xml")/*/*/node[2])""")
+        .user("xqtest1")
+        .assertXPath("""not(empty($output))""")
+        .go
+
+      assert(firstCall(1) != secondCall(1))
+    }
+
+    it("generates the same id twice") {
+      val firstCall = xq("""common:generate-id(doc("/db/data/original/en/test_common.xml"))""")
+        .user("xqtest1")
+        .go
+
+      val secondCall = xq("""common:generate-id(doc("/db/data/original/en/test_common.xml"))""")
+        .user("xqtest1")
+        .go
+
+      assert(firstCall.head == secondCall.head)
     }
   }
 }

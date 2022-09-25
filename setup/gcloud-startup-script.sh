@@ -26,7 +26,7 @@ while [[ -n $(pgrep apt-get) ]]; do sleep 1; done
 
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -yq ddclient maven openjdk-8-jdk ant libxml2 libxml2-utils nginx python3-certbot-nginx python3-lxml unzip unattended-upgrades update-notifier-common
+apt-get install -yq ddclient docker.io maven openjdk-8-jdk ant libxml2 libxml2-utils nginx python3-certbot-nginx python3-lxml unzip unattended-upgrades update-notifier-common
 update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 echo "Setting up unattended upgrades..."
@@ -36,7 +36,7 @@ dpkg-reconfigure -f noninteractive unattended-upgrades
 echo "Obtaining opensiddur sources..."
 mkdir -p src
 cd src
-git clone git://github.com/opensiddur/opensiddur.git
+git clone https://github.com/opensiddur/opensiddur.git
 cd opensiddur
 git checkout ${BRANCH}
 export SRC=$(pwd)
@@ -53,17 +53,15 @@ ant autodeploy
 
 chown -R exist:exist ${INSTALL_DIR}
 
-# install the yajsw script
-echo "Installing YAJSW..."
-export RUN_AS_USER=exist
-export WRAPPER_UNATTENDED=1
-export WRAPPER_USE_SYSTEMD=1
-${INSTALL_DIR}/tools/yajsw/bin/installDaemon.sh
+# install the service script
+echo "Installing service script..."
+cp setup/exist-db.service /etc/systemd/system/
+chown exist:exist /etc/systemd/system/exist-db.service
 
 echo "Installing periodic backup cleaning..."
 cat << EOF > /etc/cron.daily/clean-exist-backups
 #!/bin/bash
-BASE_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
+BASE_DIR=${INSTALL_DIR}/etc/webapp/WEB-INF/data/export
 EARLIEST_DATE=\$(date -d "14 days ago" +%Y%m%d)
 
 for backup in \$( \
@@ -193,7 +191,7 @@ then
 fi;
 
 echo "Installing daily backup copy..."
-EXPORT_DIR=${INSTALL_DIR}/webapp/WEB-INF/data/export
+EXPORT_DIR=${INSTALL_DIR}/etc/webapp/WEB-INF/data/export
 cat << EOF > /etc/cron.daily/copy-exist-backups
 #!/bin/bash
 echo "Starting Open Siddur Daily Backup to Cloud..."
@@ -222,7 +220,9 @@ EOF
 chmod +x /etc/cron.daily/copy-exist-backups
 
 echo "Starting eXist..."
-systemctl start eXist-db
+systemctl daemon-reload
+systemctl enable exist-db
+systemctl start exist-db
 
 echo "Wait until eXist-db is up..."
 python3 python/wait_for_up.py --host=localhost --port=8080 --timeout=86400
@@ -297,6 +297,7 @@ gcloud logging -q write instance "${INSTANCE_NAME}: Web server is up." --severit
 echo "Changing JLPTEI schema for v0.12+..."
 ${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upg12='http://jewishliturgy.org/modules/upgrade12' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade12.xqm'; upg12:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
 ${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upgrade122='http://jewishliturgy.org/modules/upgrade122' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade122.xqm'; upgrade122:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
+${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; xmldb:reindex('/db')" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
 
 echo "Removing stale ssh keys..."
 # Note that this will (intentionally) leave the key for the immediate-prior instance

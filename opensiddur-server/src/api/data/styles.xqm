@@ -28,7 +28,7 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
 
 declare variable $sty:data-type := "styles";
 declare variable $sty:schema := concat($paths:schema-base, "/style.rnc");
-declare variable $sty:schematron := concat($paths:schema-base, "/style.xsl2");
+declare variable $sty:schematron := concat($paths:schema-base, "/style.xsl");
 declare variable $sty:path-base := concat($data:path-base, "/", $sty:data-type);
 declare variable $sty:api-path-base := concat("/api/data/", $sty:data-type);  
 

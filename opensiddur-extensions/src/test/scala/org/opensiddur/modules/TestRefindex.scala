@@ -2,12 +2,12 @@ package org.opensiddur.modules
 
 import org.opensiddur.DbTest
 
-class TestRefindex extends DbTest {
+class BaseTestRefindex extends DbTest {
   override val prolog =
     """xquery version '3.1';
       import module namespace tcommon="http://jewishliturgy.org/test/tcommon"
        at "xmldb:exist:/db/apps/opensiddur-server/test/tcommon.xqm";
-      
+
       import module namespace ridx="http://jewishliturgy.org/modules/refindex"
         at "xmldb:exist:///db/apps/opensiddur-server/modules/refindex.xqm";
       import module namespace mirror="http://jewishliturgy.org/modules/mirror"
@@ -18,11 +18,11 @@ class TestRefindex extends DbTest {
       declare namespace tei="http://www.tei-c.org/ns/1.0";
       declare namespace j="http://jewishliturgy.org/ns/jlptei/1.0";
       """
-
-  override def beforeAll()  {
+  override def beforeAll() {
     super.beforeAll()
 
-    xq("""
+    xq(
+      """
     let $users := tcommon:setup-test-users(1)
     let $index-collection :=
       if (xmldb:collection-available($ridx:ridx-path))
@@ -34,15 +34,10 @@ class TestRefindex extends DbTest {
         )
     return ()
     """)
-    .go
-
-    setupResource("src/test/resources/modules/refindex/reference-target.xml", "reference-target", "original", 1, Some("en"))
-    setupResource("src/test/resources/modules/refindex/reference-source.xml", "reference-source", "original", 1, Some("en"))
+      .go
   }
 
   override def afterAll()  {
-    teardownResource("reference-source", "original", 1)
-    teardownResource("reference-target", "original", 1)
     xq(
       """
         let $users := tcommon:teardown-test-users(1)
@@ -52,7 +47,25 @@ class TestRefindex extends DbTest {
           else ()
         return ()
         """)
-    .go
+      .go
+
+    super.afterAll()
+  }
+
+}
+
+class TestRefindex extends BaseTestRefindex {
+
+  override def beforeAll()  {
+    super.beforeAll()
+
+    setupResource("src/test/resources/modules/refindex/reference-target.xml", "reference-target", "original", 1, Some("en"))
+    setupResource("src/test/resources/modules/refindex/reference-source.xml", "reference-source", "original", 1, Some("en"))
+  }
+
+  override def afterAll()  {
+    teardownResource("reference-source", "original", 1)
+    teardownResource("reference-target", "original", 1)
 
     super.afterAll()
   }
@@ -435,6 +448,51 @@ class TestRefindex extends DbTest {
         true()
       )""")
         .assertEmpty
+        .go
+    }
+  }
+}
+
+class TestRidxReindexCollection extends BaseTestRefindex {
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+
+    setupResource("src/test/resources/modules/refindex/reference-target.xml", "reference-target", "original", 1, Some("en"))
+    setupResource("src/test/resources/modules/refindex/reference-source.xml", "reference-source", "original", 1, Some("en"))
+    setupResource("src/test/resources/modules/refindex/reference-target-too.xml", "reference-target-too", "original", 1, Some("en"))
+    setupResource("src/test/resources/modules/refindex/reference-source-too.xml", "reference-source-too", "original", 1, Some("en"))
+
+    // remove 2 files without removing their index entries
+    xq(
+      """
+        let $r1 := xmldb:remove("/db/data/original/en", "reference-source.xml")
+        let $r2 := xmldb:remove("/db/data/original/en", "reference-target.xml")
+        return ()""")
+      .user("admin")
+      .go
+  }
+
+  override def afterEach(): Unit = {
+    teardownResource("reference-source", "original", 1)
+    teardownResource("reference-target", "original", 1)
+    teardownResource("reference-source-too", "original", 1)
+    teardownResource("reference-target-too", "original", 1)
+
+    super.afterEach()
+  }
+
+  describe("ridx:reindex#2") {
+    // setupResource calls reindex already...
+
+
+    it("removes the index entries for the removed files") {
+      xq("""ridx:reindex("/db/data/original/en", ())""")
+        .user("admin")
+        .assertXPath("""mirror:collection-available($ridx:ridx-path, "/db/data/original/en")""")
+        .assertXPath("""not(mirror:doc-available($ridx:ridx-path, "/db/data/original/en/reference-source.xml"))""")
+        .assertXPath("""not(mirror:doc-available($ridx:ridx-path, "/db/data/original/en/reference-target.xml"))""")
+        .assertXPath("""mirror:doc-available($ridx:ridx-path, "/db/data/original/en/reference-source-too.xml")""")
+        .assertXPath("""mirror:doc-available($ridx:ridx-path, "/db/data/original/en/reference-target-too.xml")""")
         .go
     }
   }

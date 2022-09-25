@@ -28,7 +28,7 @@ import module namespace paths="http://jewishliturgy.org/modules/paths"
 
 declare variable $notes:data-type := "notes";
 declare variable $notes:schema := concat($paths:schema-base, "/annotation.rnc");
-declare variable $notes:schematron := concat($paths:schema-base, "/annotation.xsl2");
+declare variable $notes:schematron := concat($paths:schema-base, "/annotation.xsl");
 declare variable $notes:path-base := concat($data:path-base, "/", $notes:data-type);
 declare variable $notes:api-path-base := concat("/api/data/", $notes:data-type);
 

@@ -13,6 +13,8 @@ xquery version "3.1";
  :)
 module namespace ridx = 'http://jewishliturgy.org/modules/refindex';
 
+import module namespace app="http://jewishliturgy.org/modules/app"
+  at "app.xqm";
 import module namespace debug="http://jewishliturgy.org/transform/debug"
   at "debug.xqm";
 import module namespace mirror="http://jewishliturgy.org/modules/mirror"
@@ -64,12 +66,19 @@ declare function ridx:index-collection(
 };
 
 (:~ index or reindex a document given its location by collection
- : and resource name :)
+ : and resource name.
+ : If the resource is empty, clear and reindex the collection.
+ : Note that this is the only way to clear documents by collection name.
+ :)
 declare function ridx:reindex(
   $collection as xs:string,
-  $resource as xs:string
+  $resource as xs:string?
   ) {
-  ridx:reindex(doc(concat($collection, "/", $resource)))
+  if (not($resource))
+  then
+    let $remove := mirror:remove($ridx:ridx-path, $collection, ())
+    return ridx:reindex(collection($collection))
+  else ridx:reindex(doc(concat($collection, "/", $resource)))
 };
 
 declare function ridx:is-enabled(
@@ -144,9 +153,10 @@ declare function ridx:reindex(
         ))
         then
           let $mirror-collection := mirror:mirror-path($ridx:ridx-path, $collection)
-          let $reindex := system:as-user("admin", $magic:password,
-          xmldb:reindex($mirror-collection, $resource)
-          )
+          let $reindex :=
+            system:as-user("admin", $magic:password, (
+                xmldb:reindex($mirror-collection, $resource)
+            ))
           return ()
         else debug:debug($debug:warn, "refindex", 
           concat("Could not store index for ", $collection, "/", $resource))
@@ -154,7 +164,7 @@ declare function ridx:reindex(
 
 declare function ridx:remove(
   $collection as xs:string,
-  $resource as xs:string
+  $resource as xs:string?
   ) as empty-sequence() {
   mirror:remove($ridx:ridx-path, $collection, $resource)
 };
@@ -378,10 +388,10 @@ declare function ridx:query-document(
 (:~ disable the reference index: you must be admin! :)
 declare function ridx:disable(
   ) as xs:boolean {
-  let $user := xmldb:get-current-user()
+  let $user := app:auth-user()
   let $idx-flag := xs:anyURI(concat($ridx:ridx-path, "/", $ridx:disable-flag))
   return
-    xmldb:is-admin-user($user)
+    sm:is-dba($user)
     and (
       local:make-index-collection($ridx:indexed-base-path),
       if (xmldb:store(
@@ -402,7 +412,7 @@ declare function ridx:disable(
 (:~ re-enable the reference index: you must be admin to run! :)
 declare function ridx:enable(
   ) as xs:boolean {
-  if (xmldb:is-admin-user(xmldb:get-current-user())
+  if (sm:is-dba(app:auth-user())
     and doc-available(concat($ridx:ridx-path, "/", $ridx:disable-flag))
     )
   then (
