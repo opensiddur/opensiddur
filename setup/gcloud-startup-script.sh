@@ -297,6 +297,7 @@ gcloud logging -q write instance "${INSTANCE_NAME}: Web server is up." --severit
 echo "Changing JLPTEI schema for v0.12+..."
 ${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upg12='http://jewishliturgy.org/modules/upgrade12' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade12.xqm'; upg12:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
 ${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; import module namespace upgrade122='http://jewishliturgy.org/modules/upgrade122' at 'xmldb:exist:///db/apps/opensiddur-server/modules/upgrade122.xqm'; upgrade122:upgrade-all()" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
+${INSTALL_DIR}/bin/client.sh -qs -u admin -P "${PASSWORD}" -x "xquery version '3.1'; xmldb:reindex('/db')" -ouri=xmldb:exist://localhost:8080/exist/xmlrpc
 
 echo "Removing stale ssh keys..."
 # Note that this will (intentionally) leave the key for the immediate-prior instance

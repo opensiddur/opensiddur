@@ -180,13 +180,14 @@ declare function upg:schema-changes-0-9-0() {
     for $document in collection("/db/data/notes")
     let $collection := util:collection-name($document)
     let $resource := util:document-name($document)
-    let $uri-title := crest:tei-title-function($document)
+    let $uri-title := data:normalize-resource-title(crest:tei-title-function($document), false())
     let $resource-number := 
         let $n := tokenize($resource, '-')[last()]
         where matches($resource, "-\d+\.xml$") and matches($n, "\d+\.xml")
         return substring-before($n, '.xml')
     let $new-name := 
         string-join((
+
             encode-for-uri(replace(replace(normalize-space($uri-title), "\p{M}", ""), "[,;:$=@]+", "-")),
             $resource-number), "-") || ".xml"
     where not($new-name=$resource)
