@@ -55,3 +55,4 @@ Please join our discussion lists:
 You can also follow us on Twitter (@opensiddur), Google+ (https://plus.google.com/u/0/communities/106561535392892700238), and Facebook (https://www.facebook.com/opensiddur).
 
 For history prior to version 0.4.1, see our old Subversion repository at http://jewishliturgy.googlecode.com
+
