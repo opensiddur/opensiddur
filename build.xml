@@ -3,7 +3,7 @@
         Build file for opensiddur
     </description>
     <property name="lib.dir" location="lib"/>
-    <property name="exist.version" value="6.0.1"/>
+    <property name="exist.version" value="6.2.0"/>
     <property name="ivy.version" value="2.4.0"/>
 	<property name="build" location="build"/>
     <property name="dist" location="dist"/>
@@ -83,7 +83,7 @@
 	<target name="build-exist" depends="init" unless="exist.uptodate">
         <mkdir dir="${deps.dir}"/>
 		<get dest="${installer}"
-             src="https://github.com/eXist-db/exist/releases/download/eXist-6.0.1/exist-installer-${exist.version}.jar"/>
+             src="https://github.com/eXist-db/exist/releases/download/eXist-${exist.version}/exist-installer-${exist.version}.jar"/>
 	</target>
 	
 	<target name="install-exist" depends="init,build-exist"
