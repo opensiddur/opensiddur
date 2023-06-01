@@ -426,7 +426,7 @@ declare function uri:dependency(
   ) as xs:string+ {
   let $new-dependencies := 
     distinct-values(
-      for $targets in $doc//*[@targets|@target|@domains|@ref]/(@target|@targets|@domains|@ref)
+      for $targets in $doc//*[not(@type="url")][@targets|@target|@domains|@ref]/(@target|@targets|@domains|@ref)
       for $target in 
         tokenize($targets, '\s+')
           [not(starts-with(., '#'))]
