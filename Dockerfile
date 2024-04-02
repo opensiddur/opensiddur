@@ -1,4 +1,4 @@
-FROM ubuntu:kinetic
+FROM ubuntu:jammy
 
 RUN useradd -c "eXist db"  exist
 # install dependencies
