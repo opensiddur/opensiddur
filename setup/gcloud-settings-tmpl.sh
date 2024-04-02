@@ -8,7 +8,7 @@ PROJECT_NAME=opensiddur
 INSTANCE_NAME=opensiddur-server-${VERSION}
 ZONE=us-west2-a
 MACHINE_TYPE=n1-standard-1
-IMAGE=ubuntu-2004-focal-v20200529
+IMAGE=ubuntu-2204-jammy-v20240319
 IMAGE_PROJECT=ubuntu-os-cloud
 BOOT_DISK_SIZE_GB=20
 
