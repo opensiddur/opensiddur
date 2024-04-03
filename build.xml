@@ -262,6 +262,8 @@ CLASSPATH_PREFIX=/usr/local/opensiddur/lib/*:/usr/local/opensiddur/lib/user/*</e
             <arg value="build"/>
             <arg value="-t"/>
             <arg value="${docker.image.tag}"/>
+            <arg value="--build-arg"/>
+            <arg value="EXIST_VERSION=${exist.version}"/>
             <arg value="."/>
         </exec>
     </target>

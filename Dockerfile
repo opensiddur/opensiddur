@@ -1,5 +1,7 @@
 FROM ubuntu:jammy
 
+ARG EXIST_VERSION
+
 RUN useradd -c "eXist db"  exist
 # install dependencies
 RUN apt-get update
@@ -11,7 +13,7 @@ RUN chown exist:exist /usr/local/opensiddur
 USER exist:exist
 
 # copy the build
-COPY dependencies/exist-installer-*.jar /tmp/exist-installer.jar
+COPY dependencies/exist-installer-${EXIST_VERSION}.jar /tmp/exist-installer.jar
 COPY setup/docker-install-options.conf /tmp/
 
 # run the installer

@@ -39,7 +39,7 @@ declare function merge:j-streamText(
     then ()
     else (
         element j:streamText {
-            ($old-streamText/@xml:id, $new-streamText/@xml:id)[1]
+            ($old-streamText/@xml:id, $new-streamText/@xml:id)[1],
             let $old-stream-sequence := stream-sequence($old-streamText/node())
         }
     )
